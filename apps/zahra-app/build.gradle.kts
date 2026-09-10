@@ -7,7 +7,8 @@ plugins {
 // اگر projectId خالی باشد، اپ در «حالت محلی» بالا می‌آید و چیزی به سرور نمی‌فرستد.
 val appwriteEndpoint = findProperty("resolvedAppwriteEndpoint") as? String
     ?: "https://fra.cloud.appwrite.io/v1"
-val appwriteProjectId = findProperty("resolvedAppwriteProjectId") as? String ?: ""
+// پیش‌فرض سخت‌کد‌شده (پروژه‌ی «همیار من» در Appwrite Cloud — fra)؛ با local.properties قابل override.
+val appwriteProjectId = findProperty("resolvedAppwriteProjectId") as? String ?: "6a9d59e3002751cc3ea8"
 val appwriteDatabaseId = findProperty("resolvedAppwriteDatabaseId") as? String ?: "main_db"
 
 android {
@@ -15,13 +16,14 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "ir.behzad.roozhayeman"
+        applicationId = "com.hamyareman.ir"   // Platform ثبت‌شده در کنسول Appwrite
         minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
         buildConfigField("String", "APPWRITE_ENDPOINT", "\"$appwriteEndpoint\"")
         buildConfigField("String", "APPWRITE_PROJECT_ID", "\"$appwriteProjectId\"")
+        buildConfigField("String", "APPWRITE_PROJECT_NAME", "\"همیار من\"")
         buildConfigField("String", "APPWRITE_DATABASE_ID", "\"$appwriteDatabaseId\"")
     }
 

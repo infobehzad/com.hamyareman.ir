@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">روزهای من</string>
+    <string name="app_name">همیار من</string>
     <string name="app_subtitle">یه جای امن برای روزای تو</string>
     <string name="notif_channel_messages">پیام‌های حرف دل</string>
     <string name="notif_channel_calls">تماس با بابا</string>

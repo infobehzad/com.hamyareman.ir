@@ -2,9 +2,12 @@
 # مسیر SDK اندروید (Android Studio خودش می‌سازد):
 # sdk.dir=/Users/you/Library/Android/sdk
 
-# --- Appwrite (اجباری برای حالت سرور؛ بدون آن اپ در حالت محلی کار می‌کند) ---
+# --- Appwrite ---
+# ⚠️ از ۱۴۰۴/۰۶ مقادیر پیش‌فرض داخل apps/zahra-app/build.gradle.kts سخت‌کد شده‌اند
+# (پروژه 6a9d59e3002751cc3ea8 — endpoint fra). این فایل فقط برای override محلی است.
+# حالت سرور با همین پیش‌فرض‌ها فعال است؛ بدون این فایل هم اپ به همان پروژه وصل می‌شود.
 # کنسول Appwrite › Project › Overview › Project ID
-appwrite.projectId=
+appwrite.projectId=6a9d59e3002751cc3ea8
 # منطقه‌ی پروژه: fra / nyc / sgp / sydney
 appwrite.endpoint=https://fra.cloud.appwrite.io/v1
 # نام دیتابیسی که با `appwrite push tablesDB` ساخته می‌شود

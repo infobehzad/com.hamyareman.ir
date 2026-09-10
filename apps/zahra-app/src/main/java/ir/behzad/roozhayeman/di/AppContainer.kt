@@ -1,6 +1,11 @@
 package ir.behzad.roozhayeman.di
 
 import android.content.Context
+import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import io.appwrite.services.Account
 import ir.behzad.platform.core.appwrite.AppwriteAuthService
 import ir.behzad.platform.core.appwrite.AppwriteClientProvider
 import ir.behzad.platform.core.appwrite.AppwriteFunctionsService
@@ -52,6 +57,18 @@ class AppContainer(context: Context) {
         projectId = BuildConfig.APPWRITE_PROJECT_ID,
         databaseId = BuildConfig.APPWRITE_DATABASE_ID,
     )
+
+    init {
+        // «Ping» Appwrite: یک درخواست واقعی در شروع اپ تا اتصال در کنسول دیده شود.
+        // (SDK اندروید متد ping() ندارد؛ Account.get() سبک‌ترین درخواست احرازشده است.)
+        if (appwrite.isConfigured) {
+            CoroutineScope(Dispatchers.IO).launch {
+                runCatching { Account(appwrite.client).get() }
+                    .onSuccess { Log.i("AppwritePing", "اتصال Appwrite تأیید شد (پروژه: ${BuildConfig.APPWRITE_PROJECT_NAME})") }
+                    .onFailure { Log.w("AppwritePing", "Appwrite پاسخ داد: ${it.message}") }
+            }
+        }
+    }
 
     val functions = AppwriteFunctionsService(appwrite)
 
