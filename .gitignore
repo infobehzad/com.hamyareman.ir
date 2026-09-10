@@ -30,3 +30,6 @@ artifacts/wellness-references/learning/*.png
 
 # Node dependencies (deploy با npm ci نصب می‌کند)
 node_modules/
+
+# کلید خصوصی GitHub App — فقط لوکال، هرگز کامیت نشود
+github-app-private-key.pem
