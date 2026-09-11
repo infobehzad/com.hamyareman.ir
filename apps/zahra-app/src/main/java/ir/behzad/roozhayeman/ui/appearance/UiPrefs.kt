@@ -40,17 +40,17 @@ class UiPrefs(context: Context) {
                 android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES
         }
 
-    fun setTheme(value: BrandTheme) {
+    fun updateTheme(value: BrandTheme) {
         theme = value
         store.putString(KEY_THEME, value.name)
     }
 
-    fun setDarkMode(value: String) {
+    fun updateDarkMode(value: String) {
         darkMode = value
         store.putString(KEY_DARK, value)
     }
 
-    fun setFontKey(value: String) {
+    fun updateFontKey(value: String) {
         fontKey = value
         store.putString(KEY_FONT, value)
     }

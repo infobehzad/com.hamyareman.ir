@@ -65,7 +65,7 @@ fun AppearanceScreen(onBack: () -> Unit) {
                         colors = CardDefaults.cardColors(
                             containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
                         ),
-                        modifier = Modifier.fillMaxWidth().clickable { prefs.setTheme(brand) },
+                        modifier = Modifier.fillMaxWidth().clickable { prefs.updateTheme(brand) },
                     ) {
                         Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
                             ThemeSwatches(brand)
@@ -85,7 +85,7 @@ fun AppearanceScreen(onBack: () -> Unit) {
             listOf("system" to "سیستم", "light" to "روشن", "dark" to "تاریک").forEach { (key, label) ->
                 FilterChip(
                     selected = prefs.darkMode == key,
-                    onClick = { prefs.setDarkMode(key) },
+                    onClick = { prefs.updateDarkMode(key) },
                     label = { Text(label) },
                 )
             }
@@ -99,7 +99,7 @@ fun AppearanceScreen(onBack: () -> Unit) {
                     title = "فونت سیستم (پیش‌فرض)",
                     downloaded = true,
                     selected = prefs.fontKey.isBlank(),
-                    onSelect = { prefs.setFontKey("") },
+                    onSelect = { prefs.updateFontKey("") },
                 )
                 FontLibrary.catalog.forEach { entry ->
                     val downloaded = FontLibrary.isDownloaded(context, entry.key)
@@ -109,13 +109,13 @@ fun AppearanceScreen(onBack: () -> Unit) {
                         selected = prefs.fontKey == entry.key,
                         onSelect = {
                             if (downloaded) {
-                                prefs.setFontKey(entry.key)
+                                prefs.updateFontKey(entry.key)
                             } else {
                                 busy = entry.key
                                 scope.launch {
                                     val r = FontLibrary.download(context, entry)
                                     busy = null
-                                    if (r.isSuccess) prefs.setFontKey(entry.key)
+                                    if (r.isSuccess) prefs.updateFontKey(entry.key)
                                 }
                             }
                         },
