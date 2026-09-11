@@ -11,7 +11,7 @@ process.env.NODE_ENV = 'production';
 const fs = require('fs');
 const path = require('path');
 const sdk = require('node-appwrite');
-const { InputFile } = sdk;
+const { InputFile } = require('node-appwrite/file');
 
 const ENDPOINT = process.env.APPWRITE_ENDPOINT || 'https://fra.cloud.appwrite.io/v1';
 const PROJECT = process.env.APPWRITE_PROJECT_ID || '6a9d59e3002751cc3ea8';
