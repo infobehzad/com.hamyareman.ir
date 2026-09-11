@@ -19,6 +19,8 @@ data class StudyPack(
     val flashcards: List<Flashcard>,
     val questions: List<Question>,
     val solutions: List<Solution>,
+    /** شناسه‌ی فایل صوتی روخوانی درس روی سرور (باکت) — خالی یعنی صوت ندارد. */
+    val audioFileId: String = "",
 ) {
     data class Section(val id: String, val title: String, val kind: String, val body: String, val images: List<String> = emptyList())
     data class Flashcard(val id: String, val front: String, val back: String, val topic: String, val hint: String)
@@ -78,6 +80,7 @@ data class StudyPack(
                 lessonId = o.optString("lessonId"), title = o.optString("title"),
                 bookTitle = o.optString("bookTitle"), pdfFileName = o.optString("pdfFileName"),
                 sections = sections, flashcards = cards, questions = questions, solutions = solutions,
+                audioFileId = o.optString("audioFileId"),
             )
         }.getOrNull()
     }

@@ -238,6 +238,78 @@ private fun ContentTab(pack: StudyPack, onOpenPdf: (String) -> Unit) {
                 }
             }
         }
+        item {
+            LessonAudioPlayer(pack)
+        }
+    }
+}
+
+/**
+ * پخش‌کننده‌ی روخوانی درس — استریم مستقیم از باکت Appwrite (کش در سرور نداریم؛
+ * MediaPlayer خودش استریم می‌کند). فقط وقتی pack.audioFileId تنظیم شده نمایش داده می‌شود.
+ */
+@Composable
+private fun LessonAudioPlayer(pack: StudyPack) {
+    if (pack.audioFileId.isBlank()) return
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val url = "https://fra.cloud.appwrite.io/v1/storage/buckets/6aa1eaae00303400117b/files/${pack.audioFileId}/view?project=6a9d59e3002751cc3ea8"
+    var ready by remember(pack.audioFileId) { mutableStateOf(false) }
+    var playing by remember(pack.audioFileId) { mutableStateOf(false) }
+    var error by remember(pack.audioFileId) { mutableStateOf(false) }
+    val player = remember(pack.audioFileId) {
+        android.media.MediaPlayer().apply {
+            setAudioAttributes(
+                android.media.AudioAttributes.Builder()
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                    .build()
+            )
+            setOnPreparedListener { ready = true }
+            setOnErrorListener { _, _, _ -> error = true; true }
+            setDataSource(url)
+            prepareAsync()
+        }
+    }
+    androidx.compose.runtime.DisposableEffect(pack.audioFileId) {
+        onDispose {
+            runCatching { if (player.isPlaying) player.stop() }
+            player.release()
+        }
+    }
+    Card(Modifier.fillMaxWidth()) {
+        Row(
+            Modifier.padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            androidx.compose.material3.OutlinedButton(
+                onClick = {
+                    runCatching {
+                        if (!ready || error) return@runCatching
+                        if (player.isPlaying) {
+                            player.pause(); playing = false
+                        } else {
+                            player.start(); playing = true
+                        }
+                    }
+                },
+                enabled = ready && !error,
+            ) {
+                Text(
+                    when {
+                        error -> "⚠️ خطا در بارگذاری"
+                        !ready -> "⏳ در حال بارگذاری صوت…"
+                        playing -> "⏸ توقف روخوانی"
+                        else -> "▶ پخش روخوانی درس"
+                    }
+                )
+            }
+            Spacer(Modifier.width(10.dp))
+            Text(
+                "🔊 روخوانی کامل درس (دو زبانه — از سرور پخش می‌شود)",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

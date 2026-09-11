@@ -18,6 +18,18 @@ data class BookModule(
 object BookModuleRegistry {
     val modules: List<BookModule> = listOf(
         ir.behzad.platform.feature.study.books.MathC905.module,
+        ir.behzad.platform.feature.study.books.QuranC901.module,
+        ir.behzad.platform.feature.study.books.EslamiC902.module,
+        ir.behzad.platform.feature.study.books.FarsiC903.module,
+        ir.behzad.platform.feature.study.books.NegarC904.module,
+        ir.behzad.platform.feature.study.books.ScienceC906.module,
+        ir.behzad.platform.feature.study.books.EjtemaiC907.module,
+        ir.behzad.platform.feature.study.books.HonarC908.module,
+        ir.behzad.platform.feature.study.books.ArabicC909.module,
+        ir.behzad.platform.feature.study.books.EnglishC910.module,
+        ir.behzad.platform.feature.study.books.EnglishWbC911.module,
+        ir.behzad.platform.feature.study.books.KarC917.module,
+        ir.behzad.platform.feature.study.books.TafakkorC941.module,
     )
 
     fun pack(packId: String): StudyPack? =

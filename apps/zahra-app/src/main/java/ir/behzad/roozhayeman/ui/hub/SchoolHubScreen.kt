@@ -44,6 +44,21 @@ fun SchoolHubScreen(nav: NavController) {
             HubCard("🎯", "مطالعه‌ی عمیق — درس ۳: اجتماع، اشتراک و تفاضل", "نمودار ون، فرمول n(A∪B) و مسائل کلامی") { nav.hubTo(Screen.LessonStudy.of("C905_E01-L03")) }
             HubCard("🎯", "مطالعه‌ی عمیق — درس ۴: مجموعه‌ها و احتمال", "فضای نمونه، P(A) = n(A)÷n(S) و دو تاس") { nav.hubTo(Screen.LessonStudy.of("C905_E01-L04")) }
             HubCard("🧪", "آزمون فصل ۱ — مجموعه‌ها", "آزمون بازه‌ای از ۴ درس با پیگیری ضعف‌ها") { nav.hubTo(Screen.LessonStudy.of("C905_E01-EXAM")) }
+
+        MenuGroup("📚 مطالعه‌ی عمیق — درس اول همه‌ی کتاب‌ها", "۱۳ کتاب پایه نهم؛ هر درس با سکشن، فلش‌کارت، آزمون و حل تشریحی") {
+            HubCard("🕌", "آموزش قرآن — این جهان راه است", "آیه‌ی ۱۰ زخرف، تدبر و روخوانی آیات") { nav.hubTo(Screen.LessonStudy.of("C901_L01")) }
+            HubCard("📿", "تعلیمات اسلامی — تو را چگونه بشناسم؟", "شناخت صفات خدا، خطبه‌ی ۹۱، حمد و تسبیح") { nav.hubTo(Screen.LessonStudy.of("C902_E01-L01")) }
+            HubCard("✒️", "فارسی — آفرینش همه تنبیه خداوند دل است", "قصیده‌ی سعدی، دانش ادبی و حکایت سفر") { nav.hubTo(Screen.LessonStudy.of("C903_E01-L01")) }
+            HubCard("📝", "نگارش — نظام ذهنی پرورده و بند", "ساختار سه‌بخشی نوشته و نوشتن بند") { nav.hubTo(Screen.LessonStudy.of("C904_L01")) }
+            HubCard("🔬", "علوم — مواد و نقش آنها در زندگی", "مواد خالص و مخلوط، فلزها، بسپارها") { nav.hubTo(Screen.LessonStudy.of("C906_E01-L01")) }
+            HubCard("🌍", "مطالعات — زمین، مهد زیبای انسان‌ها", "مختصات جغرافیایی، مدارها و نصف‌النهارها") { nav.hubTo(Screen.LessonStudy.of("C907_E01-L01")) }
+            HubCard("🎨", "فرهنگ و هنر — فضا و عمق", "پرسپکتیو، نقطه‌ی گریز و ترسیم حجم") { nav.hubTo(Screen.LessonStudy.of("C908_E01-L01")) }
+            HubCard("📖", "عربی — مراجعة دروس الصف السابع والثامن", "واژه‌نامه‌ی ۱۸ کلمه و مرور قواعد") { nav.hubTo(Screen.LessonStudy.of("C909_L01")) }
+            HubCard("🔤", "انگلیسی — Personality", "مکالمه، Practiceها، Language Melody و گرامر") { nav.hubTo(Screen.LessonStudy.of("C910_L01")) }
+            HubCard("📓", "کتاب کار انگلیسی — Personality", "تمرین‌های to be و There is/are با پاسخ") { nav.hubTo(Screen.LessonStudy.of("C911_L01")) }
+            HubCard("🛠", "کار و فناوری — الگوریتم", "حل مسئله، الگوریتم و روندنما") { nav.hubTo(Screen.LessonStudy.of("C917_E01-L01")) }
+            HubCard("🧭", "تفکر و سبک زندگی — شروع یک ماجرا", "داستان یوسف (ع) و درمان حسادت") { nav.hubTo(Screen.LessonStudy.of("C941_L01")) }
+        }
         }
 
         MenuGroup("🗓 برنامه‌ی هفتگی", "چرخش شیفت و درس‌های هر روز") {
