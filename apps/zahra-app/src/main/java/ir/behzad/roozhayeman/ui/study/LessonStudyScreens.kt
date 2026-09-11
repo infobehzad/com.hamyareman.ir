@@ -763,28 +763,6 @@ private fun SolutionsTab(pack: StudyPack) {
                     Text(s.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(6.dp))
                     Text(s.body, style = MaterialTheme.typography.bodyMedium)
-                    if (s.images.isNotEmpty()) {
-                        Spacer(Modifier.height(8.dp))
-                        s.images.forEach { path ->
-                            val ctx = androidx.compose.ui.platform.LocalContext.current
-                            val bmp = remember(path) {
-                                runCatching {
-                                    android.graphics.BitmapFactory.decodeStream(ctx.assets.open(path))
-                                }.getOrNull()
-                            }
-                            if (bmp != null) {
-                                Image(
-                                    bitmap = bmp.asImageBitmap(),
-                                    contentDescription = "تصویر جزوه",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(10.dp)),
-                                    contentScale = androidx.compose.ui.layout.ContentScale.FillWidth,
-                                )
-                                Spacer(Modifier.height(6.dp))
-                            }
-                        }
-                    }
                 }
             }
         }

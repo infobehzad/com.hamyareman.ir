@@ -54,8 +54,17 @@ private sealed class PdfState {
 }
 
 /** کش LRU صفحه‌ها تا حافظه کنترل شود (همزمان حداکثر ~۸ صفحه). */
-private class PageCache(maxPages: Int = 8) : LinkedHashMap<Int, Bitmap>(16, 0.75f, true) {
-    override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Int, Bitmap>?): Boolean = size > maxPages
+private class PageCache(private val maxPages: Int = 8) {
+    private val map = LinkedHashMap<Int, Bitmap>(16, 0.75f, true)
+
+    operator fun get(index: Int): Bitmap? = synchronized(this) { map[index] }
+
+    operator fun set(index: Int, value: Bitmap) {
+        synchronized(this) {
+            map[index] = value
+            while (map.size > maxPages) map.remove(map.keys.first())
+        }
+    }
 }
 
 @Composable
