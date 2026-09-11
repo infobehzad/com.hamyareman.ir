@@ -64,6 +64,7 @@ import ir.behzad.roozhayeman.ui.settings.RemindersScreen
 import ir.behzad.roozhayeman.ui.settings.SettingsScreen
 import ir.behzad.roozhayeman.ui.settings.SyncScreen
 import ir.behzad.roozhayeman.ui.study.LessonStudyScreen
+import ir.behzad.roozhayeman.ui.study.LessonPdfScreen
 import ir.behzad.roozhayeman.ui.study.AudiobookScreen
 import ir.behzad.roozhayeman.ui.wellness.SketchGalleryScreen
 import ir.behzad.roozhayeman.ui.wellness.WellnessScreen
@@ -149,6 +150,15 @@ fun ZahraNavHost() {
                 listOf(navArgument("packId") { type = NavType.StringType }),
             ) { entry ->
                 LessonStudyScreen(
+                    packId = entry.arguments?.getString("packId").orEmpty(),
+                    onBack = { nav.popBackStack() },
+                )
+            }
+            composable(
+                Screen.LessonPdf.route,
+                listOf(navArgument("packId") { type = NavType.StringType }),
+            ) { entry ->
+                LessonPdfScreen(
                     packId = entry.arguments?.getString("packId").orEmpty(),
                     onBack = { nav.popBackStack() },
                 )

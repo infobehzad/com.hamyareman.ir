@@ -1,5 +1,6 @@
 package ir.behzad.roozhayeman.ui.study
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +43,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -72,7 +75,7 @@ import org.json.JSONObject
 private val TABS = listOf("خلاصه‌ها" to "content", "فلش‌کارت" to "cards", "آزمون" to "quiz", "حل تشریحی" to "solutions")
 
 @Composable
-fun LessonStudyScreen(packId: String, onBack: () -> Unit) {
+fun LessonStudyScreen(packId: String, onBack: () -> Unit, onOpenPdf: (String) -> Unit = {}) {
     val container = LocalAppContainer.current
     val pack = remember(packId) { container.studyPacks.pack(packId) }
     var refresh by remember { mutableIntStateOf(0) }
@@ -143,7 +146,7 @@ fun LessonStudyScreen(packId: String, onBack: () -> Unit) {
                 today = today,
             ) { refresh++ }
             "solutions" -> SolutionsTab(pack)
-            else -> ContentTab(pack)
+            else -> ContentTab(pack, onOpenPdf)
         }
     }
 }
@@ -167,7 +170,7 @@ private fun kindColor(kind: String): Color = when (kind) {
 }
 
 @Composable
-private fun ContentTab(pack: StudyPack) {
+private fun ContentTab(pack: StudyPack, onOpenPdf: (String) -> Unit) {
     LazyColumn(
         Modifier.fillMaxSize(),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
@@ -200,15 +203,40 @@ private fun ContentTab(pack: StudyPack) {
                     Text(s.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(6.dp))
                     Text(s.body, style = MaterialTheme.typography.bodyMedium)
+                    if (s.images.isNotEmpty()) {
+                        Spacer(Modifier.height(8.dp))
+                        s.images.forEach { path ->
+                            val ctx = androidx.compose.ui.platform.LocalContext.current
+                            val bmp = remember(path) {
+                                runCatching {
+                                    android.graphics.BitmapFactory.decodeStream(ctx.assets.open(path))
+                                }.getOrNull()
+                            }
+                            if (bmp != null) {
+                                Image(
+                                    bitmap = bmp.asImageBitmap(),
+                                    contentDescription = "تصویر جزوه",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(10.dp)),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.FillWidth,
+                                )
+                                Spacer(Modifier.height(6.dp))
+                            }
+                        }
+                    }
                 }
             }
         }
         item {
-            Text(
-                "📄 کتاب درس: ${pack.pdfFileName}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            if (pack.pdfFileName.isNotBlank()) {
+                androidx.compose.material3.OutlinedButton(
+                    onClick = { onOpenPdf(pack.packId) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text("📕 کتاب درس — مشاهده‌ی PDF (${pack.pdfFileName})")
+                }
+            }
         }
     }
 }
@@ -735,6 +763,28 @@ private fun SolutionsTab(pack: StudyPack) {
                     Text(s.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(6.dp))
                     Text(s.body, style = MaterialTheme.typography.bodyMedium)
+                    if (s.images.isNotEmpty()) {
+                        Spacer(Modifier.height(8.dp))
+                        s.images.forEach { path ->
+                            val ctx = androidx.compose.ui.platform.LocalContext.current
+                            val bmp = remember(path) {
+                                runCatching {
+                                    android.graphics.BitmapFactory.decodeStream(ctx.assets.open(path))
+                                }.getOrNull()
+                            }
+                            if (bmp != null) {
+                                Image(
+                                    bitmap = bmp.asImageBitmap(),
+                                    contentDescription = "تصویر جزوه",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(10.dp)),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.FillWidth,
+                                )
+                                Spacer(Modifier.height(6.dp))
+                            }
+                        }
+                    }
                 }
             }
         }

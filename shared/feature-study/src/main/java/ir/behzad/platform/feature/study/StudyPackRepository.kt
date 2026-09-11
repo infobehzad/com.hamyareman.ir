@@ -16,6 +16,8 @@ class StudyPackRepository(context: Context) {
     }.getOrDefault(emptyList())
 
     fun pack(packId: String): StudyPack? {
+        // اول ماژول‌های کدی کتاب‌ها (منبع اصلی)، بعد assets (سازگاری قدیمی)
+        BookModuleRegistry.pack(packId)?.let { return it }
         if (cache.containsKey(packId)) return cache[packId]
         val raw = runCatching {
             appContext.assets.open("$dir/$packId.json").bufferedReader().use { it.readText() }

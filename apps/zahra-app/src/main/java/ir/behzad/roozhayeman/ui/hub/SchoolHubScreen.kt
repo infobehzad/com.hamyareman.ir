@@ -43,6 +43,7 @@ fun SchoolHubScreen(nav: NavController) {
             HubCard("🎯", "مطالعه‌ی عمیق — درس ۲: مجموعه‌های برابر و نمایش", "زیرمجموعه، قاعده‌ی 2ⁿ، مجموعه‌های N و W و Z و Q") { nav.hubTo(Screen.LessonStudy.of("C905_E01-L02")) }
             HubCard("🎯", "مطالعه‌ی عمیق — درس ۳: اجتماع، اشتراک و تفاضل", "نمودار ون، فرمول n(A∪B) و مسائل کلامی") { nav.hubTo(Screen.LessonStudy.of("C905_E01-L03")) }
             HubCard("🎯", "مطالعه‌ی عمیق — درس ۴: مجموعه‌ها و احتمال", "فضای نمونه، P(A) = n(A)÷n(S) و دو تاس") { nav.hubTo(Screen.LessonStudy.of("C905_E01-L04")) }
+            HubCard("🧪", "آزمون فصل ۱ — مجموعه‌ها", "آزمون بازه‌ای از ۴ درس با پیگیری ضعف‌ها") { nav.hubTo(Screen.LessonStudy.of("C905_E01-EXAM")) }
         }
 
         MenuGroup("🗓 برنامه‌ی هفتگی", "چرخش شیفت و درس‌های هر روز") {

@@ -20,7 +20,7 @@ data class StudyPack(
     val questions: List<Question>,
     val solutions: List<Solution>,
 ) {
-    data class Section(val id: String, val title: String, val kind: String, val body: String)
+    data class Section(val id: String, val title: String, val kind: String, val body: String, val images: List<String> = emptyList())
     data class Flashcard(val id: String, val front: String, val back: String, val topic: String, val hint: String)
     data class Question(
         val id: String,
@@ -47,7 +47,7 @@ data class StudyPack(
             val sections = (o.optJSONArray("sections") ?: JSONArray()).let { a ->
                 (0 until a.length()).map {
                     val s = a.getJSONObject(it)
-                    Section(s.optString("id"), s.optString("title"), s.optString("kind", "note"), s.optString("body"))
+                    Section(s.optString("id"), s.optString("title"), s.optString("kind", "note"), s.optString("body"), strArray(s, "images"))
                 }
             }
             val cards = (o.optJSONArray("flashcards") ?: JSONArray()).let { a ->

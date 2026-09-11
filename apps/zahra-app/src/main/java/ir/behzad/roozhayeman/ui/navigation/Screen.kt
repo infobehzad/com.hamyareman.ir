@@ -53,6 +53,11 @@ sealed class Screen(val route: String) {
     data object LessonStudy : Screen("study-lesson/{packId}") {
         fun of(packId: String) = "study-lesson/" + Uri.encode(packId)
     }
+
+    /** نمایشگر PDF کتاب درس (از باکت Appwrite — کش فقط روی گوشی). */
+    data object LessonPdf : Screen("study-lesson-pdf/{packId}") {
+        fun of(packId: String) = "study-lesson-pdf/" + Uri.encode(packId)
+    }
     data object Pdf : Screen("pdf")
     data object Charts : Screen("charts")
     data object Art : Screen("art")
