@@ -1,6 +1,7 @@
 package ir.behzad.platform.feature.playback
 
 import ir.behzad.platform.core.appwrite.AppwriteClientProvider
+import ir.behzad.platform.core.appwrite.BackendConfig
 import ir.behzad.platform.core.appwrite.TablesDbService
 import ir.behzad.platform.core.common.AppResult
 import ir.behzad.platform.core.common.LocalStore
