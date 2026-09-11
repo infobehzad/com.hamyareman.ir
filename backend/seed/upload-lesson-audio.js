@@ -147,7 +147,7 @@ function mp3DurationSec(buf) {
                 console.log(`  ⬆ آپلود شد: ${it.name} (${(it.size / 1024).toFixed(0)}KB)`);
                 uploaded++;
             }
-            const r = await upsertRow(info, it.size, mp3DurationSec(it.size));
+            const r = await upsertRow({ ...info, fileId: it.name }, it.size, mp3DurationSec(it.size));
             if (r !== 'failed') rowsOk++;
         } catch (e) {
             console.log(`  ❌ ${it.name}: ${e.message}`);
