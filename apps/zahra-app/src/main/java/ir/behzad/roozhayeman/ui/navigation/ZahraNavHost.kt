@@ -63,6 +63,7 @@ import ir.behzad.roozhayeman.ui.settings.AppLockScreen
 import ir.behzad.roozhayeman.ui.settings.RemindersScreen
 import ir.behzad.roozhayeman.ui.settings.SettingsScreen
 import ir.behzad.roozhayeman.ui.settings.SyncScreen
+import ir.behzad.roozhayeman.ui.study.LessonStudyScreen
 import ir.behzad.roozhayeman.ui.study.AudiobookScreen
 import ir.behzad.roozhayeman.ui.wellness.SketchGalleryScreen
 import ir.behzad.roozhayeman.ui.wellness.WellnessScreen
@@ -140,6 +141,16 @@ fun ZahraNavHost() {
                     lessonId = entry.arguments?.getString("lessonId").orEmpty(),
                     onBack = { nav.popBackStack() },
                     onReview = { nav.navigate(Screen.QuizReview.route) },
+                )
+            }
+
+            composable(
+                Screen.LessonStudy.route,
+                listOf(navArgument("packId") { type = NavType.StringType }),
+            ) { entry ->
+                LessonStudyScreen(
+                    packId = entry.arguments?.getString("packId").orEmpty(),
+                    onBack = { nav.popBackStack() },
                 )
             }
             composable(Screen.QuizReview.route) { QuizReviewScreen { nav.popBackStack() } }

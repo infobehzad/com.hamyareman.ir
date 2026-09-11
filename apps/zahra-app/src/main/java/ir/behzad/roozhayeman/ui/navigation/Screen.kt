@@ -48,6 +48,11 @@ sealed class Screen(val route: String) {
             if (lessonId.isNullOrBlank()) "quiz" else "quiz?lessonId=${Uri.encode(lessonId)}"
     }
     data object QuizReview : Screen("quizreview")
+
+    /** صفحه‌ی مطالعه‌ی عمیق یک درس (فلش‌کارت/آزمون/حل) — پک با `packId` مثل C905_E01-L01. */
+    data object LessonStudy : Screen("study-lesson/{packId}") {
+        fun of(packId: String) = "study-lesson/${'$'}{Uri.encode(packId)}"
+    }
     data object Pdf : Screen("pdf")
     data object Charts : Screen("charts")
     data object Art : Screen("art")

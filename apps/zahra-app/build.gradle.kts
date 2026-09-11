@@ -95,6 +95,7 @@ dependencies {
     implementation(project(":feature-hearttoheart"))
     implementation(project(":feature-calls"))
     implementation(project(":feature-playback"))
+    implementation(project(":feature-study"))
     debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit)
     implementation(project(":core-sync"))

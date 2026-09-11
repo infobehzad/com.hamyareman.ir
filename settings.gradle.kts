@@ -36,6 +36,7 @@ include(
     ":feature-hearttoheart",
     ":feature-calls",
     ":feature-playback",
+    ":feature-study",
 )
 
 project(":zahra-app").projectDir = file("apps/zahra-app")
@@ -49,3 +50,4 @@ project(":feature-pairing").projectDir = file("shared/feature-pairing")
 project(":feature-hearttoheart").projectDir = file("shared/feature-hearttoheart")
 project(":feature-calls").projectDir = file("shared/feature-calls")
 project(":feature-playback").projectDir = file("shared/feature-playback")
+project(":feature-study").projectDir = file("shared/feature-study")

@@ -13,6 +13,8 @@ import ir.behzad.platform.core.appwrite.AppwriteRealtimeFeed
 import ir.behzad.platform.core.appwrite.AppwriteStorageService
 import ir.behzad.platform.core.appwrite.AppwriteTablesDbService
 import ir.behzad.platform.core.appwrite.ServerActions
+import ir.behzad.platform.feature.study.StudyPackRepository
+import ir.behzad.platform.feature.study.StudyProgressRepository
 import ir.behzad.platform.core.common.LocalStore
 import ir.behzad.platform.core.common.ScreenTimeTracker
 import ir.behzad.platform.core.common.UserRole
@@ -227,6 +229,23 @@ class AppContainer(context: Context) {
      * چون ترتیب مقداردهی اولیه در کلاس مهم است).
      */
     val ai = AiCompanion(functions, store, encryptor, serverActions)
+
+    /**
+     * پرامپت ۰۴: بسته‌های مطالعه از assets (پایلوت: C905_E01-L01).
+     * آفلاین کامل — بعداً با محتوای کامل کاربر جایگزین می‌شود.
+     */
+    val studyPacks = StudyPackRepository(context)
+
+    /**
+     * پرامپت ۰۴: پیشرفت مطالعه (وضعیت SRS فلش‌کارت‌ها + تاریخچه‌ی آزمون‌ها).
+     * نوشتن اول در کش محلی؛ سپس صف outbox در [SyncEngine] به جدول
+     * `study_progress` می‌فرستد. بعد از `sync` تعریف شده چون به آن نیاز دارد.
+     */
+    val studyProgress = StudyProgressRepository(
+        store = store,
+        sync = sync,
+        userIdProvider = { auth.cachedUserId().orEmpty() },
+    )
 
     val role: UserRole get() = auth.cachedRole()
     val partnerId: String? get() = pairing.cachedLink().partnerId

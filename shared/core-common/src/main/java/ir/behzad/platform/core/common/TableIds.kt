@@ -48,6 +48,7 @@ object TableIds {
 
     // --- پرامپت ۰۱: حافظه‌ی پیشرفت پلیر ویدیو/صوت ---
     const val LESSON_MEDIA_PROGRESS = "lesson_media_progress"
+    const val STUDY_PROGRESS = "study_progress"
 
     // --- پرامپت ۰۲: ماژول ورزش/یوگا/تنفس/یادگیری ---
     const val WELLNESS_MOVES = "wellness_moves"
@@ -92,6 +93,9 @@ object FunctionIds {
     const val WEEKLY_SUMMARY = "weekly-summary"
     /** لایه‌ی AI «همراه زهرا» — proxy سمت سرور؛ کلید مدل هرگز در اپ نیست. */
     const val AI_COMPANION = "ai-companion"
+
+    /** لایه‌ی AI «معلم خصوصی» مطالعه — رفع اشکال مفهومی؛ آفلاین بدون آن کامل است. */
+    const val STUDY_TUTOR = "study-tutor"
 
     /**
      * هشدار «کمک می‌خوام» به پدر: متن و مقصد را سرور می‌سازد، پیوند فعال را بررسی
