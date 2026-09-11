@@ -68,7 +68,7 @@ class AppwriteTablesDbService(
     override val isConfigured: Boolean get() = db != null
 
     override suspend fun list(tableId: String, queries: List<String>): AppResult<List<TableRow>> = guarded {
-        val res: RowList<Row<Map<String, Any?>>> = db!!.listRows(
+        val res: RowList<Row<Map<String, Any>>> = db!!.listRows(
             databaseId = provider.databaseId,
             tableId = tableId,
             queries = queries,
@@ -82,7 +82,7 @@ class AppwriteTablesDbService(
         permissions: List<String>,
         rowId: String,
     ): AppResult<Unit> = guarded {
-        val row: Row<Map<String, Any?>> = db!!.createRow(
+        val row: Row<Map<String, Any>> = db!!.createRow(
             databaseId = provider.databaseId,
             tableId = tableId,
             rowId = rowId,
@@ -108,7 +108,7 @@ class AppwriteTablesDbService(
         data: Map<String, Any?>,
         permissions: List<String>,
     ): AppResult<Unit> = guarded {
-        val row: Row<Map<String, Any?>> = db!!.upsertRow(
+        val row: Row<Map<String, Any>> = db!!.upsertRow(
             databaseId = provider.databaseId,
             tableId = tableId,
             rowId = rowId,
@@ -127,8 +127,8 @@ class AppwriteTablesDbService(
         Unit
     }
 
-    private fun Row<Map<String, Any?>>.toTableRow(): TableRow =
-        TableRow(id = id, payload = data ?: emptyMap())
+    private fun Row<Map<String, Any>>.toTableRow(): TableRow =
+        TableRow(id = id, payload = data)
 
     /** هر خطای سرور/شبکه به Err با پیام آدمیزاد تبدیل می‌شود — اپ هرگز crash نمی‌کند. */
     private inline fun <T> guarded(block: () -> T): AppResult<T> {
