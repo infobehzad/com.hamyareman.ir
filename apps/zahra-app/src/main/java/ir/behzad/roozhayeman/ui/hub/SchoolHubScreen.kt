@@ -39,7 +39,10 @@ fun SchoolHubScreen(nav: NavController) {
         MenuGroup("📚 کتاب‌ها و دروس", "درس‌های امروز و مسیر یادگیری") {
             HubCard("📖", "درس‌های من", "کتاب‌های پایه نهم، درس به درس با بازی و پیشرفت") { nav.hubTo(Screen.Learning.route) }
             HubCard("✏️", "مطالعه", "تمرکز، روتین مطالعه و ابزارهای درس") { nav.hubTo(Screen.StudyHome.route) }
-            HubCard("🎯", "مطالعه‌ی عمیق (پایلوت)", "فلش‌کارت، آزمون و حل تشریحی — ریاضی نهم: معرفی مجموعه") { nav.hubTo(Screen.LessonStudy.of("C905_E01-L01")) }
+            HubCard("🎯", "مطالعه‌ی عمیق — درس ۱: معرفی مجموعه", "فلش‌کارت، آزمون و حل تشریحی — ریاضی نهم فصل ۱") { nav.hubTo(Screen.LessonStudy.of("C905_E01-L01")) }
+            HubCard("🎯", "مطالعه‌ی عمیق — درس ۲: مجموعه‌های برابر و نمایش", "زیرمجموعه، قاعده‌ی 2ⁿ، مجموعه‌های N و W و Z و Q") { nav.hubTo(Screen.LessonStudy.of("C905_E01-L02")) }
+            HubCard("🎯", "مطالعه‌ی عمیق — درس ۳: اجتماع، اشتراک و تفاضل", "نمودار ون، فرمول n(A∪B) و مسائل کلامی") { nav.hubTo(Screen.LessonStudy.of("C905_E01-L03")) }
+            HubCard("🎯", "مطالعه‌ی عمیق — درس ۴: مجموعه‌ها و احتمال", "فضای نمونه، P(A) = n(A)÷n(S) و دو تاس") { nav.hubTo(Screen.LessonStudy.of("C905_E01-L04")) }
         }
 
         MenuGroup("🗓 برنامه‌ی هفتگی", "چرخش شیفت و درس‌های هر روز") {

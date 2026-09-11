@@ -91,7 +91,7 @@ fun LessonStudyScreen(packId: String, onBack: () -> Unit) {
                 Text("این بسته‌ی مطالعه هنوز آماده نیست.", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "فعلاً فقط «ریاضی نهم — معرفی مجموعه» پایلوت است؛ بقیه‌ی درس‌ها به‌زودی.",
+                    "فعلاً دروس ۱ تا ۴ فصل ۱ ریاضی نهم آماده است؛ از هاب «مدرسه» انتخاب کن.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
