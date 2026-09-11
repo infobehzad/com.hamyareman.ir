@@ -202,7 +202,7 @@ fun LessonPlayerScreen(
                 )
 
                 // --- نوار پیشرفت با نقاط seek-jump ---
-                progressFlow.value?.let { p ->
+                progressFlow.collectAsState().value?.let { p ->
                     if (p.seekJumps.isNotEmpty()) {
                         SeekJumpsLegend(p)
                     }
