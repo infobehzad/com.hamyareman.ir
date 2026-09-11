@@ -90,6 +90,14 @@ async function setVars() {
     const AI_ENDPOINT = (process.env.AI_ENDPOINT || '').trim();
 
     if (!AI_API_KEY) {
+        if (TARGET_IS_SHARED) {
+            // روی فانکشن مشترک ai-companion متغیرهای AI از قبل در کنسول هست؛
+            // نبودِ secret خطا نیست — همان تنظیمات کنسول استفاده می‌شود.
+            console.log('· AI_API_KEY secret خالی است — متغیرهای موجود کنسولِ ai-companion دست‌نخورده می‌مانند.');
+            console.log('  (اگر گام smoke شکست خورد و not_configured داد، یعنی Variables کنسول خالی است؛');
+            console.log('   آن‌وقت secret گیت‌هابِ AI_API_KEY را ثبت و این ورک‌فلو را دوباره اجرا کن.)');
+            return;
+        }
         console.error('');
         console.error('❌ secret گیت‌هابِ AI_API_KEY خالی است.');
         console.error('   ۱) کنسول ارائه‌دهنده‌ی مدل → کلید API را بردار (همان کلید ai-companion).');
