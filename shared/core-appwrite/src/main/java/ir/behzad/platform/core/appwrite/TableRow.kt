@@ -17,6 +17,9 @@ data class TableRow(
     val id: String,
     val payload: Map<String, Any?> = emptyMap(),
 ) {
+    /** نام مستعار هم‌راستا با مدل SDK — بعضی مصرف‌کننده‌ها `row.data[...]` می‌خوانند. */
+    val data: Map<String, Any?> get() = payload
+
     /** مقدار رشته‌ای ستون؛ خالی/غایب → [default]. */
     fun string(key: String, default: String = ""): String =
         (payload[key] as? String)?.takeIf { it.isNotBlank() } ?: default
