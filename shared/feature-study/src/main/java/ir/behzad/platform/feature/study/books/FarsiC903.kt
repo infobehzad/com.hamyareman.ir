@@ -1,3 +1,13 @@
+package ir.behzad.platform.feature.study.books
+
+import ir.behzad.platform.feature.study.BookModule
+import ir.behzad.platform.feature.study.StudyPack
+
+/**
+ * ماژول کتاب «فارسی پایه نهم (C903)» — معماری مصوب: کل محتوای درس داخل کد.
+ * منبع تألیف: PDF کتاب درسی ریپو.
+ */
+object FarsiC903 {
     private fun l01(): StudyPack = StudyPack(
         packId = "C903_E01-L01", bookCode = "C903", lessonId = "E01-L01",
         title = "درس ۱ — آفرینش همه تنبیه خداوند دل است", bookTitle = "فارسی پایه نهم", pdfFileName = "C903_E01-L01_BOOK.pdf",

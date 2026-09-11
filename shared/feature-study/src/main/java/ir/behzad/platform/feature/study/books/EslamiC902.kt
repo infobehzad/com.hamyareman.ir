@@ -1,3 +1,13 @@
+package ir.behzad.platform.feature.study.books
+
+import ir.behzad.platform.feature.study.BookModule
+import ir.behzad.platform.feature.study.StudyPack
+
+/**
+ * ماژول کتاب «تعلیمات اسلامی پایه نهم (C902)» — معماری مصوب: کل محتوای درس داخل کد.
+ * منبع تألیف: PDF کتاب درسی ریپو.
+ */
+object EslamiC902 {
     private fun l01(): StudyPack = StudyPack(
         packId = "C902_E01-L01", bookCode = "C902", lessonId = "E01-L01",
         title = "درس ۱ — تو را چگونه بشناسم؟", bookTitle = "تعلیمات اسلامی پایه نهم", pdfFileName = "C902_E01-L01_BOOK.pdf",

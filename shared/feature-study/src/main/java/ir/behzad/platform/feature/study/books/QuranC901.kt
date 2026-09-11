@@ -1,3 +1,13 @@
+package ir.behzad.platform.feature.study.books
+
+import ir.behzad.platform.feature.study.BookModule
+import ir.behzad.platform.feature.study.StudyPack
+
+/**
+ * ماژول کتاب «آموزش قرآن پایه نهم (C901)» — معماری مصوب: کل محتوای درس داخل کد.
+ * منبع تألیف: PDF کتاب درسی ریپو.
+ */
+object QuranC901 {
     private fun l01(): StudyPack = StudyPack(
         packId = "C901_L01", bookCode = "C901", lessonId = "L01",
         title = "درس ۱ — این جهان راه است و ما راهی و مرکب، خوی ماست", bookTitle = "آموزش قرآن پایه نهم", pdfFileName = "C901_L01_BOOK.pdf",

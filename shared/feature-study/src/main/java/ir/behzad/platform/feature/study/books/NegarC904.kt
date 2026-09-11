@@ -1,3 +1,13 @@
+package ir.behzad.platform.feature.study.books
+
+import ir.behzad.platform.feature.study.BookModule
+import ir.behzad.platform.feature.study.StudyPack
+
+/**
+ * ماژول کتاب «نگارش پایه نهم (C904)» — معماری مصوب: کل محتوای درس داخل کد.
+ * منبع تألیف: PDF کتاب درسی ریپو.
+ */
+object NegarC904 {
     private fun l01(): StudyPack = StudyPack(
         packId = "C904_L01", bookCode = "C904", lessonId = "L01",
         title = "درس ۱ — نظام ذهنی «پرورده» و «بند» بنویسیم", bookTitle = "نگارش پایه نهم", pdfFileName = "C904_L01_BOOK.pdf",
