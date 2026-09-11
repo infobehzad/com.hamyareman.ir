@@ -71,6 +71,8 @@ object Sm2 {
 
     /** نمره‌ی تسلط ۰..۱۰۰ برای نمایش (پیشرفت فاصله‌ها + پایداری). */
     fun mastery(state: CardState): Int {
+        // کارت نو حتی با ease پیش‌فرض تسلط ندارد؛ تسلط فقط با مرور واقعی ساخته می‌شود.
+        if (state.reps == 0 && state.intervalDays == 0) return 0
         val repsPart = (state.reps.coerceAtMost(8).toDouble() / 8.0) * 0.30
         val intervalPart = (state.intervalDays.coerceAtMost(60).toDouble() / 60.0) * 0.50
         val easePart = ((state.ease - MIN_EASE) / (2.5 - MIN_EASE)).coerceIn(0.0, 1.0) * 0.20

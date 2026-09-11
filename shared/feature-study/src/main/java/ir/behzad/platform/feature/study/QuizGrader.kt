@@ -41,10 +41,13 @@ object QuizGrader {
         if (given.isBlank()) return 0.0 to false
         return when (question.type) {
             "mcq" -> {
+                // سه راه درست: متن کامل برابر، یا برچسب گزینه («الف»)، یا همان با برچسب.
                 val want = normalize(question.answer)
-                val ok = want == given ||
-                    want.startsWith(given.removePrefix("(").take(1) + ")") ||
-                    given.startsWith(want.removePrefix("(").take(1) + ")")
+                val label = want.substringBefore(')').trim()
+                val wantBody = if (label != want) want.substringAfter(')').trim() else want
+                val ok = given == want ||
+                    given == wantBody ||
+                    (label.isNotBlank() && (given == label || want.startsWith("$given)") || given.startsWith("$label)")))
                 (if (ok) 1.0 else 0.0) to ok
             }
             "numeric" -> {
