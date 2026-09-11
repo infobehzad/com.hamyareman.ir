@@ -55,7 +55,12 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "/META-INF/DEPENDENCIES"
         }
-    }
+    }}
+
+lint {
+    // پروژه آگاهانه از APIهای unstable پخش media3 استفاده می‌کند (پلیر/سشن)؛
+    // هشدارهای UnstableApi را به‌جای ۷ خطای لینت، یک‌جا بی‌اثر می‌کنیم.
+    disable += "UnsafeOptInUsageError"
 }
 
 // AGP 9: پلاگین Kotlin Android حذف شده (Kotlin داخلی است)؛
