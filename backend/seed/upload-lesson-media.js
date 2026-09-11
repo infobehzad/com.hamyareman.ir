@@ -229,6 +229,27 @@ async function uploadAll(items) {
     return byLesson;
 }
 
+/** سطر را می‌نویسد؛ اگر سرور «Unknown attribute: X» داد، X را از payload حذف و دوباره. */
+async function writeRowResilient(rowId, data, exists) {
+    let payload = { ...data };
+    for (let i = 0; i < 8; i++) {
+        try {
+            if (exists) await tables.updateRow({ databaseId: DB, tableId: 'lessons', rowId, data: payload });
+            else await tables.createRow({ databaseId: DB, tableId: 'lessons', rowId, data: payload });
+            return { ok: true };
+        } catch (e) {
+            const m = String(e && e.message || e).match(/Unknown attribute:\s*"?([A-Za-z0-9_]+)"?/i);
+            if (m && payload[m[1]] !== undefined) {
+                console.log(`    · ستون «${m[1]}» روی سرور نیست — از payload حذف شد`);
+                delete payload[m[1]];
+                continue;
+            }
+            throw e;
+        }
+    }
+    return { ok: false };
+}
+
 async function seedLessonsRows(byLesson) {
     const keys = [...byLesson.keys()];
     if (keys.length === 0) { console.log('\n(سید lessons: درسی با رسانه‌ی موجود پیدا نشد)'); return; }
@@ -258,8 +279,9 @@ async function seedLessonsRows(byLesson) {
             try { await tables.getRow({ databaseId: DB, tableId: 'lessons', rowId }); }
             catch (_) { exists = false; }
             if (dryRun) { console.log(`  [dry] ${exists ? 'update' : 'create'} ${rowId} (V:${hasVideo ? '✓' : '—'} A:${hasAudio ? '✓' : '—'})`); continue; }
-            if (exists) { await tables.updateRow({ databaseId: DB, tableId: 'lessons', rowId, data }); updated++; }
-            else { await tables.createRow({ databaseId: DB, tableId: 'lessons', rowId, data }); created++; }
+            const r = await writeRowResilient(rowId, data, exists);
+            if (!r.ok) { failed++; console.log(`  ⚠️ ${rowId}: چند ستون غایب بود و نوشته نشد`); continue; }
+            if (exists) updated++; else created++;
             console.log(`  ✅ ${rowId} (V:${hasVideo ? '✓' : '—'} A:${hasAudio ? '✓' : '—'})`);
         } catch (e) {
             failed++;

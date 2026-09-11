@@ -99,7 +99,7 @@ async function migrate() {
         { key: 'hasAudio', type: 'boolean', required: false, default: false },
         { key: 'videoUrl', type: 'string', size: 1024, required: false, default: '' },
         { key: 'audioUrl', type: 'string', size: 1024, required: false, default: '' },
-        { key: 'chapterMarkers', type: 'string', size: 8192, required: false, default: '[]' },
+        { key: 'chapterMarkers', type: 'string', size: 1024, required: false, default: '[]' },
         { key: 'flashcardSetId', type: 'string', size: 64, required: false, default: '' },
         { key: 'questionBankId', type: 'string', size: 64, required: false, default: '' },
         { key: 'examRangeGroup', type: 'string', size: 32, required: false, default: '' },
