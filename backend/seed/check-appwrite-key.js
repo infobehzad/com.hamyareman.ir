@@ -31,6 +31,11 @@ const client = new sdk.Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID).set
             const functions = new sdk.Functions(client);
             await functions.list();
             console.log('✅ کلید با اسکوپ functions معتبر است.');
+        } else if (which === 'storage') {
+            const BUCKET = process.env.APPWRITE_BUCKET_ID || '6aa1eaae00303400117b';
+            const storage = new sdk.Storage(client);
+            await storage.listFiles({ bucketId: BUCKET, queries: [sdk.Query.limit(1)] });
+            console.log(`✅ کلید با باکت ${BUCKET} (wellness-media) کار می‌کند.`);
         } else {
             const tables = new sdk.TablesDB(client);
             await tables.listTables({ databaseId: DB });
@@ -47,7 +52,7 @@ const client = new sdk.Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID).set
             console.error('   کلید نامعتبر یا بی‌اسکوپ است. در کنسول Appwrite › Overview ›');
             console.error('   Integrations › API Keys یک کلید با این اسکوپ‌ها بساز و مقدار secret');
             console.error('   APPWRITE_API_KEY را در گیت‌هاب با آن جایگزین کن:');
-            console.error('     tables.write / documents.write / functions.write');
+            console.error('     tables.write / documents.write / functions.write / storage.write');
         } else if (String(code) === '404') {
             console.error('   پروژه یا دیتابیس پیدا نشد. APPWRITE_PROJECT_ID و');
             console.error('   APPWRITE_DATABASE_ID (ZahraDB) را با کنسول بسنج.');
