@@ -1,6 +1,6 @@
 package ir.behzad.roozhayeman.ui.wellness
 
-import ir.behzad.roozhayeman.ui.exercise.WellnessMove.Category
+import ir.behzad.roozhayeman.ui.wellness.WellnessMove.Category
 
 /**
  * پرامپت ۰۲ — کاتالوگ کامل حرکات یوگا/ورزش/تنفس/یادگیری.

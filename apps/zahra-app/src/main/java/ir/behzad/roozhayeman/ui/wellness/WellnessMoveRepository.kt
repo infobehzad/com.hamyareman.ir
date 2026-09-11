@@ -1,6 +1,6 @@
 package ir.behzad.roozhayeman.ui.wellness
 
-import ir.behzad.platform.core.appwrite.AppResult
+import ir.behzad.platform.core.common.AppResult
 import ir.behzad.platform.core.appwrite.BackendConfig
 import ir.behzad.platform.core.appwrite.TablesDbService
 import ir.behzad.platform.core.common.LocalStore

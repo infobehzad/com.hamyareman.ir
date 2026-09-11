@@ -200,7 +200,7 @@ private fun MoveCard(move: WellnessMove, onStart: () -> Unit) {
             Spacer(Modifier.height(8.dp))
             Text(move.instructionsFa, style = MaterialTheme.typography.bodySmall, maxLines = 3)
             Spacer(Modifier.height(8.dp))
-            PrimaryButton("شروع جلسه", onStart, modifier = Modifier.fillMaxWidth())
+            PrimaryButton(text = "شروع جلسه", onClick = onStart, modifier = Modifier.fillMaxWidth())
         }
     }
 }

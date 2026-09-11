@@ -95,6 +95,8 @@ dependencies {
     implementation(project(":feature-hearttoheart"))
     implementation(project(":feature-calls"))
     implementation(project(":feature-playback"))
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
     implementation(project(":feature-study"))
     debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit)

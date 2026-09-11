@@ -50,6 +50,9 @@ class AppContainer(context: Context) {
     /** داده‌های اپ زهرا (تنظیمات، کش، رمز PIN). */
     val store = LocalStore(context)
 
+    /** کانتکست اپلیکیشن برای صفحاتی که Context لازم دارند (مثل پلیر). */
+    val appContext = context.applicationContext
+
     /** ظاهر اپ (تم/حالت رنگ/فونت) — سراسری و پایدار. */
     val uiPrefs = ir.behzad.roozhayeman.ui.appearance.UiPrefs(context)
 
@@ -180,6 +183,9 @@ class AppContainer(context: Context) {
 
     val lock = AppLock(store)
 
+    /** موتور سینک outbox — قبل از همه‌ی ریپوهایی که به آن ارجاع می‌دهند. */
+    val sync = SyncEngine(store, tables)
+
     /**
      * پرامپت ۰۱: حافظه‌ی پیشرفت پلیر ویدیو/صوت.
      *
@@ -214,7 +220,6 @@ class AppContainer(context: Context) {
     val biometric = BiometricUnlock(store, lock)
     val quiet = QuietHoursManager(store)
     val reminders = ReminderScheduler(context)
-    val sync = SyncEngine(store, tables)
 
     /** کلید در Android Keystore است؛ هیچ بایتی از آن روی دیسک نمی‌ماند. */
     val encryptor = Encryptor()

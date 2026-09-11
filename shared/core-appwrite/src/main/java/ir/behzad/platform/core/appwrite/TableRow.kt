@@ -24,6 +24,18 @@ data class TableRow(
     fun string(key: String, default: String = ""): String =
         (payload[key] as? String)?.takeIf { it.isNotBlank() } ?: default
 
+    /** مقدار بولی ستون؛ Boolean واقعی، «true/false» رشته‌ای، یا 0/1 عددی؛ غایب → [default]. */
+    fun boolean(key: String, default: Boolean = false): Boolean = when (val v = payload[key]) {
+        is Boolean -> v
+        is String -> when (v.lowercase().trim()) {
+            "true", "1", "yes" -> true
+            "false", "0", "no" -> false
+            else -> default
+        }
+        is Number -> v.toInt() != 0
+        else -> default
+    }
+
     /** مقدار عددی ستون؛ عدد یا رشته‌ی عددی؛ غایب/نامعتبر → [default]. */
     fun long(key: String, default: Long = 0L): Long = when (val v = payload[key]) {
         is Number -> v.toLong()
