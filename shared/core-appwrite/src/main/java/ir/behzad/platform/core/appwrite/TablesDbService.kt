@@ -68,7 +68,7 @@ class AppwriteTablesDbService(
     override val isConfigured: Boolean get() = db != null
 
     override suspend fun list(tableId: String, queries: List<String>): AppResult<List<TableRow>> = guarded {
-        val res: RowList<Row<Map<String, Any>>> = db!!.listRows(
+        val res: RowList<Map<String, Any>> = db!!.listRows(
             databaseId = provider.databaseId,
             tableId = tableId,
             queries = queries,
