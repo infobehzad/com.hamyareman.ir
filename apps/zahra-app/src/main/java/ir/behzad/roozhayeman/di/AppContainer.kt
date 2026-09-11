@@ -48,6 +48,9 @@ class AppContainer(context: Context) {
     /** داده‌های اپ زهرا (تنظیمات، کش، رمز PIN). */
     val store = LocalStore(context)
 
+    /** ظاهر اپ (تم/حالت رنگ/فونت) — سراسری و پایدار. */
+    val uiPrefs = ir.behzad.roozhayeman.ui.appearance.UiPrefs(context)
+
     /** استور مشترک پیوند — اپ پدر روی همان دستگاه هم آن را می‌خواند. */
     private val pairingStore = LocalStore(context, AppwritePairingRepository.PAIRING_STORE)
 

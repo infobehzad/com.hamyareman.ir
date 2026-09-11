@@ -110,5 +110,6 @@
             </intent-filter>
         </service>
 
+        <receiver android:name=".notifications.MedsReceiver" android:exported="false" />
     </application>
 </manifest>

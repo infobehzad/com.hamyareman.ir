@@ -24,6 +24,8 @@ import ir.behzad.platform.core.notifications.NotificationPermissions
 import ir.behzad.platform.core.security.AppLock
 import ir.behzad.platform.core.security.BiometricPromptRunner
 import ir.behzad.roozhayeman.di.AppContainer
+import ir.behzad.roozhayeman.ui.appearance.FontLibrary
+import ir.behzad.roozhayeman.ui.appearance.LocalUiPrefs
 import ir.behzad.platform.feature.calls.IncomingCallsHost
 import ir.behzad.roozhayeman.ui.navigation.ZahraNavHost
 
@@ -84,7 +86,7 @@ class MainActivity : FragmentActivity() {
                 bioNotice = null
                 BiometricPromptRunner.show(
                     activity = activity,
-                    title = "روزهای من",
+                    title = "همیار من",
                     subtitle = "برای بازکردن دفترچه‌ات اثر انگشت یا چهره‌ات را تأیید کن.",
                     negativeText = "واردکردن PIN",
                     onSuccess = {
@@ -105,7 +107,13 @@ class MainActivity : FragmentActivity() {
                 if (!isUnlocked && offerBiometric) unlockWithBiometric()
             }
 
-            PlatformTheme(brand = BrandTheme.DollStage) {
+            val uiPrefs = container.uiPrefs
+            CompositionLocalProvider(LocalUiPrefs provides uiPrefs) {
+                PlatformTheme(
+                    brand = uiPrefs.theme,
+                    darkTheme = uiPrefs.darkTheme,
+                    fontFamily = FontLibrary.fontFamilyFor(activity, uiPrefs.fontKey),
+                ) {
                 CompositionLocalProvider(LocalAppContainer provides container) {
                     Surface(Modifier.fillMaxSize()) {
                         if (isUnlocked) {
@@ -122,7 +130,7 @@ class MainActivity : FragmentActivity() {
                             )
                         } else {
                             PinLockGate(
-                                title = "روزهای من قفل است",
+                                title = "همیار من قفل است",
                                 subtitle = "برای دیدن دفترچه‌ات PIN را وارد کن.",
                                 minLength = AppLock.MIN_PIN,
                                 maxLength = AppLock.MAX_PIN,
@@ -142,6 +150,7 @@ class MainActivity : FragmentActivity() {
                         }
                     }
                 }
+            }
             }
         }
     }

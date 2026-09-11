@@ -12,24 +12,39 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import ir.behzad.platform.core.designsystem.SectionCard
+import ir.behzad.roozhayeman.ui.hub.HubCard
+import ir.behzad.roozhayeman.ui.hub.hubTo
+import ir.behzad.roozhayeman.ui.hub.HubHeader
+import ir.behzad.roozhayeman.ui.hub.HubBody
 import ir.behzad.roozhayeman.ui.navigation.Screen
 
+/**
+ * «بیشتر» — همه‌چیز غیر از ۵ تب اصلی:
+ * ارتباط با بابا، فضای امن، سرگرمی‌های خلاق، شخصی‌سازی (ظاهر و فونت) و تنظیمات.
+ */
 @Composable
 fun MoreScreen(nav: NavController) {
-    Column(Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("بیشتر", style = MaterialTheme.typography.titleLarge)
-        SectionCard("آموزش هوش مصنوعی", "مسیر پیش‌نیازدار، یادآور روزانه و ارزیابی.") { nav.navigate(Screen.AiLearning.route) }
-        SectionCard("چرخه و ذهن‌آگاهی", "تقویم و تمرین تنفس.") { nav.navigate(Screen.Cycle.route) }
-        SectionCard("زمان صفحه", "سقف خودانتخابی و حالت تمرکز.") { nav.navigate(Screen.ScreenTime.route) }
-        SectionCard("فضای امن من", "نوشتن، آلبوم با بابا، شماره‌های کمک.") { nav.navigate(Screen.SafeSpace.route) }
-        SectionCard("نقاشی سیاه‌قلم", "ایده‌ی امروز و گالری.") { nav.navigate(Screen.Art.route) }
-        SectionCard("آشپزی", "دستور پخت درخواستی.") { nav.navigate(Screen.Recipes.route) }
-        SectionCard("ورزش و یوگا", "کاتالوگ حرکت‌ها.") { nav.navigate(Screen.Exercise.route) }
-        SectionCard("سلامتی (یوگا، ورزش، تنفس، یادگیری)", "۴۳ حرکت با تایمر و اعلان صوتی فارسی.") { nav.navigate(Screen.Wellness.route) }
-        SectionCard("آب", "یادآور نوشیدن.") { nav.navigate(Screen.Water.route) }
-        SectionCard("امتیاز و بج", "فقط جنبه‌ی مثبت.") { nav.navigate(Screen.Badges.route) }
-        SectionCard("پیوند با بابا", "کد ۶ رقمی.") { nav.navigate(Screen.Pairing.route) }
-        SectionCard("تنظیمات", "حریم، قفل، تم.") { nav.navigate(Screen.Settings.route) }
+    HubBody {
+        HubHeader("بیشتر", "هر چیز دیگر که به کارت می‌آید")
+
+        HubCard("💞", "قلب‌به‌قلب با بابا", "پیام، ویس، عکس و تماس — جای امنِ دوتایی") { nav.hubTo(Screen.Heart.route) }
+        HubCard("🔗", "پیوند با بابا", "کد ۶ رقمی اتصال") { nav.hubTo(Screen.Pairing.route) }
+
+        HubCard("🛟", "فضای امن من", "نوشتن، آلبوم، شماره‌های کمک") { nav.hubTo(Screen.SafeSpace.route) }
+        HubCard("🚨", "شماره‌های کمک", "همیشه در دسترس") { nav.hubTo(Screen.Helplines.route) }
+
+        HubCard("🎨", "نقاشی سیاه‌قلم", "ایده‌ی امروز و گالری") { nav.hubTo(Screen.Art.route) }
+        HubCard("🍲", "آشپزی", "دستور پخت درخواستی") { nav.hubTo(Screen.Recipes.route) }
+        HubCard("🏅", "امتیاز و بج", "فقط جنبه‌ی مثبت") { nav.hubTo(Screen.Badges.route) }
+        HubCard("⏳", "زمان صفحه", "سقف خودانتخابی و حالت تمرکز") { nav.hubTo(Screen.ScreenTime.route) }
+
+        HubCard("🎨", "ظاهر و فونت", "تم رنگی، حالت تاریک/روشن، فونت دانلودی") { nav.hubTo(Screen.Appearance.route) }
+        HubCard("⚙️", "تنظیمات", "حریم، قفل، همگام‌سازی") { nav.hubTo(Screen.Settings.route) }
+
+        Text(
+            "همیار من — نسخه‌ی ۱.۰",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }

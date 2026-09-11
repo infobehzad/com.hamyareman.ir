@@ -3,6 +3,9 @@ package ir.behzad.roozhayeman.ui.navigation
 import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.MoreHoriz
@@ -12,6 +15,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 sealed class Screen(val route: String) {
     data object Home : Screen("home")
     data object Study : Screen("study")
+    data object StudyHome : Screen("study-home")
     data object Chat : Screen("chat")
     data object Heart : Screen("heart")
     data object More : Screen("more")
@@ -31,6 +35,13 @@ sealed class Screen(val route: String) {
     data object Library : Screen("library")
     data object Audiobook : Screen("audiobook")
     data object School : Screen("school")
+    data object HealthHub : Screen("health")
+    data object AwarenessHub : Screen("awareness")
+    data object WeeklySchedule : Screen("weekly-schedule")
+    data object Meds : Screen("meds")
+    data object SleepLog : Screen("sleep-log")
+    data object ReadingCorner : Screen("reading-corner")
+    data object Appearance : Screen("appearance")
     /** آزمون. `lessonId` اختیاری است تا از صفحه‌ی درس فقط سؤال‌های همان درس بیاید. */
     data object Quiz : Screen("quiz?lessonId={lessonId}") {
         fun of(lessonId: String? = null) =
@@ -76,10 +87,11 @@ sealed class Screen(val route: String) {
 
 data class Tab(val route: String, val icon: ImageVector, val label: String)
 val Tabs = listOf(
-    Tab(Screen.Home.route, Icons.Filled.Home, "خانه"),
-    Tab(Screen.Study.route, Icons.Filled.MenuBook, "درس"),
-    Tab(Screen.Chat.route, Icons.Filled.SmartToy, "همراه"),
-    Tab(Screen.Heart.route, Icons.Filled.Favorite, "بابا"),
+    Tab(Screen.Home.route, Icons.Filled.Home, "داشبورد"),
+    Tab(Screen.Study.route, Icons.Filled.School, "مدرسه"),
+    Tab(Screen.HealthHub.route, Icons.Filled.FitnessCenter, "سلامتی"),
+    Tab(Screen.AwarenessHub.route, Icons.Filled.SelfImprovement, "آگاهی"),
+    Tab(Screen.Chat.route, Icons.Filled.SmartToy, "همراه من"),
     Tab(Screen.More.route, Icons.Filled.MoreHoriz, "بیشتر"),
 )
 val TopRoutes = Tabs.map { it.route }.toSet()

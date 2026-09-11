@@ -6,10 +6,29 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.LayoutDirection
 
-enum class BrandTheme { DollStage, CalmFather }
+/**
+ * تم‌های قابل‌انتخاب اپ «همیار من»:
+ * - DollStage: تم عروسکی اصلی (پیش‌فرض)
+ * - Stitch: جزیره‌ای/فضایی (آبی الکتریکی + صورتی مرجانی)
+ * - MoonNight: بنفش شبانه با طلایی
+ * - Mint: سبز نعنایی تازه
+ * - CalmFather: تم آرامِ اپ پدر (تغییر نکند)
+ */
+enum class BrandTheme(val label: String) {
+    DollStage("عروسکی"),
+    Stitch("جزیره‌ای (استیچ)"),
+    MoonNight("شب ماه"),
+    Mint("نعنایی"),
+    CalmFather("آرام (پدر)"),
+}
+
+/** فونت جاری اپ — از ظاهر/تنظیمات عوض می‌شود؛ پیش‌فرض فونت سیستم. */
+val LocalPlatformFont = staticCompositionLocalOf { FontFamily.Default }
 
 private val DollLight = lightColorScheme(
     primary = DollPink, onPrimary = DollCreamOn,
@@ -55,17 +74,103 @@ private val CalmDark = darkColorScheme(
     outline = CalmOutlineNight, error = CalmErrorNight,
 )
 
+private val StitchLight = lightColorScheme(
+    primary = StitchBlue, onPrimary = StitchOnBlue,
+    primaryContainer = StitchBlueContainer, onPrimaryContainer = StitchOnBlueContainer,
+    secondary = StitchPink, onSecondary = StitchOnPink,
+    secondaryContainer = StitchPinkContainer, onSecondaryContainer = StitchOnPinkContainer,
+    tertiary = StitchTeal, onTertiary = StitchOnTeal,
+    tertiaryContainer = StitchTealContainer, onTertiaryContainer = StitchOnTealContainer,
+    background = StitchBg, onBackground = StitchOnBg,
+    surface = StitchSurface, onSurface = StitchOnBg,
+    surfaceVariant = StitchSurfaceVariant, onSurfaceVariant = StitchOnSurfaceVariant,
+    outline = StitchOutline, error = StitchError,
+)
+private val StitchDark = darkColorScheme(
+    primary = StitchBlueNight, onPrimary = StitchOnBlueNight,
+    primaryContainer = StitchBlueNightContainer, onPrimaryContainer = StitchOnBlueNightContainer,
+    secondary = StitchPinkNight, onSecondary = StitchOnPinkNight,
+    secondaryContainer = StitchPinkNightContainer, onSecondaryContainer = StitchOnPinkNightContainer,
+    tertiary = StitchTealNight, onTertiary = StitchOnTealNight,
+    tertiaryContainer = StitchTealNightContainer, onTertiaryContainer = StitchOnTealNightContainer,
+    background = StitchNightBg, onBackground = StitchNightOnBg,
+    surface = StitchNightSurface, onSurface = StitchNightOnBg,
+    surfaceVariant = StitchNightSurfaceVariant, onSurfaceVariant = StitchNightOnSurfaceVariant,
+    outline = StitchNightOutline, error = StitchNightError,
+)
+
+private val MoonLight = lightColorScheme(
+    primary = MoonViolet, onPrimary = MoonOnViolet,
+    primaryContainer = MoonVioletContainer, onPrimaryContainer = MoonOnVioletContainer,
+    secondary = MoonGold, onSecondary = MoonOnGold,
+    secondaryContainer = MoonGoldContainer, onSecondaryContainer = MoonOnGoldContainer,
+    tertiary = MoonRose, onTertiary = MoonOnRose,
+    tertiaryContainer = MoonRoseContainer, onTertiaryContainer = MoonOnRoseContainer,
+    background = MoonBg, onBackground = MoonOnBg,
+    surface = MoonSurface, onSurface = MoonOnBg,
+    surfaceVariant = MoonSurfaceVariant, onSurfaceVariant = MoonOnSurfaceVariant,
+    outline = MoonOutline, error = MoonError,
+)
+private val MoonDark = darkColorScheme(
+    primary = MoonVioletNight, onPrimary = MoonOnVioletNight,
+    primaryContainer = MoonVioletNightContainer, onPrimaryContainer = MoonOnVioletNightContainer,
+    secondary = MoonGoldNight, onSecondary = MoonOnGoldNight,
+    secondaryContainer = MoonGoldNightContainer, onSecondaryContainer = MoonOnGoldNightContainer,
+    tertiary = MoonRoseNight, onTertiary = MoonOnRoseNight,
+    tertiaryContainer = MoonRoseNightContainer, onTertiaryContainer = MoonOnRoseNightContainer,
+    background = MoonNightBg, onBackground = MoonNightOnBg,
+    surface = MoonNightSurface, onSurface = MoonNightOnBg,
+    surfaceVariant = MoonNightSurfaceVariant, onSurfaceVariant = MoonNightOnSurfaceVariant,
+    outline = MoonNightOutline, error = MoonNightError,
+)
+
+private val MintLight = lightColorScheme(
+    primary = MintGreen, onPrimary = MintOnGreen,
+    primaryContainer = MintGreenContainer, onPrimaryContainer = MintOnGreenContainer,
+    secondary = MintLime, onSecondary = MintOnLime,
+    secondaryContainer = MintLimeContainer, onSecondaryContainer = MintOnLimeContainer,
+    tertiary = MintSky, onTertiary = MintOnSky,
+    tertiaryContainer = MintSkyContainer, onTertiaryContainer = MintOnSkyContainer,
+    background = MintBg, onBackground = MintOnBg,
+    surface = MintSurface, onSurface = MintOnBg,
+    surfaceVariant = MintSurfaceVariant, onSurfaceVariant = MintOnSurfaceVariant,
+    outline = MintOutline, error = MintError,
+)
+private val MintDark = darkColorScheme(
+    primary = MintGreenNight, onPrimary = MintOnGreenNight,
+    primaryContainer = MintGreenNightContainer, onPrimaryContainer = MintOnGreenNightContainer,
+    secondary = MintLimeNight, onSecondary = MintOnLimeNight,
+    secondaryContainer = MintLimeNightContainer, onSecondaryContainer = MintOnLimeNightContainer,
+    tertiary = MintSkyNight, onTertiary = MintOnSkyNight,
+    tertiaryContainer = MintSkyNightContainer, onTertiaryContainer = MintOnSkyNightContainer,
+    background = MintNightBg, onBackground = MintNightOnBg,
+    surface = MintNightSurface, onSurface = MintNightOnBg,
+    surfaceVariant = MintNightSurfaceVariant, onSurfaceVariant = MintNightOnSurfaceVariant,
+    outline = MintNightOutline, error = MintNightError,
+)
+
 @Composable
 fun PlatformTheme(
     brand: BrandTheme,
     darkTheme: Boolean = isSystemInDarkTheme(),
+    fontFamily: FontFamily = FontFamily.Default,
     content: @Composable () -> Unit,
 ) {
     val scheme = when (brand) {
         BrandTheme.DollStage -> if (darkTheme) DollDark else DollLight
+        BrandTheme.Stitch -> if (darkTheme) StitchDark else StitchLight
+        BrandTheme.MoonNight -> if (darkTheme) MoonDark else MoonLight
+        BrandTheme.Mint -> if (darkTheme) MintDark else MintLight
         BrandTheme.CalmFather -> if (darkTheme) CalmDark else CalmLight
     }
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        MaterialTheme(colorScheme = scheme, typography = PlatformTypography, shapes = PlatformShapes, content = content)
+        CompositionLocalProvider(LocalPlatformFont provides fontFamily) {
+            MaterialTheme(
+                colorScheme = scheme,
+                typography = platformTypography(fontFamily),
+                shapes = PlatformShapes,
+                content = content,
+            )
+        }
     }
 }

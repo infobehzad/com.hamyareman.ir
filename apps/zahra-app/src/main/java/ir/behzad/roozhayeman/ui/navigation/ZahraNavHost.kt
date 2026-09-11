@@ -35,6 +35,14 @@ import ir.behzad.roozhayeman.ui.cycle.MoodCheckInScreen
 import ir.behzad.roozhayeman.ui.exercise.ExerciseDetailScreen
 import ir.behzad.roozhayeman.ui.exercise.ExerciseScreen
 import ir.behzad.roozhayeman.ui.gamification.BadgesScreen
+import ir.behzad.roozhayeman.ui.appearance.AppearanceScreen
+import ir.behzad.roozhayeman.ui.hub.AwarenessHubScreen
+import ir.behzad.roozhayeman.ui.hub.HealthHubScreen
+import ir.behzad.roozhayeman.ui.hub.MedsScreen
+import ir.behzad.roozhayeman.ui.hub.ReadingCornerScreen
+import ir.behzad.roozhayeman.ui.hub.SchoolHubScreen
+import ir.behzad.roozhayeman.ui.hub.SleepLogScreen
+import ir.behzad.roozhayeman.ui.hub.WeeklyScheduleScreen
 import ir.behzad.roozhayeman.ui.home.HomeScreen
 import ir.behzad.roozhayeman.ui.learning.LearningHomeScreen
 import ir.behzad.roozhayeman.ui.learning.LessonScreen
@@ -89,7 +97,8 @@ fun ZahraNavHost() {
     }) { pad ->
         NavHost(nav, startDestination = Screen.Home.route, modifier = Modifier.padding(pad)) {
             composable(Screen.Home.route) { HomeScreen(nav) }
-            composable(Screen.Study.route) { StudyHomeScreen(nav) }
+            composable(Screen.Study.route) { SchoolHubScreen(nav) }
+            composable(Screen.StudyHome.route) { StudyHomeScreen(nav) }
             composable(Screen.Chat.route) {
                 ChatScreen(
                     onSettings = { nav.navigate(Screen.ChatSettings.route) },
@@ -100,6 +109,13 @@ fun ZahraNavHost() {
                 HeartToHeartScreen(c.heart, MessageDirection.TO_FATHER, onStartCall = { nav.navigate(Screen.Call.route) }, onDialTel = { c.calls.dialTel(c.fatherTel) })
             }
             composable(Screen.More.route) { MoreScreen(nav) }
+            composable(Screen.HealthHub.route) { HealthHubScreen(nav) }
+            composable(Screen.AwarenessHub.route) { AwarenessHubScreen(nav) }
+            composable(Screen.WeeklySchedule.route) { WeeklyScheduleScreen { nav.popBackStack() } }
+            composable(Screen.Meds.route) { MedsScreen { nav.popBackStack() } }
+            composable(Screen.SleepLog.route) { SleepLogScreen { nav.popBackStack() } }
+            composable(Screen.ReadingCorner.route) { ReadingCornerScreen { nav.popBackStack() } }
+            composable(Screen.Appearance.route) { AppearanceScreen { nav.popBackStack() } }
             composable(Screen.Cycle.route) { CycleCalendarScreen({ nav.popBackStack() }, { nav.navigate(Screen.Mood.route) }, { nav.navigate(Screen.Mindfulness.route) }) }
             composable(Screen.Mood.route) { MoodCheckInScreen { nav.popBackStack() } }
             composable(Screen.Mindfulness.route) { MindfulnessScreen { nav.popBackStack() } }

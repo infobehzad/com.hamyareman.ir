@@ -1,0 +1,83 @@
+package ir.behzad.roozhayeman.ui.hub
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import ir.behzad.roozhayeman.ui.navigation.Screen
+
+/**
+ * هاب «مدرسه» — تمام دنیای آموزشی به‌صورت درختی (دسته‌بندی در تو در تو):
+ * کتاب‌ها و دروس، برنامه‌ی هفتگی شیفت‌دار، آزمون‌ها، پلیر دروس،
+ * کتابخانه و کتاب صوتی، جزوه (PDF)، آموزش هوش مصنوعی و پیشرفت.
+ */
+@Composable
+fun SchoolHubScreen(nav: NavController) {
+    HubBody {
+        HubHeader("مدرسه 🎒", "همه‌چیزِ درس و یادگیری، مرتب و دسته‌بندی‌شده")
+
+        MenuGroup("📚 کتاب‌ها و دروس", "درس‌های امروز و مسیر یادگیری") {
+            HubCard("📖", "درس‌های من", "کتاب‌های پایه نهم، درس به درس با بازی و پیشرفت") { nav.hubTo(Screen.Learning.route) }
+            HubCard("✏️", "مطالعه", "تمرکز، روتین مطالعه و ابزارهای درس") { nav.hubTo(Screen.StudyHome.route) }
+        }
+
+        MenuGroup("🗓 برنامه‌ی هفتگی", "چرخش شیفت و درس‌های هر روز") {
+            HubCard("⏰", "برنامه‌ی هفتگی من", "شیفت صبح/عصر/شب + جدول درس هر روز") { nav.hubTo(Screen.WeeklySchedule.route) }
+            HubCard("🏫", "برنامه‌ی مدرسه", "زنگ‌ها و برنامه‌ی کلاسی") { nav.hubTo(Screen.School.route) }
+        }
+
+        MenuGroup("📝 آزمون و بازخورد", "سنجش خودت و دیدن نتیجه") {
+            HubCard("🧪", "جزوه‌ها و آپلود PDF", "جزوه‌ی معلم را بده تا سوال ساخته شود") { nav.hubTo(Screen.Pdf.route) }
+            HubCard("📈", "نمودار پیشرفت", "رشدت را ببین — بدون قضاوت") { nav.hubTo(Screen.Charts.route) }
+        }
+
+        MenuGroup("🎧 پلیرها و کتاب", "گوش دادن به درس و کتاب") {
+            HubCard("📚", "کتابخانه", "کتاب‌های دیجیتال من") { nav.hubTo(Screen.Library.route) }
+            HubCard("🔊", "کتاب صوتی (پلیر دروس)", "پخش‌کننده‌ی صوتی درس‌ها") { nav.hubTo(Screen.Audiobook.route) }
+        }
+
+        MenuGroup("🤖 آموزش هوش مصنوعی", "مسیر پیش‌نیازدار و ارزیابی") {
+            HubCard("✨", "یادگیری با AI", "از پایه تا پروژه، درسِ روزانه‌شده") { nav.hubTo(Screen.AiLearning.route) }
+        }
+    }
+}
+
+/** گروه تاشو — دسته‌بندی در تو در تو. */
+@Composable
+private fun MenuGroup(title: String, subtitle: String, content: @Composable () -> Unit) {
+    var open by rememberSaveable { mutableStateOf(false) }
+    Card(modifier = Modifier.fillMaxWidth().clickable { open = !open }) {
+        Column(Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.weight(1f)) {
+                    Text(title, style = MaterialTheme.typography.titleMedium)
+                    Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Icon(if (open) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore, contentDescription = if (open) "بستن" else "بازکردن")
+            }
+            AnimatedVisibility(visible = open) {
+                Column(Modifier.padding(top = 10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { content() }
+            }
+        }
+    }
+}
