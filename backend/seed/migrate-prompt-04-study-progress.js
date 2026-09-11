@@ -65,11 +65,23 @@ async function tryCreateStringColumn(key, size) {
 
 (async () => {
     console.log('مهاجرت پرامپت ۰۴: جدول study_progress');
-    await ensureTable();
-    await tryCreateStringColumn('userId', 64);
-    await tryCreateStringColumn('packId', 128);
-    await tryCreateStringColumn('srsState', 100000);   // JSON وضعیت SM-2 همه‌ی کارت‌ها
-    await tryCreateStringColumn('attempts', 200000);   // JSON تاریخچه‌ی آزمون‌ها (تا ۵۰ آزمون)
-    await tryCreateStringColumn('updatedAtIso', 32);
+    try {
+        await ensureTable();
+        await tryCreateStringColumn('userId', 64);
+        await tryCreateStringColumn('packId', 128);
+        await tryCreateStringColumn('srsState', 100000);   // JSON وضعیت SM-2 همه‌ی کارت‌ها
+        await tryCreateStringColumn('attempts', 200000);   // JSON تاریخچه‌ی آزمون‌ها (تا ۵۰ آزمون)
+        await tryCreateStringColumn('updatedAtIso', 32);
+    } catch (e) {
+        const msg = String(e && e.message || e);
+        if (String(e && e.code) === '401' || msg.includes('unauthorized') || msg.includes('scope')) {
+            console.error('');
+            console.error('❌ کلید API معتبر نیست یا اسکوپ tables.write ندارد.');
+            console.error('   گیت‌هاب › Settings › Secrets › APPWRITE_API_KEY را با کلیدی که');
+            console.error('   tables.write + documents.write + functions.write دارد جایگزین کن،');
+            console.error('   بعد ورک‌فلو را دوباره اجرا کن.');
+        }
+        throw e;
+    }
     console.log('تمام شد.');
 })();
