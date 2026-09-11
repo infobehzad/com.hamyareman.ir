@@ -1,0 +1,30 @@
+package ir.behzad.platform.core.appwrite
+
+/**
+ * ردیف ساده‌ی یک جدول TablesDB — مستقل از مدل‌های SDK.
+ *
+ * چرا کلاس خودمان:
+ *  - مصرف‌کننده‌ها (ریپازیتوری‌ها) نباید به مدل‌های `io.appwrite` گره بخورند تا
+ *    در تست‌های JVM بدون Robolectric قابل ساخت باشند.
+ *  - Realtime در SDK مقدار payload را `Any?` می‌دهد؛ این‌جا یک‌بار به نقشه‌ی
+ *    امن تبدیل و همیشه همین کلاس بین لایه‌ها جابه‌جا می‌شود.
+ *
+ * خواننده‌ها فقط این دو تایپ را برمی‌گردانند (همان چیزی که کاتالوگ/تماس/قرین‌سازی
+ * لازم دارند): [string] و [long]. اگر خواندنی غایب یا از نوع دیگر باشد،
+ * مقدار پیش‌فرض برمی‌گردد — نه exception (داده‌ی ناقص هرگز اپ را نباید بیندازد).
+ */
+data class TableRow(
+    val id: String,
+    val payload: Map<String, Any?> = emptyMap(),
+) {
+    /** مقدار رشته‌ای ستون؛ خالی/غایب → [default]. */
+    fun string(key: String, default: String = ""): String =
+        (payload[key] as? String)?.takeIf { it.isNotBlank() } ?: default
+
+    /** مقدار عددی ستون؛ عدد یا رشته‌ی عددی؛ غایب/نامعتبر → [default]. */
+    fun long(key: String, default: Long = 0L): Long = when (val v = payload[key]) {
+        is Number -> v.toLong()
+        is String -> v.toDoubleOrNull()?.toLong() ?: default
+        else -> default
+    }
+}

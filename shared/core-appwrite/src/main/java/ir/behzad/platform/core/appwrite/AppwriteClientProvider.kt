@@ -22,7 +22,7 @@ class AppwriteClientProvider(
 ) : BackendConfig {
     private val appContext = context.applicationContext
 
-    val isConfigured: Boolean get() = projectId.isNotBlank()
+    override val isConfigured: Boolean get() = projectId.isNotBlank()
 
     val client: Client by lazy {
         Client(appContext)
