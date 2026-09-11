@@ -30,6 +30,22 @@ on:
         options:
           - 'false'
           - 'true'
+      test_fallback:
+        description: 'placeholderهای صفر بایتی با فایل مستر تست پر شوند؟ (تست زنجیره‌ی پخش)'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      upgrade_test:
+        description: 'فایل تستِ موجود در باکت با نسخه‌ی واقعی ریپو جایگزین شود؟'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
       book:
         description: 'فقط یک کتاب (مثلاً C905) — خالی = همه'
         required: false
@@ -78,6 +94,8 @@ jobs:
           ARGS=""
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
           if [ "${{ github.event.inputs.seed_lessons }}" = "true" ]; then ARGS="$ARGS --seed-lessons"; fi
+          if [ "${{ github.event.inputs.test_fallback }}" = "true" ]; then ARGS="$ARGS --test-fallback"; fi
+          if [ "${{ github.event.inputs.upgrade_test }}" = "true" ]; then ARGS="$ARGS --upgrade-test"; fi
           if [ -n "${{ github.event.inputs.book }}" ]; then ARGS="$ARGS --book ${{ github.event.inputs.book }}"; fi
           echo "▶ اجرای upload-lesson-media.js $ARGS"
           node upload-lesson-media.js $ARGS
