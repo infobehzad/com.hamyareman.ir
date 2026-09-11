@@ -48,6 +48,8 @@ jobs:
       AI_API_KEY: ${{ secrets.AI_API_KEY }}
       AI_MODEL: ${{ github.event.inputs.ai_model }}
       AI_ENDPOINT: ${{ github.event.inputs.ai_endpoint }}
+      # پلن رایگان Appwrite سقف functions دارد؛ حالت study-tutor داخل ai-companion است.
+      STUDY_FUNCTION_ID: ai-companion
 
     steps:
       - name: 📥 Checkout

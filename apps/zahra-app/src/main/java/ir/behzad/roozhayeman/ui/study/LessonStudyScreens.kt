@@ -652,6 +652,7 @@ private fun QuizResult(
                                     aiBusy[r.questionId] = true
                                     scope.launch {
                                         val body = JSONObject()
+                                            .put("mode", "study-tutor")
                                             .put("lessonTitle", pack.title)
                                             .put("question", q.text)
                                             .put("correctAnswer", q.answer)

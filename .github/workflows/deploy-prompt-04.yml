@@ -37,6 +37,8 @@ jobs:
       APPWRITE_PROJECT_ID: 6a9d59e3002751cc3ea8
       APPWRITE_API_KEY: ${{ secrets.APPWRITE_API_KEY }}
       APPWRITE_DATABASE_ID: ZahraDB
+      # فانکشن study-tutor روی ai-companion سوار شده (سقف پلن رایگان).
+      STUDY_FUNCTION_ID: ai-companion
 
     steps:
       - name: 📥 Checkout

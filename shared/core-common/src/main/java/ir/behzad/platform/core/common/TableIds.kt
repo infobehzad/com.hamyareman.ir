@@ -95,8 +95,12 @@ object FunctionIds {
     /** لایه‌ی AI «همراه زهرا» — proxy سمت سرور؛ کلید مدل هرگز در اپ نیست. */
     const val AI_COMPANION = "ai-companion"
 
-    /** لایه‌ی AI «معلم خصوصی» مطالعه — رفع اشکال مفهومی؛ آفلاین بدون آن کامل است. */
-    const val STUDY_TUTOR = "study-tutor"
+    /**
+     * لایه‌ی AI «معلم خصوصی» مطالعه — رفع اشکال مفهومی؛ آفلاین بدون آن کامل است.
+     * روی همان فانکشن ai-companion سوار است (mode=study-tutor) چون پلن رایگان
+     * Appwrite سقف تعداد functions دارد.
+     */
+    const val STUDY_TUTOR = "ai-companion"
 
     /**
      * هشدار «کمک می‌خوام» به پدر: متن و مقصد را سرور می‌سازد، پیوند فعال را بررسی

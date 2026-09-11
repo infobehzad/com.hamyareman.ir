@@ -111,8 +111,90 @@ function extractReply(payload) {
   return '';
 }
 
+/**
+ * حالت «معلم خصوصی» مطالعه (پرامپت ۰۴) — همان تابع، کلید و مدل ai-companion.
+ * ورودی: { mode:"study-tutor", lessonTitle, sectionTitle, question, correctAnswer, studentAnswer }
+ * خروجی: { ok:true, reply, model } — متن ذخیره/لاگ نمی‌شود؛ فقط طول‌ها.
+ * چرا این‌جا؟ پلن رایگان Appwrite سقف تعداد functions دارد؛ به‌جای فانکشن تازه، یک mode اضافه شد.
+ */
+const STUDY_SYSTEM_PROMPT = [
+  'تو «معلم خصوصی» یک نوجوان ایرانی پایه نهم هستی و فقط رفع اشکال مفهومی می‌کنی.',
+  'قواعد سخت:',
+  '۱) همیشه فارسی ساده، گرم و کوتاه بنویس؛ حداکثر ۵ جمله.',
+  '۲) نقص مفهومی جواب دانش‌آموز را نسبت به جواب درست پیدا کن و همان را توضیح بده.',
+  '۳) جواب درست را مستقیم لو نده؛ با یک اشاره‌ی کوچک به راه درست برسان و آخر یک جمله‌ی تشویق کوتاه بگو.',
+  '۴) نمره نده و درباره‌ی چیزهای غیر از همین سوال حرف نزن.',
+  '۵) اگر جواب دانش‌آموز تقریباً درست بود، همان نکته‌ی ظریف را بگو.',
+  '۶) اگر نمی‌دانی یا سوال مبهم است، صادقانه بگو و به «توضیح آفلاین زیر همان سوال» ارجاع بده.',
+].join('\n');
+
+async function studyTutorReply(body, res) {
+  const question = String(body.question || '').trim().slice(0, 1500);
+  const correct = String(body.correctAnswer || '').trim().slice(0, 500);
+  const student = String(body.studentAnswer || '').trim().slice(0, 500);
+  const lesson = String(body.lessonTitle || '').trim().slice(0, 200);
+  const section = String(body.sectionTitle || '').trim().slice(0, 200);
+
+  if (!question || !correct) {
+    return res.json({ ok: false, error: 'empty_question', fallback: 'این سوال برای رفع اشکال کامل نیست.' });
+  }
+
+  const apiKey = process.env.AI_API_KEY;
+  const model = pickModel();
+  if (!apiKey || !model) {
+    return res.json({ ok: false, error: 'not_configured', fallback: 'رفع اشکال با هوش مصنوعی هنوز تنظیم نشده — توضیح آفلاین زیر همان سوال کمکت می‌کند.' });
+  }
+
+  const userContent = [
+    lesson ? `درس: ${lesson}` : '',
+    section ? `بخش مرتبط: ${section}` : '',
+    `سوال: ${question}`,
+    `جواب درست: ${correct}`,
+    `جواب دانش‌آموز: ${student || '(بی‌جواب)'}`,
+  ].filter(Boolean).join('\n');
+
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    const upstream = await fetch(endpoint(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: STUDY_SYSTEM_PROMPT },
+          { role: 'user', content: userContent },
+        ],
+        temperature: Number(process.env.AI_TEMPERATURE || 0.4),
+        max_tokens: Number(process.env.AI_MAX_TOKENS || 350),
+        stream: false,
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!upstream.ok) {
+      console.error('study-tutor upstream status', upstream.status);
+      return res.json({ ok: false, error: 'upstream_error', status: upstream.status, fallback: 'الان به مدل نرسیدم؛ بعداً دوباره امتحان کن.' });
+    }
+    const reply = extractReply(await upstream.json());
+    if (!reply) {
+      return res.json({ ok: false, error: 'empty_reply', fallback: 'جوابی از مدل نگرفتم؛ دوباره امتحان کن.' });
+    }
+    console.log('study-tutor ok', { model, inLen: userContent.length, outLen: reply.length });
+    return res.json({ ok: true, reply, model });
+  } catch (err) {
+    console.error('study-tutor failed', err && err.name ? err.name : 'error');
+    return res.json({ ok: false, error: 'network_error', fallback: 'اتصال به مدل برقرار نشد؛ بعداً دوباره امتحان کن.' });
+  }
+}
+
 module.exports = async function aiCompanion(req, res) {
   const body = parseBody(req);
+
+  // مسیریابی حالت مطالعه — قبل از منطق گفت‌وگو و ایمنی بحران (سوال درسی است).
+  if (body.mode === 'study-tutor') {
+    return studyTutorReply(body, res);
+  }
   const message = String(body.message || '').trim().slice(0, 2000);
   const tone = body.tone === 'formal' ? 'formal' : 'warm';
 

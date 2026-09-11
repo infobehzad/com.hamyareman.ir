@@ -18,7 +18,8 @@
  */
 const sdk = require('node-appwrite');
 
-const FUNCTION_ID = 'study-tutor';
+const FUNCTION_ID = process.env.STUDY_FUNCTION_ID || 'study-tutor';
+const TARGET_IS_SHARED = FUNCTION_ID === 'ai-companion';
 const mode = (process.argv[2] || 'vars').toLowerCase();
 
 /** تنظیمات ساخت فانکشن — هم‌قرارداد با backend/appwrite.json و deploy-prompt-04-study-tutor.js */
@@ -68,6 +69,11 @@ async function upsertVariable(functions, key, value) {
     const list = await functions.listVariables({ functionId: FUNCTION_ID });
     const found = (list.variables || []).find(v => v.key === key);
     if (found) {
+        if (TARGET_IS_SHARED) {
+            // فانکشن مشترک ai-companion — متغیرِ موجود را دست نمی‌زنیم (کلید همان است).
+            console.log(`· ${key} از قبل روی ${FUNCTION_ID} هست — بدون تغییر`);
+            return;
+        }
         await functions.updateVariable({
             functionId: FUNCTION_ID, variableId: found.$id, key, value,
         });
@@ -105,6 +111,7 @@ async function smoke() {
     const functions = client();
     console.log('🧪 اجرای آزمایشی study-tutor …');
     const body = JSON.stringify({
+        mode: 'study-tutor',
         lessonTitle: 'درس ۱ — معرفی مجموعه',
         sectionTitle: 'مجموعه‌ی تهی و یکتایی اعضا',
         question: 'آیا مجموعه‌ی ∅ با {∅} برابر است؟',

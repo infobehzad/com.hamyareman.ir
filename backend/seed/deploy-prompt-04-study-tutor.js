@@ -27,7 +27,9 @@ const ENDPOINT = process.env.APPWRITE_ENDPOINT || 'https://fra.cloud.appwrite.io
 const PROJECT_ID = process.env.APPWRITE_PROJECT_ID || '';
 const API_KEY = process.env.APPWRITE_API_KEY || '';
 
-const FUNCTION_ID = 'study-tutor';
+// هدف دیپلوی: پیش‌فرض study-tutor (فانکشن مستقل)؛ با STUDY_FUNCTION_ID=ai-companion
+// روی فانکشن موجود ai-companion دیپلوی می‌شود (پلن رایگان Appwrite سقف functions دارد).
+const FUNCTION_ID = process.env.STUDY_FUNCTION_ID || 'study-tutor';
 const FUNCTION_DIR = path.join(__dirname, '..', 'functions', FUNCTION_ID);
 
 /** تنظیمات مرجع — هم‌قرارداد با backend/appwrite.json */
