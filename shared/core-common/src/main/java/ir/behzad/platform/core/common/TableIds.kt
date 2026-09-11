@@ -57,7 +57,7 @@ object TableIds {
 
     /**
      * همه‌ی جداولی که واقعاً در Appwrite ساخته می‌شوند
-     * (مطابق `backend/appwrite.json` — ۲۳ جدول).
+     * (مطابق `backend/appwrite.json` — ۲۴ جدول).
      */
     val serverTables: Set<String> = setOf(
         PROFILES, USER_SETTINGS, FATHER_LINKS, PAIRING_CODES,
@@ -65,6 +65,7 @@ object TableIds {
         WEEKLY_SUMMARIES, ROUTINE_BLOCKS, WATER_LOGS, EXERCISE_LOGS, BADGES,
         LESSONS, QUIZZES, RECIPES, EXERCISES, LEARNING_NODES, ART_PROMPTS,
         LESSON_MEDIA_PROGRESS, WELLNESS_MOVES, SKETCH_REFERENCES, WELLNESS_LOGS,
+        STUDY_PROGRESS,
     )
 
     /** جدول‌های «فقط روی دستگاه» — در سرور هیچ سطری ندارند و ساخته هم نمی‌شوند. */

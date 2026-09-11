@@ -28,7 +28,7 @@ enum class BrandTheme(val label: String) {
 }
 
 /** فونت جاری اپ — از ظاهر/تنظیمات عوض می‌شود؛ پیش‌فرض فونت سیستم. */
-val LocalPlatformFont = staticCompositionLocalOf { FontFamily.Default }
+val LocalPlatformFont = staticCompositionLocalOf<FontFamily> { FontFamily.Default }
 
 private val DollLight = lightColorScheme(
     primary = DollPink, onPrimary = DollCreamOn,
