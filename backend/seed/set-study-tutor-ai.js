@@ -166,8 +166,10 @@ async function smoke() {
         console.log('  «' + String(parsed.reply || '').slice(0, 300) + '»');
         console.log('🎉 study-tutor آماده است.');
     } else if (parsed && parsed.error === 'not_configured') {
-        console.log('⚠️ فانکشن اجرا شد ولی می‌گوید AI تنظیم نیست — احتمالاً دیپلویِ پس از ست‌کردن متغیرها انجام نشده.');
-        console.log('   ورک‌فلو را با redeploy=true دوباره اجرا کن.');
+        console.log('⚠️ فانکشن اجرا شد ولی متغیرهای AI روی آن خالی است.');
+        console.log('   یکی از این دو:');
+        console.log('   الف) گیت‌هاب › Settings › Secrets › New repository secret ← Name: AI_API_KEY، مقدار: کلید ارائه‌دهنده — بعد این ورک‌فلو را دوباره اجرا کن (خودش متغیر را می‌سازد و دیپلوی می‌کند).');
+        console.log('   ب) کنسول Appwrite › Functions › ai-companion › Variables ← AI_API_KEY و AI_MODEL را دستی ست کن — بعد فقط گام smoke لازم است.');
         console.log('  ' + out);
         process.exit(4);
     } else {
