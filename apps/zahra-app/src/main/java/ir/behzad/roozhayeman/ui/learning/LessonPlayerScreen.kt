@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -152,6 +155,16 @@ fun LessonPlayerScreen(
         ) {
             // --- نوار وضعیت درس (پرامپت ۰۱) ---
             LessonStatusBar(lesson = lesson, progress = progressFlow.collectAsState().value)
+
+            // پرش‌های seek به‌صورت نقطه روی خط زمان (پرامپت ۰۱)
+            SeekJumpDots(progressFlow.collectAsState().value)
+            if (state.chapterCount > 1) {
+                Text(
+                    "فصل ${state.chapterIndex + 1} از ${state.chapterCount} — فصل‌ها پشت‌سرهم به‌صورت پلی‌لیست پخش می‌شوند",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
 
             // --- انتخاب‌گر تب ویدیو/صوت ---
             if (lesson.videoUrl.isNotBlank() && lesson.audioUrl.isNotBlank()) {
@@ -428,6 +441,27 @@ private fun SeekJumpsLegend(progress: LessonMediaProgressRepository.Progress) {
                     style = MaterialTheme.typography.labelSmall,
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun SeekJumpDots(progress: LessonMediaProgressRepository.Progress?) {
+    val jumps = progress?.seekJumps.orEmpty().takeLast(8)
+    val dur = progress?.durationSec ?: 0.0
+    if (jumps.isEmpty() || dur <= 0.0) return
+    BoxWithConstraints(
+        Modifier.fillMaxWidth().height(8.dp).padding(horizontal = 4.dp),
+    ) {
+        val w = maxWidth
+        jumps.forEach { sj ->
+            val f = (sj.toSec / dur).toFloat().coerceIn(0f, 1f)
+            Box(
+                Modifier
+                    .offset(x = w * f - 3.dp)
+                    .size(6.dp)
+                    .background(MaterialTheme.colorScheme.tertiary, CircleShape),
+            )
         }
     }
 }

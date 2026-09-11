@@ -10,6 +10,12 @@ import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
+import androidx.media3.datasource.cache.SimpleCache
+import androidx.media3.database.StandaloneDatabaseProvider
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -64,7 +70,7 @@ class LessonMediaPlayer(
         val title: String,
         val bookCode: String,
         val lessonId: String,
-        val mediaType: LessonMediaProgressRepository.MediaType,
+        val mediaType: LessonMediaProgressRepository.MediaType,    val chapterUrls: List<String> = emptyList(),
     )
 
     data class PlayerState(
@@ -77,6 +83,8 @@ class LessonMediaPlayer(
         val mediaType: LessonMediaProgressRepository.MediaType? = null,
         val bookCode: String = "",
         val lessonId: String = "",
+        val chapterIndex: Int = 0,
+        val chapterCount: Int = 0,
         val error: String? = null,
     )
 
@@ -84,7 +92,7 @@ class LessonMediaPlayer(
      * بارگذاری و پخش (یا آماده‌سازی) یک رسانه از URL.
      * اگر [autoplay] نباشد، فقط prepare می‌شود تا کاربر بتواند دکمه‌ی «ادامه» بزند.
      */
-    suspend fun load(
+suspend fun load(
         uri: String,
         title: String,
         bookCode: String,
@@ -98,26 +106,27 @@ class LessonMediaPlayer(
         }
         ensurePlayer()
 
+        // قرارداد فصل‌ها: فایل همنام با پسوند 01/02/03 → یک پلی‌لیست برای کل درس.
+        // پخش با استریم و بافر از سرور انجام می‌شود و سگمنت‌ها در SimpleCache
+        // فقط روی گوشی کش می‌شوند (پخش مجدد = بدون دانلود مجدد).
+        val chapters = expandChapters(uri)
         val uid = userId() ?: ""
         val progress = progressRepo.load(uid, bookCode, lessonId, mediaType)
+        val chapterIndex = progress.chapterIndex.coerceIn(0, chapters.lastIndex)
         val startMs = (progress.lastPositionSec * 1000.0).toLong().coerceAtLeast(0L)
         val startSpeed = progress.playbackSpeed.toFloat().coerceIn(MIN_SPEED, MAX_SPEED)
 
-        current = MediaContext(uri, title, bookCode, lessonId, mediaType)
+        current = MediaContext(chapters.first(), title, bookCode, lessonId, mediaType, chapters)
 
         val p = player ?: return
-        p.setMediaItem(
+        val items = chapters.mapIndexed { i, url ->
+            val t = if (chapters.size > 1) "$title — فصل ${i + 1}" else title
             MediaItem.Builder()
-                .setUri(uri)
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setTitle(title)
-                        .setDisplayTitle(title)
-                        .build()
-                )
-                .build(),
-            startMs,
-        )
+                .setUri(url)
+                .setMediaMetadata(MediaMetadata.Builder().setTitle(t).setDisplayTitle(t).build())
+                .build()
+        }
+        p.setMediaItems(items, chapterIndex, startMs)
         p.playbackParameters = PlaybackParameters(startSpeed)
         p.prepare()
         if (autoplay) p.playWhenReady = true
@@ -239,7 +248,13 @@ class LessonMediaPlayer(
 
     private fun ensurePlayer() {
         if (player != null) return
+        val cacheFactory = CacheDataSource.Factory()
+            .setCache(obtainCache(appContext))
+            .setUpstreamDataSourceFactory(
+                DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true),
+            )
         val p = ExoPlayer.Builder(appContext)
+            .setMediaSourceFactory(DefaultMediaSourceFactory(cacheFactory))
             .setHandleAudioBecomingNoisy(true)
             .setSeekBackIncrementMs(SEEK_INCREMENT_MS)
             .setSeekForwardIncrementMs(SEEK_INCREMENT_MS)
@@ -295,6 +310,7 @@ class LessonMediaPlayer(
             speed = p.playbackParameters.speed.toDouble(),
             appendView = completed,
             markCompleted = completed,
+            chapterIndex = p.currentMediaItemIndex,
         )
     }
 
@@ -314,6 +330,8 @@ class LessonMediaPlayer(
                 bufferedFraction = p.bufferedPosition
                     .let { bp -> if (p.duration > 0) bp.toFloat() / p.duration else 0f }
                     .coerceIn(0f, 1f),
+                chapterIndex = if (p.mediaItemCount > 0) p.currentMediaItemIndex else 0,
+                chapterCount = current?.chapterUrls?.size ?: 0,
             )
         }
     }
@@ -358,5 +376,29 @@ class LessonMediaPlayer(
         const val COMPLETION_FRACTION = 0.9
         /** سرعت‌های قابل‌انتخاب در UI. */
         val ALLOWED_SPEEDS = listOf(0.75f, 1f, 1.25f, 1.5f, 2f)
+
+        /** کش رسانه فقط روی گوشی — سقف ۵۱۲MB با حذف خودکار قدیمی‌ها (LRU). */
+        const val CACHE_MAX_BYTES = 512L * 1024 * 1024
+        const val CHAPTER_COUNT = 3
+
+        @Volatile private var sharedCache: SimpleCache? = null
+
+        fun obtainCache(context: android.content.Context): SimpleCache = sharedCache ?: synchronized(this) {
+            sharedCache ?: SimpleCache(
+                java.io.File(context.cacheDir, "lesson_media_cache"),
+                LeastRecentlyUsedCacheEvictor(CACHE_MAX_BYTES),
+                StandaloneDatabaseProvider(context),
+            ).also { sharedCache = it }
+        }
+
+        /**
+         * گسترش فصل‌ها: هر URI که پیش از پسوند با عدد تمام شود (مثلاً C905-L01-V01.mp4)
+         * به فصل‌های 01..CHAPTER_COUNT همنام گسترش می‌یابد؛ اگر الگو نخورد، تک‌فایل است.
+         */
+        fun expandChapters(uri: String): List<String> {
+            val m = Regex("^(.*?)(\\d+)(\\.[A-Za-z0-9]+)$").find(uri) ?: return listOf(uri)
+            val width = m.groupValues[2].length
+            return (1..CHAPTER_COUNT).map { "${m.groupValues[1]}${it.toString().padStart(width, '0')}${m.groupValues[3]}" }
+        }
     }
 }

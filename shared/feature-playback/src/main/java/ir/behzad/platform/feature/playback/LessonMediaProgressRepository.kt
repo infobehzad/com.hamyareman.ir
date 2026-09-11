@@ -43,6 +43,7 @@ class LessonMediaProgressRepository(
         val playbackSpeed: Double = 1.0,
         val isCompleted: Boolean = false,
         val viewCount: Int = 0,
+        val chapterIndex: Int = 0,
         val lastViewedAtIso: String = "",
         val viewHistory: List<ViewEvent> = emptyList(),
         val seekJumps: List<SeekEvent> = emptyList(),
@@ -142,6 +143,7 @@ class LessonMediaProgressRepository(
         positionSec: Double,
         durationSec: Double,
         speed: Double,
+        chapterIndex: Int = 0,
         seekJump: SeekEvent? = null,
         appendView: Boolean = false,
         markCompleted: Boolean = false,
@@ -171,6 +173,7 @@ class LessonMediaProgressRepository(
             playbackSpeed = speed,
             isCompleted = current.isCompleted || markCompleted,
             viewCount = newViewCount,
+            chapterIndex = chapterIndex,
             lastViewedAtIso = nowIso,
             viewHistory = newHistory,
             seekJumps = newSeeks,
@@ -187,6 +190,7 @@ class LessonMediaProgressRepository(
             "lastPositionSec" to updated.lastPositionSec,
             "durationSec" to updated.durationSec,
             "playbackSpeed" to updated.playbackSpeed,
+            "chapterIndex" to updated.chapterIndex,
             "isCompleted" to updated.isCompleted,
             "viewCount" to updated.viewCount,
             "lastViewedAtIso" to updated.lastViewedAtIso,
@@ -216,6 +220,7 @@ class LessonMediaProgressRepository(
                 lastPositionSec = o.optDouble("lastPositionSec", 0.0),
                 durationSec = o.optDouble("durationSec", 0.0),
                 playbackSpeed = o.optDouble("playbackSpeed", 1.0),
+                chapterIndex = o.optInt("chapterIndex", 0),
                 isCompleted = o.optBoolean("isCompleted", false),
                 viewCount = o.optInt("viewCount", 0),
                 lastViewedAtIso = o.optString("lastViewedAtIso"),
@@ -230,6 +235,7 @@ class LessonMediaProgressRepository(
             .put("bookCode", p.bookCode)
             .put("lessonId", p.lessonId)
             .put("mediaType", p.mediaType.wire)
+            .put("chapterIndex", p.chapterIndex)
             .put("lastPositionSec", p.lastPositionSec)
             .put("durationSec", p.durationSec)
             .put("playbackSpeed", p.playbackSpeed)
