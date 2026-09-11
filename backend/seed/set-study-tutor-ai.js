@@ -136,9 +136,26 @@ async function smoke() {
         { 'Content-Type': 'application/json' },
     );
     console.log(`  status=${exec.status} | http=${exec.responseStatusCode}`);
-    // لاگ فانکشن فقط طول ورودی/خروجی را دارد (بدون متن) — برای اشکال‌زدایی چاپ می‌شود.
-    const errLog = (exec.logsStderr || '').trim();
-    const outLog = (exec.logsStdout || '').trim();
+
+    // اگر شکست خورد، JSON خام execution را می‌گیریم تا فیلد لاگِ این نسخه‌ی Appwrite معلوم شود.
+    if (exec.status !== 'completed') {
+        try {
+            const ENDPOINT = (process.env.APPWRITE_ENDPOINT || '').replace(/\/$/, '');
+            const KEY = (process.env.APPWRITE_API_KEY || '').trim();
+            const PROJECT = process.env.APPWRITE_PROJECT_ID || '';
+            const r = await fetch(`${ENDPOINT}/functions/${FUNCTION_ID}/executions/${exec.$id}`, {
+                headers: { 'X-Appwrite-Project': PROJECT, 'X-Appwrite-Key': KEY },
+            });
+            const raw = await r.json();
+            const slim = { ...raw };
+            delete slim.responseBody;   // متن پاسخ لازم نیست
+            console.log('  raw execution:', JSON.stringify(slim).slice(0, 1400));
+        } catch (e) {
+            console.log('  (دریافت لاگ خام ناموفق: ' + String(e && e.message || e) + ')');
+        }
+    }
+    const errLog = (exec.logsStderr || exec.stderr || '').trim();
+    const outLog = (exec.logsStdout || exec.stdout || '').trim();
     if (errLog) console.log('  stderr: ' + errLog.slice(-500));
     if (outLog) console.log('  logs:   ' + outLog.slice(-300));
     const out = (exec.responseBody || '').slice(0, 600);
