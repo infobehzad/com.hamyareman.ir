@@ -126,15 +126,21 @@ async function smoke() {
         correctAnswer: 'خیر — {∅} یک عضو دارد که خود ∅ است',
         studentAnswer: 'بله برابرند چون هر دو خالی‌اند',
     });
-    const exec = await functions.createExecution({
-        functionId: FUNCTION_ID,
-        path: '/',
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+    // امضای پوزیشنال SDK 18: (functionId, body, async, path, method, headers)
+    const exec = await functions.createExecution(
+        FUNCTION_ID,
         body,
-        async: false,
-    });
+        false,                            // اجرای همگام
+        '/',
+        'POST',
+        { 'Content-Type': 'application/json' },
+    );
     console.log(`  status=${exec.status} | http=${exec.responseStatusCode}`);
+    // لاگ فانکشن فقط طول ورودی/خروجی را دارد (بدون متن) — برای اشکال‌زدایی چاپ می‌شود.
+    const errLog = (exec.logsStderr || '').trim();
+    const outLog = (exec.logsStdout || '').trim();
+    if (errLog) console.log('  stderr: ' + errLog.slice(-500));
+    if (outLog) console.log('  logs:   ' + outLog.slice(-300));
     const out = (exec.responseBody || '').slice(0, 600);
     let parsed = null;
     try { parsed = JSON.parse(exec.responseBody || 'null'); } catch (_) { /* خام نشان بده */ }
