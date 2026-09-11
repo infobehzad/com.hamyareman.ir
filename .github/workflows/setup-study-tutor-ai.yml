@@ -64,23 +64,14 @@ jobs:
         working-directory: backend/seed
         run: npm ci
 
-      - name: 🔑 سلامت کلید Appwrite (تشخیص سریع)
+      - name: 🧼 نرمال‌سازی کلیدها (بدون whitespace)
         run: |
-          HTTP=$(curl -s -o /tmp/keycheck.json -w "%{http_code}" \
-            -H "X-Appwrite-Project: $APPWRITE_PROJECT_ID" \
-            -H "X-Appwrite-Key: $APPWRITE_API_KEY" \
-            "$APPWRITE_ENDPOINT/functions?queries[]=limit(1)")
-          echo "  GET /functions → HTTP $HTTP"
-          if [ "$HTTP" = "200" ]; then
-            echo "✅ کلید معتبر است."
-          else
-            echo "❌ APPWRITE_API_KEY در دسترس نیست (HTTP $HTTP):"
-            head -c 400 /tmp/keycheck.json; echo
-            echo ""
-            echo "   گیت‌هاب › Settings › Secrets › APPWRITE_API_KEY را با کلیدی که"
-            echo "   functions.write دارد جایگزین کن، بعد دوباره اجرا کن."
-            exit 1
-          fi
+          echo "APPWRITE_API_KEY=$(printf '%s' "$APPWRITE_API_KEY" | tr -d '[:space:]')" >> "$GITHUB_ENV"
+          echo "AI_API_KEY=$(printf '%s' "$AI_API_KEY" | tr -d '[:space:]')" >> "$GITHUB_ENV"
+
+      - name: 🔑 سلامت کلید Appwrite (با خود SDK)
+        working-directory: backend/seed
+        run: node check-appwrite-key.js functions
 
       - name: 🧩 گام ۱/۳ — ست‌کردن متغیرهای AI روی فانکشن
         working-directory: backend/seed

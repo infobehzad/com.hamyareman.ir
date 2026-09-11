@@ -53,25 +53,13 @@ jobs:
         working-directory: backend/seed
         run: npm ci
 
-      - name: 🔑 سلامت کلید API (تشخیص سریع)
+      - name: 🧼 نرمال‌سازی کلیدها (بدون whitespace)
         run: |
-          HTTP=$(curl -s -o /tmp/keycheck.json -w "%{http_code}" \
-            -H "X-Appwrite-Project: $APPWRITE_PROJECT_ID" \
-            -H "X-Appwrite-Key: $APPWRITE_API_KEY" \
-            "$APPWRITE_ENDPOINT/databases/$APPWRITE_DATABASE_ID/tables?queries[]=limit(1)")
-          echo "  GET /tables → HTTP $HTTP"
-          if [ "$HTTP" = "200" ]; then
-            echo "✅ کلید معتبر است."
-          else
-            echo "❌ کلید در دسترس نیست (HTTP $HTTP):"
-            head -c 400 /tmp/keycheck.json; echo
-            echo ""
-            echo "   راهنما: در گیت‌هاب › Settings › Secrets and variables › Actions،"
-            echo "   مقدار APPWRITE_API_KEY را با یک کلید معتبر Appwrite جایگزین کن که این"
-            echo "   اسکوپ‌ها را دارد: tables.write، documents.write، functions.write"
-            echo "   (کنسول Appwrite › Overview › Integrations › API Keys › New key)"
-            exit 1
-          fi
+          echo "APPWRITE_API_KEY=$(printf '%s' "$APPWRITE_API_KEY" | tr -d '[:space:]')" >> "$GITHUB_ENV"
+
+      - name: 🔑 سلامت کلید API (با خود SDK)
+        working-directory: backend/seed
+        run: node check-appwrite-key.js tables
 
       - name: 🗄 گام ۱/۲ — Migration جدول study_progress
         if: github.event.inputs.skip_migration != 'true'
