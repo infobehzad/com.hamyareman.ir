@@ -188,7 +188,9 @@ async function studyTutorReply(body, res) {
   }
 }
 
-module.exports = async function aiCompanion(req, res) {
+// Appwrite 2.x: امضای context — همه‌چیز از یک آبجکت می‌آید ({req, res, log, error}).
+module.exports = async function aiCompanion(ctx) {
+  const { req, res, log: logInfo, error: logErr } = ctx;
   const body = parseBody(req);
 
   // مسیریابی حالت مطالعه — قبل از منطق گفت‌وگو و ایمنی بحران (سوال درسی است).
@@ -246,7 +248,7 @@ module.exports = async function aiCompanion(req, res) {
 
     if (!upstream.ok) {
       // متن خطای upstream را برنمی‌گردانیم (ممکن است کلید یا اطلاعات داخلی داشته باشد).
-      console.error('ai-companion upstream status', upstream.status);
+      logErr('ai-companion upstream status', upstream.status);
       return res.json({ ok: false, error: 'upstream_error', status: upstream.status, fallback: 'الان به مدل نرسیدم. چند دقیقه دیگر دوباره امتحان کن.' });
     }
 
@@ -256,10 +258,10 @@ module.exports = async function aiCompanion(req, res) {
       return res.json({ ok: false, error: 'empty_reply', fallback: 'جوابی از مدل نگرفتم؛ دوباره امتحان کن.' });
     }
     // فقط طول پیام لاگ می‌شود، نه محتوایش.
-    console.log('ai-companion ok', { model, inLen: message.length, outLen: reply.length });
+    logInfo('ai-companion ok', { model, inLen: message.length, outLen: reply.length });
     return res.json({ ok: true, crisis: false, reply, model });
   } catch (err) {
-    console.error('ai-companion failed', err && err.name ? err.name : 'error');
+    logErr('ai-companion failed', err && err.name ? err.name : 'error');
     return res.json({ ok: false, error: 'network_error', fallback: 'اتصال به مدل برقرار نشد. اینترنت را چک کن یا بعداً دوباره بیا.' });
   }
 };
