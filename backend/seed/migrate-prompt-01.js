@@ -38,15 +38,19 @@ async function tryCreateColumn(tableId, column) {
             console.log(`  [dry] createColumn ${tableId}.${column.key} (${column.type})`);
             return;
         }
-        await tables.createColumn({
-            databaseId: DATABASE_ID,
-            tableId: tableId,
-            key: column.key,
-            type: column.type,
-            size: column.size,
-            required: !!column.required,
-            default: column.default,
-        });
+        // SDK 18 (Appwrite 2.x): هر نوع، متد خودش را دارد.
+        const base = { databaseId: DATABASE_ID, tableId, key: column.key, required: !!column.required };
+        if (column.type === 'string') {
+            await tables.createStringColumn({ ...base, size: column.size || 256, default: column.default ?? '' });
+        } else if (column.type === 'boolean') {
+            await tables.createBooleanColumn({ ...base, default: column.default ?? false });
+        } else if (column.type === 'integer') {
+            await tables.createIntegerColumn({ ...base, default: column.default ?? 0 });
+        } else if (column.type === 'double') {
+            await tables.createFloatColumn({ ...base, default: column.default ?? 0 });
+        } else {
+            throw new Error(`نوع پشتیبانی‌نشده: ${column.type}`);
+        }
         console.log(`  ✅ ${tableId}.${column.key}`);
     } catch (e) {
         const msg = String(e && e.message || e);

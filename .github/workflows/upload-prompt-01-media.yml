@@ -88,6 +88,13 @@ jobs:
         working-directory: backend/seed
         run: node check-appwrite-key.js storage
 
+      - name: 🗄 مایگریشن اسکیمای lessons (وقتی سید فعال است — idempotent)
+        if: github.event.inputs.seed_lessons == 'true'
+        working-directory: backend/seed
+        run: |
+          echo "▶ اجرای migrate-prompt-01.js (ستون‌های bookCode/videoUrl/... + جدول lesson_media_progress)"
+          node migrate-prompt-01.js
+
       - name: 📤 آپلود رسانه‌ی درس‌ها
         working-directory: backend/seed
         run: |
