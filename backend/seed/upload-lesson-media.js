@@ -118,16 +118,36 @@ function dieOnScope(e, what) {
     throw e;
 }
 
+/** خطای گذرای سرور (5xx/شبکه) را با backoff دوباره امتحان می‌کند. */
+async function withRetry(fn, tries = 4) {
+    let last;
+    for (let i = 0; i < tries; i++) {
+        try {
+            return await fn();
+        } catch (e) {
+            const code = String(e && e.code || '');
+            const msg = String(e && e.message || e);
+            const transient = code.startsWith('5') || /timeout|ECONN|socket|network|Server Error/i.test(msg);
+            if (!transient || i === tries - 1) throw e;
+            last = e;
+            const wait = 2000 * (i + 1) * (i + 1);
+            console.log(`    … خطای گذرا (${msg.slice(0, 40)}) — تلاش مجدد تا ${wait / 1000}s`);
+            await new Promise(r => setTimeout(r, wait));
+        }
+    }
+    throw last;
+}
+
 async function uploadOne(f, label) {
     if (dryRun) {
         console.log(`  [dry] ${label} (${((f.size || masterSize[f.kind]) / 1024).toFixed(0)} KB)`);
         return;
     }
-    await storage.createFile({
+    await withRetry(() => storage.createFile({
         bucketId: BUCKET,
         fileId: f.name,
         file: InputFile.fromPath(f.full, f.name),
-    });
+    }));
     console.log(`  ${label} ✅`);
 }
 
@@ -141,7 +161,7 @@ async function processItem(f) {
         if (meta) {
             const isTest = upgradeTest && masterSize[f.kind] === meta.sizeOriginal;
             if (isTest) {
-                if (!dryRun) await storage.deleteFile({ bucketId: BUCKET, fileId: f.name });
+                if (!dryRun) await withRetry(() => storage.deleteFile({ bucketId: BUCKET, fileId: f.name }));
                 await uploadOne(f, `🔁 ارتقای تست→واقعی ${f.name}`);
                 return { state: 'upgraded', f };
             }
@@ -175,6 +195,7 @@ async function uploadAll(items) {
     const stats = { 'uploaded-real': 0, 'uploaded-test': 0, exists: 0, upgraded: 0, placeholder: 0 };
     const byLesson = new Map();
     let idx = 0, failed = 0;
+    const failedNames = [];
 
     async function worker() {
         while (idx < list.length) {
@@ -191,14 +212,20 @@ async function uploadAll(items) {
                 }
             } catch (e) {
                 failed++;
+                failedNames.push(f.name);
                 console.log(`  ❌ ${f.name}: ${e && e.message || e}`);
-                dieOnScope(e, 'آپلود (storage.write)');
+                const msg = String(e && e.message || e);
+                if (String(e && e.code) === '401' || /scope/i.test(msg)) dieOnScope(e, 'آپلود (storage.write)');
             }
         }
     }
     await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 
     console.log(`\n📊 آپلود واقعی: ${stats['uploaded-real']} | تست: ${stats['uploaded-test']} | ارتقا: ${stats.upgraded} | از قبل بود: ${stats.exists} | placeholder باقی‌مانده: ${stats.placeholder} | خطا: ${failed}`);
+    if (failedNames.length) {
+        console.log(`⚠️ شکست‌خورده‌ها (اجرای مجدد idempotent است): ${failedNames.slice(0, 10).join('، ')}${failedNames.length > 10 ? ' …' : ''}`);
+    }
+    global.__uploadFailed = failedNames.length;
     return byLesson;
 }
 
@@ -250,4 +277,5 @@ async function seedLessonsRows(byLesson) {
     const byLesson = await uploadAll(items);
     if (seedLessons) await seedLessonsRows(byLesson);
     console.log('\nتمام شد.');
+    if (global.__uploadFailed) process.exit(1);
 })();
