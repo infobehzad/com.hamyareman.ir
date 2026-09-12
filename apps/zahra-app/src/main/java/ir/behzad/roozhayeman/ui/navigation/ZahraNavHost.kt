@@ -67,6 +67,7 @@ import ir.behzad.roozhayeman.ui.study.BookDetailScreen
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import ir.behzad.roozhayeman.ui.study.LessonStudyScreen
+import ir.behzad.roozhayeman.ui.study.StudyMedia
 import ir.behzad.roozhayeman.ui.study.LessonTeachScreen
 import ir.behzad.roozhayeman.ui.study.LessonPdfScreen
 import ir.behzad.roozhayeman.ui.study.AudiobookScreen
