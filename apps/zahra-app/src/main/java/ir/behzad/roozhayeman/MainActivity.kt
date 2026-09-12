@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
+import ir.behzad.platform.core.common.AppResult
 import ir.behzad.platform.core.designsystem.BrandTheme
 import ir.behzad.platform.core.designsystem.PinLockGate
 import ir.behzad.platform.core.designsystem.PlatformTheme
@@ -27,7 +28,9 @@ import ir.behzad.roozhayeman.di.AppContainer
 import ir.behzad.roozhayeman.ui.appearance.FontLibrary
 import ir.behzad.roozhayeman.ui.appearance.LocalUiPrefs
 import ir.behzad.platform.feature.calls.IncomingCallsHost
+import ir.behzad.roozhayeman.ui.auth.LoginScreen
 import ir.behzad.roozhayeman.ui.navigation.ZahraNavHost
+import kotlinx.coroutines.launch
 
 val LocalAppContainer = staticCompositionLocalOf<AppContainer> { error("AppContainer missing") }
 
@@ -50,6 +53,9 @@ class MainActivity : FragmentActivity() {
      * پس‌زمینه) دوباره ارزیابی شود و تایم‌اوت قفل خودکار واقعاً کار کند.
      */
     private val unlocked = mutableStateOf(true)
+
+    /** null = در حال بررسی سشن؛ true = وارد شده؛ false = باید صفحه‌ی ورود ببیند. */
+    private val loggedIn = mutableStateOf<Boolean?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,6 +113,16 @@ class MainActivity : FragmentActivity() {
                 if (!isUnlocked && offerBiometric) unlockWithBiometric()
             }
 
+            val scope = androidx.compose.runtime.rememberCoroutineScope()
+            var loginLoading by remember { mutableStateOf(false) }
+            var loginError by remember { mutableStateOf<String?>(null) }
+
+            LaunchedEffect(Unit) {
+                if (loggedIn.value == null) {
+                    loggedIn.value = if (!container.auth.isConfigured) true else runCatching { container.auth.currentUser() != null }.getOrDefault(false)
+                }
+            }
+
             val uiPrefs = container.uiPrefs
             CompositionLocalProvider(LocalUiPrefs provides uiPrefs) {
                 PlatformTheme(
@@ -116,7 +132,36 @@ class MainActivity : FragmentActivity() {
                 ) {
                 CompositionLocalProvider(LocalAppContainer provides container) {
                     Surface(Modifier.fillMaxSize()) {
-                        if (isUnlocked) {
+                        when {
+                            // ۰) هنوز وضعیت سشن نامعلوم است — لحظه‌ای خالی تا پرش نبینیم.
+                            loggedIn.value == null -> Unit
+
+                            // ۱) وارد نشده: دروازه‌ی لاگین (گوگل/مهمان) قبل از هر محتوایی.
+                            loggedIn.value == false -> LoginScreen(
+                                loading = loginLoading,
+                                error = loginError,
+                                onGoogle = {
+                                    loginLoading = true; loginError = null
+                                    scope.launch {
+                                        when (val r = container.auth.signInWithGoogle(activity)) {
+                                            is AppResult.Ok -> loggedIn.value = true
+                                            is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
+                                        }
+                                    }
+                                },
+                                onGuest = {
+                                    loginLoading = true; loginError = null
+                                    scope.launch {
+                                        when (val r = container.auth.signInAsGuest()) {
+                                            is AppResult.Ok -> loggedIn.value = true
+                                            is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
+                                        }
+                                    }
+                                },
+                            )
+
+                            // ۲) وارد شده و قفل باز: اپ.
+                            isUnlocked -> {
                             ZahraNavHost()
 
                             // زنگِ تماس ورودی روی هر صفحه‌ای بالا می‌آید — ولی فقط بعد از
@@ -128,7 +173,9 @@ class MainActivity : FragmentActivity() {
                                 remoteLabel = "بابا",
                                 remoteUserId = container.partnerId,
                             )
-                        } else {
+                            }
+                            // ۳) وارد شده ولی قفل فعال: صفحه‌ی PIN.
+                            else -> {
                             PinLockGate(
                                 title = "همیار من قفل است",
                                 subtitle = "برای دیدن دفترچه‌ات PIN را وارد کن.",
@@ -147,6 +194,7 @@ class MainActivity : FragmentActivity() {
                                 },
                                 onUnlocked = { unlocked.value = true },
                             )
+                            }
                         }
                     }
                 }

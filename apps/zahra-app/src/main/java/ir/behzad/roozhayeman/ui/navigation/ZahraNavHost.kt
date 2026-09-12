@@ -63,11 +63,14 @@ import ir.behzad.roozhayeman.ui.settings.AppLockScreen
 import ir.behzad.roozhayeman.ui.settings.RemindersScreen
 import ir.behzad.roozhayeman.ui.settings.SettingsScreen
 import ir.behzad.roozhayeman.ui.settings.SyncScreen
+import ir.behzad.roozhayeman.ui.study.BookDetailScreen
 import ir.behzad.roozhayeman.ui.study.LessonStudyScreen
+import ir.behzad.roozhayeman.ui.study.LessonTeachScreen
 import ir.behzad.roozhayeman.ui.study.LessonPdfScreen
 import ir.behzad.roozhayeman.ui.study.AudiobookScreen
 import ir.behzad.roozhayeman.ui.wellness.SketchGalleryScreen
 import ir.behzad.roozhayeman.ui.wellness.WellnessScreen
+import ir.behzad.roozhayeman.ui.study.AcademyHubScreen
 import ir.behzad.roozhayeman.ui.study.LibraryScreen
 import ir.behzad.roozhayeman.ui.study.PdfUploadScreen
 import ir.behzad.roozhayeman.ui.study.ProgressChartsScreen
@@ -112,6 +115,30 @@ fun ZahraNavHost() {
             }
             composable(Screen.More.route) { MoreScreen(nav) }
             composable(Screen.HealthHub.route) { HealthHubScreen(nav) }
+            composable(Screen.Academy.route) { AcademyHubScreen(nav) }
+            composable(
+                Screen.Book.route,
+                listOf(navArgument("bookCode") { type = NavType.StringType }),
+            ) { entry ->
+                BookDetailScreen(
+                    bookCode = entry.arguments?.getString("bookCode").orEmpty(),
+                    onBack = { nav.popBackStack() },
+                    onTeach = { packId -> nav.navigate(Screen.LessonTeach.of(packId)) },
+                    onStudy = { packId -> nav.navigate(Screen.LessonStudy.of(packId)) },
+                    onCharts = { nav.navigate(Screen.Charts.route) },
+                )
+            }
+            composable(
+                Screen.LessonTeach.route,
+                listOf(navArgument("packId") { type = NavType.StringType }),
+            ) { entry ->
+                LessonTeachScreen(
+                    packId = entry.arguments?.getString("packId").orEmpty(),
+                    onBack = { nav.popBackStack() },
+                    onStudy = { packId -> nav.navigate(Screen.LessonStudy.of(packId)) },
+                    onPdf = { packId -> nav.navigate(Screen.LessonPdf.of(packId)) },
+                )
+            }
             composable(Screen.AwarenessHub.route) { AwarenessHubScreen(nav) }
             composable(Screen.WeeklySchedule.route) { WeeklyScheduleScreen { nav.popBackStack() } }
             composable(Screen.Meds.route) { MedsScreen { nav.popBackStack() } }

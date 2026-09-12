@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.SmartToy
@@ -37,6 +38,13 @@ sealed class Screen(val route: String) {
     data object School : Screen("school")
     data object HealthHub : Screen("health")
     data object AwarenessHub : Screen("awareness")
+    data object Academy : Screen("academy")
+    data object Book : Screen("study-book/{bookCode}") {
+        fun of(bookCode: String) = "study-book/${Uri.encode(bookCode)}"
+    }
+    data object LessonTeach : Screen("study-teach/{packId}") {
+        fun of(packId: String) = "study-teach/${Uri.encode(packId)}"
+    }
     data object WeeklySchedule : Screen("weekly-schedule")
     data object Meds : Screen("meds")
     data object SleepLog : Screen("sleep-log")
@@ -99,8 +107,8 @@ data class Tab(val route: String, val icon: ImageVector, val label: String)
 val Tabs = listOf(
     Tab(Screen.Home.route, Icons.Filled.Home, "داشبورد"),
     Tab(Screen.Study.route, Icons.Filled.School, "مدرسه"),
+    Tab(Screen.Academy.route, Icons.Filled.LocalLibrary, "آموزشگاه"),
     Tab(Screen.HealthHub.route, Icons.Filled.FitnessCenter, "سلامتی"),
-    Tab(Screen.AwarenessHub.route, Icons.Filled.SelfImprovement, "آگاهی"),
     Tab(Screen.Chat.route, Icons.Filled.SmartToy, "همراه من"),
     Tab(Screen.More.route, Icons.Filled.MoreHoriz, "بیشتر"),
 )

@@ -1,6 +1,7 @@
 package ir.behzad.roozhayeman.ui.hub
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,6 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -22,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import ir.behzad.platform.core.common.LocalStore
+import ir.behzad.platform.feature.study.BookModuleRegistry
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -71,7 +75,27 @@ fun WeeklyScheduleScreen(onBack: () -> Unit) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
+        // فهرست کشویی: دروس هر ۱۳ کتاب + «ورزش» — ورزش فقط همین‌جا ثبت می‌شود.
+        val subjectItems = remember {
+            BookModuleRegistry.modules.flatMap { m -> m.packs.map { p -> p.title } } + "ورزش 🏃‍♀️"
+        }
+        var menuOpen by remember { mutableStateOf(false) }
         Text("درس‌های روزها", style = MaterialTheme.typography.titleMedium)
+        Box {
+            OutlinedButton(onClick = { menuOpen = true }) { Text("➕ انتخاب از فهرست (دروس + ورزش)") }
+            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                subjectItems.forEach { item ->
+                    DropdownMenuItem(
+                        text = { Text(item) },
+                        onClick = {
+                            if (editingDay == null) editingDay = Days.first()
+                            if (draft.isBlank()) draft = item else draft = "$draft، $item"
+                            menuOpen = false
+                        },
+                    )
+                }
+            }
+        }
         Days.forEach { day ->
             val lessons = lessonsOf(day)
             Card(Modifier.fillMaxWidth().padding(vertical = 3.dp)) {

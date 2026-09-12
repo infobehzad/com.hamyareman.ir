@@ -1,6 +1,8 @@
 package ir.behzad.platform.core.appwrite
 
+import androidx.activity.ComponentActivity
 import io.appwrite.ID
+import io.appwrite.OAuthProvider
 import io.appwrite.services.Account
 import ir.behzad.platform.core.common.AppError
 import ir.behzad.platform.core.common.AppResult
@@ -29,6 +31,7 @@ interface AuthService {
 
     suspend fun signUp(name: String, email: String, password: String): AppResult<AuthUser>
     suspend fun signIn(email: String, password: String): AppResult<AuthUser>
+    suspend fun signInWithGoogle(activity: ComponentActivity): AppResult<AuthUser>
     suspend fun signInAsGuest(): AppResult<AuthUser>
     suspend fun logout(): AppResult<Unit>
 }
@@ -108,6 +111,21 @@ class AppwriteAuthService(
             bootstrap()
             requireUser()
         }.getOrElse { AppResult.Err(AppwriteErrors.map(it, "ورود مهمان ناموفق بود.")) }
+    }
+
+    /**
+     * ورود با گوگل (OAuth2): مرورگر/کروم‌تب باز می‌شود و برگشت با اسکیم
+     * `appwrite-callback-<PROJECT_ID>` به همین اپ می‌آید (intent-filter در Manifest).
+     * برگشت توسط SDK روی همان activity شنود می‌شود، پس [activity] باید همان
+     * اکتیویتیِ زنده‌ی فعلی باشد.
+     */
+    override suspend fun signInWithGoogle(activity: ComponentActivity): AppResult<AuthUser> {
+        if (!provider.isConfigured) return AppResult.Ok(localUser)
+        return runCatching {
+            account.createOAuth2Session(activity = activity, provider = OAuthProvider.GOOGLE)
+            bootstrap()
+            requireUser()
+        }.getOrElse { AppResult.Err(AppwriteErrors.map(it, "ورود با گوگل ناموفق بود.")) }
     }
 
     override suspend fun logout(): AppResult<Unit> {
