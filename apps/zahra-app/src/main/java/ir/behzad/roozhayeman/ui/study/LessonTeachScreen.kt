@@ -171,6 +171,9 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
     fun savePos(t: TeachTrack, p: Long) { if (p > 0) store.putString(posKey(t), p.toString()) else store.remove(posKey(t)) }
     fun cached(t: TeachTrack) = cacheTick >= 0 && MediaVault.isCached(context, t.cacheKey)
 
+    /** «زمان درس» — سکوتِ اجباری پلیر دروس (کلید سراسری از «بیشتر»). */
+    fun quietOn(): Boolean = store.getString("quiet_mode", "0") == "1"
+
     LaunchedEffect(packId) { TeachStats.enter(context, packId) }
 
     fun startTrack(t: TeachTrack, autoplay: Boolean, fromServer: Boolean = false) {
@@ -199,9 +202,6 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
             if (autoplay) playback.play()
         }
     }
-
-    /** «زمان درس» — سکوتِ اجباری پلیر دروس (کلید سراسری از «بیشتر»). */
-    fun quietOn(): Boolean = store.getString("quiet_mode", "0") == "1"
 
     // نظرسنجی موقعیت + آمار شنیدن + ذخیره‌ی دوره‌ای موقعیت (~۴ ثانیه).
     LaunchedEffect(state.playing, loadedKey) {
