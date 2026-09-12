@@ -109,7 +109,11 @@ fun BookDetailScreen(
                         Text("🔔 $due کارت امروز باید مرور شود", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                     }
                     Spacer(Modifier.height(8.dp))
-                    val teachDone = TeachStats.isDone(ctx, pack.packId)
+                    val expectedMedia = teachTracksOf(pack).size + (if (StudyMedia.videoIds(pack.packId).isNotEmpty()) 1 else 0)
+                    val teachDone = run {
+                        TeachStats.expectMedia(ctx, pack.packId, expectedMedia.coerceAtLeast(1))
+                        TeachStats.isDone(ctx, pack.packId)
+                    }
                     val showLockDialog = remember(pack.packId) { androidx.compose.runtime.mutableStateOf(false) }
                     if (showLockDialog.value) {
                         androidx.compose.material3.AlertDialog(

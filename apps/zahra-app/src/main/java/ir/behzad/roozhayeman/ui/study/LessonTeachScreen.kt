@@ -165,6 +165,11 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
     var quiet by remember { mutableStateOf(false) }
 
     val track = tracks[activeIdx]
+    LaunchedEffect(packId, tracks.size) {
+        // شرط اتمام دوره = کامل‌شدن همه‌ی رسانه‌های درس: صوت‌ها + ویدیو (اگر دارد).
+        val expected = tracks.size + (if (StudyMedia.videoIds(packId).isNotEmpty()) 1 else 0)
+        TeachStats.expectMedia(context, packId, expected.coerceAtLeast(1))
+    }
 
     fun posKey(t: TeachTrack) = "teach_${packId}_${t.cacheKey}_pos"
     fun savedPos(t: TeachTrack) = store.getString(posKey(t), "0").toLongOrNull() ?: 0L
@@ -249,8 +254,9 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
     LaunchedEffect(state.playing, posMs, state.durationMs) {
         val dur = state.durationMs
         if (!state.playing && state.hasMedia && dur > 0 && posMs > 0 && posMs >= dur - 900) {
-            TeachStats.markFirstPassDone(context, packId)
-            loadedKey?.let { key -> tracks.firstOrNull { it.cacheKey == key }?.let { savePos(it, 0L) } }
+            val key = loadedKey ?: track.cacheKey
+            TeachStats.markTrackDone(context, packId, key)
+            loadedKey?.let { k -> tracks.firstOrNull { it.cacheKey == k }?.let { savePos(it, 0L) } }
         }
     }
 
@@ -504,7 +510,7 @@ private fun LessonVideoPlayer(packId: String, packTitle: String, fileId: String,
         val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 if (playbackState == Player.STATE_ENDED) {
-                    if (p.duration > 0) TeachStats.markFirstPassDone(context, packId)
+                    if (p.duration > 0) TeachStats.markTrackDone(context, packId, fileId)
                 }
             }
 
@@ -543,7 +549,7 @@ private fun LessonVideoPlayer(packId: String, packTitle: String, fileId: String,
                     TeachStats.addVideo(context, packId, 5, durSec.toInt())
                     val d = p.duration
                     if (d > 0 && p.currentPosition * 100 / d >= 95) {
-                        TeachStats.markFirstPassDone(context, packId)
+                        TeachStats.markTrackDone(context, packId, fileId)
                     }
                 }
             }

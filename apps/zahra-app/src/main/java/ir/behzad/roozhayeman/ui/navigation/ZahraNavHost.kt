@@ -64,6 +64,7 @@ import ir.behzad.roozhayeman.ui.settings.RemindersScreen
 import ir.behzad.roozhayeman.ui.settings.SettingsScreen
 import ir.behzad.roozhayeman.ui.settings.SyncScreen
 import ir.behzad.roozhayeman.ui.study.BookDetailScreen
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import ir.behzad.roozhayeman.ui.study.LessonStudyScreen
 import ir.behzad.roozhayeman.ui.study.LessonTeachScreen
@@ -78,6 +79,8 @@ import ir.behzad.roozhayeman.ui.study.HealthProgressScreen
 import ir.behzad.roozhayeman.ui.study.LockedStudyScreen
 import ir.behzad.roozhayeman.ui.study.ProgressChartsScreen
 import ir.behzad.roozhayeman.ui.study.TeachStats
+import ir.behzad.roozhayeman.ui.study.teachTracksOf
+import ir.behzad.platform.feature.study.BookModuleRegistry
 import ir.behzad.roozhayeman.ui.study.QuizReviewScreen
 import ir.behzad.roozhayeman.ui.study.QuizScreen
 import ir.behzad.roozhayeman.ui.study.SchoolScheduleScreen
@@ -182,9 +185,15 @@ fun ZahraNavHost() {
                 listOf(navArgument("packId") { type = NavType.StringType }),
             ) { entry ->
                 val packId = entry.arguments?.getString("packId").orEmpty()
+                val pack = remember(packId) { BookModuleRegistry.pack(packId) }
                 // قفل سراسری: مطالعه فقط پس از اتمام اولین دوره‌ی تدریس باز می‌شود
                 // (هیچ ورودیِ دیگری به این بخش راه ندارد).
-                if (TeachStats.isDone(LocalContext.current, packId)) {
+                val expected = if (pack == null) 1 else teachTracksOf(pack).size + (if (StudyMedia.videoIds(packId).isNotEmpty()) 1 else 0)
+                val done = pack != null && run {
+                    TeachStats.expectMedia(LocalContext.current, packId, expected.coerceAtLeast(1))
+                    TeachStats.isDone(LocalContext.current, packId)
+                }
+                if (done) {
                     LessonStudyScreen(
                         packId = packId,
                         onBack = { nav.popBackStack() },

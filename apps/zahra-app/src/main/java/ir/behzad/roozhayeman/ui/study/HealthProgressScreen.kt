@@ -136,11 +136,13 @@ fun HealthProgressScreen(onBack: () -> Unit) {
                     )
                 }
                 rows.forEach { (pack, snap) ->
+                    val expectedMedia = teachTracksOf(pack).size + (if (StudyMedia.videoIds(pack.packId).isNotEmpty()) 1 else 0)
                     Column(Modifier.fillMaxWidth()) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(pack.title, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
                             Text(
-                                if (snap.done) "✓ دوره‌ی اول تمام شد" else "در جریان",
+                                if (snap.done) "✓ دوره‌ی اول تمام شد"
+                                else "در جریان (${fa(snap.doneMedia)}/${fa(expectedMedia)} رسانه کامل)",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = if (snap.done) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -152,6 +154,7 @@ fun HealthProgressScreen(onBack: () -> Unit) {
                         Text(
                             buildString {
                                 append("نشست‌ها: ${fa(snap.sessions)}")
+                                if (snap.lastSessionAtMs > 0) append(" (آخرین: ${JalaliDate.formatFa(snap.lastSessionAtMs)})")
                                 append(" · دیده‌شده: ${mmss(snap.watchedSec)} از ${mmss(snap.totalSec)}")
                                 append(" · باقی: ${mmss(snap.remainSec)}")
                                 if (snap.jumps > 0) append(" · پرش >۳ث: ${fa(snap.jumps)}")

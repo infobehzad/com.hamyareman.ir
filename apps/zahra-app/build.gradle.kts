@@ -13,14 +13,27 @@ val appwriteDatabaseId = findProperty("resolvedAppwriteDatabaseId") as? String ?
 
 android {
     namespace = "ir.behzad.roozhayeman"
+
+    // امضای دیباگِ ثابت (keystore در ریشه‌ی ریپو؛ PKCS12) — تا APK هر ران CI
+    // امضای یکسان داشته باشد و نصبِ روی نسخه‌ی قبلی همیشه «آپدیت» بماند.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = rootProject.file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+            storeType = "pkcs12"
+        }
+    }
+
     compileSdk = 37
 
     defaultConfig {
         applicationId = "com.hamyareman.ir"   // Platform ثبت‌شده در کنسول Appwrite
         minSdk = 26
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.3"
+        versionCode = 5
+        versionName = "1.4"
         buildConfigField("String", "APPWRITE_ENDPOINT", "\"$appwriteEndpoint\"")
         buildConfigField("String", "APPWRITE_PROJECT_ID", "\"$appwriteProjectId\"")
         buildConfigField("String", "APPWRITE_PROJECT_NAME", "\"همیار من\"")

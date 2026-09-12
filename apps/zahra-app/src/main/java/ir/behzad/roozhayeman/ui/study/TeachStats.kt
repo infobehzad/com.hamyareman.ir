@@ -22,7 +22,9 @@ object TeachStats {
         val videoSec: Int = 0,
         val jumps: Int = 0,
         val done: Boolean = false,
+        val doneMedia: Int = 0,
         val startedAtMs: Long = 0L,
+        val lastSessionAtMs: Long = 0L,
         val completedAtMs: Long = 0L,
         val audioDurSec: Int = 0,
         val videoDurSec: Int = 0,
@@ -52,11 +54,15 @@ object TeachStats {
         store(ctx).putString(key(packId), o.toString())
     }
 
-    /** شروع یک نشست تدریس — هر بازشدن صفحه‌ی تدریس یک بار. */
+    /** شروع یک نشست تدریس — هر بازشدن صفحه‌ی تدریس یک بار + تاریخ نشست‌ها (حداکثر ۶۰ تا). */
     fun enter(ctx: Context, packId: String) {
         val o = read(ctx, packId)
         o.put("s", o.optInt("s") + 1)
         if (o.optLong("st") == 0L) o.put("st", System.currentTimeMillis())
+        val sl = o.optJSONArray("sl") ?: org.json.JSONArray()
+        sl.put(System.currentTimeMillis())
+        while (sl.length() > 60) sl.remove(0)
+        o.put("sl", sl)
         write(ctx, packId, o)
     }
 
@@ -85,27 +91,54 @@ object TeachStats {
         write(ctx, packId, o)
     }
 
-    /** پایان اولین دوره‌ی تدریس — فقط بار اول زمان ثبت می‌شود (تاریخ اتمام). */
-    fun markFirstPassDone(ctx: Context, packId: String) {
+    /**
+     * پایانِ کاملِ یک رسانه‌ی درس (صوت درس/مقدمه/ویدیو) — کلید رسانه ثبت می‌شود
+     * و تاریخ «اتمام اولین دوره» فقط با اولین بارِ کامل‌شدن همه‌ی رسانه‌ها ثبت می‌شود.
+     */
+    fun markTrackDone(ctx: Context, packId: String, mediaKey: String) {
         val o = read(ctx, packId)
-        if (!o.optBoolean("d")) {
-            o.put("d", true)
-            o.put("ca", System.currentTimeMillis())
+        val dt = o.optJSONArray("dt") ?: org.json.JSONArray()
+        val exists = (0 until dt.length()).any { dt.optString(it) == mediaKey }
+        if (!exists) { dt.put(mediaKey); o.put("dt", dt) }
+        val exp = o.optInt("exp", 1).coerceAtLeast(1)
+        if (!o.optBoolean("d") && dt.length() >= exp) {
+            o.put("d", true); o.put("ca", System.currentTimeMillis())
+        }
+        write(ctx, packId, o)
+    }
+
+    /** ثبت تعداد کل رسانه‌های درس — شرط اتمام دوره = کامل‌شدن همین تعداد. */
+    fun expectMedia(ctx: Context, packId: String, count: Int) {
+        if (count <= 0) return
+        val o = read(ctx, packId)
+        if (o.optInt("exp") != count) {
+            o.put("exp", count)
+            if (o.optBoolean("d") && (o.optJSONArray("dt")?.length() ?: 0) < count) {
+                o.put("d", false); o.remove("ca")
+            }
             write(ctx, packId, o)
         }
     }
 
-    fun isDone(ctx: Context, packId: String): Boolean = read(ctx, packId).optBoolean("d")
+    /** آیا دوره‌ی اول تدریس (همه‌ی رسانه‌ها) تمام شده؟ */
+    fun isDone(ctx: Context, packId: String): Boolean {
+        val o = read(ctx, packId)
+        val exp = o.optInt("exp", 1).coerceAtLeast(1)
+        return (o.optJSONArray("dt")?.length() ?: 0) >= exp
+    }
 
     fun snap(ctx: Context, packId: String): Snap {
         val o = read(ctx, packId)
+        val sl = o.optJSONArray("sl")
         return Snap(
             sessions = o.optInt("s"),
             listenSec = o.optInt("ls"),
             videoSec = o.optInt("vs"),
             jumps = o.optInt("j"),
             done = o.optBoolean("d"),
+            doneMedia = o.optJSONArray("dt")?.length() ?: 0,
             startedAtMs = o.optLong("st"),
+            lastSessionAtMs = if (sl != null && sl.length() > 0) sl.optLong(sl.length() - 1) else o.optLong("st"),
             completedAtMs = o.optLong("ca"),
             audioDurSec = o.optInt("ad"),
             videoDurSec = o.optInt("vd"),
