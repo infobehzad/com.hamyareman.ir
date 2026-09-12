@@ -7,10 +7,7 @@
  * اجرا: APPWRITE_DATABASE_ID=ZahraDB node migrate-teach-stats.js
  * الگو: migrate-prompt-01.js (idempotent — اجرای مجدد بی‌ضرر است).
  */
-const path = require('path');
-require(path.join(__dirname, 'node_modules', 'dotenv')).config({ path: path.join(__dirname, '.env') });
-
-const sdk = require(path.join(__dirname, 'node_modules', 'node-appwrite'));
+const sdk = require('node-appwrite');
 
 const ENDPOINT = process.env.APPWRITE_ENDPOINT || 'https://fra.cloud.appwrite.io/v1';
 const PROJECT_ID = process.env.APPWRITE_PROJECT_ID;

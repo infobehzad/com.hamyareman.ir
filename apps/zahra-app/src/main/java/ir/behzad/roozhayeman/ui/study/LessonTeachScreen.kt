@@ -181,10 +181,10 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
     /** «زمان درس» — سکوتِ اجباری پلیر دروس (کلید سراسری از «بیشتر»). */
     fun quietOn(): Boolean = store.getString("quiet_mode", "0") == "1"
 
+    val appContainer = ir.behzad.roozhayeman.LocalAppContainer.current
     LaunchedEffect(packId) {
         TeachStats.enter(context, packId)
-        val container = ir.behzad.roozhayeman.LocalAppContainer.current
-        launch { runCatching { TeachCloud.push(container.sync) } }
+        runCatching { TeachCloud.push(appContainer.sync) }
     }
 
     var forceServer by remember { mutableStateOf(false) }
