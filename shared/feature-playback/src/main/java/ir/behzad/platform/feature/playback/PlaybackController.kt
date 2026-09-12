@@ -103,6 +103,21 @@ class PlaybackController(context: Context) {
         publish(current)
     }
 
+    /**
+     * صف چندترکه (مثلاً «صوت درس» + «مقدمه» یک درس) — اعلان سیستمی خودش
+     * دکمه‌های قبلی/بعدی را نشان می‌دهد و جابه‌جایی ترک را انجام می‌دهد.
+     */
+    fun setMediaItems(items: List<MediaItem>, startIndex: Int = 0, startPositionMs: Long = 0L) {
+        val current = controller ?: return
+        if (items.isEmpty()) return
+        current.setMediaItems(items, startIndex.coerceIn(0, items.size - 1), startPositionMs.coerceAtLeast(0L))
+        current.prepare()
+        publish(current)
+    }
+
+    /** شناسه‌ی ترک جاری — برای همگام‌سازی UI با دکمه‌های قبلی/بعدیِ اعلان. */
+    fun currentMediaId(): String? = controller?.currentMediaItem?.mediaId
+
     fun play() {
         controller?.play()
     }

@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
@@ -161,6 +162,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
     var listenAccumMs by remember { mutableLongStateOf(0L) }
     var lastSaveMs by remember { mutableLongStateOf(0L) }
     var dragMs by remember { mutableLongStateOf(-1L) }
+    var quiet by remember { mutableStateOf(false) }
 
     val track = tracks[activeIdx]
 
@@ -173,29 +175,50 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
 
     fun startTrack(t: TeachTrack, autoplay: Boolean, fromServer: Boolean = false) {
         msg = null
+        if (quietOn()) {
+            msg = "🔇 «زمان درس» روشن است — تا خاموشش کنی، پخش صدا فعال نمی‌شود."
+            return
+        }
         scope.launch {
             val ok = playback.connect()
             if (!ok) {
                 msg = "اتصال به سرویس پخش ممکن نشد؛ یک‌بار دیگر امتحان کن."
                 return@launch
             }
-            val local = cached(t) && !fromServer
-            loadedKey = t.cacheKey
-            // موقعیتِ حافظه فقط برای پخش محلی اعمال می‌شود (سرورِ ما Range را درست جواب می‌دهد).
-            playback.setMedia(
-                uri = if (local) MediaVault.localUrl(context, t.cacheKey) else StudyMedia.viewUrl(t.fileId),
-                title = "$screenTitle — ${t.label}",
-                startPositionMs = if (local) savedPos(t) else 0L,
-            )
+            // صف همه‌ی ترک‌های درس — اعلان سیستمی دکمه‌ی قبلی/بعدی می‌دهد.
+            val items = tracks.map { tr ->
+                val useLocal = MediaVault.isCached(context, tr.cacheKey) && !(fromServer && tr.cacheKey == t.cacheKey)
+                MediaItem.Builder()
+                    .setMediaId(tr.cacheKey)
+                    .setUri(if (useLocal) MediaVault.localUrl(context, tr.cacheKey) else StudyMedia.viewUrl(tr.fileId))
+                    .setMediaMetadata(MediaMetadata.Builder().setTitle(screenTitle).setArtist(tr.label).build())
+                    .build()
+            }
+            playback.setMediaItems(items, tracks.indexOf(t).coerceAtLeast(0), if (cached(t) && !fromServer) savedPos(t) else 0L)
             playback.setSpeed(speed)
             if (autoplay) playback.play()
         }
     }
 
+    /** «زمان درس» — سکوتِ اجباری پلیر دروس (کلید سراسری از «بیشتر»). */
+    fun quietOn(): Boolean = store.getString("quiet_mode", "0") == "1"
+
     // نظرسنجی موقعیت + آمار شنیدن + ذخیره‌ی دوره‌ای موقعیت (~۴ ثانیه).
     LaunchedEffect(state.playing, loadedKey) {
-        while (state.playing) {
+        while (true) {
             delay(500)
+            // «زمان درس» فعال شد؟ هر صدایی از پلیر دروس فوراً متوقف می‌شود.
+            if (quietOn()) {
+                quiet = true
+                if (state.playing) {
+                    runCatching { playback.pause() }
+                    savePos(track, playback.positionMs)
+                    msg = "🔇 «زمان درس» فعال است — پخش متوقف شد."
+                }
+                continue
+            }
+            quiet = false
+            if (!state.playing) continue
             posMs = playback.positionMs
             listenAccumMs += 500
             if (listenAccumMs >= 5000) {
@@ -206,6 +229,18 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
             if (posMs - lastSaveMs >= 4000 || posMs < lastSaveMs) {
                 loadedKey?.let { key -> tracks.firstOrNull { it.cacheKey == key }?.let { savePos(it, posMs) } }
                 lastSaveMs = posMs
+            }
+            // اگر از اعلان (قبلی/بعدی) ترک عوض شد، UI همگام شود.
+            val cur = playback.currentMediaId()
+            if (cur != null && cur != loadedKey) {
+                val idx = tracks.indexOfFirst { it.cacheKey == cur }
+                if (idx >= 0 && idx != activeIdx) {
+                    activeIdx = idx
+                    store.putString("teach_${packId}_track", idx.toString())
+                }
+                loadedKey = cur
+                lastSaveMs = 0L
+                posMs = 0L
             }
         }
     }
@@ -251,7 +286,9 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
             Spacer(Modifier.height(6.dp))
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 OutlinedButton(onClick = {
-                    if (state.playing) {
+                    if (quietOn()) {
+                        msg = "🔇 «زمان درس» روشن است — از «بیشتر» خاموشش کن."
+                    } else if (state.playing) {
                         playback.pause()
                         savePos(track, posMs)
                     } else if (loadedKey == track.cacheKey && state.hasMedia) {
@@ -346,6 +383,13 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                         }
                     }) { Text("⬇ دانلود برای پخش محلی") }
                 }
+            }
+            if (quiet) {
+                Text(
+                    "🔇 زمان درس — پخش صوت دروس خاموش است (از «بیشتر» خاموش کن)",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
             }
             msg?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         }
@@ -485,10 +529,13 @@ private fun LessonVideoPlayer(packId: String, packTitle: String, fileId: String,
     }
 
     // تیک تماشای واقعی — هر ثانیه فقط هنگام پخش؛ ثبت هر ۵ ثانیه؛ ۹۵٪ = پایان دوره.
+    // «زمان درس» فعال = صدای ویدیو هم بی‌صدا می‌شود.
     LaunchedEffect(player) {
         val p = player ?: return@LaunchedEffect
+        val qstore = LocalStore(context, "hamyar_teach")
         while (true) {
             delay(1000)
+            p.volume = if (qstore.getString("quiet_mode", "0") == "1") 0f else 1f
             if (p.isPlaying) {
                 watchAccum += 1000
                 val durSec = (p.duration.takeIf { it > 0 } ?: 0L) / 1000

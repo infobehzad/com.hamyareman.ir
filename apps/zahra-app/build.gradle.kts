@@ -19,8 +19,8 @@ android {
         applicationId = "com.hamyareman.ir"   // Platform ثبت‌شده در کنسول Appwrite
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.2"
+        versionCode = 4
+        versionName = "1.3"
         buildConfigField("String", "APPWRITE_ENDPOINT", "\"$appwriteEndpoint\"")
         buildConfigField("String", "APPWRITE_PROJECT_ID", "\"$appwriteProjectId\"")
         buildConfigField("String", "APPWRITE_PROJECT_NAME", "\"همیار من\"")
