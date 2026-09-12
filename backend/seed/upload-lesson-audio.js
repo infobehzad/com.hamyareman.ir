@@ -148,6 +148,7 @@ function mp3DurationSec(buf) {
                 console.log(`  ⬆ آپلود شد: ${it.name} (${(it.size / 1024).toFixed(0)}KB)`);
                 uploaded++;
             }
+            if (/INTRO/.test(it.name)) { console.log('    (فایل اینترو — فقط آپلود، بدون سطر جدول)'); continue; }
             const r = await upsertRow({ ...info, fileId: it.name }, it.size, mp3DurationSec(it.size));
             if (r !== 'failed') rowsOk++;
         } catch (e) {
