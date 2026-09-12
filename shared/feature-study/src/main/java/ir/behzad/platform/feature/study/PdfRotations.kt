@@ -1,4 +1,4 @@
-package ir.hamyareman.shared.data
+package ir.behzad.platform.feature.study
 
 /** چرخش تصحیحی (درجه) برای PDFهایی که 180° آپلود شده‌اند؛ به‌کاررفته هنگام رندر. */
 object PdfRotations {
