@@ -43,6 +43,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.composed
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
@@ -181,6 +184,8 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
 
     LaunchedEffect(packId) { TeachStats.enter(context, packId) }
 
+    var forceServer by remember { mutableStateOf(false) }
+
     fun startTrack(t: TeachTrack, autoplay: Boolean, fromServer: Boolean = false) {
         msg = null
         if (quietOn()) {
@@ -195,7 +200,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
             }
             // صف همه‌ی ترک‌های درس — اعلان سیستمی دکمه‌ی قبلی/بعدی می‌دهد.
             val items = tracks.map { tr ->
-                val useLocal = MediaVault.isCached(context, tr.cacheKey) && !(fromServer && tr.cacheKey == t.cacheKey)
+                val useLocal = !forceServer && MediaVault.isCached(context, tr.cacheKey) && !(fromServer && tr.cacheKey == t.cacheKey)
                 MediaItem.Builder()
                     .setMediaId(tr.cacheKey)
                     .setUri(if (useLocal) MediaVault.localUrl(context, tr.cacheKey) else StudyMedia.viewUrl(tr.fileId))
@@ -268,6 +273,16 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
         }
     }
 
+    // اگر پخشِ محلی (گاوصندوق) خطا داد، بی‌سروصدا از سرور ادامه بده.
+    LaunchedEffect(state.error) {
+        val err = state.error ?: return@LaunchedEffect
+        if (!forceServer && loadedKey != null) {
+            forceServer = true
+            msg = "پخش محلی ممکن نشد — از سرور ادامه می‌دهیم."
+            startTrack(track, autoplay = true, fromServer = true)
+        }
+    }
+
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(12.dp)) {
             // انتخاب ترک — سوییچ = توقف قبلی، ادامه/پخش جدید (فقط یکی).
@@ -297,10 +312,23 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                     } else if (state.playing) {
                         playback.pause()
                         savePos(track, posMs)
-                    } else if (loadedKey == track.cacheKey && state.hasMedia) {
-                        playback.play()
                     } else {
-                        startTrack(track, autoplay = true)
+                        // اگر سرویس/اتصال افتاده باشد (مثلاً بعد از مکث طولانی)،
+                        // اول دوباره وصل و آماده می‌کنیم و بعد پخش — از همان جای حافظه.
+                        scope.launch {
+                            if (!playback.connect()) {
+                                msg = "اتصال به سرویس پخش ممکن نشد؛ دوباره امتحان کن."
+                                return@launch
+                            }
+                            if (loadedKey == track.cacheKey && state.hasMedia && !state.error.isNullOrBlank()) {
+                                forceServer = true
+                            }
+                            if (loadedKey == track.cacheKey && state.hasMedia && !forceServer) {
+                                playback.play()
+                            } else {
+                                startTrack(track, autoplay = true)
+                            }
+                        }
                     }
                 }) { Text(if (state.playing && loadedKey == track.cacheKey) "⏸ توقف" else "▶ پخش") }
                 TextButton(onClick = {
@@ -319,10 +347,24 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                     Text("🌐 سرور")
                 }
             }
+            val seekUnlocked = remember { mutableStateOf(TeachStats.isDone(context, packId)) }
+            var showSeekDialog by remember { mutableStateOf(false) }
+            if (showSeekDialog) {
+                androidx.compose.material3.AlertDialog(
+                    onDismissRequest = { showSeekDialog = false },
+                    confirmButton = {
+                        TextButton(onClick = { showSeekDialog = false }) { Text("باشه") }
+                    },
+                    title = { Text("تا یک بار کامل نشده، سیک قفل است 🔒") },
+                    text = { Text("یک‌بار که تا آخر گوشش کنی، جابه‌جایی آزاد می‌شود — همون‌جوری که دوست داری 🌱") },
+                )
+            }
             if (loadedKey == track.cacheKey && state.durationMs > 0) {
-                Slider(
-                    value = (((if (dragMs >= 0) dragMs else posMs).toFloat()) / state.durationMs).coerceIn(0f, 1f),
-                    onValueChange = { dragMs = (it * state.durationMs).toLong() },
+                Box {
+                    Slider(
+                        value = (((if (dragMs >= 0) dragMs else posMs).toFloat()) / state.durationMs).coerceIn(0f, 1f),
+                        enabled = seekUnlocked.value,
+                        onValueChange = { dragMs = (it * state.durationMs).toLong() },
                     onValueChangeFinished = {
                         if (dragMs >= 0) {
                             if (abs(dragMs - posMs) > 3000) TeachStats.addJump(context, packId)
@@ -334,7 +376,16 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                     },
                     modifier = Modifier.fillMaxWidth(),
                 )
-            }
+                if (!seekUnlocked.value) {
+                    // لایه‌ی لمس برای دیالوگِ قفلِ سیک (تا اتمام اولین دوره).
+                    Box(
+                        Modifier.matchParentSize().padding(vertical = 10.dp)
+                            .androidClickable { showSeekDialog = true },
+                    )
+                }
+                } // Box
+            } // if(loadedKey)
+            LaunchedEffect(Unit) { seekUnlocked.value = TeachStats.isDone(context, packId) }
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                 TEACH_SPEEDS.forEach { v ->
                     FilterChip(
@@ -363,11 +414,26 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                     }
                     cached(track) -> {
                         Text("✓ روی گوشی (رمزشده)", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
-                        TextButton(onClick = {
-                            MediaVault.delete(context, track.cacheKey)
-                            cacheTick++
-                            msg = "فایل از حافظه‌ی گوشی حذف شد."
-                        }) { Text("🗑 حذف") }
+                        var confirmDelete by remember { mutableStateOf(false) }
+                        if (confirmDelete) {
+                            androidx.compose.material3.AlertDialog(
+                                onDismissRequest = { confirmDelete = false },
+                                confirmButton = {
+                                    TextButton(onClick = {
+                                        confirmDelete = false
+                                        MediaVault.delete(context, track.cacheKey)
+                                        cacheTick++
+                                        msg = "فایل از حافظه‌ی گوشی حذف شد."
+                                    }) { Text("حذف") }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { confirmDelete = false }) { Text("نگه‌دار") }
+                                },
+                                title = { Text("حذف فایل دانلودشده؟") },
+                                text = { Text("پخش بعدی از سرور انجام می‌شود؛ هر وقت خواستی دوباره دانلود می‌کنی.") },
+                            )
+                        }
+                        TextButton(onClick = { confirmDelete = true }) { Text("🗑 حذف") }
                     }
                     else -> TextButton(onClick = {
                         downloading = true; progressPct = -1
@@ -458,11 +524,24 @@ private fun LessonVideoSection(packId: String, packTitle: String) {
                     if (!useLocal) {
                         TextButton(onClick = { useLocal = true }) { Text("▶ محلی") }
                     }
-                    TextButton(onClick = {
-                        MediaVault.delete(context, fileId)
-                        useLocal = false; cacheTick++
-                        msg = "ویدیو از حافظه‌ی گوشی حذف شد."
-                    }) { Text("🗑") }
+                    var confirmDelV by remember { mutableStateOf(false) }
+                    if (confirmDelV) {
+                        androidx.compose.material3.AlertDialog(
+                            onDismissRequest = { confirmDelV = false },
+                            confirmButton = {
+                                TextButton(onClick = {
+                                    confirmDelV = false
+                                    MediaVault.delete(context, fileId)
+                                    useLocal = false; cacheTick++
+                                    msg = "ویدیو از حافظه‌ی گوشی حذف شد."
+                                }) { Text("حذف") }
+                            },
+                            dismissButton = { TextButton(onClick = { confirmDelV = false }) { Text("نگه‌دار") } },
+                            title = { Text("حذف ویدیوی دانلودشده؟") },
+                            text = { Text("پخش بعدی از سرور انجام می‌شود.") },
+                        )
+                    }
+                    TextButton(onClick = { confirmDelV = true }) { Text("🗑") }
                 }
                 else -> TextButton(onClick = {
                     downloading = true; progressPct = -1
@@ -565,6 +644,17 @@ private fun LessonVideoPlayer(packId: String, packTitle: String, fileId: String,
 
 // ------------------------------------------------------------- کتاب (PDF)
 
+private fun Modifier.androidClickable(onClick: () -> Unit): Modifier =
+    this.then(
+        Modifier.composed {
+            androidx.compose.foundation.clickable(
+                interactionSource = androidx.compose.foundation.interaction.MutableInteractionSource(),
+                indication = null,
+                onClick = onClick,
+            )
+        },
+    )
+
 private sealed class TeachPdfState {
     data object Idle : TeachPdfState()
     data class Downloading(val pct: Int) : TeachPdfState()
@@ -598,24 +688,30 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
 
     LaunchedEffect(fileId) {
         if (fileId.isBlank()) {
-            state = TeachPdfState.Error("این درس فایل PDF ندارد.")
+            state = TeachPdfState.Error("برای این بخش، کتابِ PDF جداگانه‌ای نیست.")
             return@LaunchedEffect
         }
         try {
             val cacheDir = File(ctx.filesDir, "media/pdf-cache").apply { mkdirs() }
             val target = File(cacheDir, fileId)
-            if (!target.exists() || target.length() < 1024) {
+            // فایل ناقص/خراب قبلی → دوباره دانلود می‌شود (خودترمیمی).
+            fun isValid(f: File) = f.length() > 1024 && runCatching {
+                f.inputStream().use { val h = ByteArray(5); it.read(h); String(h) == "%PDF-" }
+            }.getOrDefault(false)
+            if (!isValid(target)) {
+                target.delete()
                 state = TeachPdfState.Downloading(0)
                 val conn = (URL(StudyMedia.viewUrl(fileId)).openConnection() as HttpURLConnection).apply {
                     connectTimeout = 15000; readTimeout = 30000; instanceFollowRedirects = true
                 }
                 if (conn.responseCode !in 200..299) {
-                    state = TeachPdfState.Error("PDF این درس هنوز روی سرور نیست.")
+                    state = TeachPdfState.Error("دریافت PDF ممکن نشد (کد ${conn.responseCode}).")
                     return@LaunchedEffect
                 }
                 val total = conn.contentLengthLong
+                val part = File(cacheDir, "$fileId.part")
                 conn.inputStream.use { input ->
-                    java.io.FileOutputStream(target).use { out ->
+                    java.io.FileOutputStream(part).use { out ->
                         val buf = ByteArray(64 * 1024)
                         var read: Int; var done = 0L
                         while (input.read(buf).also { read = it } > 0) {
@@ -627,13 +723,23 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
                         }
                     }
                 }
+                if (!isValid(part)) {
+                    part.delete()
+                    state = TeachPdfState.Error("فایل PDF ناقص رسید؛ یک‌بار دیگر تلاش کن.")
+                    return@LaunchedEffect
+                }
+                if (!part.renameTo(target)) {
+                    part.copyTo(target, overwrite = true); part.delete()
+                }
             }
             val fd = ParcelFileDescriptor.open(target, ParcelFileDescriptor.MODE_READ_ONLY)
             val r = PdfRenderer(fd)
             synchronized(renderLock) { renderer = r }
             state = TeachPdfState.Ready(r.pageCount)
         } catch (e: Exception) {
-            state = TeachPdfState.Error("بازکردن PDF ناموفق بود؛ احتمالاً هنوز روی سرور آپلود نشده.")
+            // کش خراب را پاک کن تا دفعه‌ی بعد از نو دانلود شود.
+            runCatching { File(File(ctx.filesDir, "media/pdf-cache"), fileId).delete() }
+            state = TeachPdfState.Error("بازکردن PDF ناموفق بود؛ دوباره تلاش کن.")
         }
     }
 

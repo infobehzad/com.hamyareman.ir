@@ -12,7 +12,7 @@ import ir.behzad.platform.feature.study.StudyPack
 object FarsiC903 {
     private fun l01(): StudyPack = StudyPack(
         packId = "C903_E01-L01", bookCode = "C903", lessonId = "E01-L01",
-        title = "درس ۱ — آفرینش همه تنبیه خداوند دل است", bookTitle = "فارسی پایه نهم", pdfFileName = "C903_E01-L01-1_BOOK.pdf",
+        title = "درس ۱ — آفرینش همه تنبیه خداوند دل است", bookTitle = "فارسی پایه نهم", pdfFileName = "C903_E01-L01_BOOK.pdf",
         audioFileId = "C903_E01-L01-1_AUDIO.mp3",
         audio2FileId = "C903_E01-L01-2_AUDIO.mp3", audio2Title = "حکایت: سفر",
         sections = listOf(
