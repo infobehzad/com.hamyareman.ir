@@ -67,6 +67,10 @@ class AppContainer(context: Context) {
     )
 
     init {
+        // سینک ابری آمار تدریس: هر رویداد → صف outbox؛ ارسال در لحظه‌های مناسب.
+        ir.behzad.roozhayeman.ui.study.TeachStats.cloudSink = { packId ->
+            ir.behzad.roozhayeman.ui.study.TeachCloud.enqueue(context, sync, auth.cachedUserId(), packId)
+        }
         // «Ping» Appwrite: یک درخواست واقعی در شروع اپ تا اتصال در کنسول دیده شود.
         // (SDK اندروید متد ping() ندارد؛ Account.get() سبک‌ترین درخواست احرازشده است.)
         if (appwrite.isConfigured) {

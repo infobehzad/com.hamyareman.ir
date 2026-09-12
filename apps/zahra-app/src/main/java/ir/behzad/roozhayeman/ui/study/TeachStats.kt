@@ -47,11 +47,20 @@ object TeachStats {
 
     private fun key(packId: String) = "ts_$packId"
 
+    /**
+     * قلاب سینک ابری — AppContainer آن را به TeachCloud وصل می‌کند؛ هر ثبت رویداد
+     * وضعیت پک را در صف‌ی outbox هم می‌گذارد (ارسال در لحظه‌های مناسب انجام می‌شود).
+     * آمار محلی مرجع است؛ صف فقط برای «سینک‌شونده بودن» است.
+     */
+    @Volatile
+    var cloudSink: ((packId: String) -> Unit)? = null
+
     private fun read(ctx: Context, packId: String): JSONObject =
         runCatching { JSONObject(store(ctx).getString(key(packId), "{}")) }.getOrDefault(JSONObject())
 
     private fun write(ctx: Context, packId: String, o: JSONObject) {
         store(ctx).putString(key(packId), o.toString())
+        runCatching { cloudSink?.invoke(packId) }
     }
 
     /** شروع یک نشست تدریس — هر بازشدن صفحه‌ی تدریس یک بار + تاریخ نشست‌ها (حداکثر ۶۰ تا). */
@@ -121,6 +130,9 @@ object TeachStats {
     }
 
     /** آیا دوره‌ی اول تدریس (همه‌ی رسانه‌ها) تمام شده؟ */
+    /** JSON خام آمار یک پک — برای سینک ابری. */
+    fun raw(ctx: Context, packId: String): JSONObject = read(ctx, packId)
+
     fun isDone(ctx: Context, packId: String): Boolean {
         val o = read(ctx, packId)
         val exp = o.optInt("exp", 1).coerceAtLeast(1)

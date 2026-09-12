@@ -85,6 +85,10 @@ fun HealthProgressScreen(onBack: () -> Unit) {
     val store = container.store
     val today = remember { JalaliDate.todayIso() }
 
+    // ارسال صف سینک ابری آمار (اگر چیزی مانده باشد) — بی‌سروصدا.
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        runCatching { TeachCloud.push(container.sync) }
+    }
     AppTopBar(title = "پیشرفت سلامتی 📊", onBack = onBack)
     Column(
         Modifier.fillMaxSize().padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
