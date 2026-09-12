@@ -1,5 +1,6 @@
 package ir.behzad.roozhayeman.ui.study
 
+import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import ir.behzad.roozhayeman.ui.hub.HubBody
 import ir.behzad.roozhayeman.ui.hub.HubMenuGroup

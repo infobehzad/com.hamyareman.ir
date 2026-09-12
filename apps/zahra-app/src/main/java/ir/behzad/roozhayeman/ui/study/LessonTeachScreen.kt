@@ -229,11 +229,11 @@ private fun LessonAudioPlayer(label: String, fileId: String, cacheKey: String) {
         prepared = false
         runCatching {
             p.setDataSource(file.absolutePath)
-            p.setOnPrepared {
+            p.setOnPreparedListener { mp ->
                 prepared = true
-                dur = it.duration.toLong()
-                applySpeed(it, speed)
-                it.start()
+                dur = mp.duration.toLong()
+                applySpeed(mp, speed)
+                mp.start()
                 playing = true
             }
             p.setOnCompletionListener { playing = false }
