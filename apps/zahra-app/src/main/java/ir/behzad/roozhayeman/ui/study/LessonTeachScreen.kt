@@ -657,6 +657,48 @@ private sealed class TeachPdfState {
     data class Error(val message: String) : TeachPdfState()
 }
 
+/** خطای قابل‌گزارش (دانلود/اعتبارسنجی) — پیامش مستقیم به کاربر نشان داده می‌شود. */
+private class PdfUnavailable(message: String) : Exception(message)
+
+/** دانلود/اعتبارسنجی/بازکردن PDF — فقط روی IO صدا زده می‌شود. */
+private fun openTeachPdf(ctx: android.content.Context, fileId: String, onProgress: (Int) -> Unit): PdfRenderer {
+    val cacheDir = File(ctx.filesDir, "media/pdf-cache").apply { mkdirs() }
+    val target = File(cacheDir, fileId)
+    fun isValid(f: File) = f.length() > 1024 && runCatching {
+        f.inputStream().use { val h = ByteArray(5); it.read(h); String(h) == "%PDF-" }
+    }.getOrDefault(false)
+    if (!isValid(target)) {
+        target.delete()
+        val conn = (URL(StudyMedia.viewUrl(fileId)).openConnection() as HttpURLConnection).apply {
+            connectTimeout = 15000; readTimeout = 30000; instanceFollowRedirects = true
+        }
+        conn.connect()
+        if (conn.responseCode !in 200..299) throw PdfUnavailable("دریافت PDF ممکن نشد (کد ${conn.responseCode}).")
+        val total = conn.contentLengthLong
+        val part = File(cacheDir, "$fileId.part")
+        conn.inputStream.use { input ->
+            java.io.FileOutputStream(part).use { out ->
+                val buf = ByteArray(64 * 1024)
+                var read: Int
+                var done = 0L
+                while (input.read(buf).also { read = it } > 0) {
+                    out.write(buf, 0, read); done += read
+                    if (total > 0) onProgress(((done * 100) / total).toInt())
+                }
+            }
+        }
+        if (!isValid(part)) {
+            part.delete()
+            throw PdfUnavailable("فایل PDF ناقص رسید؛ یک‌بار دیگر تلاش کن.")
+        }
+        if (!part.renameTo(target)) {
+            part.copyTo(target, overwrite = true); part.delete()
+        }
+    }
+    val fd = ParcelFileDescriptor.open(target, ParcelFileDescriptor.MODE_READ_ONLY)
+    return PdfRenderer(fd)
+}
+
 /** کش LRU صفحه‌های PDF (~۸ صفحه) تا حافظه کنترل بماند. */
 private class TeachPageCache(private val maxPages: Int = 8) {
     private val map = LinkedHashMap<Int, Bitmap>(16, 0.75f, true)
@@ -687,52 +729,17 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
             return@LaunchedEffect
         }
         try {
-            val cacheDir = File(ctx.filesDir, "media/pdf-cache").apply { mkdirs() }
-            val target = File(cacheDir, fileId)
-            // فایل ناقص/خراب قبلی → دوباره دانلود می‌شود (خودترمیمی).
-            fun isValid(f: File) = f.length() > 1024 && runCatching {
-                f.inputStream().use { val h = ByteArray(5); it.read(h); String(h) == "%PDF-" }
-            }.getOrDefault(false)
-            if (!isValid(target)) {
-                target.delete()
-                state = TeachPdfState.Downloading(0)
-                val conn = (URL(StudyMedia.viewUrl(fileId)).openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 15000; readTimeout = 30000; instanceFollowRedirects = true
-                }
-                if (conn.responseCode !in 200..299) {
-                    state = TeachPdfState.Error("دریافت PDF ممکن نشد (کد ${conn.responseCode}).")
-                    return@LaunchedEffect
-                }
-                val total = conn.contentLengthLong
-                val part = File(cacheDir, "$fileId.part")
-                conn.inputStream.use { input ->
-                    java.io.FileOutputStream(part).use { out ->
-                        val buf = ByteArray(64 * 1024)
-                        var read: Int; var done = 0L
-                        while (input.read(buf).also { read = it } > 0) {
-                            out.write(buf, 0, read); done += read
-                            if (total > 0) {
-                                val pct = ((done * 100) / total).toInt()
-                                if (state is TeachPdfState.Downloading) state = TeachPdfState.Downloading(pct)
-                            }
-                        }
-                    }
-                }
-                if (!isValid(part)) {
-                    part.delete()
-                    state = TeachPdfState.Error("فایل PDF ناقص رسید؛ یک‌بار دیگر تلاش کن.")
-                    return@LaunchedEffect
-                }
-                if (!part.renameTo(target)) {
-                    part.copyTo(target, overwrite = true); part.delete()
+            // دانلود و بازکردن روی IO — HttpURLConnection روی Main می‌شکند.
+            val r = withContext(Dispatchers.IO) {
+                openTeachPdf(ctx, fileId) { pct ->
+                    if (state is TeachPdfState.Downloading) state = TeachPdfState.Downloading(pct)
                 }
             }
-            val fd = ParcelFileDescriptor.open(target, ParcelFileDescriptor.MODE_READ_ONLY)
-            val r = PdfRenderer(fd)
             synchronized(renderLock) { renderer = r }
             state = TeachPdfState.Ready(r.pageCount)
+        } catch (e: PdfUnavailable) {
+            state = TeachPdfState.Error(e.message ?: "PDF در دسترس نیست.")
         } catch (e: Exception) {
-            // کش خراب را پاک کن تا دفعه‌ی بعد از نو دانلود شود.
             runCatching { File(File(ctx.filesDir, "media/pdf-cache"), fileId).delete() }
             state = TeachPdfState.Error("بازکردن PDF ناموفق بود؛ دوباره تلاش کن.")
         }

@@ -55,7 +55,24 @@ fun LoginScreen(
                 if (loading) {
                     CircularProgressIndicator()
                 } else {
-                    Button(onClick = onGoogle, modifier = Modifier.fillMaxWidth()) {
+                    // یک قدم آگاهانه قبل از پرش به مرورگر — انتخابِ نهایی با خود او.
+                    var confirmGoogle by remember { androidx.compose.runtime.mutableStateOf(false) }
+                    if (confirmGoogle) {
+                        androidx.compose.material3.AlertDialog(
+                            onDismissRequest = { confirmGoogle = false },
+                            confirmButton = {
+                                androidx.compose.material3.TextButton(onClick = { confirmGoogle = false; onGoogle() }) {
+                                    Text("ادامه")
+                                }
+                            },
+                            dismissButton = {
+                                androidx.compose.material3.TextButton(onClick = { confirmGoogle = false }) { Text("بی‌خیال") }
+                            },
+                            title = { Text("ورود با گوگل") },
+                            text = { Text("مرورگر باز می‌شود و به اپ برمی‌گردی. اگر در مرورگر با اکانت گوگلت وارد باشی، گوگل شاید بدون پرسیدن همان اکانت را تأیید کند؛ برای دیدن صفحه‌ی انتخاب اکانت، در مرورگر چند اکانت داشته باش یا اول از اکانت خارج شو.") },
+                        )
+                    }
+                    Button(onClick = { confirmGoogle = true }, modifier = Modifier.fillMaxWidth()) {
                         Text("ورود با گوگل")
                     }
                     Spacer(Modifier.height(8.dp))
