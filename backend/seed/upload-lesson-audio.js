@@ -51,7 +51,8 @@ function withRetry(fn, tries = 4) {
 // شناسه‌های پک و عنوان‌ها — هماهنگ با BookModuleRegistry اپ
 const PACK_INFO = {
     'C901_L01_AUDIO.mp3':        { packId: 'C901_L01',      bookCode: 'C901', lessonId: 'L01',      title: 'آموزش قرآن نهم — درس ۱ (روخوانی آیات دو زبانه)', voices: 'مرد عربی + زن فارسی' },
-    'C903_E01-L01_AUDIO.mp3':    { packId: 'C903_E01-L01',  bookCode: 'C903', lessonId: 'E01-L01',  title: 'فارسی نهم — درس ۱ (روخوانی شعر و حکایت)', voices: 'مرد فارسی (با اعراب خفیف)' },
+    'C903_E01-L01-1_AUDIO.mp3':  { packId: 'C903_E01-L01-1', bookCode: 'C903', lessonId: 'E01-L01-1', title: 'فارسی نهم — درس ۱ بخش ۱ (قصیده، آموزش و تمرین‌ها)', voices: 'مرد فارسی (با اعراب خفیف)' },
+    'C903_E01-L01-2_AUDIO.mp3':  { packId: 'C903_E01-L01-2', bookCode: 'C903', lessonId: 'E01-L01-2', title: 'فارسی نهم — درس ۱ بخش ۲ (حکایت: سفر)', voices: 'مرد فارسی (با اعراب خفیف)' },
     'C909_L01_AUDIO.mp3':        { packId: 'C909_L01',      bookCode: 'C909', lessonId: 'L01',      title: 'عربی نهم — درس ۱ (واژه‌نامه دو زبانه)', voices: 'مرد عربی + زن فارسی' },
     'C910_L01_AUDIO.mp3':        { packId: 'C910_L01',      bookCode: 'C910', lessonId: 'L01',      title: 'انگلیسی نهم — درس ۱ (مکالمه، ملودی و گرامر)', voices: '۲ مرد + ۲ زن (انگلیسی) + زن فارسی' },
 };
@@ -153,6 +154,17 @@ function mp3DurationSec(buf) {
             console.log(`  ❌ ${it.name}: ${e.message}`);
             failed++;
         }
+    }
+    // حذف فایل‌های منسوخ (رینیم‌شده) از باکت و جدول
+    const PRUNE_FILEIDS = ['C903_E01-L01_AUDIO.mp3'];
+    for (const fid of PRUNE_FILEIDS) {
+        if (dryRun) { console.log(`  [dry] حذف منسوخ: ${fid}`); continue; }
+        try { await storage.deleteFile({ bucketId: BUCKET, fileId: fid }); console.log(`  🗑 فایل منسوخ حذف شد: ${fid}`); }
+        catch (e) { console.log(`  (فایل منسوخ در باکت نبود: ${fid})`); }
+        try {
+            const list = await tables.listRows({ databaseId: DB, tableId: TABLE, queries: [sdk.Query.equal('fileId', fid)] });
+            for (const r of list.rows) { await tables.deleteRow({ databaseId: DB, tableId: TABLE, rowId: r.$id }); console.log(`  🗑 سطر منسوخ حذف شد: ${fid}`); }
+        } catch (e) { console.log(`  ⚠ حذف سطر ${fid}: ${e.message}`); }
     }
     console.log(`📊 آپلود: ${uploaded} | از قبل: ${items.length - uploaded - skipped - failed} | skip: ${skipped} | خطا: ${failed} | سطر جدول: ${rowsOk}`);
     if (failed > 0) process.exit(1);

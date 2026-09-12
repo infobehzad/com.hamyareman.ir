@@ -250,13 +250,21 @@ private fun ContentTab(pack: StudyPack, onOpenPdf: (String) -> Unit) {
  */
 @Composable
 private fun LessonAudioPlayer(pack: StudyPack) {
-    if (pack.audioFileId.isBlank()) return
-    val ctx = androidx.compose.ui.platform.LocalContext.current
-    val url = "https://fra.cloud.appwrite.io/v1/storage/buckets/6aa1eaae00303400117b/files/${pack.audioFileId}/view?project=6a9d59e3002751cc3ea8"
-    var ready by remember(pack.audioFileId) { mutableStateOf(false) }
-    var playing by remember(pack.audioFileId) { mutableStateOf(false) }
-    var error by remember(pack.audioFileId) { mutableStateOf(false) }
-    val player = remember(pack.audioFileId) {
+    // ترک‌های صوتی درس: بخش ۱ (روخوانی اصلی) و در صورت وجود بخش ۲ (حکایت/شعرخوانی)
+    val tracks = remember(pack) {
+        buildList {
+            if (pack.audioFileId.isNotBlank()) add(pack.audioFileId to "روخوانی درس")
+            if (pack.audio2FileId.isNotBlank()) add(pack.audio2FileId to pack.audio2Title.ifBlank { "بخش دوم" })
+        }
+    }
+    if (tracks.isEmpty()) return
+    var sel by remember(pack) { mutableStateOf(0) }
+    val (fileId, trackLabel) = tracks[sel]
+    val url = "https://fra.cloud.appwrite.io/v1/storage/buckets/6aa1eaae00303400117b/files/$fileId/view?project=6a9d59e3002751cc3ea8"
+    var ready by remember(fileId) { mutableStateOf(false) }
+    var playing by remember(fileId) { mutableStateOf(false) }
+    var error by remember(fileId) { mutableStateOf(false) }
+    val player = remember(fileId) {
         android.media.MediaPlayer().apply {
             setAudioAttributes(
                 android.media.AudioAttributes.Builder()
@@ -270,45 +278,56 @@ private fun LessonAudioPlayer(pack: StudyPack) {
             prepareAsync()
         }
     }
-    androidx.compose.runtime.DisposableEffect(pack.audioFileId) {
+    androidx.compose.runtime.DisposableEffect(fileId) {
         onDispose {
             runCatching { if (player.isPlaying) player.stop() }
             player.release()
         }
     }
     Card(Modifier.fillMaxWidth()) {
-        Row(
-            Modifier.padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            androidx.compose.material3.OutlinedButton(
-                onClick = {
-                    runCatching {
-                        if (!ready || error) return@runCatching
-                        if (player.isPlaying) {
-                            player.pause(); playing = false
-                        } else {
-                            player.start(); playing = true
+        Column(Modifier.padding(14.dp)) {
+            if (tracks.size > 1) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    tracks.forEachIndexed { i, (_, t) ->
+                        androidx.compose.material3.FilterChip(
+                            selected = sel == i,
+                            onClick = { sel = i },
+                            label = { Text(t) },
+                        )
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                androidx.compose.material3.OutlinedButton(
+                    onClick = {
+                        runCatching {
+                            if (!ready || error) return@runCatching
+                            if (player.isPlaying) {
+                                player.pause(); playing = false
+                            } else {
+                                player.start(); playing = true
+                            }
                         }
-                    }
-                },
-                enabled = ready && !error,
-            ) {
+                    },
+                    enabled = ready && !error,
+                ) {
+                    Text(
+                        when {
+                            error -> "⚠️ خطا در بارگذاری"
+                            !ready -> "⏳ در حال بارگذاری صوت…"
+                            playing -> "⏸ توقف روخوانی"
+                            else -> "▶ پخش روخوانی درس"
+                        }
+                    )
+                }
+                Spacer(Modifier.width(10.dp))
                 Text(
-                    when {
-                        error -> "⚠️ خطا در بارگذاری"
-                        !ready -> "⏳ در حال بارگذاری صوت…"
-                        playing -> "⏸ توقف روخوانی"
-                        else -> "▶ پخش روخوانی درس"
-                    }
+                    "🔊 $trackLabel (از سرور پخش می‌شود)",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Spacer(Modifier.width(10.dp))
-            Text(
-                "🔊 روخوانی کامل درس (دو زبانه — از سرور پخش می‌شود)",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
     }
 }
