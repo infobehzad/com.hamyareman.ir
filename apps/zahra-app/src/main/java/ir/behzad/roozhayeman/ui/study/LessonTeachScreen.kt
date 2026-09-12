@@ -66,7 +66,8 @@ import java.net.URL
 import java.util.Locale
 import kotlin.math.abs
 
-internal val TEACH_SPEEDS = listOf(0.75f, 0.9f, 1f, 1.25f)
+/** سرعت‌های پخش v1.9 — ترتیب کاربر: x2/x1.5/x1/x0.75/x0.5 (زیر نوار سیک). */
+internal val TEACH_SPEEDS = listOf(2f, 1.5f, 1f, 0.75f, 0.5f)
 
 /** یک فایل صوتی قابل‌پخش در صفحه‌ی تدریس/خلاصه‌ها. */
 internal data class TeachTrack(val label: String, val fileId: String, val cacheKey: String)
@@ -76,16 +77,26 @@ internal fun teachTracksOf(pack: StudyPack): List<TeachTrack> = buildList {
     if (pack.audio2FileId.isNotBlank()) add(TeachTrack(pack.audio2Title.ifBlank { "مقدمه" }, pack.audio2FileId, "${pack.packId}_INTRO.mp3"))
 }
 
+/**
+ * مقصد «لمس اعلان پخش» — سرویس رسانه PendingIntent به MainActivity می‌فرستد،
+ * اینجا packId نگه داشته می‌شود و ZahraNavHost به صفحه‌ی تدریس همان درس می‌پرد.
+ * قانون: صوت فقط داخل صفحه‌ی تدریس پخش می‌شود — پس پخش خودکار هم آنجا انجام می‌گیرد.
+ */
+object TeachLaunch {
+    var pendingTeachPack by mutableStateOf<String?>(null)
+}
+
 internal fun teachMmss(ms: Long): String {
     val s = ms.coerceAtLeast(0L) / 1000
     return toPersianDigits(String.format(Locale.US, "%d:%02d", s / 60, s % 60))
 }
 
 internal fun teachSpeedLabel(v: Float): String = when (v) {
-    0.75f -> "۰٫۷۵×"
-    0.9f -> "۰٫۹×"
-    1f -> "۱×"
-    1.25f -> "۱٫۲۵×"
+    2f -> "×۲"
+    1.5f -> "×۱٫۵"
+    1f -> "×۱"
+    0.75f -> "×۰٫۷۵"
+    0.5f -> "×۰٫۵"
     else -> "${v}×"
 }
 
@@ -154,7 +165,10 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
     var activeIdx by remember {
         mutableIntStateOf(store.getString("teach_${packId}_track", "0").toIntOrNull()?.coerceIn(0, tracks.size - 1) ?: 0)
     }
-    var speed by remember { mutableFloatStateOf(store.getString("teach_${packId}_speed", "1").toFloatOrNull() ?: 1f) }
+    var speed by remember {
+        val saved = store.getString("teach_${packId}_speed", "1").toFloatOrNull() ?: 1f
+        mutableFloatStateOf(if (TEACH_SPEEDS.contains(saved)) saved else 1f)
+    }
     var posMs by remember { mutableLongStateOf(0L) }
     var downloading by remember { mutableStateOf(false) }
     var progressPct by remember { mutableIntStateOf(-1) }
@@ -213,6 +227,14 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
             playback.setMediaItems(items, tracks.indexOf(t).coerceAtLeast(0), if (cached(t) && !fromServer) savedPos(t) else 0L)
             playback.setSpeed(speed)
             if (autoplay) playback.play()
+        }
+    }
+
+    // لمس اعلان/دکمه‌ی پلی در اعلان → کاربر به همین صفحه‌ی تدریس آمده؛ پخش را اینجا شروع کن.
+    LaunchedEffect(packId) {
+        if (TeachLaunch.pendingTeachPack == packId) {
+            TeachLaunch.pendingTeachPack = null
+            startTrack(track, autoplay = true)
         }
     }
 
@@ -287,31 +309,34 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
     }
 
     Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(12.dp)) {
-            // انتخاب ترک — سوییچ = توقف قبلی، ادامه/پخش جدید (فقط یکی).
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                tracks.forEachIndexed { i, t ->
-                    FilterChip(
-                        selected = i == activeIdx,
-                        onClick = {
-                            if (i != activeIdx) {
-                                loadedKey?.let { key -> tracks.firstOrNull { it.cacheKey == key }?.let { savePos(it, posMs) } }
-                                activeIdx = i
-                                store.putString("teach_${packId}_track", i.toString())
-                                val wasPlaying = state.playing
-                                runCatching { playback.pause() }
-                                startTrack(tracks[i], autoplay = wasPlaying)
-                            }
-                        },
-                        label = { Text((if (cached(t)) "✓ " else "") + t.label) },
-                    )
+        Column(Modifier.padding(10.dp)) {
+            // انتخاب ترک — فقط وقتی درس چند صوت دارد (v1.9: عنوان تک‌صوت حذف شد).
+            if (tracks.size > 1) {
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    tracks.forEachIndexed { i, t ->
+                        FilterChip(
+                            selected = i == activeIdx,
+                            onClick = {
+                                if (i != activeIdx) {
+                                    loadedKey?.let { key -> tracks.firstOrNull { it.cacheKey == key }?.let { savePos(it, posMs) } }
+                                    activeIdx = i
+                                    store.putString("teach_${packId}_track", i.toString())
+                                    val wasPlaying = state.playing
+                                    runCatching { playback.pause() }
+                                    startTrack(tracks[i], autoplay = wasPlaying)
+                                }
+                            },
+                            label = { Text(t.label) },
+                        )
+                    }
                 }
+                Spacer(Modifier.height(4.dp))
             }
-            Spacer(Modifier.height(6.dp))
+            // ردیف پخش: ▶/⏸ + زمان — v1.9: دکمه‌ی Stop حذف شد (پخش/توقف کافی است).
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 OutlinedButton(onClick = {
                     if (quietOn()) {
-                        msg = "🔇 «زمان درس» روشن است — از «بیشتر» خاموشش کن."
+                        // «زمان درس» روشن است — بدون پیامِ اضافه، پخش نمی‌شود.
                     } else if (state.playing) {
                         playback.pause()
                         savePos(track, posMs)
@@ -320,7 +345,6 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                         // اول دوباره وصل و آماده می‌کنیم و بعد پخش — از همان جای حافظه.
                         scope.launch {
                             if (!playback.connect()) {
-                                msg = "اتصال به سرویس پخش ممکن نشد؛ دوباره امتحان کن."
                                 return@launch
                             }
                             if (loadedKey == track.cacheKey && state.hasMedia && !state.error.isNullOrBlank()) {
@@ -334,11 +358,6 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                         }
                     }
                 }) { Text(if (state.playing && loadedKey == track.cacheKey) "⏸ توقف" else "▶ پخش") }
-                TextButton(onClick = {
-                    runCatching { playback.pause(); playback.seekTo(0L) }
-                    savePos(track, 0L)
-                    posMs = 0
-                }) { Text("⏹") }
                 if (loadedKey == track.cacheKey && state.durationMs > 0) {
                     Text(
                         "${teachMmss(if (dragMs >= 0) dragMs else posMs)} / ${teachMmss(state.durationMs)}",
@@ -346,9 +365,12 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                     )
                 }
                 Spacer(Modifier.weight(1f))
-                TextButton(onClick = { startTrack(track, autoplay = state.playing, fromServer = true) }) {
-                    Text("🌐 سرور")
-                }
+                // برچسب منبع: «آنلاین»/«آفلاین» (v1.9 — جای «سرور» و «روی گوشی رمز شده»).
+                Text(
+                    if (cached(track)) "آفلاین" else "آنلاین",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
             }
             val seekUnlocked = remember { mutableStateOf(TeachStats.isDone(context, packId)) }
             var showSeekDialog by remember { mutableStateOf(false) }
@@ -368,28 +390,29 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                         value = (((if (dragMs >= 0) dragMs else posMs).toFloat()) / state.durationMs).coerceIn(0f, 1f),
                         enabled = seekUnlocked.value,
                         onValueChange = { dragMs = (it * state.durationMs).toLong() },
-                    onValueChangeFinished = {
-                        if (dragMs >= 0) {
-                            if (abs(dragMs - posMs) > 3000) TeachStats.addJump(context, packId)
-                            playback.seekTo(dragMs)
-                            posMs = dragMs
-                            savePos(track, dragMs)
-                            dragMs = -1
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                if (!seekUnlocked.value) {
-                    // لایه‌ی لمس برای دیالوگِ قفلِ سیک (تا اتمام اولین دوره).
-                    Box(
-                        Modifier.matchParentSize().padding(vertical = 10.dp)
-                            .androidClickable { showSeekDialog = true },
+                        onValueChangeFinished = {
+                            if (dragMs >= 0) {
+                                if (abs(dragMs - posMs) > 3000) TeachStats.addJump(context, packId)
+                                playback.seekTo(dragMs)
+                                posMs = dragMs
+                                savePos(track, dragMs)
+                                dragMs = -1
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth().height(26.dp),
                     )
-                }
+                    if (!seekUnlocked.value) {
+                        // لایه‌ی لمس برای دیالوگِ قفلِ سیک (تا اتمام اولین دوره).
+                        Box(
+                            Modifier.matchParentSize().padding(vertical = 2.dp)
+                                .androidClickable { showSeekDialog = true },
+                        )
+                    }
                 } // Box
             } // if(loadedKey)
             LaunchedEffect(Unit) { seekUnlocked.value = TeachStats.isDone(context, packId) }
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+            // سرعت‌های پخش — زیر نوار سیک (v1.9).
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
                 TEACH_SPEEDS.forEach { v ->
                     FilterChip(
                         selected = speed == v,
@@ -398,11 +421,12 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                             runCatching { playback.setSpeed(v) }
                             store.putString("teach_${packId}_speed", v.toString())
                         },
-                        label = { Text(teachSpeedLabel(v)) },
+                        label = { Text(teachSpeedLabel(v), style = MaterialTheme.typography.labelMedium) },
                     )
                 }
             }
             Spacer(Modifier.height(4.dp))
+            // ردیف دانلود/حذف آفلاین — v1.9: «دانلود» و پس از دانلود «حذف آفلاین» با دیالوگ.
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 when {
                     downloading -> {
@@ -416,7 +440,6 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                         )
                     }
                     cached(track) -> {
-                        Text("✓ روی گوشی (رمزشده)", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                         var confirmDelete by remember { mutableStateOf(false) }
                         if (confirmDelete) {
                             androidx.compose.material3.AlertDialog(
@@ -426,17 +449,16 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                                         confirmDelete = false
                                         MediaVault.delete(context, track.cacheKey)
                                         cacheTick++
-                                        msg = "فایل از حافظه‌ی گوشی حذف شد."
                                     }) { Text("حذف") }
                                 },
                                 dismissButton = {
                                     TextButton(onClick = { confirmDelete = false }) { Text("نگه‌دار") }
                                 },
-                                title = { Text("حذف فایل دانلودشده؟") },
-                                text = { Text("پخش بعدی از سرور انجام می‌شود؛ هر وقت خواستی دوباره دانلود می‌کنی.") },
+                                title = { Text("حذف فایل آفلاین؟") },
+                                text = { Text("فایل از حافظه‌ی گوشی پاک می‌شود و پخش بعدی از سرور (آنلاین) انجام می‌گیرد؛ هر وقت خواستی دوباره دانلود می‌کنی.") },
                             )
                         }
-                        TextButton(onClick = { confirmDelete = true }) { Text("🗑 حذف") }
+                        TextButton(onClick = { confirmDelete = true }) { Text("🗑 حذف آفلاین") }
                     }
                     else -> TextButton(onClick = {
                         downloading = true; progressPct = -1
@@ -450,23 +472,13 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                                     ) { pct -> progressPct = pct }
                                 }
                                 downloading = false; cacheTick++
-                                msg = "دانلود شد — از این به بعد محلی و رمزشده پخش می‌شود."
                             } catch (e: Exception) {
                                 downloading = false
-                                msg = "دانلود ناموفق بود؛ اینترنت را چک کن."
                             }
                         }
-                    }) { Text("⬇ دانلود برای پخش محلی") }
+                    }) { Text("⬇ دانلود") }
                 }
             }
-            if (quiet) {
-                Text(
-                    "🔇 زمان درس — پخش صوت دروس خاموش است (از «بیشتر» خاموش کن)",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-            msg?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         }
     }
 }
@@ -804,7 +816,14 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
                                                 val b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
                                                 b.eraseColor(Color.WHITE)
                                                 page.render(b, null, android.graphics.Matrix().apply { setScale(scale, scale) }, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-                                                b
+                                                // v1.9: برخی PDFها ۱۸۰° آپلود شده‌اند — تصحیح چرخش هنگام رندر.
+                                                val deg = ir.behzad.platform.feature.study.PdfRotations.degrees[fileId] ?: 0
+                                                if (deg % 360 != 0) {
+                                                    val m = android.graphics.Matrix().apply { postRotate(deg.toFloat()) }
+                                                    Bitmap.createBitmap(b, 0, 0, b.width, b.height, m, true)
+                                                } else {
+                                                    b
+                                                }
                                             }
                                         }
                                     } catch (e: Exception) { null }

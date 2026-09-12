@@ -62,6 +62,9 @@ class MainActivity : FragmentActivity() {
         val app = application as RoozhayeManApplication
         enableEdgeToEdge()
         unlocked.value = !app.container.lock.isLockedNow()
+        // لمس اعلان پخش (حتی با اپ کاملاً بسته) → بعد از لاگین/باز شدن قفل،
+        // صفحه‌ی تدریس همان درس باز و پخش همان‌جا شروع می‌شود.
+        captureTeachIntent(intent)
 
         setContent {
             val container = app.container
@@ -207,6 +210,20 @@ class MainActivity : FragmentActivity() {
         super.onResume()
         val container = (application as RoozhayeManApplication).container
         unlocked.value = !container.lock.isLockedNow()
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        captureTeachIntent(intent)
+    }
+
+    /** extra درسِ اعلان پخش → [TeachLaunch] (nav به صفحه‌ی تدریس می‌پرد). */
+    private fun captureTeachIntent(intent: android.content.Intent?) {
+        val packId = intent?.getStringExtra(ir.behzad.platform.feature.playback.PlaybackService.TEACH_OPEN_EXTRA) ?: return
+        if (intent.action == ir.behzad.platform.feature.playback.PlaybackService.TEACH_OPEN_ACTION && !packId.isBlank()) {
+            ir.behzad.roozhayeman.ui.study.TeachLaunch.pendingTeachPack = packId
+        }
     }
 
     override fun onPause() {

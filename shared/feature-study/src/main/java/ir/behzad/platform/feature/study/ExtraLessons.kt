@@ -5,6 +5,9 @@ package ir.behzad.platform.feature.study
  * هر درس PDF کتابش را دارد (نام‌ها یک‌به‌یک با فایل‌های سرور چک شده) و
  * صفحه‌ی «تدریس» همان لحظه کار می‌کند (کتاب + صوت به‌محض آپلودشدن).
  *
+ * v1.9: عنوان هر واحد از خودِ PDF/ساختار رسمی کتاب خوانده شده (LessonTitles) —
+ * فارسی هر درس، حکایت، شعرخوانی و روان‌خوانی یک ردیف جدا با صوت مخصوص خودش است.
+ *
  * محتوای تعاملی (فلش‌کارت/آزمون/حل) نوبت‌به‌نوبت از PDF بازسازی و به پکِ همان
  * درس اضافه می‌شود — تا آن موقع تب‌ها پیام صادقانه‌ی «به‌زودی» می‌دهند.
  * صوت‌ها با قرارداد شناخته‌شده‌ی `<packId-خط‌دار>-AUDIO.mp3` خوانده می‌شوند؛
@@ -12,8 +15,10 @@ package ir.behzad.platform.feature.study
  */
 object ExtraLessons {
 
-    /** lessonId های باقی‌مانده‌ی هر کتاب (درس ۱ هر کتاب از قبل در رجیستری است). */
-    private val remaining: Map<String, List<String>> = mapOf(
+    /** واحد شمارش هر کتاب، فقط برای عنوان‌های عمومی (بدون عنوان از PDF). */
+    private val unitWords: Map<String, String> = mapOf("C906" to "فصل", "C917" to "پودمان")
+
+    private val lessonIds: Map<String, List<String>> = mapOf(
         "C901" to (2..11).map { "L%02d".format(it) },
         "C902" to listOf(
             "E01-L02", "E02-L01", "E02-L02", "E02-L03", "E03-L01", "E03-L02",
@@ -73,10 +78,28 @@ object ExtraLessons {
         "C941" to (2..12).map { "L%02d".format(it) },
     )
 
+    /** آیتم‌های زیرِ فارسی (حکایت/شعرخوانی/روان‌خوانی) — عنوان مستقل، بدون شماره. */
+    private val subItemPrefixes = listOf("حکایت", "شعرخوانی", "روان‌خوانی")
+
+    /** عنوان نمایشی: از PDF اگر هست؛ وگرنه «درس/فصل/پودمان N». */
+    fun displayTitle(bookCode: String, lessonId: String, fallbackNumber: Int): String {
+        val packId = "${bookCode}_$lessonId"
+        val fromPdf = LessonTitles.titles[packId]
+        if (fromPdf != null) {
+            val isSub = subItemPrefixes.any { fromPdf.startsWith(it) }
+            val hasUnit = listOf("درس", "فصل", "پودمان", "Lesson", "مرور").any { fromPdf.startsWith(it) }
+            return when {
+                isSub || hasUnit -> fromPdf
+                else -> "${unitWords[bookCode] ?: "درس"} ${ir.behzad.platform.core.common.toPersianDigits(fallbackNumber.toString())} - $fromPdf"
+            }
+        }
+        val unit = unitWords[bookCode] ?: "درس"
+        return "$unit ${ir.behzad.platform.core.common.toPersianDigits(fallbackNumber.toString())}"
+    }
+
     /** درس‌هایِ هنوز ثبت‌نشده‌ی یک ماژول (PDF واقعی، بدون محتوای تعاملی تا بازسازی). */
     fun extrasFor(module: BookModule): List<StudyPack> {
-        val ids = remaining[module.bookCode] ?: return emptyList()
-        val unit = if (module.bookCode == "C906") "فصل" else "درس"
+        val ids = lessonIds[module.bookCode] ?: return emptyList()
         return ids.mapIndexed { i, lessonId ->
             val packId = "${module.bookCode}_$lessonId"
             val n = i + 2 // درس ۱ هر کتاب از قبل ثبت است
@@ -84,7 +107,7 @@ object ExtraLessons {
                 packId = packId,
                 bookCode = module.bookCode,
                 lessonId = lessonId,
-                title = "$unit ${ir.behzad.platform.core.common.toPersianDigits(n.toString())}",
+                title = displayTitle(module.bookCode, lessonId, n),
                 bookTitle = module.title,
                 pdfFileName = "${packId}_BOOK.pdf",
                 sections = emptyList(),

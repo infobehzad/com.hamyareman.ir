@@ -7,6 +7,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
@@ -94,6 +95,20 @@ fun ZahraNavHost() {
     val entry by nav.currentBackStackEntryAsState()
     val route = entry?.destination?.route
     val c = LocalAppContainer.current
+    // لمس اعلان پخش → صفحه‌ی تدریس همان درس (قانون: صوت فقط در صفحه‌ی تدریس پخش می‌شود؛
+    // پس بعد از لود شدن همان صفحه، پخش خودکار از TeachAudioBar شروع می‌شود).
+    LaunchedEffect(ir.behzad.roozhayeman.ui.study.TeachLaunch.pendingTeachPack) {
+        val p = ir.behzad.roozhayeman.ui.study.TeachLaunch.pendingTeachPack ?: return@LaunchedEffect
+        if (ir.behzad.platform.feature.study.BookModuleRegistry.pack(p) != null) {
+            ir.behzad.roozhayeman.ui.study.TeachLaunch.pendingTeachPack = null
+            nav.navigate(Screen.LessonTeach.of(p)) {
+                popUpTo(Screen.Home.route)
+                launchSingleTop = true
+            }
+        } else {
+            ir.behzad.roozhayeman.ui.study.TeachLaunch.pendingTeachPack = null
+        }
+    }
     Scaffold(bottomBar = {
         if (route in TopRoutes) {
             NavigationBar {

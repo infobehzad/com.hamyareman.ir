@@ -1,8 +1,11 @@
 package ir.behzad.platform.feature.playback
 
+import android.app.PendingIntent
 import android.content.Intent
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.DefaultMediaNotificationProvider
@@ -47,7 +50,15 @@ class PlaybackService : MediaSessionService() {
             .setSeekForwardIncrementMs(SEEK_INCREMENT_MS)
             .build()
 
-        mediaSession = MediaSession.Builder(this, player).build()
+        mediaSession = MediaSession.Builder(this, player)
+            // لمس اعلان پخش → باز شدن صفحه‌ی تدریس همان درس (حتی وقتی اپ بسته است).
+            .setSessionActivity(teachPendingIntent(currentPackOf(player)))
+            .build()
+        player.addListener(object : Player.Listener {
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                mediaSession?.setSessionActivity(teachPendingIntent(currentPackOf(player)))
+            }
+        })
 
         setMediaNotificationProvider(
             DefaultMediaNotificationProvider(this).apply {
@@ -55,6 +66,27 @@ class PlaybackService : MediaSessionService() {
             },
         )
     }
+
+    /** packId از mediaId (مثل «C903_E01-L02_AUDIO.mp3» → «C903_E01-L02»). */
+    private fun currentPackOf(player: Player?): String? {
+        val id = player?.currentMediaItem?.mediaId ?: return null
+        return id.removeSuffix("_AUDIO.mp3").removeSuffix("_INTRO.mp3").takeIf { it.isNotBlank() }
+    }
+
+    /** لمس اعلان → MainActivity با extra درس جاری؛ بقیه‌اش را nav اپ انجام می‌دهد. */
+    private fun teachPendingIntent(packId: String?): PendingIntent =
+        PendingIntent.getActivity(
+            this,
+            0,
+            Intent().apply {
+                setClassName(packageName, TEACH_ACTIVITY)
+                action = TEACH_OPEN_ACTION
+                putExtra(TEACH_OPEN_EXTRA, packId)
+                putExtra(TEACH_OPEN_AUTOPLAY, true)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = mediaSession
 
@@ -82,5 +114,11 @@ class PlaybackService : MediaSessionService() {
     companion object {
         /** ۳۰ ثانیه — همان مقداری که UI هم برای دکمه‌های «عقب/جلو» استفاده می‌کند. */
         const val SEEK_INCREMENT_MS = 30_000L
+
+        /** لمس اعلان پخش → باز شدن صفحه‌ی تدریس همان درس (v1.9). */
+        const val TEACH_OPEN_ACTION = "ir.behzad.roozhayeman.OPEN_TEACH"
+        const val TEACH_OPEN_EXTRA = "open_pack"
+        const val TEACH_OPEN_AUTOPLAY = "open_pack_autoplay"
+        const val TEACH_ACTIVITY = "ir.behzad.roozhayeman.MainActivity"
     }
 }

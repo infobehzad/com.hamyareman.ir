@@ -130,6 +130,11 @@ fun LessonPdfScreen(packId: String, onBack: () -> Unit) {
 
     Column(Modifier.fillMaxSize()) {
         AppTopBar(title = "📕 " + (pack?.title ?: "کتاب درس"), onBack = onBack)
+        // v1.9: پلیر صوت در همه‌ی صفحات جزوه‌ها هم هست (صوت همان درس، همان‌جا پخش می‌شود).
+        val tracks = remember(packId) { pack?.let { teachTracksOf(it) } ?: emptyList() }
+        if (tracks.isNotEmpty()) {
+            TeachAudioBar(packId = packId, screenTitle = pack?.title ?: "", tracks = tracks)
+        }
         when (val st = state) {
             is PdfState.Error -> Box(Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
                 Text(st.message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
@@ -163,7 +168,14 @@ fun LessonPdfScreen(packId: String, onBack: () -> Unit) {
                                                 val b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
                                                 b.eraseColor(Color.WHITE)
                                                 page.render(b, null, android.graphics.Matrix().apply { setScale(scale, scale) }, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-                                                b
+                                                // v1.9: تصحیح چرخش PDFهای ۱۸۰° آپلودشده.
+                                                val deg = ir.behzad.platform.feature.study.PdfRotations.degrees[fileId] ?: 0
+                                                if (deg % 360 != 0) {
+                                                    val m = android.graphics.Matrix().apply { postRotate(deg.toFloat()) }
+                                                    Bitmap.createBitmap(b, 0, 0, b.width, b.height, m, true)
+                                                } else {
+                                                    b
+                                                }
                                             }
                                         }
                                     } catch (e: Exception) { null }
