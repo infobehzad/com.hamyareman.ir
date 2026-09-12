@@ -43,9 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.composed
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
@@ -645,15 +643,7 @@ private fun LessonVideoPlayer(packId: String, packTitle: String, fileId: String,
 // ------------------------------------------------------------- کتاب (PDF)
 
 private fun Modifier.androidClickable(onClick: () -> Unit): Modifier =
-    this.then(
-        Modifier.composed {
-            androidx.compose.foundation.clickable(
-                interactionSource = androidx.compose.foundation.interaction.MutableInteractionSource(),
-                indication = null,
-                onClick = onClick,
-            )
-        },
-    )
+    this.pointerInput(Unit) { androidx.compose.foundation.gestures.detectTapGestures { onClick() } }
 
 private sealed class TeachPdfState {
     data object Idle : TeachPdfState()
