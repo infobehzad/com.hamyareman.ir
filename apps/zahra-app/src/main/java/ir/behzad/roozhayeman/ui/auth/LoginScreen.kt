@@ -71,6 +71,13 @@ fun LoginScreen(
         }
         Spacer(Modifier.height(16.dp))
         Text(
+            "نسخه‌ی " + ir.behzad.roozhayeman.BuildConfig.VERSION_NAME + " — اگر این عدد را نمی‌بینی، APK قدیمی نصب است.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
             "🔒 چرخه، ژورنال و چتِ خام هرگز به سرور نمی‌رود؛ لاگین فقط هویت تو را تأیید می‌کند.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
