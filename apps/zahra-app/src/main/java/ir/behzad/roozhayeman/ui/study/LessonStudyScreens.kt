@@ -252,7 +252,17 @@ private fun FlashcardsTab(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            Text("✓ کارت سررسیدی امروز نمانده!", style = MaterialTheme.typography.titleMedium)
+            if (pack.flashcards.isEmpty()) {
+                Text("🃏 فلش‌کارت این درس به‌زودی اضافه می‌شود", style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "محتوای تعاملی این درس از روی کتاب بازسازی می‌شود؛ تا آن موقع می‌توانی کتاب درس را در «خلاصه و نکات» بخوانی.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                Text("✓ کارت سررسیدی امروز نمانده!", style = MaterialTheme.typography.titleMedium)
+            }
             Spacer(Modifier.height(8.dp))
             Text(
                 "کارت‌های مرورشده طبق برنامه‌ی تکرار، روزهای بعد دوباره می‌آیند. آزمون هم اشتباه‌های قبلی را ۷ روز بعد دوباره می‌پرسد.",
@@ -430,6 +440,22 @@ private fun QuizTab(
             },
         )
         else -> {
+            if (pack.questions.isEmpty()) {
+                Column(
+                    Modifier.fillMaxSize().padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Text("📝 سوال‌های این درس به‌زودی اضافه می‌شود", style = MaterialTheme.typography.titleMedium)
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        "آزمون این درس از روی کتاب ساخته می‌شود؛ اول تدریس را کامل کن تا باز شود.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                return
+            }
             val due = progress.periodicQuizDue(pack.packId, today)
             val wrongIds = progress.periodicWrongIds(pack.packId).filter { id -> pack.questions.any { it.id == id } }
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
@@ -714,6 +740,22 @@ private fun parseTutorReply(raw: String): String? = runCatching {
 
 @Composable
 private fun SolutionsTab(pack: StudyPack) {
+    if (pack.solutions.isEmpty()) {
+        Column(
+            Modifier.fillMaxSize().padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text("✏️ حل تشریحی این درس به‌زودی اضافه می‌شود", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "حل تمرین‌های کتاب، قدم‌به‌قدم و تصویری، از روی خود کتاب بازسازی می‌شود.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        return
+    }
     if (pack.solutions.isEmpty()) {
         Column(
             Modifier.fillMaxSize().padding(24.dp),
