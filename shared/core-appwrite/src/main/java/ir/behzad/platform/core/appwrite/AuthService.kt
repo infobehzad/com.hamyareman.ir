@@ -2,7 +2,7 @@ package ir.behzad.platform.core.appwrite
 
 import androidx.activity.ComponentActivity
 import io.appwrite.ID
-import io.appwrite.OAuthProvider
+import io.appwrite.enums.OAuthProvider
 import io.appwrite.services.Account
 import ir.behzad.platform.core.common.AppError
 import ir.behzad.platform.core.common.AppResult
