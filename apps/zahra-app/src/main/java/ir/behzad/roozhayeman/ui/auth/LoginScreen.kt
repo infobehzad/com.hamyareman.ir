@@ -58,7 +58,7 @@ fun LoginScreen(
                 } else {
                     // یک قدم آگاهانه قبل از پرش به مرورگر — انتخابِ نهایی با خود او.
                     val confirmGoogle = remember { androidx.compose.runtime.mutableStateOf(false) }
-                    if (confirmGoogle) {
+                    if (confirmGoogle.value) {
                         androidx.compose.material3.AlertDialog(
                             onDismissRequest = { confirmGoogle.value = false },
                             confirmButton = {
