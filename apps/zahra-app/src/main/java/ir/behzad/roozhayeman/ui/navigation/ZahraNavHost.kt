@@ -64,6 +64,7 @@ import ir.behzad.roozhayeman.ui.settings.RemindersScreen
 import ir.behzad.roozhayeman.ui.settings.SettingsScreen
 import ir.behzad.roozhayeman.ui.settings.SyncScreen
 import ir.behzad.roozhayeman.ui.study.BookDetailScreen
+import androidx.compose.ui.platform.LocalContext
 import ir.behzad.roozhayeman.ui.study.LessonStudyScreen
 import ir.behzad.roozhayeman.ui.study.LessonTeachScreen
 import ir.behzad.roozhayeman.ui.study.LessonPdfScreen
@@ -73,7 +74,10 @@ import ir.behzad.roozhayeman.ui.wellness.WellnessScreen
 import ir.behzad.roozhayeman.ui.study.AcademyHubScreen
 import ir.behzad.roozhayeman.ui.study.LibraryScreen
 import ir.behzad.roozhayeman.ui.study.PdfUploadScreen
+import ir.behzad.roozhayeman.ui.study.HealthProgressScreen
+import ir.behzad.roozhayeman.ui.study.LockedStudyScreen
 import ir.behzad.roozhayeman.ui.study.ProgressChartsScreen
+import ir.behzad.roozhayeman.ui.study.TeachStats
 import ir.behzad.roozhayeman.ui.study.QuizReviewScreen
 import ir.behzad.roozhayeman.ui.study.QuizScreen
 import ir.behzad.roozhayeman.ui.study.SchoolScheduleScreen
@@ -140,6 +144,7 @@ fun ZahraNavHost() {
                 )
             }
             composable(Screen.AwarenessHub.route) { AwarenessHubScreen(nav) }
+            composable(Screen.HealthProgress.route) { HealthProgressScreen(onBack = { nav.popBackStack() }) }
             composable(Screen.WeeklySchedule.route) { WeeklyScheduleScreen { nav.popBackStack() } }
             composable(Screen.Meds.route) { MedsScreen { nav.popBackStack() } }
             composable(Screen.SleepLog.route) { SleepLogScreen { nav.popBackStack() } }
@@ -176,10 +181,17 @@ fun ZahraNavHost() {
                 Screen.LessonStudy.route,
                 listOf(navArgument("packId") { type = NavType.StringType }),
             ) { entry ->
-                LessonStudyScreen(
-                    packId = entry.arguments?.getString("packId").orEmpty(),
-                    onBack = { nav.popBackStack() },
-                )
+                val packId = entry.arguments?.getString("packId").orEmpty()
+                // قفل سراسری: مطالعه فقط پس از اتمام اولین دوره‌ی تدریس باز می‌شود
+                // (هیچ ورودیِ دیگری به این بخش راه ندارد).
+                if (TeachStats.isDone(LocalContext.current, packId)) {
+                    LessonStudyScreen(
+                        packId = packId,
+                        onBack = { nav.popBackStack() },
+                    )
+                } else {
+                    LockedStudyScreen(onBack = { nav.popBackStack() })
+                }
             }
             composable(
                 Screen.LessonPdf.route,

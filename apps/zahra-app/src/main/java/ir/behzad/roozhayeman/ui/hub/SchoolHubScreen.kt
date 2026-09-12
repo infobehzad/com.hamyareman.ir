@@ -57,7 +57,7 @@ fun SchoolHubScreen(nav: NavController) {
                                         bitmap = cover.asImageBitmap(),
                                         contentDescription = "کاور ${book.title}",
                                         modifier = Modifier.fillMaxWidth().height(120.dp),
-                                        contentScale = ContentScale.Crop,
+                                        contentScale = ContentScale.Fit,
                                     )
                                 }
                                 Column(Modifier.padding(10.dp)) {

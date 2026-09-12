@@ -13,7 +13,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +30,6 @@ import ir.behzad.platform.core.designsystem.AppTopBar
 import ir.behzad.platform.core.designsystem.PrimaryButton
 import ir.behzad.platform.core.designsystem.SectionCard
 import ir.behzad.roozhayeman.LocalAppContainer
-import ir.behzad.roozhayeman.ui.art.artStreak
 import ir.behzad.roozhayeman.ui.art.readGallery
 import ir.behzad.roozhayeman.ui.exercise.exerciseMinutesOn
 import ir.behzad.roozhayeman.ui.exercise.exerciseSessionsOn
@@ -51,10 +49,8 @@ private data class DayStat(
     val quizTotal: Int,
 )
 
+// مصوب: آب/ورزش/نقاشی به «پیشرفت سلامتی» منتقل شد؛ این نمودار فقط دروس است.
 private enum class Metric(val label: String, val unit: String) {
-    WATER("آب", "لیوان"),
-    EXERCISE("ورزش", "دقیقه"),
-    ART("نقاشی", "اثر"),
     QUIZ("آزمون", "درصد"),
 }
 
@@ -63,7 +59,7 @@ private enum class Metric(val label: String, val unit: String) {
 fun ProgressChartsScreen(onBack: () -> Unit) {
     val container = LocalAppContainer.current
     val store = container.store
-    var metric by remember { mutableStateOf(Metric.WATER) }
+    var metric by remember { mutableStateOf(Metric.QUIZ) }
 
     val gallery = remember { readGallery(store) }
     val attempts = remember { readQuizAttempts(store) }
@@ -88,9 +84,6 @@ fun ProgressChartsScreen(onBack: () -> Unit) {
 
     val values = days.map { stat ->
         when (metric) {
-            Metric.WATER -> stat.water
-            Metric.EXERCISE -> stat.exerciseMinutes
-            Metric.ART -> stat.artCount
             Metric.QUIZ -> if (stat.quizTotal == 0) 0 else (stat.quizCorrect * 100) / stat.quizTotal
         }
     }
@@ -101,7 +94,7 @@ fun ProgressChartsScreen(onBack: () -> Unit) {
     }
 
     Column(Modifier.fillMaxSize()) {
-        AppTopBar("پیشرفت", onBack)
+        AppTopBar("نمودار پیشرفت مدرسه", onBack)
         Column(
             Modifier
                 .fillMaxSize()
@@ -111,18 +104,9 @@ fun ProgressChartsScreen(onBack: () -> Unit) {
         ) {
             Text("۷ روز گذشته — فقط تشویق، بدون مقایسه با کسی", style = MaterialTheme.typography.titleMedium)
 
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Metric.entries.forEach { item ->
-                    FilterChip(selected = metric == item, onClick = { metric = item }, label = { Text(item.label) })
-                }
-            }
-
             BarChart(values = values, labels = days.map { JalaliDate.toJalali(it.dayIso)?.day?.toString()?.let(JalaliDate::toPersianDigits) ?: "" })
 
             val summary = when (metric) {
-                Metric.WATER -> "${values.sum()} لیوان در ۷ روز"
-                Metric.EXERCISE -> "${values.sum()} دقیقه حرکت (${days.sumOf { it.exerciseSessions }} جلسه)"
-                Metric.ART -> "${values.sum()} اثر کشیده‌شده · استریک ${artStreak(gallery)} روز"
                 Metric.QUIZ -> {
                     val total = days.sumOf { it.quizTotal }
                     val correct = days.sumOf { it.quizCorrect }
@@ -149,7 +133,7 @@ fun ProgressChartsScreen(onBack: () -> Unit) {
 
             SectionCard(
                 title = "استریک‌ها",
-                body = "نقاشی: ${artStreak(gallery)} روز · مرور فاصله‌دار: ${dueItems(store).size} سؤال در انتظار",
+                body = "مرور فاصله‌دار: ${dueItems(store).size} سؤال در انتظار · آمار آب/ورزش/نقاشی در «پیشرفت سلامتی»",
             ) { }
             Text(
                 "اگر یک روز رد شد، مهم نیست؛ فردا از نو. این نمودار برای مچ‌گرفتن نیست.",

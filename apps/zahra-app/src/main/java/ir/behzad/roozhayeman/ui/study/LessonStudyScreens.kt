@@ -72,7 +72,7 @@ import org.json.JSONObject
  *
  * همه‌چیز آفلاین کار می‌کند؛ AI فقط تقویت است و اگر در دسترس نباشد چیزی کم نمی‌شود.
  */
-private val TABS = listOf("خلاصه‌ها" to "content", "فلش‌کارت" to "cards", "آزمون" to "quiz", "حل تشریحی" to "solutions")
+private val TABS = listOf("خلاصه و نکات" to "content", "فلش‌کارت" to "cards", "آزمون" to "quiz", "حل تشریحی" to "solutions")
 
 @Composable
 fun LessonStudyScreen(packId: String, onBack: () -> Unit, onOpenPdf: (String) -> Unit = {}) {
@@ -171,166 +171,51 @@ private fun kindColor(kind: String): Color = when (kind) {
 
 @Composable
 private fun ContentTab(pack: StudyPack, onOpenPdf: (String) -> Unit) {
-    LazyColumn(
-        Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+    // طبق بازخورد مصوب: خلاصه‌ها = «همان متن کتاب» (PDF صفحه‌به‌صفحه) با همان
+    // پلیرِ تدریس بالای صفحه + خلاصه/نکات امتحانی در یک جمع‌شونده.
+    val tracks = teachTracksOf(pack)
+    Column(
+        Modifier.fillMaxSize().padding(horizontal = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        item {
-            Text(
-                "${pack.bookTitle} — ${pack.title}",
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Spacer(Modifier.height(2.dp))
-            Text(
-                "بخش‌های مهم این درس، مرتب و کوتاه. اول این‌ها را بخوان، بعد فلش‌کارت و آزمون.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        items(pack.sections, key = { it.id }) { s ->
-            Card(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(14.dp)) {
-                    Surface(shape = RoundedCornerShape(6.dp), color = kindColor(s.kind).copy(alpha = 0.14f)) {
-                        Text(
-                            kindLabel(s.kind),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = kindColor(s.kind),
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                        )
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    Text(s.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                    Spacer(Modifier.height(6.dp))
-                    Text(s.body, style = MaterialTheme.typography.bodyMedium)
-                    if (s.images.isNotEmpty()) {
-                        Spacer(Modifier.height(8.dp))
-                        s.images.forEach { path ->
-                            val ctx = androidx.compose.ui.platform.LocalContext.current
-                            val bmp = remember(path) {
-                                runCatching {
-                                    android.graphics.BitmapFactory.decodeStream(ctx.assets.open(path))
-                                }.getOrNull()
-                            }
-                            if (bmp != null) {
-                                Image(
-                                    bitmap = bmp.asImageBitmap(),
-                                    contentDescription = "تصویر جزوه",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(10.dp)),
-                                    contentScale = androidx.compose.ui.layout.ContentScale.FillWidth,
-                                )
+        if (tracks.isNotEmpty()) TeachAudioBar(packId = pack.packId, screenTitle = pack.title, tracks = tracks)
+
+        val examNotes = remember(pack.packId) { pack.sections.filter { it.kind == "exam" || it.kind == "important" } }
+        if (examNotes.isNotEmpty()) {
+            var showNotes by remember { mutableStateOf(false) }
+            OutlinedButton(onClick = { showNotes = !showNotes }, modifier = Modifier.fillMaxWidth()) {
+                Text(if (showNotes) "📄 بستن خلاصه و نکات امتحانی" else "📌 خلاصه و نکات امتحانی (${examNotes.size} مورد)")
+            }
+            if (showNotes) {
+                Column(
+                    Modifier.fillMaxWidth().weight(0.35f).verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    examNotes.forEach { s ->
+                        Card(Modifier.fillMaxWidth()) {
+                            Column(Modifier.padding(12.dp)) {
+                                Surface(shape = RoundedCornerShape(6.dp), color = kindColor(s.kind).copy(alpha = 0.14f)) {
+                                    Text(
+                                        kindLabel(s.kind),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = kindColor(s.kind),
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                    )
+                                }
                                 Spacer(Modifier.height(6.dp))
+                                Text(s.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                Spacer(Modifier.height(4.dp))
+                                Text(s.body, style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }
                 }
             }
         }
-        item {
-            if (pack.pdfFileName.isNotBlank()) {
-                androidx.compose.material3.OutlinedButton(
-                    onClick = { onOpenPdf(pack.packId) },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text("📕 کتاب درس — مشاهده‌ی PDF (${pack.pdfFileName})")
-                }
-            }
-        }
-        item {
-            LessonAudioPlayer(pack)
-        }
+        TeachPdfPages(modifier = Modifier.weight(1f), fileId = pack.pdfFileName, pack = pack)
     }
 }
 
-/**
- * پخش‌کننده‌ی روخوانی درس — استریم مستقیم از باکت Appwrite (کش در سرور نداریم؛
- * MediaPlayer خودش استریم می‌کند). فقط وقتی pack.audioFileId تنظیم شده نمایش داده می‌شود.
- */
-@Composable
-private fun LessonAudioPlayer(pack: StudyPack) {
-    // ترک‌های صوتی درس: بخش ۱ (روخوانی اصلی) و در صورت وجود بخش ۲ (حکایت/شعرخوانی)
-    val tracks = remember(pack) {
-        buildList {
-            if (pack.audioFileId.isNotBlank()) add(pack.audioFileId to "روخوانی درس")
-            if (pack.audio2FileId.isNotBlank()) add(pack.audio2FileId to pack.audio2Title.ifBlank { "بخش دوم" })
-        }
-    }
-    if (tracks.isEmpty()) return
-    var sel by remember(pack) { mutableStateOf(0) }
-    val (fileId, trackLabel) = tracks[sel]
-    val url = "https://fra.cloud.appwrite.io/v1/storage/buckets/6aa1eaae00303400117b/files/$fileId/view?project=6a9d59e3002751cc3ea8"
-    var ready by remember(fileId) { mutableStateOf(false) }
-    var playing by remember(fileId) { mutableStateOf(false) }
-    var error by remember(fileId) { mutableStateOf(false) }
-    val player = remember(fileId) {
-        android.media.MediaPlayer().apply {
-            setAudioAttributes(
-                android.media.AudioAttributes.Builder()
-                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH)
-                    .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
-                    .build()
-            )
-            setOnPreparedListener { ready = true }
-            setOnErrorListener { _, _, _ -> error = true; true }
-            setDataSource(url)
-            prepareAsync()
-        }
-    }
-    androidx.compose.runtime.DisposableEffect(fileId) {
-        onDispose {
-            runCatching { if (player.isPlaying) player.stop() }
-            player.release()
-        }
-    }
-    Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(14.dp)) {
-            if (tracks.size > 1) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    tracks.forEachIndexed { i, (_, t) ->
-                        androidx.compose.material3.FilterChip(
-                            selected = sel == i,
-                            onClick = { sel = i },
-                            label = { Text(t) },
-                        )
-                    }
-                }
-                Spacer(Modifier.height(8.dp))
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                androidx.compose.material3.OutlinedButton(
-                    onClick = {
-                        runCatching {
-                            if (!ready || error) return@runCatching
-                            if (player.isPlaying) {
-                                player.pause(); playing = false
-                            } else {
-                                player.start(); playing = true
-                            }
-                        }
-                    },
-                    enabled = ready && !error,
-                ) {
-                    Text(
-                        when {
-                            error -> "⚠️ خطا در بارگذاری"
-                            !ready -> "⏳ در حال بارگذاری صوت…"
-                            playing -> "⏸ توقف روخوانی"
-                            else -> "▶ پخش روخوانی درس"
-                        }
-                    )
-                }
-                Spacer(Modifier.width(10.dp))
-                Text(
-                    "🔊 $trackLabel (از سرور پخش می‌شود)",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
-}
 
 // ---------------------------------------------------------------- فلش‌کارت
 

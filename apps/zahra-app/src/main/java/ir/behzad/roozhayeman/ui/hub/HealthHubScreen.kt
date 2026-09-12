@@ -31,6 +31,7 @@ import java.util.Locale
 fun HealthHubScreen(nav: NavController) {
     HubBody {
         HubHeader("سلامتی 💚", "بدنت دوست توست — هر روز یک قدم مهربانی")
+        HubCard("📊", "پیشرفت سلامتی", "آب/ورزش/نقاشی + آمار تدریس، مرور و آزمون‌ها") { nav.hubTo(Screen.HealthProgress.route) }
         HubCard("🧘", "حرکات ورزشی و یوگا", "۴۳ حرکت با راهنمای صوتی آزرا و تایمر") { nav.hubTo(Screen.Wellness.route) }
         HubCard("💧", "آب بنوش", "لیوان‌های امروز را ثبت کن") { nav.hubTo(Screen.Water.route) }
         HubCard("😴", "خواب من", "خوابیدن و بیدار شدن را ثبت کن؛ رشته‌ات را نگه دار") { nav.hubTo(Screen.SleepLog.route) }

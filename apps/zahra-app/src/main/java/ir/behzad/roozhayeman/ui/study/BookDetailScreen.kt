@@ -66,8 +66,8 @@ fun BookDetailScreen(
                     Image(
                         bitmap = cover.asImageBitmap(),
                         contentDescription = "کاور ${module.title}",
-                        modifier = Modifier.width(84.dp).height(112.dp),
-                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.width(96.dp).height(128.dp),
+                        contentScale = ContentScale.Fit,
                     )
                     Spacer(Modifier.width(12.dp))
                 }
@@ -109,9 +109,26 @@ fun BookDetailScreen(
                         Text("🔔 $due کارت امروز باید مرور شود", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                     }
                     Spacer(Modifier.height(8.dp))
+                    val teachDone = TeachStats.isDone(ctx, pack.packId)
+                    var showLockDialog by remember(pack.packId) { androidx.compose.runtime.mutableStateOf(false) }
+                    if (showLockDialog) {
+                        androidx.compose.material3.AlertDialog(
+                            onDismissRequest = { showLockDialog = false },
+                            confirmButton = {
+                                androidx.compose.material3.TextButton(onClick = { showLockDialog = false }) { Text("متوجه شدم") }
+                            },
+                            title = { Text("🔒 اول تدریس، بعد تمرین") },
+                            text = { Text("برای باز شدن «مطالعه و آزمون»، اول دوره‌ی اول تدریس این درس را تا انتها ببین. همین‌که صوت/ویدیو تمام شود، خودکار فعال می‌شود.") },
+                        )
+                    }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(onClick = { onTeach(pack.packId) }, modifier = Modifier.weight(1f)) { Text("📖 تدریس") }
-                        OutlinedButton(onClick = { onStudy(pack.packId) }, modifier = Modifier.weight(1f)) { Text("🎯 مطالعه و آزمون") }
+                        OutlinedButton(
+                            onClick = {
+                                if (teachDone) onStudy(pack.packId) else showLockDialog = true
+                            },
+                            modifier = Modifier.weight(1f),
+                        ) { Text(if (teachDone) "🎯 مطالعه و آزمون" else "🔒 مطالعه و آزمون") }
                     }
                 }
             }

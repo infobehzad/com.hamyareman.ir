@@ -118,9 +118,9 @@ class MainActivity : FragmentActivity() {
             var loginError by remember { mutableStateOf<String?>(null) }
 
             LaunchedEffect(Unit) {
-                if (loggedIn.value == null) {
-                    loggedIn.value = if (!container.auth.isConfigured) true else runCatching { container.auth.currentUser() != null }.getOrDefault(false)
-                }
+                // مصوب: اولِ هر اجرای اپ، دروازه‌ی ورود (گوگل/مهمان) نشان داده می‌شود —
+                // سشنِ مانده‌ی قبلی به‌صورت خودکار وارد نمی‌کند.
+                if (loggedIn.value != false) loggedIn.value = false
             }
 
             val uiPrefs = container.uiPrefs

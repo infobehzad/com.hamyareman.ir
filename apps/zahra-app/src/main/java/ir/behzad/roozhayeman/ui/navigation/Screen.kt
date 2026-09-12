@@ -68,6 +68,7 @@ sealed class Screen(val route: String) {
     }
     data object Pdf : Screen("pdf")
     data object Charts : Screen("charts")
+    data object HealthProgress : Screen("health-progress")
     data object Art : Screen("art")
     data object Gallery : Screen("gallery")
     data object Learning : Screen("learning")
