@@ -110,12 +110,12 @@ fun BookDetailScreen(
                     }
                     Spacer(Modifier.height(8.dp))
                     val teachDone = TeachStats.isDone(ctx, pack.packId)
-                    var showLockDialog by remember(pack.packId) { androidx.compose.runtime.mutableStateOf(false) }
-                    if (showLockDialog) {
+                    val showLockDialog = remember(pack.packId) { androidx.compose.runtime.mutableStateOf(false) }
+                    if (showLockDialog.value) {
                         androidx.compose.material3.AlertDialog(
-                            onDismissRequest = { showLockDialog = false },
+                            onDismissRequest = { showLockDialog.value = false },
                             confirmButton = {
-                                androidx.compose.material3.TextButton(onClick = { showLockDialog = false }) { Text("متوجه شدم") }
+                                androidx.compose.material3.TextButton(onClick = { showLockDialog.value = false }) { Text("متوجه شدم") }
                             },
                             title = { Text("🔒 اول تدریس، بعد تمرین") },
                             text = { Text("برای باز شدن «مطالعه و آزمون»، اول دوره‌ی اول تدریس این درس را تا انتها ببین. همین‌که صوت/ویدیو تمام شود، خودکار فعال می‌شود.") },
@@ -125,7 +125,7 @@ fun BookDetailScreen(
                         Button(onClick = { onTeach(pack.packId) }, modifier = Modifier.weight(1f)) { Text("📖 تدریس") }
                         OutlinedButton(
                             onClick = {
-                                if (teachDone) onStudy(pack.packId) else showLockDialog = true
+                                if (teachDone) onStudy(pack.packId) else showLockDialog.value = true
                             },
                             modifier = Modifier.weight(1f),
                         ) { Text(if (teachDone) "🎯 مطالعه و آزمون" else "🔒 مطالعه و آزمون") }

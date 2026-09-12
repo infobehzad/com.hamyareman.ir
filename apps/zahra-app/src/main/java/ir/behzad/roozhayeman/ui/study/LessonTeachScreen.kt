@@ -441,6 +441,7 @@ private fun LessonVideoSection(packId: String, packTitle: String) {
 private fun LessonVideoPlayer(packId: String, packTitle: String, fileId: String, uri: String) {
     val context = LocalContext.current
     var player by remember(fileId, uri) { mutableStateOf<ExoPlayer?>(null) }
+    var watchAccum by remember(fileId, uri) { mutableLongStateOf(0L) }
 
     DisposableEffect(fileId, uri) {
         val p = ExoPlayer.Builder(context).build().apply {
@@ -453,7 +454,6 @@ private fun LessonVideoPlayer(packId: String, packTitle: String, fileId: String,
             playWhenReady = false
         }
         player = p
-        var watchAccum = 0L
         val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 if (playbackState == Player.STATE_ENDED) {
@@ -507,3 +507,169 @@ private fun LessonVideoPlayer(packId: String, packTitle: String, fileId: String,
     )
 }
 
+// ------------------------------------------------------------- کتاب (PDF)
+
+private sealed class TeachPdfState {
+    data object Idle : TeachPdfState()
+    data class Downloading(val pct: Int) : TeachPdfState()
+    data class Ready(val pageCount: Int) : TeachPdfState()
+    data class Error(val message: String) : TeachPdfState()
+}
+
+/** کش LRU صفحه‌های PDF (~۸ صفحه) تا حافظه کنترل بماند. */
+private class TeachPageCache(private val maxPages: Int = 8) {
+    private val map = LinkedHashMap<Int, Bitmap>(16, 0.75f, true)
+    operator fun get(index: Int): Bitmap? = synchronized(this) { map[index] }
+    operator fun set(index: Int, value: Bitmap) {
+        synchronized(this) {
+            map[index] = value
+            while (map.size > maxPages) map.remove(map.keys.first())
+        }
+    }
+}
+
+/**
+ * کتابِ درس — دانلود PDF از باکت و رندر صفحه‌به‌صفحه (PdfRenderer).
+ * اگر PDF هنوز روی سرور نبود، متن سکشن‌های غیرامتحانی جایگزین می‌شود.
+ */
+@Composable
+internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: StudyPack) {
+    val ctx = LocalContext.current
+    var state by remember(fileId) { mutableStateOf<TeachPdfState>(TeachPdfState.Idle) }
+    val pageCache = remember(fileId) { TeachPageCache() }
+    var renderer by remember(fileId) { mutableStateOf<PdfRenderer?>(null) }
+    val renderLock = remember(fileId) { Any() }
+
+    LaunchedEffect(fileId) {
+        if (fileId.isBlank()) {
+            state = TeachPdfState.Error("این درس فایل PDF ندارد.")
+            return@LaunchedEffect
+        }
+        try {
+            val cacheDir = File(ctx.filesDir, "media/pdf-cache").apply { mkdirs() }
+            val target = File(cacheDir, fileId)
+            if (!target.exists() || target.length() < 1024) {
+                state = TeachPdfState.Downloading(0)
+                val conn = (URL(StudyMedia.viewUrl(fileId)).openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 15000; readTimeout = 30000; instanceFollowRedirects = true
+                }
+                if (conn.responseCode !in 200..299) {
+                    state = TeachPdfState.Error("PDF این درس هنوز روی سرور نیست.")
+                    return@LaunchedEffect
+                }
+                val total = conn.contentLengthLong
+                conn.inputStream.use { input ->
+                    java.io.FileOutputStream(target).use { out ->
+                        val buf = ByteArray(64 * 1024)
+                        var read: Int; var done = 0L
+                        while (input.read(buf).also { read = it } > 0) {
+                            out.write(buf, 0, read); done += read
+                            if (total > 0) {
+                                val pct = ((done * 100) / total).toInt()
+                                if (state is TeachPdfState.Downloading) state = TeachPdfState.Downloading(pct)
+                            }
+                        }
+                    }
+                }
+            }
+            val fd = ParcelFileDescriptor.open(target, ParcelFileDescriptor.MODE_READ_ONLY)
+            val r = PdfRenderer(fd)
+            synchronized(renderLock) { renderer = r }
+            state = TeachPdfState.Ready(r.pageCount)
+        } catch (e: Exception) {
+            state = TeachPdfState.Error("بازکردن PDF ناموفق بود؛ احتمالاً هنوز روی سرور آپلود نشده.")
+        }
+    }
+
+    when (val st = state) {
+        is TeachPdfState.Error -> {
+            Column(
+                modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text("📕 کتاب درس", style = MaterialTheme.typography.titleMedium)
+                Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(12.dp)) {
+                        Text(st.message, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            "تا آپلودشدن PDF، متن درس را همین‌جا می‌بینی:",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                pack.sections.filter { it.kind != "exam" }.forEach { sec ->
+                    Card(Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(12.dp)) {
+                            Text(sec.title, style = MaterialTheme.typography.titleMedium)
+                            Spacer(Modifier.height(4.dp))
+                            Text(sec.body, style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                }
+            }
+        }
+        is TeachPdfState.Downloading -> Card(modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator()
+                Spacer(Modifier.height(8.dp))
+                Text("در حال آماده‌سازی کتاب… (${toPersianDigits(st.pct.toString())}٪)", style = MaterialTheme.typography.bodySmall)
+            }
+        }
+        is TeachPdfState.Ready -> Column(modifier = modifier) {
+            Text("📕 کتاب درس — ${toPersianDigits(st.pageCount.toString())} صفحه", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(6.dp))
+            LazyColumn(
+                Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                items(st.pageCount) { index ->
+                    Card(Modifier.fillMaxWidth()) {
+                        Column {
+                            var bmp by remember(fileId, index) { mutableStateOf<Bitmap?>(pageCache[index]) }
+                            LaunchedEffect(fileId, index) {
+                                if (bmp == null) {
+                                    val r = renderer ?: return@LaunchedEffect
+                                    val rendered: Bitmap? = try {
+                                        synchronized(renderLock) {
+                                            r.openPage(index).use { page ->
+                                                val targetW = 1080
+                                                val scale = targetW.toFloat() / page.width.toFloat()
+                                                val w = targetW
+                                                val h = (page.height * scale).toInt().coerceAtLeast(1)
+                                                val b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+                                                b.eraseColor(Color.WHITE)
+                                                page.render(b, null, android.graphics.Matrix().apply { setScale(scale, scale) }, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                                                b
+                                            }
+                                        }
+                                    } catch (e: Exception) { null }
+                                    if (rendered != null) {
+                                        synchronized(pageCache) { pageCache[index] = rendered }
+                                        bmp = rendered
+                                    }
+                                }
+                            }
+                            if (bmp == null) {
+                                Box(Modifier.fillMaxWidth().height(320.dp), contentAlignment = Alignment.Center) {
+                                    CircularProgressIndicator(Modifier.padding(16.dp))
+                                }
+                            } else {
+                                Image(bitmap = bmp!!.asImageBitmap(), contentDescription = "صفحه ${index + 1}", modifier = Modifier.fillMaxWidth())
+                            }
+                            Text(
+                                "صفحه ${toPersianDigits((index + 1).toString())} از ${toPersianDigits(st.pageCount.toString())}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(8.dp),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        TeachPdfState.Idle -> Card(modifier.fillMaxWidth()) {
+            Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+        }
+    }
+}
