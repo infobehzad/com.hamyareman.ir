@@ -198,7 +198,7 @@ async function studyTutorReply(body, res) {
  * خروجی: { ok: true, userId, secret } — اپ با account.createSession(userId, secret) وارد می‌شود.
  */
 const GOOGLE_AUD = process.env.GOOGLE_WEB_CLIENT_ID ||
-  '347554951220-a9g731uur5nb5egiogvt46kd83fri4qk.apps.googleusercontent.com';
+  '347554951220-gfvsc84d437nsl6jsg6u06aur5c0fsiu.apps.googleusercontent.com';
 
 async function googleAuthSession(body, res, logErr) {
   try {

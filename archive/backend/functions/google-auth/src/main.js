@@ -12,7 +12,7 @@ const sdk = require('node-appwrite');
 const crypto = require('crypto');
 
 const AUD = process.env.GOOGLE_WEB_CLIENT_ID ||
-  '347554951220-a9g731uur5nb5egiogvt46kd83fri4qk.apps.googleusercontent.com';
+  '347554951220-gfvsc84d437nsl6jsg6u06aur5c0fsiu.apps.googleusercontent.com';
 
 module.exports = async ({ req, res, log, error }) => {
   try {
