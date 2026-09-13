@@ -70,7 +70,17 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- برگشت OAuth گوگل: اسکیم استاندارد Appwrite = appwrite-callback-<PROJECT_ID> -->
+        </activity>
+
+        <!-- برگشت OAuth گوگل (v1.22):
+             فیلتر VIEW قبلاً اشتباهاً روی MainActivity بود و دیپلینک بازگشتی را
+             می‌ربود؛ در نتیجه CallbackActivity کتابخانه‌ی Appwrite هرگز اجرا نمی‌شد
+             و تبادل توکن معلق می‌ماند (اپ برای همیشه Loading).
+             طبق مستند رسمی، اکتیویتی خودِ SDK با اسکیم appwrite-callback-<PROJECT_ID>
+             ثبت می‌شود. (SDK 27.1.0 در مانیفستش placeholder ندارد — بازرسی AAR شد.) -->
+        <activity
+            android:name="io.appwrite.views.CallbackActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
