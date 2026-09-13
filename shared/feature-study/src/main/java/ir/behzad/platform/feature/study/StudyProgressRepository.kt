@@ -21,10 +21,13 @@ class StudyProgressRepository(
         val total: Int,
         val wrongIds: List<String>,
         val weakTopics: List<String>,
+        /** لحظه‌ی دقیق آزمون (epoch) — v1.13: نمایش با تاریخ/ساعت شمسی. */
+        val atMs: Long = 0L,
     ) {
         fun toJson(): String = JSONObject()
             .put("dateKey", dateKey).put("scorePct", scorePct).put("total", total)
-            .put("wrongIds", JSONArray(wrongIds)).put("weakTopics", JSONArray(weakTopics)).toString()
+            .put("wrongIds", JSONArray(wrongIds)).put("weakTopics", JSONArray(weakTopics))
+            .put("atMs", atMs).toString()
 
         companion object {
             fun fromJson(raw: String): Attempt = runCatching {
@@ -39,6 +42,7 @@ class StudyProgressRepository(
                     total = o.optInt("total"),
                     wrongIds = arr(o, "wrongIds"),
                     weakTopics = arr(o, "weakTopics"),
+                    atMs = o.optLong("atMs"),
                 )
             }.getOrDefault(Attempt("", 0, 0, emptyList(), emptyList()))
         }

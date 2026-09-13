@@ -405,6 +405,7 @@ private fun QuizTab(
                         total = o.results.size,
                         wrongIds = o.wrongQuestionIds,
                         weakTopics = o.weakTopics,
+                        atMs = System.currentTimeMillis(),
                     ),
                 )
                 outcome = o
