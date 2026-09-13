@@ -1,12 +1,13 @@
 name: Deploy google-auth function
 
-# دیپلوی تابع ورود native گوگل (Credential Manager) — create/update + build + smoke test.
+# ورود native گوگل — به‌صورت mode=google-auth روی فانکشن موجود ai-companion
+# (پلن رایگان سقف functions دارد؛ الگوی همان study-tutor).
 on:
   workflow_dispatch:
 
 jobs:
   deploy:
-    name: deploy google-auth
+    name: deploy google-auth mode
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -16,5 +17,5 @@ jobs:
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
-      - name: 🚀 Deploy (create/update + build + smoke)
+      - name: 🚀 Deploy (scopes + build + smoke ×4)
         run: python3 backend/functions/google-auth/deploy.py

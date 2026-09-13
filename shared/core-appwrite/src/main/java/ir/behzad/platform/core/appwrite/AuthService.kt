@@ -138,7 +138,7 @@ class AppwriteAuthService(
         if (!provider.isConfigured) return AppResult.Ok(localUser)
         return runCatching {
             val svc = functions ?: error("توابع سرور در دسترس نیست.")
-            val payload = """{"idToken":"$idToken","nonce":"$nonce"}"""
+            val payload = """{"mode":"google-auth","idToken":"$idToken","nonce":"$nonce"}"""
             val body = svc.callForBody(FunctionIds.GOOGLE_AUTH, payload)
                 ?: error("پاسخ سرور دریافت نشد.")
             val o = org.json.JSONObject(body)

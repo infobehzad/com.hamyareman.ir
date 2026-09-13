@@ -90,8 +90,12 @@ object BucketIds {
 /** شناسه‌ی توابع سرور (Function ID در کنسول Appwrite). */
 object FunctionIds {
     const val USER_BOOTSTRAP = "user-bootstrap"
-    /** ورود native گوگل — idToken → session (verify سمت سرور). */
-    const val GOOGLE_AUTH = "google-auth"
+    /**
+     * ورود native گوگل — idToken → session (verify سمت سرور).
+     * روی همان فانکشن ai-companion سوار است (mode=google-auth) چون پلن رایگان
+     * Appwrite سقف تعداد functions دارد.
+     */
+    const val GOOGLE_AUTH = "ai-companion"
     const val PAIRING = "pairing"
     const val WEEKLY_SUMMARY = "weekly-summary"
     /** لایه‌ی AI «همراه زهرا» — proxy سمت سرور؛ کلید مدل هرگز در اپ نیست. */

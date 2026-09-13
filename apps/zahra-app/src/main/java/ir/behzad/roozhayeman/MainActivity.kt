@@ -266,7 +266,7 @@ class MainActivity : FragmentActivity() {
                     cred.type == com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
                 ) {
                     val gc = com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.createFrom(cred.data)
-                    onToken(gc.idToken, nonce)
+                    onToken(gc.idToken, hashedNonce)
                 } else {
                     onError("نوع اعتبار پشتیبانی نشد.")
                 }

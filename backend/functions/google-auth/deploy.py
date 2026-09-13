@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""دیپلوی تابع google-auth روی Appwrite (REST) — create/update + deployment + smoke test.
+"""دیپلوی mode=google-auth روی فانکشن موجود ai-companion (بدون ساخت فانکشن جدید).
+پلن رایگان Appwrite سقف functions دارد؛ ورود native گوگل مثل study-tutor به‌صورت
+mode روی ai-companion سوار می‌شود. مراحل: scopes (اجتماعی) → آپلود کد → build →
+تست دود چهارگانه (گوگل‌اث + زنده‌بودن چت‌بات و study-tutor).
 محیط: APPWRITE_ENDPOINT / APPWRITE_PROJECT_ID / APPWRITE_API_KEY"""
 import json, os, subprocess, sys, time, urllib.request, urllib.error
 
 EP = os.environ["APPWRITE_ENDPOINT"].rstrip("/")
 PROJECT = os.environ["APPWRITE_PROJECT_ID"]
 KEY = os.environ["APPWRITE_API_KEY"]
-FUNC = "google-auth"
-DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+FUNC = "ai-companion"
+SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai-companion")
 
 def api(method, path, payload=None):
     data = json.dumps(payload).encode() if payload is not None else None
@@ -20,43 +23,30 @@ def api(method, path, payload=None):
     except urllib.error.HTTPError as e:
         return e.code, json.load(e)
 
-# ۱) runtime: جدیدترین node
-code, rt = api("GET", "/functions/runtimes")
-runtimes = [r["key"] for r in rt.get("runtimes", []) if r["key"].startswith("node-")]
-RUNTIME = runtimes[-1] if runtimes else "node-20.0"
-print("runtime:", RUNTIME)
-
-SPEC = {
-    "functionId": FUNC, "name": FUNC, "runtime": RUNTIME,
-    "execute": ["guests"], "events": [], "schedule": "", "timeout": 15,
-    "enabled": True, "logging": True, "entrypoint": "src/main.js",
-    "commands": "npm install", "scopes": ["users.write", "sessions.write"],
-}
-code, resp = api("POST", "/functions", SPEC)
-if code == 409:
-    print("exists → update")
-    del SPEC["functionId"]
-    code, resp = api("PATCH", f"/functions/{FUNC}", SPEC)
-print("create/update:", code, json.dumps(resp)[:200])
-if code == 403 and "maximum number of functions" in json.dumps(resp):
-    print("⛔ سهمیه‌ی فانکشن پلن پر است — فانکشن‌های موجود این‌اند:")
-    c2, lst = api("GET", "/functions")
-    for f in lst.get("functions", []):
-        print(f'  - id={f["$id"]}  name={f["name"]}  runtime={f["runtime"]}  enabled={f["enabled"]}')
-    sys.exit("سهمیه پر — یکی از فانکشن‌های بالا باید حذف شود (در کنسول یا با تایید صریح).")
+# ۱) scopes — فقط اضافه؛ چیزی حذف نمی‌شود
+code, fn = api("GET", f"/functions/{FUNC}")
 if code >= 400:
-    sys.exit("create/update failed")
+    sys.exit(f"GET {FUNC} failed: {fn}")
+have = set(fn.get("scopes", []))
+need = {"users.read", "users.write", "sessions.write"}
+if not need <= have:
+    merged = sorted(have | need)
+    code, r = api("PATCH", f"/functions/{FUNC}", {"scopes": merged})
+    print("scopes patched:", merged, code)
+    if code >= 400:
+        sys.exit(f"scopes patch failed: {r}")
+else:
+    print("scopes OK:", sorted(have))
 
-# ۲) tarball
-subprocess.run(["tar", "--exclude=node_modules", "--exclude=.npm", "-czf", "/tmp/ga.tgz", "-C", DIR, "."], check=True)
-# ۳) deployment (multipart)
+# ۲) tarball از ai-companion
+subprocess.run(["tar", "--exclude=node_modules", "--exclude=.npm", "-czf", "/tmp/ai.tgz", "-C", os.path.abspath(SRC), "."], check=True)
 boundary = "----ga" + str(int(time.time()))
-with open("/tmp/ga.tgz", "rb") as f:
+with open("/tmp/ai.tgz", "rb") as f:
     tar = f.read()
 parts = []
 for k, v in [("entrypoint", "src/main.js"), ("commands", "npm install"), ("activate", "true")]:
     parts.append(f'--{boundary}\r\ncontent-disposition: form-data; name="{k}"\r\n\r\n{v}\r\n'.encode())
-parts.append((f'--{boundary}\r\ncontent-disposition: form-data; name="code"; filename="ga.tgz"\r\n'
+parts.append((f'--{boundary}\r\ncontent-disposition: form-data; name="code"; filename="ai.tgz"\r\n'
               f'content-type: application/gzip\r\n\r\n').encode() + tar + b"\r\n")
 parts.append(f"--{boundary}--\r\n".encode())
 req = urllib.request.Request(EP + f"/functions/{FUNC}/deployments", data=b"".join(parts), method="POST", headers={
@@ -66,22 +56,30 @@ with urllib.request.urlopen(req, timeout=300) as r:
     dep = json.load(r)
 print("deployment:", dep.get("$id"), dep.get("status"))
 
-# ۴) صبر تا ready
+# ۳) صبر تا ready
 for i in range(36):
     code, d = api("GET", f"/functions/{FUNC}/deployments/{dep['$id']}")
     st = d.get("status")
     print("status:", st)
-    if st == "ready": break
+    if st == "ready":
+        break
     if st == "failed":
         print(d.get("errors")); sys.exit("build failed")
     time.sleep(10)
 else:
     sys.exit("timeout waiting build")
 
-# ۵) smoke test — بدون idToken باید خطای تمیز بدهد
-code, ex = api("POST", f"/functions/{FUNC}/executions", {"async": False, "body": "{}"})
-print("smoke:", code, ex.get("responseStatusCode"), (ex.get("responseBody") or "")[:200])
-if code == 201 and '"ok":false' in (ex.get("responseBody") or ""):
-    print("✅ google-auth deployed and responsive")
-else:
-    sys.exit("smoke test failed")
+# ۴) تست دود چهارگانه
+def smoke(name, body, expect):
+    code, ex = api("POST", f"/functions/{FUNC}/executions",
+                   {"async": False, "body": json.dumps(body, ensure_ascii=False)})
+    out = ex.get("responseBody") or ""
+    print(f"smoke[{name}] http={code} status={ex.get('responseStatusCode')} → {out[:160]}")
+    if code != 201 or expect not in out:
+        sys.exit(f"smoke {name} failed")
+
+smoke("google-no-token", {"mode": "google-auth"}, '"error":"idToken missing"')
+smoke("google-fake-token", {"mode": "google-auth", "idToken": "fake.token.here"}, '"ok":false')
+smoke("chatbot-alive", {}, 'empty_message')
+smoke("study-tutor-alive", {"mode": "study-tutor"}, '"ok":false')
+print("✅ google-auth (mode on ai-companion) deployed — همه‌ی شاخه‌ها پاسخ می‌دهند")

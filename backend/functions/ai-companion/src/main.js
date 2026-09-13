@@ -188,10 +188,76 @@ async function studyTutorReply(body, res) {
   }
 }
 
+/**
+ * google-auth — ورود استاندارد گوگل روی اندروید (Credential Manager).
+ * روی همین فانکشن سوار شد (mode=google-auth) چون پلن رایگان سقف functions دارد.
+ *
+ * ورودی: { "mode": "google-auth", "idToken": "...", "nonce": "..." }
+ * کار: صحت idToken با tokeninfo گوگل (aud/nonce/email_verified) → پیدا/ساخت کاربر
+ *      با شناسه‌ی قطعی از sub → ساخت سشن با کلید تابع.
+ * خروجی: { ok: true, userId, secret } — اپ با account.createSession(userId, secret) وارد می‌شود.
+ */
+const GOOGLE_AUD = process.env.GOOGLE_WEB_CLIENT_ID ||
+  '347554951220-a9g731uur5nb5egiogvt46kd83fri4qk.apps.googleusercontent.com';
+
+async function googleAuthSession(body, res, logErr) {
+  try {
+    const idToken = String(body.idToken || '');
+    const nonce = String(body.nonce || '');
+    if (!idToken) {
+      return res.json({ ok: false, error: 'idToken missing' });
+    }
+
+    const r = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken));
+    const info = await r.json();
+    if (!info || !info.sub) {
+      logErr && logErr('google tokeninfo rejected the token');
+      return res.json({ ok: false, error: 'توکن گوگل نامعتبر است.' });
+    }
+    if (info.aud !== GOOGLE_AUD) {
+      logErr && logErr('google aud mismatch: ' + info.aud);
+      return res.json({ ok: false, error: 'توکن برای این اپ صادر نشده است.' });
+    }
+    if (String(info.email_verified) !== 'true') {
+      return res.json({ ok: false, error: 'ایمیل گوگل تأیید نشده است.' });
+    }
+    if (nonce && info.nonce && String(info.nonce) !== nonce) {
+      return res.json({ ok: false, error: 'نشست ورود معتبر نیست (nonce).' });
+    }
+
+    const sdk = require('node-appwrite');
+    const client = new sdk.Client()
+      .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
+      .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
+      .setKey(process.env.APPWRITE_FUNCTION_API_KEY);
+    const users = new sdk.Users(client);
+
+    // شناسه‌ی قطعی از sub — دوباره ورود، همان کاربر.
+    const crypto = require('crypto');
+    const userId = 'g' + crypto.createHash('sha256').update('google:' + info.sub).digest('hex').slice(0, 34);
+    try {
+      await users.get(userId);
+    } catch (e) {
+      await users.create(userId, info.email, info.name || '');
+    }
+
+    const session = await users.createSession(userId);
+    return res.json({ ok: true, userId: session.userId || userId, secret: session.secret });
+  } catch (err) {
+    logErr && logErr('google-auth failed: ' + (err && err.message ? err.message : err));
+    return res.json({ ok: false, error: 'ورود ناموفق: ' + (err && err.message ? err.message : err) });
+  }
+}
+
 // Appwrite 2.x: امضای context — همه‌چیز از یک آبجکت می‌آید ({req, res, log, error}).
 module.exports = async function aiCompanion(ctx) {
   const { req, res, log: logInfo, error: logErr } = ctx;
   const body = parseBody(req);
+
+  // مسیریابی ورود native گوگل (Credential Manager) — idToken → سشن.
+  if (body.mode === 'google-auth') {
+    return googleAuthSession(body, res, logErr);
+  }
 
   // مسیریابی حالت مطالعه — قبل از منطق گفت‌وگو و ایمنی بحران (سوال درسی است).
   if (body.mode === 'study-tutor') {
