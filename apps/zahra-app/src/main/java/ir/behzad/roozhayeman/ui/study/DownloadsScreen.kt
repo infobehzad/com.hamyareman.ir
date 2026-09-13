@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.Download
@@ -26,11 +28,14 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -40,34 +45,33 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import ir.behzad.platform.core.common.LocalStore
 import ir.behzad.platform.core.common.toPersianDigits
 import ir.behzad.platform.core.designsystem.AppTopBar
-import ir.behzad.platform.feature.study.BookModule
 import ir.behzad.platform.feature.study.BookModuleRegistry
+import ir.behzad.platform.feature.study.BookToc
+import ir.behzad.platform.feature.study.BookToc.TocNode
 import ir.behzad.platform.feature.study.StudyPack
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import kotlin.math.roundToInt
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.Locale
 
 /**
- * «مدیریت دانلود کتاب‌ها» (v1.14) — کارتی به‌تفکیک کتاب:
- *  - وضعیت هر فایل: دانلود شده ✓ / در حال دانلود (٪) / دانلود نشده ⬇ /
- *    «فایل روی سرور نیست» (HTTP 404 — ماندگار) / «اتصال اینترنت را بررسی کن» (گذرا)؛
- *  - «دانلود یکجای این کتاب» با نوار پیشرفت و نمایش حجم دانلودشده؛
- *  - PDF در همان کش صفحه‌ی تدریس (media/pdf-cache) و صوت در گاوصندوق رمزشده
- *    (MediaVault) ذخیره می‌شود — پس هرچه اینجا دانلود شود، آفلاین هم کار می‌کند.
+ * «مدیریت دانلود کتاب‌ها» (v1.16) — با همان ساختار فهرست رسمی هر کتاب:
+ *  - فصل/بخش = کارت آکاردئونی (هر لحظه فقط یکی باز؛ پیش‌فرض جمع؛ حافظه‌دار)؛
+ *  - فقط ردیف‌های دارای تدریس (packId) در لیست‌اند — جلسه‌ها/ستایش/نیایش/… حذف؛
+ *  - برای هر درس: وضعیت PDF و تک‌تک بخش‌های صوت؛
+ *  - دو دکمه‌ی جدا در سطح کتاب: «دانلود همه‌ی PDFها» و «دانلود همه‌ی صوت‌ها»؛
+ *  - حجم: «۱۸ مگابایت از ۱۲۰ مگابایت» (مجموع حجم واقعی فایل‌های سرور با HEAD)؛
+ *  - ارقام با فونت جدولی (tnum) تا با تغییر عدد، متن نلرزد.
  */
-
-private enum class FileKind(val label: String) { PDF("📕 PDF"), AUDIO("🎧 صوت") }
-
-private fun keyOf(packId: String, kind: FileKind) = "$packId:${kind.name}"
 
 private fun pdfCacheFile(ctx: android.content.Context, fileId: String): File =
     File(File(ctx.filesDir, "media/pdf-cache").apply { mkdirs() }, fileId)
@@ -75,15 +79,46 @@ private fun pdfCacheFile(ctx: android.content.Context, fileId: String): File =
 private fun pdfCached(ctx: android.content.Context, fileId: String): Boolean =
     pdfCacheFile(ctx, fileId).let { it.exists() && it.length() > 1024 }
 
-private fun fmtSize(bytes: Long): String =
-    if (bytes >= 1024L * 1024L) {
-        "${toPersianDigits(String.format(Locale.US, "%.1f", bytes / (1024.0 * 1024.0)))} مگابایت"
-    } else {
-        "${toPersianDigits((bytes / 1024L).toString())} کیلوبایت"
-    }
+/** ارقام با عرض ثابت (۴ رقم، مکمل صفر) — با تغییر عدد، کل متن جابه‌جا نمی‌شود. */
+private fun fixNum(n: Int): String = toPersianDigits(n.toString()).padStart(4, '۰')
+
+/** درصد با عرض ثابت ۳ رقمی (بیشینه‌ی ۱۰۰). */
+private fun fixPct(n: Int): String = toPersianDigits(n.toString()).padStart(3, '۰')
+
+/** مثال: ۰۰۱۸ مگابایت از ۰۱۲۰ مگابایت */
+private fun mbFixed(bytes: Long): String =
+    fixNum((bytes / (1024.0 * 1024.0)).roundToInt()).let { "$it مگابایت" }
+
+/** ارقام جدولی — عرض ثابت تا تغییر عدد، متن را نلرزاند. */
+private val numStyle: TextStyle
+    @Composable get() = MaterialTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum")
 
 /** فایل روی سرور وجود ندارد (HTTP 404). */
 private class NotFoundOnServer : Exception("404")
+
+/** حجم فایل سرور با درخواست HEAD — برای «X از Y مگابایت» (کش در حافظه‌ی پروسه). */
+private val remoteSizeCache = mutableMapOf<String, Long>()
+
+private fun headSizeBlocking(fileId: String): Long {
+    remoteSizeCache[fileId]?.let { return it }
+    val conn = (URL(StudyMedia.viewUrl(fileId)).openConnection() as HttpURLConnection).apply {
+        connectTimeout = 10000; readTimeout = 10000; instanceFollowRedirects = true
+        requestMethod = "HEAD"
+    }
+    return try {
+        conn.connect()
+        val len = if (conn.responseCode in 200..299) conn.contentLengthLong else -1L
+        // -2 یعنی «سرور ندارد/ناموفق» — همیشه کش می‌شود تا پروب بی‌نهایت نشود
+        val cached = if (len > 0) len else -2L
+        remoteSizeCache[fileId] = cached
+        cached
+    } catch (e: Exception) {
+        remoteSizeCache[fileId] = -2L
+        -2L
+    } finally {
+        conn.disconnect()
+    }
+}
 
 /** دانلود PDF به کش مشترک تدریس — ۴۰۴ تفکیک می‌شود. */
 private fun downloadPdfBlocking(ctx: android.content.Context, fileId: String, onProgress: (Int) -> Unit) {
@@ -112,6 +147,7 @@ private fun downloadPdfBlocking(ctx: android.content.Context, fileId: String, on
     }.getOrDefault(false)
     if (!ok) { tmp.delete(); throw java.io.IOException("ناقص") }
     if (!tmp.renameTo(target)) { tmp.copyTo(target, overwrite = true); tmp.delete() }
+    remoteSizeCache[fileId] = target.length()
 }
 
 @Composable
@@ -120,28 +156,21 @@ fun DownloadsScreen(onBack: () -> Unit) {
     val store = remember { LocalStore(ctx, "hamyar_downloads") }
     val books = remember { BookModuleRegistry.modules }
     val scope = rememberCoroutineScope()
-    // key → درصد (حضور کلید = در حال دانلود)
-    val busy = remember { mutableStateMapOf<String, Int>() }
-    // key → true (خطای شبکه‌ی گذرا)
-    val netErr = remember { mutableStateMapOf<String, Boolean>() }
+    val busy = remember { mutableStateMapOf<String, Int>() }   // key → درصد
+    val netErr = remember { mutableStateMapOf<String, Boolean>() } // key → خطای شبکه
     var tick by remember { mutableIntStateOf(0) }
 
-    /** دانلود یک فایل؛ خطاها تفکیک و ثبت می‌شوند. */
-    suspend fun dlFile(pack: StudyPack, kind: FileKind, fileId: String, cacheKey: String) {
-        val key = keyOf(pack.packId, kind)
+    suspend fun dl(fileId: String, cacheKey: String, key: String, asPdf: Boolean) {
         if (busy.containsKey(key)) return
         netErr.remove(key)
         busy[key] = 0
         try {
             withContext(Dispatchers.IO) {
-                when (kind) {
-                    FileKind.PDF -> downloadPdfBlocking(ctx, fileId) { busy[key] = it }
-                    FileKind.AUDIO -> MediaVault.downloadEncrypted(ctx, StudyMedia.viewUrl(fileId), cacheKey) { busy[key] = it }
-                }
+                if (asPdf) downloadPdfBlocking(ctx, fileId) { busy[key] = it }
+                else MediaVault.downloadEncrypted(ctx, StudyMedia.viewUrl(fileId), cacheKey) { busy[key] = it }
             }
             tick++
         } catch (e: NotFoundOnServer) {
-            // ماندگار: این فایل روی سرور نیست — بعدها که آپلود شد خودکار درست می‌شود.
             store.putString("dl404_$fileId", "1")
         } catch (e: Exception) {
             netErr[key] = true
@@ -150,45 +179,11 @@ fun DownloadsScreen(onBack: () -> Unit) {
         }
     }
 
-    fun fileIds(pack: StudyPack, kind: FileKind): Pair<String?, String?> = when (kind) {
-        FileKind.PDF -> pack.pdfFileName to null
-        FileKind.AUDIO -> teachTracksOf(pack).firstOrNull()?.let { it.fileId to it.cacheKey } ?: (null to null)
-    }
-
-    fun isDone(pack: StudyPack, kind: FileKind): Boolean {
-        val (fid, ck) = fileIds(pack, kind)
-        return when (kind) {
-            FileKind.PDF -> fid != null && pdfCached(ctx, fid)
-            FileKind.AUDIO -> ck != null && MediaVault.isCached(ctx, ck)
-        }
-    }
-
-    fun missing(pack: StudyPack): List<Pair<FileKind, Pair<String?, String?>>> =
-        listOf(FileKind.PDF, FileKind.AUDIO)
-            .filter { !isDone(pack, it) }
-            .map { it to fileIds(pack, it) }
-
-    fun downloadPack(pack: StudyPack) {
+    fun download(moduleFiles: List<Quadruple>) {
         scope.launch {
-            for ((kind, ids) in missing(pack)) {
+            for (q in moduleFiles) {
                 if (!isActive) break
-                val (fid, ck) = ids
-                if (fid == null) continue
-                dlFile(pack, kind, fid, ck ?: "")
-            }
-        }
-    }
-
-    fun downloadBook(module: BookModule) {
-        scope.launch {
-            for (p in module.packs) {
-                if (!isActive) break
-                for ((kind, ids) in missing(p)) {
-                    if (!isActive) break
-                    val (fid, ck) = ids
-                    if (fid == null) continue
-                    dlFile(p, kind, fid, ck ?: "")
-                }
+                dl(q.fileId, q.cacheKey, q.statusKey, q.isPdf)
             }
         }
     }
@@ -197,73 +192,142 @@ fun DownloadsScreen(onBack: () -> Unit) {
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(12.dp)) {
         item {
             Text(
-                "صوت و PDF همه‌ی درس‌ها — هر چیزی که اینجا دانلود شود، بدون اینترنت هم پخش و باز می‌شود (صوت رمزشده روی گوشی ذخیره می‌شود).",
+                "فقط درس‌هایی که تدریس دارند اینجاست — هر فایل که دانلود شود، بدون اینترنت هم کار می‌کند (صوت رمزشده ذخیره می‌شود).",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(8.dp))
         }
         items(books.size) { i ->
-            BookDownloadCard(
+            BookDlCard(
                 module = books[i],
                 store = store,
                 busy = busy,
                 netErr = netErr,
                 tick = tick,
-                onDownloadBook = { downloadBook(books[i]) },
-                onDownloadPack = { p -> downloadPack(p) },
+                onDownload = { files -> download(files) },
+                // پروب حجم فایل‌های گم‌شده (یک‌بار، در پس‌زمینه)
+                onProbe = { ids ->
+                    scope.launch {
+                        withContext(Dispatchers.IO) { ids.forEach { headSizeBlocking(it) } }
+                        tick++
+                    }
+                },
+                onRefresh = { tick++ },
             )
         }
     }
 }
 
+private data class Quadruple(val statusKey: String, val fileId: String, val cacheKey: String, val isPdf: Boolean)
+
 @Composable
-private fun BookDownloadCard(
-    module: BookModule,
+private fun BookDlCard(
+    module: ir.behzad.platform.feature.study.BookModule,
     store: LocalStore,
     busy: Map<String, Int>,
     netErr: Map<String, Boolean>,
     tick: Int,
-    onDownloadBook: () -> Unit,
-    onDownloadPack: (StudyPack) -> Unit,
+    onDownload: (List<Quadruple>) -> Unit,
+    onProbe: (List<String>) -> Unit,
+    onRefresh: () -> Unit,
 ) {
     val ctx = LocalContext.current
     val cover = remember(module.bookCode) {
         runCatching { BitmapFactory.decodeStream(ctx.assets.open("book-covers/${module.bookCode}.jpg")) }.getOrNull()
     }
-    val anyBusy = remember(tick, busy.size) {
-        module.packs.any { p ->
-            busy.containsKey(keyOf(p.packId, FileKind.PDF)) || busy.containsKey(keyOf(p.packId, FileKind.AUDIO))
-        }
-    }
-    val bytesOnDevice = remember(module.bookCode, tick) {
-        module.packs.sumOf { p -> pdfCacheFile(ctx, p.pdfFileName).takeIf { it.exists() }?.length() ?: 0L } +
-            module.packs.sumOf { p ->
-                teachTracksOf(p).sumOf { t ->
-                    if (MediaVault.isCached(ctx, t.cacheKey)) MediaVault.vaultFile(ctx, t.cacheKey).length() else 0L
+    val toc = remember(module.bookCode) { BookToc.forBook(module.bookCode) }
+
+    data class KindStat(val total: Int, val done: Int, val missing: List<Quadruple>)
+
+    fun statOf(kind: String?): KindStat {
+        val all = mutableListOf<Quadruple>()
+        val doneFlags = mutableListOf<Boolean>()
+        fun walk(n: TocNode) {
+            n.packId?.let { pid ->
+                BookModuleRegistry.pack(pid)?.let { pack ->
+                    if (kind != "audio") {
+                        all.add(Quadruple("$pid:PDF", pack.pdfFileName, "", true))
+                        doneFlags.add(pdfCached(ctx, pack.pdfFileName))
+                    }
+                    if (kind != "pdf") teachTracksOf(pack).forEach { t ->
+                        all.add(Quadruple("$pid:${t.cacheKey}", t.fileId, t.cacheKey, false))
+                        doneFlags.add(MediaVault.isCached(ctx, t.cacheKey))
+                    }
                 }
             }
-    }
-    val totalFiles = remember(module.bookCode) {
-        module.packs.sumOf { 1 + teachTracksOf(it).size }
-    }
-    val doneFiles = remember(module.bookCode, tick) {
-        module.packs.sumOf { p ->
-            (if (pdfCached(ctx, p.pdfFileName)) 1 else 0) + teachTracksOf(p).count { MediaVault.isCached(ctx, it.cacheKey) }
+            n.children.forEach(::walk)
         }
+        toc.forEach(::walk)
+        val done = doneFlags.count { it }
+        return KindStat(all.size, done, all.filterIndexed { i, _ -> !doneFlags[i] })
     }
-    val doneInBatch = remember(module.bookCode, tick) {
-        module.packs.count { p ->
-            pdfCached(ctx, p.pdfFileName) && teachTracksOf(p).all { MediaVault.isCached(ctx, it.cacheKey) }
+
+    // v1.16: آمار تفکیک PDF/صوت — هر نوع با نوار و دکمه‌ی خودش
+    val pdfStat = remember(module.bookCode, tick) { statOf("pdf") }
+    val audioStat = remember(module.bookCode, tick) { statOf("audio") }
+    val allStat = remember(module.bookCode, tick) { statOf(null) }
+
+    // حجم محلی دانلودشده + حجم کل سرور (فایل‌های گم‌شده با HEAD)
+    val downloadedBytes = remember(module.bookCode, tick) {
+        var sum = 0L
+        fun walk(n: TocNode) {
+            n.packId?.let { pid ->
+                BookModuleRegistry.pack(pid)?.let { pack ->
+                    pdfCacheFile(ctx, pack.pdfFileName).takeIf { it.exists() }?.let { sum += it.length() }
+                    teachTracksOf(pack).forEach { t ->
+                        if (MediaVault.isCached(ctx, t.cacheKey)) sum += MediaVault.vaultFile(ctx, t.cacheKey).length()
+                    }
+                }
+            }
+            n.children.forEach(::walk)
         }
+        toc.forEach(::walk)
+        sum
     }
-    val curBusy = busy.entries.firstOrNull { e ->
-        module.packs.any { p -> e.key == keyOf(p.packId, FileKind.PDF) || e.key == keyOf(p.packId, FileKind.AUDIO) }
+    val totalBytes = remember(module.bookCode, tick) {
+        var sum = downloadedBytes
+        val probe = mutableListOf<String>()
+        fun walk(n: TocNode) {
+            n.packId?.let { pid ->
+                BookModuleRegistry.pack(pid)?.let { pack ->
+                    if (!pdfCached(ctx, pack.pdfFileName)) {
+                        when (val s = remoteSizeCache[pack.pdfFileName]) {
+                            null -> probe.add(pack.pdfFileName)
+                            else -> if (s > 0) sum += s
+                        }
+                    }
+                    teachTracksOf(pack).forEach { t ->
+                        if (!MediaVault.isCached(ctx, t.cacheKey)) {
+                            when (val s = remoteSizeCache[t.fileId]) {
+                                null -> probe.add(t.fileId)
+                                else -> if (s > 0) sum += s
+                            }
+                        }
+                    }
+                }
+            }
+            n.children.forEach(::walk)
+        }
+        toc.forEach(::walk)
+        if (probe.isNotEmpty()) onProbe(probe)
+        sum
     }
-    val overallPct = if (anyBusy) {
-        ((doneInBatch * 100 + (curBusy?.value ?: 0).coerceAtLeast(0)).toFloat() / (totalFiles.coerceAtLeast(1) * 100f)).coerceIn(0f, 1f)
-    } else {
-        doneFiles.toFloat() / totalFiles.coerceAtLeast(1)
+
+    val anyBusy = busy.keys.any { k ->
+        val pid = k.substringBefore(":")
+        module.packs.any { it.packId == pid }
+    }
+    // (۱۳) حذف فایل فقط با دیالوگ تایید — هر کتاب دیالوگ خودش را دارد
+    var pendingDelete by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
+
+    // آکاردئون فصل‌ها — هر لحظه فقط یک فصل باز؛ حافظه‌دار؛ پیش‌فرض همه جمع.
+    var openSection by remember(module.bookCode) {
+        mutableStateOf(store.getString("dl_acc_${module.bookCode}", ""))
+    }
+    fun toggle(id: String) {
+        openSection = if (openSection == id) "" else id
+        store.putString("dl_acc_${module.bookCode}", openSection)
     }
 
     Card(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
@@ -281,101 +345,264 @@ private fun BookDownloadCard(
                 Column(Modifier.weight(1f)) {
                     Text(module.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                     Text(
-                        "دانلودشده: ${toPersianDigits(doneFiles.toString())} از ${toPersianDigits(totalFiles.toString())} فایل · ${fmtSize(bytesOnDevice)}",
-                        style = MaterialTheme.typography.labelSmall,
+                        "${mbFixed(downloadedBytes)} از ${mbFixed(totalBytes)}",
+                        style = numStyle,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
+            Spacer(Modifier.height(8.dp))
+            // نوار وضعیت PDF — تفکیک از صوت
+            KindBar(
+                label = "PDF",
+                done = pdfStat.done,
+                total = pdfStat.total,
+                modifier = Modifier.fillMaxWidth(),
+            )
             Spacer(Modifier.height(6.dp))
-            LinearProgressIndicator(
-                progress = { overallPct },
-                modifier = Modifier.fillMaxWidth().height(8.dp),
+            // نوار وضعیت صوت — تفکیک از PDF
+            KindBar(
+                label = "صوت",
+                done = audioStat.done,
+                total = audioStat.total,
+                modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(8.dp))
-            Button(
-                onClick = onDownloadBook,
-                enabled = !anyBusy && doneFiles < totalFiles,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Icon(Icons.Outlined.Download, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(6.dp))
-                Text(if (doneFiles >= totalFiles) "همه‌ی این کتاب دانلود شده ✓" else "دانلود یکجای این کتاب")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick = { onDownload(pdfStat.missing) },
+                    enabled = !anyBusy && pdfStat.missing.isNotEmpty(),
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Icon(Icons.Outlined.Download, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text("PDFها (${fixNum(pdfStat.missing.size)})", style = numStyle, maxLines = 1)
+                }
+                Button(
+                    onClick = { onDownload(audioStat.missing) },
+                    enabled = !anyBusy && audioStat.missing.isNotEmpty(),
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Icon(Icons.Outlined.Download, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text("صوت‌ها (${fixNum(audioStat.missing.size)})", style = numStyle, maxLines = 1)
+                }
             }
             Spacer(Modifier.height(6.dp))
-            module.packs.forEach { p ->
-                LessonDlRow(p, store, busy, netErr, onDownloadPack)
+            toc.forEach { node ->
+                DlNode(node, 0, openId = openSection, onToggle = ::toggle, store = store, busy = busy, netErr = netErr, onDownload = onDownload, tick = tick, onDelete = { label, onYes ->
+                    pendingDelete = label to onYes
+                })
             }
+        }
+    }
+    pendingDelete?.let { (label, onYes) ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text("حذف فایل دانلودشده") },
+            text = { Text("«$label» از حافظه‌ی دستگاه حذف شود؟") },
+            confirmButton = {
+                TextButton(onClick = { onYes(); onRefresh(); pendingDelete = null }) { Text("حذف") }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingDelete = null }) { Text("انصراف") }
+            },
+        )
+    }
+}
+
+/** پیمایش فهرست رسمی — فصل‌ها آکاردئونی؛ فقط ردیف‌های دارای تدریس. */
+/** یک نوار وضعیت برای یک نوع فایل (PDF یا صوت): «PDF · ۰۰۰۳ از ۰۰۱۲» + نوار. */
+@Composable
+private fun KindBar(label: String, done: Int, total: Int, modifier: Modifier = Modifier) {
+    Column(modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "$label · ${fixNum(done)} از ${fixNum(total)}",
+                style = numStyle,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        Spacer(Modifier.height(3.dp))
+        LinearProgressIndicator(
+            progress = { if (total == 0) 1f else done.toFloat() / total },
+            modifier = Modifier.fillMaxWidth().height(6.dp),
+        )
+    }
+}
+
+@Composable
+private fun DlNode(
+    node: TocNode,
+    depth: Int,
+    openId: String,
+    onToggle: (String) -> Unit,
+    store: LocalStore,
+    busy: Map<String, Int>,
+    netErr: Map<String, Boolean>,
+    onDownload: (List<Quadruple>) -> Unit,
+    tick: Int,
+    onDelete: (String, () -> Unit) -> Unit,
+) {
+    when {
+        node.packId == null && node.children.isNotEmpty() -> {
+            Card(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = (depth * 8).dp, top = 3.dp, bottom = 3.dp),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onToggle(node.id) }
+                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        if (openId == node.id) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        node.title,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                    )
+                }
+            }
+        }
+        node.packId != null -> {
+            val pack = remember(node.packId) { BookModuleRegistry.pack(node.packId) }
+            if (pack != null) DlLessonRow(pack, depth + 1, store, busy, netErr, onDownload, tick, onDelete)
+        }
+    }
+    if (node.children.isNotEmpty() && (node.packId != null || openId == node.id)) {
+        node.children.forEach { child ->
+            DlNode(child, depth + 1, openId = openId, onToggle = onToggle, store = store, busy = busy, netErr = netErr, onDownload = onDownload, tick = tick, onDelete = onDelete)
         }
     }
 }
 
 @Composable
-private fun LessonDlRow(
+private fun DlLessonRow(
     pack: StudyPack,
+    depth: Int,
     store: LocalStore,
     busy: Map<String, Int>,
     netErr: Map<String, Boolean>,
-    onDownload: (StudyPack) -> Unit,
+    onDownload: (List<Quadruple>) -> Unit,
+    tick: Int,
+    onDelete: (String, () -> Unit) -> Unit,
 ) {
     val ctx = LocalContext.current
     val tracks = remember(pack.packId) { teachTracksOf(pack) }
-    val audio = tracks.firstOrNull()
+
+    data class Chip(val label: String, val done: Boolean, val is404: Boolean, val isNetErr: Boolean, val isBusy: Boolean, val pct: Int, val fileId: String, val cacheKey: String, val isPdf: Boolean)
 
     @Composable
-    fun fileChip(kind: FileKind) {
-        val key = keyOf(pack.packId, kind)
-        val fileId = when (kind) {
-            FileKind.PDF -> pack.pdfFileName
-            FileKind.AUDIO -> audio?.fileId ?: ""
-        }
-        val cacheKey = when (kind) {
-            FileKind.PDF -> ""
-            FileKind.AUDIO -> audio?.cacheKey ?: ""
-        }
-        val done = when (kind) {
-            FileKind.PDF -> pdfCached(ctx, fileId)
-            FileKind.AUDIO -> cacheKey.isNotEmpty() && MediaVault.isCached(ctx, cacheKey)
-        }
+    fun chipOf(isPdf: Boolean, track: TeachTrack?): Chip {
+        val fileId = if (isPdf) pack.pdfFileName else track!!.fileId
+        val key = if (isPdf) "${pack.packId}:PDF" else "${pack.packId}:${track!!.cacheKey}"
+        val done = if (isPdf) pdfCached(ctx, fileId) else MediaVault.isCached(ctx, track!!.cacheKey)
         val is404 = store.getString("dl404_$fileId", "0") == "1"
         val pct = busy[key]
-        val (icon, label, color) = when {
-            pct != null -> FileState(Icons.Outlined.Schedule, "در حال دانلود ${toPersianDigits(pct.toString())}٪", MaterialTheme.colorScheme.primary)
-            done -> FileState(Icons.Outlined.CheckCircle, "دانلود شده", MaterialTheme.colorScheme.tertiary)
-            is404 -> FileState(Icons.Outlined.CloudOff, "فایل روی سرور نیست", MaterialTheme.colorScheme.outline)
-            netErr[key] == true -> FileState(Icons.Outlined.ErrorOutline, "اتصال اینترنت را بررسی کن", MaterialTheme.colorScheme.error)
-            else -> FileState(Icons.Outlined.Download, "دانلود نشده", MaterialTheme.colorScheme.onSurfaceVariant)
+        return Chip(
+            label = if (isPdf) "PDF" else track!!.label,
+            done = done,
+            is404 = is404,
+            isNetErr = netErr[key] == true,
+            isBusy = pct != null,
+            pct = pct ?: 0,
+            fileId = fileId,
+            cacheKey = if (isPdf) "" else track!!.cacheKey,
+            isPdf = isPdf,
+        )
+    }
+
+    @Composable
+    fun ChipView(c: Chip, onClick: (Chip) -> Unit) {
+        val (icon, tint) = when {
+            c.isBusy -> Icons.Outlined.Schedule to MaterialTheme.colorScheme.primary
+            c.done -> Icons.Outlined.CheckCircle to MaterialTheme.colorScheme.tertiary
+            c.is404 -> Icons.Outlined.CloudOff to MaterialTheme.colorScheme.outline
+            c.isNetErr -> Icons.Outlined.ErrorOutline to MaterialTheme.colorScheme.error
+            else -> Icons.Outlined.Download to MaterialTheme.colorScheme.onSurfaceVariant
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(15.dp))
-            Spacer(Modifier.width(3.dp))
+        val label = when {
+            c.isBusy -> "در حال دانلود ${fixPct(c.pct)}٪"
+            c.done -> "دانلود شده — برای حذف لمس کن"
+            c.is404 -> "فایل روی سرور نیست"
+            c.isNetErr -> "اینترنت را بررسی کن"
+            else -> "دانلود نشده"
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .clickable(enabled = !c.isBusy) { onClick(c) }
+                .padding(2.dp),
+        ) {
+            Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(13.dp))
+            Spacer(Modifier.width(2.dp))
             Text(
-                "${kind.label} · $label",
-                style = MaterialTheme.typography.labelSmall,
-                color = color,
+                if (c.isBusy) label else "${c.label} · $label",
+                style = numStyle,
+                color = tint,
                 maxLines = 1,
             )
         }
     }
 
-    val anyBusy = busy.containsKey(keyOf(pack.packId, FileKind.PDF)) || busy.containsKey(keyOf(pack.packId, FileKind.AUDIO))
-    Row(
+    fun clickChip(c: Chip) {
+        if (c.done) {
+            onDelete(c.label) {
+                if (c.isPdf) {
+                    pdfCacheFile(ctx, c.fileId).delete()
+                    store.putString("dl404_${c.fileId}", "0")
+                } else {
+                    MediaVault.delete(ctx, c.cacheKey)
+                }
+            }
+        } else {
+            onDownload(listOf(Quadruple(if (c.isPdf) "${pack.packId}:PDF" else "${pack.packId}:${c.cacheKey}", c.fileId, c.cacheKey, c.isPdf)))
+        }
+    }
+
+    val anyBusy = busy.keys.any { it.startsWith("${pack.packId}:") }
+    // v1.16: سطر اول = عنوان درس (کلیک = دانلود همه‌ی ناقص‌ها)؛
+    // سطر دوم = نمایشگر وضعیت PDF و تک‌تک صوت‌ها.
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = !anyBusy) { onDownload(pack) }
-            .padding(vertical = 5.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(start = (depth * 8).dp, top = 4.dp, bottom = 4.dp),
     ) {
-        Text(
-            pack.title,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.weight(1f),
-            maxLines = 1,
-        )
-        fileChip(FileKind.PDF)
-        Spacer(Modifier.width(10.dp))
-        if (audio != null) fileChip(FileKind.AUDIO)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(enabled = !anyBusy) {
+                    val files = mutableListOf<Quadruple>()
+                    if (!pdfCached(ctx, pack.pdfFileName)) files.add(Quadruple("${pack.packId}:PDF", pack.pdfFileName, "", true))
+                    tracks.forEach { t ->
+                        if (!MediaVault.isCached(ctx, t.cacheKey)) files.add(Quadruple("${pack.packId}:${t.cacheKey}", t.fileId, t.cacheKey, false))
+                    }
+                    if (files.isNotEmpty()) onDownload(files)
+                },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(pack.title, style = MaterialTheme.typography.labelMedium, modifier = Modifier.weight(1f), maxLines = 1)
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ChipView(chipOf(true, null)) { clickChip(it) }
+            tracks.forEach { t ->
+                Spacer(Modifier.width(10.dp))
+                ChipView(chipOf(false, t)) { clickChip(it) }
+            }
+        }
     }
 }
-
-private data class FileState(val icon: androidx.compose.ui.graphics.vector.ImageVector, val label: String, val color: androidx.compose.ui.graphics.Color)

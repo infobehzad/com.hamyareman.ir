@@ -103,9 +103,19 @@ fun BookDetailScreen(
 
         Spacer(Modifier.height(10.dp))
         val tocStore = remember(bookCode) { LocalStore(ctx, "hamyar_toc") }
+        // v1.16: آکاردئون — هر لحظه فقط یک فصل باز است؛ پیش‌فرض همه جمع‌شده؛
+        // فصلِ بازِ آخر در حافظه می‌ماند.
+        var openSection by remember(bookCode) {
+            mutableStateOf(tocStore.getString("acc_$bookCode", ""))
+        }
+        val toggle: (String) -> Unit = { id ->
+            val next = if (openSection == id) "" else id
+            openSection = next
+            tocStore.putString("acc_$bookCode", next)
+        }
         Column(Modifier.fillMaxWidth()) {
             BookToc.forBook(bookCode).forEach { node ->
-                TocRow(bookCode, node, 0, tocStore, onTeach, onStudy)
+                TocRow(bookCode, node, 0, tocStore, onTeach, onStudy, openId = openSection, onToggle = toggle)
             }
         }
     }
@@ -119,20 +129,21 @@ private fun TocRow(
     store: LocalStore,
     onTeach: (String) -> Unit,
     onStudy: (String) -> Unit,
+    openId: String,
+    onToggle: (String) -> Unit,
 ) {
     val isSection = node.packId == null && node.children.isNotEmpty()
-    val key = "open_${bookCode}_${node.id}"
-    var open by remember(node.id) { mutableStateOf(isSection && store.getString(key, "0") == "1") }
     when {
-        isSection -> SectionCardCollapsible(node, depth, open) {
-            open = !open
-            store.putString(key, if (open) "1" else "0")
-        }
-        node.packId != null -> LessonCard(node, depth, onTeach, onStudy)
+        isSection -> SectionCardCollapsible(node, depth, openId == node.id) { onToggle(node.id) }
+        node.packId != null -> LessonCard(node, depth, onTeach, onStudy, subOpen = openId == node.id, onSubToggle = { onToggle(node.id) })
         else -> StaticCard(node, depth)
     }
-    if (node.children.isNotEmpty() && (node.packId != null || open)) {
-        node.children.forEach { child -> TocRow(bookCode, child, depth + 1, store, onTeach, onStudy) }
+    // v1.16: فرزندانِ درس (جلسه‌ها/…) هم جمع‌شوندگی آکاردئونی دارند — با باز شدن،
+    // زیر کارتِ درس می‌آیند (نه داخل آن) تا دوبار رندر نشوند.
+    if (node.children.isNotEmpty() && openId == node.id) {
+        node.children.forEach { child ->
+            TocRow(bookCode, child, depth + 1, store, onTeach, onStudy, openId = openId, onToggle = onToggle)
+        }
     }
 }
 
@@ -170,7 +181,14 @@ private fun SectionCardCollapsible(node: TocNode, depth: Int, open: Boolean, onT
 
 /** کارت درس — مثل نسخه‌ی قبلی: آمار + تسلط + دو دکمه‌ی تدریس/مطالعه با شرط اتمام. */
 @Composable
-private fun LessonCard(node: TocNode, depth: Int, onTeach: (String) -> Unit, onStudy: (String) -> Unit) {
+private fun LessonCard(
+    node: TocNode,
+    depth: Int,
+    onTeach: (String) -> Unit,
+    onStudy: (String) -> Unit,
+    subOpen: Boolean,
+    onSubToggle: () -> Unit,
+) {
     val packId = node.packId ?: return
     val pack = remember(packId) { BookModuleRegistry.pack(packId) }
     val container = LocalAppContainer.current
@@ -197,7 +215,25 @@ private fun LessonCard(node: TocNode, depth: Int, onTeach: (String) -> Unit, onS
             .padding(start = (depth * 10).dp, top = 4.dp, bottom = 4.dp),
     ) {
         Column(Modifier.padding(12.dp)) {
-            Text(node.title, style = MaterialTheme.typography.titleMedium)
+            // v1.16: اگر درس زیرمنو دارد (جلسه‌های قرآن/…)، سرتیتر کلیک‌پذیر است
+            // و با شورون باز/جمع می‌شود — «یکی باز شد، اونیکی بسته» (آکاردئون کتاب).
+            val hasSubs = node.children.isNotEmpty()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(if (hasSubs) Modifier.clickable(onClick = onSubToggle) else Modifier),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(node.title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                if (hasSubs) {
+                    Icon(
+                        if (subOpen) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                        contentDescription = if (subOpen) "بستن زیرمنو" else "بازکردن زیرمنو",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp),
+                    )
+                }
+            }
             if (pack != null) {
                 Text(
                     "${pack.sections.size} سکشن · ${pack.flashcards.size} کارت · ${pack.questions.size} سؤال",
@@ -224,8 +260,6 @@ private fun LessonCard(node: TocNode, depth: Int, onTeach: (String) -> Unit, onS
                 style = MaterialTheme.typography.labelSmall,
                 color = if (teachDone) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            // زیرردیف‌های ثابتِ درس (جلسه‌های قرآن / Talking about انگلیسی).
-            node.children.forEach { child -> StaticCard(child, 0) }
             Spacer(Modifier.height(8.dp))
             val showLockDialog = remember(packId) { mutableStateOf(false) }
             if (showLockDialog.value) {
