@@ -187,6 +187,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
     var lastSaveMs by remember { mutableLongStateOf(0L) }
     var dragMs by remember { mutableLongStateOf(-1L) }
     var quiet by remember { mutableStateOf(false) }
+    var pendingStartKey by remember { mutableStateOf<String?>(null) }
 
     val track = tracks[activeIdx]
     LaunchedEffect(packId, tracks.size) {
@@ -241,6 +242,12 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
             }
             playback.setMediaItems(items, tracks.indexOf(t).coerceAtLeast(0), if (cached(t) && !fromServer) savedPos(t) else 0L)
             playback.setSpeed(speed)
+            // v1.12: فوراً ترکِ جاری را ثبت کن — تا فال‌بکِ خطا (سرور) همیشه زنده باشد
+            // و اگر پخش محلی شروع شد، واتچ‌داگ بتواند نتیجه را بسنجد.
+            loadedKey = t.cacheKey
+            lastSaveMs = 0L
+            posMs = if (cached(t) && !fromServer) savedPos(t) else 0L
+            pendingStartKey = if (autoplay) t.cacheKey else null
             if (autoplay) playback.play()
         }
     }
@@ -268,6 +275,18 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                 continue
             }
             quiet = false
+            // v1.12: همگام‌سازی ترکِ جاری حتی وقتی پخش متوقف است (تا حالت‌های خطا هم synced بمانند).
+            val curSync = playback.currentMediaId()
+            if (curSync != null && curSync != loadedKey) {
+                val idx = tracks.indexOfFirst { it.cacheKey == curSync }
+                if (idx >= 0 && idx != activeIdx) {
+                    activeIdx = idx
+                    store.putString("teach_${packId}_track", idx.toString())
+                }
+                loadedKey = curSync
+                lastSaveMs = 0L
+                posMs = 0L
+            }
             if (!state.playing) continue
             posMs = playback.positionMs
             listenAccumMs += 500
@@ -313,14 +332,28 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
         }
     }
 
-    // اگر پخشِ محلی (گاوصندوق) خطا داد، بی‌سروصدا از سرور ادامه بده.
+    // اگر پخشِ محلی (گاوصندوق) خطا داد، بی‌سروصدا از سرور ادامه بده —
+    // v1.12: بدون شرط loadedKey (پیشتر خطای آفلاین بن‌بست می‌شد و هیچی پخش نمی‌شد).
     LaunchedEffect(state.error) {
         val err = state.error ?: return@LaunchedEffect
-        if (!forceServer && loadedKey != null) {
+        if (!forceServer) {
             forceServer = true
-            msg = "پخش محلی ممکن نشد — از سرور ادامه می‌دهیم."
+            pendingStartKey = null
             startTrack(track, autoplay = true, fromServer = true)
         }
+    }
+
+    // واتچ‌داگ پخش — اگر ۵ ثانیه بعد از فرمان پخش هنوز چیزی پخش نمی‌شود
+    // (مثلاً پخش آفلاین از سرور محلی راه نیفتاد)، بی‌سروصدا از سرور ادامه بده.
+    LaunchedEffect(pendingStartKey) {
+        val k = pendingStartKey ?: return@LaunchedEffect
+        kotlinx.coroutines.delay(5000)
+        if (pendingStartKey == k && !playback.state.value.playing && !forceServer) {
+            forceServer = true
+            pendingStartKey = null
+            tracks.firstOrNull { it.cacheKey == k }?.let { startTrack(it, autoplay = true, fromServer = true) }
+        }
+        if (pendingStartKey == k) pendingStartKey = null
     }
 
     Card(Modifier.fillMaxWidth()) {

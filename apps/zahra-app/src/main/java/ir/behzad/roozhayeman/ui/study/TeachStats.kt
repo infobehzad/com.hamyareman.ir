@@ -28,6 +28,8 @@ object TeachStats {
         val completedAtMs: Long = 0L,
         val audioDurSec: Int = 0,
         val videoDurSec: Int = 0,
+        /** دوره‌ی اولِ تدریس در چند نشست تمام شد (۰ = هنوز تمام نشده). */
+        val sessionsToDone: Int = 0,
     ) {
         /** کل زمان تدریس‌شده (صوت + ویدیو) به ثانیه. */
         val watchedSec: Int get() = listenSec + videoSec
@@ -112,6 +114,8 @@ object TeachStats {
         val exp = o.optInt("exp", 1).coerceAtLeast(1)
         if (!o.optBoolean("d") && dt.length() >= exp) {
             o.put("d", true); o.put("ca", System.currentTimeMillis())
+            // v1.12: «اتمام دوره‌ی اول در چند نشست» — شمار نشست‌های همین پک هنگام اولین اتمام.
+            if (o.optInt("sc") == 0) o.put("sc", o.optInt("s").coerceAtLeast(1))
         }
         write(ctx, packId, o)
     }
@@ -154,6 +158,7 @@ object TeachStats {
             completedAtMs = o.optLong("ca"),
             audioDurSec = o.optInt("ad"),
             videoDurSec = o.optInt("vd"),
+            sessionsToDone = o.optInt("sc"),
         )
     }
 

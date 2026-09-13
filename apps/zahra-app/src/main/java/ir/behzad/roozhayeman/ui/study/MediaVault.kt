@@ -253,7 +253,15 @@ object LocalMediaServer {
             val bytes = synchronized(this) {
                 if (cacheKey == lastKey && lastBytes != null) lastBytes!!
                 else {
-                    val b = MediaVault.decryptToMemory(ctx.applicationContext, cacheKey)
+                    val b = try {
+                        MediaVault.decryptToMemory(ctx.applicationContext, cacheKey)
+                    } catch (e: Exception) {
+                        conn.getOutputStream().write(
+                            ("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n").toByteArray(),
+                        )
+                        conn.getOutputStream().flush()
+                        return
+                    }
                     lastKey = cacheKey; lastBytes = b
                     b
                 }
