@@ -78,12 +78,17 @@ if (listOnly) {
         for (const name of wanted) {
             if (existing.has(name)) { keep++; continue; }
             const buf = name.endsWith('.mp4') ? sampleVideo : sampleAudio;
-            await withRetry(() => storage.createFile({
-                bucketId: BUCKET, fileId: name,
-                file: InputFile.fromBuffer(buf, name),
-            }));
-            console.log(`  ⬆ ${name}`);
-            up++;
+            try {
+                await withRetry(() => storage.createFile({
+                    bucketId: BUCKET, fileId: name,
+                    file: InputFile.fromBuffer(buf, name),
+                }));
+                console.log(`  ⬆ ${name}`);
+                up++;
+            } catch (e) {
+                if (/already exists/i.test(String(e && e.message))) { keep++; continue; }
+                throw e;
+            }
         }
         // حذف غیرقراردادی‌ها
         let del = 0;
@@ -180,7 +185,7 @@ function mp3DurationSec(buf) {
     return Math.round(buf.length * 8 / 64000);
 }
 
-if (!listOnly) (async () => {
+if (!listOnly && !convention) (async () => {
     console.log('آپلود روخوانی درس‌ها + هماهنگ‌سازی lesson_audio');
     console.log(`endpoint: ${ENDPOINT} | project: ${PROJECT} | bucket: ${BUCKET} | db: ${DB} ${dryRun ? '| [DRY-RUN]' : ''}`);
     // پیدا کردن *_AUDIO.mp3 داخل پوشه‌های media/
