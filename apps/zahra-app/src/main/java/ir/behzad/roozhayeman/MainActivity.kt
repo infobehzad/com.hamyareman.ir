@@ -156,21 +156,17 @@ class MainActivity : FragmentActivity() {
                                 loading = loginLoading,
                                 error = loginError,
                                 onGoogle = {
+                                    // v1.21: مسیر استاندارد Appwrite OAuth2 — گوگل Secret را با
+                                    // کنسول چک می‌کند، صفحه‌ی انتخاب اکانت باز می‌شود و با
+                                    // دیپلینک به اپ برمی‌گردد. (کد native لیست‌اکانت‌ها در
+                                    // googleIdTokenFlow محفوظ مانده؛ اگر روزی لازم شد سوئیچ می‌شود.)
                                     loginLoading = true; loginError = null
-                                    googleIdTokenFlow(
-                                        onToken = { idToken, nonce ->
-                                            scope.launch {
-                                                when (val r = container.auth.signInWithGoogleToken(idToken, nonce)) {
-                                                    is AppResult.Ok -> loggedIn.value = true
-                                                    is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
-                                                }
-                                            }
-                                        },
-                                        onError = { msg ->
-                                            loginError = msg.ifBlank { null }
-                                            loginLoading = false
-                                        },
-                                    )
+                                    scope.launch {
+                                        when (val r = container.auth.signInWithGoogle(activity)) {
+                                            is AppResult.Ok -> loggedIn.value = true
+                                            is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
+                                        }
+                                    }
                                 },
                                 onGuest = {
                                     loginLoading = true; loginError = null

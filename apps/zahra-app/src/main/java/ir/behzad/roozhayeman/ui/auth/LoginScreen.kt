@@ -56,14 +56,13 @@ fun LoginScreen(
                 if (loading) {
                     CircularProgressIndicator()
                 } else {
-                    // v1.20: ورود استاندارد — لیست اکانت‌های گوگلِ خود گوشی، مستقیم و
-                    // بدون دیالوگ واسط و بدون مرورگر (Credential Manager).
+                    // ورود استاندارد گوگل از مسیر Appwrite — انتخاب اکانت و برگشت خودکار به اپ.
                     Button(onClick = onGoogle, modifier = Modifier.fillMaxWidth()) {
                         Text("ورود با گوگل")
                     }
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        "اکانتت را از لیست اکانت‌های روی همین گوشی انتخاب کن.",
+                        "اکانت گوگلت را انتخاب می‌کنی و مستقیم به همیار برمی‌گردی.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
