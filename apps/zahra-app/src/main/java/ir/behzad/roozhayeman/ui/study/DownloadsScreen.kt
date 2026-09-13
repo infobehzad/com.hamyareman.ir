@@ -152,6 +152,18 @@ private fun downloadPdfBlocking(ctx: android.content.Context, fileId: String, on
 
 @Composable
 fun DownloadsScreen(onBack: () -> Unit) {
+    // v1.18: فونت همه‌ی متن‌های این صفحه ۱٫۵ برابر (فقط متن — چیدمان ثابت می‌ماند).
+    val baseDensity = androidx.compose.ui.platform.LocalDensity.current
+    androidx.compose.runtime.CompositionLocalProvider(
+        androidx.compose.ui.platform.LocalDensity provides
+            androidx.compose.ui.unit.Density(baseDensity.density, baseDensity.fontScale * 1.5f),
+    ) {
+        DownloadsScreenInner(onBack)
+    }
+}
+
+@Composable
+private fun DownloadsScreenInner(onBack: () -> Unit) {
     val ctx = LocalContext.current
     val store = remember { LocalStore(ctx, "hamyar_downloads") }
     val books = remember { BookModuleRegistry.modules }
@@ -389,10 +401,39 @@ private fun BookDlCard(
                 }
             }
             Spacer(Modifier.height(6.dp))
-            toc.forEach { node ->
-                DlNode(node, 0, openId = openSection, onToggle = ::toggle, store = store, busy = busy, netErr = netErr, onDownload = onDownload, tick = tick, onDelete = { label, onYes ->
-                    pendingDelete = label to onYes
-                })
+            val hasSections = toc.any { it.packId == null && it.children.isNotEmpty() }
+            if (hasSections) {
+                // فصل‌ها: آکاردئون «فقط یکی باز»
+                toc.forEach { node ->
+                    DlNode(node, 0, openId = openSection, onToggle = ::toggle, store = store, busy = busy, netErr = netErr, onDownload = onDownload, tick = tick, onDelete = { label, onYes ->
+                        pendingDelete = label to onYes
+                    })
+                }
+            } else {
+                // v1.18: کتاب بدون فصل (قرآن/عربی/…) — فهرست درس‌ها داخل یک گروه جمع‌شونده
+                val listOpen = openSection == "lessons"
+                Card(Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().clickable { toggle("lessons") }.padding(horizontal = 10.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            if (listOpen) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp),
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text("فهرست درس‌ها (${fixNum(toc.count { it.packId != null })})", style = numStyle, fontWeight = FontWeight.Bold)
+                    }
+                }
+                if (listOpen) {
+                    toc.forEach { node ->
+                        DlNode(node, 0, openId = "", onToggle = {}, store = store, busy = busy, netErr = netErr, onDownload = onDownload, tick = tick, onDelete = { label, onYes ->
+                            pendingDelete = label to onYes
+                        })
+                    }
+                }
             }
         }
     }
@@ -536,7 +577,7 @@ private fun DlLessonRow(
         }
         val label = when {
             c.isBusy -> "در حال دانلود ${fixPct(c.pct)}٪"
-            c.done -> "دانلود شده — برای حذف لمس کن"
+            c.done -> "دانلود شده"
             c.is404 -> "فایل روی سرور نیست"
             c.isNetErr -> "اینترنت را بررسی کن"
             else -> "دانلود نشده"

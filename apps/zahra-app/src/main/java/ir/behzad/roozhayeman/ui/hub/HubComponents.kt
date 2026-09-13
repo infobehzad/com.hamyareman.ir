@@ -81,18 +81,31 @@ fun NavController.hubTo(route: String) {
 
 /** گروه تاشوی منوی هاب — دسته‌بندی در تو در تو (مشترک بین مدرسه/آموزشگاه/سلامتی). */
 @Composable
-fun HubMenuGroup(title: String, subtitle: String, content: @Composable () -> Unit) {
-    var open by rememberSaveable { mutableStateOf(false) }
-    Card(modifier = Modifier.fillMaxWidth().clickable { open = !open }) {
+/**
+ * گروه منوی هاب — نسخه‌ی مستقل (حافظه‌دارِ خودش) یا کنترل‌شده برای آکاردئون:
+ * اگر open/onToggle داده شود، وضعیتش را والد نگه می‌دارد («یکی باز شد، اونیکی بسته»).
+ */
+fun HubMenuGroup(
+    title: String,
+    subtitle: String,
+    open: Boolean? = null,
+    onToggle: (() -> Unit)? = null,
+    content: @Composable () -> Unit,
+) {
+    var selfOpen by rememberSaveable { mutableStateOf(false) }
+    val isOpen = open ?: selfOpen
+    Card(modifier = Modifier.fillMaxWidth().clickable {
+        if (onToggle != null) onToggle() else selfOpen = !selfOpen
+    }) {
         Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.weight(1f)) {
                     Text(title, style = MaterialTheme.typography.titleMedium)
                     Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Icon(if (open) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore, contentDescription = if (open) "بستن" else "بازکردن")
+                Icon(if (isOpen) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore, contentDescription = if (isOpen) "بستن" else "بازکردن")
             }
-            AnimatedVisibility(visible = open) {
+            AnimatedVisibility(visible = isOpen) {
                 Column(Modifier.padding(top = 10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { content() }
             }
         }

@@ -56,8 +56,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.PlayerView
 import ir.behzad.platform.core.common.LocalStore
 import ir.behzad.platform.core.common.toPersianDigits
 import ir.behzad.platform.core.designsystem.AppTopBar
@@ -150,11 +148,7 @@ fun LessonTeachScreen(
         val tracks = teachTracksOf(pack)
         if (tracks.isNotEmpty()) TeachAudioBar(packId = packId, screenTitle = pack.title, tracks = tracks)
 
-        // اگر درس ویدیو دارد، زیر پلیر صوت پخش می‌شود (با شمارش تماشا/پرش و کش رمزشده).
-        if (StudyMedia.videoIds(packId).isNotEmpty()) {
-            LessonVideoSection(packId = packId, packTitle = pack.title)
-        }
-
+        // v1.18: ویدیو به صفحه‌ی مجزای «ویدیوی تدریس» منتقل شد (VideoTeachScreen).
         TeachPdfPages(modifier = Modifier.weight(1f), fileId = pack.pdfFileName, pack = pack)
     }
 }
@@ -562,180 +556,6 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
             }
         }
     }
-}
-
-// ------------------------------------------------------------- ویدیو
-
-/** بخش ویدیوی تدریس — استریم از سرور یا پخش محلیِ رمزشده + شمارش تماشا/پرش. */
-@Composable
-private fun LessonVideoSection(packId: String, packTitle: String) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val ids = remember(packId) { StudyMedia.videoIds(packId) }
-    var current by remember(packId) { mutableIntStateOf(0) }
-    var useLocal by remember(packId) { mutableStateOf(false) }
-    var downloading by remember(packId) { mutableStateOf(false) }
-    var progressPct by remember(packId) { mutableIntStateOf(-1) }
-    var cacheTick by remember(packId) { mutableIntStateOf(0) }
-    var msg by remember(packId) { mutableStateOf<String?>(null) }
-
-    val fileId = ids[current]
-
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("🎬 ویدیو", style = MaterialTheme.typography.titleSmall)
-            Spacer(Modifier.weight(1f))
-            if (ids.size > 1) {
-                ids.indices.forEach { i ->
-                    FilterChip(
-                        selected = i == current,
-                        onClick = { current = i; useLocal = false; msg = null },
-                        label = { Text(toPersianDigits((i + 1).toString())) },
-                    )
-                }
-            }
-        }
-        if (downloading) {
-            LinearProgressIndicator(
-                progress = { (if (progressPct < 0) 0 else progressPct) / 100f },
-                modifier = Modifier.fillMaxWidth().height(6.dp),
-            )
-            Text(
-                if (progressPct >= 0) "دانلود ویدیو… ${toPersianDigits(progressPct.toString())}٪" else "دانلود ویدیو…",
-                style = MaterialTheme.typography.bodySmall,
-            )
-        }
-        val uri = if (cacheTick >= 0 && useLocal && MediaVault.isCached(context, fileId)) {
-            MediaVault.localUrl(context, fileId)
-        } else {
-            StudyMedia.viewUrl(fileId)
-        }
-        LessonVideoPlayer(packId = packId, packTitle = packTitle, fileId = fileId, uri = uri)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = { useLocal = false; msg = null }) { Text("🌐 از سرور") }
-            when {
-                downloading -> Unit
-                MediaVault.isCached(context, fileId) -> {
-                    Text("✓ روی گوشی", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
-                    if (!useLocal) {
-                        TextButton(onClick = { useLocal = true }) { Text("▶ محلی") }
-                    }
-                    var confirmDelV by remember { mutableStateOf(false) }
-                    if (confirmDelV) {
-                        androidx.compose.material3.AlertDialog(
-                            onDismissRequest = { confirmDelV = false },
-                            confirmButton = {
-                                TextButton(onClick = {
-                                    confirmDelV = false
-                                    MediaVault.delete(context, fileId)
-                                    useLocal = false; cacheTick++
-                                    msg = "ویدیو از حافظه‌ی گوشی حذف شد."
-                                }) { Text("حذف") }
-                            },
-                            dismissButton = { TextButton(onClick = { confirmDelV = false }) { Text("نگه‌دار") } },
-                            title = { Text("حذف ویدیوی دانلودشده؟") },
-                            text = { Text("پخش بعدی از سرور انجام می‌شود.") },
-                        )
-                    }
-                    TextButton(onClick = { confirmDelV = true }) { Text("🗑") }
-                }
-                else -> TextButton(onClick = {
-                    downloading = true; progressPct = -1
-                    scope.launch {
-                        try {
-                            withContext(Dispatchers.IO) {
-                                MediaVault.downloadEncrypted(context, StudyMedia.viewUrl(fileId), fileId) { pct -> progressPct = pct }
-                            }
-                            downloading = false; cacheTick++; useLocal = true
-                            msg = "دانلود شد — پخش محلی رمزشده."
-                        } catch (e: Exception) {
-                            downloading = false
-                            msg = "دانلود ناموفق بود."
-                        }
-                    }
-                }) { Text("⬇ دانلود") }
-            }
-            msg?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-        }
-    }
-}
-
-/**
- * پلیر ویدیو (ExoPlayer) — تماشای واقعی (هر ثانیه هنگام پخش) و پرش‌های >۳ ثانیه
- * شمرده می‌شود؛ اتمام ≥۹۵٪ = پایان اولین دوره‌ی تدریس.
- * نکته: player فقط روی رشته‌ی اصلی لمس می‌شود (تیک کوروتین، نه Timer).
- */
-@Composable
-private fun LessonVideoPlayer(packId: String, packTitle: String, fileId: String, uri: String) {
-    val context = LocalContext.current
-    var player by remember(fileId, uri) { mutableStateOf<ExoPlayer?>(null) }
-    var watchAccum by remember(fileId, uri) { mutableLongStateOf(0L) }
-
-    DisposableEffect(fileId, uri) {
-        val p = ExoPlayer.Builder(context).build().apply {
-            setMediaItem(
-                MediaItem.Builder().setUri(uri).setMediaMetadata(
-                    androidx.media3.common.MediaMetadata.Builder().setTitle(packTitle).build(),
-                ).build(),
-            )
-            prepare()
-            playWhenReady = false
-        }
-        player = p
-        val listener = object : Player.Listener {
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                if (playbackState == Player.STATE_ENDED) {
-                    if (p.duration > 0) TeachStats.markTrackDone(context, packId, fileId)
-                }
-            }
-
-            override fun onPositionDiscontinuity(
-                oldPosition: Player.PositionInfo,
-                newPosition: Player.PositionInfo,
-                reason: Int,
-            ) {
-                if (reason == Player.DISCONTINUITY_REASON_SEEK &&
-                    abs(newPosition.positionMs - oldPosition.positionMs) > 3000
-                ) {
-                    TeachStats.addJump(context, packId)
-                }
-            }
-        }
-        p.addListener(listener)
-        onDispose {
-            p.removeListener(listener)
-            p.release()
-            player = null
-        }
-    }
-
-    // تیک تماشای واقعی — هر ثانیه فقط هنگام پخش؛ ثبت هر ۵ ثانیه؛ ۹۵٪ = پایان دوره.
-    // «زمان درس» فعال = صدای ویدیو هم بی‌صدا می‌شود.
-    LaunchedEffect(player) {
-        val p = player ?: return@LaunchedEffect
-        val qstore = LocalStore(context, "hamyar_teach")
-        while (true) {
-            delay(1000)
-            p.volume = if (qstore.getString("quiet_mode", "0") == "1") 0f else 1f
-            if (p.isPlaying) {
-                watchAccum += 1000
-                val durSec = (p.duration.takeIf { it > 0 } ?: 0L) / 1000
-                if (watchAccum % 5000L == 0L) {
-                    TeachStats.addVideo(context, packId, 5, durSec.toInt())
-                    val d = p.duration
-                    if (d > 0 && p.currentPosition * 100 / d >= 95) {
-                        TeachStats.markTrackDone(context, packId, fileId)
-                    }
-                }
-            }
-        }
-    }
-
-    androidx.compose.ui.viewinterop.AndroidView(
-        factory = { ctx -> PlayerView(ctx).apply { useController = true } },
-        update = { view -> view.player = player },
-        modifier = Modifier.fillMaxWidth().height(210.dp),
-    )
 }
 
 // ------------------------------------------------------------- کتاب (PDF)

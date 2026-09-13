@@ -80,6 +80,7 @@ import ir.behzad.roozhayeman.ui.study.PdfUploadScreen
 import ir.behzad.roozhayeman.ui.study.HealthProgressScreen
 import ir.behzad.roozhayeman.ui.study.LockedStudyScreen
 import ir.behzad.roozhayeman.ui.study.ProgressChartsScreen
+import ir.behzad.roozhayeman.ui.study.VideoTeachScreen
 import ir.behzad.roozhayeman.ui.study.DownloadsScreen
 import ir.behzad.roozhayeman.ui.study.TeachStats
 import ir.behzad.roozhayeman.ui.study.teachTracksOf
@@ -149,7 +150,8 @@ fun ZahraNavHost() {
                     onBack = { nav.popBackStack() },
                     onTeach = { packId -> nav.navigate(Screen.LessonTeach.of(packId)) },
                     onStudy = { packId -> nav.navigate(Screen.LessonStudy.of(packId)) },
-                    onCharts = { nav.navigate(Screen.Charts.route) },
+                    onVideoTeach = { packId -> nav.navigate(Screen.VideoTeach.of(packId)) },
+                    onCharts = { nav.navigate(Screen.Charts.of(entry.arguments?.getString("bookCode"))) },
                 )
             }
             composable(
@@ -230,7 +232,25 @@ fun ZahraNavHost() {
             }
             composable(Screen.QuizReview.route) { QuizReviewScreen { nav.popBackStack() } }
             composable(Screen.Pdf.route) { PdfUploadScreen { nav.popBackStack() } }
-            composable(Screen.Charts.route) { ProgressChartsScreen { nav.popBackStack() } }
+            composable(
+                Screen.Charts.route,
+                listOf(navArgument("bookCode") { type = NavType.StringType; defaultValue = "" }),
+            ) { entry ->
+                ProgressChartsScreen(
+                    bookCode = entry.arguments?.getString("bookCode").orEmpty().ifBlank { null },
+                    onBack = { nav.popBackStack() },
+                    onPickBook = { code -> nav.navigate(Screen.Charts.of(code)) },
+                )
+            }
+            composable(
+                Screen.VideoTeach.route,
+                listOf(navArgument("packId") { type = NavType.StringType }),
+            ) { entry ->
+                VideoTeachScreen(
+                    packId = entry.arguments?.getString("packId").orEmpty(),
+                    onBack = { nav.popBackStack() },
+                )
+            }
             composable(Screen.Downloads.route) { DownloadsScreen { nav.popBackStack() } }
             composable(Screen.Art.route) { DailyArtPromptScreen({ nav.popBackStack() }, { nav.navigate(Screen.Gallery.route) }) }
             composable(Screen.Gallery.route) { ArtGalleryScreen { nav.popBackStack() } }

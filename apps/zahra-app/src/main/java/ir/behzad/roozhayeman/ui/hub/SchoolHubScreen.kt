@@ -15,7 +15,10 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -24,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import ir.behzad.platform.feature.study.BookModuleRegistry
+import ir.behzad.platform.core.common.LocalStore
 import ir.behzad.roozhayeman.ui.navigation.Screen
 
 /**
@@ -36,10 +40,24 @@ import ir.behzad.roozhayeman.ui.navigation.Screen
  */
 @Composable
 fun SchoolHubScreen(nav: NavController) {
+    // v1.18: آکاردئون منوی مدرسه — هر لحظه فقط یک گروه باز؛ وضعیت آخرین گروه باز حافظه‌دار.
+    val ctxHub = LocalContext.current
+    val hubStore = remember { LocalStore(ctxHub, "hamyar_hub") }
+    var openGroup by remember { mutableStateOf(hubStore.getString("acc_school", "")) }
+    fun toggleGroup(id: String) {
+        openGroup = if (openGroup == id) "" else id
+        hubStore.putString("acc_school", openGroup)
+    }
+
     HubBody {
         HubHeader("مدرسه 🎒", "همه‌چیز از کتاب شروع می‌شود — یک کتاب را باز کن")
 
-        HubMenuGroup("📚 کتاب‌ها", "۱۳ کتاب پایه نهم — هر کتاب با درس‌ها، صوت، ویدیو و آزمونش") {
+        HubMenuGroup(
+            "📚 کتاب‌ها",
+            "۱۳ کتاب پایه نهم — هر کتاب با درس‌ها، صوت، ویدیو و آزمونش",
+            open = openGroup == "books",
+            onToggle = { toggleGroup("books") },
+        ) {
             val ctx = LocalContext.current
             val books = remember { BookModuleRegistry.modules }
             books.chunked(2).forEach { pair ->
@@ -76,18 +94,33 @@ fun SchoolHubScreen(nav: NavController) {
             }
         }
 
-        HubMenuGroup("⬇️ دانلودها", "صوت و PDF هر کتاب — دانلود یکجا با نمایش حجم") {
+        HubMenuGroup(
+            "⬇️ دانلودها",
+            "صوت و PDF هر کتاب — دانلود یکجا با نمایش حجم",
+            open = openGroup == "downloads",
+            onToggle = { toggleGroup("downloads") },
+        ) {
             HubCard("📶", "مدیریت دانلود کتاب‌ها", "وضعیت دانلود صوت‌ها و PDFها به تفکیک کتاب") { nav.hubTo(Screen.Downloads.route) }
         }
 
-        HubMenuGroup("🗓 برنامه‌ی هفتگی", "چرخش شیفت و درس‌های هر روز") {
+        HubMenuGroup(
+            "🗓 برنامه‌ی هفتگی",
+            "چرخش شیفت و درس‌های هر روز",
+            open = openGroup == "schedule",
+            onToggle = { toggleGroup("schedule") },
+        ) {
             HubCard("⏰", "برنامه‌ی هفتگی من", "شیفت صبح/عصر/شب + جدول درس هر روز (با ورزش)") { nav.hubTo(Screen.WeeklySchedule.route) }
             HubCard("🏫", "برنامه‌ی مدرسه", "زنگ‌ها و برنامه‌ی کلاسی") { nav.hubTo(Screen.School.route) }
         }
 
-        HubMenuGroup("📝 آزمون و بازخورد", "سنجش دروس مدرسه") {
+        HubMenuGroup(
+            "📝 آزمون و بازخورد",
+            "سنجش دروس مدرسه",
+            open = openGroup == "quiz",
+            onToggle = { toggleGroup("quiz") },
+        ) {
             HubCard("🧪", "جزوه‌ها و آپلود PDF", "جزوه‌ی معلم را بده تا سوال ساخته شود") { nav.hubTo(Screen.Pdf.route) }
-            HubCard("📈", "نمودار پیشرفت دروس", "رشدت در هر درس — طبق آزمون‌ها و فلش‌کارت‌ها") { nav.hubTo(Screen.Charts.route) }
+            HubCard("📈", "نمودار پیشرفت دروس", "رشدت در هر درس — طبق آزمون‌ها و فلش‌کارت‌ها") { nav.hubTo(Screen.Charts.of(null)) }
         }
     }
 }

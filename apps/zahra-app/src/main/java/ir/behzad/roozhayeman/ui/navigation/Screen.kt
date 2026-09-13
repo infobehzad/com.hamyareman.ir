@@ -67,7 +67,17 @@ sealed class Screen(val route: String) {
         fun of(packId: String) = "study-lesson-pdf/" + Uri.encode(packId)
     }
     data object Pdf : Screen("pdf")
-    data object Charts : Screen("charts")
+
+    /** نمودار پیشرفت — v1.18: برای هر کتاب اختصاصی؛ bookCode اختیاری (بدون آن = انتخاب کتاب). */
+    data object Charts : Screen("charts?bookCode={bookCode}") {
+        fun of(bookCode: String? = null) =
+            if (bookCode.isNullOrBlank()) "charts" else "charts?bookCode=${Uri.encode(bookCode)}"
+    }
+
+    /** ویدیوی تدریس هر درس — صفحه‌ی مجزا و تمام‌صفحه (v1.18). */
+    data object VideoTeach : Screen("video-teach/{packId}") {
+        fun of(packId: String) = "video-teach/" + Uri.encode(packId)
+    }
 
     /** مدیریت دانلود صوت/PDF کتاب‌ها (v1.14). */
     data object Downloads : Screen("study-downloads")

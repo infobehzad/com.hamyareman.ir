@@ -1,5 +1,6 @@
 package ir.behzad.roozhayeman.ui.study
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -38,14 +40,48 @@ import ir.behzad.roozhayeman.LocalAppContainer
  *  - فلش‌کارت‌ها: کل/یادگرفته/باقیمانده/مرورشده + تسلط؛
  *  - آزمون‌ها: تعداد، آخرین/بهترین/میانگین + موضوعات ضعیف، با تاریخ/ساعت شمسی.
  */
+/**
+ * v1.18 — نمودار پیشرفت «اختصاصی هر کتاب»: فقط گزارش‌های همان کتاب لیست می‌شود.
+ * بدون bookCode: فهرست کتاب‌ها برای انتخاب (با شمار شروع‌شده/کامل‌شده‌ی هر کتاب).
+ */
 @Composable
-fun ProgressChartsScreen(onBack: () -> Unit) {
+fun ProgressChartsScreen(bookCode: String?, onBack: () -> Unit, onPickBook: (String) -> Unit) {
     val container = LocalAppContainer.current
     val ctx = LocalContext.current
     val books = remember { BookModuleRegistry.modules }
+    val module = remember(bookCode) { books.firstOrNull { it.bookCode == bookCode } }
+
+    if (module == null) {
+        // ---------- انتخاب کتاب ----------
+        Column(Modifier.fillMaxSize()) {
+            AppTopBar("نمودار پیشرفت کدام کتاب؟", onBack)
+            Column(
+                Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                books.forEach { m ->
+                    val started = m.packs.count { TeachStats.raw(ctx, it.packId).length() > 0 }
+                    val done = m.packs.count { TeachStats.isDone(ctx, it.packId) }
+                    Card(
+                        Modifier.fillMaxWidth().androidClickable { onPickBook(m.bookCode) },
+                    ) {
+                        Column(Modifier.padding(14.dp)) {
+                            Text("📘 ${m.title}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Text(
+                                "${toPersianDigits(started.toString())} درس شروع شده · دوره‌ی اولِ ${toPersianDigits(done.toString())} درس کامل شده",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        return
+    }
 
     Column(Modifier.fillMaxSize()) {
-        AppTopBar("نمودار پیشرفت دروس", onBack)
+        AppTopBar("نمودار پیشرفت — ${module.title}", onBack)
         Column(
             Modifier
                 .fillMaxSize()
@@ -53,19 +89,21 @@ fun ProgressChartsScreen(onBack: () -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // ---------- جمع‌بندی کلی ----------
-            val allPacks = books.flatMap { it.packs }
+            val books = listOf(module)
+
+            // ---------- جمع‌بندی همین کتاب ----------
+            val allPacks = module.packs
             val startedAll = allPacks.count { TeachStats.raw(ctx, it.packId).length() > 0 }
             val doneAll = allPacks.count { TeachStats.isDone(ctx, it.packId) }
             SectionCard(
-                title = "جمع‌بندی",
+                title = "جمع‌بندی این کتاب",
                 body = "${toPersianDigits(startedAll.toString())} درس شروع شده · دوره‌ی اولِ ${toPersianDigits(doneAll.toString())} درس کامل شده · " +
                     "همه‌ی اعداد خودکار ثبت و سینک می‌شوند و قابل ویرایش نیستند (تاریخ‌ها شمسی).",
             ) { }
 
-            // ---------- به‌تفکیک هر کتاب ----------
-            books.forEach { module ->
-                val packs = module.packs
+            // ---------- درس‌های همین کتاب ----------
+            books.forEach { md ->
+                val packs = md.packs
                 val teachActive = packs.filter { TeachStats.raw(ctx, it.packId).length() > 0 }
                 val doneHere = packs.count { TeachStats.isDone(ctx, it.packId) }
                 val cardRows = packs.mapNotNull { p ->
@@ -76,7 +114,14 @@ fun ProgressChartsScreen(onBack: () -> Unit) {
                     val at = runCatching { container.studyProgress.attempts(p.packId) }.getOrDefault(emptyList())
                     if (at.isEmpty()) null else p to at
                 }
-                if (teachActive.isEmpty() && cardRows.isEmpty() && quizRows.isEmpty()) return@forEach
+                if (teachActive.isEmpty() && cardRows.isEmpty() && quizRows.isEmpty()) {
+                    Text(
+                        "هنوز گزارشی برای این کتاب ثبت نشده — با تدریس/فلش‌کارت/آزمون، اینجا پر می‌شود.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    return@forEach
+                }
 
                 Text("📘 ${module.title}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 if (teachActive.isNotEmpty()) {
@@ -159,6 +204,9 @@ fun ProgressChartsScreen(onBack: () -> Unit) {
         }
     }
 }
+
+private fun Modifier.androidClickable(onClick: () -> Unit): Modifier =
+    this.pointerInput(Unit) { detectTapGestures { onClick() } }
 
 /** ردیف تدریس یک درس — وضعیت اولین دوره با محاسبه‌ی مشاهده/باقیمانده و نشست‌ها. */
 @Composable

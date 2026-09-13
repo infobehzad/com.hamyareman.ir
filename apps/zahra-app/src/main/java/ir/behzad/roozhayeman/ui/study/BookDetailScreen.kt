@@ -60,6 +60,7 @@ fun BookDetailScreen(
     onBack: () -> Unit,
     onTeach: (String) -> Unit,
     onStudy: (String) -> Unit,
+    onVideoTeach: (String) -> Unit,
     onCharts: () -> Unit,
 ) {
     val module = remember(bookCode) { BookModuleRegistry.modules.firstOrNull { it.bookCode == bookCode } }
@@ -115,7 +116,7 @@ fun BookDetailScreen(
         }
         Column(Modifier.fillMaxWidth()) {
             BookToc.forBook(bookCode).forEach { node ->
-                TocRow(bookCode, node, 0, tocStore, onTeach, onStudy, openId = openSection, onToggle = toggle)
+                TocRow(bookCode, node, 0, tocStore, onTeach, onStudy, onVideoTeach, openId = openSection, onToggle = toggle)
             }
         }
     }
@@ -129,20 +130,21 @@ private fun TocRow(
     store: LocalStore,
     onTeach: (String) -> Unit,
     onStudy: (String) -> Unit,
+    onVideoTeach: (String) -> Unit,
     openId: String,
     onToggle: (String) -> Unit,
 ) {
     val isSection = node.packId == null && node.children.isNotEmpty()
     when {
         isSection -> SectionCardCollapsible(node, depth, openId == node.id) { onToggle(node.id) }
-        node.packId != null -> LessonCard(node, depth, onTeach, onStudy, subOpen = openId == node.id, onSubToggle = { onToggle(node.id) })
+        node.packId != null -> LessonCard(node, depth, onTeach, onStudy, onVideoTeach, subOpen = openId == node.id, onSubToggle = { onToggle(node.id) })
         else -> StaticCard(node, depth)
     }
     // v1.16: فرزندانِ درس (جلسه‌ها/…) هم جمع‌شوندگی آکاردئونی دارند — با باز شدن،
     // زیر کارتِ درس می‌آیند (نه داخل آن) تا دوبار رندر نشوند.
     if (node.children.isNotEmpty() && openId == node.id) {
         node.children.forEach { child ->
-            TocRow(bookCode, child, depth + 1, store, onTeach, onStudy, openId = openId, onToggle = onToggle)
+            TocRow(bookCode, child, depth + 1, store, onTeach, onStudy, onVideoTeach, openId = openId, onToggle = onToggle)
         }
     }
 }
@@ -186,6 +188,7 @@ private fun LessonCard(
     depth: Int,
     onTeach: (String) -> Unit,
     onStudy: (String) -> Unit,
+    onVideoTeach: (String) -> Unit,
     subOpen: Boolean,
     onSubToggle: () -> Unit,
 ) {
@@ -272,14 +275,16 @@ private fun LessonCard(
                     text = { Text("برای باز شدن «مطالعه و آزمون»، اول دوره‌ی اول تدریس این درس را تا انتها ببین. همین‌که صوت/ویدیو تمام شود، خودکار فعال می‌شود.") },
                 )
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = { onTeach(packId) }, modifier = Modifier.weight(1f)) { Text("📖 تدریس") }
+            // v1.18: «ویدیوی تدریس» میان تدریس و مطالعه — صفحه‌ی مجزای تمام‌صفحه
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Button(onClick = { onTeach(packId) }, modifier = Modifier.weight(1f)) { Text("📖 تدریس", maxLines = 1) }
+                Button(onClick = { onVideoTeach(packId) }, modifier = Modifier.weight(1f)) { Text("🎬 ویدیوی تدریس", maxLines = 1) }
                 OutlinedButton(
                     onClick = {
                         if (teachDone) onStudy(packId) else showLockDialog.value = true
                     },
                     modifier = Modifier.weight(1f),
-                ) { Text(if (teachDone) "🎯 مطالعه و آزمون" else "🔒 مطالعه و آزمون") }
+                ) { Text(if (teachDone) "🎯 مطالعه" else "🔒 مطالعه", maxLines = 1) }
             }
         }
     }
