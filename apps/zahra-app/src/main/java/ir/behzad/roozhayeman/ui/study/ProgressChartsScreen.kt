@@ -27,30 +27,22 @@ import ir.behzad.platform.core.common.toPersianDigits
 import ir.behzad.platform.core.designsystem.AppTopBar
 import ir.behzad.platform.core.designsystem.SectionCard
 import ir.behzad.platform.feature.study.BookModuleRegistry
+import ir.behzad.platform.feature.study.StudyPack
 import ir.behzad.roozhayeman.LocalAppContainer
 
 /**
- * «نمودار پیشرفت دروس» (v1.13) — جایگزین نمودار ۷روزه‌ی مدرسه:
- * فقط آمار واقعی و محاسباتیِ درس‌ها، همه‌ی خودکار ثبت‌شده و سینک‌شونده، غیرقابل ویرایش:
- *  ۱) تدریس — وضعیت اولین دوره‌ی هر درس: زمانِ مشاهده‌شده از کل + باقیمانده،
- *     تعداد نشست‌ها و اینکه اتمام دوره‌ی اول در چند نشست بوده (با تاریخ/ساعت شمسی)؛
- *  ۲) فلش‌کارت‌ها — کل/یادگرفته/باقیمانده/مرورشده و درصد تسلط؛
- *  ۳) آزمون‌ها — تعداد، آخرین/بهترین نمره، موضوعات ضعیف (با تاریخ/ساعت شمسی).
- * منبع آمار: TeachStats + StudyProgressRepository (هر دو در هر نوشتن به سرور هم می‌روند).
+ * «نمودار پیشرفت دروس» (v1.14) — تفکیک‌شده به‌ازای هر کتاب:
+ * فقط آمار واقعیِ خودکارِ ثبت‌شده و سینک‌شونده، غیرقابل ویرایش:
+ *  - تدریس: وضعیت اولین دوره‌ی هر درس — مشاهده‌شده از کل + باقیمانده، نشست‌ها،
+ *    «اتمام دوره‌ی اول در چند نشست» و تاریخ/ساعت شمسیِ شروع/آخرین نشست/اتمام؛
+ *  - فلش‌کارت‌ها: کل/یادگرفته/باقیمانده/مرورشده + تسلط؛
+ *  - آزمون‌ها: تعداد، آخرین/بهترین/میانگین + موضوعات ضعیف، با تاریخ/ساعت شمسی.
  */
 @Composable
 fun ProgressChartsScreen(onBack: () -> Unit) {
     val container = LocalAppContainer.current
     val ctx = LocalContext.current
-    val today = remember { JalaliDate.todayIso() }
-
-    // همه‌ی محاسبات از داده‌ی واقعیِ ثبت‌شده — هیچ ورودی دستی وجود ندارد.
-    val rows = remember {
-        BookModuleRegistry.modules
-            .asSequence()
-            .flatMap { m -> m.packs.asSequence().map { m.title to it } }
-            .toList()
-    }
+    val books = remember { BookModuleRegistry.modules }
 
     Column(Modifier.fillMaxSize()) {
         AppTopBar("نمودار پیشرفت دروس", onBack)
@@ -61,80 +53,43 @@ fun ProgressChartsScreen(onBack: () -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // ---------- خلاصه‌ی کلی ----------
-            val teachActive = rows.mapNotNull { (_, p) ->
-                if (TeachStats.raw(ctx, p.packId).length() > 0) p else null
-            }
-            val doneCount = teachActive.count { TeachStats.isDone(ctx, it.packId) }
+            // ---------- جمع‌بندی کلی ----------
+            val allPacks = books.flatMap { it.packs }
+            val startedAll = allPacks.count { TeachStats.raw(ctx, it.packId).length() > 0 }
+            val doneAll = allPacks.count { TeachStats.isDone(ctx, it.packId) }
             SectionCard(
                 title = "جمع‌بندی",
-                body = "${toPersianDigits(teachActive.size.toString())} درس شروع شده · " +
-                    "دوره‌ی اولِ ${toPersianDigits(doneCount.toString())} درس کامل شده · " +
-                    "همه‌ی اعداد خودکار ثبت و سینک می‌شوند و قابل ویرایش نیستند.",
+                body = "${toPersianDigits(startedAll.toString())} درس شروع شده · دوره‌ی اولِ ${toPersianDigits(doneAll.toString())} درس کامل شده · " +
+                    "همه‌ی اعداد خودکار ثبت و سینک می‌شوند و قابل ویرایش نیستند (تاریخ‌ها شمسی).",
             ) { }
 
-            // ---------- تدریس ----------
-            if (teachActive.isNotEmpty()) {
-                Text("تدریس — اولین دوره‌ی هر درس", style = MaterialTheme.typography.titleMedium)
-                teachActive.forEach { pack ->
-                    val snap = TeachStats.snap(ctx, pack.packId)
-                    val totalSec = (snap.audioDurSec + snap.videoDurSec).coerceAtLeast(1)
-                    val watched = snap.watchedSec.coerceAtMost(totalSec)
-                    val remainSec = (totalSec - watched).coerceAtLeast(0)
-                    val pct = (watched * 100) / totalSec
-                    Card(Modifier.fillMaxWidth()) {
-                        Column(Modifier.padding(12.dp)) {
-                            Text(pack.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                            Spacer(Modifier.height(4.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    "${teachMmss(watched * 1000L)} از ${teachMmss(totalSec * 1000L)} (${toPersianDigits(pct.toString())}٪)",
-                                    style = MaterialTheme.typography.labelMedium,
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                LinearProgressIndicator(
-                                    progress = { watched.toFloat() / totalSec },
-                                    modifier = Modifier.weight(1f).height(8.dp),
-                                )
-                            }
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                "باقیمانده: ${teachMmss(remainSec * 1000L)} · نشست‌ها: ${toPersianDigits(snap.sessions.toString())}" +
-                                    if (snap.done) " · اتمام دوره‌ی اول: ${toPersianDigits(snap.sessionsToDone.toString())} نشست ✓"
-                                    else " · دوره‌ی اول هنوز کامل نشده",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Text(
-                                buildString {
-                                    append("شروع: ")
-                                    append(if (snap.startedAtMs > 0) JalaliDate.stampFa(snap.startedAtMs) else "—")
-                                    append(" · آخرین نشست: ")
-                                    append(if (snap.lastSessionAtMs > 0) JalaliDate.stampFa(snap.lastSessionAtMs) else "—")
-                                    if (snap.done && snap.completedAtMs > 0) {
-                                        append(" · اتمام: ")
-                                        append(JalaliDate.stampFa(snap.completedAtMs))
-                                    }
-                                },
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
+            // ---------- به‌تفکیک هر کتاب ----------
+            books.forEach { module ->
+                val packs = module.packs
+                val teachActive = packs.filter { TeachStats.raw(ctx, it.packId).length() > 0 }
+                val doneHere = packs.count { TeachStats.isDone(ctx, it.packId) }
+                val cardRows = packs.mapNotNull { p ->
+                    val states = runCatching { container.studyProgress.cards(p.packId) }.getOrDefault(emptyMap())
+                    if (p.flashcards.isEmpty() || states.isEmpty()) null else p to states
                 }
-            }
+                val quizRows = packs.mapNotNull { p ->
+                    val at = runCatching { container.studyProgress.attempts(p.packId) }.getOrDefault(emptyList())
+                    if (at.isEmpty()) null else p to at
+                }
+                if (teachActive.isEmpty() && cardRows.isEmpty() && quizRows.isEmpty()) return@forEach
 
-            // ---------- فلش‌کارت‌ها ----------
-            val cardPacks = rows.mapNotNull { (book, p) ->
-                if (p.flashcards.isEmpty()) return@mapNotNull null
-                val states = runCatching { container.studyProgress.cards(p.packId) }.getOrDefault(emptyMap())
-                if (states.isEmpty()) return@mapNotNull null
-                Triple(book, p, states)
-            }
-            if (cardPacks.isNotEmpty()) {
-                Spacer(Modifier.height(4.dp))
-                Text("فلش‌کارت‌ها", style = MaterialTheme.typography.titleMedium)
-                cardPacks.forEach { (_, pack, states) ->
+                Text("📘 ${module.title}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                if (teachActive.isNotEmpty()) {
+                    Text(
+                        "دوره‌ی اول کامل شده: ${toPersianDigits(doneHere.toString())} از ${toPersianDigits(teachActive.size.toString())} درس شروع‌شده",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                teachActive.forEach { pack -> TeachRow(pack) }
+
+                cardRows.forEach { (pack, states) ->
                     val total = pack.flashcards.size
                     val reviewed = states.values.sumOf { it.reps }
                     val learned = states.values.count { it.reps > 0 }
@@ -163,17 +118,8 @@ fun ProgressChartsScreen(onBack: () -> Unit) {
                         }
                     }
                 }
-            }
 
-            // ---------- آزمون‌ها ----------
-            val quizPacks = rows.mapNotNull { (_, p) ->
-                val at = runCatching { container.studyProgress.attempts(p.packId) }.getOrDefault(emptyList())
-                if (at.isEmpty()) null else p to at
-            }
-            if (quizPacks.isNotEmpty()) {
-                Spacer(Modifier.height(4.dp))
-                Text("تحلیل آزمون‌ها", style = MaterialTheme.typography.titleMedium)
-                quizPacks.forEach { (pack, at) ->
+                quizRows.forEach { (pack, at) ->
                     val last = at.last()
                     val best = at.maxOf { it.scorePct }
                     val avg = at.sumOf { it.scorePct } / at.size.coerceAtLeast(1)
@@ -206,8 +152,58 @@ fun ProgressChartsScreen(onBack: () -> Unit) {
             }
 
             Text(
-                "این صفحه فقط از آمارِ خودکار پر می‌شود — چیزی اینجا قابل ویرایش نیست. با هر نوشتن، داده‌ها در حسابِ زهرا هم ذخیره می‌شوند (تاریخ‌ها شمسی‌اند).",
+                "این صفحه فقط از آمارِ خودکار پر می‌شود — چیزی اینجا قابل ویرایش نیست. با هر نوشتن، داده‌ها در حسابِ زهرا هم ذخیره می‌شوند.",
                 style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/** ردیف تدریس یک درس — وضعیت اولین دوره با محاسبه‌ی مشاهده/باقیمانده و نشست‌ها. */
+@Composable
+private fun TeachRow(pack: StudyPack) {
+    val snap = TeachStats.snap(LocalContext.current, pack.packId)
+    val totalSec = (snap.audioDurSec + snap.videoDurSec).coerceAtLeast(1)
+    val watched = snap.watchedSec.coerceAtMost(totalSec)
+    val remainSec = (totalSec - watched).coerceAtLeast(0)
+    val pct = (watched * 100) / totalSec
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    if (snap.done) "✅" else "⏳",
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(pack.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Text("${toPersianDigits(pct.toString())}٪", style = MaterialTheme.typography.labelMedium)
+            }
+            Spacer(Modifier.height(4.dp))
+            LinearProgressIndicator(
+                progress = { watched.toFloat() / totalSec },
+                modifier = Modifier.fillMaxWidth().height(8.dp),
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "مشاهده: ${teachMmss(watched * 1000L)} از ${teachMmss(totalSec * 1000L)} · باقیمانده: ${teachMmss(remainSec * 1000L)} · نشست‌ها: ${toPersianDigits(snap.sessions.toString())}" +
+                    if (snap.done) " · اتمام دوره‌ی اول: ${toPersianDigits(snap.sessionsToDone.toString())} نشست"
+                    else "",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                buildString {
+                    append("شروع: ")
+                    append(if (snap.startedAtMs > 0) JalaliDate.stampFa(snap.startedAtMs) else "—")
+                    append(" · آخرین نشست: ")
+                    append(if (snap.lastSessionAtMs > 0) JalaliDate.stampFa(snap.lastSessionAtMs) else "—")
+                    if (snap.done && snap.completedAtMs > 0) {
+                        append(" · اتمام: ")
+                        append(JalaliDate.stampFa(snap.completedAtMs))
+                    }
+                },
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }

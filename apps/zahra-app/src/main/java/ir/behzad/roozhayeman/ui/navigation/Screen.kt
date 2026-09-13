@@ -68,6 +68,9 @@ sealed class Screen(val route: String) {
     }
     data object Pdf : Screen("pdf")
     data object Charts : Screen("charts")
+
+    /** مدیریت دانلود صوت/PDF کتاب‌ها (v1.14). */
+    data object Downloads : Screen("study-downloads")
     data object HealthProgress : Screen("health-progress")
     data object Art : Screen("art")
     data object Gallery : Screen("gallery")

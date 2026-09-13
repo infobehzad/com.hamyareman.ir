@@ -80,6 +80,7 @@ import ir.behzad.roozhayeman.ui.study.PdfUploadScreen
 import ir.behzad.roozhayeman.ui.study.HealthProgressScreen
 import ir.behzad.roozhayeman.ui.study.LockedStudyScreen
 import ir.behzad.roozhayeman.ui.study.ProgressChartsScreen
+import ir.behzad.roozhayeman.ui.study.DownloadsScreen
 import ir.behzad.roozhayeman.ui.study.TeachStats
 import ir.behzad.roozhayeman.ui.study.teachTracksOf
 import ir.behzad.platform.feature.study.BookModuleRegistry
@@ -230,6 +231,7 @@ fun ZahraNavHost() {
             composable(Screen.QuizReview.route) { QuizReviewScreen { nav.popBackStack() } }
             composable(Screen.Pdf.route) { PdfUploadScreen { nav.popBackStack() } }
             composable(Screen.Charts.route) { ProgressChartsScreen { nav.popBackStack() } }
+            composable(Screen.Downloads.route) { DownloadsScreen { nav.popBackStack() } }
             composable(Screen.Art.route) { DailyArtPromptScreen({ nav.popBackStack() }, { nav.navigate(Screen.Gallery.route) }) }
             composable(Screen.Gallery.route) { ArtGalleryScreen { nav.popBackStack() } }
             composable(Screen.Learning.route) { LearningHomeScreen(nav) }

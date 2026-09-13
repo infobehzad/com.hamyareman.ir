@@ -76,6 +76,10 @@ fun SchoolHubScreen(nav: NavController) {
             }
         }
 
+        HubMenuGroup("⬇️ دانلودها", "صوت و PDF هر کتاب — دانلود یکجا با نمایش حجم") {
+            HubCard("📶", "مدیریت دانلود کتاب‌ها", "وضعیت دانلود صوت‌ها و PDFها به تفکیک کتاب") { nav.hubTo(Screen.Downloads.route) }
+        }
+
         HubMenuGroup("🗓 برنامه‌ی هفتگی", "چرخش شیفت و درس‌های هر روز") {
             HubCard("⏰", "برنامه‌ی هفتگی من", "شیفت صبح/عصر/شب + جدول درس هر روز (با ورزش)") { nav.hubTo(Screen.WeeklySchedule.route) }
             HubCard("🏫", "برنامه‌ی مدرسه", "زنگ‌ها و برنامه‌ی کلاسی") { nav.hubTo(Screen.School.route) }

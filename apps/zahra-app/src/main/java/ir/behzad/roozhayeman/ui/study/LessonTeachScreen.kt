@@ -173,9 +173,11 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
     var activeIdx by remember {
         mutableIntStateOf(store.getString("teach_${packId}_track", "0").toIntOrNull()?.coerceIn(0, tracks.size - 1) ?: 0)
     }
+    // v1.14: تا اتمام اولین دوره، سرعت‌های تندتر از ۱x فعال نیستند (حتی اگر قبلاً ذخیره شده بود).
     var speed by remember {
         val saved = store.getString("teach_${packId}_speed", "1").toFloatOrNull() ?: 1f
-        mutableFloatStateOf(if (TEACH_SPEEDS.contains(saved)) saved else 1f)
+        val firstPassDone = TeachStats.isDone(context, packId)
+        mutableFloatStateOf(if (TEACH_SPEEDS.contains(saved) && (saved <= 1f || firstPassDone)) saved else 1f)
     }
     var posMs by remember { mutableLongStateOf(0L) }
     var downloading by remember { mutableStateOf(false) }
@@ -541,6 +543,8 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                 TEACH_SPEEDS.forEach { v ->
                     FilterChip(
                         selected = speed == v,
+                        // v1.14: x1.5 و x2 فقط بعد از اتمام اولین دوره فعال می‌شوند.
+                        enabled = seekUnlocked.value || v <= 1f,
                         onClick = {
                             speed = v
                             runCatching { playback.setSpeed(v) }

@@ -217,6 +217,13 @@ private fun LessonCard(node: TocNode, depth: Int, onTeach: (String) -> Unit, onS
                     Text("🔔 ${toPersianDigits(due.toString())} کارت امروز باید مرور شود", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                 }
             }
+            // وضعیت دوره‌ی اول تدریس (v1.14).
+            Text(
+                if (teachDone) "✅ دوره‌ی اول تدریس کامل شده — مطالعه و آزمون باز است"
+                else "⏳ دوره‌ی اول تدریس ناقص — تا کامل شود، مطالعه قفل است",
+                style = MaterialTheme.typography.labelSmall,
+                color = if (teachDone) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             // زیرردیف‌های ثابتِ درس (جلسه‌های قرآن / Talking about انگلیسی).
             node.children.forEach { child -> StaticCard(child, 0) }
             Spacer(Modifier.height(8.dp))
