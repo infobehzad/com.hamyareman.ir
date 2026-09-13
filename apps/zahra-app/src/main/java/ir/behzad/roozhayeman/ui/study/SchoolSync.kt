@@ -43,9 +43,9 @@ object SchoolSync {
             // ---------- آمار تدریس ----------
             when (val r = tables.list(TEACH_TABLE)) {
                 is ir.behzad.platform.core.common.AppResult.Ok -> {
-                    r.data.forEach { row ->
-                        val packId = row.data["packId"] as? String ?: return@forEach
-                        val stats = row.data["stats"] as? String ?: return@forEach
+                    r.value.forEach { row ->
+                        val packId = row.payload["packId"] as? String ?: return@forEach
+                        val stats = row.payload["stats"] as? String ?: return@forEach
                         val remote = runCatching { JSONObject(stats) }.getOrNull() ?: return@forEach
                         if (mergeTeachIntoLocal(context, packId, remote)) merged++
                     }
@@ -56,12 +56,12 @@ object SchoolSync {
             // ---------- پیشرفت مطالعه (فلش‌کارت + آزمون) ----------
             when (val r = tables.list(STUDY_TABLE)) {
                 is ir.behzad.platform.core.common.AppResult.Ok -> {
-                    r.data.forEach { row ->
-                        val rowUserId = row.data["userId"] as? String
+                    r.value.forEach { row ->
+                        val rowUserId = row.payload["userId"] as? String
                         if (!rowUserId.isNullOrBlank() && rowUserId != userId) return@forEach
-                        val packId = row.data["packId"] as? String ?: return@forEach
-                        val srs = row.data["srsState"] as? String ?: ""
-                        val attempts = row.data["attempts"] as? String ?: ""
+                        val packId = row.payload["packId"] as? String ?: return@forEach
+                        val srs = row.payload["srsState"] as? String ?: ""
+                        val attempts = row.payload["attempts"] as? String ?: ""
                         if (mergeStudyIntoLocal(context, packId, srs, attempts)) merged++
                     }
                 }

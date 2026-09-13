@@ -156,10 +156,10 @@ fun DownloadsScreen(onBack: () -> Unit) {
     }
 
     fun isDone(pack: StudyPack, kind: FileKind): Boolean {
-        val (fid, ck) = fileIds(pack, kind) ?: return true
+        val (fid, ck) = fileIds(pack, kind)
         return when (kind) {
-            FileKind.PDF -> pdfCached(ctx, fid)
-            FileKind.AUDIO -> MediaVault.isCached(ctx, ck!!)
+            FileKind.PDF -> fid != null && pdfCached(ctx, fid)
+            FileKind.AUDIO -> ck != null && MediaVault.isCached(ctx, ck)
         }
     }
 
