@@ -475,8 +475,10 @@ private fun DlNode(
                 }
             }
         }
-        node.packId != null -> {
-            val pack = remember(node.packId) { BookModuleRegistry.pack(node.packId) }
+        else -> {
+            // smart-cast کراس‌ماژول ممکن نیست — با val محلی
+            val pid = node.packId
+            val pack = pid?.let { remember(it) { BookModuleRegistry.pack(it) } }
             if (pack != null) DlLessonRow(pack, depth + 1, store, busy, netErr, onDownload, tick, onDelete)
         }
     }
