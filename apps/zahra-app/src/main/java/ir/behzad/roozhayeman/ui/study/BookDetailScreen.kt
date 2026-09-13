@@ -43,7 +43,7 @@ import ir.behzad.platform.core.common.toPersianDigits
 import ir.behzad.platform.core.designsystem.AppTopBar
 import ir.behzad.platform.feature.study.BookModuleRegistry
 import ir.behzad.platform.feature.study.BookToc
-import ir.behzad.platform.feature.study.TocNode
+import ir.behzad.platform.feature.study.BookToc.TocNode
 import ir.behzad.roozhayeman.LocalAppContainer
 import ir.behzad.roozhayeman.ui.hub.HubBody
 
