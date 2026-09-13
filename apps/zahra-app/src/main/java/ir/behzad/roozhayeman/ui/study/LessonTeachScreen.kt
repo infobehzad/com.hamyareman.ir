@@ -373,10 +373,93 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                         }
                     }
                 }) { Text(if (state.playing && loadedKey == track.cacheKey) "⏸ توقف" else "▶ پخش") }
+                // v1.11: منبع (پخش آنلاین/پخش آفلاین) با آیکون + دانلود/حذف آفلاین —
+                // بالا و سمت چپِ دکمه‌ی توقف.
+                val online = !cached(track)
+                val srcColor = if (online) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
+                Icon(
+                    if (online) Icons.Outlined.Cloud else Icons.Outlined.Smartphone,
+                    contentDescription = null,
+                    tint = srcColor,
+                    modifier = Modifier.size(16.dp),
+                )
+                Text(
+                    if (online) "پخش آنلاین" else "پخش آفلاین",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = srcColor,
+                    maxLines = 1,
+                )
+                when {
+                    downloading -> {
+                        LinearProgressIndicator(
+                            progress = { (if (progressPct < 0) 0 else progressPct) / 100f },
+                            modifier = Modifier.width(72.dp).height(6.dp),
+                        )
+                        if (progressPct >= 0) {
+                            Text(
+                                "${toPersianDigits(progressPct.toString())}٪",
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1,
+                            )
+                        }
+                    }
+                    cached(track) -> {
+                        var confirmDelete by remember { mutableStateOf(false) }
+                        if (confirmDelete) {
+                            androidx.compose.material3.AlertDialog(
+                                onDismissRequest = { confirmDelete = false },
+                                confirmButton = {
+                                    TextButton(onClick = {
+                                        confirmDelete = false
+                                        MediaVault.delete(context, track.cacheKey)
+                                        cacheTick++
+                                    }) { Text("حذف") }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { confirmDelete = false }) { Text("نگه‌دار") }
+                                },
+                                title = { Text("حذف فایل آفلاین؟") },
+                                text = { Text("فایل از حافظه‌ی گوشی پاک می‌شود و پخش بعدی آنلاین انجام می‌گیرد؛ هر وقت خواستی دوباره دانلود می‌کنی.") },
+                            )
+                        }
+                        TextButton(
+                            onClick = { confirmDelete = true },
+                            colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error,
+                            ),
+                        ) {
+                            Icon(Icons.Outlined.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(2.dp))
+                            Text("حذف آفلاین", maxLines = 1)
+                        }
+                    }
+                    else -> TextButton(onClick = {
+                        downloading = true; progressPct = -1
+                        scope.launch {
+                            try {
+                                withContext(Dispatchers.IO) {
+                                    MediaVault.downloadEncrypted(
+                                        context,
+                                        StudyMedia.viewUrl(track.fileId),
+                                        track.cacheKey,
+                                    ) { pct -> progressPct = pct }
+                                }
+                                downloading = false; cacheTick++
+                            } catch (e: Exception) {
+                                downloading = false
+                            }
+                        }
+                    }) {
+                        Icon(Icons.Outlined.Download, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(2.dp))
+                        Text("دانلود", maxLines = 1)
+                    }
+                }
                 if (loadedKey == track.cacheKey && state.durationMs > 0) {
                     Text(
                         "${teachMmss(if (dragMs >= 0) dragMs else posMs)} / ${teachMmss(state.durationMs)}",
                         style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
                     )
                 }
                 Spacer(Modifier.weight(1f))
@@ -432,88 +515,6 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                         },
                         label = { Text(teachSpeedLabel(v), style = MaterialTheme.typography.labelMedium) },
                     )
-                }
-            }
-            Spacer(Modifier.height(4.dp))
-            // v1.10: منبع و دانلود در یک ردیف — «پخش آنلاین/پخش آفلاین» با آیکون همرنگ
-            // کنار «دانلود» یا «حذف آفلاین» (با دیالوگ تایید).
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                val online = !cached(track)
-                val srcColor = if (online) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
-                Icon(
-                    if (online) Icons.Outlined.Cloud else Icons.Outlined.Smartphone,
-                    contentDescription = null,
-                    tint = srcColor,
-                    modifier = Modifier.size(18.dp),
-                )
-                Text(
-                    if (online) "پخش آنلاین" else "پخش آفلاین",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = srcColor,
-                )
-                Spacer(Modifier.weight(1f))
-                when {
-                    downloading -> {
-                        LinearProgressIndicator(
-                            progress = { (if (progressPct < 0) 0 else progressPct) / 100f },
-                            modifier = Modifier.weight(1f).height(6.dp),
-                        )
-                        Text(
-                            if (progressPct >= 0) "دانلود… ${toPersianDigits(progressPct.toString())}٪" else "دانلود…",
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                    cached(track) -> {
-                        var confirmDelete by remember { mutableStateOf(false) }
-                        if (confirmDelete) {
-                            androidx.compose.material3.AlertDialog(
-                                onDismissRequest = { confirmDelete = false },
-                                confirmButton = {
-                                    TextButton(onClick = {
-                                        confirmDelete = false
-                                        MediaVault.delete(context, track.cacheKey)
-                                        cacheTick++
-                                    }) { Text("حذف") }
-                                },
-                                dismissButton = {
-                                    TextButton(onClick = { confirmDelete = false }) { Text("نگه‌دار") }
-                                },
-                                title = { Text("حذف فایل آفلاین؟") },
-                                text = { Text("فایل از حافظه‌ی گوشی پاک می‌شود و پخش بعدی آنلاین انجام می‌گیرد؛ هر وقت خواستی دوباره دانلود می‌کنی.") },
-                            )
-                        }
-                        TextButton(
-                            onClick = { confirmDelete = true },
-                            colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
-                                contentColor = MaterialTheme.colorScheme.error,
-                            ),
-                        ) {
-                            Icon(Icons.Outlined.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text("حذف آفلاین")
-                        }
-                    }
-                    else -> TextButton(onClick = {
-                        downloading = true; progressPct = -1
-                        scope.launch {
-                            try {
-                                withContext(Dispatchers.IO) {
-                                    MediaVault.downloadEncrypted(
-                                        context,
-                                        StudyMedia.viewUrl(track.fileId),
-                                        track.cacheKey,
-                                    ) { pct -> progressPct = pct }
-                                }
-                                downloading = false; cacheTick++
-                            } catch (e: Exception) {
-                                downloading = false
-                            }
-                        }
-                    }) {
-                        Icon(Icons.Outlined.Download, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text("دانلود")
-                    }
                 }
             }
         }
