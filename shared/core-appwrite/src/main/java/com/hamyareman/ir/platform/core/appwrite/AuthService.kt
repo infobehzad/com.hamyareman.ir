@@ -128,6 +128,11 @@ class AppwriteAuthService(
     override suspend fun signInWithGoogle(activity: ComponentActivity): AppResult<AuthUser> {
         if (!provider.isConfigured) return AppResult.Ok(localUser)
         return runCatching {
+            // مهم: اگر سشن فعلی (مهمان یا لاگین قبلی) زنده باشد، Appwrite اکانت گوگل را
+            // به همان کاربرِ فعلی می‌چسباند و کاربر جدیدی با ایمیل جدید ساخته نمی‌شود
+            // (همان باگ «فقط ایمیل اولین ورود ذخیره می‌شود»). پس اول سشن فعلی را
+            // تمام می‌کنیم تا OAuth همیشه از صفر شروع کند و هر اکانت گوگل، کاربر خودش را بسازد.
+            runCatching { account.deleteSession("current") }
             account.createOAuth2Session(activity = activity, provider = OAuthProvider.GOOGLE)
             bootstrap()
             requireUser()
