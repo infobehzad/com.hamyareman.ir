@@ -130,9 +130,7 @@ function mp3DurationSec(buf) {
     return Math.round(buf.length * 8 / 64000);
 }
 
-if (listOnly) process.exit(0);
-
-(async () => {
+if (!listOnly) (async () => {
     console.log('آپلود روخوانی درس‌ها + هماهنگ‌سازی lesson_audio');
     console.log(`endpoint: ${ENDPOINT} | project: ${PROJECT} | bucket: ${BUCKET} | db: ${DB} ${dryRun ? '| [DRY-RUN]' : ''}`);
     // پیدا کردن *_AUDIO.mp3 داخل پوشه‌های media/
