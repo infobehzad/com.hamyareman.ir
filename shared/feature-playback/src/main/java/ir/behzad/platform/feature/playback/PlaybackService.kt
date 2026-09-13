@@ -77,7 +77,7 @@ class PlaybackService : MediaSessionService() {
                     if (playerCommand == Player.COMMAND_PLAY_PAUSE && pack != null && !TeachGate.teachPageOpen) {
                         TeachGate.requestedPack = pack
                         runCatching { mediaSession.sessionActivity?.send() }
-                        return SessionResult(SessionResult.RESULT_ERROR).resultCode
+                        return SessionResult.RESULT_ERROR_UNKNOWN
                     }
                     return super.onPlayerCommandRequest(mediaSession, controllerInfo, playerCommand)
                 }
