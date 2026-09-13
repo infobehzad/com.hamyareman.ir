@@ -14,12 +14,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Cloud
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.Smartphone
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -298,6 +306,13 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
         }
     }
 
+    // قانون v1.10: صوت تدریس فقط داخل صفحه‌ی تدریس پخش می‌شود — سرویس با این پرچم
+    // دکمه‌ی پلی اعلان را می‌سنجد (تا این صفحه باز نشود، پلیِ اعلان پخش نمی‌کند).
+    DisposableEffect(packId) {
+        ir.behzad.platform.feature.playback.TeachGate.teachPageOpen = true
+        onDispose { ir.behzad.platform.feature.playback.TeachGate.teachPageOpen = false }
+    }
+
     // اگر پخشِ محلی (گاوصندوق) خطا داد، بی‌سروصدا از سرور ادامه بده.
     LaunchedEffect(state.error) {
         val err = state.error ?: return@LaunchedEffect
@@ -365,12 +380,6 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                     )
                 }
                 Spacer(Modifier.weight(1f))
-                // برچسب منبع: «آنلاین»/«آفلاین» (v1.9 — جای «سرور» و «روی گوشی رمز شده»).
-                Text(
-                    if (cached(track)) "آفلاین" else "آنلاین",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
             }
             val seekUnlocked = remember { mutableStateOf(TeachStats.isDone(context, packId)) }
             var showSeekDialog by remember { mutableStateOf(false) }
@@ -426,8 +435,23 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                 }
             }
             Spacer(Modifier.height(4.dp))
-            // ردیف دانلود/حذف آفلاین — v1.9: «دانلود» و پس از دانلود «حذف آفلاین» با دیالوگ.
+            // v1.10: منبع و دانلود در یک ردیف — «پخش آنلاین/پخش آفلاین» با آیکون همرنگ
+            // کنار «دانلود» یا «حذف آفلاین» (با دیالوگ تایید).
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                val online = !cached(track)
+                val srcColor = if (online) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
+                Icon(
+                    if (online) Icons.Outlined.Cloud else Icons.Outlined.Smartphone,
+                    contentDescription = null,
+                    tint = srcColor,
+                    modifier = Modifier.size(18.dp),
+                )
+                Text(
+                    if (online) "پخش آنلاین" else "پخش آفلاین",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = srcColor,
+                )
+                Spacer(Modifier.weight(1f))
                 when {
                     downloading -> {
                         LinearProgressIndicator(
@@ -455,10 +479,19 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                                     TextButton(onClick = { confirmDelete = false }) { Text("نگه‌دار") }
                                 },
                                 title = { Text("حذف فایل آفلاین؟") },
-                                text = { Text("فایل از حافظه‌ی گوشی پاک می‌شود و پخش بعدی از سرور (آنلاین) انجام می‌گیرد؛ هر وقت خواستی دوباره دانلود می‌کنی.") },
+                                text = { Text("فایل از حافظه‌ی گوشی پاک می‌شود و پخش بعدی آنلاین انجام می‌گیرد؛ هر وقت خواستی دوباره دانلود می‌کنی.") },
                             )
                         }
-                        TextButton(onClick = { confirmDelete = true }) { Text("🗑 حذف آفلاین") }
+                        TextButton(
+                            onClick = { confirmDelete = true },
+                            colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error,
+                            ),
+                        ) {
+                            Icon(Icons.Outlined.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("حذف آفلاین")
+                        }
                     }
                     else -> TextButton(onClick = {
                         downloading = true; progressPct = -1
@@ -476,7 +509,11 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                                 downloading = false
                             }
                         }
-                    }) { Text("⬇ دانلود") }
+                    }) {
+                        Icon(Icons.Outlined.Download, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("دانلود")
+                    }
                 }
             }
         }

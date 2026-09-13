@@ -11,6 +11,21 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import androidx.media3.session.SessionResult
+import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.ListenableFuture
+
+/**
+ * وضعیت «صفحه‌ی تدریس باز است» — پل بین سرویس رسانه و UI (همان پروسه).
+ * قانون v1.10: صوت تدریس فقط داخل صفحه‌ی تدریس پخش می‌شود؛ تا این صفحه باز
+ * نشده، دکمه‌ی پلی اعلان به‌جای پخش، همان صفحه را باز می‌کند.
+ */
+object TeachGate {
+    @Volatile var teachPageOpen: Boolean = false
+
+    /** درسی که باید در باز شدن بعدی اپ، صفحه‌ی تدریسش باز شود. */
+    @Volatile var requestedPack: String? = null
+}
 
 /**
  * سرویس پخش کتاب صوتی (Media3).
@@ -51,8 +66,21 @@ class PlaybackService : MediaSessionService() {
             .build()
 
         mediaSession = MediaSession.Builder(this, player)
-            // لمس اعلان پخش → باز شدن صفحه‌ی تدریس همان درس (حتی وقتی اپ بسته است).
+            // لمس خود اعلان → باز شدن صفحه‌ی تدریس همان درس (حتی وقتی اپ بسته است).
             .setSessionActivity(teachPendingIntent(currentPackOf(player)))
+            // دکمه‌ی پلی اعلان هم مثل لمس اعلان: اول صفحه‌ی تدریس باز شود، بعد پخش.
+            .setCallback(object : MediaSession.Callback {
+                override fun onPlay(session: MediaSession): ListenableFuture<SessionResult> {
+                    val pack = currentPackOf(session.player)
+                    if (pack != null && !TeachGate.teachPageOpen) {
+                        TeachGate.requestedPack = pack
+                        runCatching { session.sessionActivity.send() }
+                        return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+                    }
+                    session.player.play()
+                    return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+                }
+            })
             .build()
         player.addListener(object : Player.Listener {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {

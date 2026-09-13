@@ -220,9 +220,18 @@ class MainActivity : FragmentActivity() {
 
     /** extra درسِ اعلان پخش → [TeachLaunch] (nav به صفحه‌ی تدریس می‌پرد). */
     private fun captureTeachIntent(intent: android.content.Intent?) {
-        val packId = intent?.getStringExtra(ir.behzad.platform.feature.playback.PlaybackService.TEACH_OPEN_EXTRA) ?: return
-        if (intent.action == ir.behzad.platform.feature.playback.PlaybackService.TEACH_OPEN_ACTION && !packId.isBlank()) {
+        val action = ir.behzad.platform.feature.playback.PlaybackService.TEACH_OPEN_ACTION
+        val packId = intent?.getStringExtra(ir.behzad.platform.feature.playback.PlaybackService.TEACH_OPEN_EXTRA)
+        if (intent?.action == action && !packId.isNullOrBlank()) {
             ir.behzad.roozhayeman.ui.study.TeachLaunch.pendingTeachPack = packId
+            ir.behzad.platform.feature.playback.TeachGate.requestedPack = null
+            return
+        }
+        // پلیِ اعلان وقتی اکتیویتی بدون extra بالا آمده (همان پروسه) — از گیتِ سرویس بخوان.
+        val req = ir.behzad.platform.feature.playback.TeachGate.requestedPack
+        if (!req.isNullOrBlank()) {
+            ir.behzad.roozhayeman.ui.study.TeachLaunch.pendingTeachPack = req
+            ir.behzad.platform.feature.playback.TeachGate.requestedPack = null
         }
     }
 

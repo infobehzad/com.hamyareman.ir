@@ -11,7 +11,7 @@ object HonarC908 {
     private fun l01(): StudyPack = StudyPack(
         packId = "C908_E01-L01", bookCode = "C908", lessonId = "E01-L01",
         title = "درس ۱ — فضا و عمق", bookTitle = "فرهنگ و هنر پایه نهم", pdfFileName = "C908_E01-L01_BOOK.pdf",
-        audioFileId = "",
+        audioFileId = "C908_E01-L01_AUDIO.mp3",
         sections = listOf(
             StudyPack.Section(id = "s1", title = "مفهوم فضا", kind = "concept", body = "فضا، پیرامون ماست؛ فضای بسته‌ی اتاق با دیوارها محدود می‌شود (فضای معماری).\nفضاهای مختلف احساسات متفاوتی می‌سازند: فضای بزرگ حس آزادی، فضای کوچک گاه حس امنیت یا محدودیت.\nمثال: شبستان مسجد وکیل شیراز — فضای معماری با حس آرامش."),
             StudyPack.Section(id = "s2", title = "درک عمق و بزرگی اشیا", kind = "important", body = "با مشاهده‌ی دقیق یک منظره می‌توان اندازه‌ی واقعی اشیای دور و نزدیک را حدس زد.\nاشیای نزدیک بزرگ‌تر، اشیای دور کوچک‌تر دیده می‌شوند؛ این پایه‌ی طراحی فضا در نقاشی است."),

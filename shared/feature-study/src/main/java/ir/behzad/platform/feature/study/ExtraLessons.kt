@@ -81,6 +81,14 @@ object ExtraLessons {
     /** آیتم‌های زیرِ فارسی (حکایت/شعرخوانی/روان‌خوانی) — عنوان مستقل، بدون شماره. */
     private val subItemPrefixes = listOf("حکایت", "شعرخوانی", "روان‌خوانی")
 
+    /**
+     * صوت‌هایی که نامشان از قرارداد پیروی نمی‌کند — صوتِ «حکایت سفر» در باکت
+     * به‌صورت بخش ۲ صوت درس ۱ فارسی آپلود شده است.
+     */
+    private val audioOverride: Map<String, String> = mapOf(
+        "C903_E01-L02" to "C903_E01-L01-2_AUDIO.mp3",
+    )
+
     /** عنوان نمایشی: از PDF اگر هست؛ وگرنه «درس/فصل/پودمان N». */
     fun displayTitle(bookCode: String, lessonId: String, fallbackNumber: Int): String {
         val packId = "${bookCode}_$lessonId"
@@ -114,7 +122,7 @@ object ExtraLessons {
                 flashcards = emptyList(),
                 questions = emptyList(),
                 solutions = emptyList(),
-                audioFileId = "${packId.replace('_', '-')}-AUDIO.mp3",
+                audioFileId = audioOverride[packId] ?: "${packId}_AUDIO.mp3",
             )
         }
     }

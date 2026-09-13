@@ -39,7 +39,15 @@ object BookModuleRegistry {
     )
 
     val modules: List<BookModule> =
-        authored.map { m -> m.copy(packs = m.packs + ExtraLessons.extrasFor(m)) }
+        authored.map { m ->
+            m.copy(
+                // عنوان پک‌ها از فهرست رسمی کتاب (BookToc) می‌آید — v1.10؛
+                // اگر پک در فهرست نبود عنوان قبلی‌اش می‌ماند.
+                packs = (m.packs + ExtraLessons.extrasFor(m)).map { p ->
+                    BookToc.packTitle(p.packId)?.let { t -> p.copy(title = t) } ?: p
+                },
+            )
+        }
 
     fun pack(packId: String): StudyPack? =
         modules.asSequence().flatMap { it.packs }.firstOrNull { it.packId == packId }
