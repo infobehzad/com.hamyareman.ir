@@ -42,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -166,6 +167,12 @@ fun DownloadsScreen(onBack: () -> Unit) {
 private fun DownloadsScreenInner(onBack: () -> Unit) {
     val ctx = LocalContext.current
     val store = remember { LocalStore(ctx, "hamyar_downloads") }
+    // v1.19: آکاردئون کتاب‌ها — فقط یک کتاب باز؛ حافظه‌دار
+    var openBook by remember { mutableStateOf(store.getString("dl_openbook", "")) }
+    fun toggleBook(code: String) {
+        openBook = if (openBook == code) "" else code
+        store.putString("dl_openbook", openBook)
+    }
     val books = remember { BookModuleRegistry.modules }
     val scope = rememberCoroutineScope()
     val busy = remember { mutableStateMapOf<String, Int>() }   // key → درصد
@@ -217,6 +224,8 @@ private fun DownloadsScreenInner(onBack: () -> Unit) {
                 busy = busy,
                 netErr = netErr,
                 tick = tick,
+                expanded = openBook == books[i].bookCode,
+                onToggleBook = { toggleBook(books[i].bookCode) },
                 onDownload = { files -> download(files) },
                 // پروب حجم فایل‌های گم‌شده (یک‌بار، در پس‌زمینه)
                 onProbe = { ids ->
@@ -240,6 +249,8 @@ private fun BookDlCard(
     busy: Map<String, Int>,
     netErr: Map<String, Boolean>,
     tick: Int,
+    expanded: Boolean,
+    onToggleBook: () -> Unit,
     onDownload: (List<Quadruple>) -> Unit,
     onProbe: (List<String>) -> Unit,
     onRefresh: () -> Unit,
@@ -342,9 +353,13 @@ private fun BookDlCard(
         store.putString("dl_acc_${module.bookCode}", openSection)
     }
 
+    // v1.19: کارت کتاب = آکاردئون — سربرگ همیشه دیده می‌شود؛ محتوا فقط کتابِ باز
     Card(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
         Column(Modifier.padding(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().androidClickable(onClick = onToggleBook),
+            ) {
                 if (cover != null) {
                     Image(
                         bitmap = cover.asImageBitmap(),
@@ -362,7 +377,14 @@ private fun BookDlCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+                Icon(
+                    if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(22.dp),
+                )
             }
+            if (!expanded) return@Column
             Spacer(Modifier.height(8.dp))
             // نوار وضعیت PDF — تفکیک از صوت
             KindBar(
@@ -437,22 +459,28 @@ private fun BookDlCard(
             }
         }
     }
+    // v1.19: به‌جای پاپ‌آپ — منوی پایین صفحه
     pendingDelete?.let { (label, onYes) ->
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { pendingDelete = null },
-            title = { Text("حذف فایل دانلودشده") },
-            text = { Text("«$label» از حافظه‌ی دستگاه حذف شود؟") },
-            confirmButton = {
-                TextButton(onClick = { onYes(); onRefresh(); pendingDelete = null }) { Text("حذف") }
-            },
-            dismissButton = {
-                TextButton(onClick = { pendingDelete = null }) { Text("انصراف") }
-            },
-        )
+        androidx.compose.material3.ModalBottomSheet(onDismissRequest = { pendingDelete = null }) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+                Text("حذف فایل دانلودشده", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(4.dp))
+                Text("«$label» از حافظه‌ی دستگاه حذف شود؟", style = MaterialTheme.typography.bodyMedium)
+                Spacer(Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = { onYes(); onRefresh(); pendingDelete = null }) { Text("حذف") }
+                    OutlinedButton(onClick = { pendingDelete = null }) { Text("انصراف") }
+                }
+                Spacer(Modifier.height(24.dp))
+            }
+        }
     }
 }
 
 /** پیمایش فهرست رسمی — فصل‌ها آکاردئونی؛ فقط ردیف‌های دارای تدریس. */
+private fun Modifier.androidClickable(onClick: () -> Unit): Modifier =
+    this.pointerInput(Unit) { androidx.compose.foundation.gestures.detectTapGestures { onClick() } }
+
 /** یک نوار وضعیت برای یک نوع فایل (PDF یا صوت): «PDF · ۰۰۰۳ از ۰۰۱۲» + نوار. */
 @Composable
 private fun KindBar(label: String, done: Int, total: Int, modifier: Modifier = Modifier) {

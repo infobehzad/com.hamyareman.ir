@@ -70,6 +70,15 @@ fun VideoTeachScreen(packId: String, onBack: () -> Unit) {
 
     // --- تمام‌صفحه: مخفی‌کردن نوار وضعیت/ناوبری تا وقتی صفحه باز است ---
     val activity = remember { context as? android.app.Activity }
+    // v1.19: دکمه‌ی فول‌اسکرین خود پلیر — چرخش افقی و حذف کنترل‌های بالایی
+    var fullscreen by remember { mutableStateOf(false) }
+    androidx.compose.runtime.LaunchedEffect(fullscreen) {
+        activity?.requestedOrientation = if (fullscreen) {
+            android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        } else {
+            android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        }
+    }
     DisposableEffect(Unit) {
         val window = activity?.window
         val decor = window?.decorView
@@ -184,6 +193,7 @@ fun VideoTeachScreen(packId: String, onBack: () -> Unit) {
     }
 
     Column(Modifier.fillMaxSize()) {
+        if (!fullscreen) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "بازگشت")
@@ -202,9 +212,11 @@ fun VideoTeachScreen(packId: String, onBack: () -> Unit) {
                 )
             }
         }
+        }
 
-        PlayerViewHost(player)
+        PlayerViewHost(player, fullscreen = fullscreen, onToggleFullscreen = { fullscreen = !fullscreen })
 
+        if (!fullscreen) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp).verticalScroll(rememberScrollState())) {
             // سرعت‌ها — قفلِ تازمانِ اتمام دوره‌ی اول
             Row(
@@ -298,18 +310,28 @@ fun VideoTeachScreen(packId: String, onBack: () -> Unit) {
             }
             Spacer(Modifier.height(12.dp))
         }
+        }
     }
 }
 
 @Composable
-private fun PlayerViewHost(player: ExoPlayer?) {
+private fun PlayerViewHost(player: ExoPlayer?, fullscreen: Boolean, onToggleFullscreen: () -> Unit) {
     androidx.compose.ui.viewinterop.AndroidView(
         factory = { ctx ->
             PlayerView(ctx).apply {
                 useController = true
+                // دکمه‌ی فول‌اسکرین داخل کنترل‌های خود پلیر
+                setFullscreenButtonClickListener { onToggleFullscreen() }
             }
         },
-        update = { view -> view.player = player },
-        modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f),
+        update = { view ->
+            view.player = player
+            view.setFullscreenButtonClickListener { onToggleFullscreen() }
+        },
+        modifier = if (fullscreen) {
+            Modifier.fillMaxSize()
+        } else {
+            Modifier.fillMaxWidth().aspectRatio(16f / 9f)
+        },
     )
 }

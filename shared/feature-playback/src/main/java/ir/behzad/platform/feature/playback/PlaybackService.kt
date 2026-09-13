@@ -76,7 +76,8 @@ class PlaybackService : MediaSessionService() {
                     val pack = currentPackOf(mediaSession.player)
                     if (playerCommand == Player.COMMAND_PLAY_PAUSE && pack != null && !TeachGate.teachPageOpen) {
                         TeachGate.requestedPack = pack
-                        runCatching { mediaSession.sessionActivity?.send() }
+                        // PendingIntent تازه با packId همین رسانه — نه نسخه‌ی قدیمیِ کش‌شده
+                        runCatching { teachPendingIntent(pack).send() }
                         return SessionResult.RESULT_ERROR_UNKNOWN
                     }
                     return super.onPlayerCommandRequest(mediaSession, controllerInfo, playerCommand)
@@ -96,10 +97,15 @@ class PlaybackService : MediaSessionService() {
         )
     }
 
-    /** packId از mediaId (مثل «C903_E01-L02_AUDIO.mp3» → «C903_E01-L02»). */
+    /**
+     * packId از mediaId (مثل «C903_E01-L02_AUDIO.mp3» → «C903_E01-L02»).
+     * ترک‌های بخش‌بندی‌شده‌ی فارسی (…-1/…-2) هم به پک درسِ مادر برمی‌گردند.
+     */
     private fun currentPackOf(player: Player?): String? {
         val id = player?.currentMediaItem?.mediaId ?: return null
-        return id.removeSuffix("_AUDIO.mp3").removeSuffix("_INTRO.mp3").takeIf { it.isNotBlank() }
+        var pid = id.removeSuffix("_AUDIO.mp3").removeSuffix("_INTRO.mp3")
+        if (pid.endsWith("-1") || pid.endsWith("-2")) pid = pid.dropLast(2)
+        return pid.takeIf { it.isNotBlank() }
     }
 
     /** لمس اعلان → MainActivity با extra درس جاری؛ بقیه‌اش را nav اپ انجام می‌دهد. */

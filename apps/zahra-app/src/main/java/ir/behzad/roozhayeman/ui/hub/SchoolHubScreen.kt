@@ -50,7 +50,7 @@ fun SchoolHubScreen(nav: NavController) {
     }
 
     HubBody {
-        HubHeader("مدرسه 🎒", "همه‌چیز از کتاب شروع می‌شود — یک کتاب را باز کن")
+        HubHeader("مدرسه 🎒", "کلاسِ درس همیشه باز است — هر روز یک قدم با برنامه و درس‌هایت جلو برو")
 
         HubMenuGroup(
             "📚 کتاب‌ها",
