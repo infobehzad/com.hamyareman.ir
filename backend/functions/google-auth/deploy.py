@@ -38,6 +38,12 @@ if code == 409:
     del SPEC["functionId"]
     code, resp = api("PATCH", f"/functions/{FUNC}", SPEC)
 print("create/update:", code, json.dumps(resp)[:200])
+if code == 403 and "maximum number of functions" in json.dumps(resp):
+    print("⛔ سهمیه‌ی فانکشن پلن پر است — فانکشن‌های موجود این‌اند:")
+    c2, lst = api("GET", "/functions")
+    for f in lst.get("functions", []):
+        print(f'  - id={f["$id"]}  name={f["name"]}  runtime={f["runtime"]}  enabled={f["enabled"]}')
+    sys.exit("سهمیه پر — یکی از فانکشن‌های بالا باید حذف شود (در کنسول یا با تایید صریح).")
 if code >= 400:
     sys.exit("create/update failed")
 
