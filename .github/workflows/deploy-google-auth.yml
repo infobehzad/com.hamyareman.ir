@@ -18,4 +18,4 @@ jobs:
       - name: 📥 Checkout
         uses: actions/checkout@v4
       - name: 🚀 Deploy (scopes + build + smoke ×4)
-        run: python3 backend/functions/google-auth/deploy.py
+        run: python3 archive/backend/functions/google-auth/deploy.py

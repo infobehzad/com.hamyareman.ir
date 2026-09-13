@@ -56,15 +56,15 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: backend/seed/package-lock.json
+          cache-dependency-path: archive/backend/seed/package-lock.json
 
       - name: 📦 نصب وابستگی‌ها
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: npm ci
 
       - name: 🗄 گام ۱/۴ — Migration (جداول guided_sessions و guided_progress)
         if: github.event.inputs.skip_migration != 'true'
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: |
           echo "▶ اجرای migrate-prompt-03.js ..."
           node migrate-prompt-03.js
@@ -72,7 +72,7 @@ jobs:
 
       - name: 🧹 گام ۲/۴ — پاکسازی سطرهای تکراری (قبل از seed)
         if: github.event.inputs.skip_seed != 'true'
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: |
           echo "▶ اجرای cleanup-guided-sessions.js ..."
           node cleanup-guided-sessions.js
@@ -80,11 +80,11 @@ jobs:
 
       - name: 📤 گام ۳/۴ — آپلود تصاویر + صوت جلسات
         if: github.event.inputs.skip_upload != 'true'
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: |
           echo "▶ شمارش فایل‌ها برای آپلود ..."
-          REF_COUNT=$(find ../../artifacts/prompt-03-push/guided-references -type f \( -name "*.jpg" -o -name "*.png" \) 2>/dev/null | wc -l)
-          AUDIO_COUNT=$(find ../../artifacts/prompt-03-push/guided-audio -type f -name "*.mp3" 2>/dev/null | wc -l)
+          REF_COUNT=$(find ../../archive/artifacts/prompt-03-push/guided-references -type f \( -name "*.jpg" -o -name "*.png" \) 2>/dev/null | wc -l)
+          AUDIO_COUNT=$(find ../../archive/artifacts/prompt-03-push/guided-audio -type f -name "*.mp3" 2>/dev/null | wc -l)
           echo "  تصویر: $REF_COUNT فایل"
           echo "  صوت:   $AUDIO_COUNT فایل"
           echo "  جمع:   $((REF_COUNT + AUDIO_COUNT)) فایل"
@@ -94,7 +94,7 @@ jobs:
 
       - name: 🌱 گام ۴/۴ — Seed ۴۵ جلسه به guided_sessions
         if: github.event.inputs.skip_seed != 'true'
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: |
           echo "▶ اجرای seed-guided-sessions.js ..."
           node seed-guided-sessions.js

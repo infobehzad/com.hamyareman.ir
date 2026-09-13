@@ -49,10 +49,10 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: backend/seed/package-lock.json
+          cache-dependency-path: archive/backend/seed/package-lock.json
 
       - name: 📦 نصب وابستگی‌ها
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: npm ci
 
       - name: 🧼 نرمال‌سازی کلیدها (بدون whitespace)
@@ -60,12 +60,12 @@ jobs:
           echo "APPWRITE_API_KEY=$(printf '%s' "$APPWRITE_API_KEY" | tr -d '[:space:]')" >> "$GITHUB_ENV"
 
       - name: 🔑 سلامت کلید API (با خود SDK)
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: node check-appwrite-key.js tables
 
       - name: 🗄 گام ۱/۲ — Migration جدول study_progress
         if: github.event.inputs.skip_migration != 'true'
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: |
           echo "▶ اجرای migrate-prompt-04-study-progress.js ..."
           node migrate-prompt-04-study-progress.js
@@ -73,7 +73,7 @@ jobs:
 
       - name: 🚀 گام ۲/۲ — دیپلوی فانکشن study-tutor
         if: github.event.inputs.skip_function != 'true'
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: |
           echo "▶ اجرای deploy-prompt-04-study-tutor.js ..."
           node deploy-prompt-04-study-tutor.js

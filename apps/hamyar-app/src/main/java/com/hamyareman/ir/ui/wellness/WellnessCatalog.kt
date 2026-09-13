@@ -7,7 +7,7 @@ import com.hamyareman.ir.ui.wellness.WellnessMove.Category
  *
  * نکته‌ها:
  *  - ۱۵ یوگا، ۱۵ ورزش، ۸ تنفس، ۵ یادگیری = ۴۳ حرکت (مطابق معیارهای پذیرش پرامپت ۰۲).
- *  - `referenceImageUrl` به فایل‌هایی اشاره می‌کند که در `artifacts/wellness-references/` ساخته شدند
+ *  - `referenceImageUrl` به فایل‌هایی اشاره می‌کند که در آرشیو (تاریخچه‌ی گیت‌هاب) ساخته شدند
  *    و بعد از deploy در باکت `wellness-media` با URL عمومی در دسترس خواهند بود.
  *  - `referenceImagePromptTemplate` برای قابلیت آینده‌ی «تولید دوباره با چهره‌ی کاربر» نگه داشته شده.
  *  - `audioCueId` به فایل صوتی TTS فارسی اشاره می‌کند که در همان باکت آپلود می‌شود.

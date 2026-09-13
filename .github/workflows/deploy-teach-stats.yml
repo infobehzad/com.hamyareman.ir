@@ -26,14 +26,14 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: backend/seed/package-lock.json
+          cache-dependency-path: archive/backend/seed/package-lock.json
 
       - name: 📦 نصب وابستگی‌ها
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: npm ci
 
       - name: 🗄 ساخت/به‌روزرسانی جدول teach_stats
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: |
           echo "▶ اجرای migrate-teach-stats.js ..."
           node migrate-teach-stats.js

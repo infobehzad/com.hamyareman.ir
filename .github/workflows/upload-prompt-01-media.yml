@@ -74,10 +74,10 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: backend/seed/package-lock.json
+          cache-dependency-path: archive/backend/seed/package-lock.json
 
       - name: 📦 نصب وابستگی‌ها
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: npm ci
 
       - name: 🧼 نرمال‌سازی کلید (بدون whitespace)
@@ -85,18 +85,18 @@ jobs:
           echo "APPWRITE_API_KEY=$(printf '%s' "$APPWRITE_API_KEY" | tr -d '[:space:]')" >> "$GITHUB_ENV"
 
       - name: 🔑 سلامت کلید برای باکت (با خود SDK)
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: node check-appwrite-key.js storage
 
       - name: 🗄 مایگریشن اسکیمای lessons (وقتی سید فعال است — idempotent)
         if: github.event.inputs.seed_lessons == 'true'
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: |
           echo "▶ اجرای migrate-prompt-01.js (ستون‌های bookCode/videoUrl/... + جدول lesson_media_progress)"
           node migrate-prompt-01.js
 
       - name: 📤 آپلود رسانه‌ی درس‌ها
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: |
           ARGS=""
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi

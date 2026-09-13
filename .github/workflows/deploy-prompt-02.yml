@@ -55,15 +55,15 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: backend/seed/package-lock.json
+          cache-dependency-path: archive/backend/seed/package-lock.json
 
       - name: 📦 نصب وابستگی‌ها
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: npm ci
 
       - name: 🗄 گام ۱/۴ — Migration (database + جداول + بررسی bucket)
         if: github.event.inputs.skip_migration != 'true'
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: |
           echo "▶ اجرای migrate-prompt-02.js ..."
           node migrate-prompt-02.js
@@ -71,7 +71,7 @@ jobs:
 
       - name: 🧹 گام ۲/۴ — پاکسازی سطرهای تکراری (قبل از seed)
         if: github.event.inputs.skip_seed != 'true'
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: |
           echo "▶ اجرای cleanup-wellness-moves.js ..."
           node cleanup-wellness-moves.js
@@ -79,11 +79,11 @@ jobs:
 
       - name: 📤 گام ۳/۴ — آپلود تصاویر + صوت
         if: github.event.inputs.skip_upload != 'true'
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: |
           echo "▶ شمارش فایل‌ها برای آپلود ..."
-          IMAGE_COUNT=$(find ../../artifacts/prompt-02-push/wellness-references -type f \( -name "*.jpg" -o -name "*.png" \) 2>/dev/null | wc -l)
-          AUDIO_COUNT=$(find ../../artifacts/prompt-02-push/wellness-audio -type f -name "*.mp3" 2>/dev/null | wc -l)
+          IMAGE_COUNT=$(find ../../archive/artifacts/prompt-02-push/wellness-references -type f \( -name "*.jpg" -o -name "*.png" \) 2>/dev/null | wc -l)
+          AUDIO_COUNT=$(find ../../archive/artifacts/prompt-02-push/wellness-audio -type f -name "*.mp3" 2>/dev/null | wc -l)
           echo "  تصویر: $IMAGE_COUNT فایل"
           echo "  صوت:   $AUDIO_COUNT فایل"
           echo "  جمع:   $((IMAGE_COUNT + AUDIO_COUNT)) فایل"
@@ -93,7 +93,7 @@ jobs:
 
       - name: 🌱 گام ۴/۴ — Seed ۴۳ حرکت به wellness_moves
         if: github.event.inputs.skip_seed != 'true'
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: |
           echo "▶ اجرای seed-wellness-moves.js ..."
           node seed-wellness-moves.js

@@ -60,10 +60,10 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: backend/seed/package-lock.json
+          cache-dependency-path: archive/backend/seed/package-lock.json
 
       - name: 📦 نصب وابستگی‌ها
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: npm ci
 
       - name: 🧼 نرمال‌سازی کلیدها (بدون whitespace)
@@ -72,18 +72,18 @@ jobs:
           echo "AI_API_KEY=$(printf '%s' "$AI_API_KEY" | tr -d '[:space:]')" >> "$GITHUB_ENV"
 
       - name: 🔑 سلامت کلید Appwrite (با خود SDK)
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: node check-appwrite-key.js functions
 
       - name: 🧩 گام ۱/۳ — ست‌کردن متغیرهای AI روی فانکشن
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: |
           echo "▶ اجرای set-study-tutor-ai.js vars ..."
           node set-study-tutor-ai.js vars
           echo "✅ متغیرها ست شدند."
 
       - name: 🚀 گام ۲/۳ — دیپلوی فانکشن (متغیرها با دیپلوی تازه فعال می‌شوند)
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: |
           echo "▶ اجرای deploy-prompt-04-study-tutor.js ..."
           node deploy-prompt-04-study-tutor.js
@@ -91,7 +91,7 @@ jobs:
 
       - name: 🧪 گام ۳/۳ — اجرای آزمایشی (smoke test)
         if: github.event.inputs.run_smoke != 'false'
-        working-directory: backend/seed
+        working-directory: archive/backend/seed
         run: |
           echo "▶ اجرای set-study-tutor-ai.js smoke ..."
           node set-study-tutor-ai.js smoke
