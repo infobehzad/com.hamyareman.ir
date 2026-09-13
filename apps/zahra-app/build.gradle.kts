@@ -109,6 +109,7 @@ dependencies {
     // ورود native گوگل — Credential Manager + play-services provider
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play)
+    implementation(libs.googleid)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(project(":core-common"))
     implementation(project(":core-designsystem"))

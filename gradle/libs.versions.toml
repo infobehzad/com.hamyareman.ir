@@ -14,7 +14,8 @@ datastore = "1.1.7"
 biometric = "1.1.0"           # آخرین نسخه‌ی پایدار androidx.biometric (بررسی‌شده از Google Maven)
 appcompat = "1.8.0"           # برای تم بیومتریک در API < 28 (dialog سازگاری)
 media3 = "1.11.0"             # پخش صوت در پس‌زمینه (کتاب صوتی)
-credentials = "1.5.0"          # Credential Manager — ورود native گوگل (لیست اکانت‌های گوشی)
+credentials = "1.5.0"
+googleid = "1.1.1"          # پارسر GoogleIdTokenCredential برای Credential Manager          # Credential Manager — ورود native گوگل (لیست اکانت‌های گوشی)
 junit = "4.13.2"
 
 [libraries]
@@ -37,6 +38,7 @@ androidx-biometric = { group = "androidx.biometric", name = "biometric", version
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
 androidx-credentials-play = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
+googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
 androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
 androidx-media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "media3" }
 androidx-media3-common = { group = "androidx.media3", name = "media3-common", version.ref = "media3" }
