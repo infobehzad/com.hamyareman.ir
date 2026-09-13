@@ -1,7 +1,10 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package ir.behzad.roozhayeman.ui.study
 
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -479,7 +482,7 @@ private fun BookDlCard(
 
 /** پیمایش فهرست رسمی — فصل‌ها آکاردئونی؛ فقط ردیف‌های دارای تدریس. */
 private fun Modifier.androidClickable(onClick: () -> Unit): Modifier =
-    this.pointerInput(Unit) { androidx.compose.foundation.gestures.detectTapGestures { onClick() } }
+    this.pointerInput(Unit) { detectTapGestures { onClick() } }
 
 /** یک نوار وضعیت برای یک نوع فایل (PDF یا صوت): «PDF · ۰۰۰۳ از ۰۰۱۲» + نوار. */
 @Composable
