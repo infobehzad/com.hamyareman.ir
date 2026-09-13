@@ -209,6 +209,13 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
         runCatching { TeachCloud.push(appContainer.sync) }
     }
 
+    // قانون v1.10: صوت تدریس فقط وقتی صفحه‌ی پلیر (تدریس/جزوه/نکات) باز است از اعلان
+    // هم پخش می‌شود — سرویس با این پرچم پلیِ اعلان را می‌سنجد.
+    DisposableEffect(packId) {
+        ir.behzad.platform.feature.playback.TeachGate.teachPageOpen = true
+        onDispose { ir.behzad.platform.feature.playback.TeachGate.teachPageOpen = false }
+    }
+
     var forceServer by remember { mutableStateOf(false) }
 
     fun startTrack(t: TeachTrack, autoplay: Boolean, fromServer: Boolean = false) {
@@ -304,13 +311,6 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
             runCatching { playback.pause() }
             playback.release()
         }
-    }
-
-    // قانون v1.10: صوت تدریس فقط داخل صفحه‌ی تدریس پخش می‌شود — سرویس با این پرچم
-    // دکمه‌ی پلی اعلان را می‌سنجد (تا این صفحه باز نشود، پلیِ اعلان پخش نمی‌کند).
-    DisposableEffect(packId) {
-        ir.behzad.platform.feature.playback.TeachGate.teachPageOpen = true
-        onDispose { ir.behzad.platform.feature.playback.TeachGate.teachPageOpen = false }
     }
 
     // اگر پخشِ محلی (گاوصندوق) خطا داد، بی‌سروصدا از سرور ادامه بده.

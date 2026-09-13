@@ -12,8 +12,6 @@ import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import androidx.media3.session.SessionResult
-import com.google.common.util.concurrent.Futures
-import com.google.common.util.concurrent.ListenableFuture
 
 /**
  * وضعیت «صفحه‌ی تدریس باز است» — پل بین سرویس رسانه و UI (همان پروسه).
@@ -68,17 +66,20 @@ class PlaybackService : MediaSessionService() {
         mediaSession = MediaSession.Builder(this, player)
             // لمس خود اعلان → باز شدن صفحه‌ی تدریس همان درس (حتی وقتی اپ بسته است).
             .setSessionActivity(teachPendingIntent(currentPackOf(player)))
-            // دکمه‌ی پلی اعلان هم مثل لمس اعلان: اول صفحه‌ی تدریس باز شود، بعد پخش.
+            // دکمه‌ی پلی اعلان هم مثل لمس اعلان: اول صفحه‌ی پلیر (تدریس) باز شود، بعد پخش.
             .setCallback(object : MediaSession.Callback {
-                override fun onPlay(session: MediaSession): ListenableFuture<SessionResult> {
-                    val pack = currentPackOf(session.player)
-                    if (pack != null && !TeachGate.teachPageOpen) {
+                override fun onPlayerCommandRequest(
+                    mediaSession: MediaSession,
+                    controllerInfo: MediaSession.ControllerInfo,
+                    playerCommand: Int,
+                ): Int {
+                    val pack = currentPackOf(mediaSession.player)
+                    if (playerCommand == Player.COMMAND_PLAY_PAUSE && pack != null && !TeachGate.teachPageOpen) {
                         TeachGate.requestedPack = pack
-                        runCatching { session.sessionActivity.send() }
-                        return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+                        runCatching { mediaSession.sessionActivity?.send() }
+                        return SessionResult(SessionResult.RESULT_ERROR).resultCode
                     }
-                    session.player.play()
-                    return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+                    return super.onPlayerCommandRequest(mediaSession, controllerInfo, playerCommand)
                 }
             })
             .build()
