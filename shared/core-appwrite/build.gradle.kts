@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "ir.behzad.platform.core.appwrite"
+    namespace = "com.hamyareman.ir.platform.core.appwrite"
     compileSdk = 37
 
     defaultConfig {

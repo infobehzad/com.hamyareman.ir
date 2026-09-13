@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "ir.behzad.platform.feature.study"
+    namespace = "com.hamyareman.ir.platform.feature.study"
     compileSdk = 37
 
     defaultConfig {

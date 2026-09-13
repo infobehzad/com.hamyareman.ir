@@ -38,7 +38,7 @@
 
 | اپ | Package Name | نام پیشنهادی |
 | --- | --- | --- |
-| روزهای من (زهرا) | `ir.behzad.roozhayeman` | Roozhaye Man |
+| روزهای من (زهرا) | `com.hamyareman.ir` | Hamyar |
 | همراه پدر | `ir.behzad.hamrahpadar` | Hamrah Padar |
 
 چرا دو پلتفرم؟ چون هر اپ یک Project ID مشترک دارد ولی Package Name متفاوت است و
@@ -348,7 +348,7 @@ val calls = CallEngine(
 - [ ] ۵ جدول خصوصی **ساخته نشد** (عمداً)
 - [ ] ۴ باکت با همان شناسه‌ها ساخته شد (`zahra-private` بدون دسترسی خواندن عمومی)
 - [ ] Email/Password و Anonymous در Authentication روشن است
-- [ ] دو پلتفرم اندروید: `ir.behzad.roozhayeman` و `ir.behzad.hamrahpadar`
+- [ ] دو پلتفرم اندروید: `com.hamyareman.ir` و `ir.behzad.hamrahpadar`
 - [ ] **نه تابع** deploy شد و کلید `APPWRITE_FUNCTION_API_KEY` روی همه‌شان گذاشته شد
 - [ ] `notify-guardian`: متغیر `GUARDIAN_RATE_LIMIT_MS` (اختیاری، پیش‌فرض ۳۰۰۰۰۰)
 - [ ] `ai-companion`: `AI_API_KEY` و `AI_MODELS`/`AI_MODEL`/`AI_ENDPOINT`

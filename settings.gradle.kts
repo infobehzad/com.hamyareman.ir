@@ -22,10 +22,10 @@ dependencyResolutionManagement {
 
 // این پروژه نسخه‌ی جداشده‌ی «فقط اپ زهرا» از ZahraPadarPlatform است.
 // اپ پدر و ماژول مشترکی که فقط پدر لازم دارد اینجا نیست — به Padar-App-Final.zip نگاه کنید.
-rootProject.name = "RoozhayeManPlatform"
+rootProject.name = "HamyarPlatform"
 
 include(
-    ":zahra-app",
+    ":hamyar-app",
     ":core-common",
     ":core-designsystem",
     ":core-appwrite",
@@ -39,7 +39,7 @@ include(
     ":feature-study",
 )
 
-project(":zahra-app").projectDir = file("apps/zahra-app")
+project(":hamyar-app").projectDir = file("apps/hamyar-app")
 project(":core-common").projectDir = file("shared/core-common")
 project(":core-designsystem").projectDir = file("shared/core-designsystem")
 project(":core-appwrite").projectDir = file("shared/core-appwrite")

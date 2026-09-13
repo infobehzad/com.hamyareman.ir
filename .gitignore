@@ -13,7 +13,7 @@ local.properties
 
 # Keep the distributable APK in version control
 !artifacts/
-!artifacts/zahra-app-debug.apk
+!artifacts/hamyar-app-debug.apk
 
 # پرامپت ۰۲: تصاویر مرجع تولیدی (هر کدام ~300KB، ۴۳ حرکت ≈ ۱۲MB)
 # فقط منبع پرامپت و metadata در git نگه داشته می‌شود.

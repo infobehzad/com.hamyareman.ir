@@ -54,7 +54,7 @@
 
 | ماژول | نقش | وضعیت بیلد | وضعیت عملکرد |
 | --- | --- | --- | --- |
-| `:zahra-app` | اپ زهرا، ۴۰+ صفحه | ✅ اصلاح شد | ✅ کامل (به‌جز موارد بخش ۶) |
+| `:hamyar-app` | اپ زهرا، ۴۰+ صفحه | ✅ اصلاح شد | ✅ کامل (به‌جز موارد بخش ۶) |
 | `:padar-app` | اپ پدر: اخلاق‌نامه، پیوند، حرف دل، هفته، تنظیمات | ✅ اصلاح شد | ✅ کامل |
 | `:core-common` | `JalaliDate`, `LocalStore`, `TableIds`, `PrivacyPolicy`, `UserRole`, `AppResult`, `Helplines`, **`ScreenTimeTracker`** | ✅ | ✅ بازنویسی شد |
 | `:core-designsystem` | تم دو برند، `AppTopBar`, `PrimaryButton`, `InlineButton`, `SectionCard`, `PinLockGate` | ✅ (وابستگی دوری حذف شد) | ✅ |
@@ -128,7 +128,7 @@
 | نبود `local.properties` در مسیر خواندن | `sdk.dir`/Appwrite خوانده نمی‌شد | روت `build.gradle.kts` فایل را می‌خواند و به `findProperty` تزریق می‌کند |
 | `:core-designsystem` به خودش وابسته بود | وابستگی دوری → شکست resolve | حذف شد |
 | نبود آیکون لانچر + نبود `values-night` + منیفست ناقص | `@mipmap/ic_launcher` به منبع ناموجود ارجاع می‌داد | آیکون تطبیقی وکتوری + تم روز/شب + منیفست کامل برای هر دو اپ |
-| `import ir.behzad.platform.core.appwrite.AppResult` در **۱۰ فایل** | `AppResult`/`AppError` در `core.common` تعریف شده‌اند، نه `core.appwrite` → «unresolved reference» | همه به `ir.behzad.platform.core.common.AppResult/AppError` اصلاح شدند |
+| `import com.hamyareman.ir.platform.core.appwrite.AppResult` در **۱۰ فایل** | `AppResult`/`AppError` در `core.common` تعریف شده‌اند، نه `core.appwrite` → «unresolved reference» | همه به `com.hamyareman.ir.platform.core.common.AppResult/AppError` اصلاح شدند |
 | نبود تابع سطح‌بسته‌ی `toPersianDigits` / `toLatinDigits` | ۶ فایل UI و `PairingRepository` و حتی تست موجود (`JalaliDateTest`) آن‌ها را از `core.common` وارد می‌کردند؛ فقط نسخه‌ی عضوِ `JalaliDate` وجود داشت | `shared/core-common/.../Digits.kt` ساخته شد: `toPersianDigits` (نماینده‌ی نسخه‌ی عضو) و `toLatinDigits` (رقم فارسی ۰-۹ و عربی ٠-٩ → لاتین) |
 
 ### ۵-۲) باگ‌های عملکردی جدی
@@ -188,8 +188,8 @@
 | --- | --- | --- |
 | محتوا | `backend/seed/content.json` | ۸ درس، ۹ آزمون، ۸ آشپزی، ۵ ورزش، ۸ گره‌ی نقشه‌ی راه، ۱۴ ایده‌ی نقاشی — همه فارسی و قابل‌اجرا |
 | ایمپورت | `backend/seed/import.js` | upsert (اول `updateRow`، بعد `createRow`)، `--dry-run` و `--only=`؛ شناسه‌ی سطر = `id` محتوا، پس اجرای دوباره safe است |
-| مدل/مخزن | `apps/zahra-app/.../ui/content/CatalogRepository.kt` | **سرور → کش محلی → محتوای داخلی**؛ ستون‌های آرایه‌ای به‌صورت رشته‌ی JSON |
-| آفلاین | `apps/zahra-app/.../ui/content/BuiltInContent.kt` | زیرمجموعه‌ی داخلی تا اپ بدون اینترنت و بدون seed هم خالی نماند |
+| مدل/مخزن | `apps/hamyar-app/.../ui/content/CatalogRepository.kt` | **سرور → کش محلی → محتوای داخلی**؛ ستون‌های آرایه‌ای به‌صورت رشته‌ی JSON |
+| آفلاین | `apps/hamyar-app/.../ui/content/BuiltInContent.kt` | زیرمجموعه‌ی داخلی تا اپ بدون اینترنت و بدون seed هم خالی نماند |
 
 صفحه‌هایی که به مخزن وصل شدند و **رفتار واقعی** گرفتند (نه فقط نمایش داده):
 
@@ -262,7 +262,7 @@
 - **ارزیابی** (`AiAssessmentScreen`): شش سؤال پخش‌شده از بانک همین مسیر ⇒ مبتدی / در حال رشد /
   پیشرفته، ذخیره روی دستگاه.
 - **یادآور روزانه**: `Reminder("ai-lesson-daily", …, 17:00)` با شناسه‌ی ثابت در
-  `RoozhayeManApplication` ساخته می‌شود (پس نصب‌های قدیمی هم آن را می‌گیرند)، از
+  `HamyarApplication` ساخته می‌شود (پس نصب‌های قدیمی هم آن را می‌گیرند)، از
   `AlarmManager.setAndAllowWhileIdle` و **ساعات سکوت** پیروی می‌کند، و از خود ماژول
   با یک Switch خاموش/روشن و ۳۰‌دقیقه جابه‌جا می‌شود.
 - **پیشرفت واقعی**: «خوانده‌شدن درس» در `ui/content/LessonProgress.kt` ثبت می‌شود
@@ -550,7 +550,7 @@ gradle wrapper --gradle-version 9.6.0
 cp local.properties.example local.properties   # سپس appwrite.projectId را پر کن
 
 # بیلد:
-./gradlew :zahra-app:assembleDebug
+./gradlew :hamyar-app:assembleDebug
 ./gradlew :padar-app:assembleDebug
 ./gradlew test            # تست‌های JVM (core-common, feature-pairing)
 ```

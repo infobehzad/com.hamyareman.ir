@@ -32,7 +32,7 @@
 ## ۲. ساختار پروژه (فقط ماژول‌های مخصوص این اپ)
 
 ```
-apps/zahra-app/     کد اختصاصی اپ زهرا (۴۰+ صفحه در ۱۶ بخش UI)
+apps/hamyar-app/     کد اختصاصی اپ زهرا (۴۰+ صفحه در ۱۶ بخش UI)
 shared/
   core-common        JalaliDate، Digits، LocalStore، PrivacyPolicy، Helplines، ScreenTimeTracker
   core-designsystem   تم/رنگ/تایپوگرافی + PinLockGate
@@ -60,9 +60,9 @@ backend/              بک‌اند مشترک Appwrite (با اپ پدر مشت
 cp local.properties.example local.properties
 # appwrite.projectId را پر کنید (خالی هم باشد، اپ در «حالت محلی» بالا می‌آید)
 
-./gradlew :zahra-app:assembleDebug --stacktrace
+./gradlew :hamyar-app:assembleDebug --stacktrace
 ./gradlew test               # تست‌های JVM (core-common, feature-pairing)
-./gradlew :zahra-app:lintDebug
+./gradlew :hamyar-app:lintDebug
 ```
 
 پیش‌نیاز: **JDK 17**، Android SDK با `compileSdk 36` / `Build-Tools 36.0.0`.

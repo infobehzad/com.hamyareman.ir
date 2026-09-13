@@ -23,7 +23,7 @@
 ## نحوه‌ی اجرای deploy
 
 ### گزینه ۱: از GitHub UI (ساده‌ترین)
-1. به `https://github.com/behzadinfo-dotcom/Zahraa_app-with-apk/actions` بروید
+1. به `https://github.com/behzadinfo-dotcom/com.hamyareman.ir/actions` بروید
 2. در سمت چپ روی "Deploy Prompt 02 (wellness)" کلیک کنید
 3. دکمه‌ی "Run workflow" را بزنید
 4. (اختیاری) گزینه‌های skip را تنظیم کنید
@@ -94,7 +94,7 @@ gh workflow run deploy-prompt-02.yml -f skip_migration=true
 ## امنیت
 
 ⚠️ **مهم**: workflow شامل **API key با دسترسی کامل** است. پس از deploy موفق:
-1. به `https://github.com/behzadinfo-dotcom/Zahraa_app-with-apk/settings/secrets/actions` بروید
+1. به `https://github.com/behzadinfo-dotcom/com.hamyareman.ir/settings/secrets/actions` بروید
 2. **API key را در Appwrite Console تغییر دهید** (یکی جدید بسازید)
 3. کلید قدیمی را revoke کنید
 4. کلید جدید را فقط در GitHub Secrets ذخیره کنید

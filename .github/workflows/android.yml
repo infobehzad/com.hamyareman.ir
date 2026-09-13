@@ -33,11 +33,11 @@ jobs:
         with:
           packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
       - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew test :zahra-app:assembleDebug :zahra-app:lintDebug --stacktrace
+      - run: ./gradlew test :hamyar-app:assembleDebug :hamyar-app:lintDebug --stacktrace
       - name: Upload debug APK
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: zahra-app-debug-apk
-          path: apps/zahra-app/build/outputs/apk/debug/*.apk
+          name: hamyar-app-debug-apk
+          path: apps/hamyar-app/build/outputs/apk/debug/*.apk
           if-no-files-found: error

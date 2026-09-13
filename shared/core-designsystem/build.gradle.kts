@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "ir.behzad.platform.core.designsystem"
+    namespace = "com.hamyareman.ir.platform.core.designsystem"
     compileSdk = 37
 
     defaultConfig {

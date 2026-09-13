@@ -10,7 +10,7 @@ shared/feature-study/                 ← موتور مستقل از UI
   QuizGrader.kt     تصحیح قطعی آفلاین (mcq/numeric/short با ارقام فارسی+کسر)
   StudyProgressRepository.kt  کش محلی + outbox → جدول study_progress
   StudyPackRepository.kt      خواندن از assets
-apps/zahra-app  ui/study/LessonStudyScreens.kt   ← ۴ تب: خلاصه‌ها/فلش‌کارت/آزمون/حل
+apps/hamyar-app  ui/study/LessonStudyScreens.kt   ← ۴ تب: خلاصه‌ها/فلش‌کارت/آزمون/حل
 backend/functions/study-tutor/        ← AI اختیاری رفع اشکال مفهومی (کلید سمت سرور)
 backend/seed/migrate-prompt-04-study-progress.js  ← جدول study_progress (idempotent)
 ```
@@ -33,7 +33,7 @@ SyncEngine به جدول `study_progress` (سطر `sp-<uid>-<packId>`، همه�
 
 ## گسترش به بقیه‌ی دروس (بعد از تأیید پایلوت)
 
-۱. JSON پک جدید در `apps/zahra-app/src/main/assets/studypacks/<bookId>-<lessonId>.json`
+۱. JSON پک جدید در `apps/hamyar-app/src/main/assets/studypacks/<bookId>-<lessonId>.json`
    با همین اسکیمای ۵ کلید (sections/flashcards/questions/solutions/…).
 ۲. ورودی هاب: `Screen.LessonStudy.of(packId)` — همین.
 ۳. نیازی به تغییر موتور/UI نیست؛ محتوای فعلی نمونه‌ی واقعی فصل۱ درس۱ است و بعداً

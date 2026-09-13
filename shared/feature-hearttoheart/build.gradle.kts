@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "ir.behzad.platform.feature.hearttoheart"
+    namespace = "com.hamyareman.ir.platform.feature.hearttoheart"
     compileSdk = 37
 
     defaultConfig {

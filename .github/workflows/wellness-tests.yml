@@ -9,8 +9,8 @@ on:
     branches: [main, 'arena/**']
   pull_request:
     paths:
-      - 'apps/zahra-app/src/**'
-      - 'apps/zahra-app/src/test/**'
+      - 'apps/hamyar-app/src/**'
+      - 'apps/hamyar-app/src/test/**'
       - 'gradle/libs.versions.toml'
       - '.github/workflows/wellness-tests.yml'
 
@@ -30,7 +30,7 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      # تست‌های :zahra-app به SDK اندروید نیاز دارند (کامپایل ماژول‌های اندروید).
+      # تست‌های :hamyar-app به SDK اندروید نیاز دارند (کامپایل ماژول‌های اندروید).
       - name: 🤖 Setup Android SDK
         uses: android-actions/setup-android@v3
 
@@ -39,8 +39,8 @@ jobs:
 
       - name: 🧪 اجرای تست‌های wellness
         run: |
-          ./gradlew :zahra-app:testDebugUnitTest \
-            --tests "ir.behzad.roozhayeman.ui.wellness.*" \
+          ./gradlew :hamyar-app:testDebugUnitTest \
+            --tests "com.hamyareman.ir.ui.wellness.*" \
             --info --stacktrace
 
       - name: 📊 گزارش تست
@@ -49,7 +49,7 @@ jobs:
           echo "═══════════════════════════════════════"
           echo "  📋 گزارش تست‌های wellness"
           echo "═══════════════════════════════════════"
-          REPORT_DIR="apps/zahra-app/build/test-results/testDebugUnitTest"
+          REPORT_DIR="apps/hamyar-app/build/test-results/testDebugUnitTest"
           if [ -d "$REPORT_DIR" ]; then
             echo "  فایل‌های گزارش:"
             find "$REPORT_DIR" -name "*.xml" -type f | wc -l | xargs -I {} echo "    {} فایل XML"
@@ -68,6 +68,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wellness-test-results
-          path: apps/zahra-app/build/reports/tests/testDebugUnitTest/
+          path: apps/hamyar-app/build/reports/tests/testDebugUnitTest/
           retention-days: 7
           if-no-files-found: ignore

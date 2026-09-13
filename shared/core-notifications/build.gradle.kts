@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "ir.behzad.platform.core.notifications"
+    namespace = "com.hamyareman.ir.platform.core.notifications"
     compileSdk = 37
 
     defaultConfig {

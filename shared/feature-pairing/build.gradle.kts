@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "ir.behzad.platform.feature.pairing"
+    namespace = "com.hamyareman.ir.platform.feature.pairing"
     compileSdk = 37
 
     defaultConfig {

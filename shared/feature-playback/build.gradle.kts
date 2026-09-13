@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "ir.behzad.platform.feature.playback"
+    namespace = "com.hamyareman.ir.platform.feature.playback"
     compileSdk = 37
 
     defaultConfig {

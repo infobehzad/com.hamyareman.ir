@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "ir.behzad.platform.feature.calls"
+    namespace = "com.hamyareman.ir.platform.feature.calls"
     compileSdk = 37
 
     defaultConfig {
