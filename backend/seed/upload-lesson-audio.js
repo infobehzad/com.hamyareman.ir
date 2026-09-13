@@ -23,6 +23,7 @@ const ROOT = path.resolve(__dirname, '../../wellness-references/School-books-9')
 const dryRun = process.argv.includes('--dry-run');
 const force = process.argv.includes('--force');
 const listOnly = process.argv.includes('--list');
+const convention = process.argv.includes('--convention');
 
 if (!KEY) { console.error('❌ APPWRITE_API_KEY ست نیست'); process.exit(2); }
 
@@ -45,6 +46,55 @@ if (listOnly) {
             offset += 100;
         } while (offset < total);
         console.log(`#TOTAL ${count}`);
+    })().then(() => process.exit(0)).catch(e => { console.error('❌', e.message); process.exit(1); });
+} else if (convention) {
+    // v1.17 — یکدست‌سازی باکت با قرارداد سراسری:
+    //  صوت هر پک: <packId>_AUDIO.mp3 (placeholder برای ناقص‌ها؛ REALها دست‌نخورده)
+    //  ویدیوی هر پک: <dash>-V01.mp4
+    //  حذف: بخش‌های -A0n.mp3 و ویدیوهای -V02/-V03.mp4 (همه placeholder)
+    (async () => {
+        const meta = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'pack-list.json'), 'utf8'));
+        const sampleAudio = fs.readFileSync(path.resolve(__dirname, 'sample-audio.mp3'));
+        const sampleVideo = fs.readFileSync(path.resolve(__dirname, 'sample-video.mp4'));
+
+        const existing = new Map();
+        let offset = 0;
+        for (;;) {
+            const res = await withRetry(() => storage.listFiles({ bucketId: BUCKET, queries: [sdk.Query.limit(100), sdk.Query.offset(offset)] }));
+            for (const f of res.files) existing.set(f.$id || f.name, f.sizeOriginal);
+            offset += 100;
+            if (offset >= res.total) break;
+        }
+        console.log(`📦 باکت: ${existing.size} فایل`);
+
+        let up = 0, keep = 0;
+        const wanted = new Set();
+        for (const pk of meta.packs) {
+            const audio = `${pk.packId}_AUDIO.mp3`;
+            wanted.add(audio);
+            if (pk.authoredAudio) wanted.add(pk.authoredAudio);
+            wanted.add(`${pk.dash}-V01.mp4`);
+        }
+        for (const name of wanted) {
+            if (existing.has(name)) { keep++; continue; }
+            const buf = name.endsWith('.mp4') ? sampleVideo : sampleAudio;
+            await withRetry(() => storage.createFile({
+                bucketId: BUCKET, fileId: name,
+                file: InputFile.fromBuffer(buf, name),
+            }));
+            console.log(`  ⬆ ${name}`);
+            up++;
+        }
+        // حذف غیرقراردادی‌ها
+        let del = 0;
+        for (const name of existing.keys()) {
+            const isStale = /-A0\d\.mp3$/.test(name) || /-V0[23]\.mp4$/.test(name);
+            if (!isStale || wanted.has(name)) continue;
+            await withRetry(() => storage.deleteFile({ bucketId: BUCKET, fileId: name }));
+            console.log(`  🗑 ${name}`);
+            del++;
+        }
+        console.log(`📊 آپلود: ${up} | از قبل: ${keep} | حذف: ${del}`);
     })().then(() => process.exit(0)).catch(e => { console.error('❌', e.message); process.exit(1); });
 } else if (!fs.existsSync(ROOT)) { console.error('❌ مسیر کتاب‌ها نیست:', ROOT); process.exit(2); }
 let tables = null;

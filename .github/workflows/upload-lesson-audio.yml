@@ -15,6 +15,10 @@ on:
         description: 'فقط فهرست کامل باکت'
         required: false
         default: 'false'
+      convention:
+        description: 'یکدست‌سازی با قرارداد: صوت/ویدیوی ناقص + حذف بخش‌های اضافی'
+        required: false
+        default: 'false'
 
 jobs:
   upload:
@@ -45,4 +49,5 @@ jobs:
           if [ "${{ inputs.dry_run }}" = "true" ]; then FLAGS="$FLAGS --dry-run"; fi
           if [ "${{ inputs.force }}" = "true" ]; then FLAGS="$FLAGS --force"; fi
           if [ "${{ inputs.list_only }}" = "true" ]; then FLAGS="$FLAGS --list"; fi
+          if [ "${{ inputs.convention }}" = "true" ]; then FLAGS="$FLAGS --convention"; fi
           node upload-lesson-audio.js $FLAGS

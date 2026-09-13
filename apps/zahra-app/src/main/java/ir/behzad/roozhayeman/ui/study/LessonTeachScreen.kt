@@ -81,26 +81,14 @@ internal val TEACH_SPEEDS = listOf(2f, 1.5f, 1f, 0.75f, 0.5f)
 internal data class TeachTrack(val label: String, val fileId: String, val cacheKey: String)
 
 /**
- * صوت چندبخشی — بعضی درس‌ها صوتشان در باکت به‌صورت چند بخش (A01/A02/…) است؛
- * هر بخش یک ترکِ مستقل در صف پخش (بخش ۱، بخش ۲، …).
+ * v1.17 — قرارداد سراسری رسانه‌ها: هر پک «یک صوت» دارد:
+ *  - اگر audioFileId پک پر باشد (authored/override حکایت سفر) از همان استفاده می‌شود؛
+ *  - وگرنه نام قراردادی «<packId>_AUDIO.mp3» (در باکت برای همه‌ی ۲۰۹ پک موجود است).
+ * ترک دوم (اینترو) حذف شد. هر ویدیو هم یک فایل قراردادی «<dash>-V01.mp4» است (StudyMedia).
  */
-private val MULTIPART_AUDIO: Map<String, List<String>> = mapOf(
-    "C905_E01-L01" to listOf("C905-E01-L01-A01.mp3", "C905-E01-L01-A02.mp3", "C905-E01-L01-A03.mp3"),
-    "C905_E01-L02" to listOf("C905-E01-L02-A01.mp3", "C905-E01-L02-A02.mp3", "C905-E01-L02-A03.mp3"),
-    "C905_E01-L03" to listOf("C905-E01-L03-A01.mp3", "C905-E01-L03-A02.mp3", "C905-E01-L03-A03.mp3"),
-    "C905_E01-L04" to listOf("C905-E01-L04-A01.mp3", "C905-E01-L04-A02.mp3", "C905-E01-L04-A03.mp3"),
-)
-
-internal fun teachTracksOf(pack: StudyPack): List<TeachTrack> = buildList {
-    val parts = MULTIPART_AUDIO[pack.packId]
-    if (parts != null) {
-        parts.forEachIndexed { idx, fid ->
-            add(TeachTrack("بخش ${toPersianDigits((idx + 1).toString())}", fid, "${pack.packId}_A%02d.mp3".format(idx + 1)))
-        }
-        return@buildList
-    }
-    if (pack.audioFileId.isNotBlank()) add(TeachTrack("صوت درس", pack.audioFileId, "${pack.packId}_AUDIO.mp3"))
-    if (pack.audio2FileId.isNotBlank()) add(TeachTrack(pack.audio2Title.ifBlank { "مقدمه" }, pack.audio2FileId, "${pack.packId}_INTRO.mp3"))
+internal fun teachTracksOf(pack: StudyPack): List<TeachTrack> {
+    val fid = pack.audioFileId.ifBlank { "${pack.packId}_AUDIO.mp3" }
+    return listOf(TeachTrack("صوت درس", fid, fid))
 }
 
 /**
