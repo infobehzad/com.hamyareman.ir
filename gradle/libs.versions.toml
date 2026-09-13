@@ -15,7 +15,7 @@ biometric = "1.1.0"           # آخرین نسخه‌ی پایدار androidx.b
 appcompat = "1.8.0"           # برای تم بیومتریک در API < 28 (dialog سازگاری)
 media3 = "1.11.0"             # پخش صوت در پس‌زمینه (کتاب صوتی)
 credentials = "1.5.0"
-googleid = "1.1.1"          # پارسر GoogleIdTokenCredential برای Credential Manager          # Credential Manager — ورود native گوگل (لیست اکانت‌های گوشی)
+googleid = "1.1.1"          # پارسر GoogleIdTokenCredential برای Credential Manager
 junit = "4.13.2"
 
 [libraries]
