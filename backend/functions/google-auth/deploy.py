@@ -19,7 +19,8 @@ def api(method, path, payload=None):
         "content-type": "application/json"})
     try:
         with urllib.request.urlopen(req, timeout=60) as r:
-            return r.status, json.load(r)
+            raw = r.read().decode() or "{}"
+            return r.status, json.loads(raw)
     except urllib.error.HTTPError as e:
         return e.code, json.load(e)
 
