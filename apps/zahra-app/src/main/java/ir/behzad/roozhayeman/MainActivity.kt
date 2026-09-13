@@ -126,6 +126,17 @@ class MainActivity : FragmentActivity() {
                 if (loggedIn.value != false) loggedIn.value = false
             }
 
+            // v1.14: با ورود، همه‌ی آمار مدرسه (تدریس/فلش‌کارت/آزمون/نمودار پیشرفت)
+            // از سرور بازیابی و ادغام می‌شود — تعویض گوشی یا نصب مجدد هیچ‌چیز را از دست نمی‌دهد.
+            LaunchedEffect(loggedIn.value == true) {
+                if (loggedIn.value == true) {
+                    val uid = runCatching { container.auth.currentUserId() }.getOrNull()
+                    runCatching {
+                        ir.behzad.roozhayeman.ui.study.SchoolSync.restoreAll(activity, container.tables, container.sync, uid)
+                    }
+                }
+            }
+
             val uiPrefs = container.uiPrefs
             CompositionLocalProvider(LocalUiPrefs provides uiPrefs) {
                 PlatformTheme(
