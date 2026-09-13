@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
 import ir.behzad.platform.core.common.AppResult
 import ir.behzad.platform.core.designsystem.BrandTheme
 import ir.behzad.platform.core.designsystem.PinLockGate
@@ -156,12 +157,20 @@ class MainActivity : FragmentActivity() {
                                 error = loginError,
                                 onGoogle = {
                                     loginLoading = true; loginError = null
-                                    scope.launch {
-                                        when (val r = container.auth.signInWithGoogle(activity)) {
-                                            is AppResult.Ok -> loggedIn.value = true
-                                            is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
-                                        }
-                                    }
+                                    googleIdTokenFlow(
+                                        onToken = { idToken, nonce ->
+                                            scope.launch {
+                                                when (val r = container.auth.signInWithGoogleToken(idToken, nonce)) {
+                                                    is AppResult.Ok -> loggedIn.value = true
+                                                    is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
+                                                }
+                                            }
+                                        },
+                                        onError = { msg ->
+                                            loginError = msg.ifBlank { null }
+                                            loginLoading = false
+                                        },
+                                    )
                                 },
                                 onGuest = {
                                     loginLoading = true; loginError = null
@@ -221,6 +230,54 @@ class MainActivity : FragmentActivity() {
         super.onResume()
         val container = (application as RoozhayeManApplication).container
         unlocked.value = !container.lock.isLockedNow()
+    }
+
+    /**
+     * ورود استاندارد گوگل روی اندروید (Credential Manager) — بدون مرورگر و بدون
+     * دیالوگ واسط: خود سیستم لیست اکانت‌های گوگلِ روی گوشی را مستقیم نشان می‌دهد.
+     * idToken برای صحت‌سنجی و ساخت سشن به تابع سرور «google-auth» می‌رود.
+     */
+    private fun googleIdTokenFlow(onToken: (String, String) -> Unit, onError: (String) -> Unit) {
+        val webClientId = BuildConfig.GOOGLE_WEB_CLIENT_ID.trim()
+        if (webClientId.isBlank()) {
+            onError("شناسه‌ی وب گوگل (googleWebClientId) تنظیم نشده است.")
+            return
+        }
+        val nonce = java.util.UUID.randomUUID().toString().replace("-", "").take(24)
+        val hashedNonce = java.security.MessageDigest.getInstance("SHA-256")
+            .digest(nonce.toByteArray(Charsets.UTF_8))
+            .joinToString("") { "%02x".format(it) }
+        val option = com.google.android.libraries.identity.googleid.GetGoogleIdOption.Builder()
+            .setServerClientId(webClientId)
+            .setNonce(hashedNonce)
+            // false = همه‌ی اکانت‌های روی گوشی لیست شوند (نه فقط قبلی‌ها)
+            .setFilterByAuthorizedAccounts(false)
+            .setAutoSelectAllowed(false)
+            .build()
+        val request = androidx.credentials.GetCredentialRequest.Builder()
+            .addCredentialOption(option)
+            .build()
+        val cm = androidx.credentials.CredentialManager.create(this)
+        lifecycleScope.launch {
+            try {
+                val resp = cm.getCredential(this@MainActivity, request)
+                val cred = resp.credential
+                if (cred is androidx.credentials.CustomCredential &&
+                    cred.type == com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+                ) {
+                    val gc = com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.createFrom(cred.data)
+                    onToken(gc.idToken, nonce)
+                } else {
+                    onError("نوع اعتبار پشتیبانی نشد.")
+                }
+            } catch (e: androidx.credentials.exceptions.GetCredentialCancellationException) {
+                onError("") // کاربر بست — بی‌پیام
+            } catch (e: androidx.credentials.exceptions.GetCredentialException) {
+                onError("انتخاب اکانت ممکن نشد: " + (e.localizedMessage ?: e.javaClass.simpleName))
+            } catch (e: Exception) {
+                onError(e.localizedMessage ?: "خطای ناشناخته در ورود گوگل")
+            }
+        }
     }
 
     override fun onNewIntent(intent: android.content.Intent) {

@@ -56,26 +56,18 @@ fun LoginScreen(
                 if (loading) {
                     CircularProgressIndicator()
                 } else {
-                    // یک قدم آگاهانه قبل از پرش به مرورگر — انتخابِ نهایی با خود او.
-                    val confirmGoogle = remember { androidx.compose.runtime.mutableStateOf(false) }
-                    if (confirmGoogle.value) {
-                        androidx.compose.material3.AlertDialog(
-                            onDismissRequest = { confirmGoogle.value = false },
-                            confirmButton = {
-                                androidx.compose.material3.TextButton(onClick = { confirmGoogle.value = false; onGoogle() }) {
-                                    Text("ادامه")
-                                }
-                            },
-                            dismissButton = {
-                                androidx.compose.material3.TextButton(onClick = { confirmGoogle.value = false }) { Text("بی‌خیال") }
-                            },
-                            title = { Text("ورود با گوگل") },
-                            text = { Text("مرورگر باز می‌شود و به اپ برمی‌گردی. اگر در مرورگر با اکانت گوگلت وارد باشی، گوگل شاید بدون پرسیدن همان اکانت را تأیید کند؛ برای دیدن صفحه‌ی انتخاب اکانت، در مرورگر چند اکانت داشته باش یا اول از اکانت خارج شو.") },
-                        )
-                    }
-                    Button(onClick = { confirmGoogle.value = true }, modifier = Modifier.fillMaxWidth()) {
+                    // v1.20: ورود استاندارد — لیست اکانت‌های گوگلِ خود گوشی، مستقیم و
+                    // بدون دیالوگ واسط و بدون مرورگر (Credential Manager).
+                    Button(onClick = onGoogle, modifier = Modifier.fillMaxWidth()) {
                         Text("ورود با گوگل")
                     }
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        "اکانتت را از لیست اکانت‌های روی همین گوشی انتخاب کن.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
                     Spacer(Modifier.height(8.dp))
                     OutlinedButton(onClick = onGuest, modifier = Modifier.fillMaxWidth()) {
                         Text("ورود مهمان (بدون همگام‌سازی)")

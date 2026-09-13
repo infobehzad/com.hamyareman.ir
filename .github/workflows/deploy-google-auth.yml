@@ -1,0 +1,20 @@
+name: Deploy google-auth function
+
+# دیپلوی تابع ورود native گوگل (Credential Manager) — create/update + build + smoke test.
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: deploy google-auth
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      APPWRITE_ENDPOINT: https://fra.cloud.appwrite.io/v1
+      APPWRITE_PROJECT_ID: 6a9d59e3002751cc3ea8
+      APPWRITE_API_KEY: ${{ secrets.APPWRITE_API_KEY }}
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+      - name: 🚀 Deploy (create/update + build + smoke)
+        run: python3 backend/functions/google-auth/deploy.py

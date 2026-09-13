@@ -32,6 +32,12 @@ interface AuthService {
     suspend fun signUp(name: String, email: String, password: String): AppResult<AuthUser>
     suspend fun signIn(email: String, password: String): AppResult<AuthUser>
     suspend fun signInWithGoogle(activity: ComponentActivity): AppResult<AuthUser>
+
+    /**
+     * ورود native گوگل (Credential Manager) — idToken از اکانت‌های روی خود گوشی؛
+     * صحت‌سنجی و ساخت سشن سمت سرور با تابع «google-auth». بدون مرورگر.
+     */
+    suspend fun signInWithGoogleToken(idToken: String, nonce: String): AppResult<AuthUser>
     suspend fun signInAsGuest(): AppResult<AuthUser>
     suspend fun logout(): AppResult<Unit>
 }
@@ -123,6 +129,21 @@ class AppwriteAuthService(
         if (!provider.isConfigured) return AppResult.Ok(localUser)
         return runCatching {
             account.createOAuth2Session(activity = activity, provider = OAuthProvider.GOOGLE)
+            bootstrap()
+            requireUser()
+        }.getOrElse { AppResult.Err(AppwriteErrors.map(it, "ورود با گوگل ناموفق بود.")) }
+    }
+
+    override suspend fun signInWithGoogleToken(idToken: String, nonce: String): AppResult<AuthUser> {
+        if (!provider.isConfigured) return AppResult.Ok(localUser)
+        return runCatching {
+            val svc = functions ?: error("توابع سرور در دسترس نیست.")
+            val payload = """{"idToken":"$idToken","nonce":"$nonce"}"""
+            val body = svc.callForBody(FunctionIds.GOOGLE_AUTH, payload)
+                ?: error("پاسخ سرور دریافت نشد.")
+            val o = org.json.JSONObject(body)
+            require(o.optBoolean("ok")) { o.optString("error", "توکن گوگل پذیرفته نشد.") }
+            account.createSession(o.optString("userId"), o.optString("secret"))
             bootstrap()
             requireUser()
         }.getOrElse { AppResult.Err(AppwriteErrors.map(it, "ورود با گوگل ناموفق بود.")) }
