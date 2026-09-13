@@ -252,7 +252,7 @@ class MainActivity : FragmentActivity() {
             .setNonce(hashedNonce)
             // false = همه‌ی اکانت‌های روی گوشی لیست شوند (نه فقط قبلی‌ها)
             .setFilterByAuthorizedAccounts(false)
-            .setAutoSelectAllowed(false)
+            .setAutoSelectEnabled(false)
             .build()
         val request = androidx.credentials.GetCredentialRequest.Builder()
             .addCredentialOption(option)
