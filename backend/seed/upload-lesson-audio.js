@@ -22,12 +22,31 @@ const TABLE = 'lesson_audio';
 const ROOT = path.resolve(__dirname, '../../wellness-references/School-books-9');
 const dryRun = process.argv.includes('--dry-run');
 const force = process.argv.includes('--force');
+const listOnly = process.argv.includes('--list');
 
 if (!KEY) { console.error('❌ APPWRITE_API_KEY ست نیست'); process.exit(2); }
-if (!fs.existsSync(ROOT)) { console.error('❌ مسیر کتاب‌ها نیست:', ROOT); process.exit(2); }
 
 const client = new sdk.Client().setEndpoint(ENDPOINT).setProject(PROJECT).setKey(KEY);
 const storage = new sdk.Storage(client);
+
+// --list: فهرست کامل فایل‌های باکت (fileId\tsize) — برای هماهنگ‌سازی/رینیم
+if (listOnly) {
+    (async () => {
+        let offset = 0;
+        let total = null;
+        let count = 0;
+        do {
+            const res = await withRetry(() => storage.listFiles({
+                bucketId: BUCKET,
+                queries: [sdk.Query.limit(100), sdk.Query.offset(offset)],
+            }));
+            total = res.total;
+            for (const f of res.files) { console.log(`${f.$id || f.name}\t${f.sizeOriginal}`); count++; }
+            offset += 100;
+        } while (offset < total);
+        console.log(`#TOTAL ${count}`);
+    })().then(() => process.exit(0)).catch(e => { console.error('❌', e.message); process.exit(1); });
+} else if (!fs.existsSync(ROOT)) { console.error('❌ مسیر کتاب‌ها نیست:', ROOT); process.exit(2); }
 let tables = null;
 try { tables = new sdk.TablesDB(client); } catch (_) { tables = new sdk.Databases(client); }
 
@@ -110,6 +129,8 @@ function mp3DurationSec(buf) {
     // تخمین ساده: بیت‌ریت ثابت 64kbps جبری — برای نمایش کافی است؛ دقیق‌تر با ffprobe سرور.
     return Math.round(buf.length * 8 / 64000);
 }
+
+if (listOnly) process.exit(0);
 
 (async () => {
     console.log('آپلود روخوانی درس‌ها + هماهنگ‌سازی lesson_audio');

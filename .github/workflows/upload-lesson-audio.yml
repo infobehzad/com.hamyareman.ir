@@ -11,6 +11,10 @@ on:
         description: 'حذف و آپلود مجدد حتی اگر فایل موجود باشد'
         required: false
         default: 'false'
+      list_only:
+        description: 'فقط فهرست کامل باکت'
+        required: false
+        default: 'false'
 
 jobs:
   upload:
@@ -40,4 +44,5 @@ jobs:
           FLAGS=""
           if [ "${{ inputs.dry_run }}" = "true" ]; then FLAGS="$FLAGS --dry-run"; fi
           if [ "${{ inputs.force }}" = "true" ]; then FLAGS="$FLAGS --force"; fi
+          if [ "${{ inputs.list_only }}" = "true" ]; then FLAGS="$FLAGS --list"; fi
           node upload-lesson-audio.js $FLAGS
