@@ -100,6 +100,12 @@ class PlaybackService : MediaSessionService() {
                     val pack = currentPackOf(player)
                     TeachGate.currentPack = pack
                     mediaSession?.setSessionActivity(teachPendingIntent(pack))
+                    // ضمانت سخت‌افزارگونه‌ی «هرگز در پس‌زمینه»: اگر هیچ صفحه‌ی پخشِ
+                    // صوت باز نیست، پخش هرگز ادامه پیدا نکند — حتی اگر رویداد
+                    // چرخه‌ی عمر UI از دست رفته باشد (قفل/مینیمایز/جابجایی اپ).
+                    if (player.playWhenReady && !TeachGate.teachPageOpen) {
+                        player.pause()
+                    }
                 }
             }
 
