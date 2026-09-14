@@ -27,22 +27,47 @@ def api(method, path, payload=None):
         try: return e.code, json.loads(raw or "{}")
         except Exception: return e.code, {}
 
-def deploy_function(fid, name, src_dir, scopes, extra_env=None):
+def runtime_candidates():
     code, rt = api("GET", "/functions/runtimes")
-    runtimes = sorted(r["key"] for r in rt.get("runtimes", []) if r["key"].startswith("node-"))
-    RUNTIME = runtimes[-1] if runtimes else "node-20.0"
+    keys = [r["key"] for r in rt.get("runtimes", []) if r["key"].startswith("node-")]
+    def ver(k):
+        try: return int(k.split("-")[1].split(".")[0])
+        except Exception: return 0
+    return sorted(keys, key=ver, reverse=True)
+
+def create_function(fid, spec):
+    """ساخت با امتحان رانتایم‌ها به ترتیب جدید→قدیم."""
+    for RUNTIME in runtime_candidates() or ["node-22.0", "node-21.0", "node-20.0", "node-18.0"]:
+        s2 = dict(spec, runtime=RUNTIME)
+        code, resp = api("POST", "/functions", dict(s2, functionId=fid))
+        if code == 201:
+            print(f"[{fid}] created with runtime {RUNTIME}")
+            return None
+        if code == 409:
+            return None  # موجود است — caller با PATCH به‌روز می‌کند
+        msg = json.dumps(resp)
+        if "runtime" in msg or "not supported" in msg:
+            print(f"[{fid}] runtime {RUNTIME} رد شد → بعدی")
+            continue
+        return f"POST {fid} failed: {resp}"
+    return "هیچ رانتایم node پذیرفته نشد"
+
+def deploy_function(fid, name, src_dir, scopes, extra_env=None):
     spec = {
-        "name": name, "runtime": RUNTIME, "execute": ["guests"], "events": [],
+        "name": name, "execute": ["guests"], "events": [],
         "schedule": "", "timeout": 30, "enabled": True, "logging": True,
         "entrypoint": "src/main.js", "commands": "npm install", "scopes": scopes,
     }
-    code, resp = api("POST", "/functions", dict(spec, functionId=fid))
-    if code == 409:
+    err = create_function(fid, spec)
+    if err:
+        sys.exit(err)
+    code, cur = api("GET", f"/functions/{fid}")
+    if code == 200 and cur.get("$id") == fid:
+        spec["runtime"] = cur.get("runtime")
         code, resp = api("PATCH", f"/functions/{fid}", spec)
         if code >= 400:
             sys.exit(f"PATCH {fid} failed: {resp}")
-    elif code >= 400:
-        sys.exit(f"POST {fid} failed: {resp}")
+        print(f"[{fid}] updated (runtime {spec['runtime']})")
     if extra_env:
         api("PATCH", f"/functions/{fid}", {"vars": extra_env})
     tar = os.path.join("/tmp", fid + ".tgz")
