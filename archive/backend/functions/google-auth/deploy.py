@@ -43,18 +43,18 @@ def inventory():
 
 def create_function(fid, spec):
     """ساخت با امتحان رانتایم‌ها به ترتیب جدید→قدیم. خروجی: "created" | "exists"."""
-    for RUNTIME in runtime_candidates() or ["node-22.0", "node-21.0", "node-20.0", "node-18.0"]:
+    for RUNTIME in runtime_candidates() or ["node-26", "node-25", "node-24", "node-23", "node-22", "node-21.0", "node-20.0", "node-18.0"]:
         s2 = dict(spec, runtime=RUNTIME)
         code, resp = api("POST", "/functions", dict(s2, functionId=fid))
-        print(f"[{fid}] POST runtime={RUNTIME} → {code} {json.dumps(resp)[:200]}")
+        msg = json.dumps(resp)
+        print(f"[{fid}] POST runtime={RUNTIME} → {code} {msg[:200]}")
         if code == 201:
             return "created"
         if code == 409:
-            msg = json.dumps(resp)
             if "maximum" in msg or "additional_resource" in msg:
                 sys.exit(f"⛔ سهمیه فانکشن پر است — ابتدا یکی حذف شود. پیام: {msg}")
             return "exists"
-        if code == 404 or "not supported" in msg or "runtime" in msg:
+        if code == 404 or "not supported" in msg or "runtime" in msg or "Invalid" in msg:
             continue
         # خطای ناشناخته → تلاش با رانتایم بعدی
     return "هیچ رانتایم node پذیرفته نشد"
