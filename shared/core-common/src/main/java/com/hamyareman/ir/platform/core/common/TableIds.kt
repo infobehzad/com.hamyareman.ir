@@ -94,10 +94,9 @@ object FunctionIds {
     const val USER_BOOTSTRAP = "user-bootstrap"
     /**
      * ورود native گوگل — idToken → session (verify سمت سرور).
-     * روی همان فانکشن ai-companion سوار است (mode=google-auth) چون پلن رایگان
-     * Appwrite سقف تعداد functions دارد.
+     * فانکشن مستقل «google-auth» (پس از حذف ai-companion قدیمی در نظافت کنسول).
      */
-    const val GOOGLE_AUTH = "ai-companion"
+    const val GOOGLE_AUTH = "google-auth"
     const val PAIRING = "pairing"
     const val WEEKLY_SUMMARY = "weekly-summary"
     /** لایه‌ی AI «همراه زهرا» — proxy سمت سرور؛ کلید مدل هرگز در اپ نیست. */
