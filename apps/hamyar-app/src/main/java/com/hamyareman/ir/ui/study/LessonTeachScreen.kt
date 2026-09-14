@@ -791,7 +791,10 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
             Spacer(Modifier.height(6.dp))
             // v1.29 — زوم لمسی دوانگشتی (مثل گالری): وقتی صفحه‌ای زوم است،
             // لیست اسکرول نمی‌شود تا جابه‌جایی/پن دست کاربر باشد.
-            var pageZoomed by remember { mutableStateOf(false) }
+            var zoomScale by remember { mutableFloatStateOf(1f) }
+            var zoomX by remember { mutableFloatStateOf(0f) }
+            var zoomY by remember { mutableFloatStateOf(0f) }
+            val pageZoomed = zoomScale > 1.01f
             LazyColumn(
                 Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
