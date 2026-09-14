@@ -140,7 +140,7 @@ fun HealthProgressScreen(onBack: () -> Unit) {
                     )
                 }
                 rows.forEach { (pack, snap) ->
-                    val expectedMedia = teachTracksOf(pack).size + (if (StudyMedia.videoIds(pack.packId).isNotEmpty()) 1 else 0)
+                    val expectedMedia = expectedTeachMedia(pack)
                     Column(Modifier.fillMaxWidth()) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(pack.title, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
