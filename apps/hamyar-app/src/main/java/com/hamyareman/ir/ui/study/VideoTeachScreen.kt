@@ -72,11 +72,14 @@ fun VideoTeachScreen(packId: String, onBack: () -> Unit) {
     val activity = remember { context as? android.app.Activity }
     // v1.19: دکمه‌ی فول‌اسکرین خود پلیر — چرخش افقی و حذف کنترل‌های بالایی
     var fullscreen by remember { mutableStateOf(false) }
+    val startedLandscape = remember {
+        activity?.resources?.configuration?.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+    }
     androidx.compose.runtime.LaunchedEffect(fullscreen) {
-        activity?.requestedOrientation = if (fullscreen) {
-            android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-        } else {
-            android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        activity?.requestedOrientation = when {
+            fullscreen -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            startedLandscape -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            else -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
     }
     DisposableEffect(Unit) {
@@ -92,7 +95,10 @@ fun VideoTeachScreen(packId: String, onBack: () -> Unit) {
                 android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
                 android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         }
-        onDispose { if (decor != null) decor.systemUiVisibility = oldSystemUi }
+        onDispose {
+            if (decor != null) decor.systemUiVisibility = oldSystemUi
+            activity?.requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        }
     }
     androidx.activity.compose.BackHandler { onBack() }
 
@@ -177,7 +183,11 @@ fun VideoTeachScreen(packId: String, onBack: () -> Unit) {
         val p = player ?: return@LaunchedEffect
         while (true) {
             delay(1000)
-            p.volume = if (store.getString("quiet_mode", "0") == "1") 0f else 1f
+            if (store.getString("quiet_mode", "0") == "1") {
+                if (p.isPlaying) p.pause()
+                continue
+            }
+            p.volume = 1f
             if (p.isPlaying) {
                 watchAccum += 1000
                 val durSec = (p.duration.takeIf { it > 0 } ?: 0L) / 1000

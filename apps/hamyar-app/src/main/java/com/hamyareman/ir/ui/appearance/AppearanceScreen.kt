@@ -51,6 +51,7 @@ fun AppearanceScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var busy by remember { mutableStateOf<String?>(null) }
+    var pendingTheme by remember { mutableStateOf<BrandTheme?>(null) }
 
     Column(Modifier.fillMaxSize()) {
         AppTopBar("ظاهر و فونت", onBack)
@@ -92,9 +93,32 @@ fun AppearanceScreen(onBack: () -> Unit) {
             }
 
             Text("تم‌های دخترانه", style = MaterialTheme.typography.titleMedium)
-            ThemeGroup(BrandTheme.entries.filter { it.themeGender == ThemeGender.GIRL }, prefs)
+            ThemeGroup(BrandTheme.entries.filter { it.themeGender == ThemeGender.GIRL }, prefs) { pendingTheme = it }
             Text("تم‌های پسرانه", style = MaterialTheme.typography.titleMedium)
-            ThemeGroup(BrandTheme.entries.filter { it.themeGender == ThemeGender.BOY }, prefs)
+            ThemeGroup(BrandTheme.entries.filter { it.themeGender == ThemeGender.BOY }, prefs) { pendingTheme = it }
+
+            pendingTheme?.let { brand ->
+                AlertDialog(
+                    onDismissRequest = { pendingTheme = null },
+                    title = { Text("پیش‌نمایش تم «${brand.label}»") },
+                    text = {
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                brand.swatches().forEach { c ->
+                                    Box(Modifier.size(36.dp).background(c, CircleShape).border(1.dp, MaterialTheme.colorScheme.outline, CircleShape))
+                                }
+                            }
+                            Text("اگر تأیید کنی، تم همین حالا روی کل اپ اعمال می‌شود.")
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { prefs.updateTheme(brand); pendingTheme = null }) { Text("اعمال تم") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { pendingTheme = null }) { Text("انصراف") }
+                    },
+                )
+            }
 
             Text("فونت", style = MaterialTheme.typography.titleMedium)
             Card {

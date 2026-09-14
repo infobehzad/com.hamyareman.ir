@@ -51,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.ui.graphics.graphicsLayer
@@ -255,6 +256,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                     .build()
             }
             playback.setMediaItems(items, tracks.indexOf(t).coerceAtLeast(0), if (cached(t) && !fromServer) savedPos(t) else 0L)
+            com.hamyareman.ir.platform.feature.playback.TeachGate.currentPack = packId
             playback.setSpeed(speed)
             // v1.12: فوراً ترکِ جاری را ثبت کن — تا فال‌بکِ خطا (سرور) همیشه زنده باشد
             // و اگر پخش محلی شروع شد، واتچ‌داگ بتواند نتیجه را بسنجد.
@@ -605,41 +607,45 @@ private class PdfUnavailable(message: String) : Exception(message)
 private fun ZoomablePageImage(
     bitmap: androidx.compose.ui.graphics.ImageBitmap,
     contentDescription: String,
-    onZoomChanged: (Boolean) -> Unit,
+    scale: Float,
+    offsetX: Float,
+    offsetY: Float,
+    onTransform: (scale: Float, offsetX: Float, offsetY: Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var scale by remember { mutableFloatStateOf(1f) }
-    var offsetX by remember { mutableFloatStateOf(0f) }
-    var offsetY by remember { mutableFloatStateOf(0f) }
     var size by remember { mutableStateOf(IntSize.Zero) }
-
+    fun clamp(newScale: Float, nxIn: Float, nyIn: Float) {
+        val s = newScale.coerceIn(1f, 5f)
+        val maxX = size.width * (s - 1f) / 2f
+        val maxY = size.height * (s - 1f) / 2f
+        val nx = if (s <= 1.001f) 0f else nxIn.coerceIn(-maxX, maxX)
+        val ny = if (s <= 1.001f) 0f else nyIn.coerceIn(-maxY, maxY)
+        onTransform(s, nx, ny)
+    }
     Box(
         modifier
             .onSizeChanged { size = it }
-            .pointerInput(Unit) {
+            .pointerInput(scale, offsetX, offsetY, size) {
                 detectTransformGestures { centroid, pan, zoom, _ ->
                     val newScale = (scale * zoom).coerceIn(1f, 5f)
                     val f = if (scale > 0f) newScale / scale else 1f
-                    var nx = centroid.x - (centroid.x - offsetX) * f + pan.x
-                    var ny = centroid.y - (centroid.y - offsetY) * f + pan.y
-                    val maxX = size.width * (newScale - 1f) / 2f
-                    val maxY = size.height * (newScale - 1f) / 2f
-                    nx = nx.coerceIn(-maxX, maxX)
-                    ny = ny.coerceIn(-maxY, maxY)
-                    scale = newScale
-                    offsetX = if (newScale <= 1.001f) 0f else nx
-                    offsetY = if (newScale <= 1.001f) 0f else ny
-                    onZoomChanged(newScale > 1.01f)
+                    val nx = centroid.x - (centroid.x - offsetX) * f + pan.x
+                    val ny = centroid.y - (centroid.y - offsetY) * f + pan.y
+                    clamp(newScale, nx, ny)
                 }
             }
-            .pointerInput(Unit) {
+            .pointerInput(scale, offsetX, offsetY, size) {
+                if (scale <= 1.01f) return@pointerInput
+                detectDragGestures { change, drag ->
+                    change.consume()
+                    clamp(scale, offsetX + drag.x, offsetY + drag.y)
+                }
+            }
+            .pointerInput(scale) {
                 detectTapGestures(
                     onDoubleTap = {
-                        if (scale > 1f) {
-                            scale = 1f; offsetX = 0f; offsetY = 0f; onZoomChanged(false)
-                        } else {
-                            scale = 2.5f; offsetX = 0f; offsetY = 0f; onZoomChanged(true)
-                        }
+                        if (scale > 1f) onTransform(1f, 0f, 0f)
+                        else onTransform(2.5f, 0f, 0f)
                     },
                 )
             },
@@ -834,7 +840,10 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
                                 ZoomablePageImage(
                                     bitmap = bmp!!.asImageBitmap(),
                                     contentDescription = "صفحه ${index + 1}",
-                                    onZoomChanged = { pageZoomed = it },
+                                    scale = zoomScale,
+                                    offsetX = zoomX,
+                                    offsetY = zoomY,
+                                    onTransform = { s, x, y -> zoomScale = s; zoomX = x; zoomY = y },
                                     modifier = Modifier.fillMaxWidth(),
                                 )
                             }

@@ -56,7 +56,7 @@ class PlaybackService : MediaSessionService() {
             .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
             .build()
 
-        val player = ExoPlayer.Builder(this)
+        val exo = ExoPlayer.Builder(this)
             .setAudioAttributes(audioAttributes, /* handleAudioFocus = */ true)
             // کشیدن هدفون/قطع بلوتوث ⇒ توقف؛ نه پخش ناگهانی با بلندگو در جمع.
             .setHandleAudioBecomingNoisy(true)
@@ -65,6 +65,18 @@ class PlaybackService : MediaSessionService() {
             .setSeekBackIncrementMs(SEEK_INCREMENT_MS)
             .setSeekForwardIncrementMs(SEEK_INCREMENT_MS)
             .build()
+        // فقط پلی/مکث روی اعلان — prev/next را از فرمان‌های پلیر برمی‌داریم،
+        // بدون فیلتر session (setMediaItems را هرگز محدود نکن).
+        val player = object : ForwardingPlayer(exo) {
+            override fun getAvailableCommands(): Player.Commands =
+                Player.Commands.Builder()
+                    .addAll(super.getAvailableCommands())
+                    .remove(Player.COMMAND_SEEK_TO_PREVIOUS)
+                    .remove(Player.COMMAND_SEEK_TO_NEXT)
+                    .remove(Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
+                    .remove(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
+                    .build()
+        }
 
         mediaSession = MediaSession.Builder(this, player)
             // لمس خود اعلان → باز شدن صفحه‌ی تدریس همان درس (حتی وقتی اپ بسته است).

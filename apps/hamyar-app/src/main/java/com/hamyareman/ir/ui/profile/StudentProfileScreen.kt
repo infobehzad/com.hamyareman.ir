@@ -1,19 +1,42 @@
 package com.hamyareman.ir.ui.profile
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 
 /** فقط ارقام لاتین — کیبورد فارسی هم ممکن است ۰-۹ بدهد؛ همه را لاتین می‌کنیم. */
@@ -23,17 +46,16 @@ private fun latinDigits(s: String): String = buildString {
             '۰' -> '0'; '۱' -> '1'; '۲' -> '2'; '۳' -> '3'; '۴' -> '4'
             '۵' -> '5'; '۶' -> '6'; '۷' -> '7'; '۸' -> '8'; '۹' -> '9'
             else -> c
-        }
+        },
     )
 }
 
 /**
- * فرم ثبت‌نام دانش‌آموز — بلافاصله پس از اولین ورود موفق گوگل.
- * قواعد اجباری: نام و نام‌خانوادگی فارسی، سن عددی، پایه (دراپ‌داون)،
- * موبایل ۱۰ رقمی با +98 ثابت. تغییر پایه فقط یک‌بار و تا یک هفته پس از
- * خرید و فقط از طریق پشتیبانی (تغییر سمت سرور) — با اعلان واضح و بولد.
+ * فرم ثبت‌نام دانش‌آموز — بلافاصله پس از اولین ورود موفق اگر پروفایل نباشد.
+ * قواعد اجباری: نام و نام‌خانوادگی، سن، جنسیت، پایه، موبایل.
+ * استان→شهر اختیاری با پیش‌فرض خالی.
  */
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StudentProfileScreen(
     email: String,
@@ -76,7 +98,6 @@ fun StudentProfileScreen(
                 style = MaterialTheme.typography.bodyMedium,
             )
 
-            // ایمیل از حساب گوگل — فقط نمایشی (غیرقابل ویرایش).
             OutlinedTextField(
                 value = email,
                 onValueChange = {},
@@ -131,7 +152,6 @@ fun StudentProfileScreen(
                 Text("پسر یا دختر را انتخاب کن", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
             }
 
-            // دراپ‌داون پایه — همان گزینه‌های مصوب.
             ExposedDropdownMenuBox(expanded = gradeOpen, onExpandedChange = { gradeOpen = it }) {
                 OutlinedTextField(
                     value = grade.fa,
@@ -151,22 +171,31 @@ fun StudentProfileScreen(
                 }
             }
 
-            // موبایل: +98 ثابت و غیرقابل حذف + دقیقاً ۱۰ رقم.
-            OutlinedTextField(
-                value = phone,
-                onValueChange = { phone = latinDigits(it).filter { c -> c.isDigit() }.take(10) },
-                label = { Text("شماره همراه *") },
-                isError = phoneBad,
-                supportingText = {
-                    Text(if (phoneBad) "دقیقاً ۱۰ رقم — با ۹ شروع شود" else "۱۰ رقم؛ ۹۸ به‌صورت خودکار اولش هست")
-                },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                prefix = { Text("+98", fontWeight = FontWeight.Bold) },
-                modifier = Modifier.fillMaxWidth(),
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                OutlinedTextField(
+                    value = phone,
+                    onValueChange = { phone = latinDigits(it).filter { c -> c.isDigit() }.take(10) },
+                    label = { Text("شماره همراه *") },
+                    isError = phoneBad,
+                    supportingText = {
+                        Text(if (phoneBad) "دقیقاً ۱۰ رقم — با ۹ شروع شود" else "۱۰ رقم؛ ۹۸ به‌صورت خودکار اولش هست")
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    prefix = { Text("+98", fontWeight = FontWeight.Bold) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            IranLocationFields(
+                province = province,
+                county = county,
+                city = city,
+                onProvince = { province = it },
+                onCounty = { county = it },
+                onCity = { city = it },
             )
 
-            // اعلان واضح و بولد — سیاست تغییر پایه.
             Surface(
                 shape = MaterialTheme.shapes.medium,
                 color = MaterialTheme.colorScheme.errorContainer,
@@ -203,12 +232,6 @@ fun StudentProfileScreen(
             ) {
                 if (saving) CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp)
                 else Text("ثبت و ورود به همیار", fontWeight = FontWeight.Bold)
-            }
-            Spacer(Modifier.height(12.dp))
-        }
-    }
-}
- به همیار", fontWeight = FontWeight.Bold)
             }
             Spacer(Modifier.height(12.dp))
         }

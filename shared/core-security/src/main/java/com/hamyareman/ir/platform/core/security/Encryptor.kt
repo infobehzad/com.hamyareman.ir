@@ -50,6 +50,9 @@ class Encryptor(private val alias: String = DEFAULT_ALIAS) {
 
     private fun getOrCreateKey(): SecretKey {
         (keyStore.getKey(alias, null) as? SecretKey)?.let { return it }
+        if (alias == DEFAULT_ALIAS) {
+            (keyStore.getKey(LEGACY_ALIAS, null) as? SecretKey)?.let { return it }
+        }
         val spec = KeyGenParameterSpec.Builder(
             alias,
             KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
@@ -65,7 +68,8 @@ class Encryptor(private val alias: String = DEFAULT_ALIAS) {
     }
 
     companion object {
-        const val DEFAULT_ALIAS = "roozhayeman_private_v1"
+        const val DEFAULT_ALIAS = "hamyareman_private_v1"
+        const val LEGACY_ALIAS = "roozhayeman_private_v1"
         private const val ANDROID_KEYSTORE = "AndroidKeyStore"
         private const val TRANSFORMATION = "AES/GCM/NoPadding"
         private const val IV_BYTES = 12
