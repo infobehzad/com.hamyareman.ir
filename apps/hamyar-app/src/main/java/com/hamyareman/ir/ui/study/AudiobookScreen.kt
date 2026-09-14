@@ -203,11 +203,18 @@ fun AudiobookScreen(onBack: () -> Unit) {
     }
 
     DisposableEffect(Unit) {
+        // قاعده‌ی سراسری صوت: صفحه‌ی پخش باز = پخش مجاز؛ بسته = مکث فوری.
+        com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = true
         onDispose {
             store.putInt(KEY_POSITION, playback.positionMs.toInt())
-            playback.release() // فقط اتصال صفحه قطع می‌شود؛ صدا در پس‌زمینه می‌ماند
+            runCatching { playback.pause() }
+            com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = false
+            playback.release()
         }
     }
+
+    // هرگز در پس‌زمینه: هوم/مینیمایز/جابجایی اپ/قفل گوشی → مکث؛ برگشت → ادامه از همان‌جا.
+    com.hamyareman.ir.ui.study.PauseOnStopEffect { runCatching { playback.pause() } }
 
     fun seekTo(ms: Long) {
         val target = ms.coerceIn(0L, (if (state.durationMs > 0L) state.durationMs else ms).coerceAtLeast(0L))
