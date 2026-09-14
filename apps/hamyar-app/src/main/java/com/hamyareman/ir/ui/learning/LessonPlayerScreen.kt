@@ -108,6 +108,10 @@ fun LessonPlayerScreen(
         onDispose { player.release() }
     }
 
+    // هرگز در پس‌زمینه: هوم/مینیمایز/جابجایی اپ/قفل گوشی → مکث فوری؛
+    // برگشت به صفحه → ادامه از همان جایی که مانده بود.
+    com.hamyareman.ir.ui.study.PauseOnStopEffect { player.pause() }
+
     val state by player.state.collectAsState()
 
     // بارگذاری خودکار وقتی وارد صفحه می‌شویم: ویدیو اولویت دارد
