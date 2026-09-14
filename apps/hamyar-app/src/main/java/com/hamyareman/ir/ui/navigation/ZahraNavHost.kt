@@ -93,6 +93,7 @@ import com.hamyareman.ir.ui.study.StudyHomeScreen
 import com.hamyareman.ir.ui.study.StudyMedia
 import com.hamyareman.ir.ui.study.TeachStats
 import com.hamyareman.ir.ui.study.VideoTeachScreen
+import com.hamyareman.ir.ui.study.expectedTeachMedia
 import com.hamyareman.ir.ui.study.teachTracksOf
 import com.hamyareman.ir.ui.water.WaterScreen
 import com.hamyareman.ir.ui.wellness.SketchGalleryScreen
@@ -215,9 +216,9 @@ fun ZahraNavHost() {
                 val pack = remember(packId) { BookModuleRegistry.pack(packId) }
                 // قفل سراسری: مطالعه فقط پس از اتمام اولین دوره‌ی تدریس باز می‌شود
                 // (هیچ ورودیِ دیگری به این بخش راه ندارد).
-                val expected = if (pack == null) 1 else teachTracksOf(pack).size + (if (StudyMedia.videoIds(packId).isNotEmpty()) 1 else 0)
+                val expected = if (pack == null) 1 else expectedTeachMedia(pack)
                 val done = pack != null && run {
-                    TeachStats.expectMedia(LocalContext.current, packId, expected.coerceAtLeast(1))
+                    TeachStats.expectMedia(LocalContext.current, packId, expected)
                     TeachStats.isDone(LocalContext.current, packId)
                 }
                 if (done) {
@@ -339,6 +340,13 @@ fun ZahraNavHost() {
                     else -> com.hamyareman.ir.ui.profile.UserProfileScreen(
                         profile = profile,
                         onBack = { nav.popBackStack() },
+                        onLogout = {
+                            scopeUp.launch {
+                                runCatching { container.auth.logout() }
+                                com.hamyareman.ir.ui.profile.StudentProfileState.clearMirror(ctx)
+                                (ctx as? com.hamyareman.ir.MainActivity)?.onLoggedOut()
+                            }
+                        },
                         onSave = { p ->
                             scopeUp.launch {
                                 val uid = runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
