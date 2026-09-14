@@ -35,20 +35,28 @@ def runtime_candidates():
         except Exception: return 0
     return sorted(keys, key=ver, reverse=True)
 
+def inventory():
+    code, lst = api("GET", "/functions")
+    fns = lst.get("functions", [])
+    print("فانکشن‌های روی سرور:", [(f["$id"], f.get("runtime")) for f in fns])
+    return fns
+
 def create_function(fid, spec):
     """ساخت با امتحان رانتایم‌ها به ترتیب جدید→قدیم. خروجی: "created" | "exists"."""
     for RUNTIME in runtime_candidates() or ["node-22.0", "node-21.0", "node-20.0", "node-18.0"]:
         s2 = dict(spec, runtime=RUNTIME)
         code, resp = api("POST", "/functions", dict(s2, functionId=fid))
+        print(f"[{fid}] POST runtime={RUNTIME} → {code} {json.dumps(resp)[:200]}")
         if code == 201:
-            print(f"[{fid}] created with runtime {RUNTIME}")
             return "created"
         if code == 409:
+            msg = json.dumps(resp)
+            if "maximum" in msg or "additional_resource" in msg:
+                sys.exit(f"⛔ سهمیه فانکشن پر است — ابتدا یکی حذف شود. پیام: {msg}")
             return "exists"
-        msg = json.dumps(resp)
-        if "runtime" in msg or "not supported" in msg:
-            print(f"[{fid}] runtime {RUNTIME} رد شد → بعدی")
+        if code == 404 or "not supported" in msg or "runtime" in msg:
             continue
+        # خطای ناشناخته → تلاش با رانتایم بعدی
     return "هیچ رانتایم node پذیرفته نشد"
 
 def deploy_function(fid, name, src_dir, scopes, extra_env=None):
@@ -57,9 +65,14 @@ def deploy_function(fid, name, src_dir, scopes, extra_env=None):
         "schedule": "", "timeout": 30, "enabled": True, "logging": True,
         "entrypoint": "src/main.js", "commands": "npm install", "scopes": scopes,
     }
+    inventory()
     created = create_function(fid, spec)
     if created not in ("created", "exists"):
         sys.exit(created)
+    code, cur = api("GET", f"/functions/{fid}")
+    print(f"[{fid}] GET پس از ساخت → {code}")
+    if code != 200:
+        sys.exit(f"⛔ فانکشن {fid} روی سرور تأیید نشد (کد {code})")
     if created == "exists":
         # runtime بعد از ساخت تغییر نمی‌کند — فقط فیلدهای امن را به‌روز کن.
         upd = {k: v for k, v in spec.items() if k != "runtime"}
@@ -84,8 +97,12 @@ def deploy_function(fid, name, src_dir, scopes, extra_env=None):
     req = urllib.request.Request(EP + f"/functions/{fid}/deployments", data=b"".join(parts), method="POST", headers={
         "X-Appwrite-Project": PROJECT, "X-Appwrite-Key": KEY,
         "content-type": f"multipart/form-data; boundary={boundary}"})
-    with urllib.request.urlopen(req, timeout=300) as r:
-        dep = json.loads(r.read().decode() or "{}")
+    try:
+        with urllib.request.urlopen(req, timeout=300) as r:
+            dep = json.loads(r.read().decode() or "{}")
+    except urllib.error.HTTPError as e:
+        body = e.read().decode(errors="replace")[:400]
+        sys.exit(f"⛔ آپلود دیپلوی {fid} رد شد: {e.code} {body}")
     print(f"[{fid}] deployment:", dep.get("$id"), dep.get("status"))
     for _ in range(36):
         code, d = api("GET", f"/functions/{fid}/deployments/{dep['$id']}")
