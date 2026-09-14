@@ -170,7 +170,7 @@ fun AppearanceScreen(onBack: () -> Unit) {
 }
 
 @Composable
-private fun ThemeGroup(brands: List<BrandTheme>, prefs: UiPrefs) {
+private fun ThemeGroup(brands: List<BrandTheme>, prefs: UiPrefs, onPreview: (BrandTheme) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         brands.forEach { brand ->
             val selected = prefs.theme == brand
@@ -178,7 +178,7 @@ private fun ThemeGroup(brands: List<BrandTheme>, prefs: UiPrefs) {
                 colors = CardDefaults.cardColors(
                     containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
                 ),
-                modifier = Modifier.fillMaxWidth().clickable { prefs.updateTheme(brand) },
+                modifier = Modifier.fillMaxWidth().clickable { onPreview(brand) },
             ) {
                 Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
