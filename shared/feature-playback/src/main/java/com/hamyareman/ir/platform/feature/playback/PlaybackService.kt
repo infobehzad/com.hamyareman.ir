@@ -100,13 +100,16 @@ class PlaybackService : MediaSessionService() {
                     val pack = currentPackOf(player)
                     TeachGate.currentPack = pack
                     mediaSession?.setSessionActivity(teachPendingIntent(pack))
-                    // ضمانت سخت‌افزارگونه‌ی «هرگز در پس‌زمینه»: اگر هیچ صفحه‌ی پخشِ
-                    // صوت باز نیست، پخش هرگز ادامه پیدا نکند — حتی اگر رویداد
-                    // چرخه‌ی عمر UI از دست رفته باشد (قفل/مینیمایز/جابجایی اپ).
-                    if (player.playWhenReady && !TeachGate.teachPageOpen) {
-                        player.pause()
-                    }
                 }
+                enforceForegroundOnly(player)
+            }
+
+            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                enforceForegroundOnly(player)
+            }
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                enforceForegroundOnly(player)
             }
 
             override fun onPositionDiscontinuity(
@@ -157,16 +160,19 @@ class PlaybackService : MediaSessionService() {
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = mediaSession
 
+    /** اگر صفحه‌ی پخش باز نیست، هرگز صدا ادامه پیدا نکند. */
+    private fun enforceForegroundOnly(player: Player) {
+        if ((player.playWhenReady || player.isPlaying) && !TeachGate.teachPageOpen) {
+            player.pause()
+        }
+    }
+
     /**
-     * وقتی کاربر اپ را از recents می‌بندد: اگر چیزی در حال پخش است سرویس زنده می‌ماند
-     * (وگرنه کل مفهوم «پخش در پس‌زمینه» از بین می‌رفت)؛ اگر پخش متوقف است، سرویس را
-     * می‌بندیم تا باتری و اعلان الکی نماند.
+     * بستن اپ از recents = توقف کامل پخش (قانون: هرگز در پس‌زمینه).
      */
     override fun onTaskRemoved(rootIntent: Intent?) {
-        val player = mediaSession?.player
-        if (player == null || !player.playWhenReady || player.mediaItemCount == 0) {
-            stopSelf()
-        }
+        mediaSession?.player?.pause()
+        stopSelf()
     }
 
     override fun onDestroy() {
