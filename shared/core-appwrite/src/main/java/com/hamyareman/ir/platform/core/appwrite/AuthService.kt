@@ -32,6 +32,8 @@ interface AuthService {
     suspend fun signUp(name: String, email: String, password: String): AppResult<AuthUser>
     suspend fun signIn(email: String, password: String): AppResult<AuthUser>
     suspend fun signInWithGoogle(activity: ComponentActivity): AppResult<AuthUser>
+    suspend fun signInAsGuest(): AppResult<AuthUser>
+    suspend fun logout(): AppResult<Unit>
 }
 
 /**
