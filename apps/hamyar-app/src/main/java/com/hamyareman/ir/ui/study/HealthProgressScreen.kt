@@ -129,7 +129,7 @@ fun HealthProgressScreen(onBack: () -> Unit) {
             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("تدریس‌ها — دوره‌ی اول", style = MaterialTheme.typography.titleMedium)
                 val rows = remember {
-                    BookModuleRegistry.modules.flatMap { m -> m.packs.map { it to TeachStats.snap(ctx, it.packId) } }
+                    BookModuleRegistry.modules.filter { com.hamyareman.ir.ui.profile.GradeGate.canSeeBook(it.bookCode) }.flatMap { m -> m.packs.map { it to TeachStats.snap(ctx, it.packId) } }
                         .filter { it.second.sessions > 0 || it.second.watchedSec > 0 }
                 }
                 if (rows.isEmpty()) {

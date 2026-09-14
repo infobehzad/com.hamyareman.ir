@@ -8,6 +8,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.session.ConnectionResult
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
@@ -23,6 +24,9 @@ object TeachGate {
 
     /** درسی که باید در باز شدن بعدی اپ، صفحه‌ی تدریسش باز شود. */
     @Volatile var requestedPack: String? = null
+
+    /** v1.25 — درسی که همین الان در سرویس پخش است؛ مرجع واحد «همان درس» برای لمس اعلان. */
+    @Volatile var currentPack: String? = null
 }
 
 /**
@@ -68,14 +72,38 @@ class PlaybackService : MediaSessionService() {
             .setSessionActivity(teachPendingIntent(currentPackOf(player)))
             // دکمه‌ی پلی اعلان هم مثل لمس اعلان: اول صفحه‌ی پلیر (تدریس) باز شود، بعد پخش.
             .setCallback(object : MediaSession.Callback {
+                // v1.25 — اعلان: فقط پلی/مکث + نوار زمان (بدون بک/جلو/قبلی/بعدی)؛
+                // فرمان‌های جابه‌جایی به کنترلر اعلان داده نمی‌شود (صفحه دست خود کاربر است).
+                override fun onConnect(
+                    session: MediaSession,
+                    controller: MediaSession.ControllerInfo,
+                ): ConnectionResult {
+                    val cmds = Player.Commands.Builder()
+                        .addAll(
+                            Player.COMMAND_PLAY_PAUSE,
+                            Player.COMMAND_PLAY,
+                            Player.COMMAND_PAUSE,
+                            Player.COMMAND_SEEK_IN_CURRENT,
+                            Player.COMMAND_GET_CURRENT_MEDIA_ITEM,
+                            Player.COMMAND_GET_TIMELINE,
+                            Player.COMMAND_SET_PLAYBACK_SPEED,
+                        )
+                        .build()
+                    return ConnectionResult.Builder()
+                        .setSessionActivity(session.activity)
+                        .setAvailablePlayerCommands(cmds)
+                        .build()
+                }
+
                 override fun onPlayerCommandRequest(
                     mediaSession: MediaSession,
                     controllerInfo: MediaSession.ControllerInfo,
                     playerCommand: Int,
                 ): Int {
-                    val pack = currentPackOf(mediaSession.player)
+                    val pack = currentPackOf(mediaSession.player) ?: TeachGate.currentPack
                     if (playerCommand == Player.COMMAND_PLAY_PAUSE && pack != null && !TeachGate.teachPageOpen) {
                         TeachGate.requestedPack = pack
+                        mediaSession.setSessionActivity(teachPendingIntent(pack))
                         // PendingIntent تازه با packId همین رسانه — نه نسخه‌ی قدیمیِ کش‌شده
                         runCatching { teachPendingIntent(pack).send() }
                         return SessionResult.RESULT_ERROR_UNKNOWN
@@ -86,7 +114,29 @@ class PlaybackService : MediaSessionService() {
             .build()
         player.addListener(object : Player.Listener {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                mediaSession?.setSessionActivity(teachPendingIntent(currentPackOf(player)))
+                val pack = currentPackOf(player)
+                TeachGate.currentPack = pack
+                mediaSession?.setSessionActivity(teachPendingIntent(pack))
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_READY) {
+                    val pack = currentPackOf(player)
+                    TeachGate.currentPack = pack
+                    mediaSession?.setSessionActivity(teachPendingIntent(pack))
+                }
+            }
+
+            override fun onPositionDiscontinuity(
+                oldPosition: androidx.media3.common.Player.PositionInfo,
+                newPosition: androidx.media3.common.Player.PositionInfo,
+                reason: Int,
+            ) {
+                val pack = currentPackOf(player)
+                if (pack != TeachGate.currentPack) {
+                    TeachGate.currentPack = pack
+                    mediaSession?.setSessionActivity(teachPendingIntent(pack))
+                }
             }
         })
 
@@ -112,7 +162,7 @@ class PlaybackService : MediaSessionService() {
     private fun teachPendingIntent(packId: String?): PendingIntent =
         PendingIntent.getActivity(
             this,
-            0,
+            (packId ?: "none").hashCode(),
             Intent().apply {
                 setClassName(packageName, TEACH_ACTIVITY)
                 action = TEACH_OPEN_ACTION

@@ -130,6 +130,10 @@ fun LessonTeachScreen(
     onPdf: (String) -> Unit,
 ) {
     val pack = remember(packId) { BookModuleRegistry.pack(packId) }
+    // v1.25 — نام کتاب برای اعلان پخش («نام کتاب و درس»).
+    val bookTitle = remember(packId) {
+        BookModuleRegistry.modules.firstOrNull { m -> m.packs.any { it.packId == packId } }?.title.orEmpty()
+    }
     if (pack == null) {
         AppTopBar(title = "تدریس درس", onBack = onBack)
         Column(
@@ -146,7 +150,7 @@ fun LessonTeachScreen(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         val tracks = teachTracksOf(pack)
-        if (tracks.isNotEmpty()) TeachAudioBar(packId = packId, screenTitle = pack.title, tracks = tracks)
+        if (tracks.isNotEmpty()) TeachAudioBar(packId = packId, screenTitle = pack.title, bookTitle = bookTitle, tracks = tracks)
 
         // v1.18: ویدیو به صفحه‌ی مجزای «ویدیوی تدریس» منتقل شد (VideoTeachScreen).
         TeachPdfPages(modifier = Modifier.weight(1f), fileId = pack.pdfFileName, pack = pack)
@@ -163,7 +167,7 @@ fun LessonTeachScreen(
  *  - ثانیه‌ی شنیدن/پرش‌های >۳ثانیه/اتمام دوره → TeachStats (غیرقابل ویرایش).
  */
 @Composable
-internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<TeachTrack>) {
+internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: String, tracks: List<TeachTrack>) {
     val context = LocalContext.current
     val store = remember { LocalStore(context, "hamyar_teach") }
     val scope = rememberCoroutineScope()
@@ -218,6 +222,8 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
         com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = true
         onDispose { com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = false }
     }
+    // v1.25 — خروج از صفحه با هوم/پنجره‌ها/قفل صفحه هم = مکث پخش (شرط بازبودن صفحه).
+    PauseOnStopEffect { playback.pause() }
 
     var forceServer by remember { mutableStateOf(false) }
 
@@ -239,7 +245,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, tracks: List<Tea
                 MediaItem.Builder()
                     .setMediaId(tr.cacheKey)
                     .setUri(if (useLocal) MediaVault.localUrl(context, tr.cacheKey) else StudyMedia.viewUrl(tr.fileId))
-                    .setMediaMetadata(MediaMetadata.Builder().setTitle(screenTitle).setArtist(tr.label).build())
+                    .setMediaMetadata(MediaMetadata.Builder().setTitle(screenTitle).setArtist(bookTitle.ifBlank { tr.label }).build())
                     .build()
             }
             playback.setMediaItems(items, tracks.indexOf(t).coerceAtLeast(0), if (cached(t) && !fromServer) savedPos(t) else 0L)

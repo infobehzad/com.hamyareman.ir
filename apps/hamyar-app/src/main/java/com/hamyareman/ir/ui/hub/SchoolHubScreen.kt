@@ -59,7 +59,7 @@ fun SchoolHubScreen(nav: NavController) {
             onToggle = { toggleGroup("books") },
         ) {
             val ctx = LocalContext.current
-            val books = remember { BookModuleRegistry.modules }
+            val books = remember { com.hamyareman.ir.ui.profile.GradeGate.filter(BookModuleRegistry.modules) { it.bookCode } }
             books.chunked(2).forEach { pair ->
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                     pair.forEach { book ->

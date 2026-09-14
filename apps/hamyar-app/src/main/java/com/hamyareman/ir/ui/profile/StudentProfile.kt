@@ -1,0 +1,120 @@
+package com.hamyareman.ir.ui.profile
+
+import android.content.Context
+import com.hamyareman.ir.platform.core.appwrite.RowPermissions
+import com.hamyareman.ir.platform.core.appwrite.TableIds
+import com.hamyareman.ir.platform.core.appwrite.TablesDbService
+import com.hamyareman.ir.platform.core.common.LocalStore
+
+/** پایه‌های تحصیلی — دراپ‌داون ثبت‌نام و کلید فیلتر محتوا. */
+enum class GradeLevel(val id: String, val fa: String) {
+    G5("grade5", "پایه پنجم"),
+    G6("grade6", "پایه ششم"),
+    G7("grade7", "پایه هفتم"),
+    G8("grade8", "پایه هشتم"),
+    G9("grade9", "پایه نهم"),
+    G10("grade10", "پایه دهم"),
+    G11("grade11", "پایه یازدهم"),
+    G12("grade12", "پایه دوازدهم");
+
+    companion object {
+        fun byId(id: String?): GradeLevel = entries.firstOrNull { it.id == id } ?: G9
+    }
+}
+
+/**
+ * نگاشت کتاب → پایه. **نگارش فعلی:** همه‌ی کتاب‌ها و دروس موجودِ جدول به پایه‌ی
+ * نهم لینک شده‌اند (به محض ارائه‌ی فهرست پایه‌های دیگر، همین یک تابع گسترش می‌یابد
+ * و هیچ‌جای دیگری از کد نباید تغییر کند).
+ */
+fun gradeOfBook(bookCode: String): GradeLevel = GradeLevel.G9
+
+/**
+ * وضعیت زنده‌ی پایه‌ی کاربر — آینه‌ی محلی (فوری) + تأیید ابری (سینک).
+ * صفحه‌های فهرست کتاب با [GradeGate] می‌خوانند.
+ */
+object StudentProfileState {
+    @Volatile var grade: GradeLevel = GradeLevel.G9
+    @Volatile var hasProfile: Boolean = false
+
+    fun loadMirror(ctx: Context) {
+        val store = LocalStore(ctx, STORE)
+        grade = GradeLevel.byId(store.getString(KEY_GRADE, "").ifBlank { null })
+        hasProfile = store.getString(KEY_DONE, "0") == "1"
+    }
+
+    fun writeMirror(ctx: Context, g: GradeLevel, done: Boolean) {
+        val store = LocalStore(ctx, STORE)
+        store.putString(KEY_GRADE, g.id)
+        store.putString(KEY_DONE, if (done) "1" else "0")
+        grade = g
+        hasProfile = done
+    }
+
+    private const val STORE = "hamyar_profile"
+    private const val KEY_GRADE = "grade"
+    private const val KEY_DONE = "registered"
+}
+
+/** فیلتر مرکزی محتوای مدرسه بر اساس پایه‌ی کاربر. */
+object GradeGate {
+    fun canSeeBook(bookCode: String): Boolean = gradeOfBook(bookCode) == StudentProfileState.grade
+    fun <T> filter(list: List<T>, bookCodeOf: (T) -> String): List<T> = list.filter { canSeeBook(bookCodeOf(it)) }
+}
+
+/**
+ * پروفایل دانش‌آموز — جدول واحد `student_profiles`؛ هر کاربر دقیقاً یک ردیف با
+ * `rowId = userId` گوگل (یک یوزرآی‌دی واحد برای همه‌ی دسترسی‌ها و سینک‌های بعدی).
+ */
+data class StudentProfile(
+    val userId: String,
+    val email: String,
+    val firstName: String,
+    val lastName: String,
+    val age: Int,
+    val grade: GradeLevel,
+    val phone: String, // ۱۰ رقم، بدون +98 (پیش‌شماره در UI ثابت است)
+)
+
+object StudentProfileRepo {
+    private const val TABLE = TableIds.STUDENT_PROFILES
+
+    /** ردیف کاربر؛ نبود/خطا → null (خطا هرگز نباید فرم را بی‌دلیل نشان دهد). */
+    suspend fun fetch(tables: TablesDbService, userId: String): StudentProfile? {
+        if (userId.isBlank()) return null
+        val r = tables.get(TABLE, userId)
+        return when (r) {
+            is com.hamyareman.ir.platform.core.common.AppResult.Ok -> r.value?.let { row ->
+                val d = row.data
+                StudentProfile(
+                    userId = userId,
+                    email = d["email"]?.toString().orEmpty(),
+                    firstName = d["firstName"]?.toString().orEmpty(),
+                    lastName = d["lastName"]?.toString().orEmpty(),
+                    age = d["age"]?.toString()?.toIntOrNull() ?: 0,
+                    grade = GradeLevel.byId(d["grade"]?.toString()),
+                    phone = d["phone"]?.toString().orEmpty(),
+                )
+            }
+            else -> null
+        }
+    }
+
+    /** ذخیره (ساخت/بازنویسی) + پرمیشن فقط-خودِ-کاربر؛ true = در سرور ثبت شد. */
+    suspend fun save(tables: TablesDbService, email: String, p: StudentProfile): Boolean {
+        val data = mapOf(
+            "userId" to p.userId,
+            "email" to email,
+            "firstName" to p.firstName,
+            "lastName" to p.lastName,
+            "age" to p.age,
+            "grade" to p.grade.id,
+            "phone" to p.phone,
+            "updatedAtMs" to System.currentTimeMillis(),
+        )
+        return when (tables.upsert(TABLE, p.userId, data, RowPermissions.forUser(p.userId))) {
+            is com.hamyareman.ir.platform.core.common.AppResult.Ok -> true
+            else -> false
+        }
+    }
+}

@@ -77,7 +77,7 @@ fun WeeklyScheduleScreen(onBack: () -> Unit) {
 
         // فهرست کشویی: دروس هر ۱۳ کتاب + «ورزش» — ورزش فقط همین‌جا ثبت می‌شود.
         val subjectItems = remember {
-            BookModuleRegistry.modules.flatMap { m -> m.packs.map { p -> p.title } } + "ورزش 🏃‍♀️"
+            BookModuleRegistry.modules.filter { com.hamyareman.ir.ui.profile.GradeGate.canSeeBook(it.bookCode) }.flatMap { m -> m.packs.map { p -> p.title } } + "ورزش 🏃‍♀️"
         }
         var menuOpen by remember { mutableStateOf(false) }
         Text("درس‌های روزها", style = MaterialTheme.typography.titleMedium)

@@ -58,11 +58,16 @@ class MainActivity : FragmentActivity() {
     /** null = در حال بررسی سشن؛ true = وارد شده؛ false = باید صفحه‌ی ورود ببیند. */
     private val loggedIn = mutableStateOf<Boolean?>(null)
 
+    /** null = در حال بررسی؛ true = پروفایل ثبت نشده → فرم ثبت‌نام اجباری. */
+    private val profileNeeded = mutableStateOf<Boolean?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val app = application as HamyarApplication
         enableEdgeToEdge()
         unlocked.value = !app.container.lock.isLockedNow()
+        // آینه‌ی محلی پروفایل/پایه — پیش از هر پاسخ شبکه (فیلتر فوری محتوا).
+        com.hamyareman.ir.ui.profile.StudentProfileState.loadMirror(this)
         // لمس اعلان پخش (حتی با اپ کاملاً بسته) → بعد از لاگین/باز شدن قفل،
         // صفحه‌ی تدریس همان درس باز و پخش همان‌جا شروع می‌شود.
         captureTeachIntent(intent)
@@ -121,10 +126,31 @@ class MainActivity : FragmentActivity() {
             var loginLoading by remember { mutableStateOf(false) }
             var loginError by remember { mutableStateOf<String?>(null) }
 
+            // v1.25 — «مرا به خاطر بسپار»: سشنِ معتبر = ورود مستقیم به اپ؛
+            // صفحه‌ی لاگین فقط وقتی سشنی نیست. (قانون قدیمیِ «لاگین هر اجرا» حذف شد.)
             LaunchedEffect(Unit) {
-                // مصوب: اولِ هر اجرای اپ، دروازه‌ی ورود (گوگل/مهمان) نشان داده می‌شود —
-                // سشنِ مانده‌ی قبلی به‌صورت خودکار وارد نمی‌کند.
-                if (loggedIn.value != false) loggedIn.value = false
+                if (loggedIn.value == null) {
+                    val u = runCatching { container.auth.currentUser() }.getOrNull()
+                    loggedIn.value = u != null
+                }
+            }
+
+            // v1.25 — پس از ورود: اگر ردیف پروفایل دانش‌آموز ندارد → فرم ثبت‌نام اجباری.
+            // (آفلاین بودن سرور را با آینه‌ی محلی جبران می‌کنیم تا فرم بی‌دلیل نیاید.)
+            LaunchedEffect(loggedIn.value == true) {
+                if (loggedIn.value == true) {
+                    val uid = runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+                    val fetched = if (uid.isBlank()) null else
+                        runCatching {
+                            com.hamyareman.ir.ui.profile.StudentProfileRepo.fetch(container.tables, uid)
+                        }.getOrNull()
+                    if (fetched != null) {
+                        com.hamyareman.ir.ui.profile.StudentProfileState.writeMirror(
+                            activity, fetched.grade, /* done = */ true,
+                        )
+                    }
+                    profileNeeded.value = fetched == null && !com.hamyareman.ir.ui.profile.StudentProfileState.hasProfile
+                }
             }
 
             // v1.14: با ورود، همه‌ی آمار مدرسه (تدریس/فلش‌کارت/آزمون/نمودار پیشرفت)
@@ -151,7 +177,7 @@ class MainActivity : FragmentActivity() {
                             // ۰) هنوز وضعیت سشن نامعلوم است — لحظه‌ای خالی تا پرش نبینیم.
                             loggedIn.value == null -> Unit
 
-                            // ۱) وارد نشده: دروازه‌ی لاگین (گوگل/مهمان) قبل از هر محتوایی.
+                            // ۱) وارد نشده: دروازه‌ی ورود (فقط گوگل — v1.25: مهمان حذف شد).
                             loggedIn.value == false -> LoginScreen(
                                 loading = loginLoading,
                                 error = loginError,
@@ -168,16 +194,42 @@ class MainActivity : FragmentActivity() {
                                         }
                                     }
                                 },
-                                onGuest = {
-                                    loginLoading = true; loginError = null
-                                    scope.launch {
-                                        when (val r = container.auth.signInAsGuest()) {
-                                            is AppResult.Ok -> loggedIn.value = true
-                                            is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
-                                        }
-                                    }
-                                },
                             )
+
+                            // ۱.۵) وارد شده ولی پروفایل دانش‌آموز ندارد → فرم ثبت‌نام (یک‌بار).
+                            loggedIn.value == true && profileNeeded.value == true -> {
+                                var saving by remember { mutableStateOf(false) }
+                                var formError by remember { mutableStateOf<String?>(null) }
+                                val email = remember {
+                                    runCatching { container.auth.currentUser() }.getOrNull()?.email.orEmpty()
+                                }
+                                com.hamyareman.ir.ui.profile.StudentProfileScreen(
+                                    email = email,
+                                    saving = saving,
+                                    error = formError,
+                                    onSubmit = { fn, ln, age, grade, phone ->
+                                        saving = true; formError = null
+                                        scope.launch {
+                                            val uid = container.auth.currentUserId().orEmpty()
+                                            val ok = com.hamyareman.ir.ui.profile.StudentProfileRepo.save(
+                                                container.tables,
+                                                email,
+                                                com.hamyareman.ir.ui.profile.StudentProfile(
+                                                    userId = uid, email = email, firstName = fn,
+                                                    lastName = ln, age = age, grade = grade, phone = phone,
+                                                ),
+                                            )
+                                            if (ok) {
+                                                com.hamyareman.ir.ui.profile.StudentProfileState.writeMirror(activity, grade, true)
+                                                profileNeeded.value = false
+                                            } else {
+                                                formError = "ثبت در سرور انجام نشد؛ اینترنت را چک کن و دوباره بزن."
+                                            }
+                                            saving = false
+                                        }
+                                    },
+                                )
+                            }
 
                             // ۲) وارد شده و قفل باز: اپ.
                             isUnlocked -> {
@@ -296,6 +348,13 @@ class MainActivity : FragmentActivity() {
         if (!req.isNullOrBlank()) {
             com.hamyareman.ir.ui.study.TeachLaunch.pendingTeachPack = req
             com.hamyareman.ir.platform.feature.playback.TeachGate.requestedPack = null
+            return
+        }
+        // v1.25 — لمس اعلان با extra خالی (سرویس تازه ساخته شده): پکِ جاری‌ی سرویس را
+        // مستقیم از TeachGate بخوان — زنجیره‌ی «همیشه همان درس» را می‌بندد.
+        val live = com.hamyareman.ir.platform.feature.playback.TeachGate.currentPack
+        if (intent?.action == action && !live.isNullOrBlank()) {
+            com.hamyareman.ir.ui.study.TeachLaunch.pendingTeachPack = live
         }
     }
 

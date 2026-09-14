@@ -27,6 +27,9 @@ interface TablesDbService {
     /** خواندن سطرهای یک جدول با کوئری‌های رشته‌ای Appwrite (مثل `equal("x",["1"])`). */
     suspend fun list(tableId: String, queries: List<String> = emptyList()): AppResult<List<TableRow>>
 
+    /** خواندن یک سطر با شناسه‌ی قطعی؛ نبودِ سطر → Err (در فراخوان فولد می‌شود). */
+    suspend fun get(tableId: String, rowId: String): AppResult<TableRow?>
+
     /** ساخت سطر با شناسه‌ی مشخص (مثلاً `ID.unique()` از سمت مصرف‌کننده). */
     suspend fun create(
         tableId: String,
@@ -74,6 +77,14 @@ class AppwriteTablesDbService(
             queries = queries,
         )
         res.rows.map { row -> row.toTableRow() }
+    }
+
+    override suspend fun get(tableId: String, rowId: String): AppResult<TableRow?> = guarded {
+        db!!.getRow(
+            databaseId = provider.databaseId,
+            tableId = tableId,
+            rowId = rowId,
+        ).toTableRow()
     }
 
     override suspend fun create(

@@ -24,15 +24,13 @@ import androidx.compose.ui.unit.dp
 
 /**
  * دروازه‌ی ورود — تا کاربر وارد نشود، هیچ محتوایی رندر نمی‌شود.
- * ورود با گوگل (OAuth از طریق Appwrite) راه اصلی است؛ «ورود مهمان» فقط برای
- * مواقع اضطراری است و روی سرور نقش guest می‌گیرد.
+ * v1.25: ورود با گوگل (OAuth از طریق Appwrite) تنها راه ورود است — «ورود مهمان» حذف شد.
  */
 @Composable
 fun LoginScreen(
     loading: Boolean,
     error: String?,
     onGoogle: () -> Unit,
-    onGuest: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -67,10 +65,6 @@ fun LoginScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                     )
-                    Spacer(Modifier.height(8.dp))
-                    OutlinedButton(onClick = onGuest, modifier = Modifier.fillMaxWidth()) {
-                        Text("ورود مهمان (بدون همگام‌سازی)")
-                    }
                 }
                 error?.let {
                     Spacer(Modifier.height(10.dp))

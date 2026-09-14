@@ -13,6 +13,8 @@ object TableIds {
 
     // --- هویت و پیوند ---
     const val PROFILES = "profiles"
+    /** پروفایل دانش‌آموز (ثبت‌نام پس از ورود گوگل) — هر کاربر یک ردیف با userId واحد. */
+    const val STUDENT_PROFILES = "student_profiles"
     const val USER_SETTINGS = "user_settings"
     const val FATHER_LINKS = "father_links"
     const val PAIRING_CODES = "pairing_codes"

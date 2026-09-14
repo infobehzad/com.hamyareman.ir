@@ -176,7 +176,7 @@ private fun DownloadsScreenInner(onBack: () -> Unit) {
         openBook = if (openBook == code) "" else code
         store.putString("dl_openbook", openBook)
     }
-    val books = remember { BookModuleRegistry.modules }
+    val books = remember { com.hamyareman.ir.ui.profile.GradeGate.filter(BookModuleRegistry.modules) { it.bookCode } }
     val scope = rememberCoroutineScope()
     val busy = remember { mutableStateMapOf<String, Int>() }   // key → درصد
     val netErr = remember { mutableStateMapOf<String, Boolean>() } // key → خطای شبکه
