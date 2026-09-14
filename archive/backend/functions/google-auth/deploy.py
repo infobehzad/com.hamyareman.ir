@@ -36,20 +36,19 @@ def runtime_candidates():
     return sorted(keys, key=ver, reverse=True)
 
 def create_function(fid, spec):
-    """ساخت با امتحان رانتایم‌ها به ترتیب جدید→قدیم."""
+    """ساخت با امتحان رانتایم‌ها به ترتیب جدید→قدیم. خروجی: "created" | "exists"."""
     for RUNTIME in runtime_candidates() or ["node-22.0", "node-21.0", "node-20.0", "node-18.0"]:
         s2 = dict(spec, runtime=RUNTIME)
         code, resp = api("POST", "/functions", dict(s2, functionId=fid))
         if code == 201:
             print(f"[{fid}] created with runtime {RUNTIME}")
-            return None
+            return "created"
         if code == 409:
-            return None  # موجود است — caller با PATCH به‌روز می‌کند
+            return "exists"
         msg = json.dumps(resp)
         if "runtime" in msg or "not supported" in msg:
             print(f"[{fid}] runtime {RUNTIME} رد شد → بعدی")
             continue
-        return f"POST {fid} failed: {resp}"
     return "هیچ رانتایم node پذیرفته نشد"
 
 def deploy_function(fid, name, src_dir, scopes, extra_env=None):
@@ -58,16 +57,17 @@ def deploy_function(fid, name, src_dir, scopes, extra_env=None):
         "schedule": "", "timeout": 30, "enabled": True, "logging": True,
         "entrypoint": "src/main.js", "commands": "npm install", "scopes": scopes,
     }
-    err = create_function(fid, spec)
-    if err:
-        sys.exit(err)
-    code, cur = api("GET", f"/functions/{fid}")
-    if code == 200 and cur.get("$id") == fid:
-        spec["runtime"] = cur.get("runtime")
-        code, resp = api("PATCH", f"/functions/{fid}", spec)
+    created = create_function(fid, spec)
+    if created not in ("created", "exists"):
+        sys.exit(created)
+    if created == "exists":
+        # runtime بعد از ساخت تغییر نمی‌کند — فقط فیلدهای امن را به‌روز کن.
+        upd = {k: v for k, v in spec.items() if k != "runtime"}
+        code, resp = api("PATCH", f"/functions/{fid}", upd)
         if code >= 400:
-            sys.exit(f"PATCH {fid} failed: {resp}")
-        print(f"[{fid}] updated (runtime {spec['runtime']})")
+            print(f"[{fid}] هشدار: PATCH ناموفق (ادامه می‌دهیم): {code}")
+    if extra_env:
+        api("PATCH", f"/functions/{fid}", {"vars": extra_env})
     if extra_env:
         api("PATCH", f"/functions/{fid}", {"vars": extra_env})
     tar = os.path.join("/tmp", fid + ".tgz")
