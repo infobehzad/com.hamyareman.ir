@@ -8,7 +8,6 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.session.ConnectionResult
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
@@ -77,20 +76,17 @@ class PlaybackService : MediaSessionService() {
                 override fun onConnect(
                     session: MediaSession,
                     controller: MediaSession.ControllerInfo,
-                ): ConnectionResult {
+                ): MediaSession.ConnectionResult {
                     val cmds = Player.Commands.Builder()
                         .addAll(
                             Player.COMMAND_PLAY_PAUSE,
-                            Player.COMMAND_PLAY,
-                            Player.COMMAND_PAUSE,
-                            Player.COMMAND_SEEK_IN_CURRENT,
+                            Player.COMMAND_PREPARE,
+                            Player.COMMAND_SEEK,
                             Player.COMMAND_GET_CURRENT_MEDIA_ITEM,
                             Player.COMMAND_GET_TIMELINE,
-                            Player.COMMAND_SET_PLAYBACK_SPEED,
                         )
                         .build()
-                    return ConnectionResult.Builder()
-                        .setSessionActivity(session.activity)
+                    return MediaSession.ConnectionResult.Builder(session)
                         .setAvailablePlayerCommands(cmds)
                         .build()
                 }
