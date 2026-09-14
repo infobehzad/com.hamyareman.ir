@@ -18,13 +18,12 @@ import androidx.compose.ui.platform.LocalContext
 import org.json.JSONArray
 
 /**
- * استان → شهرستان → شهر، از دیتاست رسمی پست ایران
- * (github.com/masterking32/iran-states-cities-districts).
- * دراپ‌داون‌ها پیش‌فرض خالی‌اند و وابسته به انتخاب قبلی.
+ * استان → شهر از city.js ریپوی arashmehrani/Iran-City-List
+ * (۳۱ استان، ۱۰۱۱ شهر). شهرستان در این منبع نیست.
+ * دراپ‌داون‌ها پیش‌فرض خالی‌اند؛ شهر فقط بعد از استان فعال می‌شود.
  */
 object IranPlaces {
-    data class County(val name: String, val cities: List<String>)
-    data class Province(val name: String, val counties: List<County>)
+    data class Province(val name: String, val cities: List<String>)
 
     @Volatile private var cache: List<Province>? = null
 
@@ -37,16 +36,10 @@ object IranPlaces {
             val list = ArrayList<Province>(arr.length())
             for (i in 0 until arr.length()) {
                 val o = arr.getJSONObject(i)
-                val cs = o.getJSONArray("c")
-                val counties = ArrayList<County>(cs.length())
-                for (j in 0 until cs.length()) {
-                    val c = cs.getJSONObject(j)
-                    val ts = c.getJSONArray("t")
-                    val towns = ArrayList<String>(ts.length())
-                    for (k in 0 until ts.length()) towns.add(ts.getString(k))
-                    counties.add(County(c.getString("n"), towns))
-                }
-                list.add(Province(o.getString("n"), counties))
+                val ts = o.getJSONArray("t")
+                val towns = ArrayList<String>(ts.length())
+                for (k in 0 until ts.length()) towns.add(ts.getString(k))
+                list.add(Province(o.getString("n"), towns))
             }
             cache = list
             return list
@@ -66,8 +59,7 @@ fun IranLocationFields(
 ) {
     val ctx = LocalContext.current
     val places = remember { IranPlaces.load(ctx) }
-    val counties = remember(province) { places.firstOrNull { it.name == province }?.counties.orEmpty() }
-    val cities = remember(province, county) { counties.firstOrNull { it.name == county }?.cities.orEmpty() }
+    val cities = remember(province) { places.firstOrNull { it.name == province }?.cities.orEmpty() }
 
     PlaceDropdown(
         label = "استان",
@@ -77,19 +69,11 @@ fun IranLocationFields(
         onPick = { onProvince(it); onCounty(""); onCity("") },
     )
     PlaceDropdown(
-        label = "شهرستان",
-        value = county,
-        options = counties.map { it.name },
-        placeholder = "انتخاب شهرستان",
-        enabled = province.isNotBlank(),
-        onPick = { onCounty(it); onCity("") },
-    )
-    PlaceDropdown(
         label = "شهر",
         value = city,
         options = cities,
         placeholder = "انتخاب شهر",
-        enabled = county.isNotBlank(),
+        enabled = province.isNotBlank(),
         onPick = onCity,
     )
 }
