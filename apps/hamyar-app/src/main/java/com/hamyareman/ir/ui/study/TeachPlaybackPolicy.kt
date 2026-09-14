@@ -16,10 +16,27 @@ import androidx.lifecycle.LifecycleEventObserver
 fun PauseOnStopEffect(pause: () -> Unit) {
     val owner = LocalLifecycleOwner.current
     DisposableEffect(owner) {
+        com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = true
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_STOP) pause()
+            when (event) {
+                // صفحه واقعاً دیده می‌شود — پخش فقط در این حالت مجاز است.
+                Lifecycle.Event.ON_START -> {
+                    com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = true
+                }
+                // هوم / مینیمایز / سوییچ اپ / قفل صفحه / ترک کامپوزیشن:
+                // فوراً مکث + پرچم بسته تا اعلان نتواند در پس‌زمینه پلی کند.
+                Lifecycle.Event.ON_PAUSE, Lifecycle.Event.ON_STOP -> {
+                    com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = false
+                    pause()
+                }
+                else -> Unit
+            }
         }
         owner.lifecycle.addObserver(observer)
-        onDispose { owner.lifecycle.removeObserver(observer) }
+        onDispose {
+            owner.lifecycle.removeObserver(observer)
+            com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = false
+            pause()
+        }
     }
 }
