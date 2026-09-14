@@ -21,6 +21,7 @@ data class PlaybackState(
     val connected: Boolean = false,
     val hasMedia: Boolean = false,
     val playing: Boolean = false,
+    val ended: Boolean = false,
     val positionMs: Long = 0L,
     val durationMs: Long = 0L,
     val speed: Float = 1f,
@@ -54,6 +55,9 @@ class PlaybackController(context: Context) {
     }
 
     val isConnected: Boolean get() = controller?.isConnected == true
+
+    /** برای اتصال PlayerView ویدیو به همان سرویس واحد پخش. */
+    fun asPlayer(): Player? = controller
 
     val positionMs: Long get() = controller?.currentPosition?.coerceAtLeast(0L) ?: 0L
 
@@ -128,6 +132,11 @@ class PlaybackController(context: Context) {
 
     fun seekTo(ms: Long) {
         controller?.seekTo(ms.coerceAtLeast(0L))
+    }
+
+    fun seekBy(deltaMs: Long) {
+        val c = controller ?: return
+        c.seekTo((c.currentPosition + deltaMs).coerceAtLeast(0L))
     }
 
     /** سرعت پخش — برای کتاب صوتی واقعاً استفاده می‌شود (۰٫۷۵ تا ۱٫۵). */
