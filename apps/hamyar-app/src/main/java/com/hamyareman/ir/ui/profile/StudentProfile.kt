@@ -58,6 +58,11 @@ object StudentProfileState {
         writeMirror(ctx, g, done, firstName, subscription)
     }
 
+    fun clearMirror(ctx: Context) {
+        writeMirror(ctx, GradeLevel.G9, false, "", "free")
+        saveAvatarMirror(ctx, "")
+    }
+
     fun writeMirror(ctx: Context, g: GradeLevel, done: Boolean, name: String, sub: String) {
         val store = LocalStore(ctx, STORE)
         store.putString(KEY_GRADE, g.id)
