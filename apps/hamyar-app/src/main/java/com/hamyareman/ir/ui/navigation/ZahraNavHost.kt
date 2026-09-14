@@ -359,7 +359,9 @@ fun ZahraNavHost() {
                                     com.hamyareman.ir.ui.profile.StudentProfileState.writeMirror(
                                         ctx, toSave.grade, true, toSave.firstName,
                                         profile?.subscription ?: "free",
+                                        toSave.gender,
                                     )
+                                    container.uiPrefs.applyDefaultForGender(toSave.gender)
                                     profile = toSave.copy(subscription = profile?.subscription ?: "free")
                                 }
                             }
