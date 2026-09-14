@@ -12,6 +12,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +49,7 @@ fun UserProfileScreen(
     profile: StudentProfile?,
     onBack: () -> Unit,
     onSave: (StudentProfile) -> Unit,
+    onLogout: () -> Unit = {},
 ) {
     val ctx = LocalContext.current
     var avatarPath by remember { mutableStateOf(com.hamyareman.ir.ui.profile.StudentProfileState.avatarPath) }
@@ -121,19 +124,24 @@ fun UserProfileScreen(
                 label = { Text("نام خانوادگی *") }, singleLine = true, isError = bad,
                 modifier = Modifier.fillMaxWidth(),
             )
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                OutlinedTextField(
+                    value = ageText,
+                    onValueChange = { ageText = latinDigits(it).filter { c -> c.isDigit() }.take(2) },
+                    label = { Text("سن *") }, singleLine = true, isError = bad,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
             OutlinedTextField(
-                value = ageText,
-                onValueChange = { ageText = latinDigits(it).filter { c -> c.isDigit() }.take(2) },
-                label = { Text("سن *") }, singleLine = true, isError = bad,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            OutlinedTextField(
-                value = email, onValueChange = { email = it.trim() },
+                value = email, onValueChange = {},
+                readOnly = true,
                 label = { Text("ایمیل") }, singleLine = true,
+                supportingText = { Text("تغییر ایمیل فعلاً از همین‌جا ممکن نیست") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth(),
             )
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
             OutlinedTextField(
                 value = phone,
                 onValueChange = { phone = latinDigits(it).filter { c -> c.isDigit() }.take(10) },
@@ -144,6 +152,7 @@ fun UserProfileScreen(
                 prefix = { Text("+98", fontWeight = FontWeight.Bold) },
                 modifier = Modifier.fillMaxWidth(),
             )
+            }
 
             // ─── مدرسه / استان / شهرستان ───
             OutlinedTextField(
@@ -220,6 +229,10 @@ fun UserProfileScreen(
                 if (saving) CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp)
                 else Text("ذخیره‌ی تغییرات", fontWeight = FontWeight.Bold)
             }
+            OutlinedButton(
+                onClick = onLogout,
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+            ) { Text("خروج از حساب") }
             Spacer(Modifier.height(14.dp))
         }
     }
