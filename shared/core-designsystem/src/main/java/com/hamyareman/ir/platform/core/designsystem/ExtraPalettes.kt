@@ -84,30 +84,36 @@ fun extraScheme(brand: BrandTheme, dark: Boolean): ColorScheme? = when (brand) {
     else -> null
 }
 
+private fun argb(v: Long) = Color(v.toInt())
+
 private fun trio(
     dark: Boolean,
     p: Long, s: Long, t: Long,
     bgL: Long, bgD: Long, surfaceD: Long, containerL: Long, containerD: Long,
 ): ColorScheme {
-    val primary = Color(p)
-    val secondary = Color(s)
-    val tertiary = Color(t)
+    val primary = argb(p)
+    val secondary = argb(s)
+    val tertiary = argb(t)
     return if (!dark) lightColorScheme(
         primary = primary, onPrimary = Color.White,
-        primaryContainer = Color(containerL), onPrimaryContainer = Color(bgD),
+        primaryContainer = argb(containerL), onPrimaryContainer = argb(bgD),
         secondary = secondary, onSecondary = Color.White,
         tertiary = tertiary, onTertiary = Color.White,
-        background = Color(bgL), onBackground = Color(bgD),
-        surface = Color(bgL), onSurface = Color(bgD),
-        surfaceVariant = Color(containerL), onSurfaceVariant = Color(bgD).copy(alpha = 0.72f),
+        background = argb(bgL), onBackground = argb(bgD),
+        surface = argb(bgL), onSurface = argb(bgD),
+        surfaceVariant = argb(containerL), onSurfaceVariant = argb(bgD).copy(alpha = 0.72f),
     ) else darkColorScheme(
-        primary = primary.copy(alpha = 1f).let { Color(red = (it.red + 0.25f).coerceAtMost(1f), green = (it.green + 0.2f).coerceAtMost(1f), blue = (it.blue + 0.2f).coerceAtMost(1f)) },
-        onPrimary = Color(bgD),
-        primaryContainer = Color(containerD), onPrimaryContainer = Color(containerL),
+        primary = Color(
+            red = (primary.red + 0.25f).coerceAtMost(1f),
+            green = (primary.green + 0.2f).coerceAtMost(1f),
+            blue = (primary.blue + 0.2f).coerceAtMost(1f),
+        ),
+        onPrimary = argb(bgD),
+        primaryContainer = argb(containerD), onPrimaryContainer = argb(containerL),
         secondary = secondary,
         tertiary = tertiary,
-        background = Color(bgD), onBackground = Color(0xFFE8E4DC),
-        surface = Color(surfaceD), onSurface = Color(0xFFE8E4DC),
-        surfaceVariant = Color(containerD), onSurfaceVariant = Color(0xFFC8C0B8),
+        background = argb(bgD), onBackground = Color(0xFFE8E4DC),
+        surface = argb(surfaceD), onSurface = Color(0xFFE8E4DC),
+        surfaceVariant = argb(containerD), onSurfaceVariant = Color(0xFFC8C0B8),
     )
 }
