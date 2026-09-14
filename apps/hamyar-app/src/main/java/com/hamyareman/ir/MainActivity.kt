@@ -144,8 +144,11 @@ class MainActivity : FragmentActivity() {
                             com.hamyareman.ir.ui.profile.StudentProfileRepo.fetch(container.tables, uid)
                         }.getOrNull()
                     if (fetched != null) {
+                        // v1.31 — نام و اشتراک بازیابی‌شده هم در آینه نوشته شود؛
+                        // وگرنه سلام داشبورد «دوست من» می‌ماند (باگ گزارش‌شده).
                         com.hamyareman.ir.ui.profile.StudentProfileState.writeMirror(
                             activity, fetched.grade, /* done = */ true,
+                            name = fetched.firstName, sub = fetched.subscription,
                         )
                     }
                     profileNeeded.value = fetched == null && !com.hamyareman.ir.ui.profile.StudentProfileState.hasProfile
