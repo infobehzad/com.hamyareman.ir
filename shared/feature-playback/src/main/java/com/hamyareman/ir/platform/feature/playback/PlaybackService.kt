@@ -81,12 +81,11 @@ class PlaybackService : MediaSessionService() {
                         .addAll(
                             Player.COMMAND_PLAY_PAUSE,
                             Player.COMMAND_PREPARE,
-                            Player.COMMAND_SEEK,
                             Player.COMMAND_GET_CURRENT_MEDIA_ITEM,
                             Player.COMMAND_GET_TIMELINE,
                         )
                         .build()
-                    return MediaSession.ConnectionResult.Builder(session)
+                    return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
                         .setAvailablePlayerCommands(cmds)
                         .build()
                 }
