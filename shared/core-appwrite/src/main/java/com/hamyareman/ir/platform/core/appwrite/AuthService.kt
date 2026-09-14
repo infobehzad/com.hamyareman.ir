@@ -88,6 +88,7 @@ class AppwriteAuthService(
     override suspend fun signUp(name: String, email: String, password: String): AppResult<AuthUser> {
         if (!provider.isConfigured) return AppResult.Ok(localUser)
         return runCatching {
+            runCatching { account.deleteSession("current") }
             account.create(userId = ID.unique(), email = email, password = password, name = name)
             account.createEmailPasswordSession(email = email, password = password)
             bootstrap()
@@ -98,6 +99,7 @@ class AppwriteAuthService(
     override suspend fun signIn(email: String, password: String): AppResult<AuthUser> {
         if (!provider.isConfigured) return AppResult.Ok(localUser)
         return runCatching {
+            runCatching { account.deleteSession("current") }
             account.createEmailPasswordSession(email = email, password = password)
             bootstrap()
             requireUser()
@@ -105,12 +107,7 @@ class AppwriteAuthService(
     }
 
     override suspend fun signInAsGuest(): AppResult<AuthUser> {
-        if (!provider.isConfigured) return AppResult.Ok(localUser)
-        return runCatching {
-            account.createAnonymousSession()
-            bootstrap()
-            requireUser()
-        }.getOrElse { AppResult.Err(AppwriteErrors.map(it, "ورود مهمان ناموفق بود.")) }
+        return AppResult.Err(AppError.Auth("ورود مهمان حذف شده است. با ایمیل و رمز وارد شو."))
     }
 
     /**
