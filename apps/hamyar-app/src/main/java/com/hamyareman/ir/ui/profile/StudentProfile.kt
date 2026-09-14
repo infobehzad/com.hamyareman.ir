@@ -2,7 +2,7 @@ package com.hamyareman.ir.ui.profile
 
 import android.content.Context
 import com.hamyareman.ir.platform.core.appwrite.RowPermissions
-import com.hamyareman.ir.platform.core.appwrite.TableIds
+import com.hamyareman.ir.platform.core.common.TableIds
 import com.hamyareman.ir.platform.core.appwrite.TablesDbService
 import com.hamyareman.ir.platform.core.common.LocalStore
 

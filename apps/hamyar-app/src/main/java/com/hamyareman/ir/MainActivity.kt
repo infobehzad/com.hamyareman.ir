@@ -200,8 +200,9 @@ class MainActivity : FragmentActivity() {
                             loggedIn.value == true && profileNeeded.value == true -> {
                                 var saving by remember { mutableStateOf(false) }
                                 var formError by remember { mutableStateOf<String?>(null) }
-                                val email = remember {
-                                    runCatching { container.auth.currentUser() }.getOrNull()?.email.orEmpty()
+                                var email by remember { mutableStateOf("") }
+                                LaunchedEffect(Unit) {
+                                    email = runCatching { container.auth.currentUser() }.getOrNull()?.email.orEmpty()
                                 }
                                 com.hamyareman.ir.ui.profile.StudentProfileScreen(
                                     email = email,

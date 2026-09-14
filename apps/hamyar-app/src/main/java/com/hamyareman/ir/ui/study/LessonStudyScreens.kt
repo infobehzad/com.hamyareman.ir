@@ -53,6 +53,7 @@ import com.hamyareman.ir.platform.core.common.FunctionIds
 import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 import com.hamyareman.ir.platform.core.designsystem.PrimaryButton
+import com.hamyareman.ir.platform.feature.study.BookModuleRegistry
 import com.hamyareman.ir.platform.feature.study.QuizGrader
 import com.hamyareman.ir.platform.feature.study.StudyPack
 import com.hamyareman.ir.platform.feature.study.StudyProgressRepository
@@ -178,7 +179,10 @@ private fun ContentTab(pack: StudyPack, onOpenPdf: (String) -> Unit) {
         Modifier.fillMaxSize().padding(horizontal = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        if (tracks.isNotEmpty()) TeachAudioBar(packId = pack.packId, screenTitle = pack.title, tracks = tracks)
+        val bookTitle = remember(pack.packId) {
+            BookModuleRegistry.modules.firstOrNull { m -> m.packs.any { it.packId == pack.packId } }?.title.orEmpty()
+        }
+        if (tracks.isNotEmpty()) TeachAudioBar(packId = pack.packId, screenTitle = pack.title, bookTitle = bookTitle, tracks = tracks)
 
         val examNotes = remember(pack.packId) { pack.sections.filter { it.kind == "exam" || it.kind == "important" } }
         if (examNotes.isNotEmpty()) {

@@ -132,8 +132,11 @@ fun LessonPdfScreen(packId: String, onBack: () -> Unit) {
         AppTopBar(title = "📕 " + (pack?.title ?: "کتاب درس"), onBack = onBack)
         // v1.9: پلیر صوت در همه‌ی صفحات جزوه‌ها هم هست (صوت همان درس، همان‌جا پخش می‌شود).
         val tracks = remember(packId) { pack?.let { teachTracksOf(it) } ?: emptyList() }
+        val bookTitle = remember(packId) {
+            com.hamyareman.ir.platform.feature.study.BookModuleRegistry.modules.firstOrNull { m -> m.packs.any { it.packId == packId } }?.title.orEmpty()
+        }
         if (tracks.isNotEmpty()) {
-            TeachAudioBar(packId = packId, screenTitle = pack?.title ?: "", tracks = tracks)
+            TeachAudioBar(packId = packId, screenTitle = pack?.title ?: "", bookTitle = bookTitle, tracks = tracks)
         }
         when (val st = state) {
             is PdfState.Error -> Box(Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
