@@ -30,10 +30,23 @@ object MediaVault {
     private const val MAGIC = "HMV1"
     private const val PREFS = "hamyar_vault_keys"
     private const val WRAPPED_KEY = "wrapped_data_key"
+    private const val EPOCH_KEY = "vault_epoch"
+    /** نسخه‌ی محتوای گاوصندوق — v2: پاک‌سازی placeholderهای کش‌شده‌ی نسخه‌های قدیمی اپ. */
+    private const val CACHE_EPOCH = 2
 
     private var dataKey: SecretKey? = null
 
-    private fun vaultDir(ctx: Context) = File(ctx.filesDir, DIR).apply { mkdirs() }
+    private fun vaultDir(ctx: Context): File {
+        val dir = File(ctx.filesDir, DIR).apply { mkdirs() }
+        // نسخه‌ی کش: با بالا رفتن CACHE_EPOCH، همه‌ی فایل‌های دانلودشده با نسخه‌ی
+        // قبلی (مثلاً placeholderهای قدیمی) یک‌بار پاک می‌شوند و دوباره دانلود واقعی می‌شود.
+        val prefs = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (prefs.getInt(EPOCH_KEY, 0) != CACHE_EPOCH) {
+            dir.listFiles()?.forEach { it.delete() }
+            prefs.edit().putInt(EPOCH_KEY, CACHE_EPOCH).apply()
+        }
+        return dir
+    }
 
     fun vaultFile(ctx: Context, cacheKey: String) = File(vaultDir(ctx), "$cacheKey.enc")
 
