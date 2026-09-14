@@ -149,7 +149,9 @@ class MainActivity : FragmentActivity() {
                         com.hamyareman.ir.ui.profile.StudentProfileState.writeMirror(
                             activity, fetched.grade, /* done = */ true,
                             name = fetched.firstName, sub = fetched.subscription,
+                            genderId = fetched.gender,
                         )
+                        container.uiPrefs.applyDefaultForGender(fetched.gender)
                     }
                     profileNeeded.value = fetched == null && !com.hamyareman.ir.ui.profile.StudentProfileState.hasProfile
                 }
@@ -172,6 +174,7 @@ class MainActivity : FragmentActivity() {
                     brand = uiPrefs.theme,
                     darkTheme = uiPrefs.darkTheme,
                     fontFamily = FontLibrary.fontFamilyFor(activity, uiPrefs.fontKey),
+                    textSizeOffset = uiPrefs.textSizeOffset,
                 ) {
                 CompositionLocalProvider(LocalAppContainer provides container) {
                     Surface(Modifier.fillMaxSize()) {
@@ -224,7 +227,7 @@ class MainActivity : FragmentActivity() {
                                     email = email,
                                     saving = saving,
                                     error = formError,
-                                    onSubmit = { fn, ln, age, grade, phone ->
+                                    onSubmit = { fn, ln, age, grade, phone, gender, province, county, city ->
                                         saving = true; formError = null
                                         scope.launch {
                                             val uid = container.auth.currentUserId().orEmpty()
@@ -234,10 +237,16 @@ class MainActivity : FragmentActivity() {
                                                 com.hamyareman.ir.ui.profile.StudentProfile(
                                                     userId = uid, email = email, firstName = fn,
                                                     lastName = ln, age = age, grade = grade, phone = phone,
+                                                    province = province, county = county, city = city, gender = gender,
                                                 ),
                                             )
                                             if (ok) {
-                                                com.hamyareman.ir.ui.profile.StudentProfileState.writeMirror(activity, grade, true)
+                                                com.hamyareman.ir.ui.profile.StudentProfileState.writeMirror(
+                                                    activity, grade, true, fn,
+                                                    com.hamyareman.ir.ui.profile.StudentProfileState.subscription,
+                                                    gender,
+                                                )
+                                                container.uiPrefs.applyDefaultForGender(gender)
                                                 profileNeeded.value = false
                                             } else {
                                                 formError = "ثبت در سرور انجام نشد؛ اینترنت را چک کن و دوباره بزن."
