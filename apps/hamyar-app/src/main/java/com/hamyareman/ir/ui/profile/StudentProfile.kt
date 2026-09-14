@@ -46,12 +46,16 @@ object StudentProfileState {
     var subscription: String by androidx.compose.runtime.mutableStateOf("free")
         private set
 
+    var gender: String by androidx.compose.runtime.mutableStateOf("")
+        private set
+
     fun loadMirror(ctx: Context) {
         val store = LocalStore(ctx, STORE)
         grade = GradeLevel.byId(store.getString(KEY_GRADE, "").ifBlank { null })
         hasProfile = store.getString(KEY_DONE, "0") == "1"
         firstName = store.getString(KEY_NAME, "").orEmpty()
         subscription = store.getString(KEY_SUB, "free").ifBlank { "free" }
+        gender = store.getString(KEY_GENDER, "").orEmpty()
     }
 
     fun writeMirror(ctx: Context, g: GradeLevel, done: Boolean) {
@@ -59,20 +63,22 @@ object StudentProfileState {
     }
 
     fun clearMirror(ctx: Context) {
-        writeMirror(ctx, GradeLevel.G9, false, "", "free")
+        writeMirror(ctx, GradeLevel.G9, false, "", "free", "")
         saveAvatarMirror(ctx, "")
     }
 
-    fun writeMirror(ctx: Context, g: GradeLevel, done: Boolean, name: String, sub: String) {
+    fun writeMirror(ctx: Context, g: GradeLevel, done: Boolean, name: String, sub: String, genderId: String = gender) {
         val store = LocalStore(ctx, STORE)
         store.putString(KEY_GRADE, g.id)
         store.putString(KEY_DONE, if (done) "1" else "0")
         store.putString(KEY_NAME, name)
         store.putString(KEY_SUB, sub.ifBlank { "free" })
+        store.putString(KEY_GENDER, genderId)
         grade = g
         hasProfile = done
         firstName = name
         subscription = sub.ifBlank { "free" }
+        gender = genderId
     }
 
     /** آواتار محلی (مسیر فایل) — در سرور آپلود نمی‌شود. */
@@ -93,6 +99,7 @@ object StudentProfileState {
     private const val KEY_NAME = "firstName"
     private const val KEY_SUB = "subscription"
     private const val KEY_AVATAR = "avatarPath"
+    private const val KEY_GENDER = "gender"
 }
 
 /** فیلتر مرکزی محتوای مدرسه بر اساس پایه‌ی کاربر. */
@@ -116,8 +123,18 @@ data class StudentProfile(
     val schoolName: String = "",
     val province: String = "",
     val city: String = "",
+    val county: String = "",
+    val gender: String = "", // boy | girl
     val subscription: String = "free", // free | yearly — فقط از سمت پشتیبانی تغییر می‌کند
 )
+
+enum class StudentGender(val id: String, val fa: String) {
+    BOY("boy", "پسر"),
+    GIRL("girl", "دختر");
+    companion object {
+        fun byId(id: String?) = entries.firstOrNull { it.id == id }
+    }
+}
 
 object StudentProfileRepo {
     private const val TABLE = TableIds.STUDENT_PROFILES
@@ -140,6 +157,8 @@ object StudentProfileRepo {
                     schoolName = d["schoolName"]?.toString().orEmpty(),
                     province = d["province"]?.toString().orEmpty(),
                     city = d["city"]?.toString().orEmpty(),
+                    county = d["county"]?.toString().orEmpty(),
+                    gender = d["gender"]?.toString().orEmpty(),
                     subscription = (d["subscription"]?.toString()?.ifBlank { null } ?: "free"),
                 )
             }
@@ -160,6 +179,8 @@ object StudentProfileRepo {
             "schoolName" to p.schoolName,
             "province" to p.province,
             "city" to p.city,
+            "county" to p.county,
+            "gender" to p.gender,
             "subscription" to p.subscription.ifBlank { "free" },
             "updatedAtMs" to System.currentTimeMillis(),
         )
@@ -169,12 +190,3 @@ object StudentProfileRepo {
         }
     }
 }
-
-/** استان‌های ایران — دراپ‌داون پروفایل. */
-val IRAN_PROVINCES = listOf(
-    "آذربایجان شرقی", "آذربایجان غربی", "اردبیل", "اصفهان", "البرز", "ایلام", "بوشهر",
-    "تهران", "چهارمحال و بختیاری", "خراسان جنوبی", "خراسان رضوی", "خراسان شمالی",
-    "خوزستان", "زنجان", "سمنان", "سیستان و بلوچستان", "فارس", "قزوین", "قم", "کردستان",
-    "کرمان", "کرمانشاه", "کهگیلویه و بویراحمد", "گلستان", "گیلان", "لرستان", "مازندران",
-    "مرکزی", "هرمزگان", "همدان", "یزد",
-)
