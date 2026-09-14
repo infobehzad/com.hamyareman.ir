@@ -83,7 +83,7 @@ def deploy_function(fid, name, src_dir, scopes, extra_env=None):
         api("PATCH", f"/functions/{fid}", {"vars": extra_env})
     if extra_env:
         api("PATCH", f"/functions/{fid}", {"vars": extra_env})
-    tar = os.path.join("/tmp", fid + ".tgz")
+    tar = os.path.join("/tmp", fid + ".tar.gz")
     subprocess.run(["tar", "--exclude=node_modules", "-czf", tar, "-C", src_dir, "."], check=True)
     boundary = "----dep" + str(int(time.time()))
     with open(tar, "rb") as f:
@@ -91,7 +91,7 @@ def deploy_function(fid, name, src_dir, scopes, extra_env=None):
     parts = []
     for k, v in [("entrypoint", "src/main.js"), ("commands", "npm install"), ("activate", "true")]:
         parts.append(f'--{boundary}\r\ncontent-disposition: form-data; name="{k}"\r\n\r\n{v}\r\n'.encode())
-    parts.append((f'--{boundary}\r\ncontent-disposition: form-data; name="code"; filename="{fid}.tgz"\r\n'
+    parts.append((f'--{boundary}\r\ncontent-disposition: form-data; name="code"; filename="{fid}.tar.gz"\r\n'
                   f'content-type: application/gzip\r\n\r\n').encode() + tgz + b"\r\n")
     parts.append(f"--{boundary}--\r\n".encode())
     req = urllib.request.Request(EP + f"/functions/{fid}/deployments", data=b"".join(parts), method="POST", headers={
