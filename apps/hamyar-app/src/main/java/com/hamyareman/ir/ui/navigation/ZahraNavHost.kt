@@ -1,6 +1,8 @@
 package com.hamyareman.ir.ui.navigation
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -9,20 +11,27 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.hamyareman.ir.LocalAppContainer
 import com.hamyareman.ir.platform.feature.calls.CallScreen
 import com.hamyareman.ir.platform.feature.hearttoheart.HeartToHeartScreen
 import com.hamyareman.ir.platform.feature.hearttoheart.MessageDirection
 import com.hamyareman.ir.platform.feature.pairing.ZahraPairingScreen
-import com.hamyareman.ir.LocalAppContainer
+import com.hamyareman.ir.platform.feature.study.BookModuleRegistry
 import com.hamyareman.ir.ui.ailearning.AiAssessmentScreen
 import com.hamyareman.ir.ui.ailearning.AiLearningHomeScreen
+import com.hamyareman.ir.ui.appearance.AppearanceScreen
 import com.hamyareman.ir.ui.art.ArtGalleryScreen
 import com.hamyareman.ir.ui.art.DailyArtPromptScreen
 import com.hamyareman.ir.ui.calmdown.BreathingScreen
@@ -36,7 +45,7 @@ import com.hamyareman.ir.ui.cycle.MoodCheckInScreen
 import com.hamyareman.ir.ui.exercise.ExerciseDetailScreen
 import com.hamyareman.ir.ui.exercise.ExerciseScreen
 import com.hamyareman.ir.ui.gamification.BadgesScreen
-import com.hamyareman.ir.ui.appearance.AppearanceScreen
+import com.hamyareman.ir.ui.home.HomeScreen
 import com.hamyareman.ir.ui.hub.AwarenessHubScreen
 import com.hamyareman.ir.ui.hub.HealthHubScreen
 import com.hamyareman.ir.ui.hub.MedsScreen
@@ -44,7 +53,6 @@ import com.hamyareman.ir.ui.hub.ReadingCornerScreen
 import com.hamyareman.ir.ui.hub.SchoolHubScreen
 import com.hamyareman.ir.ui.hub.SleepLogScreen
 import com.hamyareman.ir.ui.hub.WeeklyScheduleScreen
-import com.hamyareman.ir.ui.home.HomeScreen
 import com.hamyareman.ir.ui.learning.LearningHomeScreen
 import com.hamyareman.ir.ui.learning.LessonScreen
 import com.hamyareman.ir.ui.learning.PlacementTestScreen
@@ -59,37 +67,35 @@ import com.hamyareman.ir.ui.safespace.SafeSpaceScreen
 import com.hamyareman.ir.ui.safespace.WritingPromptScreen
 import com.hamyareman.ir.ui.screentime.FocusModeScreen
 import com.hamyareman.ir.ui.screentime.ScreenTimeScreen
-import com.hamyareman.ir.ui.settings.PrivacySettingsScreen
 import com.hamyareman.ir.ui.settings.AppLockScreen
+import com.hamyareman.ir.ui.settings.PrivacySettingsScreen
 import com.hamyareman.ir.ui.settings.RemindersScreen
 import com.hamyareman.ir.ui.settings.SettingsScreen
 import com.hamyareman.ir.ui.settings.SyncScreen
-import com.hamyareman.ir.ui.study.BookDetailScreen
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-import com.hamyareman.ir.ui.study.LessonStudyScreen
-import com.hamyareman.ir.ui.study.StudyMedia
-import com.hamyareman.ir.ui.study.LessonTeachScreen
-import com.hamyareman.ir.ui.study.LessonPdfScreen
-import com.hamyareman.ir.ui.study.AudiobookScreen
-import com.hamyareman.ir.ui.wellness.SketchGalleryScreen
-import com.hamyareman.ir.ui.wellness.WellnessScreen
 import com.hamyareman.ir.ui.study.AcademyHubScreen
-import com.hamyareman.ir.ui.study.LibraryScreen
-import com.hamyareman.ir.ui.study.PdfUploadScreen
-import com.hamyareman.ir.ui.study.HealthProgressScreen
-import com.hamyareman.ir.ui.study.LockedStudyScreen
-import com.hamyareman.ir.ui.study.ProgressChartsScreen
-import com.hamyareman.ir.ui.study.VideoTeachScreen
+import com.hamyareman.ir.ui.study.AudiobookScreen
+import com.hamyareman.ir.ui.study.BookDetailScreen
 import com.hamyareman.ir.ui.study.DownloadsScreen
-import com.hamyareman.ir.ui.study.TeachStats
-import com.hamyareman.ir.ui.study.teachTracksOf
-import com.hamyareman.ir.platform.feature.study.BookModuleRegistry
+import com.hamyareman.ir.ui.study.HealthProgressScreen
+import com.hamyareman.ir.ui.study.LessonPdfScreen
+import com.hamyareman.ir.ui.study.LessonStudyScreen
+import com.hamyareman.ir.ui.study.LessonTeachScreen
+import com.hamyareman.ir.ui.study.LibraryScreen
+import com.hamyareman.ir.ui.study.LockedStudyScreen
+import com.hamyareman.ir.ui.study.PdfUploadScreen
+import com.hamyareman.ir.ui.study.ProgressChartsScreen
 import com.hamyareman.ir.ui.study.QuizReviewScreen
 import com.hamyareman.ir.ui.study.QuizScreen
 import com.hamyareman.ir.ui.study.SchoolScheduleScreen
 import com.hamyareman.ir.ui.study.StudyHomeScreen
+import com.hamyareman.ir.ui.study.StudyMedia
+import com.hamyareman.ir.ui.study.TeachStats
+import com.hamyareman.ir.ui.study.VideoTeachScreen
+import com.hamyareman.ir.ui.study.teachTracksOf
 import com.hamyareman.ir.ui.water.WaterScreen
+import com.hamyareman.ir.ui.wellness.SketchGalleryScreen
+import com.hamyareman.ir.ui.wellness.WellnessScreen
+import kotlinx.coroutines.launch
 
 @Composable
 fun ZahraNavHost() {
@@ -313,6 +319,44 @@ fun ZahraNavHost() {
                 )
             }
             composable(Screen.Settings.route) { SettingsScreen(nav) }
+            composable(Screen.UserProfile.route) {
+                val container = LocalAppContainer.current
+                val ctx = androidx.compose.ui.platform.LocalContext.current
+                val scopeUp = rememberCoroutineScope()
+                var profile by remember { mutableStateOf<com.hamyareman.ir.ui.profile.StudentProfile?>(null) }
+                var loading by remember { mutableStateOf(true) }
+                LaunchedEffect(Unit) {
+                    com.hamyareman.ir.ui.profile.StudentProfileState.loadAvatarMirror(ctx)
+                    val uid = runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+                    profile = if (uid.isBlank()) null else
+                        runCatching { com.hamyareman.ir.ui.profile.StudentProfileRepo.fetch(container.tables, uid) }.getOrNull()
+                    loading = false
+                }
+                when {
+                    loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+                    else -> com.hamyareman.ir.ui.profile.UserProfileScreen(
+                        profile = profile,
+                        onBack = { nav.popBackStack() },
+                        onSave = { p ->
+                            scopeUp.launch {
+                                val uid = runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+                                val toSave = p.copy(userId = uid, grade = profile?.grade ?: com.hamyareman.ir.ui.profile.StudentProfileState.grade)
+                                val email = toSave.email.ifBlank { runCatching { container.auth.currentUser() }.getOrNull()?.email.orEmpty() }
+                                val ok = runCatching {
+                                    com.hamyareman.ir.ui.profile.StudentProfileRepo.save(container.tables, email, toSave)
+                                }.getOrDefault(false)
+                                if (ok) {
+                                    com.hamyareman.ir.ui.profile.StudentProfileState.writeMirror(
+                                        ctx, toSave.grade, true, toSave.firstName,
+                                        profile?.subscription ?: "free",
+                                    )
+                                    profile = toSave.copy(subscription = profile?.subscription ?: "free")
+                                }
+                            }
+                        },
+                    )
+                }
+            }
             composable(Screen.Privacy.route) { PrivacySettingsScreen { nav.popBackStack() } }
             composable(Screen.ChatSettings.route) { ChatSettingsScreen { nav.popBackStack() } }
             composable(Screen.Badges.route) { BadgesScreen { nav.popBackStack() } }

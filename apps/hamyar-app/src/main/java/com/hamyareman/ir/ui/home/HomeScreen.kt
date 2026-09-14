@@ -63,7 +63,7 @@ fun HomeScreen(nav: NavController) {
                 )
                 Spacer(Modifier.width(12.dp))
                 Column {
-                    Text("${greeting()} زهرا جان 🌸", style = MaterialTheme.typography.headlineMedium)
+                    Text("${greeting()} ${com.hamyareman.ir.ui.profile.StudentProfileState.firstName.ifBlank { "دوست من" }} جان 🌸", style = MaterialTheme.typography.headlineMedium)
                     Text("همیار من کنارت است؛ از مدرسه تا آرامش", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }

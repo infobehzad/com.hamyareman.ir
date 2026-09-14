@@ -47,6 +47,10 @@ jobs:
               ("integer", {"key": "age",       "required": True, "min": 4, "max": 100}),
               ("string",  {"key": "grade",     "size": 16,  "required": True}),
               ("string",  {"key": "phone",     "size": 16,  "required": True}),
+              ("string",  {"key": "schoolName", "size": 128, "required": False}),
+              ("string",  {"key": "province",   "size": 64,  "required": False}),
+              ("string",  {"key": "city",       "size": 64,  "required": False}),
+              ("string",  {"key": "subscription", "size": 16, "required": False}),
               ("integer", {"key": "updatedAtMs", "required": False}),
           ]
           for kind, body in cols:

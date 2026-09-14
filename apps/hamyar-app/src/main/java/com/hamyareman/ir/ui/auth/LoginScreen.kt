@@ -54,13 +54,13 @@ fun LoginScreen(
                 if (loading) {
                     CircularProgressIndicator()
                 } else {
-                    // ورود استاندارد گوگل از مسیر Appwrite — انتخاب اکانت و برگشت خودکار به اپ.
+                    // v1.27 — لیست مستقیم اکانت‌های گوگلِ روی همین گوشی (بدون مرورگر).
                     Button(onClick = onGoogle, modifier = Modifier.fillMaxWidth()) {
                         Text("ورود با گوگل")
                     }
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        "اکانت گوگلت را انتخاب می‌کنی و مستقیم به همیار برمی‌گردی.",
+                        "اکانتت را از لیست اکانت‌های روی همین گوشی انتخاب کن.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,

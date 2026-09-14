@@ -53,6 +53,7 @@ fun MoreScreen(nav: NavController) {
 
         QuietModeCard()
 
+        HubCard("👤", "پروفایل من", "مشخصات من، مدرسه، عکس و وضعیت اشتراک") { nav.hubTo(Screen.UserProfile.route) }
         HubCard("🎨", "ظاهر و فونت", "تم رنگی، حالت تاریک/روشن، فونت دانلودی") { nav.hubTo(Screen.Appearance.route) }
         HubCard("⚙️", "تنظیمات", "حریم، قفل، همگام‌سازی") { nav.hubTo(Screen.Settings.route) }
 

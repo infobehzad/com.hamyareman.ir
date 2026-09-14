@@ -71,25 +71,6 @@ class PlaybackService : MediaSessionService() {
             .setSessionActivity(teachPendingIntent(currentPackOf(player)))
             // دکمه‌ی پلی اعلان هم مثل لمس اعلان: اول صفحه‌ی پلیر (تدریس) باز شود، بعد پخش.
             .setCallback(object : MediaSession.Callback {
-                // v1.25 — اعلان: فقط پلی/مکث + نوار زمان (بدون بک/جلو/قبلی/بعدی)؛
-                // فرمان‌های جابه‌جایی به کنترلر اعلان داده نمی‌شود (صفحه دست خود کاربر است).
-                override fun onConnect(
-                    session: MediaSession,
-                    controller: MediaSession.ControllerInfo,
-                ): MediaSession.ConnectionResult {
-                    val cmds = Player.Commands.Builder()
-                        .addAll(
-                            Player.COMMAND_PLAY_PAUSE,
-                            Player.COMMAND_PREPARE,
-                            Player.COMMAND_GET_CURRENT_MEDIA_ITEM,
-                            Player.COMMAND_GET_TIMELINE,
-                        )
-                        .build()
-                    return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
-                        .setAvailablePlayerCommands(cmds)
-                        .build()
-                }
-
                 override fun onPlayerCommandRequest(
                     mediaSession: MediaSession,
                     controllerInfo: MediaSession.ControllerInfo,

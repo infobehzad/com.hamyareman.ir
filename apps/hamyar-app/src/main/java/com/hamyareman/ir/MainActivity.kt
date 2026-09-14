@@ -182,17 +182,25 @@ class MainActivity : FragmentActivity() {
                                 loading = loginLoading,
                                 error = loginError,
                                 onGoogle = {
-                                    // v1.21: مسیر استاندارد Appwrite OAuth2 — گوگل Secret را با
-                                    // کنسول چک می‌کند، صفحه‌ی انتخاب اکانت باز می‌شود و با
-                                    // دیپلینک به اپ برمی‌گردد. (کد native لیست‌اکانت‌ها در
-                                    // googleIdTokenFlow محفوظ مانده؛ اگر روزی لازم شد سوئیچ می‌شود.)
+                                    // v1.27 — ورود native: لیست مستقیم اکانت‌های گوگلِ روی گوشی
+                                    // (Credential Manager) — بدون مرورگر. ریشه‌ی «فقط یک ایمیل»
+                                    // کوکی سشنِ Appwrite در مرورگر بود که ورود دوم را به کاربر اول
+                                    // می‌چسباند؛ این مسیر کوکی ندارد و هر اکانت = کاربر خودش.
                                     loginLoading = true; loginError = null
-                                    scope.launch {
-                                        when (val r = container.auth.signInWithGoogle(activity)) {
-                                            is AppResult.Ok -> loggedIn.value = true
-                                            is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
-                                        }
-                                    }
+                                    googleIdTokenFlow(
+                                        onToken = { idToken, nonce ->
+                                            scope.launch {
+                                                when (val r = container.auth.signInWithGoogleToken(idToken, nonce)) {
+                                                    is AppResult.Ok -> loggedIn.value = true
+                                                    is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
+                                                }
+                                            }
+                                        },
+                                        onError = { msg ->
+                                            loginError = msg.ifBlank { null }
+                                            loginLoading = false
+                                        },
+                                    )
                                 },
                             )
 

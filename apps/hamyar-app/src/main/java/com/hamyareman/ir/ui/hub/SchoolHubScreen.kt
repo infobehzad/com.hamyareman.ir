@@ -55,7 +55,7 @@ fun SchoolHubScreen(nav: NavController) {
         val books = remember { com.hamyareman.ir.ui.profile.GradeGate.filter(BookModuleRegistry.modules) { it.bookCode } }
         HubMenuGroup(
             "📚 کتاب‌ها",
-            "${books.size} کتاب پایه نهم — هر کتاب با درس‌ها، صوت، ویدیو و آزمونش",
+            "${books.size} کتاب درسی — هر کتاب با درس‌ها، صوت، ویدیو و آزمونش",
             open = openGroup == "books",
             onToggle = { toggleGroup("books") },
         ) {

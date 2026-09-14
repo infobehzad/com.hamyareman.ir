@@ -37,23 +37,55 @@ object StudentProfileState {
     @Volatile var grade: GradeLevel = GradeLevel.G9
     @Volatile var hasProfile: Boolean = false
 
+    /** نام کوچک برای خوش‌آمد داشبورد — state تا UI پس از ذخیره فوری تازه شود. */
+    var firstName: String by androidx.compose.runtime.mutableStateOf("")
+        private set
+
+    var subscription: String by androidx.compose.runtime.mutableStateOf("free")
+        private set
+
     fun loadMirror(ctx: Context) {
         val store = LocalStore(ctx, STORE)
         grade = GradeLevel.byId(store.getString(KEY_GRADE, "").ifBlank { null })
         hasProfile = store.getString(KEY_DONE, "0") == "1"
+        firstName = store.getString(KEY_NAME, "").orEmpty()
+        subscription = store.getString(KEY_SUB, "free").ifBlank { "free" }
     }
 
     fun writeMirror(ctx: Context, g: GradeLevel, done: Boolean) {
+        writeMirror(ctx, g, done, firstName, subscription)
+    }
+
+    fun writeMirror(ctx: Context, g: GradeLevel, done: Boolean, name: String, sub: String) {
         val store = LocalStore(ctx, STORE)
         store.putString(KEY_GRADE, g.id)
         store.putString(KEY_DONE, if (done) "1" else "0")
+        store.putString(KEY_NAME, name)
+        store.putString(KEY_SUB, sub.ifBlank { "free" })
         grade = g
         hasProfile = done
+        firstName = name
+        subscription = sub.ifBlank { "free" }
+    }
+
+    /** آواتار محلی (مسیر فایل) — در سرور آپلود نمی‌شود. */
+    @Volatile var avatarPath: String = ""
+
+    fun loadAvatarMirror(ctx: Context) {
+        avatarPath = LocalStore(ctx, STORE).getString(KEY_AVATAR, "").orEmpty()
+    }
+
+    fun saveAvatarMirror(ctx: Context, path: String) {
+        LocalStore(ctx, STORE).putString(KEY_AVATAR, path)
+        avatarPath = path
     }
 
     private const val STORE = "hamyar_profile"
     private const val KEY_GRADE = "grade"
     private const val KEY_DONE = "registered"
+    private const val KEY_NAME = "firstName"
+    private const val KEY_SUB = "subscription"
+    private const val KEY_AVATAR = "avatarPath"
 }
 
 /** فیلتر مرکزی محتوای مدرسه بر اساس پایه‌ی کاربر. */
@@ -74,6 +106,10 @@ data class StudentProfile(
     val age: Int,
     val grade: GradeLevel,
     val phone: String, // ۱۰ رقم، بدون +98 (پیش‌شماره در UI ثابت است)
+    val schoolName: String = "",
+    val province: String = "",
+    val city: String = "",
+    val subscription: String = "free", // free | yearly — فقط از سمت پشتیبانی تغییر می‌کند
 )
 
 object StudentProfileRepo {
@@ -94,6 +130,10 @@ object StudentProfileRepo {
                     age = d["age"]?.toString()?.toIntOrNull() ?: 0,
                     grade = GradeLevel.byId(d["grade"]?.toString()),
                     phone = d["phone"]?.toString().orEmpty(),
+                    schoolName = d["schoolName"]?.toString().orEmpty(),
+                    province = d["province"]?.toString().orEmpty(),
+                    city = d["city"]?.toString().orEmpty(),
+                    subscription = (d["subscription"]?.toString().ifBlank { null } ?: "free"),
                 )
             }
             else -> null
@@ -110,6 +150,10 @@ object StudentProfileRepo {
             "age" to p.age,
             "grade" to p.grade.id,
             "phone" to p.phone,
+            "schoolName" to p.schoolName,
+            "province" to p.province,
+            "city" to p.city,
+            "subscription" to p.subscription.ifBlank { "free" },
             "updatedAtMs" to System.currentTimeMillis(),
         )
         return when (tables.upsert(TABLE, p.userId, data, RowPermissions.forUser(p.userId))) {
@@ -118,3 +162,12 @@ object StudentProfileRepo {
         }
     }
 }
+
+/** استان‌های ایران — دراپ‌داون پروفایل. */
+val IRAN_PROVINCES = listOf(
+    "آذربایجان شرقی", "آذربایجان غربی", "اردبیل", "اصفهان", "البرز", "ایلام", "بوشهر",
+    "تهران", "چهارمحال و بختیاری", "خراسان جنوبی", "خراسان رضوی", "خراسان شمالی",
+    "خوزستان", "زنجان", "سمنان", "سیستان و بلوچستان", "فارس", "قزوین", "قم", "کردستان",
+    "کرمان", "کرمانشاه", "کهگیلویه و بویراحمد", "گلستان", "گیلان", "لرستان", "مازندران",
+    "مرکزی", "هرمزگان", "همدان", "یزد",
+)

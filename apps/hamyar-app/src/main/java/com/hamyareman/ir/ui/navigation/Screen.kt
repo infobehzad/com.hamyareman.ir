@@ -105,6 +105,7 @@ sealed class Screen(val route: String) {
     data object Pairing : Screen("pairing")
     data object Call : Screen("call")
     data object Settings : Screen("settings")
+    data object UserProfile : Screen("user-profile")
     data object Privacy : Screen("privacy")
     data object ChatSettings : Screen("chatsettings")
     data object Badges : Screen("badges")
