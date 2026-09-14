@@ -176,7 +176,7 @@ fun HealthProgressScreen(onBack: () -> Unit) {
             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("فلش‌کارت‌ها — مرور فاصله‌دار", style = MaterialTheme.typography.titleMedium)
                 val cardRows = remember(today) {
-                    BookModuleRegistry.modules.flatMap { m -> m.packs }.mapNotNull { pack ->
+                    BookModuleRegistry.modules.filter { com.hamyareman.ir.ui.profile.GradeGate.canSeeBook(it.bookCode) }.flatMap { m -> m.packs }.mapNotNull { pack ->
                         val states = runCatching { container.studyProgress.cards(pack.packId) }.getOrDefault(emptyMap())
                         if (states.isEmpty()) null else Triple(pack, states, pack.flashcards.size)
                     }
@@ -209,7 +209,7 @@ fun HealthProgressScreen(onBack: () -> Unit) {
             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text("آزمون‌ها — تحلیل نتایج", style = MaterialTheme.typography.titleMedium)
                 val attemptRows = remember {
-                    BookModuleRegistry.modules.flatMap { it.packs }.mapNotNull { pack ->
+                    BookModuleRegistry.modules.filter { com.hamyareman.ir.ui.profile.GradeGate.canSeeBook(it.bookCode) }.flatMap { it.packs }.mapNotNull { pack ->
                         val at = runCatching { container.studyProgress.attempts(pack.packId) }.getOrDefault(emptyList())
                         if (at.isEmpty()) null else pack to at
                     }

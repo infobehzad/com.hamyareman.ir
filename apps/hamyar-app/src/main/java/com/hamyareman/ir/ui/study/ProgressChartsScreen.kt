@@ -48,7 +48,7 @@ import com.hamyareman.ir.LocalAppContainer
 fun ProgressChartsScreen(bookCode: String?, onBack: () -> Unit, onPickBook: (String) -> Unit) {
     val container = LocalAppContainer.current
     val ctx = LocalContext.current
-    val books = remember { BookModuleRegistry.modules }
+    val books = remember { com.hamyareman.ir.ui.profile.GradeGate.filter(BookModuleRegistry.modules) { it.bookCode } }
     val module = remember(bookCode) { books.firstOrNull { it.bookCode == bookCode } }
 
     if (module == null) {

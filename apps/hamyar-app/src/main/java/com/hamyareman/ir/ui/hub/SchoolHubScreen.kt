@@ -52,14 +52,14 @@ fun SchoolHubScreen(nav: NavController) {
     HubBody {
         HubHeader("مدرسه 🎒", "کلاسِ درس همیشه باز است — هر روز یک قدم با برنامه و درس‌هایت جلو برو")
 
+        val books = remember { com.hamyareman.ir.ui.profile.GradeGate.filter(BookModuleRegistry.modules) { it.bookCode } }
         HubMenuGroup(
             "📚 کتاب‌ها",
-            "۱۳ کتاب پایه نهم — هر کتاب با درس‌ها، صوت، ویدیو و آزمونش",
+            "${books.size} کتاب پایه نهم — هر کتاب با درس‌ها، صوت، ویدیو و آزمونش",
             open = openGroup == "books",
             onToggle = { toggleGroup("books") },
         ) {
             val ctx = LocalContext.current
-            val books = remember { com.hamyareman.ir.ui.profile.GradeGate.filter(BookModuleRegistry.modules) { it.bookCode } }
             books.chunked(2).forEach { pair ->
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                     pair.forEach { book ->
