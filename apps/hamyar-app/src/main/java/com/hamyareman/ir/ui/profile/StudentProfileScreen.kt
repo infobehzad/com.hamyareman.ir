@@ -73,7 +73,7 @@ fun StudentProfileScreen(
             OutlinedTextField(
                 value = email,
                 onValueChange = {},
-                label = { Text("ایمیل (از حساب گوگل)") },
+                label = { Text("ایمیل حساب") },
                 readOnly = true,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
