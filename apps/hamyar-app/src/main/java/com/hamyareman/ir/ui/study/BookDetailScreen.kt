@@ -198,12 +198,9 @@ private fun LessonCard(
     val ctx = LocalContext.current
     val today = remember { com.hamyareman.ir.platform.core.common.JalaliDate.todayIso() }
 
-    val teachDone = remember(packId) {
-        if (pack == null) false else {
-            val expected = teachTracksOf(pack).size + (if (StudyMedia.videoIds(packId).isNotEmpty()) 1 else 0)
-            TeachStats.expectMedia(ctx, packId, expected.coerceAtLeast(1))
-            TeachStats.isDone(ctx, packId)
-        }
+    val teachDone = if (pack == null) false else {
+        TeachStats.expectMedia(ctx, packId, expectedTeachMedia(pack))
+        TeachStats.isDone(ctx, packId)
     }
     val mastery = remember(packId) {
         if (pack == null) 0 else runCatching { container.studyProgress.masteryPct(pack) }.getOrDefault(0)
