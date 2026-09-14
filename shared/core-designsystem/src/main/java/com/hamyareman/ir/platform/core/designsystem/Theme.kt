@@ -7,8 +7,10 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 
 /**
@@ -24,7 +26,18 @@ enum class BrandTheme(val label: String) {
     Stitch("جزیره‌ای (استیچ)"),
     MoonNight("شب ماه"),
     Mint("نعنایی"),
-    CalmFather("آرام (پدر)"),
+    CalmFather("آرام جنگلی"),
+    RoseGarden("باغ گل"),
+    CandyCloud("آبنبات ابری"),
+    LavenderMist("مه بنفش"),
+    SunsetBloom("غروب گل"),
+    CherryFizz("آلبالو"),
+    StarryPink("صورتی ستاره‌ای"),
+    OceanBlue("اقیانوس"),
+    ForestTrail("مسیر جنگل"),
+    RocketNavy("موشک"),
+    EmberSport("ورزشی"),
+    ThunderLime("رعد لیمویی"),
 }
 
 /** فونت جاری اپ — از ظاهر/تنظیمات عوض می‌شود؛ پیش‌فرض فونت سیستم. */
@@ -154,23 +167,29 @@ fun PlatformTheme(
     brand: BrandTheme,
     darkTheme: Boolean = isSystemInDarkTheme(),
     fontFamily: FontFamily = FontFamily.Default,
+    textSizeOffset: Int = 0,
     content: @Composable () -> Unit,
 ) {
-    val scheme = when (brand) {
+    val scheme = extraScheme(brand, darkTheme) ?: when (brand) {
         BrandTheme.DollStage -> if (darkTheme) DollDark else DollLight
         BrandTheme.Stitch -> if (darkTheme) StitchDark else StitchLight
         BrandTheme.MoonNight -> if (darkTheme) MoonDark else MoonLight
         BrandTheme.Mint -> if (darkTheme) MintDark else MintLight
         BrandTheme.CalmFather -> if (darkTheme) CalmDark else CalmLight
+        else -> if (darkTheme) DollDark else DollLight
     }
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        CompositionLocalProvider(LocalPlatformFont provides fontFamily) {
-            MaterialTheme(
-                colorScheme = scheme,
-                typography = platformTypography(fontFamily),
-                shapes = PlatformShapes,
-                content = content,
-            )
-        }
+    val base = LocalDensity.current
+    val scale = ((13f + textSizeOffset.coerceIn(-6, 6)) / 13f).coerceAtLeast(0.4f)
+    CompositionLocalProvider(
+        LocalLayoutDirection provides LayoutDirection.Rtl,
+        LocalPlatformFont provides fontFamily,
+        LocalDensity provides Density(base.density, base.fontScale * scale),
+    ) {
+        MaterialTheme(
+            colorScheme = scheme,
+            typography = platformTypography(fontFamily),
+            shapes = PlatformShapes,
+            content = content,
+        )
     }
 }
