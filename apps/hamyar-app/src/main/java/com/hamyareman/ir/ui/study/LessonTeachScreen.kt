@@ -93,6 +93,9 @@ internal fun teachTracksOf(pack: StudyPack): List<TeachTrack> {
     return listOf(TeachTrack("صوت درس", fid, fid))
 }
 
+/** شرط بازشدن مطالعه/سرعت تند = اتمام صوت تدریس (ویدیو صفحه‌ی جداست و قفل را نمی‌بندد). */
+internal fun expectedTeachMedia(pack: StudyPack): Int = teachTracksOf(pack).size.coerceAtLeast(1)
+
 /**
  * مقصد «لمس اعلان پخش» — سرویس رسانه PendingIntent به MainActivity می‌فرستد،
  * اینجا packId نگه داشته می‌شود و ZahraNavHost به صفحه‌ی تدریس همان درس می‌پرد.
@@ -201,9 +204,8 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
 
     val track = tracks[activeIdx]
     LaunchedEffect(packId, tracks.size) {
-        // شرط اتمام دوره = کامل‌شدن همه‌ی رسانه‌های درس: صوت‌ها + ویدیو (اگر دارد).
-        val expected = tracks.size + (if (StudyMedia.videoIds(packId).isNotEmpty()) 1 else 0)
-        TeachStats.expectMedia(context, packId, expected.coerceAtLeast(1))
+        // قفل مطالعه و ×۱٫۵/×۲ با اتمام صوت همین صفحه باز می‌شود (ویدیو جدا است).
+        TeachStats.expectMedia(context, packId, tracks.size.coerceAtLeast(1))
     }
 
     fun posKey(t: TeachTrack) = "teach_${packId}_${t.cacheKey}_pos"
@@ -326,13 +328,20 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
         }
     }
 
-    // تشخیص پایان ترک = پایان اولین دوره‌ی تدریس (حتی در چند نشست، وقتی تا انتها برسد).
-    LaunchedEffect(state.playing, posMs, state.durationMs) {
+    // تشخیص پایان ترک: STATE_ENDED، نزدیک انتهای فایل، یا ≥۹۵٪ ثانیه‌ی شنیده‌شده.
+    LaunchedEffect(state.ended, state.playing, state.positionMs, state.durationMs, posMs) {
         val dur = state.durationMs
-        if (!state.playing && state.hasMedia && dur > 0 && posMs > 0 && posMs >= dur - 900) {
+        val pos = maxOf(posMs, state.positionMs)
+        val nearEnd = dur > 0 && pos >= dur - 1500
+        val listenSnap = TeachStats.snap(context, packId)
+        val listenedEnough = listenSnap.audioDurSec > 0 &&
+            listenSnap.listenSec >= (listenSnap.audioDurSec * 95 / 100)
+        if (state.ended || listenedEnough || (!state.playing && state.hasMedia && nearEnd)) {
             val key = loadedKey ?: track.cacheKey
             TeachStats.markTrackDone(context, packId, key)
-            loadedKey?.let { k -> tracks.firstOrNull { it.cacheKey == k }?.let { savePos(it, 0L) } }
+            if (state.ended || nearEnd) {
+                loadedKey?.let { k -> tracks.firstOrNull { it.cacheKey == k }?.let { savePos(it, 0L) } }
+            }
         }
     }
 
@@ -510,6 +519,9 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                 Spacer(Modifier.weight(1f))
             }
             val seekUnlocked = remember { mutableStateOf(TeachStats.isDone(context, packId)) }
+            LaunchedEffect(state.ended, state.playing, posMs, state.durationMs) {
+                if (TeachStats.isDone(context, packId)) seekUnlocked.value = true
+            }
             var showSeekDialog by remember { mutableStateOf(false) }
             if (showSeekDialog) {
                 androidx.compose.material3.AlertDialog(
@@ -547,7 +559,6 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                     }
                 } // Box
             } // if(loadedKey)
-            LaunchedEffect(Unit) { seekUnlocked.value = TeachStats.isDone(context, packId) }
             // سرعت‌های پخش — زیر نوار سیک (v1.9).
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
                 TEACH_SPEEDS.forEach { v ->
@@ -716,11 +727,12 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
             state = TeachPdfState.Error("برای این بخش، کتابِ PDF جداگانه‌ای نیست.")
             return@LaunchedEffect
         }
+        state = TeachPdfState.Downloading(0)
         try {
-            // دانلود و بازکردن روی IO — HttpURLConnection روی Main می‌شکند.
+            // PdfRenderer فقط از یک نخ باید دیده شود — همهٔ کار روی IO.
             val r = withContext(Dispatchers.IO) {
                 openTeachPdf(ctx, fileId) { pct ->
-                    if (state is TeachPdfState.Downloading) state = TeachPdfState.Downloading(pct)
+                    state = TeachPdfState.Downloading(pct)
                 }
             }
             synchronized(renderLock) { renderer = r }
@@ -728,7 +740,7 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
         } catch (e: PdfUnavailable) {
             state = TeachPdfState.Error(e.message ?: "PDF در دسترس نیست.")
         } catch (e: Exception) {
-            runCatching { File(File(ctx.filesDir, "media/pdf-cache"), fileId).delete() }
+            // کش دانلودشده را پاک نکن — شاید رندر مشکل داشت نه فایل.
             state = TeachPdfState.Error("بازکردن PDF ناموفق بود؛ دوباره تلاش کن.")
         }
     }
@@ -785,28 +797,29 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
                             var bmp by remember(fileId, index) { mutableStateOf<Bitmap?>(pageCache[index]) }
                             LaunchedEffect(fileId, index) {
                                 if (bmp == null) {
-                                    val r = renderer ?: return@LaunchedEffect
-                                    val rendered: Bitmap? = try {
-                                        synchronized(renderLock) {
-                                            r.openPage(index).use { page ->
-                                                val targetW = 1080
-                                                val scale = targetW.toFloat() / page.width.toFloat()
-                                                val w = targetW
-                                                val h = (page.height * scale).toInt().coerceAtLeast(1)
-                                                val b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-                                                b.eraseColor(Color.WHITE)
-                                                page.render(b, null, android.graphics.Matrix().apply { setScale(scale, scale) }, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-                                                // v1.9: برخی PDFها ۱۸۰° آپلود شده‌اند — تصحیح چرخش هنگام رندر.
-                                                val deg = com.hamyareman.ir.platform.feature.study.PdfRotations.degrees[fileId] ?: 0
-                                                if (deg % 360 != 0) {
-                                                    val m = android.graphics.Matrix().apply { postRotate(deg.toFloat()) }
-                                                    Bitmap.createBitmap(b, 0, 0, b.width, b.height, m, true)
-                                                } else {
-                                                    b
+                                    val rendered: Bitmap? = withContext(Dispatchers.IO) {
+                                        try {
+                                            synchronized(renderLock) {
+                                                val r = renderer ?: return@synchronized null
+                                                r.openPage(index).use { page ->
+                                                    val targetW = 1080
+                                                    val scale = targetW.toFloat() / page.width.toFloat()
+                                                    val w = targetW
+                                                    val h = (page.height * scale).toInt().coerceAtLeast(1)
+                                                    val b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+                                                    b.eraseColor(Color.WHITE)
+                                                    page.render(b, null, android.graphics.Matrix().apply { setScale(scale, scale) }, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                                                    val deg = com.hamyareman.ir.platform.feature.study.PdfRotations.degrees[fileId] ?: 0
+                                                    if (deg % 360 != 0) {
+                                                        val m = android.graphics.Matrix().apply { postRotate(deg.toFloat()) }
+                                                        Bitmap.createBitmap(b, 0, 0, b.width, b.height, m, true)
+                                                    } else {
+                                                        b
+                                                    }
                                                 }
                                             }
-                                        }
-                                    } catch (e: Exception) { null }
+                                        } catch (e: Exception) { null }
+                                    }
                                     if (rendered != null) {
                                         synchronized(pageCache) { pageCache[index] = rendered }
                                         bmp = rendered
