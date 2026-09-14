@@ -39,7 +39,10 @@ fun StudentProfileScreen(
     email: String,
     saving: Boolean,
     error: String?,
-    onSubmit: (firstName: String, lastName: String, age: Int, grade: GradeLevel, phone: String) -> Unit,
+    onSubmit: (
+        firstName: String, lastName: String, age: Int, grade: GradeLevel, phone: String,
+        gender: String, province: String, county: String, city: String,
+    ) -> Unit,
 ) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
@@ -47,6 +50,10 @@ fun StudentProfileScreen(
     var grade by remember { mutableStateOf(GradeLevel.G9) }
     var gradeOpen by remember { mutableStateOf(false) }
     var phone by remember { mutableStateOf("") }
+    var gender by remember { mutableStateOf("") }
+    var province by remember { mutableStateOf("") }
+    var county by remember { mutableStateOf("") }
+    var city by remember { mutableStateOf("") }
     var showErrors by remember { mutableStateOf(false) }
 
     val firstNameBad = showErrors && firstName.trim().length < 2
@@ -97,16 +104,32 @@ fun StudentProfileScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
-            OutlinedTextField(
-                value = ageText,
-                onValueChange = { ageText = latinDigits(it).filter { c -> c.isDigit() }.take(2) },
-                label = { Text("سن *") },
-                isError = ageBad,
-                supportingText = { if (ageBad) Text("سن بین ۵ تا ۶۰") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth(),
-            )
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                OutlinedTextField(
+                    value = ageText,
+                    onValueChange = { ageText = latinDigits(it).filter { c -> c.isDigit() }.take(2) },
+                    label = { Text("سن *") },
+                    isError = ageBad,
+                    supportingText = { if (ageBad) Text("سن بین ۵ تا ۶۰") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            Text("جنسیت *", style = MaterialTheme.typography.titleSmall)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                StudentGender.entries.forEach { g ->
+                    FilterChip(
+                        selected = gender == g.id,
+                        onClick = { gender = g.id },
+                        label = { Text(g.fa) },
+                    )
+                }
+            }
+            if (showErrors && gender.isBlank()) {
+                Text("پسر یا دختر را انتخاب کن", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            }
 
             // دراپ‌داون پایه — همان گزینه‌های مصوب.
             ExposedDropdownMenuBox(expanded = gradeOpen, onExpandedChange = { gradeOpen = it }) {
@@ -168,14 +191,24 @@ fun StudentProfileScreen(
                 onClick = {
                     showErrors = true
                     val ok = firstName.trim().length >= 2 && lastName.trim().length >= 2 &&
-                        (ageText.toIntOrNull() ?: 0) in 5..60 && Regex("^9\\d{9}$").matches(phone)
-                    if (ok && !saving) onSubmit(firstName.trim(), lastName.trim(), ageText.toInt(), grade, phone)
+                        (ageText.toIntOrNull() ?: 0) in 5..60 && Regex("^9\\d{9}$").matches(phone) &&
+                        gender.isNotBlank()
+                    if (ok && !saving) onSubmit(
+                        firstName.trim(), lastName.trim(), ageText.toInt(), grade, phone,
+                        gender, province, county, city,
+                    )
                 },
                 enabled = !saving,
                 modifier = Modifier.fillMaxWidth().height(52.dp),
             ) {
                 if (saving) CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp)
                 else Text("ثبت و ورود به همیار", fontWeight = FontWeight.Bold)
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+    }
+}
+ به همیار", fontWeight = FontWeight.Bold)
             }
             Spacer(Modifier.height(12.dp))
         }
