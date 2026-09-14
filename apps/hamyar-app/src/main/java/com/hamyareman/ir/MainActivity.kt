@@ -182,10 +182,9 @@ class MainActivity : FragmentActivity() {
                                 loading = loginLoading,
                                 error = loginError,
                                 onGoogle = {
-                                    // v1.27 — ورود native: لیست مستقیم اکانت‌های گوگلِ روی گوشی
-                                    // (Credential Manager) — بدون مرورگر. ریشه‌ی «فقط یک ایمیل»
-                                    // کوکی سشنِ Appwrite در مرورگر بود که ورود دوم را به کاربر اول
-                                    // می‌چسباند؛ این مسیر کوکی ندارد و هر اکانت = کاربر خودش.
+                                    // v1.28 — اول native (لیست اکانت‌های گوشی، بدون کوکی مرورگر)؛
+                                    // اگر گوشی/کنسول آماده نبود (خطای ۱۶ و امثالش) خودکار به
+                                    // مسیر استاندارد مرورگر فال‌بک می‌شود تا ورود هیچ‌وقت بلاک نشود.
                                     loginLoading = true; loginError = null
                                     googleIdTokenFlow(
                                         onToken = { idToken, nonce ->
@@ -197,8 +196,18 @@ class MainActivity : FragmentActivity() {
                                             }
                                         },
                                         onError = { msg ->
-                                            loginError = msg.ifBlank { null }
-                                            loginLoading = false
+                                            if (msg.isBlank()) {
+                                                // کاربر خودش بست — هیچی
+                                                loginLoading = false
+                                            } else {
+                                                // فال‌بک: مرورگر (Appwrite OAuth2)
+                                                scope.launch {
+                                                    when (val r = container.auth.signInWithGoogle(activity)) {
+                                                        is AppResult.Ok -> loggedIn.value = true
+                                                        is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
+                                                    }
+                                                }
+                                            }
                                         },
                                     )
                                 },
@@ -330,7 +339,15 @@ class MainActivity : FragmentActivity() {
             } catch (e: androidx.credentials.exceptions.GetCredentialCancellationException) {
                 onError("") // کاربر بست — بی‌پیام
             } catch (e: androidx.credentials.exceptions.GetCredentialException) {
-                onError("انتخاب اکانت ممکن نشد: " + (e.localizedMessage ?: e.javaClass.simpleName))
+                val raw = e.localizedMessage ?: e.javaClass.simpleName
+                val fa = if (raw.contains("matching credential", true) || raw.contains("one tap", true)) {
+                    // خطای ۱۶ گوگل: کلاینت Android (پکیج + SHA-1) در همان پروژه‌ی
+                    // Client ID وب ثبت نشده — به مسیر مرورگر فال‌بک می‌شود.
+                    ""
+                } else {
+                    "انتخاب اکانت ممکن نشد: " + raw
+                }
+                onError(fa)
             } catch (e: Exception) {
                 onError(e.localizedMessage ?: "خطای ناشناخته در ورود گوگل")
             }
