@@ -183,10 +183,25 @@ class MainActivity : FragmentActivity() {
                             loggedIn.value == false -> LoginScreen(
                                 loading = loginLoading,
                                 error = loginError,
+                                onEmailSignIn = { em, pw ->
+                                    loginLoading = true; loginError = null
+                                    scope.launch {
+                                        when (val r = container.auth.signIn(em, pw)) {
+                                            is AppResult.Ok -> loggedIn.value = true
+                                            is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
+                                        }
+                                    }
+                                },
+                                onEmailSignUp = { nm, em, pw ->
+                                    loginLoading = true; loginError = null
+                                    scope.launch {
+                                        when (val r = container.auth.signUp(nm, em, pw)) {
+                                            is AppResult.Ok -> loggedIn.value = true
+                                            is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
+                                        }
+                                    }
+                                },
                                 onGoogle = {
-                                    // v1.29 — تنها مسیر: وب‌اپ استاندارد Appwrite OAuth2.
-                                    // (google یک‌بار در فرم کنسول با Client ID/Secret تنظیم شده؛
-                                    // Secret هرگز در اپ/مخزن نیست — فقط در کنسول Appwrite.)
                                     loginLoading = true; loginError = null
                                     scope.launch {
                                         when (val r = container.auth.signInWithGoogle(activity)) {
@@ -316,5 +331,12 @@ class MainActivity : FragmentActivity() {
         super.onPause()
         // خروج از اپ = شروع دوباره‌ی تایمر قفل خودکار (اگر کاربر فعالش کرده باشد).
         (application as HamyarApplication).container.lock.lock()
+    }
+
+    /** خروج از حساب — صفحه‌ی ورود دوباره نشان داده می‌شود. */
+    fun onLoggedOut() {
+        loggedIn.value = false
+        profileNeeded.value = null
+        com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = false
     }
 }
