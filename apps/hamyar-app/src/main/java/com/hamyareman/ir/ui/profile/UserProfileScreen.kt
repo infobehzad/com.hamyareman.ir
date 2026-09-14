@@ -74,8 +74,9 @@ fun UserProfileScreen(
     var phone by remember { mutableStateOf(profile?.phone.orEmpty()) }
     var schoolName by remember { mutableStateOf(profile?.schoolName.orEmpty()) }
     var province by remember { mutableStateOf(profile?.province.orEmpty()) }
-    var provinceOpen by remember { mutableStateOf(false) }
+    var county by remember { mutableStateOf(profile?.county.orEmpty()) }
     var city by remember { mutableStateOf(profile?.city.orEmpty()) }
+    var gender by remember { mutableStateOf(profile?.gender.orEmpty()) }
     var showErrors by remember { mutableStateOf(false) }
     var saving by remember { mutableStateOf(false) }
 
