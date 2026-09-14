@@ -82,7 +82,8 @@ fun UserProfileScreen(
     val bad = showErrors && (
         firstName.trim().length < 2 || lastName.trim().length < 2 ||
             ((ageText.toIntOrNull() ?: 0) !in 5..60) ||
-            phone.isNotBlank() && !Regex("^9\\d{9}$").matches(phone)
+            phone.isNotBlank() && !Regex("^9\\d{9}$").matches(phone) ||
+            gender.isBlank()
         )
 
     Column(Modifier.fillMaxSize()) {
@@ -154,29 +155,28 @@ fun UserProfileScreen(
             )
             }
 
-            // ─── مدرسه / استان / شهرستان ───
+            Text("جنسیت *", style = MaterialTheme.typography.titleSmall, modifier = Modifier.fillMaxWidth())
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                StudentGender.entries.forEach { g ->
+                    FilterChip(
+                        selected = gender == g.id,
+                        onClick = { gender = g.id },
+                        label = { Text(g.fa) },
+                    )
+                }
+            }
+            if (showErrors && gender.isBlank()) {
+                Text("پسر یا دختر را انتخاب کن", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall, modifier = Modifier.fillMaxWidth())
+            }
+
             OutlinedTextField(
                 value = schoolName, onValueChange = { schoolName = it },
                 label = { Text("نام مدرسه") }, singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
-            ExposedDropdownMenuBox(expanded = provinceOpen, onExpandedChange = { provinceOpen = it }) {
-                OutlinedTextField(
-                    value = province, onValueChange = {}, readOnly = true,
-                    label = { Text("استان") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(provinceOpen) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor(),
-                )
-                ExposedDropdownMenu(expanded = provinceOpen, onDismissRequest = { provinceOpen = false }) {
-                    IRAN_PROVINCES.forEach { pr ->
-                        DropdownMenuItem(text = { Text(pr) }, onClick = { province = pr; provinceOpen = false })
-                    }
-                }
-            }
-            OutlinedTextField(
-                value = city, onValueChange = { city = it },
-                label = { Text("شهرستان") }, singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+            IranLocationFields(
+                province = province, county = county, city = city,
+                onProvince = { province = it }, onCounty = { county = it }, onCity = { city = it },
             )
 
             // ─── پایه (فقط نمایش) ───
@@ -208,7 +208,7 @@ fun UserProfileScreen(
                     showErrors = true
                     val phoneOk = phone.isBlank() || Regex("^9\\d{9}$").matches(phone)
                     if (firstName.trim().length >= 2 && lastName.trim().length >= 2 &&
-                        (ageText.toIntOrNull() ?: 0) in 5..60 && phoneOk
+                        (ageText.toIntOrNull() ?: 0) in 5..60 && phoneOk && gender.isNotBlank()
                     ) {
                         saving = true
                         onSave(
@@ -218,7 +218,8 @@ fun UserProfileScreen(
                             )).copy(
                                 firstName = firstName.trim(), lastName = lastName.trim(),
                                 age = ageText.toInt(), email = email.trim(), phone = phone,
-                                schoolName = schoolName.trim(), province = province, city = city.trim(),
+                                schoolName = schoolName.trim(), province = province, county = county, city = city,
+                                gender = gender,
                             ),
                         )
                     }
