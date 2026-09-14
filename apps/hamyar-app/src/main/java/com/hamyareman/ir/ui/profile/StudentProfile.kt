@@ -135,7 +135,7 @@ object StudentProfileRepo {
                     schoolName = d["schoolName"]?.toString().orEmpty(),
                     province = d["province"]?.toString().orEmpty(),
                     city = d["city"]?.toString().orEmpty(),
-                    subscription = (d["subscription"]?.toString().ifBlank { null } ?: "free"),
+                    subscription = (d["subscription"]?.toString()?.ifBlank { null } ?: "free"),
                 )
             }
             else -> null
