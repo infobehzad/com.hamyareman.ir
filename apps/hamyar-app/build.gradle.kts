@@ -32,17 +32,14 @@ android {
         applicationId = "com.hamyareman.ir"   // Platform ثبت‌شده در کنسول Appwrite
         minSdk = 26
         targetSdk = 36
-        versionCode = 29
-        versionName = "1.28"
+        versionCode = 30
+        versionName = "1.29"
         buildConfigField("String", "APPWRITE_ENDPOINT", "\"$appwriteEndpoint\"")
         buildConfigField("String", "APPWRITE_PROJECT_ID", "\"$appwriteProjectId\"")
         // برای مانیفستِ ادغام‌شده (اگر نسخه‌ای از SDK اسکیم را با ${appwriteProjectId} بخواهد)
         manifestPlaceholders["appwriteProjectId"] = appwriteProjectId
         buildConfigField("String", "APPWRITE_PROJECT_NAME", "\"همیار من\"")
         buildConfigField("String", "APPWRITE_DATABASE_ID", "\"$appwriteDatabaseId\"")
-        // شناسه‌ی OAuth Client «وب» گوگل — برای Credential Manager (لیست اکانت‌های اندروید).
-        val googleWebClientId = (findProperty("googleWebClientId") as? String)?.trim().orEmpty()
-        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleWebClientId\"")
     }
 
     buildTypes {
@@ -108,10 +105,6 @@ dependencies {
     // تم اکتیویتی باید از Theme.AppCompat باشد و appcompat هم روی classpath باشد.
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.appcompat)
-    // ورود native گوگل — Credential Manager + play-services provider
-    implementation(libs.androidx.credentials)
-    implementation(libs.androidx.credentials.play)
-    implementation(libs.googleid)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(project(":core-common"))
     implementation(project(":core-designsystem"))

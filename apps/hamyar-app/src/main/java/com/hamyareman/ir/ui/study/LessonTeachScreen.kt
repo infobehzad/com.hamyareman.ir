@@ -52,6 +52,10 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -580,6 +584,71 @@ private sealed class TeachPdfState {
 private class PdfUnavailable(message: String) : Exception(message)
 
 /** دانلود/اعتبارسنجی/بازکردن PDF — فقط روی IO صدا زده می‌شود. */
+/**
+ * v1.29 — تصویر صفحه‌ی PDF با زوم لمسی دقیقاً مثل گالری اندروید:
+ *  - پینچ دوانگشتی ۱x تا ۵x **دور نقطه‌ی انگشت‌ها**؛
+ *  - در حالت زوم، کشیدن تک‌انگشتی = پن با محدوده‌بندی (تصویر از قاب بیرون نمی‌زند)؛
+ *  - دوبار-لمس = زوم/بازگشت؛ برگشت به ۱x خودکار وسط‌چین.
+ */
+@Composable
+private fun ZoomablePageImage(
+    bitmap: androidx.compose.ui.graphics.ImageBitmap,
+    contentDescription: String,
+    onZoomChanged: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var scale by remember { mutableFloatStateOf(1f) }
+    var offsetX by remember { mutableFloatStateOf(0f) }
+    var offsetY by remember { mutableFloatStateOf(0f) }
+    var size by remember { mutableStateOf(IntSize.Zero) }
+
+    Box(
+        modifier
+            .onSizeChanged { size = it }
+            .pointerInput(Unit) {
+                detectTransformGestures { centroid, pan, zoom, _ ->
+                    val newScale = (scale * zoom).coerceIn(1f, 5f)
+                    val f = if (scale > 0f) newScale / scale else 1f
+                    var nx = centroid.x - (centroid.x - offsetX) * f + pan.x
+                    var ny = centroid.y - (centroid.y - offsetY) * f + pan.y
+                    val maxX = size.width * (newScale - 1f) / 2f
+                    val maxY = size.height * (newScale - 1f) / 2f
+                    nx = nx.coerceIn(-maxX, maxX)
+                    ny = ny.coerceIn(-maxY, maxY)
+                    scale = newScale
+                    offsetX = if (newScale <= 1.001f) 0f else nx
+                    offsetY = if (newScale <= 1.001f) 0f else ny
+                    onZoomChanged(newScale > 1.01f)
+                }
+            }
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onDoubleTap = {
+                        if (scale > 1f) {
+                            scale = 1f; offsetX = 0f; offsetY = 0f; onZoomChanged(false)
+                        } else {
+                            scale = 2.5f; offsetX = 0f; offsetY = 0f; onZoomChanged(true)
+                        }
+                    },
+                )
+            },
+    ) {
+        Image(
+            bitmap = bitmap,
+            contentDescription = contentDescription,
+            contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+            modifier = Modifier
+                .matchParentSize()
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    translationX = offsetX
+                    translationY = offsetY
+                },
+        )
+    }
+}
+
 private fun openTeachPdf(ctx: android.content.Context, fileId: String, onProgress: (Int) -> Unit): PdfRenderer {
     val cacheDir = File(ctx.filesDir, "media/pdf-cache").apply { mkdirs() }
     val target = File(cacheDir, fileId)
@@ -702,9 +771,13 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
         is TeachPdfState.Ready -> Column(modifier = modifier) {
             Text("📕 کتاب درس — ${toPersianDigits(st.pageCount.toString())} صفحه", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(6.dp))
+            // v1.29 — زوم لمسی دوانگشتی (مثل گالری): وقتی صفحه‌ای زوم است،
+            // لیست اسکرول نمی‌شود تا جابه‌جایی/پن دست کاربر باشد.
+            var pageZoomed by remember { mutableStateOf(false) }
             LazyColumn(
                 Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
+                userScrollEnabled = !pageZoomed,
             ) {
                 items(st.pageCount) { index ->
                     Card(Modifier.fillMaxWidth()) {
@@ -745,7 +818,12 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
                                     CircularProgressIndicator(Modifier.padding(16.dp))
                                 }
                             } else {
-                                Image(bitmap = bmp!!.asImageBitmap(), contentDescription = "صفحه ${index + 1}", modifier = Modifier.fillMaxWidth())
+                                ZoomablePageImage(
+                                    bitmap = bmp!!.asImageBitmap(),
+                                    contentDescription = "صفحه ${index + 1}",
+                                    onZoomChanged = { pageZoomed = it },
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
                             }
                             Text(
                                 "صفحه ${toPersianDigits((index + 1).toString())} از ${toPersianDigits(st.pageCount.toString())}",

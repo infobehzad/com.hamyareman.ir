@@ -17,7 +17,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.lifecycleScope
 import com.hamyareman.ir.platform.core.common.AppResult
 import com.hamyareman.ir.platform.core.designsystem.BrandTheme
 import com.hamyareman.ir.platform.core.designsystem.PinLockGate
@@ -182,34 +181,16 @@ class MainActivity : FragmentActivity() {
                                 loading = loginLoading,
                                 error = loginError,
                                 onGoogle = {
-                                    // v1.28 — اول native (لیست اکانت‌های گوشی، بدون کوکی مرورگر)؛
-                                    // اگر گوشی/کنسول آماده نبود (خطای ۱۶ و امثالش) خودکار به
-                                    // مسیر استاندارد مرورگر فال‌بک می‌شود تا ورود هیچ‌وقت بلاک نشود.
+                                    // v1.29 — تنها مسیر: وب‌اپ استاندارد Appwrite OAuth2.
+                                    // (google یک‌بار در فرم کنسول با Client ID/Secret تنظیم شده؛
+                                    // Secret هرگز در اپ/مخزن نیست — فقط در کنسول Appwrite.)
                                     loginLoading = true; loginError = null
-                                    googleIdTokenFlow(
-                                        onToken = { idToken, nonce ->
-                                            scope.launch {
-                                                when (val r = container.auth.signInWithGoogleToken(idToken, nonce)) {
-                                                    is AppResult.Ok -> loggedIn.value = true
-                                                    is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
-                                                }
-                                            }
-                                        },
-                                        onError = { msg ->
-                                            if (msg.isBlank()) {
-                                                // کاربر خودش بست — هیچی
-                                                loginLoading = false
-                                            } else {
-                                                // فال‌بک: مرورگر (Appwrite OAuth2)
-                                                scope.launch {
-                                                    when (val r = container.auth.signInWithGoogle(activity)) {
-                                                        is AppResult.Ok -> loggedIn.value = true
-                                                        is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
-                                                    }
-                                                }
-                                            }
-                                        },
-                                    )
+                                    scope.launch {
+                                        when (val r = container.auth.signInWithGoogle(activity)) {
+                                            is AppResult.Ok -> loggedIn.value = true
+                                            is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
+                                        }
+                                    }
                                 },
                             )
 
@@ -296,62 +277,6 @@ class MainActivity : FragmentActivity() {
         super.onResume()
         val container = (application as HamyarApplication).container
         unlocked.value = !container.lock.isLockedNow()
-    }
-
-    /**
-     * ورود استاندارد گوگل روی اندروید (Credential Manager) — بدون مرورگر و بدون
-     * دیالوگ واسط: خود سیستم لیست اکانت‌های گوگلِ روی گوشی را مستقیم نشان می‌دهد.
-     * idToken برای صحت‌سنجی و ساخت سشن به تابع سرور «google-auth» می‌رود.
-     */
-    private fun googleIdTokenFlow(onToken: (String, String) -> Unit, onError: (String) -> Unit) {
-        val webClientId = BuildConfig.GOOGLE_WEB_CLIENT_ID.trim()
-        if (webClientId.isBlank()) {
-            onError("شناسه‌ی وب گوگل (googleWebClientId) تنظیم نشده است.")
-            return
-        }
-        val nonce = java.util.UUID.randomUUID().toString().replace("-", "").take(24)
-        val hashedNonce = java.security.MessageDigest.getInstance("SHA-256")
-            .digest(nonce.toByteArray(Charsets.UTF_8))
-            .joinToString("") { "%02x".format(it) }
-        val option = com.google.android.libraries.identity.googleid.GetGoogleIdOption.Builder()
-            .setServerClientId(webClientId)
-            .setNonce(hashedNonce)
-            // false = همه‌ی اکانت‌های روی گوشی لیست شوند (نه فقط قبلی‌ها)
-            .setFilterByAuthorizedAccounts(false)
-            .setAutoSelectEnabled(false)
-            .build()
-        val request = androidx.credentials.GetCredentialRequest.Builder()
-            .addCredentialOption(option)
-            .build()
-        val cm = androidx.credentials.CredentialManager.create(this)
-        lifecycleScope.launch {
-            try {
-                val resp = cm.getCredential(this@MainActivity, request)
-                val cred = resp.credential
-                if (cred is androidx.credentials.CustomCredential &&
-                    cred.type == com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
-                ) {
-                    val gc = com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.createFrom(cred.data)
-                    onToken(gc.idToken, hashedNonce)
-                } else {
-                    onError("نوع اعتبار پشتیبانی نشد.")
-                }
-            } catch (e: androidx.credentials.exceptions.GetCredentialCancellationException) {
-                onError("") // کاربر بست — بی‌پیام
-            } catch (e: androidx.credentials.exceptions.GetCredentialException) {
-                val raw = e.localizedMessage ?: e.javaClass.simpleName
-                val fa = if (raw.contains("matching credential", true) || raw.contains("one tap", true)) {
-                    // خطای ۱۶ گوگل: کلاینت Android (پکیج + SHA-1) در همان پروژه‌ی
-                    // Client ID وب ثبت نشده — به مسیر مرورگر فال‌بک می‌شود.
-                    ""
-                } else {
-                    "انتخاب اکانت ممکن نشد: " + raw
-                }
-                onError(fa)
-            } catch (e: Exception) {
-                onError(e.localizedMessage ?: "خطای ناشناخته در ورود گوگل")
-            }
-        }
     }
 
     override fun onNewIntent(intent: android.content.Intent) {
