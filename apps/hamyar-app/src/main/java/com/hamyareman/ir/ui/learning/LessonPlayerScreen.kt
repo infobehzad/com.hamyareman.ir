@@ -67,9 +67,6 @@ import com.hamyareman.ir.LocalAppContainer
 import com.hamyareman.ir.ui.content.Lesson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /**
@@ -246,7 +243,7 @@ private fun LessonStatusBar(
                 "تماشا نشده"
             } else {
                 val dateText = progress.lastViewedAtIso.takeIf { it.isNotBlank() }
-                    ?.let { isoToJalaliDate(it) }
+                    ?.let { com.hamyareman.ir.platform.core.common.JalaliDate.formatFa(it) }
                     ?: "—"
                 val speedText = "%.2fx".format(Locale.US, progress.playbackSpeed)
                 if (progress.isCompleted) {
@@ -517,19 +514,6 @@ private fun formatSec(sec: Double): String {
     val s = total % 60
     return "%d:%02d".format(m, s)
 }
-
-/** تبدیل ساده‌ی ISO instant به تاریخ شمسیِ کوتاه (مثل ۱۴۰۴/۰۶/۱۸). */
-private fun isoToJalaliDate(iso: String): String = runCatching {
-    val instant = Instant.parse(iso)
-    val date = instant.atZone(ZoneId.systemDefault()).toLocalDate()
-    val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
-    val g = date.format(formatter)
-    // تبدیل میلادی به شمسی (ساده: ۶۲۱ روز اختلاف تقریبی)
-    val gy = g.substring(0, 4).toInt()
-    val mmdd = g.substring(5)
-    val jy = gy - 621
-    "$jy/$mmdd"
-}.getOrDefault("—")
 
 private fun switchTab(
     player: LessonMediaPlayer,

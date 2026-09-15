@@ -24,6 +24,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.hamyareman.ir.platform.core.common.JalaliDate
+import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 import java.io.File
 
@@ -39,7 +41,7 @@ private fun latinDigits(s: String): String = buildString {
 
 /**
  * منوی پروفایل کاربری — تمام مشخصات ثبت‌شده با امکان ویرایش:
- * نام/نام‌خانوادگی/سن/ایمیل/موبایل + مدرسه/استان/شهرستان + عکس پروفایل (محلی).
+ * نام/نام‌خانوادگی/تاریخ تولد شمسی (سن خودکار)/ایمیل/موبایل + مدرسه/استان + عکس پروفایل (محلی).
  * پایه: فقط نمایش (تغییر یک‌بار و از سمت پشتیبانی).
  * اشتراک (رایگان/یک‌ساله): فقط نمایش — تغییر از سمت پشتیبانی/سرور.
  */
@@ -69,7 +71,15 @@ fun UserProfileScreen(
 
     var firstName by remember { mutableStateOf(profile?.firstName.orEmpty()) }
     var lastName by remember { mutableStateOf(profile?.lastName.orEmpty()) }
-    var ageText by remember { mutableStateOf((profile?.age ?: 0).takeIf { it > 0 }?.toString().orEmpty()) }
+    val initialBirth = remember { JalaliDate.parseJalali(profile?.birthDate.orEmpty()) }
+    var birthYear by remember { mutableStateOf(initialBirth?.year) }
+    var birthMonth by remember { mutableStateOf(initialBirth?.month) }
+    var birthDay by remember { mutableStateOf(initialBirth?.day) }
+    val birthJalali = remember(birthYear, birthMonth, birthDay) {
+        val y = birthYear; val m = birthMonth; val d = birthDay
+        if (y != null && m != null && d != null) JalaliDate.Jalali(y, m, d).takeIf { JalaliDate.isValid(it) } else null
+    }
+    val computedAge = remember(birthJalali) { birthJalali?.let { JalaliDate.ageYears(it) } }
     var email by remember { mutableStateOf(profile?.email.orEmpty()) }
     var phone by remember { mutableStateOf(profile?.phone.orEmpty()) }
     var schoolName by remember { mutableStateOf(profile?.schoolName.orEmpty()) }
@@ -82,7 +92,7 @@ fun UserProfileScreen(
 
     val bad = showErrors && (
         firstName.trim().length < 2 || lastName.trim().length < 2 ||
-            ((ageText.toIntOrNull() ?: 0) !in 5..60) ||
+            (computedAge == null || computedAge !in 5..60) ||
             phone.isNotBlank() && !Regex("^9\\d{9}$").matches(phone) ||
             gender.isBlank()
         )
@@ -126,15 +136,23 @@ fun UserProfileScreen(
                 label = { Text("نام خانوادگی *") }, singleLine = true, isError = bad,
                 modifier = Modifier.fillMaxWidth(),
             )
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                OutlinedTextField(
-                    value = ageText,
-                    onValueChange = { ageText = latinDigits(it).filter { c -> c.isDigit() }.take(2) },
-                    label = { Text("سن *") }, singleLine = true, isError = bad,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+            JalaliBirthDateFields(
+                year = birthYear,
+                month = birthMonth,
+                day = birthDay,
+                onChange = { y, m, d -> birthYear = y; birthMonth = m; birthDay = d },
+                isError = showErrors && (computedAge == null || computedAge !in 5..60),
+            )
+            OutlinedTextField(
+                value = computedAge?.let { toPersianDigits(it.toString()) }.orEmpty(),
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("سن") },
+                isError = showErrors && (computedAge == null || computedAge !in 5..60),
+                supportingText = { Text("از تاریخ تولد شمسی حساب می‌شود") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
             OutlinedTextField(
                 value = email, onValueChange = {},
                 readOnly = true,
@@ -208,8 +226,9 @@ fun UserProfileScreen(
                 onClick = {
                     showErrors = true
                     val phoneOk = phone.isBlank() || Regex("^9\\d{9}$").matches(phone)
+                    val age = computedAge
                     if (firstName.trim().length >= 2 && lastName.trim().length >= 2 &&
-                        (ageText.toIntOrNull() ?: 0) in 5..60 && phoneOk && gender.isNotBlank()
+                        age != null && age in 5..60 && birthJalali != null && phoneOk && gender.isNotBlank()
                     ) {
                         saving = true
                         onSave(
@@ -218,7 +237,7 @@ fun UserProfileScreen(
                                 age = 0, grade = com.hamyareman.ir.ui.profile.StudentProfileState.grade, phone = "",
                             )).copy(
                                 firstName = firstName.trim(), lastName = lastName.trim(),
-                                age = ageText.toInt(), email = email.trim(), phone = phone,
+                                age = age, birthDate = birthJalali.isoLike, email = email.trim(), phone = phone,
                                 schoolName = schoolName.trim(), province = province, county = county, city = city,
                                 gender = gender,
                             ),

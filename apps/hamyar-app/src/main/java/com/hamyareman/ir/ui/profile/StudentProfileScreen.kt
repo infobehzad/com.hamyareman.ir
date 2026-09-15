@@ -37,6 +37,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.hamyareman.ir.platform.core.common.JalaliDate
+import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 
 /** فقط ارقام لاتین — کیبورد فارسی هم ممکن است ۰-۹ بدهد؛ همه را لاتین می‌کنیم. */
@@ -52,7 +54,7 @@ private fun latinDigits(s: String): String = buildString {
 
 /**
  * فرم ثبت‌نام دانش‌آموز — بلافاصله پس از اولین ورود موفق اگر پروفایل نباشد.
- * قواعد اجباری: نام و نام‌خانوادگی، سن، جنسیت، پایه، موبایل.
+ * قواعد اجباری: نام و نام‌خانوادگی، تاریخ تولد شمسی (سن خودکار)، جنسیت، پایه، موبایل.
  * استان→شهر اختیاری با پیش‌فرض خالی.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,13 +64,20 @@ fun StudentProfileScreen(
     saving: Boolean,
     error: String?,
     onSubmit: (
-        firstName: String, lastName: String, age: Int, grade: GradeLevel, phone: String,
+        firstName: String, lastName: String, age: Int, birthDate: String, grade: GradeLevel, phone: String,
         gender: String, province: String, county: String, city: String,
     ) -> Unit,
 ) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
-    var ageText by remember { mutableStateOf("") }
+    var birthYear by remember { mutableStateOf<Int?>(null) }
+    var birthMonth by remember { mutableStateOf<Int?>(null) }
+    var birthDay by remember { mutableStateOf<Int?>(null) }
+    val birthJalali = remember(birthYear, birthMonth, birthDay) {
+        val y = birthYear; val m = birthMonth; val d = birthDay
+        if (y != null && m != null && d != null) JalaliDate.Jalali(y, m, d).takeIf { JalaliDate.isValid(it) } else null
+    }
+    val computedAge = remember(birthJalali) { birthJalali?.let { JalaliDate.ageYears(it) } }
     var grade by remember { mutableStateOf(GradeLevel.G9) }
     var gradeOpen by remember { mutableStateOf(false) }
     var phone by remember { mutableStateOf("") }
@@ -80,7 +89,7 @@ fun StudentProfileScreen(
 
     val firstNameBad = showErrors && firstName.trim().length < 2
     val lastNameBad = showErrors && lastName.trim().length < 2
-    val ageBad = showErrors && ((ageText.toIntOrNull() ?: 0) !in 5..60)
+    val ageBad = showErrors && (computedAge == null || computedAge !in 5..60)
     val phoneBad = showErrors && !Regex("^9\\d{9}$").matches(phone)
 
     Column(Modifier.fillMaxSize()) {
@@ -125,18 +134,25 @@ fun StudentProfileScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                OutlinedTextField(
-                    value = ageText,
-                    onValueChange = { ageText = latinDigits(it).filter { c -> c.isDigit() }.take(2) },
-                    label = { Text("سن *") },
-                    isError = ageBad,
-                    supportingText = { if (ageBad) Text("سن بین ۵ تا ۶۰") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+            JalaliBirthDateFields(
+                year = birthYear,
+                month = birthMonth,
+                day = birthDay,
+                onChange = { y, m, d -> birthYear = y; birthMonth = m; birthDay = d },
+                isError = ageBad,
+            )
+            OutlinedTextField(
+                value = computedAge?.let { toPersianDigits(it.toString()) }.orEmpty(),
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("سن") },
+                isError = ageBad,
+                supportingText = {
+                    Text(if (ageBad) "سن باید بین ۵ تا ۶۰ باشد" else "از تاریخ تولد شمسی حساب می‌شود")
+                },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
 
             Text("جنسیت *", style = MaterialTheme.typography.titleSmall)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -219,11 +235,12 @@ fun StudentProfileScreen(
             Button(
                 onClick = {
                     showErrors = true
+                    val age = computedAge
                     val ok = firstName.trim().length >= 2 && lastName.trim().length >= 2 &&
-                        (ageText.toIntOrNull() ?: 0) in 5..60 && Regex("^9\\d{9}$").matches(phone) &&
-                        gender.isNotBlank()
-                    if (ok && !saving) onSubmit(
-                        firstName.trim(), lastName.trim(), ageText.toInt(), grade, phone,
+                        age != null && age in 5..60 && birthJalali != null &&
+                        Regex("^9\\d{9}$").matches(phone) && gender.isNotBlank()
+                    if (ok && !saving && age != null && birthJalali != null) onSubmit(
+                        firstName.trim(), lastName.trim(), age, birthJalali.isoLike, grade, phone,
                         gender, province, county, city,
                     )
                 },

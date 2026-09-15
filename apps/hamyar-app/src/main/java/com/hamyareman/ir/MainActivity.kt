@@ -227,7 +227,7 @@ class MainActivity : FragmentActivity() {
                                     email = email,
                                     saving = saving,
                                     error = formError,
-                                    onSubmit = { fn, ln, age, grade, phone, gender, province, county, city ->
+                                    onSubmit = { fn, ln, age, birthDate, grade, phone, gender, province, county, city ->
                                         saving = true; formError = null
                                         scope.launch {
                                             val uid = container.auth.currentUserId().orEmpty()
@@ -236,7 +236,7 @@ class MainActivity : FragmentActivity() {
                                                 email,
                                                 com.hamyareman.ir.ui.profile.StudentProfile(
                                                     userId = uid, email = email, firstName = fn,
-                                                    lastName = ln, age = age, grade = grade, phone = phone,
+                                                    lastName = ln, age = age, birthDate = birthDate, grade = grade, phone = phone,
                                                     province = province, county = county, city = city, gender = gender,
                                                 ),
                                             )

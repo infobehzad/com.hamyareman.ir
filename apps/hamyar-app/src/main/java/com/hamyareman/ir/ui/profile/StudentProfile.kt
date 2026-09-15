@@ -118,6 +118,8 @@ data class StudentProfile(
     val firstName: String,
     val lastName: String,
     val age: Int,
+    /** تاریخ تولد شمسی `yyyy-MM-dd` لاتین؛ سن از روی همین حساب می‌شود. */
+    val birthDate: String = "",
     val grade: GradeLevel,
     val phone: String, // ۱۰ رقم، بدون +98 (پیش‌شماره در UI ثابت است)
     val schoolName: String = "",
@@ -152,6 +154,7 @@ object StudentProfileRepo {
                     firstName = d["firstName"]?.toString().orEmpty(),
                     lastName = d["lastName"]?.toString().orEmpty(),
                     age = d["age"]?.toString()?.toIntOrNull() ?: 0,
+                    birthDate = d["birthDate"]?.toString().orEmpty(),
                     grade = GradeLevel.byId(d["grade"]?.toString()),
                     phone = d["phone"]?.toString().orEmpty(),
                     schoolName = d["schoolName"]?.toString().orEmpty(),
@@ -174,6 +177,7 @@ object StudentProfileRepo {
             "firstName" to p.firstName,
             "lastName" to p.lastName,
             "age" to p.age,
+            "birthDate" to p.birthDate,
             "grade" to p.grade.id,
             "phone" to p.phone,
             "schoolName" to p.schoolName,

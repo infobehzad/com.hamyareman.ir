@@ -2,21 +2,25 @@ package com.hamyareman.ir.platform.core.common
 
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 /**
  * تاریخ جلالی (شمسی).
  *
- * تبدیل با الگوریتم جلالی مستقل از ICU انجام می‌شود؛ چون Android ICU کلاس
- * `PersianCalendar` ندارد و استفاده از آن در زمان کامپایل ممکن نیست.
+ * تبدیل با الگوریتم Roozh (چرخه‌ی ۳۳ساله) انجام می‌شود — مستقل از ICU، چون
+ * Android ICU کلاس `PersianCalendar` ندارد. نسخه‌ی قبلی آفست ۱۶۰۰/۶۲۱ را
+ * اشتباه می‌بست و حدود یک سال جلو می‌زد (مثلاً ۲۰۲۶-۰۹-۱۵ → ۱۴۰۶ به‌جای ۱۴۰۵).
  *
  * قرارداد پروژه:
- *  - کلیدهای ذخیره‌سازی و محاسبات فاصله‌ی روزها همچنان ISO میلادی هستند ([todayIso]) تا
- *    داده‌های قدیمی نشکنند؛
- *  - هر چیزی که به کاربر نمایش داده می‌شود جلالی و با رقم فارسی است ([formatFa]).
+ *  - «امروز» و مهر زمانی با منطقه‌ی [TEHRAN] است، نه [ZoneId.systemDefault]؛
+ *  - کلیدهای ذخیره‌سازی و فاصله‌ی روزها ISO میلادی می‌مانند ([todayIso])؛
+ *  - نمایش برای کاربر جلالی با رقم فارسی است ([formatFa]).
  */
 object JalaliDate {
+
+    val TEHRAN: ZoneId = ZoneId.of("Asia/Tehran")
 
     private val iso = DateTimeFormatter.ISO_LOCAL_DATE
 
@@ -27,6 +31,7 @@ object JalaliDate {
         /** «۱۵ شهریور ۱۴۰۵» */
         val faLong: String get() = toPersianDigits("$day ${monthName(month)} $year")
 
+        /** ذخیره‌سازی: `1405-06-15` با رقم لاتین. */
         val isoLike: String get() = "%04d-%02d-%02d".format(year, month, day)
     }
 
@@ -39,41 +44,104 @@ object JalaliDate {
         "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه", "شنبه",
     )
 
+    /** سال کبیسه‌ی جلالی در چرخه‌ی ۳۳ساله (۱،۵،۹،۱۳،۱۷،۲۲،۲۶،۳۰). */
+    fun isLeapYear(jy: Int): Boolean {
+        val r = ((jy % 33) + 33) % 33
+        return r == 1 || r == 5 || r == 9 || r == 13 || r == 17 || r == 22 || r == 26 || r == 30
+    }
+
+    fun daysInMonth(jy: Int, jm: Int): Int = when (jm) {
+        in 1..6 -> 31
+        in 7..11 -> 30
+        12 -> if (isLeapYear(jy)) 30 else 29
+        else -> 0
+    }
+
+    fun isValid(j: Jalali): Boolean =
+        j.year in 1200..1600 && j.month in 1..12 && j.day in 1..daysInMonth(j.year, j.month)
+
     fun monthName(month: Int): String = monthNames.getOrElse(month - 1) { "" }
 
-    /** نام روز هفته‌ی یک تاریخ ISO میلادی. */
+    /** نام روز هفته‌ی یک تاریخ ISO میلادی (تقویم مدنی، مستقل از منطقه). */
     fun weekDayFa(isoDate: String): String =
-        runCatching { weekDayNames[LocalDate.parse(isoDate).dayOfWeek.value % 7] }.getOrDefault("")
+        runCatching { weekDayNames[LocalDate.parse(isoDate.take(10)).dayOfWeek.value % 7] }.getOrDefault("")
 
-    fun todayIso(): String = LocalDate.now().format(iso)
-
-    fun toJalali(isoDate: String): Jalali? = runCatching {
-        val date = LocalDate.parse(isoDate)
-        toJalali(date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli())
-    }.getOrNull()
+    fun todayIso(): String = LocalDate.now(TEHRAN).format(iso)
 
     fun todayJalali(): Jalali = toJalali(System.currentTimeMillis())
 
-    fun toJalali(epochMillis: Long): Jalali {
-        val date = LocalDate.ofInstant(Instant.ofEpochMilli(epochMillis), ZoneId.systemDefault())
-        val converted = gregorianToJalali(date.year, date.monthValue, date.dayOfMonth)
-        return Jalali(converted[0], converted[1], converted[2])
+    fun fromGregorian(gy: Int, gm: Int, gd: Int): Jalali {
+        val c = gregorianToJalali(gy, gm, gd)
+        return Jalali(c[0], c[1], c[2])
     }
 
-    /** جلالی → میلادی (برای محاسبه‌ی فاصله‌ی روزها و ذخیره‌سازی ISO). */
-    fun toGregorianIso(jalali: Jalali): String = runCatching {
-        val converted = jalaliToGregorian(jalali.year, jalali.month, jalali.day)
-        LocalDate.of(converted[0], converted[1], converted[2]).format(iso)
-    }.getOrDefault(todayIso())
+    /**
+     * ISO تاریخ (`yyyy-MM-dd`) یا instant (`…T…Z`) → جلالی.
+     * تاریخ تقویمی بدون شیفت منطقه؛ instant با تهران.
+     */
+    fun toJalali(isoDate: String): Jalali? = runCatching {
+        val raw = isoDate.trim()
+        if (raw.contains('T')) {
+            toJalali(Instant.parse(raw).toEpochMilli())
+        } else {
+            val date = LocalDate.parse(raw.take(10))
+            fromGregorian(date.year, date.monthValue, date.dayOfMonth)
+        }
+    }.getOrNull()
 
+    fun toJalali(epochMillis: Long): Jalali {
+        val date = LocalDate.ofInstant(Instant.ofEpochMilli(epochMillis), TEHRAN)
+        return fromGregorian(date.year, date.monthValue, date.dayOfMonth)
+    }
+
+    fun parseJalali(text: String): Jalali? {
+        val t = toLatinDigits(text.trim()).replace('/', '-')
+        val p = t.split('-')
+        if (p.size != 3) return null
+        val y = p[0].toIntOrNull() ?: return null
+        val m = p[1].toIntOrNull() ?: return null
+        val d = p[2].toIntOrNull() ?: return null
+        val j = Jalali(y, m, d)
+        return j.takeIf { isValid(it) }
+    }
+
+    /**
+     * جلالی → میلادی ISO. تاریخ نامعتبر → null (دیگر به «امروز» برنمی‌گردد؛
+     * آن رفتار سن را خراب می‌کرد).
+     */
+    fun toGregorianIso(jalali: Jalali): String? {
+        if (!isValid(jalali)) return null
+        return runCatching {
+            val c = jalaliToGregorian(jalali.year, jalali.month, jalali.day)
+            LocalDate.of(c[0], c[1], c[2]).format(iso)
+        }.getOrNull()
+    }
+
+    /**
+     * سن کامل به سال، نسبت به [on] (پیش‌فرض امروز تهران).
+     * قبل از تولدِ امسال هنوز سال تمام نشده.
+     */
+    fun ageYears(birth: Jalali, on: Jalali = todayJalali()): Int? {
+        if (!isValid(birth) || !isValid(on)) return null
+        if (birth.year > on.year ||
+            (birth.year == on.year && birth.month > on.month) ||
+            (birth.year == on.year && birth.month == on.month && birth.day > on.day)
+        ) return null
+        var age = on.year - birth.year
+        if (on.month < birth.month || (on.month == birth.month && on.day < birth.day)) age--
+        return age
+    }
+
+    /**
+     * الگوریتم Roozh: میلادی → جلالی.
+     * آفست ۳۵۵۶۶۶ و مبدأ −۱۵۹۵؛ بدون انشعاب غلطِ سال ۱۶۰۰.
+     */
     private fun gregorianToJalali(gy: Int, gm: Int, gd: Int): IntArray {
         val monthDays = intArrayOf(0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334)
-        var jy = if (gy > 1600) 979 else 0
-        val baseYear = if (gy > 1600) gy - 1600 else gy - 621
-        val adjustedYear = if (gm > 2) gy + 1 else gy
-        var days = 365 * baseYear + (adjustedYear + 3) / 4 - (adjustedYear + 99) / 100 +
-            (adjustedYear + 399) / 400 - 80 + gd + monthDays[gm - 1]
-        jy += 33 * (days / 12053)
+        val gy2 = if (gm > 2) gy + 1 else gy
+        var days = 355666 + 365 * gy + (gy2 + 3) / 4 - (gy2 + 99) / 100 +
+            (gy2 + 399) / 400 + gd + monthDays[gm - 1]
+        var jy = -1595 + 33 * (days / 12053)
         days %= 12053
         jy += 4 * (days / 1461)
         days %= 1461
@@ -81,21 +149,30 @@ object JalaliDate {
             jy += (days - 1) / 365
             days = (days - 1) % 365
         }
-        val jm = if (days < 186) 1 + days / 31 else 7 + (days - 186) / 30
-        val jd = 1 + if (days < 186) days % 31 else (days - 186) % 30
+        val jm: Int
+        val jd: Int
+        if (days < 186) {
+            jm = 1 + days / 31
+            jd = 1 + days % 31
+        } else {
+            jm = 7 + (days - 186) / 30
+            jd = 1 + (days - 186) % 30
+        }
         return intArrayOf(jy, jm, jd)
     }
 
+    /** الگوریتم Roozh: جلالی → میلادی. */
     private fun jalaliToGregorian(jyInput: Int, jm: Int, jd: Int): IntArray {
-        var jy = jyInput + 1597
+        val jy = jyInput + 1595
         var days = -355668 + 365 * jy + (jy / 33) * 8 + ((jy % 33) + 3) / 4 + jd +
-            if (jm < 7) (jm - 1) * 31 else (jm - 1) * 30 + 6
+            if (jm < 7) (jm - 1) * 31 else (jm - 7) * 30 + 186
         var gy = 400 * (days / 146097)
         days %= 146097
         if (days > 36524) {
-            gy += 100 * (--days / 36524)
+            days -= 1
+            gy += 100 * (days / 36524)
             days %= 36524
-            if (days >= 365) days++
+            if (days >= 365) days += 1
         }
         gy += 4 * (days / 1461)
         days %= 1461
@@ -103,44 +180,40 @@ object JalaliDate {
             gy += (days - 1) / 365
             days = (days - 1) % 365
         }
-        val gd = days + 1
+        var gd = days + 1
         val leap = (gy % 4 == 0 && gy % 100 != 0) || gy % 400 == 0
-        val monthLengths = intArrayOf(31, if (leap) 29 else 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
-        var remaining = gd
-        var gm = 1
-        while (remaining > monthLengths[gm - 1]) {
-            remaining -= monthLengths[gm - 1]
+        val monthLengths = intArrayOf(0, 31, if (leap) 29 else 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+        var gm = 0
+        while (gm < 12 && gd > monthLengths[gm + 1]) {
+            gd -= monthLengths[gm + 1]
             gm++
         }
-        return intArrayOf(gy, gm, remaining)
+        return intArrayOf(gy, gm + 1, gd)
     }
 
-    /** نمایش فارسی یک تاریخ ISO میلادی → «۱۴۰۵/۰۶/۱۵». */
+    /** نمایش فارسی یک تاریخ ISO میلادی یا instant → «۱۴۰۵/۰۶/۱۵». */
     fun formatFa(isoDate: String): String = toJalali(isoDate)?.fa ?: isoDate.replace("-", "/")
 
-    /** نمایش بلند فارسی → «۱۵ شهریور ۱۴۰۵». */
-    /** «۱۴۰۵/۰۶/۱۵» از روی زمان میلی‌ثانیه‌ای (برای مهر پیام‌ها و رویدادها). */
+    /** «۱۴۰۵/۰۶/۱۵» از روی زمان میلی‌ثانیه‌ای (تهران). */
     fun formatFa(epochMillis: Long): String = toJalali(epochMillis).fa
 
     /** «۱۵ شهریور ۱۴۰۵» از روی زمان میلی‌ثانیه‌ای. */
     fun formatFaLong(epochMillis: Long): String = toJalali(epochMillis).faLong
 
-    /** ساعت با رقم فارسی: «۱۴:۳۵». */
+    /** «۱۵ شهریور ۱۴۰۵» از روی ISO یا instant. */
+    fun formatFaLong(isoDate: String): String = toJalali(isoDate)?.faLong ?: isoDate
+
+    /** ساعت با رقم فارسی در تهران: «۱۴:۳۵». */
     fun clockFa(epochMillis: Long): String {
-        val time = java.time.LocalDateTime.ofInstant(
-            Instant.ofEpochMilli(epochMillis),
-            ZoneId.systemDefault(),
-        )
+        val time = LocalDateTime.ofInstant(Instant.ofEpochMilli(epochMillis), TEHRAN)
         return toPersianDigits("%02d:%02d".format(time.hour, time.minute))
     }
 
     /** «۱۵ شهریور ۱۴۰۵، ۱۴:۳۵» — مهر کامل برای پیام‌ها و گزارش‌ها. */
     fun stampFa(epochMillis: Long): String = "${formatFaLong(epochMillis)}، ${clockFa(epochMillis)}"
 
-    fun formatFaLong(isoDate: String): String = toJalali(isoDate)?.faLong ?: isoDate
-
     fun daysBetween(fromIso: String, toIso: String): Long = runCatching {
-        java.time.temporal.ChronoUnit.DAYS.between(LocalDate.parse(fromIso), LocalDate.parse(toIso))
+        java.time.temporal.ChronoUnit.DAYS.between(LocalDate.parse(fromIso.take(10)), LocalDate.parse(toIso.take(10)))
     }.getOrDefault(0)
 
     /** ۰۱۲۳۴۵۶۷۸۹ → ۰۱۲۳۴۵۶۷۸۹ (رقم فارسی). */
