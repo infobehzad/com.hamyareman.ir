@@ -82,6 +82,10 @@ fun ProgressChartsScreen(bookCode: String?, onBack: () -> Unit, onPickBook: (Str
 
     Column(Modifier.fillMaxSize()) {
         AppTopBar("نمودار پیشرفت — ${module.title}", onBack)
+        if (module.bookCode == "C905") {
+            MathLessonProgressPage(module, Modifier.weight(1f))
+            return
+        }
         Column(
             Modifier
                 .fillMaxSize()
@@ -203,6 +207,89 @@ fun ProgressChartsScreen(bookCode: String?, onBack: () -> Unit, onPickBook: (Str
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+    }
+}
+
+/**
+ * نمودار ریاضی: همان دکمهٔ قبلی، صفحهٔ سطری غیرقابل‌ویرایش،
+ * هر درس یک کارت با ردیف‌های عنوان سربرگ.
+ */
+@Composable
+private fun MathLessonProgressPage(
+    module: com.hamyareman.ir.platform.feature.study.BookModule,
+    modifier: Modifier = Modifier,
+) {
+    val container = LocalAppContainer.current
+    val ctx = LocalContext.current
+    Column(
+        modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text(
+            "فقط آمار خودکار — قابل ویرایش نیست. هر درس ردیف‌های سربرگ خودش را دارد.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        module.packs.forEach { pack ->
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(pack.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    MATH_TABS.forEach { title ->
+                        val line = mathTabProgressLine(ctx, container, pack, title)
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+                            Text(title, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.width(88.dp))
+                            Text(line, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun mathTabProgressLine(
+    ctx: android.content.Context,
+    container: com.hamyareman.ir.di.AppContainer,
+    pack: StudyPack,
+    tab: String,
+): String {
+    return when (tab) {
+        "تدریس" -> {
+            TeachStats.expectMedia(ctx, pack.packId, expectedTeachMedia(pack))
+            val snap = TeachStats.snap(ctx, pack.packId)
+            if (snap.sessions == 0 && !snap.done) "هنوز شروع نشده"
+            else {
+                val done = if (snap.done) "دورهٔ اول تمام" else "ناقص"
+                "نشست ${toPersianDigits(snap.sessions.toString())} · $done"
+            }
+        }
+        "مطالعه" -> {
+            val ex = runCatching { container.studyProgress.exerciseStats(pack.packId) }.getOrNull()
+            val n = ex?.length() ?: 0
+            if (n == 0) "تمرینی ثبت نشده"
+            else "تمرین ثبت‌شده: ${toPersianDigits(n.toString())}"
+        }
+        "فلش‌کارت" -> {
+            val total = pack.flashcards.size
+            if (total == 0) "فلش‌کارت هنوز نیامده"
+            else {
+                val learned = runCatching { container.studyProgress.cards(pack.packId).values.count { it.reps > 0 } }.getOrDefault(0)
+                val archived = runCatching { container.studyProgress.archivedCards(pack).size }.getOrDefault(0)
+                "یادگرفته ${toPersianDigits(learned.toString())} از ${toPersianDigits(total.toString())} · آرشیو ${toPersianDigits(archived.toString())}"
+            }
+        }
+        "خلاصه" -> "فقط مطالعه — نمره ندارد"
+        "آزمون" -> {
+            val st = runCatching { container.studyProgress.examState(pack.packId) }.getOrNull()
+            val last = st?.latest
+            if (last == null) "آزمونی ثبت نشده"
+            else {
+                val wrong = if (last.wrongNumbers.isEmpty()) "بدون غلط"
+                else "غلط ${last.wrongNumbers.joinToString("، ") { toPersianDigits(it.toString()) }}"
+                "تکرار ${toPersianDigits(st.repeatCount.toString())} · آخرین ${toPersianDigits(last.scorePct.toString())}٪ · $wrong"
+            }
+        }
+        else -> "—"
     }
 }
 

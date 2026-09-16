@@ -165,6 +165,9 @@ class MainActivity : FragmentActivity() {
                     runCatching {
                         com.hamyareman.ir.ui.study.SchoolSync.restoreAll(activity, container.tables, container.sync, uid)
                     }
+                    runCatching {
+                        com.hamyareman.ir.ui.study.SchoolSync.watchLive(activity, container.realtime, uid)
+                    }
                 }
             }
 

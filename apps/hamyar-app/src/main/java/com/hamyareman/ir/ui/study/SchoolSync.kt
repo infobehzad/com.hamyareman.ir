@@ -5,6 +5,7 @@ import com.hamyareman.ir.platform.core.appwrite.TablesDbService
 import com.hamyareman.ir.platform.core.common.LocalStore
 import com.hamyareman.ir.platform.core.sync.SyncEngine
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
@@ -62,7 +63,9 @@ object SchoolSync {
                         val packId = row.payload["packId"] as? String ?: return@forEach
                         val srs = row.payload["srsState"] as? String ?: ""
                         val attempts = row.payload["attempts"] as? String ?: ""
-                        if (mergeStudyIntoLocal(context, packId, srs, attempts)) merged++
+                        val examLedger = row.payload["examLedger"] as? String ?: ""
+                        val extras = row.payload["extras"] as? String ?: ""
+                        if (mergeStudyIntoLocal(context, packId, srs, attempts, examLedger, extras)) merged++
                     }
                 }
                 else -> Unit
@@ -124,7 +127,14 @@ object SchoolSync {
     // ------------------------------------------------ مطالعه (فلش‌کارت/آزمون)
 
     /** ادغام وضعیت SRS و آزمون‌ها — true یعنی چیزی عوض شد. */
-    private fun mergeStudyIntoLocal(context: Context, packId: String, srsRemote: String, attemptsRemote: String): Boolean {
+    private fun mergeStudyIntoLocal(
+        context: Context,
+        packId: String,
+        srsRemote: String,
+        attemptsRemote: String,
+        examRemote: String = "",
+        extrasRemote: String = "",
+    ): Boolean {
         val store = LocalStore(context) // همان store پیش‌فرضِ StudyProgressRepository؛ کلیدها با پیشوند study:
         var changed = false
 
@@ -189,6 +199,61 @@ object SchoolSync {
                 }
             }
         }
+
+        if (examRemote.isNotBlank()) {
+            val remote = com.hamyareman.ir.platform.feature.study.MathExamLedger.State.fromJson(examRemote)
+            val local = com.hamyareman.ir.platform.feature.study.MathExamLedger.State.fromJson(store.getString("study:$packId:exam"))
+            val mergedExam = com.hamyareman.ir.platform.feature.study.MathExamLedger.merge(local, remote)
+            if (mergedExam.toJson() != local.toJson()) {
+                store.putString("study:$packId:exam", mergedExam.toJson())
+                changed = true
+            }
+        }
+        if (extrasRemote.isNotBlank()) {
+            val o = runCatching { JSONObject(extrasRemote) }.getOrNull()
+            if (o != null) {
+                listOf("archive" to "study:$packId:archive", "sameday" to "study:$packId:sameday", "ex" to "study:$packId:ex").forEach { (field, key) ->
+                    val v = o.optString(field)
+                    if (v.isNotBlank() && store.getString(key).isBlank()) {
+                        store.putString(key, v)
+                        changed = true
+                    }
+                }
+            }
+        }
         return changed
+    }
+
+    suspend fun watchLive(
+        context: Context,
+        realtime: com.hamyareman.ir.platform.core.appwrite.AppwriteRealtimeFeed,
+        userId: String?,
+    ) {
+        if (!realtime.isConfigured || userId.isNullOrBlank()) return
+        kotlinx.coroutines.coroutineScope {
+            launch {
+                realtime.rows(TEACH_TABLE).collect { ev ->
+                    val packId = ev.row.payload["packId"] as? String ?: return@collect
+                    val stats = ev.row.payload["stats"] as? String ?: return@collect
+                    val remote = runCatching { JSONObject(stats) }.getOrNull() ?: return@collect
+                    mergeTeachIntoLocal(context, packId, remote)
+                }
+            }
+            launch {
+                realtime.rows(STUDY_TABLE).collect { ev ->
+                    val rowUserId = ev.row.payload["userId"] as? String
+                    if (!rowUserId.isNullOrBlank() && rowUserId != userId) return@collect
+                    val packId = ev.row.payload["packId"] as? String ?: return@collect
+                    mergeStudyIntoLocal(
+                        context,
+                        packId,
+                        ev.row.payload["srsState"] as? String ?: "",
+                        ev.row.payload["attempts"] as? String ?: "",
+                        ev.row.payload["examLedger"] as? String ?: "",
+                        ev.row.payload["extras"] as? String ?: "",
+                    )
+                }
+            }
+        }
     }
 }

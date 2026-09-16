@@ -1,6 +1,7 @@
 package com.hamyareman.ir.ui.study
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,8 +17,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -30,7 +32,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -40,16 +43,14 @@ import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 import com.hamyareman.ir.platform.feature.study.BookModuleRegistry
 import com.hamyareman.ir.platform.feature.study.MathAnswerScript
+import com.hamyareman.ir.platform.feature.study.MathExamLedger
 import com.hamyareman.ir.platform.feature.study.StudyPack
 
-private val MATH_TABS = listOf("تدریس", "مطالعه", "فلش‌کارت", "خلاصه")
+internal val MATH_TABS = listOf("تدریس", "مطالعه", "فلش‌کارت", "خلاصه", "آزمون")
 
 /**
- * چهار سربرگ درس ریاضی — هر درس هر فصل جدا.
- * ۱ تدریس (متن + صوت با قوانین قبلی)
- * ۲ PDF کتاب + تمرین جای‌خالی و کیبورد نمادها
- * ۳ فلش‌کارت با آرشیو و تکرار اسکریپتی
- * ۴ خلاصه و نکات امتحانی
+ * پنج سربرگ درس ریاضی — هر درس هر فصل جدا.
+ * قفل: فقط تدریس تا اتمام صوت باز است.
  */
 @Composable
 fun MathLessonScreen(
@@ -66,19 +67,22 @@ fun MathLessonScreen(
         Text("این درس پیدا نشد.", Modifier.padding(16.dp))
         return
     }
-    val ctx = LocalContext.current
+    val ctx = androidx.compose.ui.platform.LocalContext.current
     val teachDone = remember(packId) {
         TeachStats.expectMedia(ctx, packId, expectedTeachMedia(pack))
         TeachStats.isDone(ctx, packId)
     }
-    var tab by rememberSaveable(packId) { mutableIntStateOf(initialTab.coerceIn(0, 3)) }
+    var tab by rememberSaveable(packId) {
+        val want = initialTab.coerceIn(0, 4)
+        mutableIntStateOf(if (!teachDone && want >= 1) 0 else want)
+    }
     var lockMsg by remember { mutableStateOf(false) }
 
     Column(Modifier.fillMaxSize()) {
         AppTopBar(title = pack.title, onBack = onBack)
-        TabRow(selectedTabIndex = tab) {
+        ScrollableTabRow(selectedTabIndex = tab, edgePadding = 8.dp) {
             MATH_TABS.forEachIndexed { i, label ->
-                val locked = i >= 2 && !teachDone
+                val locked = i >= 1 && !teachDone
                 Tab(
                     selected = tab == i,
                     onClick = {
@@ -93,14 +97,15 @@ fun MathLessonScreen(
                 onDismissRequest = { lockMsg = false },
                 confirmButton = { TextButton(onClick = { lockMsg = false }) { Text("باشه") } },
                 title = { Text("اول تدریس") },
-                text = { Text("فلش‌کارت و خلاصه بعد از اتمام صوت تدریس باز می‌شوند.") },
+                text = { Text("مطالعه، فلش‌کارت، خلاصه و آزمون بعد از اتمام صوت تدریس باز می‌شوند.") },
             )
         }
         when (tab) {
             0 -> MathTeachTab(pack, bookTitle)
             1 -> MathStudyTab(pack)
             2 -> MathFlashTab(pack)
-            else -> MathSummaryTab(pack)
+            3 -> MathSummaryTab(pack)
+            else -> MathExamTab(pack)
         }
     }
 }
@@ -110,7 +115,7 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String) {
     val tracks = teachTracksOf(pack)
     val body = pack.teachText.ifBlank {
         pack.sections.filter { it.kind != "exam" }.joinToString("\n\n") { "«${it.title}»\n${it.body}" }
-            .ifBlank { "متن تدریس این درس به‌زودی اضافه می‌شود." }
+            .ifBlank { "متن تدریس این درس به‌زودی از پوشهٔ Books اضافه می‌شود." }
     }
     Column(
         Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 8.dp),
@@ -151,13 +156,14 @@ private fun MathStudyTab(pack: StudyPack) {
 private fun MathExercisesPane(pack: StudyPack, modifier: Modifier = Modifier) {
     val container = LocalAppContainer.current
     val today = remember { JalaliDate.todayIso() }
+    val ime = LocalSoftwareKeyboardController.current
     if (pack.exercises.isEmpty()) {
         Card(modifier.fillMaxWidth()) {
             Column(Modifier.padding(12.dp)) {
                 Text("تمرین‌های کتاب", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "ساختار تمرین آماده است؛ جای‌خالی‌های این درس به‌زودی از روی کتاب پر می‌شود.",
+                    "ساختار تمرین آماده است؛ جای‌خالی‌های این درس به‌زودی از پوشهٔ Books پر می‌شود.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -167,10 +173,11 @@ private fun MathExercisesPane(pack: StudyPack, modifier: Modifier = Modifier) {
     }
     var idx by rememberSaveable(pack.packId) { mutableIntStateOf(0) }
     var field by remember { mutableStateOf(TextFieldValue("")) }
+    var showKeys by remember { mutableStateOf(false) }
     var feedback by remember { mutableStateOf<String?>(null) }
     var lastOk by remember { mutableStateOf<Boolean?>(null) }
     val ex = pack.exercises[idx.coerceIn(0, pack.exercises.lastIndex)]
-    LaunchedEffect(ex.id) { field = TextFieldValue(""); feedback = null; lastOk = null }
+    LaunchedEffect(ex.id) { field = TextFieldValue(""); feedback = null; lastOk = null; showKeys = false; ime?.hide() }
 
     Column(modifier.fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
@@ -184,12 +191,24 @@ private fun MathExercisesPane(pack: StudyPack, modifier: Modifier = Modifier) {
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = field,
-                    onValueChange = { field = it; lastOk = null; feedback = null },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("جواب") },
+                    onValueChange = { },
+                    readOnly = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .pointerInput(ex.id) {
+                            detectTapGestures {
+                                ime?.hide()
+                                showKeys = true
+                            }
+                        },
+                    label = { Text("جواب — لمس برای کیبورد نماد") },
                     singleLine = true,
                 )
-                MathSymbolKeyboard(value = field, onValue = { field = it })
+                if (showKeys) {
+                    Spacer(Modifier.height(4.dp))
+                    MathSymbolKeyboard(value = field, onValue = { field = it; lastOk = null; feedback = null })
+                    TextButton(onClick = { showKeys = false }) { Text("بستن کیبورد") }
+                }
                 Spacer(Modifier.height(6.dp))
                 Button(
                     onClick = {
@@ -212,7 +231,7 @@ private fun MathExercisesPane(pack: StudyPack, modifier: Modifier = Modifier) {
                         style = MaterialTheme.typography.bodySmall,
                     )
                     if (lastOk == false) {
-                        OutlinedButton(onClick = { field = TextFieldValue(""); lastOk = null; feedback = null }, modifier = Modifier.fillMaxWidth()) {
+                        OutlinedButton(onClick = { field = TextFieldValue(""); lastOk = null; feedback = null; showKeys = true }, modifier = Modifier.fillMaxWidth()) {
                             Text("حل دوباره")
                         }
                     }
@@ -272,7 +291,7 @@ private fun MathFlashTab(pack: StudyPack) {
             }
         }
         if (pack.flashcards.isEmpty()) {
-            Text("فلش‌کارت این درس به‌زودی اضافه می‌شود.", style = MaterialTheme.typography.titleSmall)
+            Text("فلش‌کارت این درس به‌زودی از پوشهٔ Books اضافه می‌شود.", style = MaterialTheme.typography.titleSmall)
             return
         }
         if (card == null) {
@@ -317,7 +336,7 @@ private fun MathFlashTab(pack: StudyPack) {
 private fun MathSummaryTab(pack: StudyPack) {
     val summary = pack.summary.ifBlank {
         pack.sections.filter { it.kind == "exam" }.lastOrNull()?.body
-            ?: "خلاصه‌ی چندسطری این درس به‌زودی نوشته می‌شود."
+            ?: "خلاصه‌ی چندسطری این درس به‌زودی از پوشهٔ Books نوشته می‌شود."
     }
     val tips = pack.examTips.ifBlank {
         pack.sections.filter { it.kind == "exam" }.joinToString("\n\n") { it.body }
@@ -336,6 +355,85 @@ private fun MathSummaryTab(pack: StudyPack) {
                 Text("نکات امتحانی", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(8.dp))
                 Text(tips, style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+    }
+}
+
+@Composable
+private fun MathExamTab(pack: StudyPack) {
+    val container = LocalAppContainer.current
+    val today = remember { JalaliDate.todayIso() }
+    val mcq = remember(pack.packId) { MathExamLedger.mcqOf(pack) }
+    var tick by remember { mutableIntStateOf(0) }
+    val ledger = remember(pack.packId, tick) { container.studyProgress.examState(pack.packId) }
+    var answers by remember(pack.packId) { mutableStateOf(mapOf<String, String>()) }
+    var done by remember { mutableStateOf(false) }
+
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text("نمونه سوال چهارگزینه‌ای", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        if (mcq.isEmpty()) {
+            Text(
+                "ساختار آزمون آماده است؛ سوال‌ها و کلید به‌زودی از پوشهٔ Books می‌آیند. تصحیح، ثبت نتیجه و جایگزینی در نمودار از همین‌جا کار می‌کند.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (ledger.repeatCount > 0) {
+                ExamLedgerCard(ledger)
+            }
+            return
+        }
+        if (done) {
+            ExamLedgerCard(ledger)
+            Button(onClick = { answers = emptyMap(); done = false }, modifier = Modifier.fillMaxWidth()) {
+                Text("تجدید آزمون (نتیجهٔ نمودار جایگزین می‌شود)")
+            }
+            return
+        }
+        mcq.forEachIndexed { i, q ->
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(12.dp)) {
+                    Text("${toPersianDigits((i + 1).toString())}. ${q.text}", fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(6.dp))
+                    q.options.forEach { opt ->
+                        Row(
+                            Modifier.fillMaxWidth().clickable { answers = answers + (q.id to opt) },
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(selected = answers[q.id] == opt, onClick = { answers = answers + (q.id to opt) })
+                            Text(opt, style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                }
+            }
+        }
+        Button(
+            onClick = {
+                container.studyProgress.recordExamSitting(pack, answers, today)
+                tick++
+                done = true
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = answers.size == mcq.size,
+        ) { Text("تصحیح آزمون") }
+    }
+}
+
+@Composable
+internal fun ExamLedgerCard(ledger: MathExamLedger.State) {
+    val last = ledger.latest ?: return
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text("نتیجهٔ نمودار (آخرین نشست)", fontWeight = FontWeight.Bold)
+            Text("نمره: ${toPersianDigits(last.scorePct.toString())}٪ از ${toPersianDigits(last.total.toString())} سوال")
+            Text("تعداد تکرار: ${toPersianDigits(ledger.repeatCount.toString())}")
+            ledger.sittings.forEach { s ->
+                val wrong = if (s.wrongNumbers.isEmpty()) "بدون غلط"
+                else "غلط: ${s.wrongNumbers.joinToString("، ") { toPersianDigits(it.toString()) }}"
+                Text(
+                    "نشست ${toPersianDigits(s.n.toString())}: ${toPersianDigits(s.scorePct.toString())}٪ — $wrong",
+                    style = MaterialTheme.typography.bodySmall,
+                )
             }
         }
     }

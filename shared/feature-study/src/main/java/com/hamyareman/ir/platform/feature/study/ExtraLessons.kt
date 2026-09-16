@@ -36,7 +36,7 @@ object ExtraLessons {
         ),
         "C904" to (2..8).map { "L%02d".format(it) },
         "C905" to listOf(
-            "E01-L02", "E01-L03", "E01-L04",
+            "E01-L01", "E01-L02", "E01-L03", "E01-L04",
             "E02-L01", "E02-L02", "E02-L03",
             "E03-L01", "E03-L02", "E03-L03", "E03-L04", "E03-L05",
             "E04-L01", "E04-L02", "E04-L03", "E04-L04",
@@ -116,7 +116,7 @@ object ExtraLessons {
         val ids = lessonIds[module.bookCode] ?: return emptyList()
         return ids.mapIndexed { i, lessonId ->
             val packId = "${module.bookCode}_$lessonId"
-            val n = i + 2 // درس ۱ هر کتاب از قبل ثبت است
+            val n = i + if (ids.any { it == "E01-L01" || it == "L01" }) 1 else 2
             val skeleton = module.bookCode == "C905"
             StudyPack(
                 packId = packId,

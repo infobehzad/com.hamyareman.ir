@@ -196,6 +196,37 @@ class StudyProgressRepository(
         enqueue(packId)
     }
 
+    fun examState(packId: String): MathExamLedger.State =
+        MathExamLedger.State.fromJson(store.getString("study:$packId:exam"))
+
+    fun writeExamState(packId: String, state: MathExamLedger.State) {
+        store.putString("study:$packId:exam", state.toJson())
+        val latest = state.latest
+        if (latest != null) {
+            val chart = Attempt(
+                dateKey = latest.dateKey,
+                scorePct = latest.scorePct,
+                total = latest.total,
+                wrongIds = latest.wrongIds,
+                weakTopics = emptyList(),
+                atMs = latest.atMs,
+            )
+            store.putString("study:$packId:attempts", JSONArray().put(JSONObject(chart.toJson())).toString())
+        }
+        enqueue(packId)
+    }
+
+    fun recordExamSitting(
+        pack: StudyPack,
+        answers: Map<String, String>,
+        dateKey: String,
+        atMs: Long = System.currentTimeMillis(),
+    ): MathExamLedger.State {
+        val next = MathExamLedger.record(examState(pack.packId), MathExamLedger.mcqOf(pack), answers, dateKey, atMs)
+        writeExamState(pack.packId, next)
+        return next
+    }
+
     /** آزمون دوره‌ای سررسید شده؟ (۷ روز از آخرین آزمون گذشته باشد) */
     fun periodicQuizDue(packId: String, todayKey: String): Boolean {
         val last = attempts(packId).maxByOrNull { it.dateKey } ?: return false
@@ -211,13 +242,25 @@ class StudyProgressRepository(
     private fun enqueue(packId: String) {
         val uid = userIdProvider().ifBlank { "anon" }
         val rowId = "sp-${uid}-${packId}".replace(Regex("[^A-Za-z0-9_.\\-]"), "_")
+        val extras = JSONObject()
+            .put("archive", store.getString("study:$packId:archive"))
+            .put("sameday", store.getString("study:$packId:sameday"))
+            .put("ex", store.getString("study:$packId:ex"))
+            .toString()
         val payload = mapOf(
             "userId" to uid,
             "packId" to packId,
             "srsState" to store.getString("study:$packId:cards"),
             "attempts" to store.getString("study:$packId:attempts"),
+            "examLedger" to store.getString("study:$packId:exam"),
+            "extras" to extras,
             "updatedAtIso" to java.time.Instant.now().toString(),
         )
         sync.enqueue(com.hamyareman.ir.platform.core.common.TableIds.STUDY_PROGRESS, rowId, payload)
+        afterWrite?.invoke(packId)
+    }
+
+    companion object {
+        @Volatile var afterWrite: ((String) -> Unit)? = null
     }
 }
