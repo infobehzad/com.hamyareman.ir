@@ -26,7 +26,8 @@ object MathAnswerScript {
             when (ch) {
                 in '۰'..'۹' -> b.append('0' + (ch - '۰'))
                 in '٠'..'٩' -> b.append('0' + (ch - '٠'))
-                '٫', '،' -> b.append('.')
+                '٫' -> b.append('.')
+                '،' -> b.append(',')
                 '×', '⋅', '*' -> b.append('*')
                 '÷' -> b.append('/')
                 '−', '–', '—' -> b.append('-')
