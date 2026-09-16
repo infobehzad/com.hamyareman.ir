@@ -43,7 +43,7 @@ object BookModuleRegistry {
             m.copy(
                 // عنوان پک‌ها از فهرست رسمی کتاب (BookToc) می‌آید — v1.10؛
                 // اگر پک در فهرست نبود عنوان قبلی‌اش می‌ماند.
-                packs = (m.packs + ExtraLessons.extrasFor(m)).map { p ->
+                packs = (m.packs + ExtraLessons.extrasFor(m).filter { e -> m.packs.none { it.packId == e.packId } }).map { p ->
                     BookToc.packTitle(p.packId)?.let { t -> p.copy(title = t) } ?: p
                 },
             )

@@ -150,6 +150,10 @@ fun LessonTeachScreen(
         ) { Text("این درس پیدا نشد.") }
         return
     }
+    if (pack.bookCode == "C905") {
+        MathLessonScreen(packId = packId, initialTab = 0, onBack = onBack)
+        return
+    }
 
     AppTopBar(title = "تدریس — ${pack.title}", onBack = onBack)
     // پلیر همیشه «بالای صفحه» ثابت می‌ماند و کتاب (PDF) زیرش اسکرول می‌شود.

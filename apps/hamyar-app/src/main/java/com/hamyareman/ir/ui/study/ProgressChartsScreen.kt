@@ -145,10 +145,11 @@ fun ProgressChartsScreen(bookCode: String?, onBack: () -> Unit, onPickBook: (Str
                             Text(pack.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                             Spacer(Modifier.height(4.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    "یادگرفته ${toPersianDigits(learned.toString())} از ${toPersianDigits(total.toString())} · باقیمانده ${toPersianDigits(remain.toString())} · مرورشده ${toPersianDigits(reviewed.toString())} بار",
-                                    style = MaterialTheme.typography.labelMedium,
-                                )
+                            val archived = runCatching { container.studyProgress.archivedCards(pack).size }.getOrDefault(0)
+                            Text(
+                                "یادگرفته ${toPersianDigits(learned.toString())} از ${toPersianDigits(total.toString())} · باقیمانده ${toPersianDigits(remain.toString())} · مرورشده ${toPersianDigits(reviewed.toString())} بار · آرشیو ${toPersianDigits(archived.toString())}",
+                                style = MaterialTheme.typography.labelMedium,
+                            )
                                 Spacer(Modifier.width(8.dp))
                                 LinearProgressIndicator(
                                     progress = { mastery / 100f },

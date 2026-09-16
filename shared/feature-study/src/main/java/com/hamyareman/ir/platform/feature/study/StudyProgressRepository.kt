@@ -78,8 +78,98 @@ class StudyProgressRepository(
     /** کارت‌های سررسید امروز (کارت‌های نو هم اولین‌بار سررسیدند). */
     fun dueCards(pack: StudyPack, todayKey: String): List<StudyPack.Flashcard> {
         val states = cards(pack.packId)
-        return pack.flashcards.filter { Sm2.isDue(states[it.id] ?: Sm2.CardState(), todayKey) }
+        val archived = archivedIds(pack.packId)
+        val sameDay = sameDayLeft(pack.packId)
+        return pack.flashcards.filter { c ->
+            if (sameDay[c.id] ?: 0 > 0) true
+            else if (c.id in archived) false
+            else Sm2.isDue(states[c.id] ?: Sm2.CardState(), todayKey)
+        }
     }
+
+    fun archivedIds(packId: String): Set<String> {
+        val raw = store.getString("study:$packId:archive")
+        if (raw.isBlank()) return emptySet()
+        val a = runCatching { JSONArray(raw) }.getOrDefault(JSONArray())
+        return (0 until a.length()).map { a.getString(it) }.toSet()
+    }
+
+    fun archivedCards(pack: StudyPack): List<StudyPack.Flashcard> {
+        val ids = archivedIds(pack.packId)
+        return pack.flashcards.filter { it.id in ids }
+    }
+
+    fun setArchived(packId: String, cardId: String, archived: Boolean) {
+        val next = archivedIds(packId).toMutableSet()
+        if (archived) next.add(cardId) else next.remove(cardId)
+        val arr = JSONArray()
+        next.forEach { arr.put(it) }
+        store.putString("study:$packId:archive", arr.toString())
+        enqueue(packId)
+    }
+
+    fun sameDayLeft(packId: String): Map<String, Int> {
+        val raw = store.getString("study:$packId:sameday")
+        if (raw.isBlank()) return emptyMap()
+        val o = runCatching { JSONObject(raw) }.getOrDefault(JSONObject())
+        val out = mutableMapOf<String, Int>()
+        o.keys().forEach { k -> out[k] = o.optInt(k) }
+        return out
+    }
+
+    private fun writeSameDay(packId: String, map: Map<String, Int>) {
+        val o = JSONObject()
+        map.filter { it.value > 0 }.forEach { (k, v) -> o.put(k, v) }
+        store.putString("study:$packId:sameday", o.toString())
+    }
+
+    /**
+     * مرور فلش‌کارت با اسکریپت ریاضی: کیفیت SM-2 + آرشیو/تکرار همان‌روز.
+     */
+    fun reviewCardMath(packId: String, cardId: String, quality: Int, todayKey: String): Sm2.CardState {
+        val before = stateOf(packId, cardId)
+        val next = reviewCard(packId, cardId, quality, todayKey)
+        val correct = quality >= 4
+        val wrongStreak = if (correct) 0 else before.lapses + 1
+        val correctStreak = if (correct) next.reps else 0
+        val plan = MathAnswerScript.repeatPlan(correct, wrongStreak.coerceAtLeast(0), correctStreak)
+        val sd = sameDayLeft(packId).toMutableMap()
+        if (plan.sameDayRepeats > 0) sd[cardId] = plan.sameDayRepeats
+        else sd.remove(cardId)
+        writeSameDay(packId, sd)
+        setArchived(packId, cardId, plan.archive)
+        return next
+    }
+
+    fun consumeSameDay(packId: String, cardId: String) {
+        val sd = sameDayLeft(packId).toMutableMap()
+        val left = (sd[cardId] ?: 0) - 1
+        if (left <= 0) sd.remove(cardId) else sd[cardId] = left
+        writeSameDay(packId, sd)
+    }
+
+    fun recordExercise(packId: String, exerciseId: String, correct: Boolean, todayKey: String) {
+        val raw = store.getString("study:$packId:ex")
+        val o = runCatching { JSONObject(raw.ifBlank { "{}" }) }.getOrDefault(JSONObject())
+        val item = o.optJSONObject(exerciseId) ?: JSONObject()
+        item.put("tries", item.optInt("tries") + 1)
+        if (correct) item.put("ok", item.optInt("ok") + 1) else item.put("bad", item.optInt("bad") + 1)
+        item.put("last", todayKey)
+        item.put("lastOk", correct)
+        o.put(exerciseId, item)
+        store.putString("study:$packId:ex", o.toString())
+        val wrong = if (correct) 0 else item.optInt("bad")
+        val okStreak = if (correct) item.optInt("ok") else 0
+        val plan = MathAnswerScript.repeatPlan(correct, wrong, okStreak)
+        val sd = sameDayLeft(packId).toMutableMap()
+        val key = "ex-$exerciseId"
+        if (plan.sameDayRepeats > 0) sd[key] = plan.sameDayRepeats else sd.remove(key)
+        writeSameDay(packId, sd)
+        enqueue(packId)
+    }
+
+    fun exerciseStats(packId: String): JSONObject =
+        runCatching { JSONObject(store.getString("study:$packId:ex").ifBlank { "{}" }) }.getOrDefault(JSONObject())
 
     /** درصد تسلط کل پک (کارت‌های نو = صفر). */
     fun masteryPct(pack: StudyPack): Int {

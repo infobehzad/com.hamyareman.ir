@@ -24,6 +24,16 @@ data class StudyPack(
     /** بخش دوم صوت همان درس (حکایت/شعرخوانیِ داخل درس) — خالی یعنی ندارد. */
     val audio2FileId: String = "",
     val audio2Title: String = "",
+    /** متن تدریس برای نمایش در سربرگ ۱ (ریاضی). خالی = از سکشن‌ها ساخته می‌شود. */
+    val teachText: String = "",
+    /** متن تدریس برای تبدیل به صوت (TTS بعدی). */
+    val teachSpeech: String = "",
+    /** خلاصه‌ی چندسطری درس (سربرگ ۴). */
+    val summary: String = "",
+    /** نکات امتحانی (سربرگ ۴). */
+    val examTips: String = "",
+    /** تمرین‌های کتاب با جای خالی (سربرگ ۲، بعد از PDF). */
+    val exercises: List<Exercise> = emptyList(),
 ) {
     data class Section(val id: String, val title: String, val kind: String, val body: String, val images: List<String> = emptyList())
     data class Flashcard(val id: String, val front: String, val back: String, val topic: String, val hint: String)
@@ -39,6 +49,19 @@ data class StudyPack(
         val refSectionId: String,
     )
     data class Solution(val id: String, val title: String, val body: String)
+
+    /**
+     * تمرین کتاب — جواب مخفی است؛ دانش‌آموز با کیبورد ریاضی در جای خالی می‌نویسد.
+     * [altAnswers] جواب‌های هم‌ارز (مثلاً `1/2` و `۰٫۵`).
+     */
+    data class Exercise(
+        val id: String,
+        val prompt: String,
+        val answer: String,
+        val altAnswers: List<String> = emptyList(),
+        val hint: String = "",
+        val topic: String = "",
+    )
 
     fun sectionById(id: String): Section? = sections.firstOrNull { it.id == id }
 
@@ -78,6 +101,19 @@ data class StudyPack(
                     Solution(s.optString("id"), s.optString("title"), s.optString("body"))
                 }
             }
+            val exercises = (o.optJSONArray("exercises") ?: JSONArray()).let { a ->
+                (0 until a.length()).map {
+                    val e = a.getJSONObject(it)
+                    Exercise(
+                        id = e.optString("id"),
+                        prompt = e.optString("prompt"),
+                        answer = e.optString("answer"),
+                        altAnswers = strArray(e, "altAnswers"),
+                        hint = e.optString("hint"),
+                        topic = e.optString("topic"),
+                    )
+                }
+            }
             StudyPack(
                 packId = o.optString("packId"), bookCode = o.optString("bookCode"),
                 lessonId = o.optString("lessonId"), title = o.optString("title"),
@@ -86,6 +122,11 @@ data class StudyPack(
                 audioFileId = o.optString("audioFileId"),
                 audio2FileId = o.optString("audio2FileId"),
                 audio2Title = o.optString("audio2Title"),
+                teachText = o.optString("teachText"),
+                teachSpeech = o.optString("teachSpeech"),
+                summary = o.optString("summary"),
+                examTips = o.optString("examTips"),
+                exercises = exercises,
             )
         }.getOrNull()
     }

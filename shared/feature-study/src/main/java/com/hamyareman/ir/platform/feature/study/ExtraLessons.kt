@@ -106,11 +106,18 @@ object ExtraLessons {
     }
 
     /** درس‌هایِ هنوز ثبت‌نشده‌ی یک ماژول (PDF واقعی، بدون محتوای تعاملی تا بازسازی). */
+    private fun mathSkeletonSections(): List<StudyPack.Section> = listOf(
+        StudyPack.Section("teach", "متن تدریس", "concept", "ساختار تدریس این درس آماده است؛ متن کامل به‌زودی اضافه می‌شود."),
+        StudyPack.Section("summary", "خلاصه درس", "note", "خلاصه‌ی چندسطری به‌زودی."),
+        StudyPack.Section("exam", "نکات امتحانی", "exam", "نکات امتحانی به‌زودی."),
+    )
+
     fun extrasFor(module: BookModule): List<StudyPack> {
         val ids = lessonIds[module.bookCode] ?: return emptyList()
         return ids.mapIndexed { i, lessonId ->
             val packId = "${module.bookCode}_$lessonId"
             val n = i + 2 // درس ۱ هر کتاب از قبل ثبت است
+            val skeleton = module.bookCode == "C905"
             StudyPack(
                 packId = packId,
                 bookCode = module.bookCode,
@@ -118,11 +125,16 @@ object ExtraLessons {
                 title = displayTitle(module.bookCode, lessonId, n),
                 bookTitle = module.title,
                 pdfFileName = "${packId}_BOOK.pdf",
-                sections = emptyList(),
+                sections = if (skeleton) mathSkeletonSections() else emptyList(),
                 flashcards = emptyList(),
                 questions = emptyList(),
                 solutions = emptyList(),
                 audioFileId = audioOverride[packId] ?: "${packId}_AUDIO.mp3",
+                teachText = if (skeleton) "متن تدریس این درس به‌زودی اضافه می‌شود." else "",
+                teachSpeech = if (skeleton) "متن تدریس این درس به‌زودی اضافه می‌شود." else "",
+                summary = if (skeleton) "خلاصه‌ی چندسطری این درس به‌زودی نوشته می‌شود." else "",
+                examTips = if (skeleton) "نکات امتحانی این درس به‌زودی اضافه می‌شود." else "",
+                exercises = emptyList(),
             )
         }
     }

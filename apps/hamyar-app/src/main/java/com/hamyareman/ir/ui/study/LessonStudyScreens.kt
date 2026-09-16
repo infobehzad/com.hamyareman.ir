@@ -79,6 +79,10 @@ private val TABS = listOf("خلاصه و نکات" to "content", "فلش‌کا�
 fun LessonStudyScreen(packId: String, onBack: () -> Unit, onOpenPdf: (String) -> Unit = {}) {
     val container = LocalAppContainer.current
     val pack = remember(packId) { container.studyPacks.pack(packId) }
+    if (pack != null && pack.bookCode == "C905") {
+        MathLessonScreen(packId = packId, initialTab = 1, onBack = onBack)
+        return
+    }
     var refresh by remember { mutableIntStateOf(0) }
     var tab by rememberSaveable { mutableStateOf("content") }
     val today = remember { JalaliDate.todayIso() }
