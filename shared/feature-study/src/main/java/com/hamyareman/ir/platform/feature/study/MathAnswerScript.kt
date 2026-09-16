@@ -35,8 +35,8 @@ object MathAnswerScript {
                 '（' -> b.append('(')
                 '）' -> b.append(')')
                 '⊂' -> b.append('⊆')
-                '∅', '𝜙', 'ø' -> b.append('∅')
-                ' ' , '\u200c', '\t', '‌', '‍' -> Unit
+                '∅', 'ø' -> b.append('∅')
+                ' ', '\t', '\u200c', '\u200d' -> Unit
                 else -> b.append(ch)
             }
         }
