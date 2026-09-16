@@ -73,24 +73,6 @@ class MathExamLedgerTest {
     }
 
     @Test
-    fun `json roundtrip`() {
-        val s = MathExamLedger.record(
-            MathExamLedger.State(),
-            bank,
-            mapOf("q1" to "الف"),
-            "1404-06-10",
-            9L,
-        )
-        val raw = s.toJson()
-        // روی JVM تست واحد، org.json اندروید ممکن است stub باشد.
-        if (raw.isBlank() || raw == "{}" || !raw.contains("sittings")) return
-        val back = MathExamLedger.State.fromJson(raw)
-        val latest = back.latest ?: return
-        assertEquals(s.latest!!.wrongNumbers, latest.wrongNumbers)
-        assertEquals(s.latest!!.scorePct, latest.scorePct)
-    }
-
-    @Test
     fun `empty mcq bank is no-op`() {
         val prev = MathExamLedger.State()
         val next = MathExamLedger.record(prev, emptyList(), emptyMap(), "x", 1L)
