@@ -1,0 +1,3304 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,
+      initial-scale=1.0">
+    <title>جمع‌بندی جامع فصل اول ریاضی نهم - مجموعه‌ها</title>
+    <style>
+  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 50%, #ecfeff 100%);
+    color: #1e293b;
+    line-height: 1.9;
+    padding: 20px;
+    font-size: 16px;
+  }
+
+  .container {
+    max-width: 1150px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(30, 41, 59, 0.15);
+    overflow: hidden;
+  }
+
+  header {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+    color: #fff;
+    padding: 50px 30px;
+    text-align: center;
+    position: relative;
+  }
+
+  header::after {
+    content: "";
+    position: absolute;
+    bottom: -20px;
+    left: 0; right: 0;
+    height: 40px;
+    background: #fff;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+
+  header h1 {
+    font-size: 2.3rem;
+    font-weight: 900;
+    margin-bottom: 14px;
+    text-shadow: 0 3px 8px rgba(0,0,0,0.25);
+  }
+
+  header p {
+    font-size: 1.1rem;
+    opacity: 0.95;
+  }
+
+  .badges {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+
+  .badge {
+    background: rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 7px 16px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  main { padding: 40px 30px 60px; }
+
+  .intro-box {
+    background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+    border-right: 6px solid #f59e0b;
+    padding: 24px 28px;
+    border-radius: 16px;
+    margin-bottom: 40px;
+    font-size: 1.05rem;
+  }
+
+  .intro-box strong { color: #92400e; }
+
+  .toc {
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    border: 2px solid #6366f1;
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 40px;
+  }
+
+  .toc h2 {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #3730a3;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .toc h2::before { content: "📋"; font-size: 1.5rem; }
+
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .toc-item {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px 18px;
+    border-right: 4px solid #6366f1;
+    font-weight: 700;
+    color: #3730a3;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+  }
+
+  .toc-item:hover { transform: translateX(-4px); }
+
+  .lesson {
+    background: #f8fafc;
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 45px;
+    border: 2px solid #e2e8f0;
+  }
+
+  .lesson-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 18px;
+    border-bottom: 3px dashed #cbd5e1;
+  }
+
+  .lesson-number {
+    width: 62px; height: 62px;
+    border-radius: 16px;
+    color: #fff;
+    font-size: 1.4rem;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .lesson-number.l1 { background: linear-gradient(135deg, #4f46e5, #7c3aed); box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35); }
+  .lesson-number.l2 { background: linear-gradient(135deg, #0891b2, #0ea5e9); box-shadow: 0 8px 20px rgba(8, 145, 178, 0.35); }
+  .lesson-number.l3 { background: linear-gradient(135deg, #7c3aed, #ec4899); box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35); }
+  .lesson-number.l4 { background: linear-gradient(135deg, #059669, #06b6d4); box-shadow: 0 8px 20px rgba(5, 150, 105, 0.35); }
+  .lesson-number.rev { background: linear-gradient(135deg, #ea580c, #f59e0b); box-shadow: 0 8px 20px rgba(234, 88, 12, 0.35); }
+
+  .lesson-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+
+  .lesson-sub {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .section-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #4f46e5;
+    margin: 26px 0 14px;
+    padding-right: 12px;
+    border-right: 5px solid #6366f1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::before {
+    content: "◆";
+    color: #a855f7;
+    font-size: 0.9rem;
+  }
+
+  p { margin: 10px 0; }
+
+  .formula-box {
+    background: #fff7ed;
+    border: 2px solid #fb923c;
+    border-radius: 14px;
+    padding: 16px 22px;
+    margin: 18px 0;
+    text-align: center;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #9a3412;
+    direction: ltr;
+    font-family: 'Cambria Math', 'Times New Roman', serif;
+  }
+
+  .formula-box.big {
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, #fff7ed, #fed7aa);
+    border-width: 3px;
+  }
+
+  .note-box {
+    background: #ecfdf5;
+    border-right: 5px solid #10b981;
+    padding: 14px 20px;
+    border-radius: 12px;
+    margin: 18px 0;
+    color: #065f46;
+    font-size: 0.98rem;
+  }
+
+  .warning-box {
+    background: #fef2f2;
+    border-right: 5px solid #ef4444;
+    padding: 14px 20px;
+    border-radius: 12px;
+    margin: 18px 0;
+    color: #991b1b;
+    font-size: 0.98rem;
+  }
+
+  .example-box {
+    background: #f5f3ff;
+    border: 2px solid #a78bfa;
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin: 20px 0;
+  }
+
+  .example-box h4 {
+    color: #6d28d9;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .example-box h4::before {
+    content: "📌";
+    font-size: 1.2rem;
+  }
+
+  .solution {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-top: 12px;
+    border: 1px dashed #a78bfa;
+  }
+
+  .solution strong { color: #7c3aed; }
+
+  .svg-wrapper {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 22px 0;
+    text-align: center;
+    border: 2px solid #e0e7ff;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.08);
+  }
+
+  .svg-wrapper svg { max-width: 100%; height: auto; }
+
+  .svg-caption {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: 10px;
+    font-style: italic;
+  }
+
+  ul, ol { padding-right: 26px; margin: 12px 0; }
+  li { margin: 6px 0; }
+
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  }
+
+  .summary-table th {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    padding: 14px;
+    font-size: 1rem;
+  }
+
+  .summary-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.98rem;
+  }
+
+  .summary-table tr:nth-child(even) td { background: #f8fafc; }
+  .summary-table tr:last-child td { border-bottom: none; }
+
+  .mind-map {
+    background: linear-gradient(135deg, #fef9c3 0%, #fde68a 100%);
+    border: 3px solid #eab308;
+    border-radius: 20px;
+    padding: 30px;
+    margin: 30px 0;
+  }
+
+  .mind-map h2 {
+    color: #713f12;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .mind-map h2::before { content: "🧠"; font-size: 1.6rem; }
+
+  .mind-branches {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  .mind-branch {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 18px 20px;
+    border-top: 5px solid #eab308;
+    box-shadow: 0 4px 14px rgba(234, 179, 8, 0.15);
+  }
+
+  .mind-branch h4 {
+    color: #92400e;
+    font-size: 1.05rem;
+    margin-bottom: 10px;
+    font-weight: 900;
+  }
+
+  .mind-branch ul {
+    list-style: none;
+    padding-right: 0;
+    font-size: 0.92rem;
+    color: #713f12;
+  }
+
+  .mind-branch li {
+    padding: 5px 0;
+    border-bottom: 1px dashed #fde68a;
+  }
+
+  .mind-branch li:last-child { border-bottom: none; }
+
+  .mind-branch li::before {
+    content: "◄";
+    color: #eab308;
+    margin-left: 6px;
+    font-size: 0.8rem;
+  }
+
+  .final-exam {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border: 3px solid #ef4444;
+    border-radius: 20px;
+    padding: 32px;
+    margin: 40px 0;
+  }
+
+  .final-exam h2 {
+    color: #991b1b;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .final-exam h2::before { content: "📝"; font-size: 1.6rem; }
+
+  .question {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin: 18px 0;
+    border-right: 5px solid #ef4444;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  .question-title {
+    font-weight: 800;
+    color: #991b1b;
+    font-size: 1.05rem;
+    margin-bottom: 10px;
+  }
+
+  .answer {
+    background: #f0fdf4;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-top: 14px;
+    border-right: 4px solid #16a34a;
+  }
+
+  .answer-title {
+    font-weight: 800;
+    color: #166534;
+    margin-bottom: 10px;
+    font-size: 1rem;
+  }
+
+  .math { direction: ltr; display: inline-block; font-family: 'Cambria Math', serif; }
+
+  .highlight {
+    background: linear-gradient(120deg, #fef08a 0%, #fde047 100%);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-weight: 700;
+    color: #713f12;
+  }
+
+  .exam-tips {
+    background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+    border: 3px solid #4f46e5;
+    border-radius: 20px;
+    padding: 32px;
+    margin: 40px 0;
+  }
+
+  .exam-tips h2 {
+    color: #3730a3;
+    font-size: 1.6rem;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .exam-tips h2::before { content: "🏆"; font-size: 1.7rem; }
+
+  .tip-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin: 16px 0;
+    border-right: 5px solid #6366f1;
+    box-shadow: 0 4px 14px rgba(99,102,241,0.08);
+  }
+
+  .tip-card h3 {
+    color: #3730a3;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tip-card.danger { border-right-color: #dc2626; }
+  .tip-card.danger h3 { color: #991b1b; }
+  .tip-card.success { border-right-color: #16a34a; }
+  .tip-card.success h3 { color: #166534; }
+  .tip-card.warning { border-right-color: #f59e0b; }
+  .tip-card.warning h3 { color: #92400e; }
+
+  .checklist {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 22px 26px;
+    margin: 22px 0;
+    border: 2px dashed #6366f1;
+  }
+
+  .checklist h3 {
+    color: #3730a3;
+    font-size: 1.15rem;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .checklist h3::before { content: "✅"; font-size: 1.2rem; }
+
+  .checklist label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    cursor: pointer;
+    font-size: 0.98rem;
+    border-bottom: 1px dashed #e0e7ff;
+  }
+
+  .checklist label:last-child { border-bottom: none; }
+
+  .checklist input[type="checkbox"] {
+    width: 20px; height: 20px;
+    margin-top: 4px;
+    accent-color: #6366f1;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .quick-reference {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-radius: 20px;
+    padding: 32px;
+    margin: 40px 0;
+    color: #f1f5f9;
+  }
+
+  .quick-reference h2 {
+    color: #fbbf24;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .quick-reference h2::before { content: "⚡"; font-size: 1.6rem; }
+
+  .qr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+  .qr-item {
+    background: rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 18px;
+    border-right: 4px solid #fbbf24;
+    font-size: 0.92rem;
+  }
+
+  .qr-item strong {
+    color: #fbbf24;
+    display: block;
+    margin-bottom: 6px;
+    font-size: 1rem;
+  }
+
+  .qr-item span {
+    direction: ltr;
+    display: inline-block;
+    font-family: 'Cambria Math', serif;
+    color: #cbd5e1;
+    font-weight: 700;
+  }
+
+  footer {
+    text-align: center;
+    padding: 34px 20px;
+    background: #1e293b;
+    color: #cbd5e1;
+    font-size: 0.9rem;
+  }
+
+  footer strong { color: #a855f7; }
+
+  @media (max-width: 640px) {
+    body { padding: 8px; font-size: 15px; }
+    main { padding: 20px 14px 40px; }
+    header { padding: 30px 16px; }
+    header h1 { font-size: 1.4rem; }
+    .lesson { padding: 18px; }
+    .lesson-title { font-size: 1.15rem; }
+    .final-exam, .exam-tips, .mind-map, .quick-reference { padding: 18px; }
+    .toc-item { font-size: 0.88rem; }
+  }
+</style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>📘 جمع‌بندی جامع فصل اول ریاضی نهم</h1>
+        <p>مجموعه‌ها – مرور کامل و نکات کلیدی امتحانی</p>
+        <div class="badges"> <span class="badge">📚 مرور کل فصل</span>
+          <span class="badge">🧠 نقشه‌ی ذهنی</span> <span class="badge">📝
+
+            ۱۵ نمونه سوال</span> <span class="badge">🏆 نکات طلایی</span>
+          <span class="badge">✅ چک‌لیست مطالعه</span> </div>
+      </header>
+      <main>
+        <!-- ====== INTRO ====== -->
+        <div class="intro-box"> <strong>سلام دانش‌آموز عزیز! 🌟</strong><br>
+          به فایل <strong>جمع‌بندی جامع فصل اول ریاضی نهم</strong> خوش
+          آمدی! در این فایل، تمام آنچه در چهار درس این فصل یاد گرفتیم را
+          یک‌جا مرور می‌کنیم: از تعریف مجموعه تا عمل‌های اجتماع، اشتراک
+          و تفاضل. این فایل به گونه‌ای طراحی شده که <strong>قبل از
+            امتحان</strong> یا <strong>قبل از شروع فصل بعد</strong>
+          مرور کاملی داشته باشی. <strong>خانم سروناز</strong> و <strong>آقای
+
+            فرسام</strong> همراهت هستند. آماده‌ای؟... شروع می‌کنیم! </div>
+        <!-- ====== TOC ====== -->
+        <div class="toc">
+          <h2>فهرست مطالب</h2>
+          <div class="toc-grid"> <a href="#l1" class="toc-item">📍 درس
+              ۱: مفهوم مجموعه</a> <a href="#l2" class="toc-item">📍 درس
+              ۲: نمادهای عضویت و تهی</a> <a href="#l3" class="toc-item">📍
+
+              درس ۳: زیرمجموعه</a> <a href="#l4" class="toc-item">📍
+              درس ۴: عمل‌های مجموعه</a> <a href="#mind"
+              class="toc-item">🧠 نقشه‌ی ذهنی کل فصل</a> <a href="#qr"
+              class="toc-item">⚡ مرجع سریع</a> <a href="#exam"
+              class="toc-item">📝 ۱۵ نمونه سوال</a> <a href="#check"
+              class="toc-item">✅ چک‌لیست مطالعه</a> <a href="#tips"
+              class="toc-item">🏆 نکات امتحانی</a> </div>
+        </div>
+        <!-- ============================================================= -->
+        <!-- ==================== درس ۱ ================================== -->
+        <!-- ============================================================= -->
+        <section class="lesson" id="l1">
+          <div class="lesson-header">
+            <div class="lesson-number l1">۱</div>
+            <div>
+              <div class="lesson-title">مرور درس اول: مفهوم مجموعه و
+                مشخص بودن اعضا</div>
+              <div class="lesson-sub">پایه‌ی تمام مفاهیم فصل</div>
+            </div>
+          </div>
+          <div class="section-title">خلاصه‌ی درس اول</div>
+          <p><strong>تعریف مجموعه:</strong> مجموعه یعنی دسته‌ای از اشیاء
+            که دو ویژگی مهم دارند:</p>
+          <ul>
+            <li><strong>کاملاً مشخص باشند</strong> – یعنی بتوانیم تشخیص
+              دهیم چه چیزی عضو است و چه چیزی نیست.</li>
+            <li><strong>دو به دو متمایز باشند</strong> – یعنی اعضای
+              تکراری در آن وجود ندارد.</li>
+          </ul>
+          <div class="formula-box">مجموعه = دسته‌ای از اشیاء مشخص و
+            متمایز</div>
+          <p><strong>نام‌گذاری:</strong> مجموعه‌ها را با حروف <strong>بزرگ</strong>
+            مثل <span class="math">A</span>، <span class="math">B</span>،
+            <span class="math">C</span> نام‌گذاری می‌کنیم و اعضا را داخل
+            <strong>آکولاد</strong> <span class="math">{ }</span>
+            می‌نویسیم.</p>
+          <div class="example-box">
+            <h4>مثال‌های کلیدی درس ۱</h4>
+            <p><strong>مثال ۱:</strong> مجموعه‌ی اعداد طبیعی یک رقمی: <span
+                class="math">{1, 2, 3, 4, 5, 6, 7, 8, 9}</span></p>
+            <p><strong>مثال ۲:</strong> حروف کلمه‌ی «هخامنشیان»: <span
+                class="math">{ه، خ، ا، م، ن، ش، ی}</span> – تعداد اعضا
+              برابر ۷ است (حروف تکراری یک بار شمرده می‌شوند).</p>
+            <p><strong>مثال ۳:</strong> اعداد صحیح بین ۳- و ۲: <span
+                class="math">{-2, -1, 0, 1}</span> – تعداد ۴ عضو.</p>
+          </div>
+          <div class="warning-box"> <strong>⚠️ نکته:</strong> در نوشتن
+            مجموعه، ترتیب اعضا مهم نیست. {۱، ۲، ۳} = {۳، ۱، ۲} = {۲، ۳،
+            ۱}. فقط مشخص بودن و متمایز بودن مهم است. </div>
+          <div class="note-box"> <strong>💡 یادآوری:</strong> اگر
+            بپرسند آیا فلان چیز عضو مجموعه است؟ ...اگر در آکولاد نوشته
+            شده باشد، بله. اگر نباشد، خیر. اگر عبارت مبهم باشد (مثل
+            «کتاب‌های خوب»)، اصلاً مجموعه نیست. </div>
+        </section>
+        <!-- ============================================================= -->
+        <!-- ==================== درس ۲ ================================== -->
+        <!-- ============================================================= -->
+        <section class="lesson" id="l2">
+          <div class="lesson-header">
+            <div class="lesson-number l2">۲</div>
+            <div>
+              <div class="lesson-title">مرور درس دوم: نمادهای عضویت و
+                مجموعه تهی</div>
+              <div class="lesson-sub">زبان رسمی ریاضی برای مجموعه‌ها</div>
+            </div>
+          </div>
+          <div class="section-title">خلاصه‌ی درس دوم</div>
+          <p>در این درس با چهار نماد مهم آشنا شدیم:</p>
+          <div class="svg-wrapper">
+            <svg viewBox="0 0 620 330"
+              xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="b1" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#dbeafe"></stop>
+                  <stop offset="100%" stop-color="#bfdbfe"></stop> </linearGradient>
+                <linearGradient id="b2" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#fee2e2"></stop>
+                  <stop offset="100%" stop-color="#fecaca"></stop> </linearGradient>
+                <linearGradient id="b3" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#fef3c7"></stop>
+                  <stop offset="100%" stop-color="#fde68a"></stop> </linearGradient>
+                <linearGradient id="b4" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#d1fae5"></stop>
+                  <stop offset="100%" stop-color="#a7f3d0"></stop> </linearGradient>
+              </defs>
+              <rect width="620" height="330" fill="#f8fafc" rx="18"></rect>
+              <text x="310" y="32" text-anchor="middle" font-size="18"
+                font-weight="900" fill="#0c4a6e" font-family="Vazirmatn,
+                sans-serif">چهار نماد مهم درس دوم</text>
+              <rect x="20" y="55" width="140" height="240"
+                fill="url(#b1)" stroke="#2563eb" stroke-width="2"
+                rx="14"></rect>
+              <text x="90" y="115" text-anchor="middle" font-size="42"
+                font-weight="900" fill="#1d4ed8" font-family="serif">∈</text>
+              <text x="90" y="150" text-anchor="middle" font-size="13"
+                font-weight="900" fill="#1e3a8a" font-family="Vazirmatn,
+                sans-serif">عضو است</text>
+              <text x="90" y="185" text-anchor="middle" font-size="12"
+                fill="#1e3a8a" font-family="monospace">3 ∈ A</text>
+              <text x="90" y="220" text-anchor="middle" font-size="11"
+                fill="#1e3a8a" font-family="Vazirmatn, sans-serif">۳ عضو
+                A است</text>
+              <text x="90" y="255" text-anchor="middle" font-size="16"
+                fill="#16a34a" font-family="Vazirmatn, sans-serif">✅</text>
+              <rect x="170" y="55" width="140" height="240"
+                fill="url(#b2)" stroke="#dc2626" stroke-width="2"
+                rx="14"></rect>
+              <text x="240" y="115" text-anchor="middle" font-size="42"
+                font-weight="900" fill="#b91c1c" font-family="serif">∉</text>
+              <text x="240" y="150" text-anchor="middle" font-size="13"
+                font-weight="900" fill="#7f1d1d" font-family="Vazirmatn,
+                sans-serif">عضو نیست</text>
+              <text x="240" y="185" text-anchor="middle" font-size="12"
+                fill="#7f1d1d" font-family="monospace">4 ∉ A</text>
+              <text x="240" y="220" text-anchor="middle" font-size="11"
+                fill="#7f1d1d" font-family="Vazirmatn, sans-serif">۴ عضو
+                A نیست</text>
+              <text x="240" y="255" text-anchor="middle" font-size="16"
+                fill="#16a34a" font-family="Vazirmatn, sans-serif">✅</text>
+              <rect x="320" y="55" width="140" height="240"
+                fill="url(#b3)" stroke="#ea580c" stroke-width="2"
+                rx="14"></rect>
+              <text x="390" y="115" text-anchor="middle" font-size="36"
+                font-weight="900" fill="#ea580c" font-family="serif">n(A)</text>
+              <text x="390" y="150" text-anchor="middle" font-size="13"
+                font-weight="900" fill="#9a3412" font-family="Vazirmatn,
+                sans-serif">تعداد اعضا</text>
+              <text x="390" y="185" text-anchor="middle" font-size="12"
+                fill="#9a3412" font-family="monospace">n(A) = 3</text>
+              <text x="390" y="220" text-anchor="middle" font-size="11"
+                fill="#9a3412" font-family="Vazirmatn, sans-serif">سه
+                عضو دارد</text>
+              <text x="390" y="255" text-anchor="middle" font-size="16"
+                fill="#16a34a" font-family="Vazirmatn, sans-serif">✅</text>
+              <rect x="470" y="55" width="130" height="240"
+                fill="url(#b4)" stroke="#059669" stroke-width="2"
+                rx="14"></rect>
+              <text x="535" y="115" text-anchor="middle" font-size="42"
+                font-weight="900" fill="#059669" font-family="serif">∅</text>
+              <text x="535" y="150" text-anchor="middle" font-size="13"
+                font-weight="900" fill="#065f46" font-family="Vazirmatn,
+                sans-serif">مجموعه تهی</text>
+              <text x="535" y="185" text-anchor="middle" font-size="12"
+                fill="#065f46" font-family="monospace">{ }</text>
+              <text x="535" y="220" text-anchor="middle" font-size="11"
+                fill="#065f46" font-family="Vazirmatn, sans-serif">بدون
+                هیچ عضو</text>
+              <text x="535" y="255" text-anchor="middle" font-size="16"
+                fill="#16a34a" font-family="Vazirmatn, sans-serif">✅</text>
+            </svg>
+            <div class="svg-caption">شکل ۱: چهار نماد مهم درس دوم</div>
+          </div>
+          <p><strong>نکته‌ی طلایی:</strong> نماد <span class="math">∈</span>
+            فقط برای <strong>عضو</strong> به کار می‌رود، و همیشه <strong>عضو
+
+              در چپ</strong> و <strong>مجموعه در راست</strong> قرار
+            می‌گیرد.</p>
+          <div class="section-title">تفاوت تهی، مجموعه‌ی صفر و مجموعه‌ی
+            تهی</div>
+          <div class="example-box">
+            <h4>سه مفهوم پرتکرار که نباید اشتباه بگیریم</h4>
+            <ul>
+              <li><strong>تهی:</strong> <span class="math">∅</span> یا
+                <span class="math">{ }</span> – هیچ عضوی ندارد. <span
+                  class="math">n(∅) = 0</span></li>
+              <li><strong>مجموعه‌ی صفر:</strong> <span class="math">{0}</span>
+                – یک عضو دارد: عدد صفر. <span class="math">n({0}) = 1</span></li>
+              <li><strong>مجموعه‌ی تهی:</strong> <span class="math">{∅}</span>
+                – یک عضو دارد: خود تهی. <span class="math">n({∅}) = 1</span></li>
+            </ul>
+          </div>
+          <div class="warning-box"> <strong>⚠️ اشتباه رایج:</strong> <span
+              class="math">∅ ≠ {0} ≠ {∅}</span> – این سه کاملاً با هم
+            متفاوت هستند! </div>
+          <div class="note-box"> <strong>💡 نکته‌ی مهم:</strong> فقط <span
+              class="math">∅</span> و <span class="math">{ }</span> تهی
+            هستند. هر آکولادی که داخلش چیزی باشد (حتی صفر یا تهی)، دیگر
+            تهی نیست. </div>
+        </section>
+        <!-- ============================================================= -->
+        <!-- ==================== درس ۳ ================================== -->
+        <!-- ============================================================= -->
+        <section class="lesson" id="l3">
+          <div class="lesson-header">
+            <div class="lesson-number l3">۳</div>
+            <div>
+              <div class="lesson-title">مرور درس سوم: زیرمجموعه و تعداد
+                زیرمجموعه‌ها</div>
+              <div class="lesson-sub">یکی از مهم‌ترین مفاهیم فصل</div>
+            </div>
+          </div>
+          <div class="section-title">خلاصه‌ی درس سوم</div>
+          <p><strong>تعریف زیرمجموعه:</strong> می‌گوییم <span
+              class="math">A ⊆ B</span> (ای زیرمجموعه‌ی بی است) اگر <strong>هر
+
+              عضو ای، عضوی از بی هم باشد</strong>.</p>
+          <div class="svg-wrapper">
+            <svg viewBox="0 0 620 380"
+              xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient id="gB" cx="50%" cy="50%" r="70%">
+                  <stop offset="0%" stop-color="#e9d5ff"></stop>
+                  <stop offset="100%" stop-color="#c4b5fd"></stop> </radialGradient>
+                <radialGradient id="gA" cx="50%" cy="50%" r="70%">
+                  <stop offset="0%" stop-color="#c084fc"></stop>
+                  <stop offset="100%" stop-color="#7c3aed"></stop> </radialGradient>
+              </defs>
+              <rect width="620" height="380" fill="#faf5ff" rx="18"></rect>
+              <text x="310" y="34" text-anchor="middle" font-size="18"
+                font-weight="900" fill="#4c1d95" font-family="Vazirmatn,
+                sans-serif">نمودار ون: A ⊆ B</text>
+              <ellipse cx="310" cy="210" rx="200" ry="140"
+                fill="url(#gB)" stroke="#7c3aed" stroke-width="2.5"></ellipse>
+              <text x="485" y="100" font-size="20" font-weight="900"
+                fill="#6d28d9" font-family="Vazirmatn, sans-serif">B</text>
+              <ellipse cx="270" cy="220" rx="105" ry="80"
+                fill="url(#gA)" stroke="#4c1d95" stroke-width="2.5"></ellipse>
+              <text x="180" y="160" font-size="20" font-weight="900"
+                fill="#ffffff" font-family="Vazirmatn, sans-serif">A</text>
+              <text x="240" y="205" font-size="16" font-weight="700"
+                fill="#ffffff" font-family="monospace">1</text>
+              <text x="285" y="205" font-size="16" font-weight="700"
+                fill="#ffffff" font-family="monospace">2</text>
+              <text x="260" y="245" font-size="16" font-weight="700"
+                fill="#ffffff" font-family="monospace">3</text>
+              <text x="410" y="170" font-size="16" font-weight="700"
+                fill="#5b21b6" font-family="monospace">4</text>
+              <text x="430" y="230" font-size="16" font-weight="700"
+                fill="#5b21b6" font-family="monospace">5</text>
+              <text x="380" y="290" font-size="16" font-weight="700"
+                fill="#5b21b6" font-family="monospace">6</text>
+              <rect x="100" y="335" width="420" height="40"
+                fill="#fef9c3" stroke="#eab308" stroke-width="2" rx="10"></rect>
+              <text x="310" y="361" text-anchor="middle" font-size="13"
+                font-weight="700" fill="#854d0e" font-family="Vazirmatn,
+                sans-serif">هر عضو A در B هم هست ⇒ A ⊆ B</text> </svg>
+            <div class="svg-caption">شکل ۲: نمودار ون – زیرمجموعه بودن
+              ای در بی</div>
+          </div>
+          <div class="note-box"> <strong>💡 دو نکته‌ی طلایی:</strong>
+            <ul>
+              <li><strong>تهی زیرمجموعه‌ی هر مجموعه‌ای است:</strong> <span
+                  class="math">∅ ⊆ A</span></li>
+              <li><strong>هر مجموعه زیرمجموعه‌ی خودش است:</strong> <span
+                  class="math">A ⊆ A</span></li>
+            </ul>
+          </div>
+          <div class="section-title">فرمول طلایی تعداد زیرمجموعه‌ها</div>
+          <div class="formula-box big">تعداد زیرمجموعه‌های یک مجموعه‌ی n
+            عضوی = 2ⁿ</div>
+          <p><strong>جدول توان‌های دو که باید حفظ کنی:</strong></p>
+          <table class="summary-table">
+            <thead> <tr>
+                <th>تعداد اعضا (n)</th>
+                <th>2ⁿ</th>
+                <th>تعداد زیرمجموعه‌ها</th>
+              </tr>
+            </thead> <tbody>
+              <tr>
+                <td>0</td>
+                <td class="math">2⁰</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td class="math">2¹</td>
+                <td>2</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td class="math">2²</td>
+                <td>4</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td class="math">2³</td>
+                <td>8</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td class="math">2⁴</td>
+                <td>16</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td class="math">2⁵</td>
+                <td>32</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td class="math">2⁶</td>
+                <td>64</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td class="math">2⁷</td>
+                <td>128</td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td class="math">2⁸</td>
+                <td>256</td>
+              </tr>
+              <tr>
+                <td>9</td>
+                <td class="math">2⁹</td>
+                <td>512</td>
+              </tr>
+              <tr>
+                <td>10</td>
+                <td class="math">2¹⁰</td>
+                <td>1024</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="example-box">
+            <h4>روش سیستماتیک نوشتن زیرمجموعه‌ها (برای مجموعه‌ی {۱، ۲،
+              ۳})</h4>
+            <ol>
+              <li><strong>صفر عضو:</strong> تهی (۱ زیرمجموعه)</li>
+              <li><strong>یک عضو:</strong> {۱}، {۲}، {۳} (۳ زیرمجموعه)</li>
+              <li><strong>دو عضو:</strong> {۱،۲}، {۱،۳}، {۲،۳} (۳
+                زیرمجموعه)</li>
+              <li><strong>سه عضو:</strong> {۱،۲،۳} (۱ زیرمجموعه)</li>
+            </ol>
+            <p><strong>مجموع:</strong> ۱ + ۳ + ۳ + ۱ = ۸ = 2³ ✅</p>
+          </div>
+          <div class="warning-box"> <strong>⚠️ اشتباه رایج:</strong> در
+            شمردن زیرمجموعه‌ها، فراموش نکن که <strong>تهی</strong> و <strong>خود
+
+              مجموعه</strong> هر دو زیرمجموعه محسوب می‌شوند. </div>
+        </section>
+        <!-- ============================================================= -->
+        <!-- ==================== درس ۴ ================================== -->
+        <!-- ============================================================= -->
+        <section class="lesson" id="l4">
+          <div class="lesson-header">
+            <div class="lesson-number l4">۴</div>
+            <div>
+              <div class="lesson-title">مرور درس چهارم: عمل‌های اجتماع،
+                اشتراک، تفاضل</div>
+              <div class="lesson-sub">پرکاربردترین درس فصل اول</div>
+            </div>
+          </div>
+          <div class="section-title">خلاصه‌ی درس چهارم</div>
+          <p>در این درس سه عمل اصلی روی مجموعه‌ها را یاد گرفتیم:</p>
+          <div class="svg-wrapper">
+            <svg viewBox="0 0 820 380"
+              xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="uF" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#bfdbfe"></stop>
+                  <stop offset="100%" stop-color="#60a5fa"></stop> </linearGradient>
+                <linearGradient id="lF" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#fde68a"></stop>
+                  <stop offset="100%" stop-color="#f59e0b"></stop> </linearGradient>
+                <linearGradient id="cF" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#86efac"></stop>
+                  <stop offset="100%" stop-color="#22c55e"></stop> </linearGradient>
+              </defs>
+              <rect width="820" height="380" fill="#f0f9ff" rx="18"></rect>
+              <text x="410" y="34" text-anchor="middle" font-size="18"
+                font-weight="900" fill="#0c4a6e" font-family="Vazirmatn,
+                sans-serif">سه عمل اصلی روی مجموعه‌ها</text>
+              <g>
+                <circle cx="115" cy="190" r="60" fill="url(#uF)"
+                  stroke="#1d4ed8" stroke-width="2.5"></circle>
+                <circle cx="175" cy="190" r="60" fill="url(#uF)"
+                  stroke="#1d4ed8" stroke-width="2.5"></circle>
+                <text x="75" y="150" font-size="20" font-weight="900"
+                  fill="#1e3a8a" font-family="monospace">A</text>
+                <text x="205" y="150" font-size="20" font-weight="900"
+                  fill="#1e3a8a" font-family="monospace">B</text>
+                <text x="145" y="290" text-anchor="middle"
+                  font-size="16" font-weight="900" fill="#0c4a6e"
+                  font-family="Vazirmatn, sans-serif">A ∪ B</text>
+                <text x="145" y="315" text-anchor="middle"
+                  font-size="12" fill="#475569" font-family="Vazirmatn,
+                  sans-serif">همه‌ی اعضا</text>
+                <text x="145" y="335" text-anchor="middle"
+                  font-size="11" fill="#64748b" font-family="Vazirmatn,
+                  sans-serif">(شامل هر دو دایره)</text> </g>
+              <g>
+                <circle cx="385" cy="190" r="60" fill="none"
+                  stroke="#1d4ed8" stroke-width="2.5"></circle>
+                <circle cx="445" cy="190" r="60" fill="none"
+                  stroke="#be185d" stroke-width="2.5"></circle>
+                <path d="M 415 138.04 A 60 60 0 0 1 415 241.96 A 60 60 0
+                  0 1 415 138.04 Z" fill="url(#lF)" stroke="#a16207"
+                  stroke-width="1.5"></path>
+                <text x="345" y="150" font-size="20" font-weight="900"
+                  fill="#1e3a8a" font-family="monospace">A</text>
+                <text x="475" y="150" font-size="20" font-weight="900"
+                  fill="#831843" font-family="monospace">B</text>
+                <text x="415" y="290" text-anchor="middle"
+                  font-size="16" font-weight="900" fill="#0c4a6e"
+                  font-family="Vazirmatn, sans-serif">A ∩ B</text>
+                <text x="415" y="315" text-anchor="middle"
+                  font-size="12" fill="#475569" font-family="Vazirmatn,
+                  sans-serif">اعضای مشترک</text>
+                <text x="415" y="335" text-anchor="middle"
+                  font-size="11" fill="#64748b" font-family="Vazirmatn,
+                  sans-serif">(فقط ناحیه‌ی وسط)</text> </g>
+              <g>
+                <circle cx="655" cy="190" r="60" fill="none"
+                  stroke="#1d4ed8" stroke-width="2.5"></circle>
+                <circle cx="715" cy="190" r="60" fill="none"
+                  stroke="#be185d" stroke-width="2.5"></circle>
+                <path d="M 685 138.04 A 60 60 0 1 0 685 241.96 A 60 60 0
+                  0 1 685 138.04 Z" fill="url(#cF)" stroke="#166534"
+                  stroke-width="1.5"></path>
+                <text x="615" y="150" font-size="20" font-weight="900"
+                  fill="#1e3a8a" font-family="monospace">A</text>
+                <text x="745" y="150" font-size="20" font-weight="900"
+                  fill="#831843" font-family="monospace">B</text>
+                <text x="685" y="290" text-anchor="middle"
+                  font-size="16" font-weight="900" fill="#0c4a6e"
+                  font-family="Vazirmatn, sans-serif">A − B</text>
+                <text x="685" y="315" text-anchor="middle"
+                  font-size="12" fill="#475569" font-family="Vazirmatn,
+                  sans-serif">فقط اعضای A</text>
+                <text x="685" y="335" text-anchor="middle"
+                  font-size="11" fill="#64748b" font-family="Vazirmatn,
+                  sans-serif">(ناحیه‌ی سبز)</text> </g> </svg>
+            <div class="svg-caption">شکل ۳: نمایش گرافیکی سه عمل اصلی
+              فصل چهارم</div>
+          </div>
+          <table class="summary-table">
+            <thead> <tr>
+                <th>عمل</th>
+                <th>نماد</th>
+                <th>تعریف</th>
+                <th>مثال</th>
+              </tr>
+            </thead> <tbody>
+              <tr>
+                <td>اجتماع</td>
+                <td class="math">A ∪ B</td>
+                <td>همه‌ی اعضای دو مجموعه، بدون تکرار</td>
+                <td class="math">{1,2} ∪ {2,3} = {1,2,3}</td>
+              </tr>
+              <tr>
+                <td>اشتراک</td>
+                <td class="math">A ∩ B</td>
+                <td>فقط اعضای مشترک</td>
+                <td class="math">{1,2} ∩ {2,3} = {2}</td>
+              </tr>
+              <tr>
+                <td>تفاضل</td>
+                <td class="math">A − B</td>
+                <td>اعضای A که در B نیستند</td>
+                <td class="math">{1,2} − {2,3} = {1}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="section-title">خاصیت‌های مهم</div>
+          <div class="example-box">
+            <h4>خاصیت‌های اجتماع، اشتراک و تفاضل</h4>
+            <ul>
+              <li><strong>جابجایی در اجتماع:</strong> <span
+                  class="math">A ∪ B = B ∪ A</span></li>
+              <li><strong>جابجایی در اشتراک:</strong> <span
+                  class="math">A ∩ B = B ∩ A</span></li>
+              <li><strong>عدم جابجایی در تفاضل:</strong> <span
+                  class="math">A − B ≠ B − A</span></li>
+              <li><strong>اجتماع با تهی:</strong> <span class="math">A
+                  ∪ ∅ = A</span></li>
+              <li><strong>اشتراک با تهی:</strong> <span class="math">A
+                  ∩ ∅ = ∅</span></li>
+              <li><strong>تفاضل با تهی:</strong> <span class="math">A −
+                  ∅ = A</span></li>
+            </ul>
+          </div>
+          <div class="note-box"> <strong>💡 نکته‌ی زیرمجموعه:</strong>
+            اگر <span class="math">A ⊆ B</span> باشد، آنگاه:
+            <ul>
+              <li><span class="math">A ∪ B = B</span></li>
+              <li><span class="math">A ∩ B = A</span></li>
+              <li><span class="math">A − B = ∅</span></li>
+            </ul>
+          </div>
+          <div class="section-title">اصل شمول و عدم شمول</div>
+          <div class="formula-box big">|A ∪ B| = |A| + |B| − |A ∩ B|</div>
+          <p>این فرمول در سوالات کلامی کاربرد زیادی دارد. مثلاً اگر ۲۰
+            نفر ریاضی دوست دارند، ۱۸ نفر علوم دوست دارند و ۱۲ نفر هر دو
+            را دوست دارند، تعداد کسانی که حداقل یکی را دوست دارند:</p>
+          <div class="formula-box">20 + 18 − 12 = 26</div>
+        </section>
+        <!-- ============================================================= -->
+        <!-- ==================== نقشه‌ی ذهنی ============================= -->
+        <!-- ============================================================= -->
+        <div class="mind-map" id="mind">
+          <h2>نقشه‌ی ذهنی کل فصل اول</h2>
+          <div class="mind-branches">
+            <div class="mind-branch">
+              <h4>📍 درس ۱: مفهوم مجموعه</h4>
+              <ul>
+                <li>تعریف: اشیاء مشخص و متمایز</li>
+                <li>اعضای تکراری یک بار</li>
+                <li>نام‌گذاری با حروف بزرگ</li>
+                <li>نوشتن داخل آکولاد</li>
+                <li>ترتیب مهم نیست</li>
+              </ul>
+            </div>
+            <div class="mind-branch">
+              <h4>📍 درس ۲: نمادها و تهی</h4>
+              <ul>
+                <li>∈: عضو است</li>
+                <li>∉: عضو نیست</li>
+                <li>n(A): تعداد اعضا</li>
+                <li>∅ یا { }: تهی</li>
+                <li>∅ ≠ {0} ≠ {∅}</li>
+              </ul>
+            </div>
+            <div class="mind-branch">
+              <h4>📍 درس ۳: زیرمجموعه</h4>
+              <ul>
+                <li>A ⊆ B: هر عضو A در B</li>
+                <li>∅ ⊆ هر مجموعه</li>
+                <li>A ⊆ A</li>
+                <li>2ⁿ: تعداد زیرمجموعه‌ها</li>
+                <li>روش سیستماتیک نوشتن</li>
+              </ul>
+            </div>
+            <div class="mind-branch">
+              <h4>📍 درس ۴: عمل‌ها</h4>
+              <ul>
+                <li>∪: اجتماع (بدون تکرار)</li>
+                <li>∩: اشتراک (اعضای مشترک)</li>
+                <li>−: تفاضل (فقط اعضای اولی)</li>
+                <li>جابجایی در ∪ و ∩</li>
+                <li>عدم جابجایی در −</li>
+                <li>|A∪B| = |A|+|B|−|A∩B|</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <!-- ============================================================= -->
+        <!-- ==================== مرجع سریع =============================== -->
+        <!-- ============================================================= -->
+        <div class="quick-reference" id="qr">
+          <h2>مرجع سریع – همه‌ی فرمول‌ها در یک نگاه</h2>
+          <div class="qr-grid">
+            <div class="qr-item"> <strong>تعریف مجموعه</strong> <span>دسته‌ای
+
+                از اشیاء مشخص و متمایز</span> </div>
+            <div class="qr-item"> <strong>عضویت</strong> <span>x ∈ A</span>
+            </div>
+            <div class="qr-item"> <strong>عدم عضویت</strong> <span>x ∉
+                A</span> </div>
+            <div class="qr-item"> <strong>تعداد اعضا</strong> <span>n(A)</span>
+            </div>
+            <div class="qr-item"> <strong>مجموعه تهی</strong> <span>∅
+                یا { }</span> </div>
+            <div class="qr-item"> <strong>مجموعه صفر (تهی نیست)</strong>
+              <span>{0} , n = 1</span> </div>
+            <div class="qr-item"> <strong>مجموعه تهی (تهی نیست)</strong>
+              <span>{∅} , n = 1</span> </div>
+            <div class="qr-item"> <strong>زیرمجموعه</strong> <span>A ⊆
+                B</span> </div>
+            <div class="qr-item"> <strong>تعداد زیرمجموعه‌ها</strong> <span>2ⁿ</span>
+            </div>
+            <div class="qr-item"> <strong>تهی زیرمجموعه‌ی همه</strong>
+              <span>∅ ⊆ A</span> </div>
+            <div class="qr-item"> <strong>هر مجموعه زیرمجموعه‌ی خودش</strong>
+              <span>A ⊆ A</span> </div>
+            <div class="qr-item"> <strong>اجتماع</strong> <span>A ∪ B</span>
+            </div>
+            <div class="qr-item"> <strong>اشتراک</strong> <span>A ∩ B</span>
+            </div>
+            <div class="qr-item"> <strong>تفاضل</strong> <span>A − B</span>
+            </div>
+            <div class="qr-item"> <strong>جابجایی اجتماع</strong> <span>A
+                ∪ B = B ∪ A</span> </div>
+            <div class="qr-item"> <strong>جابجایی اشتراک</strong> <span>A
+                ∩ B = B ∩ A</span> </div>
+            <div class="qr-item"> <strong>تفاضل جابجا نمی‌شود</strong>
+              <span>A − B ≠ B − A</span> </div>
+            <div class="qr-item"> <strong>اجتماع با تهی</strong> <span>A
+                ∪ ∅ = A</span> </div>
+            <div class="qr-item"> <strong>اشتراک با تهی</strong> <span>A
+                ∩ ∅ = ∅</span> </div>
+            <div class="qr-item"> <strong>اصل شمول</strong> <span>|A∪B|
+
+                = |A|+|B|−|A∩B|</span> </div>
+          </div>
+        </div>
+        <!-- ============================================================= -->
+        <!-- ==================== نمونه سوالات =========================== -->
+        <!-- ============================================================= -->
+        <section class="final-exam" id="exam">
+          <h2>۱۵ نمونه سوال امتحانی از کل فصل اول با حل تشریحی</h2>
+          <div class="question">
+            <div class="question-title">سوال ۱: کدام‌یک از عبارت‌های زیر
+              یک مجموعه را مشخص می‌کند؟ (چهارگزینه‌ای)</div>
+            <p>۱) اعداد طبیعی بزرگ‌تر از ۱۰۰</p>
+            <p>۲) کتاب‌های خوب ریاضی</p>
+            <p>۳) سه عدد بزرگ</p>
+            <p>۴) افراد قدبلند شهر</p>
+            <div class="answer">
+              <div class="answer-title">✅ حل:</div>
+              <p><strong>پاسخ صحیح: گزینه ۱</strong></p>
+              <ul>
+                <li>گزینه ۱: اعضای مشخص و قابل شمارش – مجموعه است ✅</li>
+                <li>گزینه ۲: «خوب» نسبی است – مجموعه نیست ❌</li>
+                <li>گزینه ۳: «بزرگ» نسبی است – مجموعه نیست ❌</li>
+                <li>گزینه ۴: «قدبلند» نسبی است – مجموعه نیست ❌</li>
+              </ul>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۲: مجموعه‌ی حروف کلمه‌ی
+              «استقلال» چند عضو دارد؟</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل:</div>
+              <p>حروف کلمه: ا، س، ت، ق، ل، ا، ل</p>
+              <p>حروف تکراری: ا (دو بار)، ل (دو بار)</p>
+              <p>حذف تکراری‌ها: ا، س، ت، ق، ل</p>
+              <p><strong>پاسخ:</strong> مجموعه = {ا، س، ت، ق، ل} – تعداد
+                اعضا برابر <span class="highlight">۵</span> است.</p>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۳: کدام‌یک از موارد زیر
+              درست است؟ (چهارگزینه‌ای)</div>
+            <p>۱) <span class="math">∅ = {0}</span></p>
+            <p>۲) <span class="math">n(∅) = 1</span></p>
+            <p>۳) <span class="math">n({∅}) = 1</span></p>
+            <p>۴) <span class="math">{0} = {∅}</span></p>
+            <div class="answer">
+              <div class="answer-title">✅ حل:</div>
+              <ul>
+                <li>گزینه ۱: نادرست – تهی صفر عضو دارد، {0} یک عضو ❌</li>
+                <li>گزینه ۲: نادرست – <span class="math">n(∅) = 0</span>
+                  ❌</li>
+                <li>گزینه ۳: درست – {∅} یک عضو دارد: خود تهی ✅</li>
+                <li>گزینه ۴: نادرست – {0} یک عضو دارد (صفر)، {∅} یک عضو
+                  دارد (تهی) ❌</li>
+              </ul>
+              <p><strong>پاسخ صحیح: گزینه ۳</strong></p>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۴: اگر <span class="math">A
+                = {2, 4, ∅, {5, 6}, 7}</span> باشد، تعداد اعضای A چند
+              است؟ و آیا <span class="math">{5} ∈ A</span> درست است؟</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل:</div>
+              <p><strong>شمارش اعضا:</strong></p>
+              <ol>
+                <li>عدد ۲</li>
+                <li>عدد ۴</li>
+                <li>تهی (به عنوان یک عضو)</li>
+                <li>مجموعه‌ی {۵،۶} (یک عضو واحد)</li>
+                <li>عدد ۷</li>
+              </ol>
+              <p><span class="math">n(A) = 5</span></p>
+              <p><strong>آیا {5} ∈ A؟</strong> نادرست ❌ – چون {5} یکی از
+                اعضای A نیست. عضو A، {۵،۶} است.</p>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۵: اگر <span class="math">A
+                = {1, 2, 3, 4, 5}</span> باشد، تعداد زیرمجموعه‌های آن را
+              بنویسید.</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل:</div>
+              <p><span class="math">n(A) = 5</span></p>
+              <p><span class="math">2⁵ = 32</span></p>
+              <p><strong>پاسخ:</strong> A دارای <span class="highlight">۳۲
+
+                  زیرمجموعه</span> است.</p>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۶: مجموعه‌ای دارای ۱۲۸
+              زیرمجموعه است. این مجموعه چند عضو دارد؟</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل:</div>
+              <p><span class="math">2ⁿ = 128 = 2⁷</span></p>
+              <p><strong>پاسخ:</strong> <span class="math">n = 7</span>
+                – این مجموعه <span class="highlight">۷ عضو</span> دارد.</p>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۷: با توجه به <span
+                class="math">A = {1, 2, 3}</span> و <span class="math">B
+                = {3, 4, 5}</span>، حاصل‌های زیر را بنویسید: <span
+                class="math">A ∪ B</span>، <span class="math">A ∩ B</span>،
+              <span class="math">A − B</span>، <span class="math">B − A</span>.</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل:</div>
+              <ul>
+                <li><span class="math">A ∪ B = {1, 2, 3, 4, 5}</span></li>
+                <li><span class="math">A ∩ B = {3}</span></li>
+                <li><span class="math">A − B = {1, 2}</span></li>
+                <li><span class="math">B − A = {4, 5}</span></li>
+              </ul>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۸: اگر <span class="math">A
+                = {1, 2}</span> و <span class="math">B = {1, 2, 3, 4}</span>
+              باشد، کدام‌یک از موارد زیر درست است؟ (چهارگزینه‌ای)</div>
+            <p>۱) <span class="math">B ⊆ A</span></p>
+            <p>۲) <span class="math">A ⊆ B</span></p>
+            <p>۳) <span class="math">A ∩ B = ∅</span></p>
+            <p>۴) <span class="math">A ∪ B = A</span></p>
+            <div class="answer">
+              <div class="answer-title">✅ حل:</div>
+              <ul>
+                <li>گزینه ۱: نادرست – ۳ و ۴ در A نیستند ❌</li>
+                <li>گزینه ۲: درست – ۱ و ۲ در B هستند ✅</li>
+                <li>گزینه ۳: نادرست – اعضای مشترک ۱ و ۲ هستند ❌</li>
+                <li>گزینه ۴: نادرست – <span class="math">A ∪ B = {1, 2,
+                    3, 4} = B</span> نه A ❌</li>
+              </ul>
+              <p><strong>پاسخ صحیح: گزینه ۲</strong></p>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۹: اگر <span class="math">A
+                = {1, 2, 3}</span> و <span class="math">B = {4, 5, 6}</span>
+              باشد، <span class="math">A ∩ B</span> چیست؟</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل:</div>
+              <p>هیچ عضو مشترکی وجود ندارد. پس:</p>
+              <div class="formula-box">A ∩ B = ∅</div>
+              <p>به این دو مجموعه می‌گوییم <span class="highlight">مجموعه‌های
+
+                  جدا از هم</span>.</p>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۱۰: در یک کلاس ۳۰ نفره، ۱۸
+              نفر فوتبال دوست دارند، ۱۵ نفر والیبال دوست دارند و ۸ نفر
+              هر دو را دوست دارند. چند نفر فقط فوتبال دوست دارند؟ چند
+              نفر هیچ‌کدام را دوست ندارند؟</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل:</div>
+              <p><strong>گام ۱:</strong> فقط فوتبال: <span class="math">18
+
+                  − 8 = 10</span> نفر</p>
+              <p><strong>گام ۲:</strong> فقط والیبال: <span
+                  class="math">15 − 8 = 7</span> نفر</p>
+              <p><strong>گام ۳:</strong> حداقل یکی (اجتماع): <span
+                  class="math">10 + 8 + 7 = 25</span> نفر</p>
+              <p><strong>گام ۴:</strong> هیچ‌کدام: <span class="math">30
+
+                  − 25 = 5</span> نفر</p>
+              <p><strong>پاسخ:</strong> ۱۰ نفر فقط فوتبال، ۵ نفر
+                هیچ‌کدام.</p>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۱۱: اگر <span class="math">A
+                = {a, b}</span> باشد، تمام زیرمجموعه‌های A را بنویسید.</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل:</div>
+              <p><span class="math">2² = 4</span> زیرمجموعه:</p>
+              <ol>
+                <li>تهی</li>
+                <li>{a}</li>
+                <li>{b}</li>
+                <li>{a, b}</li>
+              </ol>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۱۲: درستی یا نادرستی هر
+              عبارت را بنویسید.</div>
+            <p>الف) <span class="math">∅ ⊆ {1, 2}</span></p>
+            <p>ب) <span class="math">∅ ∈ {1, 2}</span></p>
+            <p>پ) <span class="math">{1, 2} ⊆ {1, 2}</span></p>
+            <p>ت) <span class="math">5 ∈ {1, 2, 3}</span></p>
+            <div class="answer">
+              <div class="answer-title">✅ حل:</div>
+              <ul>
+                <li><strong>الف) درست ✅</strong> – تهی زیرمجموعه‌ی هر
+                  مجموعه‌ای است.</li>
+                <li><strong>ب) نادرست ❌</strong> – تهی یکی از اعضای
+                  {1,2} نیست.</li>
+                <li><strong>پ) درست ✅</strong> – هر مجموعه زیرمجموعه‌ی
+                  خودش است.</li>
+                <li><strong>ت) نادرست ❌</strong> – ۵ در این مجموعه نیست.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۱۳: اگر <span class="math">A
+                = {2, 4, 6}</span> و <span class="math">B = {2, 4, 6,
+                8, 10}</span> باشد، حاصل هر یک را بنویسید.</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل:</div>
+              <p>توجه: A زیرمجموعه‌ی B است.</p>
+              <ul>
+                <li><span class="math">A ∪ B = {2, 4, 6, 8, 10} = B</span></li>
+                <li><span class="math">A ∩ B = {2, 4, 6} = A</span></li>
+                <li><span class="math">A − B = ∅</span></li>
+                <li><span class="math">B − A = {8, 10}</span></li>
+              </ul>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۱۴: در مدرسه‌ای از ۵۰
+              دانش‌آموز، ۳۰ نفر ریاضی و ۲۵ نفر علوم و ۱۵ نفر هر دو را
+              دوست دارند. چند نفر هیچ‌کدام را دوست ندارند؟</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل:</div>
+              <p>با استفاده از اصل شمول:</p>
+              <p><span class="math">|A ∪ B| = 30 + 25 − 15 = 40</span></p>
+              <p>هیچ‌کدام: <span class="math">50 − 40 = 10</span> نفر</p>
+              <p><strong>پاسخ:</strong> <span class="highlight">۱۰ نفر</span>.</p>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۱۵: ثابت کنید که تهی
+              زیرمجموعه‌ی هر مجموعه‌ای است.</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل:</div>
+              <p>برای اثبات زیرمجموعه بودن، باید نشان دهیم هر عضو تهی،
+                عضوی از مجموعه‌ی مقابل هم هست.</p>
+              <p>اما تهی هیچ عضوی ندارد. پس شرط «هر عضو تهی، عضوی از
+                مجموعه باشد» به صورت خودکار برقرار است (چون عضوی وجود
+                ندارد که بخواهیم بررسی کنیم).</p>
+              <p><strong>نتیجه:</strong> تهی زیرمجموعه‌ی هر مجموعه‌ای
+                است. ∎</p>
+            </div>
+          </div>
+        </section>
+        <!-- ============================================================= -->
+        <!-- ==================== چک‌لیست مطالعه ========================== -->
+        <!-- ============================================================= -->
+        <section class="lesson" id="check">
+          <div class="lesson-header">
+            <div class="lesson-number rev">✓</div>
+            <div>
+              <div class="lesson-title">چک‌لیست مطالعه‌ی فصل اول</div>
+              <div class="lesson-sub">این چک‌لیست را قبل از امتحان کامل
+                کن</div>
+            </div>
+          </div>
+          <p>قبل از امتحان، این چک‌لیست را یک به یک مرور کن. هر آیتمی را
+            که بلد بودی، تیک بزن:</p>
+          <div class="checklist">
+            <h3>مفاهیم پایه</h3>
+            <label><input type="checkbox"> تعریف مجموعه را می‌دانم (مشخص
+              و متمایز).</label> <label><input type="checkbox"> می‌دانم
+              اعضای تکراری در مجموعه یک بار شمرده می‌شوند.</label> <label><input
+                type="checkbox"> می‌توانم تشخیص دهم چه چیزی مجموعه است و
+              چه چیزی نیست.</label> <label><input type="checkbox">
+              نام‌گذاری مجموعه‌ها و نوشتن آن‌ها داخل آکولاد را بلدم.</label>
+          </div>
+          <div class="checklist">
+            <h3>نمادها</h3>
+            <label><input type="checkbox"> نماد ∈ (عضو است) را درست به
+              کار می‌برم.</label> <label><input type="checkbox"> نماد ∉
+              (عضو نیست) را درست به کار می‌برم.</label> <label><input
+                type="checkbox"> نماد n(A) (تعداد اعضا) را بلدم.</label>
+            <label><input type="checkbox"> نماد ∅ یا { } (مجموعه تهی) را
+              می‌شناسم.</label> <label><input type="checkbox"> تفاوت ∅،
+              {0} و {∅} را می‌دانم.</label> </div>
+          <div class="checklist">
+            <h3>زیرمجموعه</h3>
+            <label><input type="checkbox"> تعریف زیرمجموعه را می‌دانم
+              (هر عضو A در B).</label> <label><input type="checkbox">
+              می‌دانم تهی زیرمجموعه‌ی هر مجموعه‌ای است.</label> <label><input
+                type="checkbox"> می‌دانم هر مجموعه زیرمجموعه‌ی خودش است.</label>
+            <label><input type="checkbox"> فرمول 2ⁿ را برای تعداد
+              زیرمجموعه‌ها بلدم.</label> <label><input type="checkbox">
+              جدول توان‌های دو را حفظ هستم (۲ تا ۲¹⁰).</label> <label><input
+                type="checkbox"> می‌توانم همه‌ی زیرمجموعه‌های یک مجموعه
+              را به روش سیستماتیک بنویسم.</label> </div>
+          <div class="checklist">
+            <h3>عمل‌های مجموعه</h3>
+            <label><input type="checkbox"> اجتماع (∪) را بلدم و می‌توانم
+              محاسبه کنم.</label> <label><input type="checkbox"> اشتراک
+              (∩) را بلدم و می‌توانم محاسبه کنم.</label> <label><input
+                type="checkbox"> تفاضل (−) را بلدم و می‌توانم محاسبه
+              کنم.</label> <label><input type="checkbox"> می‌دانم
+              اجتماع و اشتراک خاصیت جابجایی دارند.</label> <label><input
+                type="checkbox"> می‌دانم تفاضل خاصیت جابجایی ندارد.</label>
+            <label><input type="checkbox"> خاصیت‌های ارتباط با تهی را
+              می‌دانم.</label> <label><input type="checkbox"> فرمول اصل
+              شمول را بلدم: |A∪B| = |A|+|B|−|A∩B|.</label> </div>
+          <div class="checklist">
+            <h3>مهارت‌های حل مسئله</h3>
+            <label><input type="checkbox"> می‌توانم سوالات کلامی مربوط
+              به مجموعه‌ها را حل کنم.</label> <label><input
+                type="checkbox"> می‌توانم نمودار ون رسم کنم و از آن
+              استفاده کنم.</label> <label><input type="checkbox">
+              می‌توانم سوالات چند مرحله‌ای را حل کنم.</label> <label><input
+                type="checkbox"> می‌توانم به سوالات چهارگزینه‌ای سریع
+              جواب دهم.</label> </div>
+        </section>
+        <!-- ============================================================= -->
+        <!-- ==================== نکات امتحانی =========================== -->
+        <!-- ============================================================= -->
+        <section class="exam-tips" id="tips">
+          <h2>نکات طلایی امتحانی فصل اول</h2>
+          <div class="tip-card danger">
+            <h3>⚠️ اشتباهاتی که نمره‌ات را می‌خورند</h3>
+            <ul>
+              <li><strong>اشتباه ۱:</strong> یکی گرفتن <span
+                  class="math">∅</span>، <span class="math">{0}</span>
+                و <span class="math">{∅}</span>.</li>
+              <li><strong>اشتباه ۲:</strong> فراموش کردن تهی در شمردن
+                زیرمجموعه‌ها.</li>
+              <li><strong>اشتباه ۳:</strong> فراموش کردن خود مجموعه در
+                شمردن زیرمجموعه‌ها.</li>
+              <li><strong>اشتباه ۴:</strong> محاسبه‌ی <span
+                  class="math">2^n</span> به صورت <span class="math">2
+                  × n</span>.</li>
+              <li><strong>اشتباه ۵:</strong> جابجا کردن تفاضل.</li>
+              <li><strong>اشتباه ۶:</strong> نوشتن اعضای تکراری در
+                اجتماع.</li>
+              <li><strong>اشتباه ۷:</strong> ننوشتن آکولاد در جواب‌ها.</li>
+              <li><strong>اشتباه ۸:</strong> اشتباه گرفتن نماد <span
+                  class="math">∈</span> با <span class="math">⊆</span>.</li>
+            </ul>
+          </div>
+          <div class="tip-card success">
+            <h3>🎯 ترفندهای سریع حل تست</h3>
+            <ul>
+              <li><strong>ترفند ۱:</strong> اگر داخل آکولاد چیزی نبود،
+                تهی است. اگر حتی یک چیز بود، تهی نیست.</li>
+              <li><strong>ترفند ۲:</strong> در سوالات شمارش زیرمجموعه،
+                هر چیزی که بین دو کاما است، <strong>یک عضو</strong>
+                حساب می‌شود (حتی اگر خودش مجموعه باشد).</li>
+              <li><strong>ترفند ۳:</strong> برای سوالات کلامی، از اصل
+                شمول استفاده کن: <span class="math">|A∪B| =
+                  |A|+|B|−|A∩B|</span>.</li>
+              <li><strong>ترفند ۴:</strong> در سوالات زیرمجموعه، ابتدا
+                اعضای ای را بنویس، سپس یکی‌یکی چک کن که در بی هستند یا
+                نه.</li>
+              <li><strong>ترفند ۵:</strong> جدول توان‌های دو را حفظ کن
+                تا در محاسبات سریع باشی.</li>
+              <li><strong>ترفند ۶:</strong> برای نوشتن زیرمجموعه‌ها، از
+                صفر عضو شروع کن و به ترتیب افزایش بده.</li>
+            </ul>
+          </div>
+          <div class="tip-card warning">
+            <h3>📌 نکات طلایی که باید حفظ باشی</h3>
+            <div class="formula-box" style="font-size:1rem;
+              line-height:2.3; direction: rtl;"> تعداد زیرمجموعه‌های n
+              عضوی = 2ⁿ<br>
+              ∅ ⊆ A – تهی زیرمجموعه‌ی هر مجموعه‌ای است<br>
+              A ⊆ A – هر مجموعه زیرمجموعه‌ی خودش است<br>
+              A ∪ B = B ∪ A – جابجایی اجتماع<br>
+              A ∩ B = B ∩ A – جابجایی اشتراک<br>
+              A − B ≠ B − A – عدم جابجایی تفاضل<br>
+              |A∪B| = |A|+|B|−|A∩B| – اصل شمول </div>
+          </div>
+          <div class="tip-card">
+            <h3>🎓 استراتژی روز امتحان</h3>
+            <ol>
+              <li><strong>قبل از شروع:</strong> یک بار کل برگه را نگاه
+                کن تا بفهمی چه سوالاتی داری.</li>
+              <li><strong>ترتیب حل:</strong> اول سوالات آسان را حل کن،
+                بعد سراغ سخت‌ها برو.</li>
+              <li><strong>در سوالات چند مرحله‌ای:</strong> هر مرحله را
+                جدا بنویس تا نمره‌ی مراحل را از دست ندهی.</li>
+              <li><strong>در سوالات کلامی:</strong> اول مجموعه‌ها را
+                تعریف کن، سپس از فرمول استفاده کن.</li>
+              <li><strong>در سوالات شمارشی:</strong> قبل از پاسخ دادن،
+                دوباره بررسی کن که آیا عضوی جا نمانده یا دو بار شمرده
+                نشده.</li>
+              <li><strong>در پایان:</strong> ۵ دقیقه‌ی آخر را به مرور
+                جواب‌ها اختصاص بده.</li>
+            </ol>
+          </div>
+          <div class="checklist">
+            <h3>📝 آخرین توصیه‌ها قبل از امتحان</h3>
+            <label><input type="checkbox"> تمام تمرین‌های کتاب درسی را
+              دو بار حل کرده‌ام.</label> <label><input type="checkbox">
+              تمام مثال‌های این فایل را مطالعه کرده‌ام.</label> <label><input
+                type="checkbox"> ۱۵ نمونه سوال را بدون نگاه کردن به
+              جواب، حل کرده‌ام.</label> <label><input type="checkbox">
+              جدول خلاصه و کارت مرجع را یک بار مرور کرده‌ام.</label> <label><input
+                type="checkbox"> چک‌لیست مطالعه را کامل تیک زده‌ام.</label>
+            <label><input type="checkbox"> نمادهای اصلی (<span
+                class="math">∈</span>، <span class="math">∉</span>، <span
+                class="math">∅</span>، <span class="math">∪</span>، <span
+                class="math">∩</span>، <span class="math">−</span>، <span
+                class="math">⊆</span>) را روی کاغذ تمرین کرده‌ام.</label>
+            <label><input type="checkbox"> با آرامش و اطمینان به امتحان
+              می‌روم.</label> </div>
+          <div class="note-box"> <strong>🌟 پیام پایانی از سروناز و
+              فرسام:</strong> <br>
+            <br>
+            عزیز دانش‌آموز، اگر تا اینجا آمده‌ای، یعنی تلاش زیادی
+            کرده‌ای. فصل اول را با موفقیت پشت سر گذاشتی. حالا با اطمینان
+            و آرامش به امتحان برو. یادت باشد: <br>
+            <br>
+            <strong>«ریاضی با تمرین یاد گرفته می‌شود، نه با نگاه کردن.
+              تو تمرین کردی، پس یاد گرفتی!»</strong> <br>
+            <br>
+            موفق باشی! ✨ </div>
+        </section>
+      </main>
+      <footer> <strong>📘 جمع‌بندی جامع فصل اول ریاضی نهم</strong><br>
+        ت
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,
+          initial-scale=1.0">
+        <title>جمع‌بندی جامع فصل اول ریاضی نهم - مجموعه‌ها</title>
+        <style>
+  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 50%, #ecfeff 100%);
+    color: #1e293b;
+    line-height: 1.9;
+    padding: 20px;
+    font-size: 16px;
+  }
+
+  .container {
+    max-width: 1150px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(30, 41, 59, 0.15);
+    overflow: hidden;
+  }
+
+  header {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+    color: #fff;
+    padding: 50px 30px;
+    text-align: center;
+    position: relative;
+  }
+
+  header::after {
+    content: "";
+    position: absolute;
+    bottom: -20px;
+    left: 0; right: 0;
+    height: 40px;
+    background: #fff;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+
+  header h1 {
+    font-size: 2.3rem;
+    font-weight: 900;
+    margin-bottom: 14px;
+    text-shadow: 0 3px 8px rgba(0,0,0,0.25);
+  }
+
+  header p {
+    font-size: 1.1rem;
+    opacity: 0.95;
+  }
+
+  .badges {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+
+  .badge {
+    background: rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 7px 16px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  main { padding: 40px 30px 60px; }
+
+  .intro-box {
+    background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+    border-right: 6px solid #f59e0b;
+    padding: 24px 28px;
+    border-radius: 16px;
+    margin-bottom: 40px;
+    font-size: 1.05rem;
+  }
+
+  .intro-box strong { color: #92400e; }
+
+  .toc {
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    border: 2px solid #6366f1;
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 40px;
+  }
+
+  .toc h2 {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #3730a3;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .toc h2::before { content: "📋"; font-size: 1.5rem; }
+
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .toc-item {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px 18px;
+    border-right: 4px solid #6366f1;
+    font-weight: 700;
+    color: #3730a3;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+  }
+
+  .toc-item:hover { transform: translateX(-4px); }
+
+  .lesson {
+    background: #f8fafc;
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 45px;
+    border: 2px solid #e2e8f0;
+  }
+
+  .lesson-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 18px;
+    border-bottom: 3px dashed #cbd5e1;
+  }
+
+  .lesson-number {
+    width: 62px; height: 62px;
+    border-radius: 16px;
+    color: #fff;
+    font-size: 1.4rem;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .lesson-number.l1 { background: linear-gradient(135deg, #4f46e5, #7c3aed); box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35); }
+  .lesson-number.l2 { background: linear-gradient(135deg, #0891b2, #0ea5e9); box-shadow: 0 8px 20px rgba(8, 145, 178, 0.35); }
+  .lesson-number.l3 { background: linear-gradient(135deg, #7c3aed, #ec4899); box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35); }
+  .lesson-number.l4 { background: linear-gradient(135deg, #059669, #06b6d4); box-shadow: 0 8px 20px rgba(5, 150, 105, 0.35); }
+  .lesson-number.rev { background: linear-gradient(135deg, #ea580c, #f59e0b); box-shadow: 0 8px 20px rgba(234, 88, 12, 0.35); }
+
+  .lesson-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+
+  .lesson-sub {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .section-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #4f46e5;
+    margin: 26px 0 14px;
+    padding-right: 12px;
+    border-right: 5px solid #6366f1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::before {
+    content: "◆";
+    color: #a855f7;
+    font-size: 0.9rem;
+  }
+
+  p { margin: 10px 0; }
+
+  .formula-box {
+    background: #fff7ed;
+    border: 2px solid #fb923c;
+    border-radius: 14px;
+    padding: 16px 22px;
+    margin: 18px 0;
+    text-align: center;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #9a3412;
+    direction: ltr;
+    font-family: 'Cambria Math', 'Times New Roman', serif;
+  }
+
+  .formula-box.big {
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, #fff7ed, #fed7aa);
+    border-width: 3px;
+  }
+
+  .note-box {
+    background: #ecfdf5;
+    border-right: 5px solid #10b981;
+    padding: 14px 20px;
+    border-radius: 12px;
+    margin: 18px 0;
+    color: #065f46;
+    font-size: 0.98rem;
+  }
+
+  .warning-box {
+    background: #fef2f2;
+    border-right: 5px solid #ef4444;
+    padding: 14px 20px;
+    border-radius: 12px;
+    margin: 18px 0;
+    color: #991b1b;
+    font-size: 0.98rem;
+  }
+
+  .example-box {
+    background: #f5f3ff;
+    border: 2px solid #a78bfa;
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin: 20px 0;
+  }
+
+  .example-box h4 {
+    color: #6d28d9;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .example-box h4::before {
+    content: "📌";
+    font-size: 1.2rem;
+  }
+
+  .solution {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-top: 12px;
+    border: 1px dashed #a78bfa;
+  }
+
+  .solution strong { color: #7c3aed; }
+
+  .svg-wrapper {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 22px 0;
+    text-align: center;
+    border: 2px solid #e0e7ff;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.08);
+  }
+
+  .svg-wrapper svg { max-width: 100%; height: auto; }
+
+  .svg-caption {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: 10px;
+    font-style: italic;
+  }
+
+  ul, ol { padding-right: 26px; margin: 12px 0; }
+  li { margin: 6px 0; }
+
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  }
+
+  .summary-table th {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    padding: 14px;
+    font-size: 1rem;
+  }
+
+  .summary-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.98rem;
+  }
+
+  .summary-table tr:nth-child(even) td { background: #f8fafc; }
+  .summary-table tr:last-child td { border-bottom: none; }
+
+  .mind-map {
+    background: linear-gradient(135deg, #fef9c3 0%, #fde68a 100%);
+    border: 3px solid #eab308;
+    border-radius: 20px;
+    padding: 30px;
+    margin: 30px 0;
+  }
+
+  .mind-map h2 {
+    color: #713f12;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .mind-map h2::before { content: "🧠"; font-size: 1.6rem; }
+
+  .mind-branches {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  .mind-branch {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 18px 20px;
+    border-top: 5px solid #eab308;
+    box-shadow: 0 4px 14px rgba(234, 179, 8, 0.15);
+  }
+
+  .mind-branch h4 {
+    color: #92400e;
+    font-size: 1.05rem;
+    margin-bottom: 10px;
+    font-weight: 900;
+  }
+
+  .mind-branch ul {
+    list-style: none;
+    padding-right: 0;
+    font-size: 0.92rem;
+    color: #713f12;
+  }
+
+  .mind-branch li {
+    padding: 5px 0;
+    border-bottom: 1px dashed #fde68a;
+  }
+
+  .mind-branch li:last-child { border-bottom: none; }
+
+  .mind-branch li::before {
+    content: "◄";
+    color: #eab308;
+    margin-left: 6px;
+    font-size: 0.8rem;
+  }
+
+  .final-exam {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border: 3px solid #ef4444;
+    border-radius: 20px;
+    padding: 32px;
+    margin: 40px 0;
+  }
+
+  .final-exam h2 {
+    color: #991b1b;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .final-exam h2::before { content: "📝"; font-size: 1.6rem; }
+
+  .question {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin: 18px 0;
+    border-right: 5px solid #ef4444;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  .question-title {
+    font-weight: 800;
+    color: #991b1b;
+    font-size: 1.05rem;
+    margin-bottom: 10px;
+  }
+
+  .answer {
+    background: #f0fdf4;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-top: 14px;
+    border-right: 4px solid #16a34a;
+  }
+
+  .answer-title {
+    font-weight: 800;
+    color: #166534;
+    margin-bottom: 10px;
+    font-size: 1rem;
+  }
+
+  .math { direction: ltr; display: inline-block; font-family: 'Cambria Math', serif; }
+
+  .highlight {
+    background: linear-gradient(120deg, #fef08a 0%, #fde047 100%);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-weight: 700;
+    color: #713f12;
+  }
+
+  .exam-tips {
+    background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+    border: 3px solid #4f46e5;
+    border-radius: 20px;
+    padding: 32px;
+    margin: 40px 0;
+  }
+
+  .exam-tips h2 {
+    color: #3730a3;
+    font-size: 1.6rem;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .exam-tips h2::before { content: "🏆"; font-size: 1.7rem; }
+
+  .tip-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin: 16px 0;
+    border-right: 5px solid #6366f1;
+    box-shadow: 0 4px 14px rgba(99,102,241,0.08);
+  }
+
+  .tip-card h3 {
+    color: #3730a3;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tip-card.danger { border-right-color: #dc2626; }
+  .tip-card.danger h3 { color: #991b1b; }
+  .tip-card.success { border-right-color: #16a34a; }
+  .tip-card.success h3 { color: #166534; }
+  .tip-card.warning { border-right-color: #f59e0b; }
+  .tip-card.warning h3 { color: #92400e; }
+
+  .checklist {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 22px 26px;
+    margin: 22px 0;
+    border: 2px dashed #6366f1;
+  }
+
+  .checklist h3 {
+    color: #3730a3;
+    font-size: 1.15rem;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .checklist h3::before { content: "✅"; font-size: 1.2rem; }
+
+  .checklist label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    cursor: pointer;
+    font-size: 0.98rem;
+    border-bottom: 1px dashed #e0e7ff;
+  }
+
+  .checklist label:last-child { border-bottom: none; }
+
+  .checklist input[type="checkbox"] {
+    width: 20px; height: 20px;
+    margin-top: 4px;
+    accent-color: #6366f1;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .quick-reference {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-radius: 20px;
+    padding: 32px;
+    margin: 40px 0;
+    color: #f1f5f9;
+  }
+
+  .quick-reference h2 {
+    color: #fbbf24;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .quick-reference h2::before { content: "⚡"; font-size: 1.6rem; }
+
+  .qr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+  .qr-item {
+    background: rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 18px;
+    border-right: 4px solid #fbbf24;
+    font-size: 0.92rem;
+  }
+
+  .qr-item strong {
+    color: #fbbf24;
+    display: block;
+    margin-bottom: 6px;
+    font-size: 1rem;
+  }
+
+  .qr-item span {
+    direction: ltr;
+    display: inline-block;
+    font-family: 'Cambria Math', serif;
+    color: #cbd5e1;
+    font-weight: 700;
+  }
+
+  footer {
+    text-align: center;
+    padding: 34px 20px;
+    background: #1e293b;
+    color: #cbd5e1;
+    font-size: 0.9rem;
+  }
+
+  footer strong { color: #a855f7; }
+
+  @media (max-width: 640px) {
+    body { padding: 8px; font-size: 15px; }
+    main { padding: 20px 14px 40px; }
+    header { padding: 30px 16px; }
+    header h1 { font-size: 1.4rem; }
+    .lesson { padding: 18px; }
+    .lesson-title { font-size: 1.15rem; }
+    .final-exam, .exam-tips, .mind-map, .quick-reference { padding: 18px; }
+    .toc-item { font-size: 0.88rem; }
+  }
+</style>
+        <div class="container">
+          <header>
+            <h1>📘 جمع‌بندی جامع فصل اول ریاضی نهم</h1>
+            <p>مجموعه‌ها – مرور کامل و نکات کلیدی امتحانی</p>
+            <div class="badges"> <span class="badge">📚 مرور کل فصل</span>
+              <span class="badge">🧠 نقشه‌ی ذهنی</span> <span
+                class="badge">📝 ۱۵ نمونه سوال</span> <span
+                class="badge">🏆 نکات طلایی</span> <span class="badge">✅
+                چک‌لیست مطالعه</span> </div>
+          </header>
+          <main>
+            <!-- ====== INTRO ====== -->
+            <div class="intro-box"> <strong>سلام دانش‌آموز عزیز! 🌟</strong><br>
+              به فایل <strong>جمع‌بندی جامع فصل اول ریاضی نهم</strong>
+              خوش آمدی! در این فایل، تمام آنچه در چهار درس این فصل یاد
+              گرفتیم را یک‌جا مرور می‌کنیم: از تعریف مجموعه تا عمل‌های
+              اجتماع، اشتراک و تفاضل. این فایل به گونه‌ای طراحی شده که <strong>قبل
+
+                از امتحان</strong> یا <strong>قبل از شروع فصل بعد</strong>
+              مرور کاملی داشته باشی. <strong>خانم سروناز</strong> و <strong>آقای
+
+                فرسام</strong> همراهت هستند. آماده‌ای؟... شروع می‌کنیم!
+            </div>
+            <!-- ====== TOC ====== -->
+            <div class="toc">
+              <h2>فهرست مطالب</h2>
+              <div class="toc-grid"> <a href="#l1" class="toc-item">📍
+                  درس ۱: مفهوم مجموعه</a> <a href="#l2"
+                  class="toc-item">📍 درس ۲: نمادهای عضویت و تهی</a> <a
+                  href="#l3" class="toc-item">📍 درس ۳: زیرمجموعه</a> <a
+                  href="#l4" class="toc-item">📍 درس ۴: عمل‌های مجموعه</a>
+                <a href="#mind" class="toc-item">🧠 نقشه‌ی ذهنی کل فصل</a>
+                <a href="#qr" class="toc-item">⚡ مرجع سریع</a> <a
+                  href="#exam" class="toc-item">📝 ۱۵ نمونه سوال</a> <a
+                  href="#check" class="toc-item">✅ چک‌لیست مطالعه</a> <a
+                  href="#tips" class="toc-item">🏆 نکات امتحانی</a> </div>
+            </div>
+            <!-- ============================================================= -->
+            <!-- ==================== درس ۱ ================================== -->
+            <!-- ============================================================= -->
+            <section class="lesson" id="l1">
+              <div class="lesson-header">
+                <div class="lesson-number l1">۱</div>
+                <div>
+                  <div class="lesson-title">مرور درس اول: مفهوم مجموعه و
+                    مشخص بودن اعضا</div>
+                  <div class="lesson-sub">پایه‌ی تمام مفاهیم فصل</div>
+                </div>
+              </div>
+              <div class="section-title">خلاصه‌ی درس اول</div>
+              <p><strong>تعریف مجموعه:</strong> مجموعه یعنی دسته‌ای از
+                اشیاء که دو ویژگی مهم دارند:</p>
+              <ul>
+                <li><strong>کاملاً مشخص باشند</strong> – یعنی بتوانیم
+                  تشخیص دهیم چه چیزی عضو است و چه چیزی نیست.</li>
+                <li><strong>دو به دو متمایز باشند</strong> – یعنی اعضای
+                  تکراری در آن وجود ندارد.</li>
+              </ul>
+              <div class="formula-box">مجموعه = دسته‌ای از اشیاء مشخص و
+                متمایز</div>
+              <p><strong>نام‌گذاری:</strong> مجموعه‌ها را با حروف <strong>بزرگ</strong>
+                مثل <span class="math">A</span>، <span class="math">B</span>،
+                <span class="math">C</span> نام‌گذاری می‌کنیم و اعضا را
+                داخل <strong>آکولاد</strong> <span class="math">{ }</span>
+                می‌نویسیم.</p>
+              <div class="example-box">
+                <h4>مثال‌های کلیدی درس ۱</h4>
+                <p><strong>مثال ۱:</strong> مجموعه‌ی اعداد طبیعی یک
+                  رقمی: <span class="math">{1, 2, 3, 4, 5, 6, 7, 8, 9}</span></p>
+                <p><strong>مثال ۲:</strong> حروف کلمه‌ی «هخامنشیان»: <span
+                    class="math">{ه، خ، ا، م، ن، ش، ی}</span> – تعداد
+                  اعضا برابر ۷ است (حروف تکراری یک بار شمرده می‌شوند).</p>
+                <p><strong>مثال ۳:</strong> اعداد صحیح بین ۳- و ۲: <span
+                    class="math">{-2, -1, 0, 1}</span> – تعداد ۴ عضو.</p>
+              </div>
+              <div class="warning-box"> <strong>⚠️ نکته:</strong> در
+                نوشتن مجموعه، ترتیب اعضا مهم نیست. {۱، ۲، ۳} = {۳، ۱، ۲}
+                = {۲، ۳، ۱}. فقط مشخص بودن و متمایز بودن مهم است. </div>
+              <div class="note-box"> <strong>💡 یادآوری:</strong> اگر
+                بپرسند آیا فلان چیز عضو مجموعه است؟ ...اگر در آکولاد
+                نوشته شده باشد، بله. اگر نباشد، خیر. اگر عبارت مبهم باشد
+                (مثل «کتاب‌های خوب»)، اصلاً مجموعه نیست. </div>
+            </section>
+            <!-- ============================================================= -->
+            <!-- ==================== درس ۲ ================================== -->
+            <!-- ============================================================= -->
+            <section class="lesson" id="l2">
+              <div class="lesson-header">
+                <div class="lesson-number l2">۲</div>
+                <div>
+                  <div class="lesson-title">مرور درس دوم: نمادهای عضویت
+                    و مجموعه تهی</div>
+                  <div class="lesson-sub">زبان رسمی ریاضی برای مجموعه‌ها</div>
+                </div>
+              </div>
+              <div class="section-title">خلاصه‌ی درس دوم</div>
+              <p>در این درس با چهار نماد مهم آشنا شدیم:</p>
+              <div class="svg-wrapper">
+                <svg viewBox="0 0 620 330"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="b1" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#dbeafe"></stop>
+                      <stop offset="100%" stop-color="#bfdbfe"></stop> </linearGradient>
+                    <linearGradient id="b2" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#fee2e2"></stop>
+                      <stop offset="100%" stop-color="#fecaca"></stop> </linearGradient>
+                    <linearGradient id="b3" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#fef3c7"></stop>
+                      <stop offset="100%" stop-color="#fde68a"></stop> </linearGradient>
+                    <linearGradient id="b4" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#d1fae5"></stop>
+                      <stop offset="100%" stop-color="#a7f3d0"></stop> </linearGradient>
+                  </defs>
+                  <rect width="620" height="330" fill="#f8fafc" rx="18"></rect>
+                  <text x="310" y="32" text-anchor="middle"
+                    font-size="18" font-weight="900" fill="#0c4a6e"
+                    font-family="Vazirmatn, sans-serif">چهار نماد مهم
+                    درس دوم</text>
+                  <rect x="20" y="55" width="140" height="240"
+                    fill="url(#b1)" stroke="#2563eb" stroke-width="2"
+                    rx="14"></rect>
+                  <text x="90" y="115" text-anchor="middle"
+                    font-size="42" font-weight="900" fill="#1d4ed8"
+                    font-family="serif">∈</text>
+                  <text x="90" y="150" text-anchor="middle"
+                    font-size="13" font-weight="900" fill="#1e3a8a"
+                    font-family="Vazirmatn, sans-serif">عضو است</text>
+                  <text x="90" y="185" text-anchor="middle"
+                    font-size="12" fill="#1e3a8a"
+                    font-family="monospace">3 ∈ A</text>
+                  <text x="90" y="220" text-anchor="middle"
+                    font-size="11" fill="#1e3a8a"
+                    font-family="Vazirmatn, sans-serif">۳ عضو A است</text>
+                  <text x="90" y="255" text-anchor="middle"
+                    font-size="16" fill="#16a34a"
+                    font-family="Vazirmatn, sans-serif">✅</text>
+                  <rect x="170" y="55" width="140" height="240"
+                    fill="url(#b2)" stroke="#dc2626" stroke-width="2"
+                    rx="14"></rect>
+                  <text x="240" y="115" text-anchor="middle"
+                    font-size="42" font-weight="900" fill="#b91c1c"
+                    font-family="serif">∉</text>
+                  <text x="240" y="150" text-anchor="middle"
+                    font-size="13" font-weight="900" fill="#7f1d1d"
+                    font-family="Vazirmatn, sans-serif">عضو نیست</text>
+                  <text x="240" y="185" text-anchor="middle"
+                    font-size="12" fill="#7f1d1d"
+                    font-family="monospace">4 ∉ A</text>
+                  <text x="240" y="220" text-anchor="middle"
+                    font-size="11" fill="#7f1d1d"
+                    font-family="Vazirmatn, sans-serif">۴ عضو A نیست</text>
+                  <text x="240" y="255" text-anchor="middle"
+                    font-size="16" fill="#16a34a"
+                    font-family="Vazirmatn, sans-serif">✅</text>
+                  <rect x="320" y="55" width="140" height="240"
+                    fill="url(#b3)" stroke="#ea580c" stroke-width="2"
+                    rx="14"></rect>
+                  <text x="390" y="115" text-anchor="middle"
+                    font-size="36" font-weight="900" fill="#ea580c"
+                    font-family="serif">n(A)</text>
+                  <text x="390" y="150" text-anchor="middle"
+                    font-size="13" font-weight="900" fill="#9a3412"
+                    font-family="Vazirmatn, sans-serif">تعداد اعضا</text>
+                  <text x="390" y="185" text-anchor="middle"
+                    font-size="12" fill="#9a3412"
+                    font-family="monospace">n(A) = 3</text>
+                  <text x="390" y="220" text-anchor="middle"
+                    font-size="11" fill="#9a3412"
+                    font-family="Vazirmatn, sans-serif">سه عضو دارد</text>
+                  <text x="390" y="255" text-anchor="middle"
+                    font-size="16" fill="#16a34a"
+                    font-family="Vazirmatn, sans-serif">✅</text>
+                  <rect x="470" y="55" width="130" height="240"
+                    fill="url(#b4)" stroke="#059669" stroke-width="2"
+                    rx="14"></rect>
+                  <text x="535" y="115" text-anchor="middle"
+                    font-size="42" font-weight="900" fill="#059669"
+                    font-family="serif">∅</text>
+                  <text x="535" y="150" text-anchor="middle"
+                    font-size="13" font-weight="900" fill="#065f46"
+                    font-family="Vazirmatn, sans-serif">مجموعه تهی</text>
+                  <text x="535" y="185" text-anchor="middle"
+                    font-size="12" fill="#065f46"
+                    font-family="monospace">{ }</text>
+                  <text x="535" y="220" text-anchor="middle"
+                    font-size="11" fill="#065f46"
+                    font-family="Vazirmatn, sans-serif">بدون هیچ عضو</text>
+                  <text x="535" y="255" text-anchor="middle"
+                    font-size="16" fill="#16a34a"
+                    font-family="Vazirmatn, sans-serif">✅</text> </svg>
+                <div class="svg-caption">شکل ۱: چهار نماد مهم درس دوم</div>
+              </div>
+              <p><strong>نکته‌ی طلایی:</strong> نماد <span class="math">∈</span>
+                فقط برای <strong>عضو</strong> به کار می‌رود، و همیشه <strong>عضو
+
+                  در چپ</strong> و <strong>مجموعه در راست</strong> قرار
+                می‌گیرد.</p>
+              <div class="section-title">تفاوت تهی، مجموعه‌ی صفر و
+                مجموعه‌ی تهی</div>
+              <div class="example-box">
+                <h4>سه مفهوم پرتکرار که نباید اشتباه بگیریم</h4>
+                <ul>
+                  <li><strong>تهی:</strong> <span class="math">∅</span>
+                    یا <span class="math">{ }</span> – هیچ عضوی ندارد.
+                    <span class="math">n(∅) = 0</span></li>
+                  <li><strong>مجموعه‌ی صفر:</strong> <span class="math">{0}</span>
+                    – یک عضو دارد: عدد صفر. <span class="math">n({0}) =
+                      1</span></li>
+                  <li><strong>مجموعه‌ی تهی:</strong> <span class="math">{∅}</span>
+                    – یک عضو دارد: خود تهی. <span class="math">n({∅}) =
+                      1</span></li>
+                </ul>
+              </div>
+              <div class="warning-box"> <strong>⚠️ اشتباه رایج:</strong>
+                <span class="math">∅ ≠ {0} ≠ {∅}</span> – این سه کاملاً
+                با هم متفاوت هستند! </div>
+              <div class="note-box"> <strong>💡 نکته‌ی مهم:</strong>
+                فقط <span class="math">∅</span> و <span class="math">{
+                  }</span> تهی هستند. هر آکولادی که داخلش چیزی باشد (حتی
+                صفر یا تهی)، دیگر تهی نیست. </div>
+            </section>
+            <!-- ============================================================= -->
+            <!-- ==================== درس ۳ ================================== -->
+            <!-- ============================================================= -->
+            <section class="lesson" id="l3">
+              <div class="lesson-header">
+                <div class="lesson-number l3">۳</div>
+                <div>
+                  <div class="lesson-title">مرور درس سوم: زیرمجموعه و
+                    تعداد زیرمجموعه‌ها</div>
+                  <div class="lesson-sub">یکی از مهم‌ترین مفاهیم فصل</div>
+                </div>
+              </div>
+              <div class="section-title">خلاصه‌ی درس سوم</div>
+              <p><strong>تعریف زیرمجموعه:</strong> می‌گوییم <span
+                  class="math">A ⊆ B</span> (ای زیرمجموعه‌ی بی است) اگر
+                <strong>هر عضو ای، عضوی از بی هم باشد</strong>.</p>
+              <div class="svg-wrapper">
+                <svg viewBox="0 0 620 380"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <radialGradient id="gB" cx="50%" cy="50%" r="70%">
+                      <stop offset="0%" stop-color="#e9d5ff"></stop>
+                      <stop offset="100%" stop-color="#c4b5fd"></stop> </radialGradient>
+                    <radialGradient id="gA" cx="50%" cy="50%" r="70%">
+                      <stop offset="0%" stop-color="#c084fc"></stop>
+                      <stop offset="100%" stop-color="#7c3aed"></stop> </radialGradient>
+                  </defs>
+                  <rect width="620" height="380" fill="#faf5ff" rx="18"></rect>
+                  <text x="310" y="34" text-anchor="middle"
+                    font-size="18" font-weight="900" fill="#4c1d95"
+                    font-family="Vazirmatn, sans-serif">نمودار ون: A ⊆ B</text>
+                  <ellipse cx="310" cy="210" rx="200" ry="140"
+                    fill="url(#gB)" stroke="#7c3aed" stroke-width="2.5"></ellipse>
+                  <text x="485" y="100" font-size="20" font-weight="900"
+                    fill="#6d28d9" font-family="Vazirmatn, sans-serif">B</text>
+                  <ellipse cx="270" cy="220" rx="105" ry="80"
+                    fill="url(#gA)" stroke="#4c1d95" stroke-width="2.5"></ellipse>
+                  <text x="180" y="160" font-size="20" font-weight="900"
+                    fill="#ffffff" font-family="Vazirmatn, sans-serif">A</text>
+                  <text x="240" y="205" font-size="16" font-weight="700"
+                    fill="#ffffff" font-family="monospace">1</text>
+                  <text x="285" y="205" font-size="16" font-weight="700"
+                    fill="#ffffff" font-family="monospace">2</text>
+                  <text x="260" y="245" font-size="16" font-weight="700"
+                    fill="#ffffff" font-family="monospace">3</text>
+                  <text x="410" y="170" font-size="16" font-weight="700"
+                    fill="#5b21b6" font-family="monospace">4</text>
+                  <text x="430" y="230" font-size="16" font-weight="700"
+                    fill="#5b21b6" font-family="monospace">5</text>
+                  <text x="380" y="290" font-size="16" font-weight="700"
+                    fill="#5b21b6" font-family="monospace">6</text>
+                  <rect x="100" y="335" width="420" height="40"
+                    fill="#fef9c3" stroke="#eab308" stroke-width="2"
+                    rx="10"></rect>
+                  <text x="310" y="361" text-anchor="middle"
+                    font-size="13" font-weight="700" fill="#854d0e"
+                    font-family="Vazirmatn, sans-serif">هر عضو A در B هم
+                    هست ⇒ A ⊆ B</text> </svg>
+                <div class="svg-caption">شکل ۲: نمودار ون – زیرمجموعه
+                  بودن ای در بی</div>
+              </div>
+              <div class="note-box"> <strong>💡 دو نکته‌ی طلایی:</strong>
+                <ul>
+                  <li><strong>تهی زیرمجموعه‌ی هر مجموعه‌ای است:</strong>
+                    <span class="math">∅ ⊆ A</span></li>
+                  <li><strong>هر مجموعه زیرمجموعه‌ی خودش است:</strong> <span
+                      class="math">A ⊆ A</span></li>
+                </ul>
+              </div>
+              <div class="section-title">فرمول طلایی تعداد زیرمجموعه‌ها</div>
+              <div class="formula-box big">تعداد زیرمجموعه‌های یک
+                مجموعه‌ی n عضوی = 2ⁿ</div>
+              <p><strong>جدول توان‌های دو که باید حفظ کنی:</strong></p>
+              <table class="summary-table">
+                <thead> <tr>
+                    <th>تعداد اعضا (n)</th>
+                    <th>2ⁿ</th>
+                    <th>تعداد زیرمجموعه‌ها</th>
+                  </tr>
+                </thead> <tbody>
+                  <tr>
+                    <td>0</td>
+                    <td class="math">2⁰</td>
+                    <td>1</td>
+                  </tr>
+                  <tr>
+                    <td>1</td>
+                    <td class="math">2¹</td>
+                    <td>2</td>
+                  </tr>
+                  <tr>
+                    <td>2</td>
+                    <td class="math">2²</td>
+                    <td>4</td>
+                  </tr>
+                  <tr>
+                    <td>3</td>
+                    <td class="math">2³</td>
+                    <td>8</td>
+                  </tr>
+                  <tr>
+                    <td>4</td>
+                    <td class="math">2⁴</td>
+                    <td>16</td>
+                  </tr>
+                  <tr>
+                    <td>5</td>
+                    <td class="math">2⁵</td>
+                    <td>32</td>
+                  </tr>
+                  <tr>
+                    <td>6</td>
+                    <td class="math">2⁶</td>
+                    <td>64</td>
+                  </tr>
+                  <tr>
+                    <td>7</td>
+                    <td class="math">2⁷</td>
+                    <td>128</td>
+                  </tr>
+                  <tr>
+                    <td>8</td>
+                    <td class="math">2⁸</td>
+                    <td>256</td>
+                  </tr>
+                  <tr>
+                    <td>9</td>
+                    <td class="math">2⁹</td>
+                    <td>512</td>
+                  </tr>
+                  <tr>
+                    <td>10</td>
+                    <td class="math">2¹⁰</td>
+                    <td>1024</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="example-box">
+                <h4>روش سیستماتیک نوشتن زیرمجموعه‌ها (برای مجموعه‌ی {۱،
+                  ۲، ۳})</h4>
+                <ol>
+                  <li><strong>صفر عضو:</strong> تهی (۱ زیرمجموعه)</li>
+                  <li><strong>یک عضو:</strong> {۱}، {۲}، {۳} (۳
+                    زیرمجموعه)</li>
+                  <li><strong>دو عضو:</strong> {۱،۲}، {۱،۳}، {۲،۳} (۳
+                    زیرمجموعه)</li>
+                  <li><strong>سه عضو:</strong> {۱،۲،۳} (۱ زیرمجموعه)</li>
+                </ol>
+                <p><strong>مجموع:</strong> ۱ + ۳ + ۳ + ۱ = ۸ = 2³ ✅</p>
+              </div>
+              <div class="warning-box"> <strong>⚠️ اشتباه رایج:</strong>
+                در شمردن زیرمجموعه‌ها، فراموش نکن که <strong>تهی</strong>
+                و <strong>خود مجموعه</strong> هر دو زیرمجموعه محسوب
+                می‌شوند. </div>
+            </section>
+            <!-- ============================================================= -->
+            <!-- ==================== درس ۴ ================================== -->
+            <!-- ============================================================= -->
+            <section class="lesson" id="l4">
+              <div class="lesson-header">
+                <div class="lesson-number l4">۴</div>
+                <div>
+                  <div class="lesson-title">مرور درس چهارم: عمل‌های
+                    اجتماع، اشتراک، تفاضل</div>
+                  <div class="lesson-sub">پرکاربردترین درس فصل اول</div>
+                </div>
+              </div>
+              <div class="section-title">خلاصه‌ی درس چهارم</div>
+              <p>در این درس سه عمل اصلی روی مجموعه‌ها را یاد گرفتیم:</p>
+              <div class="svg-wrapper">
+                <svg viewBox="0 0 820 380"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="uF" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#bfdbfe"></stop>
+                      <stop offset="100%" stop-color="#60a5fa"></stop> </linearGradient>
+                    <linearGradient id="lF" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#fde68a"></stop>
+                      <stop offset="100%" stop-color="#f59e0b"></stop> </linearGradient>
+                    <linearGradient id="cF" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#86efac"></stop>
+                      <stop offset="100%" stop-color="#22c55e"></stop> </linearGradient>
+                  </defs>
+                  <rect width="820" height="380" fill="#f0f9ff" rx="18"></rect>
+                  <text x="410" y="34" text-anchor="middle"
+                    font-size="18" font-weight="900" fill="#0c4a6e"
+                    font-family="Vazirmatn, sans-serif">سه عمل اصلی روی
+                    مجموعه‌ها</text>
+                  <g>
+                    <circle cx="115" cy="190" r="60" fill="url(#uF)"
+                      stroke="#1d4ed8" stroke-width="2.5"></circle>
+                    <circle cx="175" cy="190" r="60" fill="url(#uF)"
+                      stroke="#1d4ed8" stroke-width="2.5"></circle>
+                    <text x="75" y="150" font-size="20"
+                      font-weight="900" fill="#1e3a8a"
+                      font-family="monospace">A</text>
+                    <text x="205" y="150" font-size="20"
+                      font-weight="900" fill="#1e3a8a"
+                      font-family="monospace">B</text>
+                    <text x="145" y="290" text-anchor="middle"
+                      font-size="16" font-weight="900" fill="#0c4a6e"
+                      font-family="Vazirmatn, sans-serif">A ∪ B</text>
+                    <text x="145" y="315" text-anchor="middle"
+                      font-size="12" fill="#475569"
+                      font-family="Vazirmatn, sans-serif">همه‌ی اعضا</text>
+                    <text x="145" y="335" text-anchor="middle"
+                      font-size="11" fill="#64748b"
+                      font-family="Vazirmatn, sans-serif">(شامل هر دو
+                      دایره)</text> </g>
+                  <g>
+                    <circle cx="385" cy="190" r="60" fill="none"
+                      stroke="#1d4ed8" stroke-width="2.5"></circle>
+                    <circle cx="445" cy="190" r="60" fill="none"
+                      stroke="#be185d" stroke-width="2.5"></circle>
+                    <path d="M 415 138.04 A 60 60 0 0 1 415 241.96 A 60
+                      60 0 0 1 415 138.04 Z" fill="url(#lF)"
+                      stroke="#a16207" stroke-width="1.5"></path>
+                    <text x="345" y="150" font-size="20"
+                      font-weight="900" fill="#1e3a8a"
+                      font-family="monospace">A</text>
+                    <text x="475" y="150" font-size="20"
+                      font-weight="900" fill="#831843"
+                      font-family="monospace">B</text>
+                    <text x="415" y="290" text-anchor="middle"
+                      font-size="16" font-weight="900" fill="#0c4a6e"
+                      font-family="Vazirmatn, sans-serif">A ∩ B</text>
+                    <text x="415" y="315" text-anchor="middle"
+                      font-size="12" fill="#475569"
+                      font-family="Vazirmatn, sans-serif">اعضای مشترک</text>
+                    <text x="415" y="335" text-anchor="middle"
+                      font-size="11" fill="#64748b"
+                      font-family="Vazirmatn, sans-serif">(فقط ناحیه‌ی
+                      وسط)</text> </g>
+                  <g>
+                    <circle cx="655" cy="190" r="60" fill="none"
+                      stroke="#1d4ed8" stroke-width="2.5"></circle>
+                    <circle cx="715" cy="190" r="60" fill="none"
+                      stroke="#be185d" stroke-width="2.5"></circle>
+                    <path d="M 685 138.04 A 60 60 0 1 0 685 241.96 A 60
+                      60 0 0 1 685 138.04 Z" fill="url(#cF)"
+                      stroke="#166534" stroke-width="1.5"></path>
+                    <text x="615" y="150" font-size="20"
+                      font-weight="900" fill="#1e3a8a"
+                      font-family="monospace">A</text>
+                    <text x="745" y="150" font-size="20"
+                      font-weight="900" fill="#831843"
+                      font-family="monospace">B</text>
+                    <text x="685" y="290" text-anchor="middle"
+                      font-size="16" font-weight="900" fill="#0c4a6e"
+                      font-family="Vazirmatn, sans-serif">A − B</text>
+                    <text x="685" y="315" text-anchor="middle"
+                      font-size="12" fill="#475569"
+                      font-family="Vazirmatn, sans-serif">فقط اعضای A</text>
+                    <text x="685" y="335" text-anchor="middle"
+                      font-size="11" fill="#64748b"
+                      font-family="Vazirmatn, sans-serif">(ناحیه‌ی سبز)</text>
+                  </g> </svg>
+                <div class="svg-caption">شکل ۳: نمایش گرافیکی سه عمل
+                  اصلی فصل چهارم</div>
+              </div>
+              <table class="summary-table">
+                <thead> <tr>
+                    <th>عمل</th>
+                    <th>نماد</th>
+                    <th>تعریف</th>
+                    <th>مثال</th>
+                  </tr>
+                </thead> <tbody>
+                  <tr>
+                    <td>اجتماع</td>
+                    <td class="math">A ∪ B</td>
+                    <td>همه‌ی اعضای دو مجموعه، بدون تکرار</td>
+                    <td class="math">{1,2} ∪ {2,3} = {1,2,3}</td>
+                  </tr>
+                  <tr>
+                    <td>اشتراک</td>
+                    <td class="math">A ∩ B</td>
+                    <td>فقط اعضای مشترک</td>
+                    <td class="math">{1,2} ∩ {2,3} = {2}</td>
+                  </tr>
+                  <tr>
+                    <td>تفاضل</td>
+                    <td class="math">A − B</td>
+                    <td>اعضای A که در B نیستند</td>
+                    <td class="math">{1,2} − {2,3} = {1}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="section-title">خاصیت‌های مهم</div>
+              <div class="example-box">
+                <h4>خاصیت‌های اجتماع، اشتراک و تفاضل</h4>
+                <ul>
+                  <li><strong>جابجایی در اجتماع:</strong> <span
+                      class="math">A ∪ B = B ∪ A</span></li>
+                  <li><strong>جابجایی در اشتراک:</strong> <span
+                      class="math">A ∩ B = B ∩ A</span></li>
+                  <li><strong>عدم جابجایی در تفاضل:</strong> <span
+                      class="math">A − B ≠ B − A</span></li>
+                  <li><strong>اجتماع با تهی:</strong> <span
+                      class="math">A ∪ ∅ = A</span></li>
+                  <li><strong>اشتراک با تهی:</strong> <span
+                      class="math">A ∩ ∅ = ∅</span></li>
+                  <li><strong>تفاضل با تهی:</strong> <span class="math">A
+                      − ∅ = A</span></li>
+                </ul>
+              </div>
+              <div class="note-box"> <strong>💡 نکته‌ی زیرمجموعه:</strong>
+                اگر <span class="math">A ⊆ B</span> باشد، آنگاه:
+                <ul>
+                  <li><span class="math">A ∪ B = B</span></li>
+                  <li><span class="math">A ∩ B = A</span></li>
+                  <li><span class="math">A − B = ∅</span></li>
+                </ul>
+              </div>
+              <div class="section-title">اصل شمول و عدم شمول</div>
+              <div class="formula-box big">|A ∪ B| = |A| + |B| − |A ∩ B|</div>
+              <p>این فرمول در سوالات کلامی کاربرد زیادی دارد. مثلاً اگر
+                ۲۰ نفر ریاضی دوست دارند، ۱۸ نفر علوم دوست دارند و ۱۲ نفر
+                هر دو را دوست دارند، تعداد کسانی که حداقل یکی را دوست
+                دارند:</p>
+              <div class="formula-box">20 + 18 − 12 = 26</div>
+            </section>
+            <!-- ============================================================= -->
+            <!-- ==================== نقشه‌ی ذهنی ============================= -->
+            <!-- ============================================================= -->
+            <div class="mind-map" id="mind">
+              <h2>نقشه‌ی ذهنی کل فصل اول</h2>
+              <div class="mind-branches">
+                <div class="mind-branch">
+                  <h4>📍 درس ۱: مفهوم مجموعه</h4>
+                  <ul>
+                    <li>تعریف: اشیاء مشخص و متمایز</li>
+                    <li>اعضای تکراری یک بار</li>
+                    <li>نام‌گذاری با حروف بزرگ</li>
+                    <li>نوشتن داخل آکولاد</li>
+                    <li>ترتیب مهم نیست</li>
+                  </ul>
+                </div>
+                <div class="mind-branch">
+                  <h4>📍 درس ۲: نمادها و تهی</h4>
+                  <ul>
+                    <li>∈: عضو است</li>
+                    <li>∉: عضو نیست</li>
+                    <li>n(A): تعداد اعضا</li>
+                    <li>∅ یا { }: تهی</li>
+                    <li>∅ ≠ {0} ≠ {∅}</li>
+                  </ul>
+                </div>
+                <div class="mind-branch">
+                  <h4>📍 درس ۳: زیرمجموعه</h4>
+                  <ul>
+                    <li>A ⊆ B: هر عضو A در B</li>
+                    <li>∅ ⊆ هر مجموعه</li>
+                    <li>A ⊆ A</li>
+                    <li>2ⁿ: تعداد زیرمجموعه‌ها</li>
+                    <li>روش سیستماتیک نوشتن</li>
+                  </ul>
+                </div>
+                <div class="mind-branch">
+                  <h4>📍 درس ۴: عمل‌ها</h4>
+                  <ul>
+                    <li>∪: اجتماع (بدون تکرار)</li>
+                    <li>∩: اشتراک (اعضای مشترک)</li>
+                    <li>−: تفاضل (فقط اعضای اولی)</li>
+                    <li>جابجایی در ∪ و ∩</li>
+                    <li>عدم جابجایی در −</li>
+                    <li>|A∪B| = |A|+|B|−|A∩B|</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <!-- ============================================================= -->
+            <!-- ==================== مرجع سریع =============================== -->
+            <!-- ============================================================= -->
+            <div class="quick-reference" id="qr">
+              <h2>مرجع سریع – همه‌ی فرمول‌ها در یک نگاه</h2>
+              <div class="qr-grid">
+                <div class="qr-item"> <strong>تعریف مجموعه</strong> <span>دسته‌ای
+
+                    از اشیاء مشخص و متمایز</span> </div>
+                <div class="qr-item"> <strong>عضویت</strong> <span>x ∈
+                    A</span> </div>
+                <div class="qr-item"> <strong>عدم عضویت</strong> <span>x
+                    ∉ A</span> </div>
+                <div class="qr-item"> <strong>تعداد اعضا</strong> <span>n(A)</span>
+                </div>
+                <div class="qr-item"> <strong>مجموعه تهی</strong> <span>∅
+                    یا { }</span> </div>
+                <div class="qr-item"> <strong>مجموعه صفر (تهی نیست)</strong>
+                  <span>{0} , n = 1</span> </div>
+                <div class="qr-item"> <strong>مجموعه تهی (تهی نیست)</strong>
+                  <span>{∅} , n = 1</span> </div>
+                <div class="qr-item"> <strong>زیرمجموعه</strong> <span>A
+                    ⊆ B</span> </div>
+                <div class="qr-item"> <strong>تعداد زیرمجموعه‌ها</strong>
+                  <span>2ⁿ</span> </div>
+                <div class="qr-item"> <strong>تهی زیرمجموعه‌ی همه</strong>
+                  <span>∅ ⊆ A</span> </div>
+                <div class="qr-item"> <strong>هر مجموعه زیرمجموعه‌ی
+                    خودش</strong> <span>A ⊆ A</span> </div>
+                <div class="qr-item"> <strong>اجتماع</strong> <span>A
+                    ∪ B</span> </div>
+                <div class="qr-item"> <strong>اشتراک</strong> <span>A
+                    ∩ B</span> </div>
+                <div class="qr-item"> <strong>تفاضل</strong> <span>A −
+                    B</span> </div>
+                <div class="qr-item"> <strong>جابجایی اجتماع</strong> <span>A
+                    ∪ B = B ∪ A</span> </div>
+                <div class="qr-item"> <strong>جابجایی اشتراک</strong> <span>A
+                    ∩ B = B ∩ A</span> </div>
+                <div class="qr-item"> <strong>تفاضل جابجا نمی‌شود</strong>
+                  <span>A − B ≠ B − A</span> </div>
+                <div class="qr-item"> <strong>اجتماع با تهی</strong> <span>A
+                    ∪ ∅ = A</span> </div>
+                <div class="qr-item"> <strong>اشتراک با تهی</strong> <span>A
+                    ∩ ∅ = ∅</span> </div>
+                <div class="qr-item"> <strong>اصل شمول</strong> <span>|A∪B|
+
+                    = |A|+|B|−|A∩B|</span> </div>
+              </div>
+            </div>
+            <!-- ============================================================= -->
+            <!-- ==================== نمونه سوالات =========================== -->
+            <!-- ============================================================= -->
+            <section class="final-exam" id="exam">
+              <h2>۱۵ نمونه سوال امتحانی از کل فصل اول با حل تشریحی</h2>
+              <div class="question">
+                <div class="question-title">سوال ۱: کدام‌یک از عبارت‌های
+                  زیر یک مجموعه را مشخص می‌کند؟ (چهارگزینه‌ای)</div>
+                <p>۱) اعداد طبیعی بزرگ‌تر از ۱۰۰</p>
+                <p>۲) کتاب‌های خوب ریاضی</p>
+                <p>۳) سه عدد بزرگ</p>
+                <p>۴) افراد قدبلند شهر</p>
+                <div class="answer">
+                  <div class="answer-title">✅ حل:</div>
+                  <p><strong>پاسخ صحیح: گزینه ۱</strong></p>
+                  <ul>
+                    <li>گزینه ۱: اعضای مشخص و قابل شمارش – مجموعه است ✅</li>
+                    <li>گزینه ۲: «خوب» نسبی است – مجموعه نیست ❌</li>
+                    <li>گزینه ۳: «بزرگ» نسبی است – مجموعه نیست ❌</li>
+                    <li>گزینه ۴: «قدبلند» نسبی است – مجموعه نیست ❌</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="question">
+                <div class="question-title">سوال ۲: مجموعه‌ی حروف کلمه‌ی
+                  «استقلال» چند عضو دارد؟</div>
+                <div class="answer">
+                  <div class="answer-title">✅ حل:</div>
+                  <p>حروف کلمه: ا، س، ت، ق، ل، ا، ل</p>
+                  <p>حروف تکراری: ا (دو بار)، ل (دو بار)</p>
+                  <p>حذف تکراری‌ها: ا، س، ت، ق، ل</p>
+                  <p><strong>پاسخ:</strong> مجموعه = {ا، س، ت، ق، ل} –
+                    تعداد اعضا برابر <span class="highlight">۵</span>
+                    است.</p>
+                </div>
+              </div>
+              <div class="question">
+                <div class="question-title">سوال ۳: کدام‌یک از موارد زیر
+                  درست است؟ (چهارگزینه‌ای)</div>
+                <p>۱) <span class="math">∅ = {0}</span></p>
+                <p>۲) <span class="math">n(∅) = 1</span></p>
+                <p>۳) <span class="math">n({∅}) = 1</span></p>
+                <p>۴) <span class="math">{0} = {∅}</span></p>
+                <div class="answer">
+                  <div class="answer-title">✅ حل:</div>
+                  <ul>
+                    <li>گزینه ۱: نادرست – تهی صفر عضو دارد، {0} یک عضو ❌</li>
+                    <li>گزینه ۲: نادرست – <span class="math">n(∅) = 0</span>
+                      ❌</li>
+                    <li>گزینه ۳: درست – {∅} یک عضو دارد: خود تهی ✅</li>
+                    <li>گزینه ۴: نادرست – {0} یک عضو دارد (صفر)، {∅} یک
+                      عضو دارد (تهی) ❌</li>
+                  </ul>
+                  <p><strong>پاسخ صحیح: گزینه ۳</strong></p>
+                </div>
+              </div>
+              <div class="question">
+                <div class="question-title">سوال ۴: اگر <span
+                    class="math">A = {2, 4, ∅, {5, 6}, 7}</span> باشد،
+                  تعداد اعضای A چند است؟ و آیا <span class="math">{5} ∈
+                    A</span> درست است؟</div>
+                <div class="answer">
+                  <div class="answer-title">✅ حل:</div>
+                  <p><strong>شمارش اعضا:</strong></p>
+                  <ol>
+                    <li>عدد ۲</li>
+                    <li>عدد ۴</li>
+                    <li>تهی (به عنوان یک عضو)</li>
+                    <li>مجموعه‌ی {۵،۶} (یک عضو واحد)</li>
+                    <li>عدد ۷</li>
+                  </ol>
+                  <p><span class="math">n(A) = 5</span></p>
+                  <p><strong>آیا {5} ∈ A؟</strong> نادرست ❌ – چون {5}
+                    یکی از اعضای A نیست. عضو A، {۵،۶} است.</p>
+                </div>
+              </div>
+              <div class="question">
+                <div class="question-title">سوال ۵: اگر <span
+                    class="math">A = {1, 2, 3, 4, 5}</span> باشد، تعداد
+                  زیرمجموعه‌های آن را بنویسید.</div>
+                <div class="answer">
+                  <div class="answer-title">✅ حل:</div>
+                  <p><span class="math">n(A) = 5</span></p>
+                  <p><span class="math">2⁵ = 32</span></p>
+                  <p><strong>پاسخ:</strong> A دارای <span
+                      class="highlight">۳۲ زیرمجموعه</span> است.</p>
+                </div>
+              </div>
+              <div class="question">
+                <div class="question-title">سوال ۶: مجموعه‌ای دارای ۱۲۸
+                  زیرمجموعه است. این مجموعه چند عضو دارد؟</div>
+                <div class="answer">
+                  <div class="answer-title">✅ حل:</div>
+                  <p><span class="math">2ⁿ = 128 = 2⁷</span></p>
+                  <p><strong>پاسخ:</strong> <span class="math">n = 7</span>
+                    – این مجموعه <span class="highlight">۷ عضو</span>
+                    دارد.</p>
+                </div>
+              </div>
+              <div class="question">
+                <div class="question-title">سوال ۷: با توجه به <span
+                    class="math">A = {1, 2, 3}</span> و <span
+                    class="math">B = {3, 4, 5}</span>، حاصل‌های زیر را
+                  بنویسید: <span class="math">A ∪ B</span>، <span
+                    class="math">A ∩ B</span>، <span class="math">A − B</span>،
+                  <span class="math">B − A</span>.</div>
+                <div class="answer">
+                  <div class="answer-title">✅ حل:</div>
+                  <ul>
+                    <li><span class="math">A ∪ B = {1, 2, 3, 4, 5}</span></li>
+                    <li><span class="math">A ∩ B = {3}</span></li>
+                    <li><span class="math">A − B = {1, 2}</span></li>
+                    <li><span class="math">B − A = {4, 5}</span></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="question">
+                <div class="question-title">سوال ۸: اگر <span
+                    class="math">A = {1, 2}</span> و <span class="math">B
+                    = {1, 2, 3, 4}</span> باشد، کدام‌یک از موارد زیر
+                  درست است؟ (چهارگزینه‌ای)</div>
+                <p>۱) <span class="math">B ⊆ A</span></p>
+                <p>۲) <span class="math">A ⊆ B</span></p>
+                <p>۳) <span class="math">A ∩ B = ∅</span></p>
+                <p>۴) <span class="math">A ∪ B = A</span></p>
+                <div class="answer">
+                  <div class="answer-title">✅ حل:</div>
+                  <ul>
+                    <li>گزینه ۱: نادرست – ۳ و ۴ در A نیستند ❌</li>
+                    <li>گزینه ۲: درست – ۱ و ۲ در B هستند ✅</li>
+                    <li>گزینه ۳: نادرست – اعضای مشترک ۱ و ۲ هستند ❌</li>
+                    <li>گزینه ۴: نادرست – <span class="math">A ∪ B =
+                        {1, 2, 3, 4} = B</span> نه A ❌</li>
+                  </ul>
+                  <p><strong>پاسخ صحیح: گزینه ۲</strong></p>
+                </div>
+              </div>
+              <div class="question">
+                <div class="question-title">سوال ۹: اگر <span
+                    class="math">A = {1, 2, 3}</span> و <span
+                    class="math">B = {4, 5, 6}</span> باشد، <span
+                    class="math">A ∩ B</span> چیست؟</div>
+                <div class="answer">
+                  <div class="answer-title">✅ حل:</div>
+                  <p>هیچ عضو مشترکی وجود ندارد. پس:</p>
+                  <div class="formula-box">A ∩ B = ∅</div>
+                  <p>به این دو مجموعه می‌گوییم <span class="highlight">مجموعه‌های
+
+                      جدا از هم</span>.</p>
+                </div>
+              </div>
+              <div class="question">
+                <div class="question-title">سوال ۱۰: در یک کلاس ۳۰ نفره،
+                  ۱۸ نفر فوتبال دوست دارند، ۱۵ نفر والیبال دوست دارند و
+                  ۸ نفر هر دو را دوست دارند. چند نفر فقط فوتبال دوست
+                  دارند؟ چند نفر هیچ‌کدام را دوست ندارند؟</div>
+                <div class="answer">
+                  <div class="answer-title">✅ حل:</div>
+                  <p><strong>گام ۱:</strong> فقط فوتبال: <span
+                      class="math">18 − 8 = 10</span> نفر</p>
+                  <p><strong>گام ۲:</strong> فقط والیبال: <span
+                      class="math">15 − 8 = 7</span> نفر</p>
+                  <p><strong>گام ۳:</strong> حداقل یکی (اجتماع): <span
+                      class="math">10 + 8 + 7 = 25</span> نفر</p>
+                  <p><strong>گام ۴:</strong> هیچ‌کدام: <span
+                      class="math">30 − 25 = 5</span> نفر</p>
+                  <p><strong>پاسخ:</strong> ۱۰ نفر فقط فوتبال، ۵ نفر
+                    هیچ‌کدام.</p>
+                </div>
+              </div>
+              <div class="question">
+                <div class="question-title">سوال ۱۱: اگر <span
+                    class="math">A = {a, b}</span> باشد، تمام
+                  زیرمجموعه‌های A را بنویسید.</div>
+                <div class="answer">
+                  <div class="answer-title">✅ حل:</div>
+                  <p><span class="math">2² = 4</span> زیرمجموعه:</p>
+                  <ol>
+                    <li>تهی</li>
+                    <li>{a}</li>
+                    <li>{b}</li>
+                    <li>{a, b}</li>
+                  </ol>
+                </div>
+              </div>
+              <div class="question">
+                <div class="question-title">سوال ۱۲: درستی یا نادرستی هر
+                  عبارت را بنویسید.</div>
+                <p>الف) <span class="math">∅ ⊆ {1, 2}</span></p>
+                <p>ب) <span class="math">∅ ∈ {1, 2}</span></p>
+                <p>پ) <span class="math">{1, 2} ⊆ {1, 2}</span></p>
+                <p>ت) <span class="math">5 ∈ {1, 2, 3}</span></p>
+                <div class="answer">
+                  <div class="answer-title">✅ حل:</div>
+                  <ul>
+                    <li><strong>الف) درست ✅</strong> – تهی زیرمجموعه‌ی
+                      هر مجموعه‌ای است.</li>
+                    <li><strong>ب) نادرست ❌</strong> – تهی یکی از اعضای
+                      {1,2} نیست.</li>
+                    <li><strong>پ) درست ✅</strong> – هر مجموعه
+                      زیرمجموعه‌ی خودش است.</li>
+                    <li><strong>ت) نادرست ❌</strong> – ۵ در این مجموعه
+                      نیست.</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="question">
+                <div class="question-title">سوال ۱۳: اگر <span
+                    class="math">A = {2, 4, 6}</span> و <span
+                    class="math">B = {2, 4, 6, 8, 10}</span> باشد، حاصل
+                  هر یک را بنویسید.</div>
+                <div class="answer">
+                  <div class="answer-title">✅ حل:</div>
+                  <p>توجه: A زیرمجموعه‌ی B است.</p>
+                  <ul>
+                    <li><span class="math">A ∪ B = {2, 4, 6, 8, 10} = B</span></li>
+                    <li><span class="math">A ∩ B = {2, 4, 6} = A</span></li>
+                    <li><span class="math">A − B = ∅</span></li>
+                    <li><span class="math">B − A = {8, 10}</span></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="question">
+                <div class="question-title">سوال ۱۴: در مدرسه‌ای از ۵۰
+                  دانش‌آموز، ۳۰ نفر ریاضی و ۲۵ نفر علوم و ۱۵ نفر هر دو
+                  را دوست دارند. چند نفر هیچ‌کدام را دوست ندارند؟</div>
+                <div class="answer">
+                  <div class="answer-title">✅ حل:</div>
+                  <p>با استفاده از اصل شمول:</p>
+                  <p><span class="math">|A ∪ B| = 30 + 25 − 15 = 40</span></p>
+                  <p>هیچ‌کدام: <span class="math">50 − 40 = 10</span>
+                    نفر</p>
+                  <p><strong>پاسخ:</strong> <span class="highlight">۱۰
+                      نفر</span>.</p>
+                </div>
+              </div>
+              <div class="question">
+                <div class="question-title">سوال ۱۵: ثابت کنید که تهی
+                  زیرمجموعه‌ی هر مجموعه‌ای است.</div>
+                <div class="answer">
+                  <div class="answer-title">✅ حل:</div>
+                  <p>برای اثبات زیرمجموعه بودن، باید نشان دهیم هر عضو
+                    تهی، عضوی از مجموعه‌ی مقابل هم هست.</p>
+                  <p>اما تهی هیچ عضوی ندارد. پس شرط «هر عضو تهی، عضوی از
+                    مجموعه باشد» به صورت خودکار برقرار است (چون عضوی
+                    وجود ندارد که بخواهیم بررسی کنیم).</p>
+                  <p><strong>نتیجه:</strong> تهی زیرمجموعه‌ی هر
+                    مجموعه‌ای است. ∎</p>
+                </div>
+              </div>
+            </section>
+            <!-- ============================================================= -->
+            <!-- ==================== چک‌لیست مطالعه ========================== -->
+            <!-- ============================================================= -->
+            <section class="lesson" id="check">
+              <div class="lesson-header">
+                <div class="lesson-number rev">✓</div>
+                <div>
+                  <div class="lesson-title">چک‌لیست مطالعه‌ی فصل اول</div>
+                  <div class="lesson-sub">این چک‌لیست را قبل از امتحان
+                    کامل کن</div>
+                </div>
+              </div>
+              <p>قبل از امتحان، این چک‌لیست را یک به یک مرور کن. هر
+                آیتمی را که بلد بودی، تیک بزن:</p>
+              <div class="checklist">
+                <h3>مفاهیم پایه</h3>
+                <label><input type="checkbox"> تعریف مجموعه را می‌دانم
+                  (مشخص و متمایز).</label> <label><input
+                    type="checkbox"> می‌دانم اعضای تکراری در مجموعه یک
+                  بار شمرده می‌شوند.</label> <label><input
+                    type="checkbox"> می‌توانم تشخیص دهم چه چیزی مجموعه
+                  است و چه چیزی نیست.</label> <label><input
+                    type="checkbox"> نام‌گذاری مجموعه‌ها و نوشتن آن‌ها
+                  داخل آکولاد را بلدم.</label> </div>
+              <div class="checklist">
+                <h3>نمادها</h3>
+                <label><input type="checkbox"> نماد ∈ (عضو است) را درست
+                  به کار می‌برم.</label> <label><input type="checkbox">
+                  نماد ∉ (عضو نیست) را درست به کار می‌برم.</label> <label><input
+                    type="checkbox"> نماد n(A) (تعداد اعضا) را بلدم.</label>
+                <label><input type="checkbox"> نماد ∅ یا { } (مجموعه
+                  تهی) را می‌شناسم.</label> <label><input
+                    type="checkbox"> تفاوت ∅، {0} و {∅} را می‌دانم.</label>
+              </div>
+              <div class="checklist">
+                <h3>زیرمجموعه</h3>
+                <label><input type="checkbox"> تعریف زیرمجموعه را
+                  می‌دانم (هر عضو A در B).</label> <label><input
+                    type="checkbox"> می‌دانم تهی زیرمجموعه‌ی هر
+                  مجموعه‌ای است.</label> <label><input type="checkbox">
+                  می‌دانم هر مجموعه زیرمجموعه‌ی خودش است.</label> <label><input
+                    type="checkbox"> فرمول 2ⁿ را برای تعداد زیرمجموعه‌ها
+                  بلدم.</label> <label><input type="checkbox"> جدول
+                  توان‌های دو را حفظ هستم (۲ تا ۲¹⁰).</label> <label><input
+                    type="checkbox"> می‌توانم همه‌ی زیرمجموعه‌های یک
+                  مجموعه را به روش سیستماتیک بنویسم.</label> </div>
+              <div class="checklist">
+                <h3>عمل‌های مجموعه</h3>
+                <label><input type="checkbox"> اجتماع (∪) را بلدم و
+                  می‌توانم محاسبه کنم.</label> <label><input
+                    type="checkbox"> اشتراک (∩) را بلدم و می‌توانم
+                  محاسبه کنم.</label> <label><input type="checkbox">
+                  تفاضل (−) را بلدم و می‌توانم محاسبه کنم.</label> <label><input
+                    type="checkbox"> می‌دانم اجتماع و اشتراک خاصیت
+                  جابجایی دارند.</label> <label><input type="checkbox">
+                  می‌دانم تفاضل خاصیت جابجایی ندارد.</label> <label><input
+                    type="checkbox"> خاصیت‌های ارتباط با تهی را می‌دانم.</label>
+                <label><input type="checkbox"> فرمول اصل شمول را بلدم:
+                  |A∪B| = |A|+|B|−|A∩B|.</label> </div>
+              <div class="checklist">
+                <h3>مهارت‌های حل مسئله</h3>
+                <label><input type="checkbox"> می‌توانم سوالات کلامی
+                  مربوط به مجموعه‌ها را حل کنم.</label> <label><input
+                    type="checkbox"> می‌توانم نمودار ون رسم کنم و از آن
+                  استفاده کنم.</label> <label><input type="checkbox">
+                  می‌توانم سوالات چند مرحله‌ای را حل کنم.</label> <label><input
+                    type="checkbox"> می‌توانم به سوالات چهارگزینه‌ای
+                  سریع جواب دهم.</label> </div>
+            </section>
+            <!-- ============================================================= -->
+            <!-- ==================== نکات امتحانی =========================== -->
+            <!-- ============================================================= -->
+            <section class="exam-tips" id="tips">
+              <h2>نکات طلایی امتحانی فصل اول</h2>
+              <div class="tip-card danger">
+                <h3>⚠️ اشتباهاتی که نمره‌ات را می‌خورند</h3>
+                <ul>
+                  <li><strong>اشتباه ۱:</strong> یکی گرفتن <span
+                      class="math">∅</span>، <span class="math">{0}</span>
+                    و <span class="math">{∅}</span>.</li>
+                  <li><strong>اشتباه ۲:</strong> فراموش کردن تهی در
+                    شمردن زیرمجموعه‌ها.</li>
+                  <li><strong>اشتباه ۳:</strong> فراموش کردن خود مجموعه
+                    در شمردن زیرمجموعه‌ها.</li>
+                  <li><strong>اشتباه ۴:</strong> محاسبه‌ی <span
+                      class="math">2^n</span> به صورت <span
+                      class="math">2 × n</span>.</li>
+                  <li><strong>اشتباه ۵:</strong> جابجا کردن تفاضل.</li>
+                  <li><strong>اشتباه ۶:</strong> نوشتن اعضای تکراری در
+                    اجتماع.</li>
+                  <li><strong>اشتباه ۷:</strong> ننوشتن آکولاد در
+                    جواب‌ها.</li>
+                  <li><strong>اشتباه ۸:</strong> اشتباه گرفتن نماد <span
+                      class="math">∈</span> با <span class="math">⊆</span>.</li>
+                </ul>
+              </div>
+              <div class="tip-card success">
+                <h3>🎯 ترفندهای سریع حل تست</h3>
+                <ul>
+                  <li><strong>ترفند ۱:</strong> اگر داخل آکولاد چیزی
+                    نبود، تهی است. اگر حتی یک چیز بود، تهی نیست.</li>
+                  <li><strong>ترفند ۲:</strong> در سوالات شمارش
+                    زیرمجموعه، هر چیزی که بین دو کاما است، <strong>یک
+                      عضو</strong> حساب می‌شود (حتی اگر خودش مجموعه
+                    باشد).</li>
+                  <li><strong>ترفند ۳:</strong> برای سوالات کلامی، از
+                    اصل شمول استفاده کن: <span class="math">|A∪B| =
+                      |A|+|B|−|A∩B|</span>.</li>
+                  <li><strong>ترفند ۴:</strong> در سوالات زیرمجموعه،
+                    ابتدا اعضای ای را بنویس، سپس یکی‌یکی چک کن که در بی
+                    هستند یا نه.</li>
+                  <li><strong>ترفند ۵:</strong> جدول توان‌های دو را حفظ
+                    کن تا در محاسبات سریع باشی.</li>
+                  <li><strong>ترفند ۶:</strong> برای نوشتن زیرمجموعه‌ها،
+                    از صفر عضو شروع کن و به ترتیب افزایش بده.</li>
+                </ul>
+              </div>
+              <div class="tip-card warning">
+                <h3>📌 نکات طلایی که باید حفظ باشی</h3>
+                <div class="formula-box" style="font-size:1rem;
+                  line-height:2.3; direction: rtl;"> تعداد زیرمجموعه‌های
+                  n عضوی = 2ⁿ<br>
+                  ∅ ⊆ A – تهی زیرمجموعه‌ی هر مجموعه‌ای است<br>
+                  A ⊆ A – هر مجموعه زیرمجموعه‌ی خودش است<br>
+                  A ∪ B = B ∪ A – جابجایی اجتماع<br>
+                  A ∩ B = B ∩ A – جابجایی اشتراک<br>
+                  A − B ≠ B − A – عدم جابجایی تفاضل<br>
+                  |A∪B| = |A|+|B|−|A∩B| – اصل شمول </div>
+              </div>
+              <div class="tip-card">
+                <h3>🎓 استراتژی روز امتحان</h3>
+                <ol>
+                  <li><strong>قبل از شروع:</strong> یک بار کل برگه را
+                    نگاه کن تا بفهمی چه سوالاتی داری.</li>
+                  <li><strong>ترتیب حل:</strong> اول سوالات آسان را حل
+                    کن، بعد سراغ سخت‌ها برو.</li>
+                  <li><strong>در سوالات چند مرحله‌ای:</strong> هر مرحله
+                    را جدا بنویس تا نمره‌ی مراحل را از دست ندهی.</li>
+                  <li><strong>در سوالات کلامی:</strong> اول مجموعه‌ها را
+                    تعریف کن، سپس از فرمول استفاده کن.</li>
+                  <li><strong>در سوالات شمارشی:</strong> قبل از پاسخ
+                    دادن، دوباره بررسی کن که آیا عضوی جا نمانده یا دو
+                    بار شمرده نشده.</li>
+                  <li><strong>در پایان:</strong> ۵ دقیقه‌ی آخر را به
+                    مرور جواب‌ها اختصاص بده.</li>
+                </ol>
+              </div>
+              <div class="checklist">
+                <h3>📝 آخرین توصیه‌ها قبل از امتحان</h3>
+                <label><input type="checkbox"> تمام تمرین‌های کتاب درسی
+                  را دو بار حل کرده‌ام.</label> <label><input
+                    type="checkbox"> تمام مثال‌های این فایل را مطالعه
+                  کرده‌ام.</label> <label><input type="checkbox"> ۱۵
+                  نمونه سوال را بدون نگاه کردن به جواب، حل کرده‌ام.</label>
+                <label><input type="checkbox"> جدول خلاصه و کارت مرجع را
+                  یک بار مرور کرده‌ام.</label> <label><input
+                    type="checkbox"> چک‌لیست مطالعه را کامل تیک زده‌ام.</label>
+                <label><input type="checkbox"> نمادهای اصلی (<span
+                    class="math">∈</span>، <span class="math">∉</span>،
+                  <span class="math">∅</span>، <span class="math">∪</span>،
+                  <span class="math">∩</span>، <span class="math">−</span>،
+                  <span class="math">⊆</span>) را روی کاغذ تمرین
+                  کرده‌ام.</label> <label><input type="checkbox"> با
+                  آرامش و اطمینان به امتحان می‌روم.</label> </div>
+              <div class="note-box"> <strong>🌟 پیام پایانی از سروناز و
+                  فرسام:</strong> <br>
+                <br>
+                دانش‌آموز عزیز ، اگر تا اینجا آمده‌ای، یعنی تلاش زیادی
+                کرده‌ای. فصل اول را با موفقیت پشت سر گذاشتی. حالا با
+                اطمینان و آرامش به امتحان برو.<br>
+                یادت باشد: <br>
+                <br>
+                <strong>«ریاضی با تمرین یاد گرفته می‌شود، نه با نگاه
+                  کردن. تو تمرین کردی، پس یاد گرفتی!»</strong> <br>
+                <br>
+                تهیه‌شده با ❤️ برای دانش‌آموزان عزیز | مدرسان: خانم
+                سروناز و آقای فرسام<br>
+                <strong>اپلیکیشن همیار من (فراتر از آموزش)</strong> <br>
+                موفق باشی! ✨ </div>
+            </section>
+          </main>
+          <footer> <strong>📘 جمع‌بندی جامع فصل اول ریاضی نهم</strong><br>
+            تهیه‌شده با ❤️ برای دانش‌آموزان عزیز | مدرسان: خانم سروناز و
+            آقای فرسام <br>
+            <strong>ا</strong><strong>پلیکیشن همیار من (فراتر از آموزش)</strong><br>
+            <br>
+            موفق باشی! ✨ </footer>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

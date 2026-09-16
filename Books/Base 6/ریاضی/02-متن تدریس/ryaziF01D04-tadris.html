@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+  <head>
+
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,
+      initial-scale=1.0">
+    <title>آموزش جامع ریاضی نهم - درس چهارم: عمل‌های روی مجموعه‌ها</title>
+    <style>
+  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 50%, #ecfeff 100%);
+    color: #1e293b;
+    line-height: 1.9;
+    padding: 20px;
+    font-size: 16px;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(30, 41, 59, 0.15);
+    overflow: hidden;
+  }
+
+  header {
+    background: linear-gradient(135deg, #059669 0%, #10b981 50%, #06b6d4 100%);
+    color: #fff;
+    padding: 40px 30px;
+    text-align: center;
+    position: relative;
+  }
+
+  header::after {
+    content: "";
+    position: absolute;
+    bottom: -20px;
+    left: 0; right: 0;
+    height: 40px;
+    background: #fff;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+
+  header h1 {
+    font-size: 2.1rem;
+    font-weight: 900;
+    margin-bottom: 12px;
+    text-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  }
+
+  header p {
+    font-size: 1.05rem;
+    opacity: 0.95;
+  }
+
+  .badges {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+  }
+
+  .badge {
+    background: rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  main { padding: 40px 30px 60px; }
+
+  .intro-box {
+    background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+    border-right: 6px solid #f59e0b;
+    padding: 22px 26px;
+    border-radius: 16px;
+    margin-bottom: 35px;
+    font-size: 1.02rem;
+  }
+
+  .intro-box strong { color: #92400e; }
+
+  .lesson {
+    background: #f8fafc;
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 40px;
+    border: 2px solid #e2e8f0;
+  }
+
+  .lesson-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 18px;
+    border-bottom: 3px dashed #cbd5e1;
+  }
+
+  .lesson-number {
+    width: 60px; height: 60px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #059669, #06b6d4);
+    color: #fff;
+    font-size: 1.6rem;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 8px 20px rgba(5, 150, 105, 0.35);
+  }
+
+  .lesson-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+
+  .lesson-sub {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #047857;
+    margin: 30px 0 16px;
+    padding-right: 12px;
+    border-right: 5px solid #10b981;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::before {
+    content: "◆";
+    color: #06b6d4;
+    font-size: 0.9rem;
+  }
+
+  .dialog {
+    display: flex;
+    gap: 14px;
+    margin: 18px 0;
+    align-items: flex-start;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .dialog.left { flex-direction: row; }
+  .dialog.right { flex-direction: row; }
+
+  .avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    color: #fff;
+    font-size: 1.05rem;
+    flex-shrink: 0;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+  }
+
+  .avatar.sarvnaz { background: linear-gradient(135deg, #ec4899, #f43f5e); }
+  .avatar.farsam  { background: linear-gradient(135deg, #0ea5e9, #3b82f6); }
+
+  .bubble {
+    flex: 1;
+    padding: 14px 18px;
+    border-radius: 18px;
+    position: relative;
+    font-size: 1rem;
+  }
+
+  .bubble.sarvnaz {
+    background: #fce7f3;
+    border-top-right-radius: 4px;
+    color: #831843;
+    border: 1px solid #fbcfe8;
+  }
+
+  .bubble.farsam {
+    background: #dbeafe;
+    border-top-right-radius: 4px;
+    color: #1e3a8a;
+    border: 1px solid #bfdbfe;
+  }
+
+  .speaker {
+    font-weight: 800;
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+  }
+
+  .speaker.sarvnaz { color: #be185d; }
+  .speaker.farsam  { color: #1d4ed8; }
+
+  .formula-box {
+    background: #fff7ed;
+    border: 2px solid #fb923c;
+    border-radius: 14px;
+    padding: 16px 22px;
+    margin: 18px 0;
+    text-align: center;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #9a3412;
+    direction: ltr;
+    font-family: 'Cambria Math', 'Times New Roman', serif;
+  }
+
+  .formula-box.big {
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, #fff7ed, #fed7aa);
+    border-width: 3px;
+  }
+
+  .note-box {
+    background: #ecfdf5;
+    border-right: 5px solid #10b981;
+    padding: 14px 20px;
+    border-radius: 12px;
+    margin: 18px 0;
+    color: #065f46;
+    font-size: 0.98rem;
+  }
+
+  .warning-box {
+    background: #fef2f2;
+    border-right: 5px solid #ef4444;
+    padding: 14px 20px;
+    border-radius: 12px;
+    margin: 18px 0;
+    color: #991b1b;
+    font-size: 0.98rem;
+  }
+
+  .example-box {
+    background: #f5f3ff;
+    border: 2px solid #a78bfa;
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin: 20px 0;
+  }
+
+  .example-box h4 {
+    color: #6d28d9;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .example-box h4::before {
+    content: "📌";
+    font-size: 1.2rem;
+  }
+
+  .solution {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-top: 12px;
+    border: 1px dashed #a78bfa;
+  }
+
+  .solution strong { color: #7c3aed; }
+
+  .svg-wrapper {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 22px 0;
+    text-align: center;
+    border: 2px solid #e0e7ff;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.08);
+  }
+
+  .svg-wrapper svg { max-width: 100%; height: auto; }
+
+  .svg-caption {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: 10px;
+    font-style: italic;
+  }
+
+  ul, ol { padding-right: 26px; margin: 12px 0; }
+  li { margin: 6px 0; }
+
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  }
+
+  .summary-table th {
+    background: linear-gradient(135deg, #059669, #06b6d4);
+    color: #fff;
+    padding: 14px;
+    font-size: 1rem;
+  }
+
+  .summary-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.98rem;
+  }
+
+  .summary-table tr:nth-child(even) td { background: #f8fafc; }
+  .summary-table tr:last-child td { border-bottom: none; }
+
+  .final-exam {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border: 3px solid #ef4444;
+    border-radius: 20px;
+    padding: 30px;
+    margin: 40px 0;
+  }
+
+  .final-exam h2 {
+    color: #991b1b;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .final-exam h2::before { content: "📝"; font-size: 1.6rem; }
+
+  .question {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin: 18px 0;
+    border-right: 5px solid #ef4444;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  .question-title {
+    font-weight: 800;
+    color: #991b1b;
+    font-size: 1.05rem;
+    margin-bottom: 10px;
+  }
+
+  .answer {
+    background: #f0fdf4;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-top: 14px;
+    border-right: 4px solid #16a34a;
+  }
+
+  .answer-title {
+    font-weight: 800;
+    color: #166534;
+    margin-bottom: 10px;
+    font-size: 1rem;
+  }
+
+  .math { direction: ltr; display: inline-block; font-family: 'Cambria Math', serif; }
+
+  .highlight {
+    background: linear-gradient(120deg, #fef08a 0%, #fde047 100%);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-weight: 700;
+    color: #713f12;
+  }
+
+  .op-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 16px;
+    margin: 22px 0;
+  }
+
+  .op-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease;
+  }
+
+  .op-card:hover { transform: translateY(-4px); }
+
+  .op-card .symbol {
+    font-size: 2.4rem;
+    font-weight: 900;
+    font-family: 'Cambria Math', serif;
+    margin-bottom: 8px;
+    direction: ltr;
+  }
+
+  .op-card .label {
+    font-size: 1rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .op-card .desc {
+    font-size: 0.88rem;
+    color: #475569;
+    line-height: 1.7;
+  }
+
+  .op-card.union { border-color: #3b82f6; background: linear-gradient(135deg, #eff6ff, #dbeafe); }
+  .op-card.union .symbol { color: #1d4ed8; }
+  .op-card.union .label { color: #1e3a8a; }
+
+  .op-card.inter { border-color: #f59e0b; background: linear-gradient(135deg, #fffbeb, #fde68a); }
+  .op-card.inter .symbol { color: #b45309; }
+  .op-card.inter .label { color: #92400e; }
+
+  .op-card.diff { border-color: #10b981; background: linear-gradient(135deg, #ecfdf5, #d1fae5); }
+  .op-card.diff .symbol { color: #047857; }
+  .op-card.diff .label { color: #065f46; }
+
+  .exam-tips {
+    background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+    border: 3px solid #4f46e5;
+    border-radius: 20px;
+    padding: 30px;
+    margin: 40px 0;
+  }
+
+  .exam-tips h2 {
+    color: #3730a3;
+    font-size: 1.6rem;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .exam-tips h2::before { content: "🏆"; font-size: 1.7rem; }
+
+  .tip-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin: 16px 0;
+    border-right: 5px solid #6366f1;
+    box-shadow: 0 4px 14px rgba(99,102,241,0.08);
+  }
+
+  .tip-card h3 {
+    color: #3730a3;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tip-card.danger { border-right-color: #dc2626; }
+  .tip-card.danger h3 { color: #991b1b; }
+  .tip-card.success { border-right-color: #16a34a; }
+  .tip-card.success h3 { color: #166534; }
+  .tip-card.warning { border-right-color: #f59e0b; }
+  .tip-card.warning h3 { color: #92400e; }
+
+  footer {
+    text-align: center;
+    padding: 30px 20px;
+    background: #1e293b;
+    color: #cbd5e1;
+    font-size: 0.9rem;
+  }
+
+  footer strong { color: #10b981; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 8px; font-size: 15px; }
+    main { padding: 20px 14px 40px; }
+    header { padding: 28px 16px; }
+    header h1 { font-size: 1.4rem; }
+    .lesson { padding: 18px; }
+    .lesson-title { font-size: 1.15rem; }
+    .avatar { width: 42px; height: 42px; font-size: 0.85rem; }
+    .bubble { padding: 12px 14px; font-size: 0.95rem; }
+    .final-exam, .exam-tips { padding: 18px; }
+  }
+</style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>📘 آموزش جامع ریاضی پایه نهم</h1>
+        <p>فصل اول – درس چهارم: عمل‌های روی مجموعه‌ها</p>
+      </header>
+      <main>
+        <!-- ====== INTRO ====== -->
+        <div class="intro-box"> <strong>سلام دانش‌آموز عزیز! 🌟</strong><br>
+          در سه درس قبل یاد گرفتیم که «مجموعه» چیست، چگونه اعضای آن را
+          بشماریم و با مفهوم مهم زیرمجموعه آشنا شدیم. حالا در این درس
+          می‌خواهیم با <strong>سه عمل اصلی روی مجموعه‌ها</strong> آشنا
+          شویم: <strong>اجتماع</strong>، <strong>اشتراک</strong> و <strong>تفاضل</strong>.
+          این سه عمل، پرکاربردترین ابزارهای فصل اول هستند و در امتحانات
+          نهایی حتماً از آن‌ها سوال می‌آید. <strong>خانم سروناز</strong>
+          و <strong>آقای فرسام</strong> همراه تو هستند. آماده‌ای؟ شروع
+          می‌کنیم!
+        </div>
+        <!-- ============================================================= -->
+        <!-- ==================== بخش اصلی درس =========================== -->
+        <!-- ============================================================= -->
+        <section class="lesson">
+          <div class="lesson-header">
+            <div class="lesson-number">۴</div>
+            <div>
+              <div class="lesson-title">عمل‌های روی مجموعه‌ها: اجتماع،
+                اشتراک، تفاضل</div>
+              <div class="lesson-sub">سه عمل اصلی که در امتحانات زیاد
+                می‌آید</div>
+            </div>
+          </div>
+          <!-- ========== مقدمه: چرا عمل لازم داریم؟ ========== -->
+          <div class="section-title">چرا به عمل روی مجموعه‌ها نیاز
+            داریم؟</div>
+          <div class="dialog right">
+            <div class="avatar farsam">فرسام</div>
+            <div class="bubble farsam"> <span class="speaker farsam">آقای
+                فرسام:</span> سروناز جان، تا حالا یاد گرفتیم که مجموعه
+              چیست و اعضای آن را چطور بشماریم. حالا می‌خواهم یک سؤال
+              مطرح کنم: ...اگر دو مجموعه داشته باشیم، چه کارهایی
+              می‌توانیم با آن‌ها انجام دهیم؟ ...آیا می‌توانیم آن‌ها را
+              با هم ترکیب کنیم؟ یا اعضای مشترک‌شان را پیدا کنیم؟ </div>
+          </div>
+          <div class="dialog left">
+            <div class="avatar sarvnaz">سروناز</div>
+            <div class="bubble sarvnaz"> <span class="speaker sarvnaz">خانم
+                سروناز:</span> سؤال خیلی خوبی است!... دقیقاً همین‌جاست
+              که <strong>عمل‌های روی مجموعه‌ها</strong> وارد
+              می‌شوند.... در ریاضی، وقتی دو مجموعه داریم، می‌توانیم سه
+              کار اصلی با آن‌ها انجام دهیم:
+              <ul>
+                <li><strong>اجتماع</strong> – یعنی ترکیب هر دو مجموعه در
+                  یک مجموعه‌ی واحد.</li>
+                <li><strong>اشتراک</strong> – یعنی پیدا کردن اعضای مشترک
+                  بین دو مجموعه.</li>
+                <li><strong>تفاضل</strong> – یعنی پیدا کردن اعضایی که در
+                  یکی هست و در دیگری نیست.</li>
+              </ul>
+              این‌ها مثل جمع، اشتراک و تفریق در حساب هستند، ولی برای
+              مجموعه‌ها. </div>
+          </div>
+          <div class="dialog right">
+            <div class="avatar farsam">فرسام</div>
+            <div class="bubble farsam"> <span class="speaker farsam">آقای
+                فرسام:</span> بگذار با یک مثال از زندگی روزمره شروع کنم
+              تا کامل جا بیفتد.... فرض کن دو تا سبد میوه داری.... سبد
+              اول شامل سیب، پرتقال و موز است.... سبد دوم شامل موز، انگور
+              و هندوانه است.... حالا:
+              <ul>
+                <li>اگر بخواهی <strong>همه‌ی میوه‌های دو سبد</strong>
+                  را در یک سبد بزرگ بریزی، این کار می‌شود <strong>اجتماع</strong>
+                  دو مجموعه.</li>
+                <li>اگر بخواهی ببینی چه میوه‌هایی <strong>در هر دو سبد</strong>
+                  هستند، این می‌شود <strong>اشتراک</strong>.</li>
+                <li>اگر بخواهی ببینی چه میوه‌هایی <strong>فقط در سبد
+                    اول</strong> هستند، این می‌شود <strong>تفاضل</strong>.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="dialog left">
+            <div class="avatar sarvnaz">سروناز</div>
+            <div class="bubble sarvnaz"> <span class="speaker sarvnaz">خانم
+                سروناز:</span> چه مثال ملموسی!... حالا برویم سراغ تعریف
+              دقیق ریاضی هر یک. </div>
+          </div>
+          <!-- ========== اجتماع ========== -->
+          <div class="section-title">اجتماع (اتحاد) دو مجموعه</div>
+          <div class="dialog right">
+            <div class="avatar farsam">فرسام</div>
+            <div class="bubble farsam"> <span class="speaker farsam">آقای
+                فرسام:</span> <strong>اجتماع</strong> دو مجموعه‌ی ای و
+              بی، یعنی مجموعه‌ای که شامل <strong>همه‌ی اعضای ای و همه‌ی
+                اعضای بی</strong> است، بدون نوشتن اعضای تکراری.... نماد
+              آن این است: ...ای، اجتماع، بی.... یعنی یک علامت شبیه حرف
+              انگلیسی یو که رو به بالا باز است. </div>
+          </div>
+          <div class="dialog left">
+            <div class="avatar sarvnaz">سروناز</div>
+            <div class="bubble sarvnaz"> <span class="speaker sarvnaz">خانم
+                سروناز:</span> بگذار با یک مثال ساده نشان بدهم.... فرض
+              کن مجموعه‌ی ای برابر است با یک، دو و سه.... و مجموعه‌ی بی
+              برابر است با سه، چهار و پنج.... حالا اجتماع ای و بی به این
+              ترتیب محاسبه می‌شود:
+              <div class="formula-box">A ∪ B = { 1, 2, 3, 4, 5 }</div>
+              دقت کن که عدد سه در هر دو مجموعه بود، ولی در اجتماع فقط یک
+              بار نوشته می‌شود.... چون در مجموعه اعضای تکراری شمرده
+              نمی‌شوند. </div>
+          </div>
+          <div class="dialog right">
+            <div class="avatar farsam">فرسام</div>
+            <div class="bubble farsam"> <span class="speaker farsam">آقای
+                فرسام:</span> دقیقاً!... پس نکته‌ی طلایی اجتماع این است:
+              ...<span class="highlight">همه‌ی اعضا، بدون تکرار</span>....
+              حالا یک نکته‌ی جالب دیگر: ...اجتماع دو مجموعه، خواص جالبی
+              دارد:
+              <ul>
+                <li>ای اجتماع بی، همان بی اجتماع ای است.... یعنی ترتیب
+                  مهم نیست.</li>
+                <li>اجتماع هر مجموعه با تهی، خود آن مجموعه است.... ای
+                  اجتماع تهی برابر ای است.</li>
+                <li>اجتماع هر مجموعه با خودش، خود آن مجموعه است.... ای
+                  اجتماع ای برابر ای است.</li>
+              </ul>
+            </div>
+          </div>
+          <!-- ========== اشتراک ========== -->
+          <div class="section-title">اشتراک دو مجموعه</div>
+          <div class="dialog left">
+            <div class="avatar sarvnaz">سروناز</div>
+            <div class="bubble sarvnaz"> <span class="speaker sarvnaz">خانم
+                سروناز:</span> <strong>اشتراک</strong> دو مجموعه‌ی ای و
+              بی، یعنی مجموعه‌ای که فقط شامل <strong>اعضای مشترک</strong>
+              بین این دو مجموعه است.... نماد آن این است: ...ای، اشتراک،
+              بی.... یعنی یک علامت شبیه حرف انگلیسی یو که رو به پایین
+              باز است. </div>
+          </div>
+          <div class="dialog right">
+            <div class="avatar farsam">فرسام</div>
+            <div class="bubble farsam"> <span class="speaker farsam">آقای
+                فرسام:</span> همان مثال قبلی را در نظر بگیر.... مجموعه‌ی
+              ای برابر با یک، دو و سه، و مجموعه‌ی بی برابر با سه، چهار و
+              پنج.... اشتراک ای و بی به این ترتیب محاسبه می‌شود:
+              <div class="formula-box">A ∩ B = { 3 }</div>
+              چون تنها عضو مشترک بین ای و بی، عدد سه است. </div>
+          </div>
+          <div class="dialog left">
+            <div class="avatar sarvnaz">سروناز</div>
+            <div class="bubble sarvnaz"> <span class="speaker sarvnaz">خانم
+                سروناز:</span> درست است!... و یک حالت مهم: ...اگر دو
+              مجموعه <strong>هیچ عضو مشترکی نداشته باشند</strong>،
+              اشتراک آن‌ها تهی است.... مثلاً اگر ای برابر با یک، دو و
+              سه، و بی برابر با چهار، پنج و شش باشد:
+              <div class="formula-box">A ∩ B = ∅</div>
+              به چنین مجموعه‌هایی می‌گوییم <strong>مجموعه‌های جدا از هم</strong>
+              یا متقابلاً جدا. </div>
+          </div>
+          <div class="dialog right">
+            <div class="avatar farsam">فرسام</div>
+            <div class="bubble farsam"> <span class="speaker farsam">آقای
+                فرسام:</span> یک نکته‌ی مهم دیگر: ...اشتراک هم مثل
+              اجتماع، خواص جالبی دارد:
+              <ul>
+                <li>ای اشتراک بی، همان بی اشتراک ای است.... ترتیب مهم
+                  نیست.</li>
+                <li>اشتراک هر مجموعه با تهی، تهی است.... ای اشتراک تهی
+                  برابر تهی است.</li>
+                <li>اشتراک هر مجموعه با خودش، خود آن مجموعه است.... ای
+                  اشتراک ای برابر ای است.</li>
+              </ul>
+            </div>
+          </div>
+          <!-- ========== تفاضل ========== -->
+          <div class="section-title">تفاضل دو مجموعه</div>
+          <div class="dialog left">
+            <div class="avatar sarvnaz">سروناز</div>
+            <div class="bubble sarvnaz"> <span class="speaker sarvnaz">خانم
+                سروناز:</span> <strong>تفاضل</strong> ای منهای بی، یعنی
+              مجموعه‌ای که شامل <strong>اعضایی از ای است که در بی
+                نیستند</strong>.... نماد آن این است: ...ای، منهای، بی. </div>
+          </div>
+          <div class="dialog right">
+            <div class="avatar farsam">فرسام</div>
+            <div class="bubble farsam"> <span class="speaker farsam">آقای
+                فرسام:</span> همان مثال قبلی را در نظر بگیر.... ای برابر
+              یک، دو و سه، و بی برابر سه، چهار و پنج.... تفاضل ای منهای
+              بی:
+              <div class="formula-box">A − B = { 1, 2 }</div>
+              چون اعضای ای که در بی نیستند، اعداد یک و دو هستند. <br>
+              <br>
+              و برعکس آن، تفاضل بی منهای ای:
+              <div class="formula-box">B − A = { 4, 5 }</div>
+              چون اعضای بی که در ای نیستند، اعداد چهار و پنج هستند. </div>
+          </div>
+          <div class="dialog left">
+            <div class="avatar sarvnaz">سروناز</div>
+            <div class="bubble sarvnaz"> <span class="speaker sarvnaz">خانم
+                سروناز:</span> یک نکته‌ی مهم درباره‌ی تفاضل: ...<strong>تفاضل،
+                خاصیت جابجایی ندارد</strong>.... یعنی ای منهای بی، با بی
+              منهای ای معمولاً برابر نیست.... همان‌طور که در مثال دیدیم،
+              ای منهای بی برابر یک و دو شد، ولی بی منهای ای برابر چهار و
+              پنج.... این‌ها با هم فرق دارند. </div>
+          </div>
+          <div class="dialog right">
+            <div class="avatar farsam">فرسام</div>
+            <div class="bubble farsam"> <span class="speaker farsam">آقای
+                فرسام:</span> دقیقاً!... حالا بگذار یک نکته‌ی جالب دیگر
+              هم بگویم: ...اگر ای زیرمجموعه‌ی بی باشد، آنگاه ای منهای بی
+              برابر تهی می‌شود.... چون همه‌ی اعضای ای در بی هم هستند، پس
+              هیچ عضوی از ای نیست که در بی نباشد.... پس تفاضل تهی است. </div>
+          </div>
+          <!-- ========== سه کارت عملیات ========== -->
+          <div class="op-grid">
+            <div class="op-card union">
+              <div class="symbol">∪</div>
+              <div class="label">اجتماع</div>
+              <div class="desc">همه‌ی اعضای دو مجموعه، بدون تکرار</div>
+            </div>
+            <div class="op-card inter">
+              <div class="symbol">∩</div>
+              <div class="label">اشتراک</div>
+              <div class="desc">فقط اعضای مشترک دو مجموعه</div>
+            </div>
+            <div class="op-card diff">
+              <div class="symbol">−</div>
+              <div class="label">تفاضل</div>
+              <div class="desc">اعضای اولی که در دومی نیستند</div>
+            </div>
+          </div>
+          <!-- ========== SVG نمودار ون با فاصله و رنگ صحیح ========== -->
+          <div class="svg-wrapper">
+            <svg viewBox="0 0 820 400"
+              xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="gUnionFill" x1="0" y1="0" x2="1"
+                  y2="1">
+                  <stop offset="0%" stop-color="#bfdbfe"></stop>
+                  <stop offset="100%" stop-color="#60a5fa"></stop> </linearGradient>
+                <linearGradient id="gLensFill" x1="0" y1="0" x2="1"
+                  y2="1">
+                  <stop offset="0%" stop-color="#fde68a"></stop>
+                  <stop offset="100%" stop-color="#f59e0b"></stop> </linearGradient>
+                <linearGradient id="gCrescentFill" x1="0" y1="0" x2="1"
+                  y2="1">
+                  <stop offset="0%" stop-color="#86efac"></stop>
+                  <stop offset="100%" stop-color="#22c55e"></stop> </linearGradient>
+              </defs>
+              <rect width="820" height="400" fill="#f0f9ff" rx="18"></rect>
+              <text x="410" y="36" text-anchor="middle" font-size="20"
+                font-weight="900" fill="#0c4a6e" font-family="Vazirmatn,
+                sans-serif">نمودار ون: اجتماع، اشتراک، تفاضل</text>
+              <!-- ============ شکل ۱: اجتماع (A ∪ B) ============ -->
+              <g>
+                <!-- دو دایره با پر شدن کامل و رنگ یکسان -->
+                <circle cx="115" cy="200" r="60" fill="url(#gUnionFill)"
+                  stroke="#1d4ed8" stroke-width="2.5"></circle>
+                <circle cx="175" cy="200" r="60" fill="url(#gUnionFill)"
+                  stroke="#1d4ed8" stroke-width="2.5"></circle>
+                <!-- برچسب A و B -->
+                <text x="75" y="160" font-size="20" font-weight="900"
+                  fill="#1e3a8a" font-family="monospace">A</text>
+                <text x="205" y="160" font-size="20" font-weight="900"
+                  fill="#1e3a8a" font-family="monospace">B</text>
+                <!-- عنوان زیر شکل -->
+                <text x="145" y="300" text-anchor="middle"
+                  font-size="16" font-weight="900" fill="#0c4a6e"
+                  font-family="Vazirmatn, sans-serif">A ∪ B</text>
+                <text x="145" y="325" text-anchor="middle"
+                  font-size="12" fill="#475569" font-family="Vazirmatn,
+                  sans-serif">همه‌ی اعضا</text>
+                <text x="145" y="345" text-anchor="middle"
+                  font-size="11" fill="#64748b" font-family="Vazirmatn,
+                  sans-serif">(شامل هر دو دایره)</text> </g>
+              <!-- ============ شکل ۲: اشتراک (A ∩ B) ============ -->
+              <g>
+                <!-- دایره‌های توخالی -->
+                <circle cx="385" cy="200" r="60" fill="none"
+                  stroke="#1d4ed8" stroke-width="2.5"></circle>
+                <circle cx="445" cy="200" r="60" fill="none"
+                  stroke="#be185d" stroke-width="2.5"></circle>
+                <!-- فقط ناحیه‌ی مشترک (عدسی) رنگی -->
+                <path d="M 415 148.04 A 60 60 0 0 1 415 251.96 A 60 60 0
+                  0 1 415 148.04 Z" fill="url(#gLensFill)"
+                  stroke="#a16207" stroke-width="1.5"></path>
+                <!-- برچسب‌ها -->
+                <text x="345" y="160" font-size="20" font-weight="900"
+                  fill="#1e3a8a" font-family="monospace">A</text>
+                <text x="475" y="160" font-size="20" font-weight="900"
+                  fill="#831843" font-family="monospace">B</text>
+                <!-- عنوان زیر شکل -->
+                <text x="415" y="300" text-anchor="middle"
+                  font-size="16" font-weight="900" fill="#0c4a6e"
+                  font-family="Vazirmatn, sans-serif">A ∩ B</text>
+                <text x="415" y="325" text-anchor="middle"
+                  font-size="12" fill="#475569" font-family="Vazirmatn,
+                  sans-serif">اعضای مشترک</text>
+                <text x="415" y="345" text-anchor="middle"
+                  font-size="11" fill="#64748b" font-family="Vazirmatn,
+                  sans-serif">(فقط ناحیه‌ی وسط)</text> </g>
+              <!-- ============ شکل ۳: تفاضل (A − B) ============ -->
+              <g>
+                <!-- دایره‌های توخالی -->
+                <circle cx="655" cy="200" r="60" fill="none"
+                  stroke="#1d4ed8" stroke-width="2.5"></circle>
+                <circle cx="715" cy="200" r="60" fill="none"
+                  stroke="#be185d" stroke-width="2.5"></circle>
+                <!-- فقط ناحیه‌ی A منهای B (هلال چپ) رنگی -->
+                <path d="M 685 148.04 A 60 60 0 1 0 685 251.96 A 60 60 0
+                  0 1 685 148.04 Z" fill="url(#gCrescentFill)"
+                  stroke="#166534" stroke-width="1.5"></path>
+                <!-- برچسب‌ها -->
+                <text x="615" y="160" font-size="20" font-weight="900"
+                  fill="#1e3a8a" font-family="monospace">A</text>
+                <text x="745" y="160" font-size="20" font-weight="900"
+                  fill="#831843" font-family="monospace">B</text>
+                <!-- عنوان زیر شکل -->
+                <text x="685" y="300" text-anchor="middle"
+                  font-size="16" font-weight="900" fill="#0c4a6e"
+                  font-family="Vazirmatn, sans-serif">A − B</text>
+                <text x="685" y="325" text-anchor="middle"
+                  font-size="12" fill="#475569" font-family="Vazirmatn,
+                  sans-serif">فقط اعضای A</text>
+                <text x="685" y="345" text-anchor="middle"
+                  font-size="11" fill="#64748b" font-family="Vazirmatn,
+                  sans-serif">(ناحیه‌ی سبز)</text> </g> </svg>
+            <div class="svg-caption">شکل ۱: نمایش گرافیکی صحیح سه عمل
+              اصلی – هر شکل با فاصله‌ی مناسب و ناحیه‌ی رنگی دقیق</div>
+          </div>
+          <!-- ========== مثال‌های تشریحی ========== -->
+          <div class="example-box">
+            <h4>مثال ۱: با توجه به <span class="math">A = {1, 2, 3, 4}</span>
+              و <span class="math">B = {3, 4, 5, 6}</span>، حاصل هر یک
+              را بنویسید.</h4>
+            <p>الف) <span class="math">A ∪ B</span></p>
+            <p>ب) <span class="math">A ∩ B</span></p>
+            <p>پ) <span class="math">A − B</span></p>
+            <p>ت) <span class="math">B − A</span></p>
+            <div class="solution"> <strong>حل گام‌به‌گام:</strong>
+              <ul>
+                <li><strong>الف) اجتماع:</strong> همه‌ی اعضای دو مجموعه،
+                  بدون تکرار. اعضای مشترک ۳ و ۴ فقط یک بار نوشته
+                  می‌شوند.
+                  <p><span class="math">A ∪ B = {1, 2, 3, 4, 5, 6}</span></p>
+                </li>
+                <li><strong>ب) اشتراک:</strong> فقط اعضای مشترک بین ای و
+                  بی. اعضای مشترک ۳ و ۴ هستند.
+                  <p><span class="math">A ∩ B = {3, 4}</span></p>
+                </li>
+                <li><strong>پ) تفاضل ای منهای بی:</strong> اعضای ای که
+                  در بی نیستند.
+                  <p><span class="math">A − B = {1, 2}</span></p>
+                </li>
+                <li><strong>ت) تفاضل بی منهای ای:</strong> اعضای بی که
+                  در ای نیستند.
+                  <p><span class="math">B − A = {5, 6}</span></p>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="example-box">
+            <h4>مثال ۲: اگر <span class="math">A = {1, 2, 3}</span> و <span
+                class="math">B = {4, 5, 6}</span> باشد، حاصل <span
+                class="math">A ∩ B</span> چیست؟</h4>
+            <div class="solution"> <strong>حل:</strong>
+              <p>بررسی می‌کنیم که آیا عضو مشترکی بین ای و بی وجود دارد
+                یا نه:</p>
+              <ul>
+                <li>آیا ۱ در بی هست؟ خیر ❌</li>
+                <li>آیا ۲ در بی هست؟ خیر ❌</li>
+                <li>آیا ۳ در بی هست؟ خیر ❌</li>
+              </ul>
+              <p>هیچ عضو مشترکی وجود ندارد. پس:</p>
+              <div class="formula-box">A ∩ B = ∅</div>
+              <p>به چنین مجموعه‌هایی می‌گوییم <span class="highlight">مجموعه‌های
+                  جدا از هم</span>.</p>
+            </div>
+          </div>
+          <div class="example-box">
+            <h4>مثال ۳: با توجه به <span class="math">A = {2, 4, 6, 8}</span>
+              و <span class="math">B = {2, 4, 6, 8, 10, 12}</span>،
+              حاصل هر یک را بنویسید.</h4>
+            <p>الف) <span class="math">A ∪ B</span></p>
+            <p>ب) <span class="math">A ∩ B</span></p>
+            <p>پ) <span class="math">A − B</span></p>
+            <p>ت) <span class="math">B − A</span></p>
+            <div class="solution"> <strong>حل:</strong>
+              <p>توجه کن که ای زیرمجموعه‌ی بی است، چون همه‌ی اعضای ای،
+                در بی هم هستند.</p>
+              <ul>
+                <li><strong>الف) اجتماع:</strong> چون ای زیرمجموعه‌ی بی
+                  است، اجتماع آن‌ها همان بی می‌شود.
+                  <p><span class="math">A ∪ B = {2, 4, 6, 8, 10, 12} = B</span></p>
+                </li>
+                <li><strong>ب) اشتراک:</strong> چون ای زیرمجموعه‌ی بی
+                  است، اشتراک آن‌ها همان ای می‌شود.
+                  <p><span class="math">A ∩ B = {2, 4, 6, 8} = A</span></p>
+                </li>
+                <li><strong>پ) تفاضل ای منهای بی:</strong> چون همه‌ی
+                  اعضای ای در بی هستند، هیچ عضوی از ای در بی نیست.
+                  <p><span class="math">A − B = ∅</span></p>
+                </li>
+                <li><strong>ت) تفاضل بی منهای ای:</strong> اعضای بی که
+                  در ای نیستند.
+                  <p><span class="math">B − A = {10, 12}</span></p>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="note-box"> <strong>💡 نکته‌ی طلایی:</strong> اگر
+            ای زیرمجموعه‌ی بی باشد، آنگاه:
+            <ul>
+              <li>ای اجتماع بی برابر بی است.</li>
+              <li>ای اشتراک بی برابر ای است.</li>
+              <li>ای منهای بی برابر تهی است.</li>
+            </ul>
+            این سه خاصیت را حتماً به خاطر بسپار. </div>
+          <div class="warning-box"> <strong>⚠️ اشتباه رایج:</strong>
+            بعضی دانش‌آموزان فکر می‌کنند تفاضل، خاصیت جابجایی دارد و ای
+            منهای بی با بی منهای ای برابر است.... این کاملاً اشتباه است!
+            تفاضل جابجا نمی‌شود. <br>
+            <br>
+            مثال: ای برابر یک و دو و سه، بی برابر سه و چهار و پنج:
+            <ul>
+              <li>ای منهای بی برابر یک و دو است.</li>
+              <li>بی منهای ای برابر چهار و پنج است.</li>
+            </ul>
+            می‌بینی؟ متفاوت هستند! </div>
+        </section>
+        <!-- ============================================================= -->
+        <!-- ============== مثال‌های بیشتر ============================= -->
+        <!-- ============================================================= -->
+        <section class="lesson">
+          <div class="lesson-header">
+            <div class="lesson-number">★</div>
+            <div>
+              <div class="lesson-title">مثال‌های تشریحی بیشتر</div>
+              <div class="lesson-sub">برای تسلط کامل، این مثال‌ها را با
+                دقت بخوان</div>
+            </div>
+          </div>
+          <div class="example-box">
+            <h4>مثال ۴: با توجه به <span class="math">A = {1, 3, 5, 7,
+                9}</span> و <span class="math">B = {2, 3, 5, 7, 11}</span>،
+              حاصل هر یک را بنویسید.</h4>
+            <div class="solution"> <strong>حل تشریحی:</strong>
+              <p><strong>گام اول – بررسی اعضای مشترک:</strong> اعضای
+                مشترک بین ای و بی عبارتند از ۳، ۵ و ۷.</p>
+              <p><strong>گام دوم – اجتماع:</strong> همه‌ی اعضا بدون
+                تکرار.</p>
+              <p><span class="math">A ∪ B = {1, 2, 3, 5, 7, 9, 11}</span></p>
+              <p><strong>گام سوم – اشتراک:</strong> فقط اعضای مشترک.</p>
+              <p><span class="math">A ∩ B = {3, 5, 7}</span></p>
+              <p><strong>گام چهارم – تفاضل ای منهای بی:</strong> اعضای
+                ای که در بی نیستند، یعنی ۱ و ۹.</p>
+              <p><span class="math">A − B = {1, 9}</span></p>
+              <p><strong>گام پنجم – تفاضل بی منهای ای:</strong> اعضای بی
+                که در ای نیستند، یعنی ۲ و ۱۱.</p>
+              <p><span class="math">B − A = {2, 11}</span></p>
+            </div>
+          </div>
+          <div class="example-box">
+            <h4>مثال ۵: اگر <span class="math">A = {a, b, c, d}</span>
+              و <span class="math">B = {c, d, e, f}</span> باشد، <span
+                class="math">A ∪ B</span> و <span class="math">A ∩ B</span>
+              را بنویسید.</h4>
+            <div class="solution"> <strong>حل:</strong>
+              <p><strong>اعضای مشترک:</strong> c و d</p>
+              <p><strong>اجتماع:</strong></p>
+              <p><span class="math">A ∪ B = {a, b, c, d, e, f}</span></p>
+              <p><strong>اشتراک:</strong></p>
+              <p><span class="math">A ∩ B = {c, d}</span></p>
+            </div>
+          </div>
+          <div class="example-box">
+            <h4>مثال ۶: اگر <span class="math">A = {1, 2, 3, 4, 5}</span>
+              و <span class="math">B = {1, 2, 3, 4, 5}</span> باشد،
+              حاصل <span class="math">A ∪ B</span>، <span class="math">A
+                ∩ B</span> و <span class="math">A − B</span> چیست؟</h4>
+            <div class="solution"> <strong>حل:</strong>
+              <p>وقتی دو مجموعه دقیقاً اعضای یکسان داشته باشند، به آن‌ها
+                <strong>مجموعه‌های مساوی</strong> می‌گوییم.</p>
+              <ul>
+                <li><strong>اجتماع:</strong> همه‌ی اعضا بدون تکرار.
+                  <p><span class="math">A ∪ B = {1, 2, 3, 4, 5}</span></p>
+                </li>
+                <li><strong>اشتراک:</strong> همه‌ی اعضا چون هر دو یکی
+                  هستند.
+                  <p><span class="math">A ∩ B = {1, 2, 3, 4, 5}</span></p>
+                </li>
+                <li><strong>تفاضل ای منهای بی:</strong> هیچ عضوی از ای
+                  نیست که در بی نباشد.
+                  <p><span class="math">A − B = ∅</span></p>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="example-box">
+            <h4>مثال ۷: در یک کلاس ۳۰ نفره، ۱۸ نفر فوتبال دوست دارند، ۱۵
+              نفر والیبال دوست دارند و ۸ نفر هر دو ورزش را دوست دارند.
+              چند نفر فقط فوتبال دوست دارند؟ چند نفر فقط والیبال؟ چند
+              نفر هیچ‌کدام را دوست ندارند؟</h4>
+            <div class="solution"> <strong>حل تشریحی گام‌به‌گام:</strong>
+              <p>این یک مسئله‌ی کاربردی است که با مفهوم اشتراک و اجتماع
+                حل می‌شود.</p>
+              <p><strong>گام اول – تعریف مجموعه‌ها:</strong></p>
+              <ul>
+                <li>مجموعه‌ی ای: دانش‌آموزانی که فوتبال دوست دارند (۱۸
+                  نفر)</li>
+                <li>مجموعه‌ی بی: دانش‌آموزانی که والیبال دوست دارند (۱۵
+                  نفر)</li>
+                <li>اشتراک ای و بی: کسانی که هر دو را دوست دارند (۸ نفر)</li>
+              </ul>
+              <p><strong>گام دوم – فقط فوتبال:</strong> اعضای ای که در
+                بی نیستند:</p>
+              <p><span class="math">18 − 8 = 10</span> نفر فقط فوتبال
+                دوست دارند.</p>
+              <p><strong>گام سوم – فقط والیبال:</strong> اعضای بی که در
+                ای نیستند:</p>
+              <p><span class="math">15 − 8 = 7</span> نفر فقط والیبال
+                دوست دارند.</p>
+              <p><strong>گام چهارم – کسانی که حداقل یکی را دوست دارند
+                  (اجتماع):</strong></p>
+              <p><span class="math">10 + 8 + 7 = 25</span> نفر</p>
+              <p><strong>گام پنجم – هیچ‌کدام:</strong></p>
+              <p><span class="math">30 − 25 = 5</span> نفر هیچ‌کدام را
+                دوست ندارند.</p>
+              <p><strong>پاسخ:</strong> ۱۰ نفر فقط فوتبال، ۷ نفر فقط
+                والیبال و ۵ نفر هیچ‌کدام را دوست ندارند.</p>
+            </div>
+          </div>
+          <div class="example-box">
+            <h4>مثال ۸: اگر <span class="math">A = {1, 2, 3}</span> و <span
+                class="math">B = ∅</span> باشد، حاصل هر یک را بنویسید.</h4>
+            <div class="solution"> <strong>حل:</strong>
+              <ul>
+                <li><strong>اجتماع:</strong> ای اجتماع تهی برابر ای است.
+                  <p><span class="math">A ∪ ∅ = {1, 2, 3} = A</span></p>
+                </li>
+                <li><strong>اشتراک:</strong> ای اشتراک تهی برابر تهی
+                  است.
+                  <p><span class="math">A ∩ ∅ = ∅</span></p>
+                </li>
+                <li><strong>تفاضل ای منهای تهی:</strong> همه‌ی اعضای ای
+                  باقی می‌مانند.
+                  <p><span class="math">A − ∅ = {1, 2, 3} = A</span></p>
+                </li>
+                <li><strong>تفاضل تهی منهای ای:</strong> تهی هیچ عضوی
+                  ندارد.
+                  <p><span class="math">∅ − A = ∅</span></p>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="note-box"> <strong>💡 نکته‌ی مهم:</strong> وقتی
+            تهی در عمل‌ها وارد می‌شود:
+            <ul>
+              <li>ای اجتماع تهی برابر ای است.</li>
+              <li>ای اشتراک تهی برابر تهی است.</li>
+              <li>ای منهای تهی برابر ای است.</li>
+              <li>تهی منهای ای برابر تهی است.</li>
+            </ul>
+          </div>
+        </section>
+        <!-- ============================================================= -->
+        <!-- ==================== نمونه سوال امتحانی ===================== -->
+        <!-- ============================================================= -->
+        <section class="final-exam">
+          <h2>نمونه سوالات امتحان نهایی با حل تشریحی کامل</h2>
+          <div class="question">
+            <div class="question-title">سوال ۱: مجموعه‌های <span
+                class="math">A = {2, 4, 6, 8, 9}</span>، <span
+                class="math">B = {1, 3, 5, 7, 9}</span> و <span
+                class="math">C = {1, 7, 10, 11}</span> داده شده‌اند.
+              حاصل <span class="math">A ∪ B</span>، <span class="math">A
+                ∩ B</span>، <span class="math">A ∪ C</span> و <span
+                class="math">A ∩ C</span> را بنویسید.</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل تشریحی:</div>
+              <p><strong>محاسبه‌ی اول – اجتماع ای و بی:</strong> همه‌ی
+                اعضای دو مجموعه بدون تکرار. عضو مشترک ۹ است که یک بار
+                نوشته می‌شود.</p>
+              <p><span class="math">A ∪ B = {1, 2, 3, 4, 5, 6, 7, 8, 9}</span></p>
+              <p><strong>محاسبه‌ی دوم – اشتراک ای و بی:</strong> تنها
+                عضو مشترک ۹ است.</p>
+              <p><span class="math">A ∩ B = {9}</span></p>
+              <p><strong>محاسبه‌ی سوم – اجتماع ای و سی:</strong> اعضای
+                ای: ۲، ۴، ۶، ۸، ۹. اعضای سی: ۱، ۷، ۱۰، ۱۱. هیچ عضو
+                مشترکی وجود ندارد.</p>
+              <p><span class="math">A ∪ C = {1, 2, 4, 6, 7, 8, 9, 10,
+                  11}</span></p>
+              <p><strong>محاسبه‌ی چهارم – اشتراک ای و سی:</strong> هیچ
+                عضو مشترکی وجود ندارد.</p>
+              <p><span class="math">A ∩ C = ∅</span></p>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۲: اگر <span class="math">A
+                = {2, 3, 5, 7}</span> و <span class="math">B = {1, 3,
+                5, 9}</span> باشد، حاصل‌های زیر را بنویسید: <span
+                class="math">A ∪ B</span>، <span class="math">A ∩ B</span>،
+              <span class="math">A − B</span>، <span class="math">B − A</span>.</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل تشریحی:</div>
+              <ul>
+                <li><strong>اجتماع:</strong> همه‌ی اعضا بدون تکرار.
+                  اعضای مشترک ۳ و ۵ هستند.
+                  <p><span class="math">A ∪ B = {1, 2, 3, 5, 7, 9}</span></p>
+                </li>
+                <li><strong>اشتراک:</strong> اعضای مشترک ۳ و ۵.
+                  <p><span class="math">A ∩ B = {3, 5}</span></p>
+                </li>
+                <li><strong>تفاضل ای منهای بی:</strong> اعضای ای که در
+                  بی نیستند: ۲ و ۷.
+                  <p><span class="math">A − B = {2, 7}</span></p>
+                </li>
+                <li><strong>تفاضل بی منهای ای:</strong> اعضای بی که در
+                  ای نیستند: ۱ و ۹.
+                  <p><span class="math">B − A = {1, 9}</span></p>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۳: در یک کلاس ۳۵ نفره، ۲۰
+              نفر ریاضی دوست دارند، ۱۸ نفر علوم دوست دارند و ۱۲ نفر هر
+              دو درس را دوست دارند. با استفاده از مفهوم مجموعه‌ها محاسبه
+              کنید که چند نفر فقط ریاضی دوست دارند؟ چند نفر هیچ‌کدام را
+              دوست ندارند؟</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل تشریحی:</div>
+              <p><strong>گام اول – تعریف مجموعه‌ها:</strong></p>
+              <ul>
+                <li>مجموعه‌ی ای: دانش‌آموزانی که ریاضی دوست دارند (۲۰
+                  نفر)</li>
+                <li>مجموعه‌ی بی: دانش‌آموزانی که علوم دوست دارند (۱۸
+                  نفر)</li>
+                <li>اشتراک ای و بی: هر دو را دوست دارند (۱۲ نفر)</li>
+              </ul>
+              <p><strong>گام دوم – فقط ریاضی:</strong></p>
+              <p><span class="math">20 − 12 = 8</span> نفر فقط ریاضی
+                دوست دارند.</p>
+              <p><strong>گام سوم – فقط علوم:</strong></p>
+              <p><span class="math">18 − 12 = 6</span> نفر فقط علوم دوست
+                دارند.</p>
+              <p><strong>گام چهارم – حداقل یکی را دوست دارند (اجتماع):</strong></p>
+              <p><span class="math">8 + 12 + 6 = 26</span> نفر</p>
+              <p><strong>گام پنجم – هیچ‌کدام:</strong></p>
+              <p><span class="math">35 − 26 = 9</span> نفر هیچ‌کدام را
+                دوست ندارند.</p>
+              <p><strong>پاسخ:</strong> ۸ نفر فقط ریاضی، ۶ نفر فقط علوم
+                و ۹ نفر هیچ‌کدام را دوست ندارند.</p>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۴: با توجه به <span
+                class="math">A = {1, 2, 3, 4, 5, 6}</span> و <span
+                class="math">B = {4, 5, 6, 7, 8, 9}</span>، آیا <span
+                class="math">A ∪ B</span> برابر <span class="math">B ∪
+                A</span> است؟ چرا؟</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل تشریحی:</div>
+              <p><strong>محاسبه‌ی ای اجتماع بی:</strong></p>
+              <p><span class="math">A ∪ B = {1, 2, 3, 4, 5, 6, 7, 8, 9}</span></p>
+              <p><strong>محاسبه‌ی بی اجتماع ای:</strong></p>
+              <p><span class="math">B ∪ A = {1, 2, 3, 4, 5, 6, 7, 8, 9}</span></p>
+              <p><strong>نتیجه:</strong> بله، برابر هستند! چون عمل
+                اجتماع <strong>خاصیت جابجایی</strong> دارد. یعنی ترتیب
+                نوشتن مجموعه‌ها در اجتماع مهم نیست.</p>
+              <p><strong>نکته:</strong> در ریاضی می‌گوییم <span
+                  class="math">A ∪ B = B ∪ A</span>. این خاصیت در اشتراک
+                هم برقرار است: <span class="math">A ∩ B = B ∩ A</span>.
+                اما در تفاضل برقرار نیست.</p>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۵: اگر <span class="math">A
+                = {1, 2, 3}</span> و <span class="math">B = {3, 4, 5}</span>
+              باشد، ثابت کنید <span class="math">(A ∪ B) − (A ∩ B) = (A
+                − B) ∪ (B − A)</span>.</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل تشریحی:</div>
+              <p><strong>محاسبه‌ی سمت چپ:</strong></p>
+              <p>ای اجتماع بی برابر: <span class="math">{1, 2, 3, 4, 5}</span></p>
+              <p>ای اشتراک بی برابر: <span class="math">{3}</span></p>
+              <p>تفاضل این دو: <span class="math">{1, 2, 3, 4, 5} − {3}
+                  = {1, 2, 4, 5}</span></p>
+              <p><strong>محاسبه‌ی سمت راست:</strong></p>
+              <p>ای منهای بی برابر: <span class="math">{1, 2}</span></p>
+              <p>بی منهای ای برابر: <span class="math">{4, 5}</span></p>
+              <p>اجتماع این دو: <span class="math">{1, 2} ∪ {4, 5} =
+                  {1, 2, 4, 5}</span></p>
+              <p><strong>نتیجه:</strong> سمت چپ و سمت راست برابر شدند.
+                پس اتحاد برقرار است.</p>
+              <div class="note-box"> <strong>💡 نکته:</strong> به این
+                اتحاد می‌گویند <strong>تفاضل متقارن</strong> و به آن
+                «ای دلتا بی» هم می‌گویند. یعنی اعضایی که فقط در یکی از
+                دو مجموعه هستند، نه در هر دو. </div>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۶: کدام‌یک از عبارت‌های زیر
+              درست است؟ (سوال چهارگزینه‌ای)</div>
+            <p>۱) تفاضل دو مجموعه، خاصیت جابجایی دارد.</p>
+            <p>۲) اگر ای زیرمجموعه‌ی بی باشد، آنگاه ای اجتماع بی برابر
+              بی است.</p>
+            <p>۳) اشتراک دو مجموعه‌ی جدا از هم، خود یکی از آن‌هاست.</p>
+            <p>۴) اجتماع دو مجموعه همیشه بزرگ‌تر از هر کدام به تنهایی
+              است.</p>
+            <div class="answer">
+              <div class="answer-title">✅ حل تشریحی:</div>
+              <ul>
+                <li><strong>گزینه ۱: نادرست ❌</strong> – تفاضل خاصیت
+                  جابجایی ندارد. ای منهای بی با بی منهای ای متفاوت است.</li>
+                <li><strong>گزینه ۲: درست ✅</strong> – اگر ای
+                  زیرمجموعه‌ی بی باشد، همه‌ی اعضای ای در بی هم هستند. پس
+                  اجتماع آن‌ها همان بی می‌شود.</li>
+                <li><strong>گزینه ۳: نادرست ❌</strong> – اشتراک دو
+                  مجموعه‌ی جدا از هم، تهی است، نه یکی از آن‌ها.</li>
+                <li><strong>گزینه ۴: نادرست ❌</strong> – اگر یکی از
+                  مجموعه‌ها زیرمجموعه‌ی دیگری باشد، اجتماع با آن
+                  مجموعه‌ی بزرگ‌تر برابر است، نه بزرگ‌تر از آن.</li>
+              </ul>
+              <p><strong>پاسخ صحیح: گزینه ۲</strong></p>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۷: با توجه به <span
+                class="math">A = {1, 2, 3, 4}</span> و <span
+                class="math">B = {3, 4, 5, 6}</span> و <span
+                class="math">C = {4, 5, 6, 7}</span>، حاصل <span
+                class="math">A ∩ (B ∪ C)</span> را محاسبه کنید.</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل تشریحی:</div>
+              <p><strong>گام اول – محاسبه‌ی داخل پرانتز (بی اجتماع سی):</strong></p>
+              <p><span class="math">B ∪ C = {3, 4, 5, 6, 7}</span></p>
+              <p><strong>گام دوم – محاسبه‌ی اشتراک ای با این مجموعه:</strong>
+                اعضای مشترک بین ای (یعنی ۱، ۲، ۳، ۴) و این مجموعه (یعنی
+                ۳، ۴، ۵، ۶، ۷) عبارتند از ۳ و ۴.</p>
+              <p><span class="math">A ∩ (B ∪ C) = {3, 4}</span></p>
+              <p><strong>پاسخ:</strong> <span class="math">{3, 4}</span></p>
+            </div>
+          </div>
+          <div class="question">
+            <div class="question-title">سوال ۸: در یک مدرسه، از ۵۰
+              دانش‌آموز، ۳۰ نفر در کلاس ریاضی و ۲۵ نفر در کلاس علوم
+              ثبت‌نام کرده‌اند و ۱۵ نفر در هر دو کلاس ثبت‌نام کرده‌اند.
+              چند نفر در هیچ‌کدام ثبت‌نام نکرده‌اند؟</div>
+            <div class="answer">
+              <div class="answer-title">✅ حل تشریحی:</div>
+              <p><strong>تعریف مجموعه‌ها:</strong></p>
+              <ul>
+                <li>مجموعه‌ی ای: ثبت‌نام‌شدگان ریاضی (۳۰ نفر)</li>
+                <li>مجموعه‌ی بی: ثبت‌نام‌شدگان علوم (۲۵ نفر)</li>
+                <li>اشتراک: هر دو (۱۵ نفر)</li>
+              </ul>
+              <p><strong>محاسبه‌ی اجتماع (کسانی که حداقل یکی را دارند):</strong></p>
+              <p>با استفاده از اصل شمول و عدم شمول:</p>
+              <p><span class="math">|A ∪ B| = |A| + |B| − |A ∩ B| = 30 +
+                  25 − 15 = 40</span></p>
+              <p><strong>محاسبه‌ی هیچ‌کدام:</strong></p>
+              <p><span class="math">50 − 40 = 10</span> نفر</p>
+              <p><strong>پاسخ:</strong> <span class="highlight">۱۰ نفر</span>
+                در هیچ‌کدام ثبت‌نام نکرده‌اند.</p>
+              <div class="note-box"> <strong>💡 نکته:</strong> این
+                فرمول، <strong>اصل شمول و عدم شمول</strong> نام دارد و
+                در سوالات امتحانی زیاد به کار می‌آید. حفظش کن! </div>
+            </div>
+          </div>
+        </section>
+        <!-- ============================================================= -->
+        <!-- ==================== جدول خلاصه ============================= -->
+        <!-- ============================================================= -->
+        <section class="lesson">
+          <div class="lesson-header">
+            <div class="lesson-number">★</div>
+            <div>
+              <div class="lesson-title">جدول خلاصه‌ی درس چهارم</div>
+              <div class="lesson-sub">قبل از امتحان، این جدول را یک بار
+                مرور کن</div>
+            </div>
+          </div>
+          <table class="summary-table">
+            <thead> <tr>
+                <th>عمل</th>
+                <th>نماد</th>
+                <th>معنی</th>
+                <th>مثال</th>
+              </tr>
+            </thead> <tbody>
+              <tr>
+                <td>اجتماع</td>
+                <td class="math">A ∪ B</td>
+                <td>همه‌ی اعضای دو مجموعه، بدون تکرار</td>
+                <td class="math">{1,2} ∪ {2,3} = {1,2,3}</td>
+              </tr>
+              <tr>
+                <td>اشتراک</td>
+                <td class="math">A ∩ B</td>
+                <td>فقط اعضای مشترک دو مجموعه</td>
+                <td class="math">{1,2} ∩ {2,3} = {2}</td>
+              </tr>
+              <tr>
+                <td>تفاضل</td>
+                <td class="math">A − B</td>
+                <td>اعضای A که در B نیستند</td>
+                <td class="math">{1,2} − {2,3} = {1}</td>
+              </tr>
+              <tr>
+                <td>تفاضل برعکس</td>
+                <td class="math">B − A</td>
+                <td>اعضای B که در A نیستند</td>
+                <td class="math">{2,3} − {1,2} = {3}</td>
+              </tr>
+              <tr>
+                <td>اشتراک جدا</td>
+                <td class="math">A ∩ B = ∅</td>
+                <td>وقتی دو مجموعه هیچ عضو مشترکی ندارند</td>
+                <td class="math">{1} ∩ {2} = ∅</td>
+              </tr>
+              <tr>
+                <td>اصل شمول</td>
+                <td class="math">|A∪B| = |A|+|B|−|A∩B|</td>
+                <td>محاسبه‌ی تعداد اعضای اجتماع</td>
+                <td>—</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="note-box"> <strong>💡 توصیه‌ی سروناز و فرسام:</strong>
+            <ul>
+              <li>حتماً تمرین‌های کتاب درسی این درس را دو بار حل کن.</li>
+              <li>سه نماد <span class="math">∪</span>، <span
+                  class="math">∩</span> و <span class="math">−</span>
+                را با هم اشتباه نگیر – هر کدام کار متفاوتی انجام
+                می‌دهند.</li>
+              <li>خاصیت جابجایی را در اجتماع و اشتراک به یاد داشته باش،
+                ولی در تفاضل هرگز جابجا نکن.</li>
+              <li>در سوالات کلامی، ابتدا مجموعه‌ها را تعریف کن و سپس از
+                فرمول‌ها استفاده کن.</li>
+            </ul>
+          </div>
+        </section>
+        <!-- ============================================================= -->
+        <!-- ================ بخش نکات امتحانی مهم ======================= -->
+        <!-- ============================================================= -->
+        <section class="exam-tips">
+          <h2>نکات امتحانی مهم و ضروری – درس چهارم</h2>
+          <div class="dialog left">
+            <div class="avatar sarvnaz">سروناز</div>
+            <div class="bubble sarvnaz"> <span class="speaker sarvnaz">خانم
+                سروناز:</span> فرسام جان، این درس، <strong>پرکاربردترین
+                درس فصل اول</strong> است. تقریباً در تمام امتحانات نهایی
+              از اجتماع، اشتراک و تفاضل سوال می‌آید. بگذار مهم‌ترین نکات
+              را با هم مرور کنیم. </div>
+          </div>
+          <div class="dialog right">
+            <div class="avatar farsam">فرسام</div>
+            <div class="bubble farsam"> <span class="speaker farsam">آقای
+                فرسام:</span> کاملاً درست است!... خصوصاً سوالات کلامی
+              مثل «چند نفر فقط ریاضی دوست دارند؟» که با اشتراک و اجتماع
+              حل می‌شوند.... بگذار با شکل و مثال نشان بدهم. </div>
+          </div>
+          <!-- نکته ۱: اشتباهات رایج -->
+          <div class="tip-card danger">
+            <h3>⚠️ نکته ۱: شش اشتباه رایج در درس چهارم</h3>
+            <ul>
+              <li><strong>اشتباه اول:</strong> جابجا کردن تفاضل.... ای
+                منهای بی با بی منهای ای برابر نیست!</li>
+              <li><strong>اشتباه دوم:</strong> اشتباه گرفتن نماد اجتماع
+                با اشتراک.... اجتماع شبیه حرف یو باز به بالا است، اشتراک
+                شبیه یو باز به پایین.</li>
+              <li><strong>اشتباه سوم:</strong> نوشتن اعضای تکراری در
+                اجتماع.... در اجتماع، اعضای مشترک فقط یک بار نوشته
+                می‌شوند.</li>
+              <li><strong>اشتباه چهارم:</strong> فراموش کردن اینکه
+                اجتماع و اشتراک خاصیت جابجایی دارند.... ای اجتماع بی،
+                همان بی اجتماع ای است.</li>
+              <li><strong>اشتباه پنجم:</strong> اشتباه در حل مسائل
+                کلامی.... اول باید مجموعه‌ها را تعریف کنی و سپس عمل‌ها
+                را انجام دهی.</li>
+              <li><strong>اشتباه ششم:</strong> فراموش کردن حالت‌های
+                خاص.... مثلاً ای منهای بی اگر ای زیرمجموعه‌ی بی باشد،
+                برابر تهی است.</li>
+            </ul>
+          </div>
+          <!-- SVG اشتباهات -->
+          <div class="svg-wrapper">
+            <svg viewBox="0 0 760 440"
+              xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="gDanger4" x1="0" y1="0" x2="1"
+                  y2="1">
+                  <stop offset="0%" stop-color="#fee2e2"></stop>
+                  <stop offset="100%" stop-color="#fecaca"></stop> </linearGradient>
+                <linearGradient id="gSafe4" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#d1fae5"></stop>
+                  <stop offset="100%" stop-color="#a7f3d0"></stop> </linearGradient>
+              </defs>
+              <rect width="760" height="440" fill="#fefce8" rx="18"></rect>
+              <text x="380" y="36" text-anchor="middle" font-size="19"
+                font-weight="900" fill="#713f12" font-family="Vazirmatn,
+                sans-serif">شش اشتباه رایج در درس چهارم – این‌ها را در
+                امتحان تکرار نکن</text>
+              <!-- اشتباه ۱ -->
+              <rect x="20" y="60" width="235" height="170"
+                fill="url(#gDanger4)" stroke="#dc2626" stroke-width="2"
+                rx="14"></rect>
+              <text x="137" y="90" text-anchor="middle" font-size="13"
+                font-weight="900" fill="#991b1b" font-family="Vazirmatn,
+                sans-serif">❌ اشتباه ۱</text>
+              <text x="137" y="120" text-anchor="middle" font-size="13"
+                fill="#7f1d1d" font-family="Vazirmatn, sans-serif">جابجا
+                کردن تفاضل</text>
+              <text x="137" y="150" text-anchor="middle" font-size="12"
+                fill="#7f1d1d" font-family="monospace">A−B = B−A</text>
+              <text x="137" y="180" text-anchor="middle" font-size="11"
+                fill="#7f1d1d" font-family="Vazirmatn, sans-serif">غلط!</text>
+              <text x="137" y="210" text-anchor="middle" font-size="11"
+                fill="#166534" font-family="Vazirmatn, sans-serif">✓ A−B
+                ≠ B−A</text>
+              <!-- اشتباه ۲ -->
+              <rect x="265" y="60" width="235" height="170"
+                fill="url(#gDanger4)" stroke="#dc2626" stroke-width="2"
+                rx="14"></rect>
+              <text x="382" y="90" text-anchor="middle" font-size="13"
+                font-weight="900" fill="#991b1b" font-family="Vazirmatn,
+                sans-serif">❌ اشتباه ۲</text>
+              <text x="382" y="120" text-anchor="middle" font-size="13"
+                fill="#7f1d1d" font-family="Vazirmatn, sans-serif">اشتباه
+                گرفتن نمادها</text>
+              <text x="382" y="150" text-anchor="middle" font-size="20"
+                fill="#7f1d1d" font-family="serif">∪ vs ∩</text>
+              <text x="382" y="180" text-anchor="middle" font-size="11"
+                fill="#7f1d1d" font-family="Vazirmatn, sans-serif">اجتماع:
+                باز به بالا</text>
+              <text x="382" y="210" text-anchor="middle" font-size="11"
+                fill="#166534" font-family="Vazirmatn, sans-serif">✓
+                اشتراک: باز به پایین</text>
+              <!-- اشتباه ۳ -->
+              <rect x="510" y="60" width="235" height="170"
+                fill="url(#gDanger4)" stroke="#dc2626" stroke-width="2"
+                rx="14"></rect>
+              <text x="627" y="90" text-anchor="middle" font-size="13"
+                font-weight="900" fill="#991b1b" font-family="Vazirmatn,
+                sans-serif">❌ اشتباه ۳</text>
+              <text x="627" y="120" text-anchor="middle" font-size="13"
+                fill="#7f1d1d" font-family="Vazirmatn, sans-serif">نوشتن
+                تکراری در اجتماع</text>
+              <text x="627" y="150" text-anchor="middle" font-size="12"
+                fill="#7f1d1d" font-family="monospace">غلط: {1,2,2,3}</text>
+              <text x="627" y="180" text-anchor="middle" font-size="11"
+                fill="#166534" font-family="monospace">✓ درست: {1,2,3}</text>
+              <text x="627" y="210" text-anchor="middle" font-size="11"
+                fill="#166534" font-family="Vazirmatn, sans-serif">اعضای
+                تکراری یک بار</text>
+              <!-- اشتباه ۴ -->
+              <rect x="130" y="250" width="235" height="170"
+                fill="url(#gDanger4)" stroke="#dc2626" stroke-width="2"
+                rx="14"></rect>
+              <text x="247" y="280" text-anchor="middle" font-size="13"
+                font-weight="900" fill="#991b1b" font-family="Vazirmatn,
+                sans-serif">❌ اشتباه ۴</text>
+              <text x="247" y="310" text-anchor="middle" font-size="13"
+                fill="#7f1d1d" font-family="Vazirmatn, sans-serif">فراموش
+                کردن خاصیت</text>
+              <text x="247" y="335" text-anchor="middle" font-size="13"
+                fill="#7f1d1d" font-family="Vazirmatn, sans-serif">جابجایی
+                اجتماع</text>
+              <text x="247" y="365" text-anchor="middle" font-size="12"
+                fill="#7f1d1d" font-family="monospace">A∪B ≠ B∪A؟</text>
+              <text x="247" y="395" text-anchor="middle" font-size="11"
+                fill="#166534" font-family="monospace">✓ A∪B = B∪A</text>
+              <!-- اشتباه ۵ -->
+              <rect x="395" y="250" width="235" height="170"
+                fill="url(#gDanger4)" stroke="#dc2626" stroke-width="2"
+                rx="14"></rect>
+              <text x="512" y="280" text-anchor="middle" font-size="13"
+                font-weight="900" fill="#991b1b" font-family="Vazirmatn,
+                sans-serif">❌ اشتباه ۵</text>
+              <text x="512" y="310" text-anchor="middle" font-size="13"
+                fill="#7f1d1d" font-family="Vazirmatn, sans-serif">اشتباه
+                در سوالات کلامی</text>
+              <text x="512" y="335" text-anchor="middle" font-size="11"
+                fill="#7f1d1d" font-family="Vazirmatn, sans-serif">جمع
+                ساده به جای اشتراک</text>
+              <text x="512" y="365" text-anchor="middle" font-size="11"
+                fill="#166534" font-family="Vazirmatn, sans-serif">✓
+                اول: چند نفر هر دو؟</text>
+              <text x="512" y="390" text-anchor="middle" font-size="11"
+                fill="#166534" font-family="Vazirmatn, sans-serif">سپس:
+                فقط این / فقط آن</text> </svg>
+            <div class="svg-caption">شکل ۲: شش اشتباه رایج در درس چهارم
+              – این‌ها را در امتحان تکرار نکن</div>
+          </div>
+          <!-- نکته ۲: ترفندهای سریع -->
+          <div class="tip-card success">
+            <h3>🎯 نکته ۲: ترفندهای سریع برای حل تست</h3>
+            <ul>
+              <li><strong>ترفند ۱:</strong> برای تشخیص اجتماع و اشتراک،
+                به شکل نماد نگاه کن: ...اجتماع (∪) شبیه کاسه‌ی رو به
+                بالا است که همه چیز را جمع می‌کند.... اشتراک (∩) شبیه
+                کاسه‌ی رو به پایین است که فقط اشتراک‌ها را نگه می‌دارد.</li>
+              <li><strong>ترفند ۲:</strong> در سوالات اجتماع، اول همه‌ی
+                اعضای هر دو مجموعه را بنویس، سپس تکراری‌ها را حذف کن.</li>
+              <li><strong>ترفند ۳:</strong> در سوالات اشتراک، اعضای ای
+                را یکی‌یکی چک کن که آیا در بی هم هستند یا نه.</li>
+              <li><strong>ترفند ۴:</strong> در سوالات تفاضل، اعضای ای را
+                یکی‌یکی چک کن که آیا در بی نیستند یا نه.</li>
+              <li><strong>ترفند ۵:</strong> در سوالات کلامی، همیشه اول
+                مجموعه‌ها را تعریف کن، سپس تعداد هر بخش را جدا محاسبه
+                کن.... از فرمول اصل شمول استفاده کن.</li>
+            </ul>
+          </div>
+          <!-- نکته ۳: فرمول‌های حفظی -->
+          <div class="tip-card warning">
+            <h3>📌 نکته ۳: فرمول‌ها و خاصیت‌های طلایی</h3>
+            <div class="formula-box" style="font-size:1rem;
+              line-height:2.2; direction: rtl;"> <span
+                style="direction:ltr; display:inline-block;">A ∪ B = B ∪
+                A</span> – اجتماع خاصیت جابجایی دارد<br>
+              <span style="direction:ltr; display:inline-block;">A ∩ B =
+                B ∩ A</span> – اشتراک خاصیت جابجایی دارد<br>
+              <span style="direction:ltr; display:inline-block;">A − B ≠
+                B − A</span> – تفاضل خاصیت جابجایی ندارد<br>
+              <span style="direction:ltr; display:inline-block;">A ∪ ∅ =
+                A</span> – اجتماع با تهی<br>
+              <span style="direction:ltr; display:inline-block;">A ∩ ∅ =
+                ∅</span> – اشتراک با تهی<br>
+              <span style="direction:ltr; display:inline-block;">A − ∅ =
+                A</span> – تفاضل با تهی<br>
+              <span style="direction:ltr; display:inline-block;">|A∪B| =
+                |A|+|B|−|A∩B|</span> – اصل شمول و عدم شمول </div>
+          </div>
+          <!-- SVG کارت مرجع -->
+          <div class="svg-wrapper">
+            <svg viewBox="0 0 780 460"
+              xmlns="http://www.w3.org/2000/svg">
+              <rect width="780" height="460" fill="#f0f9ff" rx="18"></rect>
+              <text x="390" y="36" text-anchor="middle" font-size="19"
+                font-weight="900" fill="#0c4a6e" font-family="Vazirmatn,
+                sans-serif">کارت مرجع سریع – درس چهارم در یک نگاه</text>
+              <!-- Row 1: Three operations -->
+              <rect x="25" y="65" width="230" height="140"
+                fill="#dbeafe" stroke="#2563eb" stroke-width="2.5"
+                rx="14"></rect>
+              <text x="140" y="115" text-anchor="middle" font-size="40"
+                font-weight="900" fill="#1d4ed8" font-family="serif">∪</text>
+              <text x="140" y="150" text-anchor="middle" font-size="16"
+                font-weight="900" fill="#1e3a8a" font-family="Vazirmatn,
+                sans-serif">اجتماع</text>
+              <text x="140" y="180" text-anchor="middle" font-size="12"
+                fill="#1e3a8a" font-family="Vazirmatn, sans-serif">همه‌ی
+                اعضا، بدون تکرار</text>
+              <rect x="275" y="65" width="230" height="140"
+                fill="#fef3c7" stroke="#f59e0b" stroke-width="2.5"
+                rx="14"></rect>
+              <text x="390" y="115" text-anchor="middle" font-size="40"
+                font-weight="900" fill="#b45309" font-family="serif">∩</text>
+              <text x="390" y="150" text-anchor="middle" font-size="16"
+                font-weight="900" fill="#92400e" font-family="Vazirmatn,
+                sans-serif">اشتراک</text>
+              <text x="390" y="180" text-anchor="middle" font-size="12"
+                fill="#92400e" font-family="Vazirmatn, sans-serif">فقط
+                اعضای مشترک</text>
+              <rect x="525" y="65" width="230" height="140"
+                fill="#d1fae5" stroke="#059669" stroke-width="2.5"
+                rx="14"></rect>
+              <text x="640" y="115" text-anchor="middle" font-size="40"
+                font-weight="900" fill="#047857" font-family="serif">−</text>
+              <text x="640" y="150" text-anchor="middle" font-size="16"
+                font-weight="900" fill="#065f46" font-family="Vazirmatn,
+                sans-serif">تفاضل</text>
+              <text x="640" y="180" text-anchor="middle" font-size="12"
+                fill="#065f46" font-family="Vazirmatn, sans-serif">اعضای
+                اولی که در دومی نیستند</text>
+              <!-- Row 2: Examples -->
+              <rect x="25" y="225" width="730" height="100"
+                fill="#ffffff" stroke="#a78bfa" stroke-width="2" rx="12"></rect>
+              <text x="390" y="250" text-anchor="middle" font-size="13"
+                font-weight="900" fill="#6d28d9" font-family="Vazirmatn,
+                sans-serif">مثال کاربردی: ای برابر یک، دو و سه / بی
+                برابر سه، چهار و پنج</text>
+              <line x1="45" y1="262" x2="735" y2="262" stroke="#a78bfa"
+                stroke-dasharray="3" stroke-width="1.5"></line>
+              <text x="150" y="290" text-anchor="middle" font-size="13"
+                fill="#1d4ed8" font-family="monospace">A∪B = {1,2,3,4,5}</text>
+              <text x="390" y="290" text-anchor="middle" font-size="13"
+                fill="#b45309" font-family="monospace">A∩B = {3}</text>
+              <text x="640" y="290" text-anchor="middle" font-size="13"
+                fill="#047857" font-family="monospace">A−B = {1,2}</text>
+              <text x="150" y="315" text-anchor="middle" font-size="12"
+                fill="#1d4ed8" font-family="monospace">B∪A = {1,2,3,4,5}</text>
+              <text x="390" y="315" text-anchor="middle" font-size="12"
+                fill="#b45309" font-family="monospace">B∩A = {3}</text>
+              <text x="640" y="315" text-anchor="middle" font-size="12"
+                fill="#047857" font-family="monospace">B−A = {4,5}</text>
+              <!-- Row 3: Key formulas -->
+              <rect x="25" y="340" width="360" height="110"
+                fill="#fce7f3" stroke="#db2777" stroke-width="2" rx="12"></rect>
+              <text x="205" y="365" text-anchor="middle" font-size="13"
+                font-weight="900" fill="#9d174d" font-family="Vazirmatn,
+                sans-serif">خاصیت‌های مهم</text>
+              <line x1="45" y1="378" x2="365" y2="378" stroke="#db2777"
+                stroke-dasharray="3" stroke-width="1.5"></line>
+              <text x="205" y="400" text-anchor="middle" font-size="12"
+                fill="#831843" font-family="monospace">A∪B = B∪A , A∩B =
+                B∩A</text>
+              <text x="205" y="423" text-anchor="middle" font-size="12"
+                fill="#831843" font-family="monospace">A∪∅ = A , A∩∅ = ∅</text>
+              <text x="205" y="445" text-anchor="middle" font-size="12"
+                fill="#831843" font-family="monospace">A−∅ = A , A−B ≠
+                B−A</text>
+              <rect x="395" y="340" width="360" height="110"
+                fill="#e0e7ff" stroke="#4f46e5" stroke-width="2" rx="12"></rect>
+              <text x="575" y="365" text-anchor="middle" font-size="13"
+                font-weight="900" fill="#3730a3" font-family="Vazirmatn,
+                sans-serif">اصل شمول و عدم شمول</text>
+              <line x1="415" y1="378" x2="735" y2="378" stroke="#4f46e5"
+                stroke-dasharray="3" stroke-width="1.5"></line>
+              <text x="575" y="405" text-anchor="middle" font-size="13"
+                fill="#3730a3" font-family="monospace">|A∪B| =
+                |A|+|B|−|A∩B|</text>
+              <text x="575" y="430" text-anchor="middle" font-size="11"
+                fill="#3730a3" font-family="Vazirmatn, sans-serif">کاربرد
+                در سوالات کلامی و شمارش</text>
+              <text x="575" y="448" text-anchor="middle" font-size="11"
+                font-style="italic" fill="#3730a3"
+                font-family="Vazirmatn, sans-serif">همیشه از این فرمول
+                استفاده کن</text> </svg>
+            <div class="svg-caption">شکل ۳: کارت مرجع سریع درس چهارم –
+              همه‌ی نمادها و فرمول‌ها در یک نگاه</div>
+          </div>
+          <!-- نکته ۴: استراتژی امتحان -->
+          <div class="tip-card">
+            <h3>🎓 نکته ۴: استراتژی طلایی برای روز امتحان</h3>
+            <ol>
+              <li><strong>قبل از هر چیز:</strong> سوال را دو بار بخوان
+                تا بفهمی دقیقاً کدام عمل را می‌خواهد.</li>
+              <li><strong>در سوالات اجتماع:</strong> ابتدا همه‌ی اعضای
+                هر دو مجموعه را در یک ردیف بنویس، سپس تکراری‌ها را حذف
+                کن.</li>
+              <li><strong>در سوالات اشتراک:</strong> اعضای ای را یکی‌یکی
+                چک کن که در بی هم هستند یا نه.... فقط آن‌هایی که هر دو
+                هستند را بنویس.</li>
+              <li><strong>در سوالات تفاضل:</strong> اعضای ای را چک کن که
+                در بی نیستند.... برعکسش برای بی منهای ای.</li>
+              <li><strong>در سوالات کلامی:</strong> اول مجموعه‌ها را
+                تعریف کن، سپس بخش‌ها را جدا محاسبه کن.... از فرمول اصل
+                شمول استفاده کن.</li>
+              <li><strong>در نوشتن جواب:</strong> همیشه نتیجه را در
+                آکولاد بنویس.... و اگر خواست، تعداد اعضا را هم بنویس.</li>
+              <li><strong>زمان‌بندی:</strong> برای هر سوال این درس حدود
+                ۳ تا ۵ دقیقه وقت بگذار.</li>
+            </ol>
+          </div>
+          <!-- نکته ۵: جمع‌بندی -->
+          <div class="dialog left">
+            <div class="avatar sarvnaz">سروناز</div>
+            <div class="bubble sarvnaz"> <span class="speaker sarvnaz">خانم
+                سروناز:</span> فرسام جان، یک توصیه‌ی نهایی برای
+              دانش‌آموزان:
+              <ul>
+                <li>حتماً تمرین‌های کتاب درسی این درس را <strong>دو بار</strong>
+                  حل کن.</li>
+                <li>سه نماد <span class="math">∪</span>، <span
+                    class="math">∩</span> و <span class="math">−</span>
+                  را روی کاغذ چند بار تمرین کن تا در امتحان سریع بنویسی.</li>
+                <li>خاصیت‌های جابجایی و ارتباط با تهی را حفظ کن.</li>
+                <li>فرمول اصل شمول و عدم شمول را در سوالات کلامی استفاده
+                  کن.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="dialog right">
+            <div class="avatar farsam">فرسام</div>
+            <div class="bubble farsam"> <span class="speaker farsam">آقای
+                فرسام:</span> و مهم‌تر از همه: ...این درس، آخرین درس فصل
+              اول است و به نوعی <strong>جمع‌بندی همه‌ی مفاهیم قبلی</strong>
+              است.... پس این درس را خوب یاد بگیر تا فصل اول را با موفقیت
+              به پایان برسانی. <br>
+              <br>
+              <strong>موفق باشی! 🌟</strong> </div>
+          </div>
+          <div class="note-box"> <strong>💡 یادآوری نهایی:</strong> قبل
+            از امتحان، جدول خلاصه و کارت مرجع سریع را یک بار مرور کن و
+            سوالات امتحانی این درس را دوباره بدون نگاه کردن به جواب، حل
+            کن.... اگر توانستی بدون کمک همه را حل کنی، یعنی آماده‌ی
+            امتحانی! </div>
+        </section>
+      </main>
+      <footer> <strong>📘 آموزش جامع ریاضی نهم – فصل اول، درس چهارم</strong><br>
+        تهیه‌شده با ❤️ برای دانش‌آموزان عزیز | مدرسان: خانم سروناز و
+        آقای فرسام<br>
+        <strong>اپلیکیشن همیار من (فراتر از آموزش)</strong> <br>
+        موفق باشی! ✨ </footer>
+    </div>
+  </body>
+</html>

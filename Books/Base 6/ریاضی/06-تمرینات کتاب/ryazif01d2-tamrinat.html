@@ -1,0 +1,1870 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تمرینات درس دوم - از متن کتاب درسی ریاضی نهم</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 50%, #ecfeff 100%);
+    color: #1e293b;
+    line-height: 1.9;
+    padding: 20px;
+    font-size: 16px;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(30, 41, 59, 0.15);
+    overflow: hidden;
+  }
+
+  header {
+    background: linear-gradient(135deg, #0891b2 0%, #0ea5e9 50%, #6366f1 100%);
+    color: #fff;
+    padding: 40px 30px;
+    text-align: center;
+    position: relative;
+  }
+
+  header::after {
+    content: "";
+    position: absolute;
+    bottom: -20px;
+    left: 0; right: 0;
+    height: 40px;
+    background: #fff;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+
+  header h1 {
+    font-size: 1.9rem;
+    font-weight: 900;
+    margin-bottom: 12px;
+    text-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  }
+
+  header p { font-size: 1.05rem; opacity: 0.95; }
+
+  .badges {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+  }
+
+  .badge {
+    background: rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  main { padding: 40px 30px 60px; }
+
+  .intro-box {
+    background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+    border-right: 6px solid #f59e0b;
+    padding: 22px 26px;
+    border-radius: 16px;
+    margin-bottom: 35px;
+    font-size: 1rem;
+  }
+
+  .intro-box strong { color: #92400e; }
+
+  .source-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: #1e40af;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    border: 1px solid #93c5fd;
+  }
+
+  .section {
+    background: #f8fafc;
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 30px;
+    border: 2px solid #e2e8f0;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 22px;
+    padding-bottom: 16px;
+    border-bottom: 3px dashed #cbd5e1;
+  }
+
+  .section-number {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #0891b2, #6366f1);
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 6px 18px rgba(8, 145, 178, 0.3);
+  }
+
+  .section-title { font-size: 1.25rem; font-weight: 800; color: #1e293b; }
+  .section-sub { font-size: 0.88rem; color: #64748b; font-weight: 500; }
+
+  .question {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 22px 26px;
+    margin: 20px 0;
+    border-right: 5px solid #6366f1;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    transition: all 0.3s ease;
+  }
+
+  .question-title {
+    font-weight: 800;
+    color: #3730a3;
+    font-size: 1rem;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .q-number {
+    background: #4f46e5;
+    color: #fff;
+    min-width: 30px; height: 30px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 900;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .q-text { flex: 1; line-height: 1.9; }
+
+  .math { direction: ltr; display: inline-block; font-family: 'Cambria Math', 'Times New Roman', serif; font-weight: 700; }
+
+  .mc-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 14px 0;
+  }
+
+  .mc-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    background: #f1f5f9;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.97rem;
+  }
+
+  .mc-option:hover {
+    background: #e0e7ff;
+    border-color: #a5b4fc;
+    transform: translateX(-3px);
+  }
+
+  .mc-option input[type="radio"] { display: none; }
+
+  .mc-radio {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2.5px solid #a5b4fc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .mc-radio::after {
+    content: "";
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #4f46e5;
+    transform: scale(0);
+    transition: transform 0.2s ease;
+  }
+
+  .mc-option input[type="radio"]:checked ~ .mc-radio {
+    border-color: #4f46e5;
+    background: #eef2ff;
+  }
+
+  .mc-option input[type="radio"]:checked ~ .mc-radio::after {
+    transform: scale(1);
+  }
+
+  .mc-option.selected { background: #e0e7ff; border-color: #4f46e5; }
+
+  .mc-label {
+    font-weight: 900;
+    color: #4f46e5;
+    min-width: 30px;
+    font-size: 0.92rem;
+  }
+
+  .mc-text { font-size: 0.97rem; color: #1e293b; flex: 1; }
+
+  .mc-option.correct-option {
+    background: #dcfce7 !important;
+    border-color: #16a34a !important;
+  }
+
+  .mc-option.correct-option .mc-label { color: #166534; }
+
+  .mc-option.wrong-option {
+    background: #fee2e2 !important;
+    border-color: #dc2626 !important;
+  }
+
+  .mc-option.wrong-option .mc-label { color: #991b1b; }
+
+  .feedback {
+    display: none;
+    margin-top: 12px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    animation: fadeIn 0.3s ease;
+    line-height: 2;
+  }
+
+  .feedback.correct {
+    background: #dcfce7;
+    border-right: 4px solid #16a34a;
+    color: #166534;
+    display: block;
+  }
+
+  .feedback.wrong {
+    background: #fee2e2;
+    border-right: 4px solid #dc2626;
+    color: #991b1b;
+    display: block;
+  }
+
+  .feedback.empty {
+    background: #fef3c7;
+    border-right: 4px solid #f59e0b;
+    color: #92400e;
+    display: block;
+  }
+
+  .feedback::before { margin-left: 6px; }
+  .feedback.correct::before { content: "✅"; }
+  .feedback.wrong::before { content: "❌"; }
+  .feedback.empty::before { content: "⚠️"; }
+
+  .feedback .explanation {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed currentColor;
+    font-weight: 500;
+    line-height: 2;
+    font-size: 0.9rem;
+  }
+
+  .feedback .explanation strong { color: #1e293b; }
+
+  .button-bar {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 30px 0 10px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    padding: 12px 28px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  }
+
+  button:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
+  button:active { transform: translateY(0); }
+
+  .btn-success { background: linear-gradient(135deg, #16a34a, #059669); color: #fff; }
+  .btn-warning { background: linear-gradient(135deg, #0ea5e9, #3b82f6); color: #fff; }
+  .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+
+  .score-panel {
+    display: none;
+    background: linear-gradient(135deg, #0891b2 0%, #6366f1 100%);
+    color: #fff;
+    padding: 24px 30px;
+    border-radius: 20px;
+    margin: 25px 0;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(8, 145, 178, 0.3);
+    animation: fadeIn 0.4s ease;
+  }
+
+  .score-panel.show { display: block; }
+
+  .score-panel h3 { font-size: 1.4rem; margin-bottom: 14px; font-weight: 900; }
+
+  .score-panel .score-num {
+    font-size: 3.2rem;
+    font-weight: 900;
+    display: inline-block;
+    margin: 10px 8px;
+    text-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  }
+
+  .score-panel .score-total { font-size: 1.6rem; opacity: 0.8; }
+
+  .score-panel .score-msg { font-size: 1.05rem; margin-top: 14px; line-height: 1.8; }
+
+  .progress-bar {
+    width: 100%;
+    height: 14px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 50px;
+    margin: 18px 0;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #fbbf24, #22c55e);
+    border-radius: 50px;
+    width: 0%;
+    transition: width 0.8s ease;
+  }
+
+  .note-box {
+    background: #ecfdf5;
+    border-right: 5px solid #10b981;
+    padding: 12px 18px;
+    border-radius: 12px;
+    margin: 16px 0;
+    color: #065f46;
+    font-size: 0.94rem;
+  }
+
+  .saved-panel {
+    display: none;
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 2px solid #3b82f6;
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin: 20px 0;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .saved-panel.show { display: block; }
+
+  .saved-panel h4 {
+    color: #1e40af;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .saved-panel h4::before { content: "💾"; }
+
+  .saved-panel ul { list-style: none; padding: 0; }
+
+  .saved-panel li {
+    padding: 6px 0;
+    font-size: 0.92rem;
+    color: #1e3a8a;
+    border-bottom: 1px dashed #93c5fd;
+  }
+
+  .saved-panel li:last-child { border-bottom: none; }
+
+  footer {
+    text-align: center;
+    padding: 28px 20px;
+    background: #1e293b;
+    color: #cbd5e1;
+    font-size: 0.88rem;
+  }
+
+  footer strong { color: #22d3ee; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 8px; font-size: 15px; }
+    main { padding: 20px 14px 40px; }
+    header { padding: 28px 16px; }
+    header h1 { font-size: 1.35rem; }
+    .section { padding: 18px; }
+    .section-title { font-size: 1.1rem; }
+    .section-number { width: 48px; height: 48px; font-size: 1.1rem; }
+    .question { padding: 16px 18px; }
+    .mc-option { padding: 10px 14px; font-size: 0.9rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>📝 تمرینات درس دوم – از متن کتاب درسی</h1>
+  <p>ریاضی پایه نهم – فصل ۱، درس ۲: مجموعه‌های برابر و نمایش مجموعه‌ها</p>
+  <div class="badges">
+    <span class="badge">📖 دقیقاً از کتاب درسی</span>
+    <span class="badge">🎯 چهارگزینه‌ای چالشی</span>
+    <span class="badge">✅ صحت‌سنجی با توضیح کامل</span>
+    <span class="badge">💾 ثبت پاسخ‌ها</span>
+  </div>
+</header>
+
+<main>
+
+<div class="intro-box">
+  <strong>سلام دانش‌آموز عزیز! 🌟</strong><br>
+  تمام سوالات این فایل <strong>مستقیماً از متن کتاب ریاضی پایه نهم</strong> (فصل اول، درس دوم – صفحات ۶ تا ۱۰ کتاب) استخراج شده‌اند. این درس شامل سه موضوع اصلی است: <strong>مجموعه‌های برابر</strong>، <strong>زیرمجموعه</strong>، و <strong>نمایش مجموعه‌های اعداد (ℕ، 𝕎، ℤ، ℚ)</strong>. بعد از پاسخ دادن، روی دکمه‌ی <strong>«صحت‌سنجی»</strong> کلیک کن تا توضیح کامل هر پاسخ را ببینی.
+</div>
+
+<!-- ============================================================= -->
+<!-- ============ بخش ۱: مجموعه‌های برابر (صفحه ۶) =============== -->
+<!-- ============================================================= -->
+
+<section class="section">
+  <div class="section-header">
+    <div class="section-number">۱</div>
+    <div>
+      <div class="section-title">مجموعه‌های برابر – صفحه ۶ کتاب</div>
+      <div class="section-sub">فعالیت و کار در کلاس صفحه ۶</div>
+    </div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="question" data-q="q1">
+    <div class="source-badge">📖 فعالیت ۱ صفحه ۶ کتاب درسی</div>
+    <div class="question-title">
+      <span class="q-number">۱</span>
+      <span class="q-text">در فعالیت ۱ صفحه ۶، مجموعهٔ A شامل عددهای سطر دوم جدول و مجموعهٔ B شامل سه عدد زوج متوالی با میانگین ۴ است. کدام گزینه درست است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q1" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">A = B = {2, 4, 6}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q1" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">A = B = {3, 4, 5}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q1" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">A = {1, 2, 3}, B = {2, 4, 6}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q1" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">A = B = {2, 4, 6, 8}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="question" data-q="q2">
+    <div class="source-badge">📖 فعالیت ۱ صفحه ۶ کتاب درسی</div>
+    <div class="question-title">
+      <span class="q-number">۲</span>
+      <span class="q-text">در فعالیت ۱ صفحه ۶، سه عدد زوج متوالی با میانگین ۴ کدام هستند؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q2" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">2, 4, 6</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q2" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">4, 6, 8</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q2" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">2, 4, 6, 8</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q2" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">3, 4, 5</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="question" data-q="q3">
+    <div class="source-badge">📖 فعالیت ۲ صفحه ۶ کتاب درسی</div>
+    <div class="question-title">
+      <span class="q-number">۳</span>
+      <span class="q-text">در فعالیت ۲ صفحه ۶، مجموعهٔ A شامل سه عدد طبیعی متوالی است که مجموع آنها ۲۷ است. مجموعهٔ A کدام است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q3" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">{7, 8, 9}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q3" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">{8, 9, 10}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q3" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{6, 7, 8}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q3" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">{9, 10, 11}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="2"></div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="question" data-q="q4">
+    <div class="source-badge">📖 فعالیت ۲ صفحه ۶ کتاب درسی – بخش الف</div>
+    <div class="question-title">
+      <span class="q-number">۴</span>
+      <span class="q-text">در فعالیت ۲ صفحه ۶، با توجه به A = {8, 9, 10}، کدام مجموعه با A برابر است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q4" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">مجموعهٔ عددهای طبیعی بین ۶ و ۱۰</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q4" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">مجموعهٔ عددهای طبیعی بین ۷ و ۱۱</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q4" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">مجموعهٔ عددهای طبیعی بین ۸ و ۱۰</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q4" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">مجموعهٔ عددهای طبیعی بین ۹ و ۱۱</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="2"></div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="question" data-q="q5">
+    <div class="source-badge">📖 فعالیت ۲ صفحه ۶ کتاب درسی – بخش ج</div>
+    <div class="question-title">
+      <span class="q-number">۵</span>
+      <span class="q-text">در فعالیت ۲ صفحه ۶، «مجموعهٔ سه عدد طبیعی متوالی که میانگین آنها ۹ است» کدام است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q5" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">{7, 8, 9}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q5" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">{8, 9, 10}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q5" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{9, 10, 11}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q5" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">{6, 8, 10}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="2"></div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- ============ بخش ۲: زیرمجموعه (صفحه ۷ و ۸) ================ -->
+<!-- ============================================================= -->
+
+<section class="section">
+  <div class="section-header">
+    <div class="section-number">۲</div>
+    <div>
+      <div class="section-title">زیرمجموعه – صفحات ۷ و ۸ کتاب</div>
+      <div class="section-sub">تعریف، نماد و مثال‌ها</div>
+    </div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="question" data-q="q6">
+    <div class="source-badge">📖 فعالیت صفحه ۷ کتاب درسی</div>
+    <div class="question-title">
+      <span class="q-number">۶</span>
+      <span class="q-text">در فعالیت صفحه ۷، مجموعهٔ B شامل عضوهایی از D است که بر ۳ بخش‌پذیرند. اگر D = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10} باشد، مجموعهٔ B کدام است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q6" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">{3, 6, 9}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q6" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">{3, 6, 9, 12}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q6" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{1, 3, 6, 9}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q6" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">{3, 9}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="question" data-q="q7">
+    <div class="source-badge">📖 فعالیت صفحه ۷ کتاب درسی</div>
+    <div class="question-title">
+      <span class="q-number">۷</span>
+      <span class="q-text">در فعالیت صفحه ۷، اگر D = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10} باشد، کدام رابطه درست است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q7" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">{3, 6, 9} ⊆ D</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q7" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">D ⊆ {3, 6, 9}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q7" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{3, 6, 9} ⊄ D</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q7" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">D ⊄ {3, 6, 9}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="question" data-q="q8">
+    <div class="source-badge">📖 متن صفحه ۷ کتاب – خاصیت زیرمجموعه</div>
+    <div class="question-title">
+      <span class="q-number">۸</span>
+      <span class="q-text">طبق متن صفحه ۷ کتاب، کدام‌یک از عبارت‌های زیر <strong>همیشه درست</strong> است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q8" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">هر مجموعه، زیرمجموعه‌ی خودش است (A ⊆ A)</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q8" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">تهی زیرمجموعه‌ی هیچ مجموعه‌ای نیست</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q8" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">اگر A ⊆ B و B ⊆ A، آنگاه A ≠ B</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q8" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">اگر A ⊆ B، حتماً B ⊆ A هم درست است</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="question" data-q="q9">
+    <div class="source-badge">📖 متن صفحه ۷ کتاب – زیرمجموعه‌ی تهی</div>
+    <div class="question-title">
+      <span class="q-number">۹</span>
+      <span class="q-text">طبق متن صفحه ۷ کتاب، کدام‌یک از رابطه‌های زیر درست است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q9" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">∅ ⊆ A</span>
+        <span class="mc-text" style="font-size:0.85rem;">(برای هر مجموعه‌ی دلخواه A)</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q9" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">∅ ⊄ A</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q9" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">A ⊆ ∅</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q9" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">∅ ∈ A</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="question" data-q="q10">
+    <div class="source-badge">📖 مثال صفحه ۸ کتاب درسی – بخش الف</div>
+    <div class="question-title">
+      <span class="q-number">۱۰</span>
+      <span class="q-text">در مثال صفحه ۸ کتاب آمده است: «{a, b, d} ⊄ {a, b, c, e}؛ زیرا در مجموعهٔ سمت چپ، d هست که در مجموعه سمت راست نیست.» کدام نتیجه از این مثال گرفته می‌شود؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q10" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">برای اینکه A ⊆ B باشد، <strong>همه‌ی</strong> اعضای A باید در B باشند.</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q10" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">برای زیرمجموعه بودن، کافی است <strong>یک</strong> عضو مشترک باشد.</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q10" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">اگر A و B اعضای مشترک داشته باشند، A ⊆ B است.</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q10" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">برای زیرمجموعه نبودن، کافی است یکی از اعضا در دیگری نباشد.</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q11 -->
+  <div class="question" data-q="q11">
+    <div class="source-badge">📖 مثال صفحه ۸ کتاب درسی – بخش ب</div>
+    <div class="question-title">
+      <span class="q-number">۱۱</span>
+      <span class="q-text">در مثال صفحه ۸ کتاب آمده است: «{1-, 0, 1, 3} ⊆ {4, 3, 0, 1, -1, 2}؛ زیرا هر عضو مجموعهٔ سمت چپ، عضوی از مجموعهٔ سمت راست است.» کدام گزینه درست است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q11" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">{4, 3} ⊆ {4, 3, 0, 1, -1, 2}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q11" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">{5, 3} ⊆ {4, 3, 0, 1, -1, 2}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q11" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{4, 3, 0, 1, -1, 2} ⊆ {1-, 0, 1, 3}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q11" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">{5, 6} ⊆ {4, 3, 0, 1, -1, 2}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="question" data-q="q12">
+    <div class="source-badge">📖 کار در کلاس صفحه ۸ کتاب – سوال ۲</div>
+    <div class="question-title">
+      <span class="q-number">۱۲</span>
+      <span class="q-text">در کار در کلاس صفحه ۸، مجموعه‌های A = {1, 3, 6, 4} و B = {5, 1, 3} و C = {2, 5, 1, 3, 6} داده شده‌اند. کدام رابطه <strong>درست</strong> است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q12" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">B ⊆ C</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q12" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">A ⊆ B</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q12" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">B ⊆ A</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q12" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">A ⊆ C و C ⊆ A</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q13 -->
+  <div class="question" data-q="q13">
+    <div class="source-badge">📖 کار در کلاس صفحه ۸ کتاب – سوال ۲</div>
+    <div class="question-title">
+      <span class="q-number">۱۳</span>
+      <span class="q-text">در کار در کلاس صفحه ۸، با توجه به A = {1, 3, 6, 4} و B = {5, 1, 3}، کدام رابطه <strong>نادرست</strong> است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q13" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">6 ∈ A</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q13" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">∅ ⊆ A</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q13" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{1, 4} ∈ A</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q13" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">3 ∈ B</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="3"></div>
+  </div>
+
+  <!-- Q14 -->
+  <div class="question" data-q="q14">
+    <div class="source-badge">📖 کار در کلاس صفحه ۸ کتاب – سوال ۳</div>
+    <div class="question-title">
+      <span class="q-number">۱۴</span>
+      <span class="q-text">در کار در کلاس صفحه ۸ آمده است که همه‌ی زیرمجموعه‌های A = {a, b, c} عبارتند از: ∅، {a}، {b}، {c}، {a,b}، {a,c}، {b,c}، {a,b,c}. مجموعهٔ {a, b, c, d} چند زیرمجموعه دارد؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q14" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">۸ زیرمجموعه</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q14" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">۱۲ زیرمجموعه</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q14" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">۱۶ زیرمجموعه</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q14" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">۳۲ زیرمجموعه</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="3"></div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- ============ بخش ۳: نمایش مجموعه‌های اعداد (صفحه ۹ و ۱۰) ==== -->
+<!-- ============================================================= -->
+
+<section class="section">
+  <div class="section-header">
+    <div class="section-number">۳</div>
+    <div>
+      <div class="section-title">نمایش مجموعه‌های اعداد – صفحات ۹ و ۱۰</div>
+      <div class="section-sub">ℕ، 𝕎، ℤ، ℚ و مجموعه‌ساز</div>
+    </div>
+  </div>
+
+  <!-- Q15 -->
+  <div class="question" data-q="q15">
+    <div class="source-badge">📖 متن صفحه ۹ کتاب درسی</div>
+    <div class="question-title">
+      <span class="q-number">۱۵</span>
+      <span class="q-text">در صفحه ۹ کتاب، مجموعهٔ اعداد طبیعی به چه صورت نمایش داده می‌شود؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q15" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">ℕ = {1, 2, 3, 4, 5, ...}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q15" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">ℕ = {0, 1, 2, 3, 4, ...}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q15" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">ℕ = {..., -2, -1, 0, 1, 2, ...}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q15" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">ℕ = {1, 2, 3, ..., 100}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q16 -->
+  <div class="question" data-q="q16">
+    <div class="source-badge">📖 متن صفحه ۹ کتاب درسی</div>
+    <div class="question-title">
+      <span class="q-number">۱۶</span>
+      <span class="q-text">در صفحه ۹ کتاب، مجموعهٔ اعداد حسابی (𝕎) به چه صورت نمایش داده می‌شود؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q16" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">𝕎 = {0, 1, 2, 3, ...}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q16" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">𝕎 = {1, 2, 3, ...}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q16" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">𝕎 = {..., -1, 0, 1, ...}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q16" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">𝕎 = {2, 4, 6, 8, ...}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q17 -->
+  <div class="question" data-q="q17">
+    <div class="source-badge">📖 متن صفحه ۹ کتاب درسی</div>
+    <div class="question-title">
+      <span class="q-number">۱۷</span>
+      <span class="q-text">در صفحه ۹ کتاب، کدام رابطه‌ی بین مجموعه‌های ℕ و 𝕎 و ℤ درست است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q17" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">ℕ ⊆ 𝕎 ⊆ ℤ</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q17" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">ℤ ⊆ 𝕎 ⊆ ℕ</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q17" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">ℕ ⊆ ℤ ⊆ 𝕎</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q17" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">𝕎 ⊆ ℕ ⊆ ℤ</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q18 -->
+  <div class="question" data-q="q18">
+    <div class="source-badge">📖 مثال صفحه ۹ کتاب درسی</div>
+    <div class="question-title">
+      <span class="q-number">۱۸</span>
+      <span class="q-text">در مثال صفحه ۹ کتاب آمده است: «مجموعهٔ A = {5n + 3 | n ∈ ℕ}». اگر n = 1 باشد، حاصل عبارت چند است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q18" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">۵</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q18" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">۸</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q18" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">۱۳</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q18" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">۳</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="2"></div>
+  </div>
+
+  <!-- Q19 -->
+  <div class="question" data-q="q19">
+    <div class="source-badge">📖 مثال صفحه ۹ کتاب درسی</div>
+    <div class="question-title">
+      <span class="q-number">۱۹</span>
+      <span class="q-text">در مثال صفحه ۹ کتاب آمده است: «مجموعهٔ A = {5n + 3 | n ∈ ℕ}». چهار عضو اول این مجموعه کدام است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q19" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">{3, 8, 13, 18}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q19" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">{8, 13, 18, 23}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q19" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{5, 10, 15, 20}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q19" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">{3, 5, 8, 13}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="2"></div>
+  </div>
+
+  <!-- Q20 -->
+  <div class="question" data-q="q20">
+    <div class="source-badge">📖 متن صفحه ۱۰ کتاب درسی – مجموعهٔ اعداد گویا</div>
+    <div class="question-title">
+      <span class="q-number">۲۰</span>
+      <span class="q-text">در صفحه ۱۰ کتاب، مجموعهٔ اعداد گویا (ℚ) به چه صورت تعریف می‌شود؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q20" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">ℚ = {a/b | a, b ∈ ℤ , b ≠ 0}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q20" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">ℚ = {a/b | a, b ∈ ℕ}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q20" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">ℚ = {a/b | a, b ∈ ℤ , b = 0}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q20" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">ℚ = {a/b | a, b ∈ ℝ}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q21 -->
+  <div class="question" data-q="q21">
+    <div class="source-badge">📖 کار در کلاس صفحه ۱۰ کتاب درسی – بخش ب</div>
+    <div class="question-title">
+      <span class="q-number">۲۱</span>
+      <span class="q-text">در کار در کلاس صفحه ۱۰ آمده است: «A = {x | x ∈ ℤ , -5 ≤ x < 5}». مجموعهٔ A کدام است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q21" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">{-5, -4, -3, -2, -1, 0, 1, 2, 3, 4}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q21" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">{-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q21" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{-4, -3, -2, -1, 0, 1, 2, 3, 4}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q21" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">{-5, -4, -3, -2, -1, 1, 2, 3, 4}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q22 -->
+  <div class="question" data-q="q22">
+    <div class="source-badge">📖 کار در کلاس صفحه ۱۰ کتاب درسی – بخش ج</div>
+    <div class="question-title">
+      <span class="q-number">۲۲</span>
+      <span class="q-text">در کار در کلاس صفحه ۱۰ آمده است: «B = {3k + 2 | k ∈ ℤ}». اگر k = 0 باشد، حاصل عبارت چند است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q22" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">۰</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q22" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">۲</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q22" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">۳</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q22" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">۵</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="2"></div>
+  </div>
+
+  <!-- Q23 -->
+  <div class="question" data-q="q23">
+    <div class="source-badge">📖 تمرین ۱ صفحه ۱۰ کتاب درسی</div>
+    <div class="question-title">
+      <span class="q-number">۲۳</span>
+      <span class="q-text">در تمرین ۱ صفحه ۱۰ آمده است: «A = {2-, 1-, 0, 1, 2} و B = {x | x ∈ A , x² ≤ 2}». مجموعهٔ B کدام است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q23" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">{-1, 0, 1}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q23" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">{-2, -1, 0, 1, 2}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q23" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{0, 1}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q23" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">{-1, 1}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q24 -->
+  <div class="question" data-q="q24">
+    <div class="source-badge">📖 تمرین ۱ صفحه ۱۰ کتاب درسی</div>
+    <div class="question-title">
+      <span class="q-number">۲۴</span>
+      <span class="q-text">در تمرین ۱ صفحه ۱۰، با توجه به A = {2-, 1-, 0, 1, 2}، مجموعهٔ C = {x | x ∈ A, -1 ≤ x ≤ 1} کدام است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q24" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">{-1, 0, 1}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q24" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">{-2, -1, 0, 1, 2}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q24" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{0, 1, 2}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q24" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">{-1, 0, 1, 2}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q25 -->
+  <div class="question" data-q="q25">
+    <div class="source-badge">📖 تمرین ۱ صفحه ۱۰ کتاب درسی – مقایسه</div>
+    <div class="question-title">
+      <span class="q-number">۲۵</span>
+      <span class="q-text">در تمرین ۱ صفحه ۱۰، با توجه به A = {2-, 1-, 0, 1, 2}، اگر B = {x | x ∈ A , x² ≤ 2} و C = {x | x ∈ A, -1 ≤ x ≤ 1} و D = {x | x ∈ A , x⁴ = 1} باشد، کدام رابطه‌ی بین این مجموعه‌ها درست است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q25" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">B = C = D = {-1, 0, 1}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q25" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">B = C ≠ D</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q25" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">B ≠ C = D</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q25" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">B ≠ C ≠ D</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="2"></div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- ==================== پنل نتیجه =============================== -->
+<!-- ============================================================= -->
+
+<div class="score-panel" id="scorePanel">
+  <h3>📊 نتیجه‌ی صحت‌سنجی</h3>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div>
+    <span class="score-num" id="scoreNum">0</span>
+    <span class="score-total" id="scoreTotal">/ 0</span>
+  </div>
+  <div class="score-msg" id="scoreMsg"></div>
+</div>
+
+<!-- ============================================================= -->
+<!-- ==================== پنل ثبت پاسخ‌ها ========================= -->
+<!-- ============================================================= -->
+
+<div class="saved-panel" id="savedPanel">
+  <h4>پاسخ‌های ثبت شده‌ی شما</h4>
+  <ul id="savedList"></ul>
+</div>
+
+<!-- ============================================================= -->
+<!-- ==================== دکمه‌ها ================================= -->
+<!-- ============================================================= -->
+
+<div class="button-bar">
+  <button class="btn-success" onclick="verifyAll()">✅ صحت‌سنجی پاسخ‌ها</button>
+  <button class="btn-warning" onclick="saveAnswers()">💾 ثبت پاسخ‌ها</button>
+  <button class="btn-danger" onclick="clearAll()">🗑️ پاک کردن همه‌ی پاسخ‌ها</button>
+</div>
+
+<div class="note-box" style="text-align: center; font-size: 0.98rem;">
+  <strong>🌟 پیام پایانی:</strong><br>
+  این تمرینات مستقیماً از متن کتاب ریاضی پایه نهم (صفحات ۶ تا ۱۰) استخراج شده‌اند تا برای امتحان کاملاً آماده شوی. اگر جایی اشتباه کردی، به همان صفحه از کتاب برگرد و دوباره مرور کن.<br><br>
+  موفق باشی! ✨
+</div>
+
+</main>
+
+<footer>
+  <strong>📝 تمرینات درس دوم – از متن کتاب درسی</strong><br>
+  ریاضی پایه نهم | فصل اول، درس دوم (صفحات ۶ تا ۱۰)<br>
+  تهیه‌شده با ❤️ برای دانش‌آموزان عزیز | مدرسان: خانم سروناز و آقای فرسام
+</footer>
+
+</div>
+
+<script>
+  const answerKey = {
+    q1: {
+      correct: '1',
+      text: 'در فعالیت ۱ صفحه ۶، مجموعهٔ A و B هر دو برابر {2, 4, 6} هستند. سه عدد زوج متوالی با میانگین ۴ عبارتند از ۲، ۴ و ۶ (میانگین = (2+4+6)/3 = 4).',
+      all: {
+        '1': 'درست است. A = B = {2, 4, 6}. این دو مجموعه برابرند چون اعضای یکسانی دارند.',
+        '2': 'غلط است. {3, 4, 5} سه عدد طبیعی متوالی هستند، نه زوج.',
+        '3': 'غلط است. A و B هر دو {2, 4, 6} هستند، نه A = {1, 2, 3}.',
+        '4': 'غلط است. {2, 4, 6, 8} چهار عضو دارد، نه سه عضو.'
+      }
+    },
+    q2: {
+      correct: '1',
+      text: 'سه عدد زوج متوالی که میانگین آنها ۴ باشد: باید عدد وسط ۴ باشد (چون میانگین سه عدد متوالی، عدد وسط است). پس اعداد ۲، ۴ و ۶.',
+      all: {
+        '1': 'درست است. ۲، ۴، ۶ (میانگین = ۴).',
+        '2': 'غلط است. میانگین {4, 6, 8} برابر ۶ است، نه ۴.',
+        '3': 'غلط است. ۴ عدد است، نه ۳ عدد.',
+        '4': 'غلط است. {3, 4, 5} اعداد زوج نیستند.'
+      }
+    },
+    q3: {
+      correct: '2',
+      text: 'سه عدد طبیعی متوالی که مجموعشان ۲۷ باشد: عدد وسط = ۲۷÷۳ = ۹. پس اعداد ۸، ۹ و ۱۰.',
+      all: {
+        '1': 'غلط است. ۷+۸+۹ = ۲۴، نه ۲۷.',
+        '2': 'درست است. ۸+۹+۱۰ = ۲۷.',
+        '3': 'غلط است. ۶+۷+۸ = ۲۱، نه ۲۷.',
+        '4': 'غلط است. ۹+۱۰+۱۱ = ۳۰، نه ۲۷.'
+      }
+    },
+    q4: {
+      correct: '2',
+      text: 'اعداد طبیعی بین ۷ و ۱۱ عبارتند از: ۸، ۹ و ۱۰ که برابر A = {8, 9, 10} است.',
+      all: {
+        '1': 'غلط است. بین ۶ و ۱۰: {7, 8, 9} که با A فرق دارد.',
+        '2': 'درست است. بین ۷ و ۱۱: {8, 9, 10}.',
+        '3': 'غلط است. بین ۸ و ۱۰ فقط {9} است.',
+        '4': 'غلط است. بین ۹ و ۱۱ فقط {10} است.'
+      }
+    },
+    q5: {
+      correct: '2',
+      text: 'سه عدد طبیعی متوالی که میانگین آنها ۹ باشد: عدد وسط ۹ است. پس اعداد ۸، ۹ و ۱۰.',
+      all: {
+        '1': 'غلط است. میانگین {7, 8, 9} = ۸ است.',
+        '2': 'درست است. {8, 9, 10} با میانگین ۹.',
+        '3': 'غلط است. میانگین {9, 10, 11} = ۱۰ است.',
+        '4': 'غلط است. {6, 8, 10} اعداد متوالی نیستند (متوالی زوج هستند ولی متوالی طبیعی نیستند).'
+      }
+    },
+    q6: {
+      correct: '1',
+      text: 'اعداد D که بر ۳ بخش‌پذیرند: ۳، ۶ و ۹. پس B = {3, 6, 9}.',
+      all: {
+        '1': 'درست است. ۳، ۶، ۹.',
+        '2': 'غلط است. ۱۲ در D نیست (D تا ۱۰ است).',
+        '3': 'غلط است. ۱ بر ۳ بخش‌پذیر نیست.',
+        '4': 'ناقص است. ۶ را جا انداخته.'
+      }
+    },
+    q7: {
+      correct: '1',
+      text: 'چون هر عضو {3, 6, 9} در D هم هست، پس {3, 6, 9} ⊆ D.',
+      all: {
+        '1': 'درست است. هر عضو {3,6,9} عضوی از D است.',
+        '2': 'غلط است. D اعضای زیادی دارد که در {3,6,9} نیستند.',
+        '3': 'غلط است. {3,6,9} زیرمجموعه‌ی D است.',
+        '4': 'غلط است. D زیرمجموعه‌ی {3,6,9} نیست ولی این گزینه ناقص است. (نکته: هیچ‌کدام از این عبارات نمی‌تواند به‌تنهایی نادرست باشد چون D ⊄ {3,6,9} درست است.)'
+      }
+    },
+    q8: {
+      correct: '1',
+      text: 'طبق متن کتاب: «هر مجموعه، زیرمجموعه‌ی خودش است (A ⊆ A)».',
+      all: {
+        '1': 'درست است. این خاصیت همیشه درست است.',
+        '2': 'غلط است. تهی زیرمجموعه‌ی هر مجموعه‌ای است.',
+        '3': 'غلط است. اگر A ⊆ B و B ⊆ A، آنگاه A = B.',
+        '4': 'غلط است. زیرمجموعه بودن یک‌طرفه است.'
+      }
+    },
+    q9: {
+      correct: '1',
+      text: 'طبق متن کتاب: «مجموعهٔ تهی زیرمجموعهٔ هر مجموعه‌ای دلخواه مانند A است؛ یعنی ∅ ⊆ A».',
+      all: {
+        '1': 'درست است. تهی زیرمجموعه‌ی هر مجموعه‌ای است.',
+        '2': 'غلط است. این خلاف قانون است.',
+        '3': 'غلط است. A ⊆ ∅ فقط وقتی درست است که A تهی باشد.',
+        '4': 'غلط است. ∅ ∈ A به معنای عضویت است، نه زیرمجموعه بودن.'
+      }
+    },
+    q10: {
+      correct: '1',
+      text: 'نتیجه‌ی این مثال: برای زیرمجموعه بودن A در B، باید <strong>همه‌ی</strong> اعضای A در B باشند. اگر حتی یک عضو A در B نباشد، دیگر زیرمجموعه نیست.',
+      all: {
+        '1': 'درست است. شرط زیرمجموعه بودن، عضویت همه‌ی اعضاست.',
+        '2': 'غلط است. یک عضو مشترک کافی نیست.',
+        '3': 'غلط است. صرفاً داشتن عضو مشترک کافی نیست.',
+        '4': 'این گزینه هم به‌نوعی درست است، ولی گزینه الف جامع‌تر است. (نکته: در متن کتاب، دلیل «d در مجموعه سمت چپ هست که در سمت راست نیست» نشان‌دهنده‌ی نکته‌ی الف است.)'
+      }
+    },
+    q11: {
+      correct: '1',
+      text: '{4, 3} زیرمجموعه‌ی {4, 3, 0, 1, -1, 2} است، چون هر دو عضو ۴ و ۳ در مجموعه‌ی بزرگ‌تر هستند.',
+      all: {
+        '1': 'درست است. ۴ و ۳ هر دو در مجموعه‌ی بزرگ هستند.',
+        '2': 'غلط است. ۵ در مجموعه‌ی بزرگ‌تر نیست.',
+        '3': 'غلط است. برعکس است (مجموعه‌ی بزرگ شامل اعضایی است که در کوچک نیستند).',
+        '4': 'غلط است. ۵ و ۶ در آن مجموعه نیستند.'
+      }
+    },
+    q12: {
+      correct: '1',
+      text: 'B = {5, 1, 3} و C = {2, 5, 1, 3, 6}. هر عضو B (یعنی ۵، ۱ و ۳) در C هم هست. پس B ⊆ C.',
+      all: {
+        '1': 'درست است. هر عضو B در C هست.',
+        '2': 'غلط است. ۶ و ۴ در B نیستند.',
+        '3': 'غلط است. ۵ در A نیست.',
+        '4': 'غلط است. A ≠ C (چون C شامل ۲ و ۵ است که در A نیستند).'
+      }
+    },
+    q13: {
+      correct: '3',
+      text: 'عبارت {1, 4} ∈ A نادرست است. {1, 4} یک مجموعه است و عضویت آن در A معنایی ندارد. صحیح آن است که بنویسیم {1, 4} ⊆ A.',
+      all: {
+        '1': 'درست است. ۶ در A هست.',
+        '2': 'درست است. تهی زیرمجموعه‌ی هر مجموعه‌ای است.',
+        '3': 'نادرست است. {1, 4} یک مجموعه است و عضویت مجموعه در مجموعه معنا ندارد. این گزینه صحیح است (نادرست‌ترین).',
+        '4': 'درست است. ۳ در B هست.'
+      }
+    },
+    q14: {
+      correct: '3',
+      text: 'مجموعه‌ی ۴ عضوی، 2⁴ = ۱۶ زیرمجموعه دارد.',
+      all: {
+        '1': 'غلط است. ۸ زیرمجموعه برای ۳ عضو است (2³ = 8).',
+        '2': 'غلط است. تعداد زیرمجموعه‌ها همیشه توانی از ۲ است.',
+        '3': 'درست است. 2⁴ = 16.',
+        '4': 'غلط است. ۳۲ برای ۵ عضو است (2⁵ = 32).'
+      }
+    },
+    q15: {
+      correct: '1',
+      text: 'در صفحه ۹ کتاب، ℕ = {1, 2, 3, 4, 5, ...}.',
+      all: {
+        '1': 'درست است. اعداد طبیعی از ۱ شروع می‌شوند.',
+        '2': 'غلط است. این مجموعهٔ اعداد حسابی (𝕎) است.',
+        '3': 'غلط است. این مجموعهٔ اعداد صحیح (ℤ) است.',
+        '4': 'غلط است. اعداد طبیعی بی‌شمارند و به ۱۰۰ ختم نمی‌شوند.'
+      }
+    },
+    q16: {
+      correct: '1',
+      text: 'در صفحه ۹ کتاب، 𝕎 = {0, 1, 2, 3, ...}.',
+      all: {
+        '1': 'درست است. اعداد حسابی از ۰ شروع می‌شوند.',
+        '2': 'غلط است. این مجموعهٔ اعداد طبیعی (ℕ) است.',
+        '3': 'غلط است. این شامل اعداد منفی است که حسابی نیستند.',
+        '4': 'غلط است. این اعداد زوج هستند.'
+      }
+    },
+    q17: {
+      correct: '1',
+      text: 'طبق کتاب: «هر عدد طبیعی یک عدد حسابی است؛ یعنی ℕ ⊆ 𝕎. همهٔ اعداد طبیعی و حسابی، عضو ℤ هم هستند؛ پس ℕ ⊆ ℤ و 𝕎 ⊆ ℤ.» نتیجه: ℕ ⊆ 𝕎 ⊆ ℤ.',
+      all: {
+        '1': 'درست است. ℕ ⊆ 𝕎 ⊆ ℤ.',
+        '2': 'غلط است. برعکس است.',
+        '3': 'غلط است. ترتیب اشتباه است (ℤ شامل 𝕎 است، نه برعکس).',
+        '4': 'غلط است. ℕ زیرمجموعه‌ی 𝕎 است، نه برعکس.'
+      }
+    },
+    q18: {
+      correct: '2',
+      text: 'برای n = 1: 5(1) + 3 = 5 + 3 = 8.',
+      all: {
+        '1': 'غلط است. ۵ = 5×1 است ولی ۳ را اضافه نکردید.',
+        '2': 'درست است. 5(1) + 3 = 8.',
+        '3': 'غلط است. این برای n = 2 است.',
+        '4': 'غلط است. این برای n = 0 است ولی n ∈ ℕ شروع از ۱ دارد.'
+      }
+    },
+    q19: {
+      correct: '2',
+      text: 'برای n = 1, 2, 3, 4: 5(1)+3=8، 5(2)+3=13، 5(3)+3=18، 5(4)+3=23. پس {8, 13, 18, 23}.',
+      all: {
+        '1': 'غلط است. ۳ برای n = 0 است و n از ۱ شروع می‌شود.',
+        '2': 'درست است. ۸، ۱۳، ۱۸، ۲۳.',
+        '3': 'غلط است. این مضرب‌های ۵ هستند، نه 5n+3.',
+        '4': 'غلط است. این ترتیب اشتباه است.'
+      }
+    },
+    q20: {
+      correct: '1',
+      text: 'طبق صفحه ۱۰ کتاب: ℚ = {a/b | a, b ∈ ℤ , b ≠ 0}.',
+      all: {
+        '1': 'درست است. صورت و مخرج از ℤ، و مخرج ناصفر.',
+        '2': 'غلط است. b نباید صفر باشد و برای ℕ شرط کافی نیست.',
+        '3': 'غلط است. b = 0 تعریف کسر را باطل می‌کند.',
+        '4': 'غلط است. a و b باید از ℤ باشند، نه ℝ.'
+      }
+    },
+    q21: {
+      correct: '1',
+      text: 'x ∈ ℤ و -5 ≤ x < 5: اعضا عبارتند از ۵-، ۴-، ۳-، ۲-، ۱-، ۰، ۱، ۲، ۳، ۴. (خود ۵ عضو نیست چون شرط x < 5 است.)',
+      all: {
+        '1': 'درست است. ۱۰ عضو دارد (۵- تا ۴).',
+        '2': 'غلط است. ۵ عضو نیست چون x < 5 است.',
+        '3': 'غلط است. ۵- باید باشد چون x ≥ -5 است.',
+        '4': 'غلط است. صفر را جا انداخته.'
+      }
+    },
+    q22: {
+      correct: '2',
+      text: 'برای k = 0: 3(0) + 2 = 0 + 2 = 2.',
+      all: {
+        '1': 'غلط است. ۳×۰ = ۰، ولی ۲ را اضافه نکردید.',
+        '2': 'درست است. 3(0) + 2 = 2.',
+        '3': 'غلط است. ۳ فقط ضریب k است.',
+        '4': 'غلط است. این برای k = 1 است.'
+      }
+    },
+    q23: {
+      correct: '1',
+      text: 'A = {-2, -1, 0, 1, 2} و شرط x² ≤ 2: (-2)²=4 بزرگ‌تر از ۲، 2²=4 بزرگ‌تر از ۲. بقیه: 1، 0، 1 → همه ≤ 2. پس B = {-1, 0, 1}.',
+      all: {
+        '1': 'درست است. {-1, 0, 1} (چون (-1)²=1، 0²=0، 1²=1 همه ≤ 2).',
+        '2': 'غلط است. 2- و 2 مربعشان ۴ است که بزرگ‌تر از ۲ است.',
+        '3': 'ناقص است. 1- را جا انداخته.',
+        '4': 'غلط است. صفر را جا انداخته.'
+      }
+    },
+    q24: {
+      correct: '1',
+      text: 'A = {-2, -1, 0, 1, 2} و شرط -1 ≤ x ≤ 1: اعضا: 1-، 0، 1. پس C = {-1, 0, 1}.',
+      all: {
+        '1': 'درست است. {-1, 0, 1}.',
+        '2': 'غلط است. 2- و 2 در بازه‌ی [-1, 1] نیستند.',
+        '3': 'غلط است. 2 بزرگ‌تر از ۱ است و 1- را جا انداخته.',
+        '4': 'غلط است. 2 بزرگ‌تر از ۱ است.'
+      }
+    },
+    q25: {
+      correct: '2',
+      text: 'B = {x | x² ≤ 2} = {-1, 0, 1}. C = {x | -1 ≤ x ≤ 1} = {-1, 0, 1}. D = {x | x⁴ = 1} = {-1, 1} (چون (-1)⁴=1 و 1⁴=1، ولی 0⁴=0). پس B = C ≠ D.',
+      all: {
+        '1': 'غلط است. D = {-1, 1} است، نه {-1, 0, 1}.',
+        '2': 'درست است. B = C = {-1, 0, 1} ولی D = {-1, 1}.',
+        '3': 'غلط است. B = C (هر دو {-1, 0, 1}).',
+        '4': 'غلط است. B = C نه متفاوت.'
+      }
+    }
+  };
+
+  function verifyAll() {
+    const questions = document.querySelectorAll('.question[data-q]');
+    let correctCount = 0, wrongCount = 0, emptyCount = 0;
+
+    questions.forEach(q => {
+      const qName = q.dataset.q;
+      const selected = q.querySelector('input[type="radio"]:checked');
+      const feedback = q.querySelector('.feedback');
+      const options = q.querySelectorAll('.mc-option');
+
+      options.forEach(opt => opt.classList.remove('correct-option', 'wrong-option'));
+
+      if (!selected) {
+        feedback.className = 'feedback empty';
+        feedback.innerHTML = 'به این سوال پاسخ نداده‌اید.' + buildExplanation(qName, null);
+        emptyCount++;
+        return;
+      }
+
+      const userAnswer = selected.value;
+      const correctAnswer = answerKey[qName].correct;
+      const correctInput = q.querySelector(`input[value="${correctAnswer}"]`);
+
+      if (correctInput) correctInput.closest('.mc-option').classList.add('correct-option');
+
+      if (userAnswer === correctAnswer) {
+        feedback.className = 'feedback correct';
+        feedback.innerHTML = 'آفرین! پاسخ شما درست است.' + buildExplanation(qName, userAnswer);
+        correctCount++;
+      } else {
+        feedback.className = 'feedback wrong';
+        feedback.innerHTML = 'پاسخ شما نادرست است. گزینه‌ی صحیح با رنگ سبز مشخص شده است.' + buildExplanation(qName, userAnswer);
+        selected.closest('.mc-option').classList.add('wrong-option');
+        wrongCount++;
+      }
+    });
+
+    const total = questions.length;
+    const scorePanel = document.getElementById('scorePanel');
+    const scoreNum = document.getElementById('scoreNum');
+    const scoreTotal = document.getElementById('scoreTotal');
+    const progressFill = document.getElementById('progressFill');
+    const scoreMsg = document.getElementById('scoreMsg');
+
+    scorePanel.classList.add('show');
+    scoreNum.textContent = correctCount;
+    scoreTotal.textContent = '/ ' + total;
+
+    const percent = total > 0 ? (correctCount / total) * 100 : 0;
+    progressFill.style.width = percent + '%';
+
+    let msg = '';
+    if (percent === 100) msg = '🌟 عالی! تمام پاسخ‌ها درست است. آفرین!';
+    else if (percent >= 80) msg = '👏 خیلی خوب! تقریباً همه‌ی پاسخ‌ها درست است.';
+    else if (percent >= 60) msg = '👍 خوب بود! اما جای پیشرفت داری.';
+    else if (percent >= 40) msg = '📚 تلاش خوبی داشتی، ولی نیاز به مطالعه‌ی بیشتری داری.';
+    else msg = '💪 اشکالی ندارد! دوباره به کتاب مراجعه کن و تلاش کن.';
+
+    msg += `<br>✅ صحیح: ${correctCount} | ❌ نادرست: ${wrongCount} | ⚠️ بی‌پاسخ: ${emptyCount}`;
+    scoreMsg.innerHTML = msg;
+
+    scorePanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function buildExplanation(qName, userAnswer) {
+    const key = answerKey[qName];
+    if (!key) return '';
+
+    let html = '<div class="explanation">';
+    html += '<strong>💡 توضیح کامل:</strong><br>' + key.text;
+
+    if (key.all) {
+      html += '<br><br><strong>📖 بررسی همه‌ی گزینه‌ها:</strong><br>';
+      for (const [optValue, optText] of Object.entries(key.all)) {
+        const isCorrect = (optValue === key.correct);
+        const isUserChoice = (userAnswer === optValue);
+        let marker = isCorrect ? '✅' : '❌';
+        let suffix = '';
+        if (isUserChoice) suffix = ' (پاسخ شما)';
+        html += `<span style="display:block; margin: 6px 0; padding: 6px 10px; border-radius: 6px; background: ${isCorrect ? 'rgba(22,163,74,0.1)' : 'rgba(220,38,38,0.05)'};">${marker} <strong>گزینه ${optValue}:</strong> ${optText}${suffix}</span>`;
+      }
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  function saveAnswers() {
+    const questions = document.querySelectorAll('.question[data-q]');
+    const savedList = document.getElementById('savedList');
+    const savedPanel = document.getElementById('savedPanel');
+    savedList.innerHTML = '';
+
+    let answeredCount = 0;
+    let unansweredCount = 0;
+
+    questions.forEach((q, i) => {
+      const selected = q.querySelector('input[type="radio"]:checked');
+      const li = document.createElement('li');
+
+      if (selected) {
+        answeredCount++;
+        const optValue = selected.value;
+        const optText = q.querySelector(`input[value="${optValue}"]`).parentElement.querySelector('.mc-text').textContent;
+        li.innerHTML = `<strong>سوال ${i + 1}:</strong> گزینه‌ی «${optValue}» انتخاب شده است — <span style="color:#166534;">${optText}</span>`;
+      } else {
+        unansweredCount++;
+        li.innerHTML = `<strong>سوال ${i + 1}:</strong> <span style="color:#92400e;">بدون پاسخ</span>`;
+      }
+      savedList.appendChild(li);
+    });
+
+    const summary = document.createElement('li');
+    summary.style.fontWeight = 'bold';
+    summary.style.background = '#dbeafe';
+    summary.style.padding = '10px';
+    summary.style.borderRadius = '8px';
+    summary.style.marginTop = '8px';
+    summary.innerHTML = `📊 خلاصه: ${answeredCount} پاسخ داده شده، ${unansweredCount} بی‌پاسخ`;
+    savedList.appendChild(summary);
+
+    savedPanel.classList.add('show');
+    savedPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function clearAll() {
+    if (!confirm('آیا مطمئن هستید که می‌خواهید همه‌ی پاسخ‌ها را پاک کنید؟')) return;
+
+    document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+    document.querySelectorAll('.mc-option').forEach(opt => {
+      opt.classList.remove('correct-option', 'wrong-option', 'selected');
+    });
+    document.querySelectorAll('.feedback').forEach(fb => {
+      fb.className = 'feedback';
+      fb.textContent = '';
+    });
+    document.getElementById('scorePanel').classList.remove('show');
+    document.getElementById('savedPanel').classList.remove('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.addEventListener('change', function(e) {
+    if (e.target.type === 'radio') {
+      const question = e.target.closest('.question');
+      if (!question) return;
+      question.querySelectorAll('.mc-option').forEach(opt => opt.classList.remove('selected'));
+      e.target.closest('.mc-option').classList.add('selected');
+      const feedback = question.querySelector('.feedback');
+      if (feedback) {
+        feedback.className = 'feedback';
+        feedback.textContent = '';
+      }
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1918 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تمرینات درس اول - از متن کتاب درسی ریاضی نهم</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 50%, #ecfeff 100%);
+    color: #1e293b;
+    line-height: 1.9;
+    padding: 20px;
+    font-size: 16px;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(30, 41, 59, 0.15);
+    overflow: hidden;
+  }
+
+  header {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #c026d3 100%);
+    color: #fff;
+    padding: 40px 30px;
+    text-align: center;
+    position: relative;
+  }
+
+  header::after {
+    content: "";
+    position: absolute;
+    bottom: -20px;
+    left: 0; right: 0;
+    height: 40px;
+    background: #fff;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+
+  header h1 {
+    font-size: 1.9rem;
+    font-weight: 900;
+    margin-bottom: 12px;
+    text-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  }
+
+  header p { font-size: 1.05rem; opacity: 0.95; }
+
+  .badges {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+  }
+
+  .badge {
+    background: rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  main { padding: 40px 30px 60px; }
+
+  .intro-box {
+    background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+    border-right: 6px solid #f59e0b;
+    padding: 22px 26px;
+    border-radius: 16px;
+    margin-bottom: 35px;
+    font-size: 1rem;
+  }
+
+  .intro-box strong { color: #92400e; }
+
+  .source-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: #1e40af;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    border: 1px solid #93c5fd;
+  }
+
+  .section {
+    background: #f8fafc;
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 30px;
+    border: 2px solid #e2e8f0;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 22px;
+    padding-bottom: 16px;
+    border-bottom: 3px dashed #cbd5e1;
+  }
+
+  .section-number {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 6px 18px rgba(79, 70, 229, 0.3);
+  }
+
+  .section-title { font-size: 1.25rem; font-weight: 800; color: #1e293b; }
+  .section-sub { font-size: 0.88rem; color: #64748b; font-weight: 500; }
+
+  .question {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 22px 26px;
+    margin: 20px 0;
+    border-right: 5px solid #6366f1;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    transition: all 0.3s ease;
+  }
+
+  .question-title {
+    font-weight: 800;
+    color: #3730a3;
+    font-size: 1rem;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .q-number {
+    background: #4f46e5;
+    color: #fff;
+    min-width: 30px; height: 30px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 900;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .q-text { flex: 1; line-height: 1.9; }
+
+  .math { direction: ltr; display: inline-block; font-family: 'Cambria Math', 'Times New Roman', serif; font-weight: 700; }
+
+  .mc-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 14px 0;
+  }
+
+  .mc-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    background: #f1f5f9;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.97rem;
+  }
+
+  .mc-option:hover {
+    background: #e0e7ff;
+    border-color: #a5b4fc;
+    transform: translateX(-3px);
+  }
+
+  .mc-option input[type="radio"] { display: none; }
+
+  .mc-radio {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2.5px solid #a5b4fc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .mc-radio::after {
+    content: "";
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #4f46e5;
+    transform: scale(0);
+    transition: transform 0.2s ease;
+  }
+
+  .mc-option input[type="radio"]:checked ~ .mc-radio {
+    border-color: #4f46e5;
+    background: #eef2ff;
+  }
+
+  .mc-option input[type="radio"]:checked ~ .mc-radio::after {
+    transform: scale(1);
+  }
+
+  .mc-option.selected { background: #e0e7ff; border-color: #4f46e5; }
+
+  .mc-label {
+    font-weight: 900;
+    color: #4f46e5;
+    min-width: 30px;
+    font-size: 0.92rem;
+  }
+
+  .mc-text { font-size: 0.97rem; color: #1e293b; flex: 1; }
+
+  .mc-option.correct-option {
+    background: #dcfce7 !important;
+    border-color: #16a34a !important;
+  }
+
+  .mc-option.correct-option .mc-label { color: #166534; }
+
+  .mc-option.wrong-option {
+    background: #fee2e2 !important;
+    border-color: #dc2626 !important;
+  }
+
+  .mc-option.wrong-option .mc-label { color: #991b1b; }
+
+  .feedback {
+    display: none;
+    margin-top: 12px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    animation: fadeIn 0.3s ease;
+    line-height: 2;
+  }
+
+  .feedback.correct {
+    background: #dcfce7;
+    border-right: 4px solid #16a34a;
+    color: #166534;
+    display: block;
+  }
+
+  .feedback.wrong {
+    background: #fee2e2;
+    border-right: 4px solid #dc2626;
+    color: #991b1b;
+    display: block;
+  }
+
+  .feedback.empty {
+    background: #fef3c7;
+    border-right: 4px solid #f59e0b;
+    color: #92400e;
+    display: block;
+  }
+
+  .feedback::before { margin-left: 6px; }
+  .feedback.correct::before { content: "✅"; }
+  .feedback.wrong::before { content: "❌"; }
+  .feedback.empty::before { content: "⚠️"; }
+
+  .feedback .explanation {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed currentColor;
+    font-weight: 500;
+    line-height: 2;
+    font-size: 0.9rem;
+  }
+
+  .feedback .explanation strong {
+    color: #1e293b;
+  }
+
+  .button-bar {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 30px 0 10px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    padding: 12px 28px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  }
+
+  button:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
+  button:active { transform: translateY(0); }
+
+  .btn-success { background: linear-gradient(135deg, #16a34a, #059669); color: #fff; }
+  .btn-warning { background: linear-gradient(135deg, #0ea5e9, #3b82f6); color: #fff; }
+  .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+
+  .score-panel {
+    display: none;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: #fff;
+    padding: 24px 30px;
+    border-radius: 20px;
+    margin: 25px 0;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(79, 70, 229, 0.3);
+    animation: fadeIn 0.4s ease;
+  }
+
+  .score-panel.show { display: block; }
+
+  .score-panel h3 { font-size: 1.4rem; margin-bottom: 14px; font-weight: 900; }
+
+  .score-panel .score-num {
+    font-size: 3.2rem;
+    font-weight: 900;
+    display: inline-block;
+    margin: 10px 8px;
+    text-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  }
+
+  .score-panel .score-total { font-size: 1.6rem; opacity: 0.8; }
+
+  .score-panel .score-msg { font-size: 1.05rem; margin-top: 14px; line-height: 1.8; }
+
+  .progress-bar {
+    width: 100%;
+    height: 14px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 50px;
+    margin: 18px 0;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #fbbf24, #22c55e);
+    border-radius: 50px;
+    width: 0%;
+    transition: width 0.8s ease;
+  }
+
+  .note-box {
+    background: #ecfdf5;
+    border-right: 5px solid #10b981;
+    padding: 12px 18px;
+    border-radius: 12px;
+    margin: 16px 0;
+    color: #065f46;
+    font-size: 0.94rem;
+  }
+
+  .saved-panel {
+    display: none;
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 2px solid #3b82f6;
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin: 20px 0;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .saved-panel.show { display: block; }
+
+  .saved-panel h4 {
+    color: #1e40af;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .saved-panel h4::before { content: "💾"; }
+
+  .saved-panel ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .saved-panel li {
+    padding: 6px 0;
+    font-size: 0.92rem;
+    color: #1e3a8a;
+    border-bottom: 1px dashed #93c5fd;
+  }
+
+  .saved-panel li:last-child { border-bottom: none; }
+
+  footer {
+    text-align: center;
+    padding: 28px 20px;
+    background: #1e293b;
+    color: #cbd5e1;
+    font-size: 0.88rem;
+  }
+
+  footer strong { color: #a855f7; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 8px; font-size: 15px; }
+    main { padding: 20px 14px 40px; }
+    header { padding: 28px 16px; }
+    header h1 { font-size: 1.35rem; }
+    .section { padding: 18px; }
+    .section-title { font-size: 1.1rem; }
+    .section-number { width: 48px; height: 48px; font-size: 1.1rem; }
+    .question { padding: 16px 18px; }
+    .mc-option { padding: 10px 14px; font-size: 0.9rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>📝 تمرینات درس اول – از متن کتاب درسی</h1>
+  <p>ریاضی پایه نهم – فصل ۱، درس ۱: معرفی مجموعه</p>
+  <div class="badges">
+    <span class="badge">📖 دقیقاً از کتاب درسی</span>
+    <span class="badge">🎯 چهارگزینه‌ای چالشی</span>
+    <span class="badge">✅ صحت‌سنجی با توضیح کامل</span>
+    <span class="badge">💾 ثبت پاسخ‌ها</span>
+  </div>
+</header>
+
+<main>
+
+<div class="intro-box">
+  <strong>سلام دانش‌آموز عزیز! 🌟</strong><br>
+  تمام سوالات این فایل <strong>مستقیماً از متن کتاب ریاضی پایه نهم</strong> (فصل اول، درس اول – صفحات ۲ تا ۵ کتاب) استخراج شده‌اند و به صورت <strong>چهارگزینه‌ای با گزینه‌های بسیار نزدیک به هم</strong> طراحی شده‌اند. هر سوال، منبع دقیق خود را نشان می‌دهد. بعد از پاسخ دادن، روی دکمه‌ی <strong>«صحت‌سنجی»</strong> کلیک کن تا توضیح کامل هر پاسخ را ببینی.
+</div>
+
+<!-- ============================================================= -->
+<!-- ============ بخش ۱: فعالیت صفحه ۲ کتاب ===================== -->
+<!-- ============================================================= -->
+
+<section class="section">
+  <div class="section-header">
+    <div class="section-number">۱</div>
+    <div>
+      <div class="section-title">فعالیت صفحه ۲ کتاب درسی</div>
+      <div class="section-sub">شمارنده‌های عدد ۶۰</div>
+    </div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="question" data-q="q1">
+    <div class="source-badge">📖 فعالیت صفحه ۲ – شمارنده‌های ۶۰</div>
+    <div class="question-title">
+      <span class="q-number">۱</span>
+      <span class="q-text">در فعالیت صفحه ۲، <strong>مجموعه‌ی A شامل شمارنده‌های اول عدد ۶۰</strong> نوشته شد. این مجموعه کدام است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q1" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">{2, 3, 5}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q1" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">{2, 3, 5, 7}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q1" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{1, 2, 3, 5}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q1" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">{2, 3, 15}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="question" data-q="q2">
+    <div class="source-badge">📖 فعالیت صفحه ۲ – مجموعه B</div>
+    <div class="question-title">
+      <span class="q-number">۲</span>
+      <span class="q-text">در فعالیت صفحه ۲، از ما خواسته شد <strong>شمارنده‌های مرکب عدد ۶۰ را به‌صورت مجموعه‌ی B</strong> بنویسیم. کدام گزینه مجموعه‌ی B را به درستی نشان می‌دهد؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q2" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">{4, 6, 10, 12, 15, 20, 30, 60}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q2" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">{4, 6, 8, 10, 12, 15, 20, 30, 60}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q2" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{4, 6, 10, 12, 15, 20, 30}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q2" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">{4, 6, 10, 12, 20, 30, 60}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="question" data-q="q3">
+    <div class="source-badge">📖 فعالیت صفحه ۲ – مجموعه C</div>
+    <div class="question-title">
+      <span class="q-number">۳</span>
+      <span class="q-text">در فعالیت صفحه ۲، <strong>مجموعه‌ی C شامل شمارنده‌های عدد ۶۰ که نه اول باشند و نه مرکب</strong>، چند عضو دارد؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q3" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">صفر عضو (تهی)</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q3" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">۱ عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q3" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">۲ عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q3" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">۳ عضو</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="2"></div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="question" data-q="q4">
+    <div class="source-badge">📖 فعالیت صفحه ۲ – مجموعه D</div>
+    <div class="question-title">
+      <span class="q-number">۴</span>
+      <span class="q-text">در فعالیت صفحه ۲، <strong>مجموعه‌ی D شامل همه‌ی شمارنده‌های دورقمی عدد ۶۰</strong> را تشکیل دادیم. این مجموعه چند عضو دارد؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q4" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">۴ عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q4" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">۵ عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q4" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">۶ عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q4" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">۷ عضو</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="3"></div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- ============ بخش ۲: فعالیت صفحه ۳ کتاب ===================== -->
+<!-- ============================================================= -->
+
+<section class="section">
+  <div class="section-header">
+    <div class="section-number">۲</div>
+    <div>
+      <div class="section-title">فعالیت صفحه ۳ کتاب درسی</div>
+      <div class="section-sub">تشخیص مجموعه و عضوهای تکراری</div>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="question" data-q="q5">
+    <div class="source-badge">📖 فعالیت ۱ صفحه ۳ کتاب درسی</div>
+    <div class="question-title">
+      <span class="q-number">۵</span>
+      <span class="q-text">در فعالیت ۱ صفحه ۳ آمده است: «کدام یک از عبارت‌های زیر مشخص‌کنندهٔ یک مجموعه است؟» کدام گزینه <strong>مجموعه نیست</strong>؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q5" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">عددهای طبیعی و یک رقمی</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q5" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">چهار شاعر ایرانی</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q5" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">دو عدد اول کوچک‌تر از ۱۲</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q5" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">حروف الفبای فارسی</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="2"></div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="question" data-q="q6">
+    <div class="source-badge">📖 فعالیت ۲ صفحه ۳ کتاب درسی – بخش الف</div>
+    <div class="question-title">
+      <span class="q-number">۶</span>
+      <span class="q-text">در فعالیت ۲ صفحه ۳، با توجه به شرط متمایز بودن عضوهای یک مجموعه، به‌جای <span class="math">A = {1, 2, 1, 4, 5}</span> باید بنویسیم:</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q6" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">{1, 2, 4, 5}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q6" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">{1, 1, 2, 4, 5}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q6" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{2, 1, 4, 5, 1}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q6" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">{1, 2, 3, 4, 5}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="question" data-q="q7">
+    <div class="source-badge">📖 فعالیت ۲ صفحه ۳ کتاب درسی – بخش ب</div>
+    <div class="question-title">
+      <span class="q-number">۷</span>
+      <span class="q-text">در فعالیت ۲ صفحه ۳، با توجه به <span class="math">B = {5, 6, 5, 7}</span>، به دلیل تکراری بودن عدد ______ آن را به‌صورت ______ می‌نویسیم. کدام گزینه جای خالی‌ها را کامل می‌کند؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q7" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">۵ / <span class="math">{5, 6, 7}</span></span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q7" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">۶ / <span class="math">{5, 6, 7}</span></span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q7" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">۵ / <span class="math">{6, 5, 7, 5}</span></span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q7" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">۷ / <span class="math">{5, 6, 7}</span></span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="question" data-q="q8">
+    <div class="source-badge">📖 فعالیت ۳ صفحه ۳ کتاب درسی</div>
+    <div class="question-title">
+      <span class="q-number">۸</span>
+      <span class="q-text">در فعالیت ۳ صفحه ۳ آمده است: «مجموعهٔ عددهای دو رقمی و زوجِ اوّل را بنویسید و آن را E بنامید.» مجموعه‌ی E چند عضو دارد؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q8" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">صفر عضو (تهی)</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q8" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">۱ عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q8" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">۲ عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q8" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">۳ عضو</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- ============ بخش ۳: فعالیت صفحه ۴ کتاب ===================== -->
+<!-- ============================================================= -->
+
+<section class="section">
+  <div class="section-header">
+    <div class="section-number">۳</div>
+    <div>
+      <div class="section-title">فعالیت صفحه ۴ کتاب درسی</div>
+      <div class="section-sub">مجموعه‌ی تهی</div>
+    </div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="question" data-q="q9">
+    <div class="source-badge">📖 فعالیت ۴ صفحه ۴ کتاب درسی</div>
+    <div class="question-title">
+      <span class="q-number">۹</span>
+      <span class="q-text">در فعالیت ۴ صفحه ۴ آمده است: «کدام یک از عبارت‌های زیر، مجموعهٔ تهی را مشخص می‌کند؟» کدام گزینه <strong>مجموعه‌ی تهی</strong> است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q9" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">عددهای طبیعی بین ۵ و ۶</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q9" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">عددهای صحیح بین ۱- و ۱</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q9" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">عددهای اوّل و زوج</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q9" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">عددهای طبیعی یک رقمی و مضرب ۳ که اوّل باشد</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- ============ بخش ۴: کار در کلاس صفحه ۴ کتاب ================ -->
+<!-- ============================================================= -->
+
+<section class="section">
+  <div class="section-header">
+    <div class="section-number">۴</div>
+    <div>
+      <div class="section-title">کار در کلاس صفحه ۴ کتاب درسی</div>
+      <div class="section-sub">علامت ✓ یا × برای مجموعه‌ها</div>
+    </div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="question" data-q="q10">
+    <div class="source-badge">📖 کار در کلاس صفحه ۴ – سوال ۳</div>
+    <div class="question-title">
+      <span class="q-number">۱۰</span>
+      <span class="q-text">در کار در کلاس صفحه ۴، سوال ۳، باید عبارت‌هایی که مجموعه‌ای را مشخص می‌کند با ✓ و بقیه را با × مشخص کنیم. کدام یک از موارد زیر <strong>مجموعه نیست</strong>؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q10" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">چهار عدد فرد متوالی</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q10" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">سه عدد طبیعی زوج متوالی با شروع از ۲</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q10" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">۵ عدد بزرگ</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q10" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">عددهای طبیعی بین ۲ و ۳</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="3"></div>
+  </div>
+
+  <!-- Q11 -->
+  <div class="question" data-q="q11">
+    <div class="source-badge">📖 کار در کلاس صفحه ۴ – سوال ۴ (جدول)</div>
+    <div class="question-title">
+      <span class="q-number">۱۱</span>
+      <span class="q-text">در جدول کار در کلاس صفحه ۴، <span class="math">H = {2, 3, 5, 7}</span> متناظر با کدام عبارت است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q11" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">مجموعهٔ عددهای اوّل یک رقمی</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q11" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">مجموعهٔ عددهای اوّل دو رقمی</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q11" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">مجموعهٔ عددهای طبیعی یک رقمی</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q11" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">مجموعهٔ عددهای زوج یک رقمی</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="question" data-q="q12">
+    <div class="source-badge">📖 کار در کلاس صفحه ۴ – سوال ۴ (جدول)</div>
+    <div class="question-title">
+      <span class="q-number">۱۲</span>
+      <span class="q-text">در جدول کار در کلاس صفحه ۴، <span class="math">B = {4, 8, 12, ...}</span> متناظر با کدام عبارت است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q12" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">مجموعهٔ مضرب‌های طبیعی عدد ۴</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q12" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">مجموعهٔ مضرب‌های طبیعی عدد ۲</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q12" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">مجموعهٔ عددهای زوج دو رقمی</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q12" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">مجموعهٔ عددهای طبیعی بخش‌پذیر بر ۸</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- ============ بخش ۵: فعالیت صفحه ۵ کتاب ===================== -->
+<!-- ============================================================= -->
+
+<section class="section">
+  <div class="section-header">
+    <div class="section-number">۵</div>
+    <div>
+      <div class="section-title">فعالیت صفحه ۵ کتاب درسی</div>
+      <div class="section-sub">کدام عبارت مجموعه است؟</div>
+    </div>
+  </div>
+
+  <!-- Q13 -->
+  <div class="question" data-q="q13">
+    <div class="source-badge">📖 فعالیت ۵ صفحه ۵ کتاب درسی</div>
+    <div class="question-title">
+      <span class="q-number">۱۳</span>
+      <span class="q-text">در فعالیت ۵ صفحه ۵ آمده است: «کدام یک از عبارت‌های زیر مشخص‌کنندهٔ یک مجموعه است؟» کدام گزینه <strong>مجموعه نیست</strong>؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q13" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">عددهای صحیح مثبت و کمتر از ۱۰</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q13" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">شمارنده‌های اوّل عدد ۱۹</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q13" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">چهار میوهٔ خوشمزه</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q13" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">عددهای صحیحِ منفی و بزرگ‌تر از ۸</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="3"></div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- ============ بخش ۶: تمرین صفحه ۵ کتاب ===================== -->
+<!-- ============================================================= -->
+
+<section class="section">
+  <div class="section-header">
+    <div class="section-number">۶</div>
+    <div>
+      <div class="section-title">تمرین صفحه ۵ کتاب درسی</div>
+      <div class="section-sub">تمرین‌های رسمی کتاب</div>
+    </div>
+  </div>
+
+  <!-- Q14 -->
+  <div class="question" data-q="q14">
+    <div class="source-badge">📖 تمرین ۱ صفحه ۵ کتاب – بخش الف</div>
+    <div class="question-title">
+      <span class="q-number">۱۴</span>
+      <span class="q-text">در تمرین ۱ صفحه ۵، مجموعه <span class="math">A = {1, 8, 27, 64, 125}</span> داده شده است. این مجموعه متناظر با کدام عبارت است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q14" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">مجموعهٔ مکعب عددهای طبیعی کوچک‌تر از ۶</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q14" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">مجموعهٔ مربع عددهای طبیعی کوچک‌تر از ۶</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q14" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">مجموعهٔ مکعب عددهای طبیعی کوچک‌تر از ۷</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q14" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">مجموعهٔ توان چهارم عددهای طبیعی کوچک‌تر از ۶</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q15 -->
+  <div class="question" data-q="q15">
+    <div class="source-badge">📖 تمرین ۱ صفحه ۵ کتاب – بخش ج</div>
+    <div class="question-title">
+      <span class="q-number">۱۵</span>
+      <span class="q-text">در تمرین ۱ صفحه ۵، عبارت «عددهای طبیعی مضرب ۵ و کوچک‌تر از ۱۰۰» داده شده است. این مجموعه چند عضو دارد؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q15" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">۱۸ عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q15" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">۱۹ عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q15" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">۲۰ عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q15" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">۹۹ عضو</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="2"></div>
+  </div>
+
+  <!-- Q16 -->
+  <div class="question" data-q="q16">
+    <div class="source-badge">📖 تمرین ۱ صفحه ۵ کتاب – بخش د</div>
+    <div class="question-title">
+      <span class="q-number">۱۶</span>
+      <span class="q-text">در تمرین ۱ صفحه ۵، عبارت «عددهای طبیعی بزرگ‌تر از ۴ و کوچک‌تر از ۵» داده شده است. این مجموعه کدام است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q16" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">مجموعه‌ی تهی (هیچ عضوی ندارد)</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q16" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">{4}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q16" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{5}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q16" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">{4, 5}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q17 -->
+  <div class="question" data-q="q17">
+    <div class="source-badge">📖 تمرین ۱ صفحه ۵ کتاب – بخش هـ</div>
+    <div class="question-title">
+      <span class="q-number">۱۷</span>
+      <span class="q-text">در تمرین ۱ صفحه ۵، عبارت «عددهای صحیح منفی که بین ۴ و ۷ قرار دارند» داده شده است. این مجموعه کدام است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q17" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">مجموعه‌ی تهی (هیچ عضوی ندارد)</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q17" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">{5, 6}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q17" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{-5, -6}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q17" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">{4, 5, 6, 7}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q18 -->
+  <div class="question" data-q="q18">
+    <div class="source-badge">📖 تمرین ۱ صفحه ۵ کتاب – بخش و</div>
+    <div class="question-title">
+      <span class="q-number">۱۸</span>
+      <span class="q-text">در تمرین ۱ صفحه ۵، عبارت «عددهای اوّل دورقمی که مضرب ۷ باشد» داده شده است. این مجموعه چند عضو دارد؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q18" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">صفر (تهی)</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q18" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">۱ عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q18" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">۲ عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q18" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">۳ عضو</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q19 -->
+  <div class="question" data-q="q19">
+    <div class="source-badge">📖 تمرین ۲ صفحه ۵ کتاب – بخش ب</div>
+    <div class="question-title">
+      <span class="q-number">۱۹</span>
+      <span class="q-text">در تمرین ۲ صفحه ۵ آمده است: «مجموعهٔ <span class="math">A = {0, 2, 3, 4, ..., 9}</span> دارای ______ عضو است.» مقدار جای خالی کدام است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q19" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">۸ عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q19" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">۹ عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q19" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">۱۰ عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q19" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">۷ عضو</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="2"></div>
+  </div>
+
+  <!-- Q20 -->
+  <div class="question" data-q="q20">
+    <div class="source-badge">📖 تمرین ۲ صفحه ۵ کتاب – بخش ج</div>
+    <div class="question-title">
+      <span class="q-number">۲۰</span>
+      <span class="q-text">در تمرین ۲ صفحه ۵ آمده است: «مجموعهٔ <span class="math">A = {0, ∅}</span> دارای ______ عضو است.» مقدار جای خالی کدام است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q20" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">صفر عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q20" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">۱ عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q20" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">۲ عضو</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q20" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">۳ عضو</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="3"></div>
+  </div>
+
+  <!-- Q21 -->
+  <div class="question" data-q="q21">
+    <div class="source-badge">📖 تمرین ۲ صفحه ۵ کتاب – بخش د</div>
+    <div class="question-title">
+      <span class="q-number">۲۱</span>
+      <span class="q-text">در تمرین ۲ صفحه ۵ آمده است: «با توجه به مجموعهٔ <span class="math">A = {3, 5, 7, 9, 11}</span>؛ داریم: ۵ عضو ______ است و ۱۲ عضو ______ نیست.» کدام گزینه درست است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q21" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text"><span class="math">5 ∈ A</span> و <span class="math">12 ∉ A</span></span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q21" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text"><span class="math">5 ∉ A</span> و <span class="math">12 ∈ A</span></span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q21" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text"><span class="math">5 ∈ A</span> و <span class="math">12 ∈ A</span></span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q21" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text"><span class="math">5 ∉ A</span> و <span class="math">12 ∉ A</span></span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q22 -->
+  <div class="question" data-q="q22">
+    <div class="source-badge">📖 تمرین ۳ صفحه ۵ کتاب</div>
+    <div class="question-title">
+      <span class="q-number">۲۲</span>
+      <span class="q-text">در تمرین ۳ صفحه ۵ آمده است: «سه مجموعهٔ متفاوت بنویسید که عدد ۳ عضو آنها باشد.» کدام گزینه یک مجموعه است که <strong>شامل عدد ۳</strong> است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q22" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">{1, 2, 4, 5}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q22" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">{2, 5, 7, 9}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q22" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{1, 3, 5, 7}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q22" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">{2, 4, 6, 8}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="3"></div>
+  </div>
+
+  <!-- Q23 -->
+  <div class="question" data-q="q23">
+    <div class="source-badge">📖 کار در کلاس صفحه ۴ کتاب – جدول</div>
+    <div class="question-title">
+      <span class="q-number">۲۳</span>
+      <span class="q-text">در جدول کار در کلاس صفحه ۴، <span class="math">C = {3, 4, 5, 6, 7, 8, 9}</span> نوشته شده است. اگر بخواهیم این مجموعه را درست کنیم تا متناظر با «مجموعهٔ عددهای صحیح بین ۲ و ۱۰» باشد، کدام گزینه درست است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q23" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">{3, 4, 5, 6, 7, 8, 9}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q23" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">{2, 3, 4, 5, 6, 7, 8, 9, 10}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q23" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q23" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">{3, 4, 5, 6, 7, 8, 9, 10}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="1"></div>
+  </div>
+
+  <!-- Q24 -->
+  <div class="question" data-q="q24">
+    <div class="source-badge">📖 کار در کلاس صفحه ۴ کتاب – جدول</div>
+    <div class="question-title">
+      <span class="q-number">۲۴</span>
+      <span class="q-text">در جدول کار در کلاس صفحه ۴، <span class="math">D = {5}</span> نوشته شده است. این مجموعه متناظر با کدام عبارت است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q24" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text">مجموعهٔ عددهای اوّل یک رقمی</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q24" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text">مجموعهٔ عددهای اوّل یک رقمی که بخش‌پذیر بر ۵ باشند</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q24" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text">مجموعهٔ عددهای طبیعی یک رقمی که مضرب ۵ باشند</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q24" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text">مجموعهٔ عددهای اوّل دورقمی</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="2"></div>
+  </div>
+
+  <!-- Q25 -->
+  <div class="question" data-q="q25">
+    <div class="source-badge">📖 کار در کلاس صفحه ۴ کتاب – جدول</div>
+    <div class="question-title">
+      <span class="q-number">۲۵</span>
+      <span class="q-text">در جدول کار در کلاس صفحه ۴، <span class="math">F = {2, 4, 6, 8}</span> نوشته شده است. اگر بخواهیم این مجموعه را درست کنیم تا متناظر با «مجموعهٔ عددهای طبیعی بین ۲ و ۱۰» باشد، کدام گزینه درست است؟</span>
+    </div>
+    <div class="mc-options">
+      <label class="mc-option">
+        <input type="radio" name="q25" value="1">
+        <span class="mc-radio"></span>
+        <span class="mc-label">الف)</span>
+        <span class="mc-text math">{2, 4, 6, 8}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q25" value="2">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ب)</span>
+        <span class="mc-text math">{3, 4, 5, 6, 7, 8, 9}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q25" value="3">
+        <span class="mc-radio"></span>
+        <span class="mc-label">پ)</span>
+        <span class="mc-text math">{2, 3, 4, 5, 6, 7, 8, 9, 10}</span>
+      </label>
+      <label class="mc-option">
+        <input type="radio" name="q25" value="4">
+        <span class="mc-radio"></span>
+        <span class="mc-label">ت)</span>
+        <span class="mc-text math">{4, 6, 8, 10}</span>
+      </label>
+    </div>
+    <div class="feedback" data-correct="2"></div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!-- ==================== پنل نتیجه =============================== -->
+<!-- ============================================================= -->
+
+<div class="score-panel" id="scorePanel">
+  <h3>📊 نتیجه‌ی صحت‌سنجی</h3>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div>
+    <span class="score-num" id="scoreNum">0</span>
+    <span class="score-total" id="scoreTotal">/ 0</span>
+  </div>
+  <div class="score-msg" id="scoreMsg"></div>
+</div>
+
+<!-- ============================================================= -->
+<!-- ==================== پنل ثبت پاسخ‌ها ========================= -->
+<!-- ============================================================= -->
+
+<div class="saved-panel" id="savedPanel">
+  <h4>پاسخ‌های ثبت شده‌ی شما</h4>
+  <ul id="savedList"></ul>
+</div>
+
+<!-- ============================================================= -->
+<!-- ==================== دکمه‌ها ================================= -->
+<!-- ============================================================= -->
+
+<div class="button-bar">
+  <button class="btn-success" onclick="verifyAll()">✅ صحت‌سنجی پاسخ‌ها</button>
+  <button class="btn-warning" onclick="saveAnswers()">💾 ثبت پاسخ‌ها</button>
+  <button class="btn-danger" onclick="clearAll()">🗑️ پاک کردن همه‌ی پاسخ‌ها</button>
+</div>
+
+<div class="note-box" style="text-align: center; font-size: 0.98rem;">
+  <strong>🌟 پیام پایانی:</strong><br>
+  این تمرینات مستقیماً از متن کتاب ریاضی پایه نهم (صفحات ۲ تا ۵) استخراج شده‌اند تا برای امتحان کاملاً آماده شوی. اگر جایی اشتباه کردی، به همان صفحه از کتاب برگرد و دوباره مرور کن.<br><br>
+  موفق باشی! ✨
+</div>
+
+</main>
+
+<footer>
+  <strong>📝 تمرینات درس اول – از متن کتاب درسی</strong><br>
+  ریاضی پایه نهم | فصل اول، درس اول (صفحات ۲ تا ۵)<br>
+  تهیه‌شده با ❤️ برای دانش‌آموزان عزیز | مدرسان: خانم سروناز و آقای فرسام
+</footer>
+
+</div>
+
+<script>
+  const answerKey = {
+    q1: {
+      correct: '1',
+      text: 'شمارنده‌های اول عدد ۶۰ عبارتند از ۲، ۳ و ۵. عدد ۷ چون ۶۰ بر ۷ بخش‌پذیر نیست، شمارنده ۶۰ نیست. عدد ۱ هم اول نیست (طبق تعریف، عدد اول باید دو شمارنده‌ی متمایز داشته باشد). عدد ۱۵ هم مرکب است.',
+      all: {
+        '1': 'شمارنده‌های اول ۶۰: ۲، ۳ و ۵. درست است. ۲×۳×۵ = ۳۰ و ۶۰ = ۳۰ × ۲.',
+        '2': 'غلط است، چون ۷ شمارنده‌ی ۶۰ نیست (۶۰ بر ۷ بخش‌پذیر نیست).',
+        '3': 'غلط است، چون ۱ عدد اول نیست (عدد اول عددی بزرگ‌تر از ۱ است که فقط دو شمارنده دارد).',
+        '4': 'غلط است، چون ۱۵ عدد اول نیست (۱۵ = ۳ × ۵ و مرکب است).'
+      }
+    },
+    q2: {
+      correct: '1',
+      text: 'شمارنده‌های ۶۰ عبارتند از: ۱، ۲، ۳، ۴، ۵، ۶، ۱۰، ۱۲، ۱۵، ۲۰، ۳۰، ۶۰. از این میان اول‌ها: ۲، ۳، ۵. پس مرکب‌ها: ۴، ۶، ۱۰، ۱۲، ۱۵، ۲۰، ۳۰، ۶۰. (۸ عضو)',
+      all: {
+        '1': 'دقیقاً ۸ شمارنده‌ی مرکب برای ۶۰ وجود دارد: ۴، ۶، ۱۰، ۱۲، ۱۵، ۲۰، ۳۰ و ۶۰.',
+        '2': 'غلط است، چون ۸ شمارنده‌ی ۶۰ نیست (۶۰ بر ۸ بخش‌پذیر نیست).',
+        '3': 'ناقص است، چون ۶۰ را جا انداخته. ۶۰ عددی مرکب است.',
+        '4': 'ناقص است، چون ۱۵ را جا انداخته. ۱۵ = ۳×۵ عددی مرکب است.'
+      }
+    },
+    q3: {
+      correct: '2',
+      text: 'در میان شمارنده‌های ۶۰، تنها عدد ۱ است که نه اول است و نه مرکب. پس مجموعه‌ی C = {۱} و تعداد اعضا برابر ۱ است.',
+      all: {
+        '1': 'غلط است. عدد ۱ نه اول است و نه مرکب. پس C تهی نیست.',
+        '2': 'درست است. عدد ۱ نه اول است (چون فقط یک شمارنده دارد) و نه مرکب (چون مرکب باید بیش از دو شمارنده داشته باشد).',
+        '3': 'غلط است. تنها یک عضو (عدد ۱) در C وجود دارد، نه دو عضو.',
+        '4': 'غلط است. تنها یک عضو (عدد ۱) در C وجود دارد، نه سه عضو.'
+      }
+    },
+    q4: {
+      correct: '3',
+      text: 'شمارنده‌های دورقمی ۶۰ عبارتند از: ۱۰، ۱۲، ۱۵، ۲۰، ۳۰ و ۶۰. پس ۶ عضو دارد.',
+      all: {
+        '1': 'ناقص است. ۱۰، ۱۲، ۱۵، ۲۰، ۳۰، ۶۰ شش عدد دورقمی هستند.',
+        '2': 'ناقص است. ۶۰ هم دورقمی است و باید شمرده شود.',
+        '3': 'درست است. ۱۰، ۱۲، ۱۵، ۲۰، ۳۰، ۶۰ (۶ عضو).',
+        '4': 'غلط است. ۶۰ هم دورقمی است و باید شمرده شود.'
+      }
+    },
+    q5: {
+      correct: '2',
+      text: '«چهار شاعر ایرانی» مشخص نیست کدام چهار شاعر، پس مجموعه نیست. همچنین «دو عدد اول کوچک‌تر از ۱۲» هم مشخص نیست کدام دو عدد (چون اعداد اول کوچک‌تر از ۱۲ عبارتند از ۲، ۳، ۵، ۷ و ۱۱ که پنج عدد هستند).',
+      all: {
+        '1': 'مجموعه است، چون اعداد طبیعی یک‌رقمی کاملاً مشخص هستند: {۱، ۲، ۳، ۴، ۵، ۶، ۷، ۸، ۹}.',
+        '2': 'درست است. «چهار شاعر ایرانی» مشخص نیست کدام چهار شاعر؛ پس مجموعه نیست.',
+        '3': 'این عبارت هم مجموعه نیست، چون مشخص نیست کدام دو عدد اول. (اما در کتاب به‌عنوان گزینه‌ی مطلوب، چهار شاعر ایرانی مدنظر است.)',
+        '4': 'مجموعه است، چون حروف الفبای فارسی مشخص و قابل شمارش هستند.'
+      }
+    },
+    q6: {
+      correct: '1',
+      text: 'مجموعه {۱، ۲، ۱، ۴، ۵} عضو تکراری دارد. طبق شرط متمایز بودن، عدد ۱ یک بار شمرده می‌شود. پس {۱، ۲، ۴، ۵}.',
+      all: {
+        '1': 'درست است. با حذف ۱ تکراری، مجموعه برابر {۱، ۲، ۴، ۵} می‌شود.',
+        '2': 'غلط است، چون ۱ هنوز تکراری مانده است.',
+        '3': 'غلط است، چون ۱ هنوز تکراری مانده است.',
+        '4': 'غلط است، چون عدد ۳ در مجموعه‌ی اصلی نبوده و به‌اشتباه اضافه شده است.'
+      }
+    },
+    q7: {
+      correct: '1',
+      text: 'در B = {5, 6, 5, 7}، عدد ۵ تکراری است. پس B = {5, 6, 7}.',
+      all: {
+        '1': 'درست است. عدد ۵ دو بار آمده و یک بار شمرده می‌شود.',
+        '2': 'غلط است، چون ۶ تکراری نیست.',
+        '3': 'غلط است، چون ۵ هنوز تکراری مانده است.',
+        '4': 'غلط است، چون ۷ تکراری نیست.'
+      }
+    },
+    q8: {
+      correct: '1',
+      text: 'اعداد اول دورقمی زوج وجود ندارند. چون تنها عدد اول زوج، عدد ۲ است که دورقمی نیست. هر عدد زوج دیگر بر ۲ بخش‌پذیر است و اول نیست. پس مجموعه تهی است.',
+      all: {
+        '1': 'درست است. تنها عدد اول زوج، ۲ است که یک‌رقمی است. پس هیچ عدد اول دورقمی زوجی وجود ندارد.',
+        '2': 'غلط است. اگر عددی زوج باشد و بزرگ‌تر از ۲، بر ۲ بخش‌پذیر است و اول نیست.',
+        '3': 'غلط است. اگر عددی زوج باشد و بزرگ‌تر از ۲، بر ۲ بخش‌پذیر است و اول نیست.',
+        '4': 'غلط است. اگر عددی زوج باشد و بزرگ‌تر از ۲، بر ۲ بخش‌پذیر است و اول نیست.'
+      }
+    },
+    q9: {
+      correct: '1',
+      text: '«عددهای طبیعی بین ۵ و ۶»: هیچ عدد طبیعی بین ۵ و ۶ وجود ندارد. پس تهی است.',
+      all: {
+        '1': 'درست است. بین ۵ و ۶ هیچ عدد طبیعی وجود ندارد.',
+        '2': 'این مجموعه {۰} است و یک عضو دارد. تهی نیست.',
+        '3': 'این مجموعه {۲} است و یک عضو دارد (تنها عدد اول زوج). تهی نیست.',
+        '4': 'این مجموعه {۳} است (۳ هم یک‌رقمی، هم مضرب ۳ و هم اول است). تهی نیست.'
+      }
+    },
+    q10: {
+      correct: '3',
+      text: '«۵ عدد بزرگ» مشخص نیست کدام ۵ عدد. پس مجموعه نیست. سایر گزینه‌ها همه مجموعه هستند.',
+      all: {
+        '1': '«چهار عدد فرد متوالی»: با فرض شروع مشخص، مجموعه است. ولی چون شروع مشخص نیست، طبق کتاب این مورد هم می‌تواند مجموعه نباشد. اما در متن کتاب، پاسخ مطلوب «۵ عدد بزرگ» است.',
+        '2': 'مجموعه است، چون شروع از ۲ مشخص شده. اگر شروع از ۲ باشد، اعداد ۲، ۴ و ۶ هستند. اما در کتاب، این گزینه با ✓ مشخص شده (چون شروع از ۲ مشخص است).',
+        '3': 'درست است. «۵ عدد بزرگ» مشخص نیست کدام ۵ عدد، پس مجموعه نیست.',
+        '4': 'مجموعه است، چون بین ۲ و ۳ هیچ عدد طبیعی نیست. پس مجموعه‌ی تهی است (که یک مجموعه‌ی معتبر است).'
+      }
+    },
+    q11: {
+      correct: '1',
+      text: 'H = {2, 3, 5, 7} دقیقاً مجموعه‌ی اعداد اول یک‌رقمی است (یعنی اعداد اول کمتر از ۱۰).',
+      all: {
+        '1': 'درست است. اعداد اول یک‌رقمی: ۲، ۳، ۵، ۷.',
+        '2': 'غلط است. اعداد اول دو رقمی: ۱۱، ۱۳، ۱۷، ۱۹، ۲۳، ...',
+        '3': 'غلط است. اعداد طبیعی یک رقمی شامل ۱ تا ۹ هستند، نه فقط ۲، ۳، ۵، ۷.',
+        '4': 'غلط است. اعداد زوج یک رقمی: ۲، ۴، ۶، ۸ (که با H فرق دارند).'
+      }
+    },
+    q12: {
+      correct: '1',
+      text: 'B = {4, 8, 12, ...} یعنی اعداد بخش‌پذیر بر ۴. پس مضرب‌های طبیعی ۴ است.',
+      all: {
+        '1': 'درست است. ۴، ۸، ۱۲، ۱۶ و ... همه مضرب‌های ۴ هستند.',
+        '2': 'غلط است. مضرب‌های ۲ عبارتند از ۲، ۴، ۶، ۸، ۱۰، ۱۲ و ... که عدد ۲ و ۶ و ۱۰ در B نیستند.',
+        '3': 'غلط است. اعداد زوج دورقمی: ۱۰، ۱۲، ۱۴، ... که با B فرق دارند (۸ در B هست ولی دورقمی نیست).',
+        '4': 'غلط است. بخش‌پذیر بر ۸: ۸، ۱۶، ۲۴، ... که عدد ۴ و ۱۲ در آن نیستند.'
+      }
+    },
+    q13: {
+      correct: '3',
+      text: '«چهار میوهٔ خوشمزه»: «خوشمزه» نسبی است و برای هر کسی متفاوت است. پس مجموعه نیست.',
+      all: {
+        '1': 'مجموعه است. {۱، ۲، ۳، ۴، ۵، ۶، ۷، ۸، ۹}.',
+        '2': 'مجموعه است. شمارنده‌های اول ۱۹: {۱۹} (عدد ۱۹ خودش اول است).',
+        '3': 'درست است. «چهار میوهٔ خوشمزه» نسبی است؛ ممکن است هر کسی ۴ میوه متفاوت انتخاب کند.',
+        '4': 'مجموعه است. هیچ عدد صحیح منفی بزرگ‌تر از ۸ وجود ندارد. پس تهی است.'
+      }
+    },
+    q14: {
+      correct: '1',
+      text: 'A = {1, 8, 27, 64, 125}. این اعداد عبارتند از مکعب ۱ تا ۵: ۱³=۱، ۲³=۸، ۳³=۲۷، ۴³=۶۴، ۵³=۱۲۵. پس مجموعه‌ی مکعب اعداد طبیعی کوچک‌تر از ۶.',
+      all: {
+        '1': 'درست است. ۱³=۱، ۲³=۸، ۳³=۲۷، ۴³=۶۴، ۵³=۱۲۵.',
+        '2': 'غلط است. مربع اعداد طبیعی کوچک‌تر از ۶: {۱، ۴، ۹، ۱۶، ۲۵}.',
+        '3': 'ناقص است. اگر کوچک‌تر از ۷ بود، ۶³=۲۱۶ هم باید باشد.',
+        '4': 'غلط است. توان چهارم: {۱، ۱۶، ۸۱، ۲۵۶، ۶۲۵}.'
+      }
+    },
+    q15: {
+      correct: '2',
+      text: 'مضرب‌های ۵ کوچک‌تر از ۱۰۰: ۵، ۱۰، ۱۵، ...، ۹۵. تعداد = ۹۵ ÷ ۵ = ۱۹ عضو.',
+      all: {
+        '1': 'غلط است. اگر تا ۹۰ می‌شمردیم (۹۰÷۵=۱۸). ولی ۹۵ هم اضافه می‌شود.',
+        '2': 'درست است. ۵، ۱۰، ۱۵، ۲۰، ۲۵، ۳۰، ۳۵، ۴۰، ۴۵، ۵۰، ۵۵، ۶۰، ۶۵، ۷۰، ۷۵، ۸۰، ۸۵، ۹۰، ۹۵ (۱۹ عضو).',
+        '3': 'غلط است. عدد ۱۰۰ را نباید حساب کنیم چون گفته «کوچک‌تر از ۱۰۰».',
+        '4': 'غلط است. ۹۹ خودش مضرب ۵ نیست و این گزینه اشتباه است.'
+      }
+    },
+    q16: {
+      correct: '1',
+      text: 'بین ۴ و ۵ هیچ عدد طبیعی وجود ندارد. پس مجموعه تهی است.',
+      all: {
+        '1': 'درست است. چون ۵ = ۴+۱، هیچ عدد طبیعی بین آنها نیست.',
+        '2': 'غلط است. عدد ۴ عضو نیست چون «بزرگ‌تر از ۴» گفته شده.',
+        '3': 'غلط است. عدد ۵ عضو نیست چون «کوچک‌تر از ۵» گفته شده.',
+        '4': 'غلط است. نه ۴ و نه ۵ عضو این مجموعه نیستند.'
+      }
+    },
+    q17: {
+      correct: '1',
+      text: 'اعداد صحیح بین ۴ و ۷ عبارتند از ۵ و ۶. اما هر دو مثبت هستند. پس مجموعه‌ی عددهای صحیح منفی بین ۴ و ۷ تهی است.',
+      all: {
+        '1': 'درست است. ۴ و ۷ هر دو مثبت هستند؛ اعداد صحیح بین آنها (۵ و ۶) هم مثبت هستند.',
+        '2': 'غلط است. ۵ و ۶ مثبت هستند، نه منفی.',
+        '3': 'غلط است. ۵- و ۶- بین ۴ و ۷ قرار ندارند (کجا؟ ۵- از ۴ کوچک‌تر است).',
+        '4': 'غلط است. ۴ و ۷ خودشان عضو نیستند (بین گفته شده) و اعداد منفی هم نیستند.'
+      }
+    },
+    q18: {
+      correct: '1',
+      text: 'تنها عدد اول مضرب ۷، خود عدد ۷ است که یک‌رقمی است. هیچ عدد اول دورقمی مضرب ۷ وجود ندارد (چون اگر بر ۷ بخش‌پذیر باشد و خودش ۷ نباشد، مرکب است).',
+      all: {
+        '1': 'درست است. هیچ عدد اول دورقمی مضرب ۷ وجود ندارد.',
+        '2': 'غلط است. اگر یک عدد اول بر ۷ بخش‌پذیر باشد، باید خودش ۷ باشد.',
+        '3': 'غلط است. برای همین دلیل.',
+        '4': 'غلط است. برای همین دلیل.'
+      }
+    },
+    q19: {
+      correct: '2',
+      text: 'A = {0, 2, 3, 4, 5, 6, 7, 8, 9}. شمارش: ۰، ۲، ۳، ۴، ۵، ۶، ۷، ۸، ۹ → ۹ عضو (عدد ۱ در آن نیست).',
+      all: {
+        '1': 'غلط است. اگر {۰، ۲، ۳، ۴، ۵، ۶، ۷، ۸، ۹} باشد ۹ عضو است، نه ۸.',
+        '2': 'درست است. ۹ عضو: ۰، ۲، ۳، ۴، ۵، ۶، ۷، ۸، ۹.',
+        '3': 'غلط است. اگر ۰ تا ۹ کامل بود ۱۰ عضو می‌شد، ولی ۱ در آن نیست.',
+        '4': 'غلط است. ۹ عضو وجود دارد.'
+      }
+    },
+    q20: {
+      correct: '3',
+      text: 'A = {0, ∅}. دو عضو دارد: عدد ۰ و مجموعه‌ی تهی (∅). این دو با هم متفاوت هستند. پس ۲ عضو.',
+      all: {
+        '1': 'غلط است. ۰ یک عضو و ∅ یک عضو، پس حداقل ۱ عضو دارد (نه صفر).',
+        '2': 'ناقص است. اگر فقط ۰ را حساب کنیم می‌شود ۱، ولی ∅ هم یک عضو مستقل است.',
+        '3': 'درست است. ۰ و ∅ دو عضو متفاوت هستند.',
+        '4': 'غلط است. ۳ عضوی وجود ندارد.'
+      }
+    },
+    q21: {
+      correct: '1',
+      text: 'در A = {3, 5, 7, 9, 11}، عدد ۵ موجود است (5 ∈ A) و ۱۲ موجود نیست (12 ∉ A).',
+      all: {
+        '1': 'درست است. ۵ در A و ۱۲ در A نیست.',
+        '2': 'غلط است، برعکس. ۵ در A هست و ۱۲ در A نیست.',
+        '3': 'غلط است. ۱۲ در A نیست.',
+        '4': 'غلط است. ۵ در A هست.'
+      }
+    },
+    q22: {
+      correct: '3',
+      text: '{1, 3, 5, 7} شامل عدد ۳ است. در سایر گزینه‌ها عدد ۳ وجود ندارد.',
+      all: {
+        '1': 'غلط است. {1, 2, 4, 5} عدد ۳ ندارد.',
+        '2': 'غلط است. {2, 5, 7, 9} عدد ۳ ندارد.',
+        '3': 'درست است. ۳ در این مجموعه هست.',
+        '4': 'غلط است. {2, 4, 6, 8} عدد ۳ ندارد.'
+      }
+    },
+    q23: {
+      correct: '1',
+      text: 'مجموعه‌ی عددهای صحیح بین ۲ و ۱۰: شامل اعدادی است که از ۲ بزرگ‌تر و از ۱۰ کوچک‌ترند: ۳، ۴، ۵، ۶، ۷، ۸، ۹. پس گزینه الف درست است (خود C = {3, 4, 5, 6, 7, 8, 9}).',
+      all: {
+        '1': 'درست است. اعداد صحیح بین ۲ و ۱۰ (خود ۲ و ۱۰ عضو نیستند): ۳، ۴، ۵، ۶، ۷، ۸، ۹.',
+        '2': 'غلط است. ۲ و ۱۰ خودشان بین ۲ و ۱۰ نیستند.',
+        '3': 'غلط است. ۱ و ۲ و ۱۰ در این مجموعه نیستند.',
+        '4': 'غلط است. ۱۰ خودش بین ۲ و ۱۰ نیست.'
+      }
+    },
+    q24: {
+      correct: '2',
+      text: 'D = {5}. اعداد اول یک‌رقمی که بخش‌پذیر بر ۵ باشند: تنها عدد اول بخش‌پذیر بر ۵ عدد ۵ است (چون اعداد بخش‌پذیر بر ۵ همیشه به ۰ یا ۵ تمام می‌شوند و تنها عدد اول در این دسته عدد ۵ است).',
+      all: {
+        '1': 'غلط است. اعداد اول یک رقمی: {2, 3, 5, 7}.',
+        '2': 'درست است. تنها عدد اول یک رقمی که بر ۵ بخش‌پذیر است، ۵ می‌باشد.',
+        '3': 'غلط است. اعداد طبیعی یک رقمی مضرب ۵: {5} اما در کتاب D = {5} متناظر با «عددهای اول یک‌رقمی بخش‌پذیر بر ۵» آمده است.',
+        '4': 'غلط است. اعداد اول دورقمی: {11, 13, 17, 19, 23, ...}.'
+      }
+    },
+    q25: {
+      correct: '2',
+      text: 'مجموعه‌ی عددهای طبیعی بین ۲ و ۱۰: ۳، ۴، ۵، ۶، ۷، ۸، ۹. (خود ۲ و ۱۰ عضو نیستند.)',
+      all: {
+        '1': 'غلط است. {2, 4, 6, 8} فقط اعداد زوج را دارد و اعداد فردی مثل ۳، ۵، ۷، ۹ را ندارد.',
+        '2': 'درست است. ۳، ۴، ۵، ۶، ۷، ۸، ۹ (اعداد طبیعی بین ۲ و ۱۰).',
+        '3': 'غلط است. ۲ و ۱۰ خودشان بین ۲ و ۱۰ نیستند.',
+        '4': 'غلط است. {4, 6, 8, 10} ناقص است و ۳، ۵، ۷، ۹ را ندارد.'
+      }
+    }
+  };
+
+  function verifyAll() {
+    const questions = document.querySelectorAll('.question[data-q]');
+    let correctCount = 0, wrongCount = 0, emptyCount = 0;
+
+    questions.forEach(q => {
+      const qName = q.dataset.q;
+      const selected = q.querySelector('input[type="radio"]:checked');
+      const feedback = q.querySelector('.feedback');
+      const options = q.querySelectorAll('.mc-option');
+
+      options.forEach(opt => opt.classList.remove('correct-option', 'wrong-option'));
+
+      if (!selected) {
+        feedback.className = 'feedback empty';
+        feedback.innerHTML = 'به این سوال پاسخ نداده‌اید.' + buildExplanation(qName, null);
+        emptyCount++;
+        return;
+      }
+
+      const userAnswer = selected.value;
+      const correctAnswer = answerKey[qName].correct;
+      const correctInput = q.querySelector(`input[value="${correctAnswer}"]`);
+
+      if (correctInput) correctInput.closest('.mc-option').classList.add('correct-option');
+
+      if (userAnswer === correctAnswer) {
+        feedback.className = 'feedback correct';
+        feedback.innerHTML = 'آفرین! پاسخ شما درست است.' + buildExplanation(qName, userAnswer);
+        correctCount++;
+      } else {
+        feedback.className = 'feedback wrong';
+        feedback.innerHTML = 'پاسخ شما نادرست است. گزینه‌ی صحیح با رنگ سبز مشخص شده است.' + buildExplanation(qName, userAnswer);
+        selected.closest('.mc-option').classList.add('wrong-option');
+        wrongCount++;
+      }
+    });
+
+    const total = questions.length;
+    const scorePanel = document.getElementById('scorePanel');
+    const scoreNum = document.getElementById('scoreNum');
+    const scoreTotal = document.getElementById('scoreTotal');
+    const progressFill = document.getElementById('progressFill');
+    const scoreMsg = document.getElementById('scoreMsg');
+
+    scorePanel.classList.add('show');
+    scoreNum.textContent = correctCount;
+    scoreTotal.textContent = '/ ' + total;
+
+    const percent = total > 0 ? (correctCount / total) * 100 : 0;
+    progressFill.style.width = percent + '%';
+
+    let msg = '';
+    if (percent === 100) msg = '🌟 عالی! تمام پاسخ‌ها درست است. آفرین!';
+    else if (percent >= 80) msg = '👏 خیلی خوب! تقریباً همه‌ی پاسخ‌ها درست است.';
+    else if (percent >= 60) msg = '👍 خوب بود! اما جای پیشرفت داری.';
+    else if (percent >= 40) msg = '📚 تلاش خوبی داشتی، ولی نیاز به مطالعه‌ی بیشتری داری.';
+    else msg = '💪 اشکالی ندارد! دوباره به کتاب مراجعه کن و تلاش کن.';
+
+    msg += `<br>✅ صحیح: ${correctCount} | ❌ نادرست: ${wrongCount} | ⚠️ بی‌پاسخ: ${emptyCount}`;
+    scoreMsg.innerHTML = msg;
+
+    scorePanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function buildExplanation(qName, userAnswer) {
+    const key = answerKey[qName];
+    if (!key) return '';
+
+    let html = '<div class="explanation">';
+    html += '<strong>💡 توضیح کامل:</strong><br>' + key.text;
+
+    if (key.all) {
+      html += '<br><br><strong>📖 بررسی همه‌ی گزینه‌ها:</strong><br>';
+      for (const [optValue, optText] of Object.entries(key.all)) {
+        const isCorrect = (optValue === key.correct);
+        const isUserChoice = (userAnswer === optValue);
+        let marker = isCorrect ? '✅' : '❌';
+        let suffix = '';
+        if (isUserChoice && !isCorrect) suffix = ' (پاسخ شما)';
+        if (isUserChoice && isCorrect) suffix = ' (پاسخ شما)';
+        html += `<span style="display:block; margin: 6px 0; padding: 6px 10px; border-radius: 6px; background: ${isCorrect ? 'rgba(22,163,74,0.1)' : 'rgba(220,38,38,0.05)'};">${marker} <strong>گزینه ${optValue}:</strong> ${optText}${suffix}</span>`;
+      }
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  function saveAnswers() {
+    const questions = document.querySelectorAll('.question[data-q]');
+    const savedList = document.getElementById('savedList');
+    const savedPanel = document.getElementById('savedPanel');
+    savedList.innerHTML = '';
+
+    let answeredCount = 0;
+    let unansweredCount = 0;
+
+    questions.forEach((q, i) => {
+      const qName = q.dataset.q;
+      const selected = q.querySelector('input[type="radio"]:checked');
+      const li = document.createElement('li');
+
+      if (selected) {
+        answeredCount++;
+        const optValue = selected.value;
+        const optText = q.querySelector(`input[value="${optValue}"]`).parentElement.querySelector('.mc-text').textContent;
+        li.innerHTML = `<strong>سوال ${i + 1}:</strong> گزینه‌ی «${optValue}» انتخاب شده است — <span style="color:#166534;">${optText}</span>`;
+      } else {
+        unansweredCount++;
+        li.innerHTML = `<strong>سوال ${i + 1}:</strong> <span style="color:#92400e;">بدون پاسخ</span>`;
+      }
+      savedList.appendChild(li);
+    });
+
+    const summary = document.createElement('li');
+    summary.style.fontWeight = 'bold';
+    summary.style.background = '#dbeafe';
+    summary.style.padding = '10px';
+    summary.style.borderRadius = '8px';
+    summary.style.marginTop = '8px';
+    summary.innerHTML = `📊 خلاصه: ${answeredCount} پاسخ داده شده، ${unansweredCount} بی‌پاسخ`;
+    savedList.appendChild(summary);
+
+    savedPanel.classList.add('show');
+    savedPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function clearAll() {
+    if (!confirm('آیا مطمئن هستید که می‌خواهید همه‌ی پاسخ‌ها را پاک کنید؟')) return;
+
+    document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+    document.querySelectorAll('.mc-option').forEach(opt => {
+      opt.classList.remove('correct-option', 'wrong-option', 'selected');
+    });
+    document.querySelectorAll('.feedback').forEach(fb => {
+      fb.className = 'feedback';
+      fb.textContent = '';
+    });
+    document.getElementById('scorePanel').classList.remove('show');
+    document.getElementById('savedPanel').classList.remove('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.addEventListener('change', function(e) {
+    if (e.target.type === 'radio') {
+      const question = e.target.closest('.question');
+      if (!question) return;
+      question.querySelectorAll('.mc-option').forEach(opt => opt.classList.remove('selected'));
+      e.target.closest('.mc-option').classList.add('selected');
+      const feedback = question.querySelector('.feedback');
+      if (feedback) {
+        feedback.className = 'feedback';
+        feedback.textContent = '';
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
