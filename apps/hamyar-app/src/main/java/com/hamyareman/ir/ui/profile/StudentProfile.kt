@@ -59,7 +59,7 @@ object StudentProfileState {
 
     fun loadMirror(ctx: Context) {
         val store = LocalStore(ctx, STORE)
-        grade = GradeLevel.byId(store.getString(KEY_GRADE, "").ifBlank { null })
+        grade = AppEdition.grade
         hasProfile = store.getString(KEY_DONE, "0") == "1"
         firstName = store.getString(KEY_NAME, "").orEmpty()
         subscription = store.getString(KEY_SUB, "free").ifBlank { "free" }
@@ -79,12 +79,12 @@ object StudentProfileState {
     fun writeMirror(ctx: Context, g: GradeLevel, done: Boolean, name: String, sub: String, genderId: String = gender) {
         val store = LocalStore(ctx, STORE)
         val keepName = if (done && name.isBlank()) firstName.ifBlank { store.getString(KEY_NAME, "").orEmpty() } else name
-        store.putString(KEY_GRADE, g.id)
+        store.putString(KEY_GRADE, AppEdition.grade.id)
         store.putString(KEY_DONE, if (done) "1" else "0")
         store.putString(KEY_NAME, keepName)
         store.putString(KEY_SUB, sub.ifBlank { "free" })
         store.putString(KEY_GENDER, genderId)
-        grade = g
+        grade = AppEdition.grade
         hasProfile = done
         firstName = keepName
         subscription = sub.ifBlank { "free" }
@@ -162,7 +162,7 @@ object StudentProfileRepo {
                     lastName = d["lastName"]?.toString().orEmpty(),
                     age = d["age"]?.toString()?.toIntOrNull() ?: 0,
                     birthDate = d["birthDate"]?.toString().orEmpty(),
-                    grade = GradeLevel.byId(d["grade"]?.toString()),
+                    grade = AppEdition.grade,
                     phone = d["phone"]?.toString().orEmpty(),
                     schoolName = d["schoolName"]?.toString().orEmpty(),
                     province = d["province"]?.toString().orEmpty(),
@@ -185,7 +185,7 @@ object StudentProfileRepo {
             "lastName" to p.lastName,
             "age" to p.age,
             "birthDate" to p.birthDate,
-            "grade" to p.grade.id,
+            "grade" to AppEdition.grade.id,
             "phone" to p.phone,
             "schoolName" to p.schoolName,
             "province" to p.province,

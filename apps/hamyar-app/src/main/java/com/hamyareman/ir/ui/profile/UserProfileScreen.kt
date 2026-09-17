@@ -43,7 +43,7 @@ private fun latinDigits(s: String): String = buildString {
 /**
  * منوی پروفایل کاربری — تمام مشخصات ثبت‌شده با امکان ویرایش:
  * نام/نام‌خانوادگی/تاریخ تولد شمسی (سن خودکار)/ایمیل/موبایل + مدرسه/استان + عکس پروفایل (محلی).
- * پایه: فقط نمایش (تغییر یک‌بار و از سمت پشتیبانی).
+ * پایه: متن ثابت این نسخهٔ اپ؛ غیرقابل تغییر.
  * اشتراک (رایگان/یک‌ساله): فقط نمایش — تغییر از سمت پشتیبانی/سرور.
  */
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
@@ -197,12 +197,10 @@ fun UserProfileScreen(
                 onProvince = { province = it }, onCounty = { county = it }, onCity = { city = it },
             )
 
-            // ─── پایه (فقط نمایش) ───
             OutlinedTextField(
-                value = (profile?.grade ?: com.hamyareman.ir.ui.profile.StudentProfileState.grade).fa,
+                value = AppEdition.gradeFa,
                 onValueChange = {}, readOnly = true,
                 label = { Text("پایه تحصیلی") },
-                supportingText = { Text("تغییر فقط یک‌بار، تا یک هفته پس از خرید، از طریق پشتیبانی") },
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -241,12 +239,13 @@ fun UserProfileScreen(
                         saveError = null
                         val payload = (profile ?: StudentProfile(
                             userId = "", email = email, firstName = "", lastName = "",
-                            age = 0, grade = com.hamyareman.ir.ui.profile.StudentProfileState.grade, phone = "",
+                            age = 0, grade = AppEdition.grade, phone = "",
                         )).copy(
                             firstName = firstName.trim(), lastName = lastName.trim(),
                             age = age, birthDate = birthJalali.isoLike, email = email.trim(), phone = phone,
                             schoolName = schoolName.trim(), province = province, county = county, city = city,
                             gender = gender,
+                            grade = AppEdition.grade,
                         )
                         scope.launch {
                             val ok = runCatching { onSave(payload) }.getOrDefault(false)

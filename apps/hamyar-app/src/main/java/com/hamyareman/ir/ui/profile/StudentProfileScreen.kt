@@ -1,6 +1,5 @@
 package com.hamyareman.ir.ui.profile
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,14 +14,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -34,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.hamyareman.ir.platform.core.common.JalaliDate
@@ -54,7 +48,7 @@ private fun latinDigits(s: String): String = buildString {
 
 /**
  * فرم ثبت‌نام دانش‌آموز — بلافاصله پس از اولین ورود موفق اگر پروفایل نباشد.
- * قواعد اجباری: نام و نام‌خانوادگی، تاریخ تولد شمسی (سن خودکار)، جنسیت، پایه، موبایل.
+ * قواعد اجباری: نام و نام‌خانوادگی، تاریخ تولد شمسی (سن خودکار)، جنسیت، موبایل. پایهٔ این اپ ثابت است.
  * استان→شهر اختیاری با پیش‌فرض خالی.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,8 +72,7 @@ fun StudentProfileScreen(
         if (y != null && m != null && d != null) JalaliDate.Jalali(y, m, d).takeIf { JalaliDate.isValid(it) } else null
     }
     val computedAge = remember(birthJalali) { birthJalali?.let { JalaliDate.ageYears(it) } }
-    var grade by remember { mutableStateOf(GradeLevel.G9) }
-    var gradeOpen by remember { mutableStateOf(false) }
+    val grade = AppEdition.grade
     var phone by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("") }
     var province by remember { mutableStateOf("") }
@@ -168,24 +161,13 @@ fun StudentProfileScreen(
                 Text("پسر یا دختر را انتخاب کن", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
             }
 
-            ExposedDropdownMenuBox(expanded = gradeOpen, onExpandedChange = { gradeOpen = it }) {
-                OutlinedTextField(
-                    value = grade.fa,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("پایه تحصیلی *") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(gradeOpen) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor(),
-                )
-                ExposedDropdownMenu(expanded = gradeOpen, onDismissRequest = { gradeOpen = false }) {
-                    GradeLevel.entries.forEach { g ->
-                        DropdownMenuItem(
-                            text = { Text(g.fa, fontWeight = if (g == grade) FontWeight.Bold else null) },
-                            onClick = { grade = g; gradeOpen = false },
-                        )
-                    }
-                }
-            }
+            OutlinedTextField(
+                value = AppEdition.gradeFa,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("پایه تحصیلی") },
+                modifier = Modifier.fillMaxWidth(),
+            )
 
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                 OutlinedTextField(
@@ -211,22 +193,6 @@ fun StudentProfileScreen(
                 onCounty = { county = it },
                 onCity = { city = it },
             )
-
-            Surface(
-                shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colorScheme.errorContainer,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(
-                    "⚠️ در انتخاب پایه دقت کن: تغییر پایه فقط «یک‌بار» و فقط تا «یک هفته پس از خرید» و صرفاً از طریق پشتیبانی (پروایدر) و با تغییر سمت سرور ممکن است.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                    textAlign = TextAlign.Right,
-                    modifier = Modifier.padding(10.dp),
-                )
-            }
 
             if (!error.isNullOrBlank()) {
                 Text(error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
