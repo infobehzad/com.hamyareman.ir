@@ -75,24 +75,35 @@ object TeachStats {
         while (sl.length() > 60) sl.remove(0)
         o.put("sl", sl)
         write(ctx, packId, o)
+        StudyActivity.add(ctx, packId, "session", "شروع نشست تدریس")
     }
 
     /** ثبت ثانیه‌های شنیدن صوت (رویدادی از پلیر؛ [sec] ذخیره‌ی دوره‌ای است). */
     fun addListen(ctx: Context, packId: String, sec: Int, trackDurationSec: Int) {
         if (sec <= 0) return
         val o = read(ctx, packId)
-        o.put("ls", o.optInt("ls") + sec)
+        val before = o.optInt("ls")
+        val after = before + sec
+        o.put("ls", after)
         if (trackDurationSec > o.optInt("ad")) o.put("ad", trackDurationSec)
         write(ctx, packId, o)
+        if (before / 30 != after / 30) {
+            StudyActivity.add(ctx, packId, "listen", "شنیدن صوت — جمعاً ${after} ثانیه")
+        }
     }
 
     /** ثبت ثانیه‌های تماشای واقعی ویدیو. */
     fun addVideo(ctx: Context, packId: String, sec: Int, trackDurationSec: Int) {
         if (sec <= 0) return
         val o = read(ctx, packId)
-        o.put("vs", o.optInt("vs") + sec)
+        val before = o.optInt("vs")
+        val after = before + sec
+        o.put("vs", after)
         if (trackDurationSec > o.optInt("vd")) o.put("vd", trackDurationSec)
         write(ctx, packId, o)
+        if (before / 30 != after / 30) {
+            StudyActivity.add(ctx, packId, "video", "تماشای ویدیو — جمعاً ${after} ثانیه")
+        }
     }
 
     /** ثبت یک پرشِ بیش از ۳ ثانیه در پلیر. */
@@ -116,8 +127,10 @@ object TeachStats {
             o.put("d", true); o.put("ca", System.currentTimeMillis())
             // v1.12: «اتمام دوره‌ی اول در چند نشست» — شمار نشست‌های همین پک هنگام اولین اتمام.
             if (o.optInt("sc") == 0) o.put("sc", o.optInt("s").coerceAtLeast(1))
+            StudyActivity.add(ctx, packId, "done", "اتمام دوره‌ی اول تدریس")
         }
         write(ctx, packId, o)
+        StudyActivity.add(ctx, packId, "track", "اتمام رسانهٔ $mediaKey")
     }
 
     /** ثبت تعداد کل رسانه‌های درس — شرط اتمام دوره = کامل‌شدن همین تعداد. */

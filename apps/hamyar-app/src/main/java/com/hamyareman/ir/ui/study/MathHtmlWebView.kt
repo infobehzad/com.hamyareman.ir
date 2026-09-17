@@ -28,7 +28,7 @@ internal fun MathInteractiveHtml(
     val progress = LocalAppContainer.current.studyProgress
     val store = remember { LocalStore(ctx, "hamyar_math_html") }
     val bridge = remember(packId, kind) {
-        HamyarHtmlBridge(packId, kind, store, progress)
+        HamyarHtmlBridge(ctx.applicationContext, packId, kind, store, progress)
     }
     AndroidView(
         factory = { c ->
@@ -66,6 +66,7 @@ internal fun MathInteractiveHtml(
 }
 
 internal class HamyarHtmlBridge(
+    private val appCtx: android.content.Context,
     private val packId: String,
     private val kind: String,
     private val store: LocalStore,
@@ -85,6 +86,14 @@ internal class HamyarHtmlBridge(
     fun recordItem(itemId: String, correct: Boolean) {
         val today = JalaliDate.todayIso()
         progress.recordExercise(packId, "${kind}_$itemId", correct, today)
+        val mark = if (correct) "درست" else "نادرست"
+        val kindFa = when (kind) {
+            "book" -> "تمرین کتاب"
+            "flash" -> "فلش‌کارت"
+            "exam" -> "آزمون"
+            else -> kind
+        }
+        StudyActivity.add(appCtx, packId, "item", "$kindFa $itemId — $mark")
         if (kind == "flash") {
             progress.reviewCardMath(packId, itemId, if (correct) 5 else 1, today)
         }
@@ -93,13 +102,27 @@ internal class HamyarHtmlBridge(
     @JavascriptInterface
     fun recordExam(scorePct: Int, total: Int, correctCount: Int, wrongCsv: String) {
         val wrong = if (wrongCsv.isBlank()) emptyList() else wrongCsv.split(",").filter { it.isNotBlank() }
-        progress.recordHtmlExam(
-            packId = packId,
-            scorePct = scorePct,
-            total = total,
-            correctCount = correctCount,
-            wrongIds = wrong,
-            dateKey = JalaliDate.todayIso(),
+        if (kind != "book") {
+            progress.recordHtmlExam(
+                packId = packId,
+                scorePct = scorePct,
+                total = total,
+                correctCount = correctCount,
+                wrongIds = wrong,
+                dateKey = JalaliDate.todayIso(),
+            )
+        }
+        val kindFa = when (kind) {
+            "book" -> "تمرین کتاب"
+            "flash" -> "فلش‌کارت"
+            "exam" -> "آزمون"
+            else -> kind
+        }
+        StudyActivity.add(
+            appCtx,
+            packId,
+            "exam",
+            "صحت‌سنجی $kindFa: $correctCount از $total درست ($scorePct٪)",
         )
     }
 }

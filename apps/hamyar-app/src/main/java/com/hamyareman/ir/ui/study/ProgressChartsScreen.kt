@@ -250,11 +250,23 @@ private fun MathLessonProgressPage(
                     if (open) {
                         val isSum = pack.lessonId.contains("SUM")
                         val labels = if (isSum) listOf("تدریس", "فلش‌کارت", "خلاصه", "آزمون")
-                        else listOf("تدریس", "تمرینات کتابی", "خلاصه")
+                        else listOf("تدریس", "تمرینات کتابی", "خلاصه", "کتاب درسی")
                         labels.forEach { title ->
                             val line = mathTabProgressLine(ctx, container, pack, title)
                             Text(title, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                             Text(line, style = MaterialTheme.typography.bodySmall)
+                        }
+                        val log = StudyActivity.rows(ctx, pack.packId).asReversed().take(40)
+                        Text("فعالیت‌ها (سطر به سطر)", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                        if (log.isEmpty()) {
+                            Text("هنوز ردیفی ثبت نشده.", style = MaterialTheme.typography.bodySmall)
+                        } else {
+                            log.forEach { row ->
+                                Text(
+                                    "• ${row.whenFa} — ${row.label}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
                         }
                     }
                 }
@@ -276,14 +288,29 @@ private fun mathTabProgressLine(
             if (snap.sessions == 0 && !snap.done) "هنوز شروع نشده"
             else {
                 val done = if (snap.done) "دورهٔ اول تمام" else "ناقص"
-                "نشست ${toPersianDigits(snap.sessions.toString())} · $done"
+                "نشست ${toPersianDigits(snap.sessions.toString())} · شنیدن ${toPersianDigits(snap.listenSec.toString())}ث · پرش ${toPersianDigits(snap.jumps.toString())} · $done"
             }
         }
         "تمرینات کتابی" -> {
             val ex = runCatching { container.studyProgress.exerciseStats(pack.packId) }.getOrNull()
             val n = ex?.length() ?: 0
             if (n == 0) "تمرینی ثبت نشده"
-            else "تمرین ثبت‌شده: ${toPersianDigits(n.toString())}"
+            else {
+                val obj = ex!!
+                var ok = 0; var bad = 0; var tries = 0
+                obj.keys().forEach { k ->
+                    val item = obj.optJSONObject(k) ?: return@forEach
+                    ok += item.optInt("ok")
+                    bad += item.optInt("bad")
+                    tries += item.optInt("tries")
+                }
+                "آیتم ${toPersianDigits(n.toString())} · تلاش ${toPersianDigits(tries.toString())} · درست ${toPersianDigits(ok.toString())} · نادرست ${toPersianDigits(bad.toString())}"
+            }
+        }
+        "کتاب درسی" -> {
+            val n = StudyActivity.rows(ctx, pack.packId).count { it.kind == "pdf" }
+            if (n == 0) "صفحه‌ای دیده نشده"
+            else "صفحهٔ دیده‌شده: ${toPersianDigits(n.toString())}"
         }
         "فلش‌کارت" -> {
             val total = pack.flashcards.size
@@ -294,7 +321,13 @@ private fun mathTabProgressLine(
                 "یادگرفته ${toPersianDigits(learned.toString())} از ${toPersianDigits(total.toString())} · آرشیو ${toPersianDigits(archived.toString())}"
             }
         }
-        "خلاصه" -> "فقط مطالعه — نمره ندارد"
+        "خلاصه" -> {
+            val all = StudyActivity.rows(ctx, pack.packId)
+            val opens = all.count { it.kind == "tab" && it.label.contains("خلاصه") }
+            val dwell = all.lastOrNull { it.kind == "dwell" && it.label.contains("خلاصه") }
+            if (opens == 0) "هنوز باز نشده"
+            else "باز شدن ${toPersianDigits(opens.toString())} بار" + (dwell?.let { " · ${it.label}" } ?: "")
+        }
         "آزمون" -> {
             val st = runCatching { container.studyProgress.examState(pack.packId) }.getOrNull()
             val last = st?.latest
@@ -358,6 +391,14 @@ private fun TeachRow(pack: StudyPack) {
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            val log = StudyActivity.rows(LocalContext.current, pack.packId).asReversed().take(12)
+            if (log.isNotEmpty()) {
+                Spacer(Modifier.height(4.dp))
+                Text("فعالیت‌ها:", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                log.forEach { row ->
+                    Text("• ${row.whenFa} — ${row.label}", style = MaterialTheme.typography.labelSmall)
+                }
+            }
         }
     }
 }

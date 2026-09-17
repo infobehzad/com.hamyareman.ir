@@ -30,6 +30,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -280,6 +281,7 @@ private fun MathStudyTab(pack: StudyPack) {
 @Composable
 private fun MathExercisesPane(pack: StudyPack, modifier: Modifier = Modifier) {
     val container = LocalAppContainer.current
+    val ctx = androidx.compose.ui.platform.LocalContext.current
     val today = remember { JalaliDate.todayIso() }
     val ime = LocalSoftwareKeyboardController.current
     val bookQs = pack.questions.filter { it.topic == "book" && it.type == "mcq" }
@@ -345,6 +347,7 @@ private fun MathExercisesPane(pack: StudyPack, modifier: Modifier = Modifier) {
                     onClick = {
                         val ok = MathAnswerScript.grade(ex, field.text)
                         container.studyProgress.recordExercise(pack.packId, ex.id, ok, today)
+                        StudyActivity.add(ctx, pack.packId, "item", "تمرین ${ex.id} — ${if (ok) "درست" else "نادرست"}")
                         lastOk = ok
                         val stats = container.studyProgress.exerciseStats(pack.packId).optJSONObject(ex.id)
                         val bad = stats?.optInt("bad") ?: 0
@@ -408,6 +411,7 @@ private fun MathBookMcqPane(pack: StudyPack, qs: List<StudyPack.Question>, modif
                     onClick = {
                         val ok = com.hamyareman.ir.platform.feature.study.QuizGrader.grade(q, pick.orEmpty()).second
                         container.studyProgress.recordExercise(pack.packId, q.id, ok, today)
+                        StudyActivity.add(ctx, pack.packId, "item", "تمرین ${q.id} — ${if (ok) "درست" else "نادرست"}")
                         lastOk = ok
                         feedback = if (ok) "درست بود ✓\n${q.explanation}"
                         else "نادرست. پاسخ درست: ${q.answer}\n${q.explanation}"
@@ -449,8 +453,12 @@ private fun MathSummaryTab(pack: StudyPack, isSum: Boolean, chapter: Int) {
     val tips = pack.examTips.ifBlank {
         pack.sections.filter { it.kind == "exam" }.joinToString("\n\n") { it.body }
     }
-    val html = remember(pack.packId, summary, tips, isSum, chapter) {
-        mathSummaryHtml(pack.title, summary, tips, isSum, chapter)
+    val html = remember(pack.packId, pack.teachHtml, summary, tips, isSum, chapter) {
+        htmlSummaryDocument(
+            teachHtml = pack.teachHtml,
+            isSum = isSum,
+            fallback = mathSummaryHtml(pack.title, summary, tips, isSum, chapter),
+        )
     }
     Column(Modifier.fillMaxSize()) {
         AndroidView(
@@ -460,6 +468,9 @@ private fun MathSummaryTab(pack: StudyPack, isSum: Boolean, chapter: Int) {
                     settings.javaScriptEnabled = false
                     settings.loadWithOverviewMode = true
                     settings.useWideViewPort = true
+                    settings.builtInZoomControls = true
+                    settings.displayZoomControls = false
+                    settings.defaultTextEncodingName = "utf-8"
                     setBackgroundColor(android.graphics.Color.WHITE)
                 }
             },
@@ -469,6 +480,29 @@ private fun MathSummaryTab(pack: StudyPack, isSum: Boolean, chapter: Int) {
             modifier = Modifier.weight(1f).padding(4.dp),
         )
     }
+}
+
+/** جدول خلاصه + نکات + SVG/شکل‌های همان HTML تدریس، با استایل اصلی. */
+internal fun htmlSummaryDocument(teachHtml: String, isSum: Boolean, fallback: String): String {
+    if (teachHtml.isBlank() || !teachHtml.contains("<html", ignoreCase = true)) return fallback
+    if (isSum) return teachHtml
+    val styles = Regex("(?is)<style[^>]*>.*?</style>").findAll(teachHtml).joinToString("\n") { it.value }
+    val markers = listOf("جدول خلاصه", "خلاصه‌ی فرمول", "summary-table", "نکات امتحانی مهم")
+    val hit = markers.map { teachHtml.indexOf(it) }.filter { it >= 0 }.minOrNull() ?: return teachHtml
+    val sec = teachHtml.lastIndexOf("<section", hit).takeIf { it >= 0 } ?: hit
+    val end = listOf("</main>", "<footer", "</body>").map { teachHtml.indexOf(it, sec) }.filter { it > sec }.minOrNull()
+        ?: teachHtml.length
+    val fragment = teachHtml.substring(sec, end)
+    if (fragment.length < 80) return teachHtml
+    return """
+<!DOCTYPE html><html dir="rtl" lang="fa"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+$styles
+</head><body>
+<div class="container">$fragment</div>
+</body></html>
+""".trimIndent()
 }
 
 private fun mathSummaryHtml(title: String, summary: String, tips: String, isSum: Boolean, chapter: Int): String {

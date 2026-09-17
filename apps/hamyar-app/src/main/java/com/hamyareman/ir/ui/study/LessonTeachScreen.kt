@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,18 +46,16 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -598,40 +597,34 @@ private fun ZoomablePageImage(
     onTransform: (scale: Float, offsetX: Float, offsetY: Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var size by remember { mutableStateOf(IntSize.Zero) }
-    fun clamp(newScale: Float, nxIn: Float, nyIn: Float) {
-        val s = newScale.coerceIn(1f, 5f)
-        val maxX = size.width * (s - 1f) / 2f
-        val maxY = size.height * (s - 1f) / 2f
-        val nx = if (s <= 1.001f) 0f else nxIn.coerceIn(-maxX, maxX)
-        val ny = if (s <= 1.001f) 0f else nyIn.coerceIn(-maxY, maxY)
-        onTransform(s, nx, ny)
-    }
+    val scaleRef = rememberUpdatedState(scale)
+    val oxRef = rememberUpdatedState(offsetX)
+    val oyRef = rememberUpdatedState(offsetY)
+    val onT = rememberUpdatedState(onTransform)
+    val aspect = if (bitmap.height > 0) bitmap.width.toFloat() / bitmap.height.toFloat() else 1f
     Box(
         modifier
             .fillMaxWidth()
-            .onSizeChanged { size = it }
-            .pointerInput(scale, offsetX, offsetY, size) {
+            .aspectRatio(aspect.coerceAtLeast(0.2f))
+            .pointerInput(Unit) {
                 detectTransformGestures { centroid, pan, zoom, _ ->
-                    val newScale = (scale * zoom).coerceIn(1f, 5f)
-                    val f = if (scale > 0f) newScale / scale else 1f
-                    val nx = centroid.x - (centroid.x - offsetX) * f + pan.x
-                    val ny = centroid.y - (centroid.y - offsetY) * f + pan.y
-                    clamp(newScale, nx, ny)
+                    val cur = scaleRef.value
+                    val newScale = (cur * zoom).coerceIn(1f, 5f)
+                    val f = if (cur > 0f) newScale / cur else 1f
+                    val nx = centroid.x - (centroid.x - oxRef.value) * f + pan.x
+                    val ny = centroid.y - (centroid.y - oyRef.value) * f + pan.y
+                    val maxX = size.width * (newScale - 1f) / 2f
+                    val maxY = size.height * (newScale - 1f) / 2f
+                    val cx = if (newScale <= 1.001f) 0f else nx.coerceIn(-maxX, maxX)
+                    val cy = if (newScale <= 1.001f) 0f else ny.coerceIn(-maxY, maxY)
+                    onT.value(newScale, cx, cy)
                 }
             }
-            .pointerInput(scale, offsetX, offsetY, size) {
-                if (scale <= 1.01f) return@pointerInput
-                detectDragGestures { change, drag ->
-                    change.consume()
-                    clamp(scale, offsetX + drag.x, offsetY + drag.y)
-                }
-            }
-            .pointerInput(scale) {
+            .pointerInput(Unit) {
                 detectTapGestures(
                     onDoubleTap = {
-                        if (scale > 1f) onTransform(1f, 0f, 0f)
-                        else onTransform(2.5f, 0f, 0f)
+                        if (scaleRef.value > 1f) onT.value(1f, 0f, 0f)
+                        else onT.value(2.5f, 0f, 0f)
                     },
                 )
             },
@@ -691,8 +684,8 @@ private fun openTeachPdf(ctx: android.content.Context, fileId: String, onProgres
     return PdfRenderer(fd)
 }
 
-/** کش LRU صفحه‌های PDF (~۸ صفحه) تا حافظه کنترل بماند. */
-private class TeachPageCache(private val maxPages: Int = 8) {
+/** کش LRU صفحه‌های PDF (~۴ صفحهٔ نزدیک) تا اسکرول سبک بماند. */
+private class TeachPageCache(private val maxPages: Int = 4) {
     private val map = LinkedHashMap<Int, Bitmap>(16, 0.75f, true)
     operator fun get(index: Int): Bitmap? = synchronized(this) { map[index] }
     operator fun set(index: Int, value: Bitmap) {
@@ -778,19 +771,23 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
             Spacer(Modifier.height(6.dp))
             // v1.29 — زوم لمسی دوانگشتی (مثل گالری): وقتی صفحه‌ای زوم است،
             // لیست اسکرول نمی‌شود تا جابه‌جایی/پن دست کاربر باشد.
-            var zoomScale by remember { mutableFloatStateOf(1f) }
-            var zoomX by remember { mutableFloatStateOf(0f) }
-            var zoomY by remember { mutableFloatStateOf(0f) }
-            val pageZoomed = zoomScale > 1.01f
+            var blockingZoom by remember { mutableStateOf(false) }
+            val seenPages = remember(fileId) { mutableSetOf<Int>() }
+            val screenW = remember {
+                ctx.resources.displayMetrics.widthPixels.coerceIn(720, 1280)
+            }
             LazyColumn(
                 Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
-                userScrollEnabled = !pageZoomed,
+                userScrollEnabled = !blockingZoom,
             ) {
-                items(st.pageCount) { index ->
+                items(st.pageCount, key = { it }) { index ->
                     Card(Modifier.fillMaxWidth()) {
                         Column {
                             var bmp by remember(fileId, index) { mutableStateOf<Bitmap?>(pageCache[index]) }
+                            var zoomScale by remember(fileId, index) { mutableFloatStateOf(1f) }
+                            var zoomX by remember(fileId, index) { mutableFloatStateOf(0f) }
+                            var zoomY by remember(fileId, index) { mutableFloatStateOf(0f) }
                             LaunchedEffect(fileId, index) {
                                 if (bmp == null) {
                                     val rendered: Bitmap? = withContext(Dispatchers.IO) {
@@ -798,7 +795,7 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
                                             synchronized(renderLock) {
                                                 val r = renderer ?: return@synchronized null
                                                 r.openPage(index).use { page ->
-                                                    val targetW = 1080
+                                                    val targetW = screenW
                                                     val scale = targetW.toFloat() / page.width.toFloat()
                                                     val w = targetW
                                                     val h = (page.height * scale).toInt().coerceAtLeast(1)
@@ -819,6 +816,9 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
                                     if (rendered != null) {
                                         synchronized(pageCache) { pageCache[index] = rendered }
                                         bmp = rendered
+                                        if (seenPages.add(index)) {
+                                            StudyActivity.add(ctx, pack.packId, "pdf", "مشاهده صفحه ${index + 1} کتاب درسی")
+                                        }
                                     }
                                 }
                             }
@@ -833,7 +833,10 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
                                     scale = zoomScale,
                                     offsetX = zoomX,
                                     offsetY = zoomY,
-                                    onTransform = { s, x, y -> zoomScale = s; zoomX = x; zoomY = y },
+                                    onTransform = { s, x, y ->
+                                        zoomScale = s; zoomX = x; zoomY = y
+                                        blockingZoom = s > 1.01f
+                                    },
                                     modifier = Modifier.fillMaxWidth(),
                                 )
                             }
