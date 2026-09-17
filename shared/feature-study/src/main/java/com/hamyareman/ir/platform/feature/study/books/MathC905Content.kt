@@ -65,13 +65,11 @@ object MathC905Content {
         )
     }
 
-    private fun derivedPdf(packId: String): String? {
-        if (packId == "C905_TOC") return "C905-fehrest.pdf"
-        Regex("""^C905_E(\d+)-L(\d+)$""").find(packId)?.let { m ->
-            return "C905f%02dd%02d.pdf".format(m.groupValues[1].toInt(), m.groupValues[2].toInt())
-        }
-        return null
-    }
+    private fun derivedPdf(packId: String): String? =
+        com.hamyareman.ir.platform.feature.study.ExtraLessons.c905PdfName(packId)
+
+    private fun derivedAudio(packId: String): String? =
+        com.hamyareman.ir.platform.feature.study.ExtraLessons.c905AudioName(packId)
 
     private fun load(): Map<String, JSONObject> {
         val stream = MathC905Content::class.java.classLoader?.getResourceAsStream("math_c905.json")
