@@ -170,6 +170,17 @@ fun MathLessonScreen(
             }
         }
         val currentKey = tabs.getOrNull(tab)?.key ?: "teach"
+        val currentLabel = tabs.getOrNull(tab)?.label ?: "تدریس"
+        DisposableEffect(pack.packId, currentKey) {
+            val start = System.currentTimeMillis()
+            StudyActivity.add(ctx, pack.packId, "tab", "باز کردن سربرگ $currentLabel")
+            onDispose {
+                val sec = ((System.currentTimeMillis() - start) / 1000L).toInt()
+                if (sec >= 2) {
+                    StudyActivity.add(ctx, pack.packId, "dwell", "سربرگ $currentLabel — ${sec} ثانیه")
+                }
+            }
+        }
         if (currentKey == "teach") {
             val tracks = teachTracksOf(pack)
             if (tracks.isNotEmpty()) {
