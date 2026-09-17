@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سوالات چهارگزینه‌ای – فصل پنجم ریاضی نهم (عبارت‌های جبری)</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --indigo: #4f46e5;
+    --purple: #7c3aed;
+    --pink: #ec4899;
+    --green: #16a34a;
+    --red: #dc2626;
+    --amber: #f59e0b;
+    --cyan: #0891b2;
+    --slate: #1e293b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 50%, #ecfeff 100%);
+    color: var(--slate); line-height: 1.9; padding: 16px; font-size: 16px; min-height: 100vh;
+  }
+  .container {
+    max-width: 950px; margin: 0 auto; background: #fff; border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(30,41,59,.15); overflow: hidden;
+  }
+  header {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed, #ec4899);
+    color: #fff; padding: 24px 26px; text-align: center;
+  }
+  header h1 { font-size: 1.45rem; font-weight: 900; margin-bottom: 6px; }
+  header p { font-size: .88rem; opacity: .92; }
+
+  /* ===== کلاس حیاتی برای نمایش صحیح عبارات ریاضی ===== */
+  .math {
+    direction: ltr;
+    unicode-bidi: isolate;
+    display: inline-block;
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+    white-space: nowrap;
+  }
+
+  .top-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 24px; background: #f8fafc; border-bottom: 2px solid #e2e8f0;
+    flex-wrap: wrap; gap: 10px;
+  }
+  .progress-info { font-size: .9rem; font-weight: 700; color: var(--indigo); }
+  .progress-info span { color: #be185d; }
+  .progress-bar-outer {
+    flex: 1; min-width: 120px; height: 12px; background: #e2e8f0;
+    border-radius: 50px; overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%; background: linear-gradient(90deg, #4f46e5, #ec4899);
+    border-radius: 50px; width: 0%; transition: width .4s ease;
+  }
+
+  .card-area {
+    padding: 30px 26px; min-height: 400px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .card-badge {
+    display: flex; gap: 8px; justify-content: center;
+    margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .badge-pill {
+    padding: 4px 14px; border-radius: 50px; font-size: .78rem;
+    font-weight: 800; color: #fff;
+  }
+  .badge-lesson-1 { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
+  .badge-lesson-2 { background: linear-gradient(135deg, #0891b2, #0ea5e9); }
+  .badge-lesson-3 { background: linear-gradient(135deg, #059669, #10b981); }
+  .badge-lesson-4 { background: linear-gradient(135deg, #ea580c, #f59e0b); }
+  .badge-lesson-5 { background: linear-gradient(135deg, #be185d, #ec4899); }
+  .badge-bar {
+    background: linear-gradient(135deg, #be185d, #ec4899);
+    padding: 4px 12px; border-radius: 50px; font-size: .75rem;
+    font-weight: 800; color: #fff;
+  }
+  .badge-repeat {
+    background: linear-gradient(135deg, #f59e0b, #ea580c);
+    padding: 4px 12px; border-radius: 50px; font-size: .75rem;
+    font-weight: 800; color: #fff;
+  }
+
+  .sources-row {
+    display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+    margin-bottom: 16px; padding: 8px 10px;
+    background: #f8fafc; border-radius: 12px;
+    border: 1px dashed #cbd5e1;
+  }
+  .sources-label {
+    width: 100%; text-align: center;
+    font-size: .74rem; font-weight: 800; color: #64748b;
+    margin-bottom: 4px;
+  }
+  .source-chip {
+    background: #fff; border: 1px solid #cbd5e1; border-radius: 8px;
+    padding: 3px 10px; font-size: .72rem; color: #334155; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .source-chip .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #4f46e5; color: #fff; font-size: .62rem; font-weight: 900;
+  }
+
+  .question-box {
+    background: linear-gradient(135deg, #f5f3ff, #e0e7ff);
+    border: 3px solid #a78bfa; border-radius: 20px;
+    padding: 26px 24px; text-align: center; margin-bottom: 20px;
+    min-height: 130px; display: flex; align-items: center; justify-content: center;
+    animation: cardIn .4s ease;
+  }
+  .question-text {
+    font-size: 1.12rem; font-weight: 800;
+    color: #3730a3; line-height: 2.3;
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(15px) scale(.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .options-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;
+  }
+  @media(max-width: 640px) { .options-grid { grid-template-columns: 1fr; } }
+  .option-btn {
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+    font-size: .98rem; font-weight: 700; padding: 14px 18px;
+    border-radius: 14px; border: 3px solid #c7d2fe;
+    background: #eef2ff; color: var(--slate); cursor: pointer;
+    text-align: right; transition: all .15s ease;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .option-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(79,70,229,.15);
+    border-color: var(--indigo);
+  }
+  .option-btn:disabled { cursor: not-allowed; opacity: .95; }
+  .option-btn.selected-opt {
+    background: #c7d2fe; border-color: var(--indigo); color: #1e1b4b;
+  }
+  .option-btn .opt-letter {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--indigo); color: #fff; font-weight: 900; flex-shrink: 0;
+  }
+  .option-btn.selected-opt .opt-letter { background: #312e81; }
+  .option-btn.correct-opt {
+    background: #dcfce7; border-color: var(--green); color: #14532d;
+  }
+  .option-btn.correct-opt .opt-letter { background: var(--green); }
+  .option-btn.wrong-opt {
+    background: #fee2e2; border-color: var(--red); color: #7f1d1d;
+  }
+  .option-btn.wrong-opt .opt-letter { background: var(--red); }
+
+  .btn-row {
+    display: flex; gap: 10px; justify-content: center;
+    flex-wrap: wrap; margin-bottom: 14px;
+  }
+  button {
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+    font-size: .95rem; font-weight: 800; padding: 12px 22px;
+    border-radius: 12px; border: none; cursor: pointer;
+    transition: all .15s ease; box-shadow: 0 3px 10px rgba(0,0,0,.08);
+  }
+  button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.13); }
+  button:active:not(:disabled) { transform: translateY(0); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-confirm { background: linear-gradient(135deg, #16a34a, #059669); color: #fff; }
+  .btn-next { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; }
+  .btn-hint { background: linear-gradient(135deg, #0ea5e9, #3b82f6); color: #fff; }
+  .btn-restart { background: linear-gradient(135deg, #be185d, #ec4899); color: #fff; }
+  .btn-archive { background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; }
+  .btn-repeat { background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; }
+
+  .hint-box {
+    display: none; background: #e0f2fe; border-right: 4px solid #0284c7;
+    padding: 10px 16px; border-radius: 10px; margin-top: 10px;
+    color: #075985; font-size: .88rem;
+  }
+  .hint-box.show { display: block; }
+
+  .stats-panel { display: none; padding: 30px 26px; }
+  .stats-panel.show { display: block; }
+  .stats-title {
+    text-align: center; font-size: 1.25rem; font-weight: 900;
+    color: var(--indigo); margin-bottom: 20px;
+  }
+  .score-summary {
+    display: flex; justify-content: center; gap: 16px;
+    flex-wrap: wrap; margin-bottom: 26px;
+  }
+  .score-card {
+    background: #fff; border-radius: 16px; padding: 18px 26px;
+    text-align: center; box-shadow: 0 4px 14px rgba(0,0,0,.07);
+    min-width: 120px;
+  }
+  .score-card .num { font-size: 2.1rem; font-weight: 900; display: block; line-height: 1.2; }
+  .score-card .lbl { font-size: .8rem; font-weight: 700; color: #64748b; }
+  .score-card.total .num { color: var(--indigo); }
+  .score-card.correct .num { color: var(--green); }
+  .score-card.wrong .num { color: var(--red); }
+  .score-card.percent .num { color: #be185d; }
+
+  .section-title {
+    font-size: 1.02rem; font-weight: 900; color: var(--indigo);
+    margin: 22px 0 12px; padding-bottom: 8px;
+    border-bottom: 2px dashed #c7d2fe;
+  }
+  .card-list { display: flex; flex-direction: column; gap: 8px; }
+  .card-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 10px;
+    background: #f8fafc; border-right: 4px solid #cbd5e1;
+    font-size: .84rem; flex-wrap: wrap;
+  }
+  .card-row.correct-row { border-right-color: var(--green); background: #f0fdf4; }
+  .card-row.wrong-row { border-right-color: var(--red); background: #fef2f2; }
+  .card-row .qnum { font-weight: 900; color: var(--indigo); min-width: 42px; }
+  .card-row .qshort { flex: 1; color: #334155; overflow: hidden; text-overflow: ellipsis; }
+  .repeat-tag {
+    display: inline-block; background: #fef3c7; color: #92400e;
+    padding: 2px 8px; border-radius: 6px;
+    font-size: .72rem; font-weight: 800;
+  }
+  .repeat-tag.done { background: #dcfce7; color: #166534; }
+  .repeat-tag.need { background: #fee2e2; color: #991b1b; }
+
+  .footer-actions {
+    display: flex; justify-content: center; gap: 10px;
+    padding: 20px 26px 26px; flex-wrap: wrap;
+  }
+  footer {
+    text-align: center; padding: 18px; background: #1e293b;
+    color: #cbd5e1; font-size: .8rem;
+  }
+  footer strong { color: #a855f7; }
+
+  .instant-analysis {
+    display: none; margin-top: 16px; animation: fadeIn .3s ease;
+  }
+  .instant-analysis.show { display: block; }
+  .instant-analysis .ia-box {
+    background: #fef2f2; border-right: 5px solid var(--red);
+    padding: 16px 20px; border-radius: 12px;
+    font-size: .9rem; line-height: 1.9;
+  }
+  .instant-analysis .ia-title {
+    font-weight: 900; color: #991b1b; margin-bottom: 10px; font-size: .98rem;
+  }
+  .instant-analysis .ia-wrong {
+    color: var(--red); font-weight: 800; margin-bottom: 6px;
+  }
+  .instant-analysis .ia-correct {
+    color: var(--green); font-weight: 800; margin-bottom: 6px;
+  }
+  .instant-analysis .ia-exp {
+    background: #fff; padding: 12px 16px; border-radius: 10px;
+    margin-top: 10px; color: var(--slate);
+    border-right: 4px solid var(--amber);
+  }
+  .instant-analysis .ia-repeat {
+    margin-top: 10px; font-size: .82rem; color: #92400e;
+    background: #fef3c7; padding: 6px 12px; border-radius: 8px;
+    display: inline-block;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .sources-box {
+    background: #eef2ff; border-right: 4px solid #4f46e5;
+    padding: 10px 14px; border-radius: 10px; margin-top: 8px;
+    font-size: .82rem;
+  }
+  .sources-box .sb-title {
+    font-weight: 900; color: #3730a3; margin-bottom: 6px; font-size: .84rem;
+  }
+  .sources-box ol {
+    margin: 0; padding-right: 20px; color: #1e293b;
+  }
+  .sources-box li { margin-bottom: 2px; }
+
+  @media (max-width: 640px) {
+    body { padding: 8px; font-size: 15px; }
+    .card-area, .stats-panel { padding: 20px 14px; }
+    header h1 { font-size: 1.1rem; }
+    .question-text { font-size: .98rem; }
+    button { padding: 10px 16px; font-size: .86rem; }
+    .score-card { padding: 14px 18px; min-width: 95px; }
+    .score-card .num { font-size: 1.6rem; }
+    .source-chip { font-size: .68rem; padding: 2px 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>📝 سوالات چهارگزینه‌ای – فصل پنجم ریاضی نهم</h1>
+    <p>عبارت‌های جبری (اتحادها و تجزیه) | ۳۰ سوال منتخب از آزمون‌های نهایی و هماهنگ استانی (تبریز و سایر استان‌ها) | ۱۴۰۰–۱۴۰۵</p>
+    <p style="margin-top:6px;font-size:.78rem;opacity:.8;">منابع: امتحان نهایی و هماهنگ استانی، مدارس تیزهوشان، گاما، قلم‌چی، مدرسان</p>
+  </header>
+
+  <div class="top-bar">
+    <div class="progress-info">
+      سوال <span id="cardNow">1</span> از <span id="cardTotal">0</span>
+      <span id="modeLabel" style="color:#f59e0b; font-weight:900;"></span>
+    </div>
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner" id="progressInner"></div>
+    </div>
+  </div>
+
+  <div class="card-area" id="cardArea">
+    <div class="card-badge" id="cardBadge"></div>
+    <div class="sources-row" id="sourcesRow"></div>
+    <div class="question-box">
+      <div class="question-text" id="questionText"></div>
+    </div>
+    <div class="options-grid" id="optionsGrid"></div>
+
+    <div class="instant-analysis" id="instantAnalysis"></div>
+
+    <div class="btn-row">
+      <button class="btn-hint" onclick="showHint()">💡 راهنما</button>
+      <button class="btn-confirm" id="btnConfirm" onclick="confirmAnswer()" disabled>✅ ثبت پاسخ</button>
+      <button class="btn-next" id="btnNext" onclick="nextCard()" disabled>➡️ سوال بعدی</button>
+    </div>
+    <div class="hint-box" id="hintBox"></div>
+  </div>
+
+  <div class="stats-panel" id="statsPanel">
+    <div class="stats-title">📊 گزارش نهایی – فصل پنجم عبارت‌های جبری</div>
+    <div class="score-summary">
+      <div class="score-card total">
+        <span class="num" id="statTotal">0</span>
+        <span class="lbl">کل سوال‌ها</span>
+      </div>
+      <div class="score-card correct">
+        <span class="num" id="statCorrect">0</span>
+        <span class="lbl">درست</span>
+      </div>
+      <div class="score-card wrong">
+        <span class="num" id="statWrong">0</span>
+        <span class="lbl">نادرست</span>
+      </div>
+      <div class="score-card percent">
+        <span class="num" id="statPercent">0%</span>
+        <span class="lbl">درصد موفقیت</span>
+      </div>
+    </div>
+
+    <div id="wrongAnalysis"></div>
+
+    <div class="section-title">📗 آرشیو سوال‌های پاسخ درست</div>
+    <div class="card-list" id="archiveList"></div>
+
+    <div class="section-title">📕 سوال‌های نادرست + تعداد تکرار</div>
+    <div class="card-list" id="wrongList"></div>
+
+    <div class="footer-actions">
+      <button class="btn-restart" onclick="restartAll()">🔄 شروع مجدد همه</button>
+      <button class="btn-repeat" onclick="startRepeatRound()">🔁 شروع دور تکرار</button>
+      <button class="btn-archive" onclick="showArchive()">📚 نمایش آرشیو کامل</button>
+    </div>
+  </div>
+
+  <div class="stats-panel" id="archivePanel">
+    <div class="stats-title">📚 آرشیو کامل سوال‌های پاسخ درست</div>
+    <div class="card-list" id="archiveFullList"></div>
+    <div class="footer-actions">
+      <button class="btn-next" onclick="backToStats()">⬅️ بازگشت به گزارش</button>
+    </div>
+  </div>
+
+  <footer>
+    <strong>📝 سوالات چهارگزینه‌ای فصل پنجم ریاضی نهم – عبارت‌های جبری</strong><br>
+    منتخب از آزمون‌های نهایی و هماهنگ استانی (تبریز و سایر استان‌ها) | ۱۴۰۰–۱۴۰۵<br>
+    <strong>* اختصاصی اپلیکیشن همیار من *</strong>
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   سوالات منتخب از آزمون‌های نهایی و هماهنگ استانی
+   فصل پنجم: عبارت‌های جبری
+   نکته مهم: تمام عبارات ریاضی داخل <span class="math"> قرار گرفته‌اند
+   ============================================================ */
+const allCards = [
+  /* ===== درس ۱: اتحاد مربع دو جمله‌ای ===== */
+  { id: 1, lesson: 1, bar: "۰/۵", q: "حاصل <span class=\"math\">(x + ۳)²</span> کدام است؟",
+    opts: ["<span class=\"math\">x² + ۶x + ۹</span>", "<span class=\"math\">x² + ۹</span>", "<span class=\"math\">x² + ۳x + ۹</span>", "<span class=\"math\">x² + ۶x + ۳</span>"],
+    correct: 0, hint: "اتحاد مربع دو جمله‌ای: (a + b)² = a² + ۲ab + b²",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۰",
+      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
+      "گاما – آزمون تستی فصل ۵ – ۱۴۰۲"
+    ],
+    exp: "(x + ۳)² = x² + ۲(x)(۳) + ۳² = x² + ۶x + ۹. طبق اتحاد مربع دو جمله‌ای، مربع جمله اول + دو برابر حاصل‌ضرب دو جمله + مربع جمله دوم." },
+
+  { id: 2, lesson: 1, bar: "۰/۵", q: "حاصل <span class=\"math\">(۲x − ۵)²</span> کدام است؟",
+    opts: ["<span class=\"math\">۴x² − ۲۰x + ۲۵</span>", "<span class=\"math\">۴x² − ۱۰x + ۲۵</span>", "<span class=\"math\">۴x² + ۲۰x + ۲۵</span>", "<span class=\"math\">۲x² − ۲۰x + ۲۵</span>"],
+    correct: 0, hint: "اتحاد مربع دو جمله‌ای با علامت منفی: (a − b)² = a² − ۲ab + b²",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۳ تبریز) – خرداد ۱۴۰۱",
+      "گاما – آزمون فصل ۵ – ۱۴۰۳"
+    ],
+    exp: "(۲x − ۵)² = (۲x)² − ۲(۲x)(۵) + ۵² = ۴x² − ۲۰x + ۲۵." },
+
+  { id: 3, lesson: 1, bar: "۰/۵", q: "حاصل <span class=\"math\">(x + y)² − (x − y)²</span> کدام است؟",
+    opts: ["<span class=\"math\">۴xy</span>", "<span class=\"math\">۲xy</span>", "<span class=\"math\">۲x² + ۲y²</span>", "<span class=\"math\">۰</span>"],
+    correct: 0, hint: "هر دو اتحاد را باز کنید و ساده کنید.",
+    sources: [
+      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
+      "مدرسان – آزمون تستی فصل ۵ – ۱۴۰۳"
+    ],
+    exp: "(x + y)² = x² + ۲xy + y² و (x − y)² = x² − ۲xy + y². با تفریق: (x² + ۲xy + y²) − (x² − ۲xy + y²) = ۴xy." },
+
+  { id: 4, lesson: 1, bar: "۰/۵", q: "حاصل <span class=\"math\">(x + y)² + (x − y)²</span> کدام است؟",
+    opts: ["<span class=\"math\">۲x² + ۲y²</span>", "<span class=\"math\">۲x² − ۲y²</span>", "<span class=\"math\">۴xy</span>", "<span class=\"math\">۲xy</span>"],
+    correct: 0, hint: "هر دو اتحاد را باز کنید و جملات مشابه را جمع کنید.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۲ تبریز) – خرداد ۱۴۰۲",
+      "گاما – آزمون تستی فصل ۵ – ۱۴۰۲"
+    ],
+    exp: "(x² + ۲xy + y²) + (x² − ۲xy + y²) = ۲x² + ۲y²." },
+
+  { id: 5, lesson: 1, bar: "۰/۵", q: "مقدار <span class=\"math\">۱۰۲²</span> با استفاده از اتحاد مربع دو جمله‌ای کدام است؟",
+    opts: ["<span class=\"math\">۱۰۴۰۴</span>", "<span class=\"math\">۱۰۴۰۲</span>", "<span class=\"math\">۱۰۴۰۸</span>", "<span class=\"math\">۱۰۰۰۴</span>"],
+    correct: 0, hint: "۱۰۲ = ۱۰۰ + ۲",
+    sources: [
+      "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
+      "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
+    ],
+    exp: "۱۰۲² = (۱۰۰ + ۲)² = ۱۰۰² + ۲(۱۰۰)(۲) + ۲² = ۱۰۰۰۰ + ۴۰۰ + ۴ = ۱۰۴۰۴." },
+
+  { id: 6, lesson: 1, bar: "۰/۵", q: "مقدار <span class=\"math\">۹۸²</span> با استفاده از اتحاد مربع دو جمله‌ای کدام است؟",
+    opts: ["<span class=\"math\">۹۶۰۴</span>", "<span class=\"math\">۹۶۰۸</span>", "<span class=\"math\">۹۶۰۲</span>", "<span class=\"math\">۹۵۰۴</span>"],
+    correct: 0, hint: "۹۸ = ۱۰۰ − ۲",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۳",
+      "گاما – آزمون فصل ۵ – ۱۴۰۲"
+    ],
+    exp: "۹۸² = (۱۰۰ − ۲)² = ۱۰۰² − ۲(۱۰۰)(۲) + ۲² = ۱۰۰۰۰ − ۴۰۰ + ۴ = ۹۶۰۴." },
+
+  /* ===== درس ۲: اتحاد مزدوج ===== */
+  { id: 7, lesson: 2, bar: "۰/۵", q: "حاصل <span class=\"math\">(x + ۳)(x − ۳)</span> کدام است؟",
+    opts: ["<span class=\"math\">x² − ۹</span>", "<span class=\"math\">x² + ۹</span>", "<span class=\"math\">x² − ۶x + ۹</span>", "<span class=\"math\">x² − ۳</span>"],
+    correct: 0, hint: "اتحاد مزدوج: (a + b)(a − b) = a² − b²",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۰",
+      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
+      "گاما – آزمون تستی فصل ۵ – ۱۴۰۲"
+    ],
+    exp: "(x + ۳)(x − ۳) = x² − ۳² = x² − ۹. طبق اتحاد مزدوج، حاصل‌ضرب دو جمله مزدوج، تفاضل مربع دو جمله است." },
+
+  { id: 8, lesson: 2, bar: "۰/۵", q: "حاصل <span class=\"math\">(۲x + ۵)(۲x − ۵)</span> کدام است؟",
+    opts: ["<span class=\"math\">۴x² − ۲۵</span>", "<span class=\"math\">۴x² + ۲۵</span>", "<span class=\"math\">۴x² − ۱۰</span>", "<span class=\"math\">۲x² − ۲۵</span>"],
+    correct: 0, hint: "اتحاد مزدوج: (a + b)(a − b) = a² − b²",
+    sources: [
+      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
+      "مدرسان – آزمون تستی فصل ۵ – ۱۴۰۳"
+    ],
+    exp: "(۲x + ۵)(۲x − ۵) = (۲x)² − ۵² = ۴x² − ۲۵." },
+
+  { id: 9, lesson: 2, bar: "۰/۵", q: "حاصل <span class=\"math\">۱۰۳ × ۹۷</span> با استفاده از اتحاد مزدوج کدام است؟",
+    opts: ["<span class=\"math\">۹۹۹۱</span>", "<span class=\"math\">۹۹۹۰</span>", "<span class=\"math\">۱۰۰۰۰</span>", "<span class=\"math\">۹۹۹۲</span>"],
+    correct: 0, hint: "۱۰۳ = ۱۰۰ + ۳ و ۹۷ = ۱۰۰ − ۳",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۳ تبریز) – خرداد ۱۴۰۱",
+      "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
+    ],
+    exp: "۱۰۳ × ۹۷ = (۱۰۰ + ۳)(۱۰۰ − ۳) = ۱۰۰² − ۳² = ۱۰۰۰۰ − ۹ = ۹۹۹۱." },
+
+  { id: 10, lesson: 2, bar: "۰/۵", q: "حاصل <span class=\"math\">(√۵ + ۲)(√۵ − ۲)</span> کدام است؟",
+    opts: ["<span class=\"math\">۱</span>", "<span class=\"math\">۹</span>", "<span class=\"math\">√۵</span>", "<span class=\"math\">۳</span>"],
+    correct: 0, hint: "اتحاد مزدوج: (a + b)(a − b) = a² − b²",
+    sources: [
+      "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
+      "گاما – آزمون فصل ۵ – ۱۴۰۲"
+    ],
+    exp: "(√۵ + ۲)(√۵ − ۲) = (√۵)² − ۲² = ۵ − ۴ = ۱." },
+
+  { id: 11, lesson: 2, bar: "۰/۵", q: "حاصل <span class=\"math\">(a + b + c)(a + b − c)</span> کدام است؟",
+    opts: ["<span class=\"math\">(a + b)² − c²</span>", "<span class=\"math\">a² + b² − c²</span>", "<span class=\"math\">a² + b² + c²</span>", "<span class=\"math\">(a − b)² − c²</span>"],
+    correct: 0, hint: "a + b را یک جمله در نظر بگیرید.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۲",
+      "مدرسان – آزمون تستی فصل ۵ – ۱۴۰۳"
+    ],
+    exp: "اگر a + b را یک جمله در نظر بگیریم: (a + b + c)(a + b − c) = (a + b)² − c². این همان اتحاد مزدوج است." },
+
+  /* ===== درس ۳: اتحاد جمله مشترک ===== */
+  { id: 12, lesson: 3, bar: "۰/۵", q: "حاصل <span class=\"math\">(x + ۲)(x + ۵)</span> کدام است؟",
+    opts: ["<span class=\"math\">x² + ۷x + ۱۰</span>", "<span class=\"math\">x² + ۱۰x + ۷</span>", "<span class=\"math\">x² + ۷x + ۷</span>", "<span class=\"math\">x² + ۱۰</span>"],
+    correct: 0, hint: "اتحاد جمله مشترک: (x + a)(x + b) = x² + (a + b)x + ab",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۰",
+      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
+      "گاما – آزمون تستی فصل ۵ – ۱۴۰۲"
+    ],
+    exp: "(x + ۲)(x + ۵) = x² + (۲ + ۵)x + (۲)(۵) = x² + ۷x + ۱۰." },
+
+  { id: 13, lesson: 3, bar: "۰/۵", q: "حاصل <span class=\"math\">(x − ۳)(x + ۷)</span> کدام است؟",
+    opts: ["<span class=\"math\">x² + ۴x − ۲۱</span>", "<span class=\"math\">x² − ۴x − ۲۱</span>", "<span class=\"math\">x² + ۴x + ۲۱</span>", "<span class=\"math\">x² + ۱۰x − ۲۱</span>"],
+    correct: 0, hint: "اتحاد جمله مشترک با ضرایب مختلف.",
+    sources: [
+      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
+      "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
+    ],
+    exp: "(x − ۳)(x + ۷) = x² + (−۳ + ۷)x + (−۳)(۷) = x² + ۴x − ۲۱." },
+
+  { id: 14, lesson: 3, bar: "۰/۵", q: "حاصل <span class=\"math\">(x − ۴)(x − ۶)</span> کدام است؟",
+    opts: ["<span class=\"math\">x² − ۱۰x + ۲۴</span>", "<span class=\"math\">x² + ۱۰x + ۲۴</span>", "<span class=\"math\">x² − ۱۰x − ۲۴</span>", "<span class=\"math\">x² − ۲۴</span>"],
+    correct: 0, hint: "دو عدد منفی: a = −۴ و b = −۶",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۲ تبریز) – خرداد ۱۴۰۱",
+      "گاما – آزمون فصل ۵ – ۱۴۰۲"
+    ],
+    exp: "(x − ۴)(x − ۶) = x² + (−۴ − ۶)x + (−۴)(−۶) = x² − ۱۰x + ۲۴." },
+
+  { id: 15, lesson: 3, bar: "۰/۵", q: "حاصل <span class=\"math\">(۲x + ۱)(۲x + ۳)</span> کدام است؟",
+    opts: ["<span class=\"math\">۴x² + ۸x + ۳</span>", "<span class=\"math\">۴x² + ۴x + ۳</span>", "<span class=\"math\">۲x² + ۸x + ۳</span>", "<span class=\"math\">۴x² + ۸x + ۱</span>"],
+    correct: 0, hint: "۲x را یک جمله در نظر بگیرید.",
+    sources: [
+      "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
+      "مدرسان – آزمون تستی فصل ۵ – ۱۴۰۳"
+    ],
+    exp: "(۲x + ۱)(۲x + ۳) = (۲x)² + (۱ + ۳)(۲x) + (۱)(۳) = ۴x² + ۸x + ۳." },
+
+  /* ===== درس ۴: تجزیه ===== */
+  { id: 16, lesson: 4, bar: "۰/۵", q: "تجزیه عبارت <span class=\"math\">x² + ۵x + ۶</span> کدام است؟",
+    opts: ["<span class=\"math\">(x + ۲)(x + ۳)</span>", "<span class=\"math\">(x + ۱)(x + ۶)</span>", "<span class=\"math\">(x − ۲)(x − ۳)</span>", "<span class=\"math\">(x + ۵)(x + ۶)</span>"],
+    correct: 0, hint: "دو عدد پیدا کنید که حاصل‌ضربشان ۶ و جمعشان ۵ باشد.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۵ تبریز) – خرداد ۱۴۰۰",
+      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
+      "گاما – آزمون تستی فصل ۵ – ۱۴۰۲"
+    ],
+    exp: "برای تجزیه x² + ۵x + ۶، دو عدد می‌خواهیم که حاصل‌ضربشان ۶ و جمعشان ۵ باشد: ۲ و ۳. پس تجزیه: (x + ۲)(x + ۳)." },
+
+  { id: 17, lesson: 4, bar: "۰/۵", q: "تجزیه عبارت <span class=\"math\">x² − ۷x + ۱۲</span> کدام است؟",
+    opts: ["<span class=\"math\">(x − ۳)(x − ۴)</span>", "<span class=\"math\">(x + ۳)(x + ۴)</span>", "<span class=\"math\">(x − ۲)(x − ۶)</span>", "<span class=\"math\">(x − ۱)(x − ۱۲)</span>"],
+    correct: 0, hint: "دو عدد که حاصل‌ضربشان ۱۲ و جمعشان −۷ باشد.",
+    sources: [
+      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
+      "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
+    ],
+    exp: "دو عدد −۳ و −۴ حاصل‌ضربشان ۱۲ و جمعشان −۷ است. پس تجزیه: (x − ۳)(x − ۴)." },
+
+  { id: 18, lesson: 4, bar: "۰/۵", q: "تجزیه عبارت <span class=\"math\">x² − ۹</span> کدام است؟",
+    opts: ["<span class=\"math\">(x − ۳)(x + ۳)</span>", "<span class=\"math\">(x − ۳)²</span>", "<span class=\"math\">(x − ۹)(x + ۱)</span>", "<span class=\"math\">(x + ۳)²</span>"],
+    correct: 0, hint: "اتحاد مزدوج: a² − b² = (a − b)(a + b)",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۱",
+      "گاما – آزمون فصل ۵ – ۱۴۰۲"
+    ],
+    exp: "x² − ۹ = x² − ۳² = (x − ۳)(x + ۳). این همان اتحاد مزدوج است." },
+
+  { id: 19, lesson: 4, bar: "۰/۵", q: "تجزیه عبارت <span class=\"math\">x² + ۶x + ۹</span> کدام است؟",
+    opts: ["<span class=\"math\">(x + ۳)²</span>", "<span class=\"math\">(x − ۳)²</span>", "<span class=\"math\">(x + ۱)(x + ۹)</span>", "<span class=\"math\">(x + ۲)(x + ۳)</span>"],
+    correct: 0, hint: "این عبارت یک مربع کامل است.",
+    sources: [
+      "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
+      "مدرسان – آزمون تستی فصل ۵ – ۱۴۰۳"
+    ],
+    exp: "x² + ۶x + ۹ = x² + ۲(x)(۳) + ۳² = (x + ۳)². این یک مربع کامل است." },
+
+  { id: 20, lesson: 4, bar: "۰/۵", q: "تجزیه عبارت <span class=\"math\">۴x² − ۲۵</span> کدام است؟",
+    opts: ["<span class=\"math\">(۲x − ۵)(۲x + ۵)</span>", "<span class=\"math\">(۴x − ۵)(x + ۵)</span>", "<span class=\"math\">(۲x − ۵)²</span>", "<span class=\"math\">(۴x − ۲۵)(x + ۱)</span>"],
+    correct: 0, hint: "اتحاد مزدوج: a² − b²",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۲",
+      "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
+    ],
+    exp: "۴x² − ۲۵ = (۲x)² − ۵² = (۲x − ۵)(۲x + ۵)." },
+
+  { id: 21, lesson: 4, bar: "۰/۵", q: "تجزیه عبارت <span class=\"math\">x² − ۵x</span> کدام است؟",
+    opts: ["<span class=\"math\">x(x − ۵)</span>", "<span class=\"math\">x(x + ۵)</span>", "<span class=\"math\">(x − ۵)²</span>", "<span class=\"math\">x²(۱ − ۵)</span>"],
+    correct: 0, hint: "فاکتور مشترک x را جدا کنید.",
+    sources: [
+      "امتحان نهایی – استان فارس – خرداد ۱۴۰۱",
+      "گاما – آزمون تستی فصل ۵ – ۱۴۰۲"
+    ],
+    exp: "x² − ۵x = x(x − ۵). با فاکتورگیری x از هر دو جمله، تجزیه حاصل می‌شود." },
+
+  { id: 22, lesson: 4, bar: "۰/۵", q: "تجزیه عبارت <span class=\"math\">۳x² + ۶x</span> کدام است؟",
+    opts: ["<span class=\"math\">۳x(x + ۲)</span>", "<span class=\"math\">۳(x² + ۶x)</span>", "<span class=\"math\">x(۳x + ۶)</span>", "<span class=\"math\">۳x(x + ۶)</span>"],
+    correct: 0, hint: "بزرگ‌ترین فاکتور مشترک را جدا کنید.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۳ تبریز) – خرداد ۱۴۰۰",
+      "مدرسان – آزمون تستی فصل ۵ – ۱۴۰۳"
+    ],
+    exp: "۳x² + ۶x = ۳x(x + ۲). بزرگ‌ترین فاکتور مشترک ۳x است." },
+
+  { id: 23, lesson: 4, bar: "۰/۵", q: "تجزیه عبارت <span class=\"math\">x² + ۸x + ۱۵</span> کدام است؟",
+    opts: ["<span class=\"math\">(x + ۳)(x + ۵)</span>", "<span class=\"math\">(x + ۱)(x + ۱۵)</span>", "<span class=\"math\">(x + ۲)(x + ۷)</span>", "<span class=\"math\">(x − ۳)(x − ۵)</span>"],
+    correct: 0, hint: "دو عدد که حاصل‌ضربشان ۱۵ و جمعشان ۸ باشد.",
+    sources: [
+      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
+      "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
+    ],
+    exp: "دو عدد ۳ و ۵ حاصل‌ضربشان ۱۵ و جمعشان ۸ است. پس تجزیه: (x + ۳)(x + ۵)." },
+
+  { id: 24, lesson: 4, bar: "۰/۵", q: "تجزیه عبارت <span class=\"math\">x² − ۴x − ۱۲</span> کدام است؟",
+    opts: ["<span class=\"math\">(x − ۶)(x + ۲)</span>", "<span class=\"math\">(x + ۶)(x − ۲)</span>", "<span class=\"math\">(x − ۳)(x + ۴)</span>", "<span class=\"math\">(x − ۴)(x + ۳)</span>"],
+    correct: 0, hint: "دو عدد که حاصل‌ضربشان −۱۲ و جمعشان −۴ باشد.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۳",
+      "گاما – آزمون فصل ۵ – ۱۴۰۲"
+    ],
+    exp: "دو عدد −۶ و ۲ حاصل‌ضربشان −۱۲ و جمعشان −۴ است. پس تجزیه: (x − ۶)(x + ۲)." },
+
+  { id: 25, lesson: 4, bar: "۰/۵", q: "تجزیه عبارت <span class=\"math\">x² − ۱۶</span> کدام است؟",
+    opts: ["<span class=\"math\">(x − ۴)(x + ۴)</span>", "<span class=\"math\">(x − ۴)²</span>", "<span class=\"math\">(x − ۸)(x + ۲)</span>", "<span class=\"math\">(x − ۱۶)(x + ۱)</span>"],
+    correct: 0, hint: "اتحاد مزدوج: a² − b²",
+    sources: [
+      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
+      "مدرسان – آزمون تستی فصل ۵ – ۱۴۰۳"
+    ],
+    exp: "x² − ۱۶ = x² − ۴² = (x − ۴)(x + ۴)." },
+
+  /* ===== درس ۵: کاربرد اتحادها ===== */
+  { id: 26, lesson: 5, bar: "۰/۵", q: "اگر <span class=\"math\">a + b = ۷</span> و <span class=\"math\">ab = ۱۲</span> باشد، مقدار <span class=\"math\">a² + b²</span> کدام است؟",
+    opts: ["<span class=\"math\">۲۵</span>", "<span class=\"math\">۳۷</span>", "<span class=\"math\">۴۹</span>", "<span class=\"math\">۲۴</span>"],
+    correct: 0, hint: "از اتحاد (a + b)² = a² + ۲ab + b² استفاده کنید.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۲ تبریز) – خرداد ۱۴۰۱",
+      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
+      "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
+    ],
+    exp: "(a + b)² = a² + ۲ab + b² → ۴۹ = a² + ۲(۱۲) + b² → a² + b² = ۴۹ − ۲۴ = ۲۵." },
+
+  { id: 27, lesson: 5, bar: "۰/۵", q: "اگر <span class=\"math\">x − y = ۵</span> و <span class=\"math\">xy = ۶</span> باشد، مقدار <span class=\"math\">x² + y²</span> کدام است؟",
+    opts: ["<span class=\"math\">۳۷</span>", "<span class=\"math\">۲۵</span>", "<span class=\"math\">۱۳</span>", "<span class=\"math\">۴۹</span>"],
+    correct: 0, hint: "از اتحاد (x − y)² = x² − ۲xy + y² استفاده کنید.",
+    sources: [
+      "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
+      "گاما – آزمون تستی فصل ۵ – ۱۴۰۲"
+    ],
+    exp: "(x − y)² = x² − ۲xy + y² → ۲۵ = x² − ۲(۶) + y² → x² + y² = ۲۵ + ۱۲ = ۳۷." },
+
+  { id: 28, lesson: 5, bar: "۰/۵", q: "مقدار <span class=\"math\">۵۱² − ۴۹²</span> با استفاده از اتحاد مزدوج کدام است؟",
+    opts: ["<span class=\"math\">۲۰۰</span>", "<span class=\"math\">۱۰۰</span>", "<span class=\"math\">۴۰۰</span>", "<span class=\"math\">۲۵۰</span>"],
+    correct: 0, hint: "a² − b² = (a − b)(a + b)",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۰",
+      "مدرسان – آزمون تستی فصل ۵ – ۱۴۰۳"
+    ],
+    exp: "۵۱² − ۴۹² = (۵۱ − ۴۹)(۵۱ + ۴۹) = ۲ × ۱۰۰ = ۲۰۰." },
+
+  { id: 29, lesson: 5, bar: "۰/۵", q: "مقدار <span class=\"math\">۱۰۱ × ۹۹</span> با استفاده از اتحاد مزدوج کدام است؟",
+    opts: ["<span class=\"math\">۹۹۹۹</span>", "<span class=\"math\">۹۹۹۸</span>", "<span class=\"math\">۱۰۰۰۰</span>", "<span class=\"math\">۹۹۹۰</span>"],
+    correct: 0, hint: "۱۰۱ = ۱۰۰ + ۱ و ۹۹ = ۱۰۰ − ۱",
+    sources: [
+      "امتحان نهایی – استان فارس – خرداد ۱۴۰۱",
+      "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
+    ],
+    exp: "۱۰۱ × ۹۹ = (۱۰۰ + ۱)(۱۰۰ − ۱) = ۱۰۰² − ۱² = ۱۰۰۰۰ − ۱ = ۹۹۹۹." },
+
+  { id: 30, lesson: 5, bar: "۰/۵", q: "اگر <span class=\"math\">x + (۱/x) = ۴</span> باشد، مقدار <span class=\"math\">x² + (۱/x²)</span> کدام است؟",
+    opts: ["<span class=\"math\">۱۴</span>", "<span class=\"math\">۱۶</span>", "<span class=\"math\">۱۸</span>", "<span class=\"math\">۱۲</span>"],
+    correct: 0, hint: "دو طرف تساوی را به توان ۲ برسانید.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۳",
+      "آزمون تیزهوشان – مدرسه علامه جعفری تبریز – دی ۱۴۰۳",
+      "گاما – آزمون تستی فصل ۵ – ۱۴۰۲"
+    ],
+    exp: "(x + ۱/x)² = x² + ۲ + ۱/x² → ۱۶ = x² + ۱/x² + ۲ → x² + ۱/x² = ۱۶ − ۲ = ۱۴." }
+];
+
+/* ===== State ===== */
+let currentIndex = 0;
+let cardsOrder = [...allCards];
+let stats = {};
+let repeatCount = {};
+let currentMode = "all";
+let repeatQueue = [];
+let currentRound = 1;
+let selectedOption = null;
+let archive = [];
+
+/* ===== Helpers ===== */
+function getLessonLabel(lesson) {
+  const map = {
+    1: "درس ۱: اتحاد مربع دو جمله‌ای",
+    2: "درس ۲: اتحاد مزدوج",
+    3: "درس ۳: اتحاد جمله مشترک",
+    4: "درس ۴: تجزیه",
+    5: "درس ۵: کاربرد اتحادها"
+  };
+  return map[lesson] || "";
+}
+function getLessonClass(lesson) { return "badge-lesson-" + lesson; }
+
+/* ===== Render Card ===== */
+function renderCard() {
+  const card = cardsOrder[currentIndex];
+  if (!card) return;
+
+  const repeatTotal = card.sources.length;
+
+  const badge = document.getElementById('cardBadge');
+  badge.innerHTML = `
+    <span class="badge-pill ${getLessonClass(card.lesson)}">${getLessonLabel(card.lesson)}</span>
+    <span class="badge-bar">📝 بارم: ${card.bar} نمره</span>
+    <span class="badge-repeat">🔁 تکرار در آزمون‌ها: ${repeatTotal} بار</span>
+  `;
+
+  const srcRow = document.getElementById('sourcesRow');
+  srcRow.innerHTML = `<div class="sources-label">📌 منابع طرح این سوال (${repeatTotal} آزمون)</div>` +
+    card.sources.map((s, i) =>
+      `<span class="source-chip"><span class="num">${i + 1}</span>${s}</span>`
+    ).join('');
+
+  document.getElementById('questionText').innerHTML = card.q;
+
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  const letters = ['الف', 'ب', 'ج', 'د'];
+  card.opts.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="opt-letter">${letters[idx]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectOption(idx, btn);
+    btn.dataset.idx = idx;
+    grid.appendChild(btn);
+  });
+
+  document.getElementById('cardNow').textContent = currentIndex + 1;
+  document.getElementById('cardTotal').textContent = cardsOrder.length;
+  document.getElementById('modeLabel').textContent = currentMode === 'repeat' ? ` (دور تکرار ${currentRound})` : '';
+  const pct = ((currentIndex) / cardsOrder.length) * 100;
+  document.getElementById('progressInner').style.width = pct + '%';
+
+  selectedOption = null;
+  document.getElementById('btnConfirm').disabled = true;
+  document.getElementById('btnConfirm').textContent = '✅ ثبت پاسخ';
+  document.getElementById('btnNext').disabled = true;
+  document.getElementById('btnNext').style.display = 'none';
+  document.getElementById('btnNext').textContent = (currentIndex === cardsOrder.length - 1) ? '📊 پایان و گزارش' : '➡️ سوال بعدی';
+  document.getElementById('hintBox').className = 'hint-box';
+  document.getElementById('hintBox').textContent = '';
+  document.getElementById('instantAnalysis').className = 'instant-analysis';
+  document.getElementById('instantAnalysis').innerHTML = '';
+
+  if (stats[card.id] && stats[card.id].answered) {
+    const prev = stats[card.id];
+    const btns = grid.querySelectorAll('.option-btn');
+    btns.forEach(b => {
+      b.disabled = true;
+      const idx = parseInt(b.dataset.idx);
+      if (idx === prev.selectedOpt && !prev.correct) b.classList.add('wrong-opt');
+      if (idx === card.correct) b.classList.add('correct-opt');
+    });
+    document.getElementById('btnConfirm').disabled = true;
+    document.getElementById('btnConfirm').style.display = 'none';
+    document.getElementById('btnNext').disabled = false;
+    document.getElementById('btnNext').style.display = 'inline-block';
+    if (!prev.correct) showInstantAnalysis(card, prev.selectedOpt);
+  } else {
+    document.getElementById('btnConfirm').style.display = 'inline-block';
+    document.getElementById('btnNext').style.display = 'none';
+  }
+}
+
+/* ===== Select Option ===== */
+function selectOption(idx, btn) {
+  const card = cardsOrder[currentIndex];
+  if (stats[card.id] && stats[card.id].answered) return;
+  const grid = document.getElementById('optionsGrid');
+  grid.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected-opt'));
+  btn.classList.add('selected-opt');
+  selectedOption = idx;
+  document.getElementById('btnConfirm').disabled = false;
+}
+
+/* ===== Instant Analysis ===== */
+function showInstantAnalysis(card, userOpt) {
+  const letters = ['الف', 'ب', 'ج', 'د'];
+  const box = document.getElementById('instantAnalysis');
+  box.className = 'instant-analysis show';
+  const sourcesHtml = card.sources.map((s, i) => `<li>${s}</li>`).join('');
+  box.innerHTML = `
+    <div class="ia-box">
+      <div class="ia-title">🔍 تحلیل پاسخ</div>
+      <div class="ia-wrong">❌ پاسخ شما: گزینه ${letters[userOpt]}) ${card.opts[userOpt]}</div>
+      <div class="ia-correct">✅ پاسخ صحیح: گزینه ${letters[card.correct]}) ${card.opts[card.correct]}</div>
+      <div class="ia-exp">📖 <strong>توضیح آموزشی:</strong> ${card.exp}</div>
+      <div class="sources-box">
+        <div class="sb-title">📌 این سوال در ${card.sources.length} آزمون زیر مطرح شده است:</div>
+        <ol>${sourcesHtml}</ol>
+      </div>
+      <div class="ia-repeat">🔁 این سوال به لیست تکرار اضافه شد. تعداد تکرار: ${repeatCount[card.id] || 0}</div>
+    </div>
+  `;
+}
+
+/* ===== Confirm Answer ===== */
+function confirmAnswer() {
+  const card = cardsOrder[currentIndex];
+  if (selectedOption === null) return;
+
+  const isCorrect = selectedOption === card.correct;
+
+  stats[card.id] = {
+    answered: true, correct: isCorrect, selectedOpt: selectedOption,
+    lesson: card.lesson, q: card.q, bar: card.bar,
+    exp: card.exp, opts: card.opts, correctOpt: card.correct,
+    sources: card.sources
+  };
+
+  if (isCorrect) {
+    if (!archive.find(a => a.id === card.id)) {
+      archive.push({ id: card.id, q: card.q, lesson: card.lesson, exp: card.exp, bar: card.bar, sources: card.sources });
+    }
+    if (currentMode === 'repeat') {
+      repeatCount[card.id] = Math.max(0, (repeatCount[card.id] || 1) - 1);
+    }
+  } else {
+    repeatCount[card.id] = (repeatCount[card.id] || 0) + 1;
+  }
+
+  const grid = document.getElementById('optionsGrid');
+  const btns = grid.querySelectorAll('.option-btn');
+  btns.forEach(b => { b.disabled = true; });
+
+  if (isCorrect) {
+    document.getElementById('btnConfirm').style.display = 'none';
+    document.getElementById('btnNext').style.display = 'inline-block';
+    setTimeout(() => { nextCard(); }, 150);
+  } else {
+    btns.forEach(b => {
+      const idx = parseInt(b.dataset.idx);
+      if (idx === selectedOption) b.classList.add('wrong-opt');
+      if (idx === card.correct) b.classList.add('correct-opt');
+    });
+    showInstantAnalysis(card, selectedOption);
+    document.getElementById('btnConfirm').disabled = true;
+    document.getElementById('btnConfirm').style.display = 'none';
+    document.getElementById('btnNext').disabled = false;
+    document.getElementById('btnNext').style.display = 'inline-block';
+  }
+}
+
+/* ===== Hint ===== */
+function showHint() {
+  const card = cardsOrder[currentIndex];
+  if (stats[card.id] && stats[card.id].answered) return;
+  const hintBox = document.getElementById('hintBox');
+  if (hintBox.classList.contains('show')) { hintBox.classList.remove('show'); return; }
+  hintBox.innerHTML = '💡 راهنما: ' + card.hint;
+  hintBox.classList.add('show');
+}
+
+/* ===== Next Card ===== */
+function nextCard() {
+  if (currentIndex < cardsOrder.length - 1) {
+    currentIndex++;
+    renderCard();
+  } else {
+    showStats();
+  }
+}
+
+/* ===== Stats ===== */
+function showStats() {
+  document.getElementById('cardArea').style.display = 'none';
+  document.getElementById('archivePanel').classList.remove('show');
+  document.getElementById('statsPanel').classList.add('show');
+
+  let totalCorrect = 0, totalWrong = 0;
+  allCards.forEach(c => {
+    if (stats[c.id] && stats[c.id].answered) {
+      if (stats[c.id].correct) totalCorrect++;
+      else totalWrong++;
+    }
+  });
+
+  const total = allCards.length;
+  const percent = total > 0 ? Math.round((totalCorrect / total) * 100) : 0;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statCorrect').textContent = totalCorrect;
+  document.getElementById('statWrong').textContent = totalWrong;
+  document.getElementById('statPercent').textContent = percent + '%';
+
+  renderWrongAnalysis();
+  renderArchiveList();
+  renderWrongList();
+}
+
+/* ===== Wrong Analysis ===== */
+function renderWrongAnalysis() {
+  const container = document.getElementById('wrongAnalysis');
+  const wrongCards = allCards.filter(c => stats[c.id] && stats[c.id].answered && !stats[c.id].correct);
+
+  if (wrongCards.length === 0) {
+    container.innerHTML = `
+      <div style="background:#f0fdf4;border-right:5px solid #16a34a;padding:16px 20px;border-radius:12px;margin-top:14px;">
+        <div style="font-weight:900;color:#166534;">🎉 تبریک! هیچ پاسخ اشتباهی نداشتید.</div>
+      </div>`;
+    return;
+  }
+
+  let html = `<div style="background:#fff8e1;border-right:5px solid #f59e0b;padding:16px 20px;border-radius:12px;margin-top:14px;">
+    <div style="font-weight:900;color:#92400e;margin-bottom:10px;font-size:1rem;">🔍 تحلیل پاسخ‌های اشتباه (${wrongCards.length} سوال)</div>`;
+
+  const letters = ['الف', 'ب', 'ج', 'د'];
+  wrongCards.forEach(c => {
+    const s = stats[c.id];
+    const sourcesHtml = c.sources.map((src, i) => `<li>${src}</li>`).join('');
+    html += `
+      <div style="margin-bottom:14px;padding-bottom:10px;border-bottom:1px dashed #fcd34d;">
+        <div style="font-weight:900;color:#4f46e5;">سوال #${c.id} – ${getLessonLabel(c.lesson)}</div>
+        <div style="font-size:.78rem;color:#64748b;margin-bottom:6px;">📝 بارم: ${c.bar} نمره | 🔁 تکرار در ${c.sources.length} آزمون</div>
+        <div style="margin:6px 0;color:#1e293b;">${c.q}</div>
+        <div style="color:#dc2626;font-weight:800;">❌ پاسخ شما: گزینه ${letters[s.selectedOpt]}) ${c.opts[s.selectedOpt]}</div>
+        <div style="color:#16a34a;font-weight:800;">✅ پاسخ صحیح: گزینه ${letters[c.correctOpt]}) ${c.opts[c.correctOpt]}</div>
+        <div style="color:#44403c;margin-top:4px;">📖 <strong>توضیح آموزشی:</strong> ${c.exp}</div>
+        <div class="sources-box">
+          <div class="sb-title">📌 منابع طرح سوال (${c.sources.length} آزمون):</div>
+          <ol>${sourcesHtml}</ol>
+        </div>
+        <div style="margin-top:6px;font-size:.82rem;color:#92400e;">🔁 تعداد تکرار فعلی: <strong>${repeatCount[c.id] || 0}</strong></div>
+      </div>`;
+  });
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+/* ===== Archive List (Stats) ===== */
+function renderArchiveList() {
+  const list = document.getElementById('archiveList');
+  if (archive.length === 0) {
+    list.innerHTML = '<div style="color:#64748b;padding:10px;">هنوز هیچ سوالی به آرشیو اضافه نشده است.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  archive.forEach(c => {
+    const row = document.createElement('div');
+    row.className = 'card-row correct-row';
+    const plainText = c.q.replace(/<[^>]*>/g, '');
+    row.innerHTML = `
+      <span class="qnum">#${c.id}</span>
+      <span class="qshort" title="${plainText}">${plainText.length > 55 ? plainText.substring(0, 55) + '...' : plainText}</span>
+      <span class="repeat-tag done">✅ در آرشیو</span>`;
+    list.appendChild(row);
+  });
+}
+
+/* ===== Wrong List (Stats) ===== */
+function renderWrongList() {
+  const list = document.getElementById('wrongList');
+  const wrongCards = allCards.filter(c => stats[c.id] && stats[c.id].answered && !stats[c.id].correct);
+  if (wrongCards.length === 0) {
+    list.innerHTML = '<div style="color:#64748b;padding:10px;">هیچ پاسخ نادرستی وجود ندارد. 🎉</div>';
+    return;
+  }
+  list.innerHTML = '';
+  wrongCards.forEach(c => {
+    const row = document.createElement('div');
+    row.className = 'card-row wrong-row';
+    const plainText = c.q.replace(/<[^>]*>/g, '');
+    row.innerHTML = `
+      <span class="qnum">#${c.id}</span>
+      <span class="qshort" title="${plainText}">${plainText.length > 55 ? plainText.substring(0, 55) + '...' : plainText}</span>
+      <span class="repeat-tag need">🔁 ${repeatCount[c.id] || 0} بار</span>`;
+    list.appendChild(row);
+  });
+}
+
+/* ===== Repeat Round ===== */
+function startRepeatRound() {
+  repeatQueue = [];
+  Object.keys(repeatCount).forEach(id => {
+    const count = repeatCount[id];
+    if (count > 0) {
+      const card = allCards.find(c => c.id === parseInt(id));
+      if (card) {
+        for (let i = 0; i < count; i++) repeatQueue.push(card);
+      }
+    }
+  });
+
+  if (repeatQueue.length === 0) {
+    alert('🎉 هیچ سوالی برای تکرار وجود ندارد.');
+    return;
+  }
+
+  repeatQueue.sort(() => Math.random() - 0.5);
+  currentMode = 'repeat';
+  cardsOrder = repeatQueue;
+  currentIndex = 0;
+  currentRound++;
+  repeatQueue.forEach(c => { delete stats[c.id]; });
+
+  document.getElementById('statsPanel').classList.remove('show');
+  document.getElementById('archivePanel').classList.remove('show');
+  document.getElementById('cardArea').style.display = 'flex';
+  renderCard();
+}
+
+/* ===== Archive Full ===== */
+function showArchive() {
+  document.getElementById('statsPanel').classList.remove('show');
+  document.getElementById('cardArea').style.display = 'none';
+  document.getElementById('archivePanel').classList.add('show');
+
+  const list = document.getElementById('archiveFullList');
+  if (archive.length === 0) {
+    list.innerHTML = '<div style="color:#64748b;padding:10px;">آرشیو خالی است.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  archive.forEach(c => {
+    const row = document.createElement('div');
+    row.className = 'card-row correct-row';
+    row.style.flexDirection = 'column';
+    row.style.alignItems = 'flex-start';
+    const srcHtml = c.sources.map((s, i) => `<div style="font-size:.74rem;color:#475569;">${i + 1}. ${s}</div>`).join('');
+    row.innerHTML = `
+      <div style="display:flex;gap:8px;align-items:center;width:100%;">
+        <span class="qnum">#${c.id}</span>
+        <span class="qshort">${c.q}</span>
+        <span class="repeat-tag done">${getLessonLabel(c.lesson)}</span>
+      </div>
+      <div style="margin-top:6px;padding-right:52px;width:100%;">
+        <div style="font-size:.74rem;font-weight:800;color:#166534;margin-bottom:2px;">📌 منابع (${c.sources.length} آزمون):</div>
+        ${srcHtml}
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+function backToStats() {
+  document.getElementById('archivePanel').classList.remove('show');
+  document.getElementById('statsPanel').classList.add('show');
+}
+
+/* ===== Restart ===== */
+function restartAll() {
+  if (!confirm('آیا مطمئن هستید؟ همه‌ی پاسخ‌ها، آرشیو و تعداد تکرارها پاک می‌شود.')) return;
+  stats = {}; repeatCount = {}; archive = [];
+  cardsOrder = [...allCards];
+  currentIndex = 0; currentMode = 'all';
+  repeatQueue = []; currentRound = 1;
+  document.getElementById('statsPanel').classList.remove('show');
+  document.getElementById('archivePanel').classList.remove('show');
+  document.getElementById('cardArea').style.display = 'flex';
+  renderCard();
+}
+
+/* ===== Init ===== */
+document.getElementById('cardTotal').textContent = allCards.length;
+renderCard();
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    const confirmBtn = document.getElementById('btnConfirm');
+    const nextBtn = document.getElementById('btnNext');
+    if (confirmBtn.style.display !== 'none' && !confirmBtn.disabled) {
+      confirmAnswer();
+    } else if (nextBtn.style.display !== 'none' && !nextBtn.disabled) {
+      nextCard();
+    }
+  }
+});
+</script>
+</body>
+</html>
