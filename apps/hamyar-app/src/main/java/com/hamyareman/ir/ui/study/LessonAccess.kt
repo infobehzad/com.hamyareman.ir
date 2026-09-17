@@ -6,11 +6,12 @@ import com.hamyareman.ir.platform.feature.study.BookToc
 import com.hamyareman.ir.ui.profile.StudentProfileState
 
 /**
- * ورود به درس: فهرست و درس۱ هر فصل همیشه باز؛ بعدی‌ها اشتراک یا اتمام تدریس قبلی.
+ * ورود به درس: درس اول هر فصل و کل فصل ۱ ریاضی رایگان؛ بقیه نیاز به اشتراک.
+ * قفل سیک/سرعت/سربرگ اعمال نمی‌شود.
  */
 object LessonAccess {
 
-    enum class Gate { Open, NeedSub, NeedPrev }
+    enum class Gate { Open, NeedSub }
 
     fun isPremium(): Boolean {
         val s = StudentProfileState.subscription.trim().lowercase()
@@ -22,6 +23,8 @@ object LessonAccess {
 
     fun isAlwaysOpen(packId: String): Boolean {
         if (isToc(packId)) return true
+        // کل فصل ۱ ریاضی نهم (درس‌ها + جمع‌بندی)
+        if (packId.startsWith("C905_E01")) return true
         val lesson = packId.substringAfter('_', packId)
         return lesson == "L01" || lesson.endsWith("-L01") || lesson.endsWith("_L01")
     }
@@ -37,7 +40,8 @@ object LessonAccess {
     }
 
     fun gate(ctx: Context, bookCode: String, packId: String): Gate {
-        // قفل درس/اشتراک/تدریس قبلی برداشته شد — همه درس‌ها بازند.
-        return Gate.Open
+        if (isAlwaysOpen(packId)) return Gate.Open
+        if (isPremium()) return Gate.Open
+        return Gate.NeedSub
     }
 }

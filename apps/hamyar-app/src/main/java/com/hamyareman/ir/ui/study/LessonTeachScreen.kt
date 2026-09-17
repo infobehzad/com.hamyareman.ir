@@ -151,6 +151,11 @@ fun LessonTeachScreen(
         ) { Text("این درس پیدا نشد.") }
         return
     }
+    val ctx = LocalContext.current
+    if (LessonAccess.gate(ctx, pack.bookCode, packId) == LessonAccess.Gate.NeedSub) {
+        NeedSubScreen(onBack = onBack)
+        return
+    }
     if (pack.bookCode == "C905") {
         MathLessonScreen(packId = packId, initialTab = 0, onBack = onBack)
         return

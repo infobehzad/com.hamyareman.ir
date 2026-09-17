@@ -62,6 +62,26 @@ fun LockedStudyScreen(onBack: () -> Unit) {
     }
 }
 
+@Composable
+fun NeedSubScreen(onBack: () -> Unit) {
+    AppTopBar(title = "نیاز به اشتراک", onBack = onBack)
+    Column(
+        Modifier.fillMaxSize().padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text("این درس با اشتراک پرمیوم باز می‌شود", style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.height(10.dp))
+        Text(
+            "درس اول هر فصل و کل فصل ۱ ریاضی بدون اشتراک در دسترس است. بقیهٔ درس‌ها بعد از فعال‌شدن اشتراک در پروفایل باز می‌شوند.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(20.dp))
+        PrimaryButton("متوجه شدم", onClick = onBack)
+    }
+}
+
 private fun mmss(sec: Int): String {
     val s = sec.coerceAtLeast(0)
     return toPersianDigits(String.format(Locale.US, "%d:%02d", s / 60, s % 60))

@@ -260,11 +260,24 @@ private fun LessonCard(
                 color = if (teachDone) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(8.dp))
+            val bookCode = pack?.bookCode ?: packId.substringBefore('_')
+            val gate = LessonAccess.gate(ctx, bookCode, packId)
+            var gateDialog by remember(packId) { mutableStateOf(false) }
+            if (gateDialog) {
+                androidx.compose.material3.AlertDialog(
+                    onDismissRequest = { gateDialog = false },
+                    confirmButton = { androidx.compose.material3.TextButton(onClick = { gateDialog = false }) { Text("باشه") } },
+                    title = { Text("نیاز به تهیه اشتراک") },
+                    text = { Text("درس اول هر فصل و فصل ۱ ریاضی رایگان است. برای بقیهٔ درس‌ها اشتراک پرمیوم لازم است.") },
+                )
+            }
             Button(
-                onClick = { onTeach(packId) },
+                onClick = {
+                    if (gate == LessonAccess.Gate.Open) onTeach(packId) else gateDialog = true
+                },
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("ورود به درس", maxLines = 1)
+                Text(if (gate == LessonAccess.Gate.Open) "ورود به درس" else "نیاز به تهیه اشتراک", maxLines = 1)
             }
         }
     }

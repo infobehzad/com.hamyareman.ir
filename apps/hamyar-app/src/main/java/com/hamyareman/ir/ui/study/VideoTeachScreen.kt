@@ -66,6 +66,10 @@ fun VideoTeachScreen(packId: String, onBack: () -> Unit) {
     val store = remember { LocalStore(context, "hamyar_teach") }
     val scope = rememberCoroutineScope()
     val pack = remember(packId) { BookModuleRegistry.pack(packId) }
+    if (pack != null && LessonAccess.gate(context, pack.bookCode, packId) == LessonAccess.Gate.NeedSub) {
+        NeedSubScreen(onBack = onBack)
+        return
+    }
     val fileId = remember(packId) { StudyMedia.videoIds(packId).firstOrNull() ?: "${packId.replace("_", "-")}-V01.mp4" }
 
     // --- تمام‌صفحه: مخفی‌کردن نوار وضعیت/ناوبری تا وقتی صفحه باز است ---
@@ -118,8 +122,7 @@ fun VideoTeachScreen(packId: String, onBack: () -> Unit) {
     // --- سرعت (قفل تا اتمام دوره‌ی اول — همان قانون صوت) ---
     var speed by remember(packId) {
         val saved = store.getString("vid_${packId}_speed", "1").toFloatOrNull() ?: 1f
-        val firstPassDone = TeachStats.isDone(context, packId)
-        mutableFloatStateOf(if (TEACH_SPEEDS.contains(saved) && (saved <= 1f || firstPassDone)) saved else 1f)
+        mutableFloatStateOf(if (TEACH_SPEEDS.contains(saved)) saved else 1f)
     }
 
     // --- پلیر ---
