@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -46,7 +48,6 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,8 +55,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -581,70 +580,6 @@ private sealed class TeachPdfState {
 private class PdfUnavailable(message: String) : Exception(message)
 
 /** دانلود/اعتبارسنجی/بازکردن PDF — فقط روی IO صدا زده می‌شود. */
-/**
- * v1.29 — تصویر صفحه‌ی PDF با زوم لمسی دقیقاً مثل گالری اندروید:
- *  - پینچ دوانگشتی ۱x تا ۵x **دور نقطه‌ی انگشت‌ها**؛
- *  - در حالت زوم، کشیدن تک‌انگشتی = پن با محدوده‌بندی (تصویر از قاب بیرون نمی‌زند)؛
- *  - دوبار-لمس = زوم/بازگشت؛ برگشت به ۱x خودکار وسط‌چین.
- */
-@Composable
-private fun ZoomablePageImage(
-    bitmap: androidx.compose.ui.graphics.ImageBitmap,
-    contentDescription: String,
-    scale: Float,
-    offsetX: Float,
-    offsetY: Float,
-    onTransform: (scale: Float, offsetX: Float, offsetY: Float) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val scaleRef = rememberUpdatedState(scale)
-    val oxRef = rememberUpdatedState(offsetX)
-    val oyRef = rememberUpdatedState(offsetY)
-    val onT = rememberUpdatedState(onTransform)
-    val aspect = if (bitmap.height > 0) bitmap.width.toFloat() / bitmap.height.toFloat() else 1f
-    Box(
-        modifier
-            .fillMaxWidth()
-            .aspectRatio(aspect.coerceAtLeast(0.2f))
-            .pointerInput(Unit) {
-                detectTransformGestures { centroid, pan, zoom, _ ->
-                    val cur = scaleRef.value
-                    val newScale = (cur * zoom).coerceIn(1f, 5f)
-                    val f = if (cur > 0f) newScale / cur else 1f
-                    val nx = centroid.x - (centroid.x - oxRef.value) * f + pan.x
-                    val ny = centroid.y - (centroid.y - oyRef.value) * f + pan.y
-                    val maxX = size.width * (newScale - 1f) / 2f
-                    val maxY = size.height * (newScale - 1f) / 2f
-                    val cx = if (newScale <= 1.001f) 0f else nx.coerceIn(-maxX, maxX)
-                    val cy = if (newScale <= 1.001f) 0f else ny.coerceIn(-maxY, maxY)
-                    onT.value(newScale, cx, cy)
-                }
-            }
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onDoubleTap = {
-                        if (scaleRef.value > 1f) onT.value(1f, 0f, 0f)
-                        else onT.value(2.5f, 0f, 0f)
-                    },
-                )
-            },
-    ) {
-        Image(
-            bitmap = bitmap,
-            contentDescription = contentDescription,
-            contentScale = androidx.compose.ui.layout.ContentScale.FillWidth,
-            modifier = Modifier
-                .fillMaxWidth()
-                .graphicsLayer {
-                    scaleX = scale
-                    scaleY = scale
-                    translationX = offsetX
-                    translationY = offsetY
-                },
-        )
-    }
-}
-
 private fun openTeachPdf(ctx: android.content.Context, fileId: String, onProgress: (Int) -> Unit): PdfRenderer {
     val cacheDir = File(ctx.filesDir, "media/pdf-cache").apply { mkdirs() }
     val target = File(cacheDir, fileId)
@@ -767,87 +702,79 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
             }
         }
         is TeachPdfState.Ready -> Column(modifier = modifier) {
-            Text("📕 کتاب درس — ${toPersianDigits(st.pageCount.toString())} صفحه", style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(6.dp))
-            // v1.29 — زوم لمسی دوانگشتی (مثل گالری): وقتی صفحه‌ای زوم است،
-            // لیست اسکرول نمی‌شود تا جابه‌جایی/پن دست کاربر باشد.
-            var blockingZoom by remember { mutableStateOf(false) }
+            var zoomed by remember { mutableStateOf(false) }
+            val pager = rememberPagerState(pageCount = { st.pageCount })
             val seenPages = remember(fileId) { mutableSetOf<Int>() }
             val screenW = remember {
-                ctx.resources.displayMetrics.widthPixels.coerceIn(720, 1280)
+                ctx.resources.displayMetrics.widthPixels.coerceIn(640, 1080)
             }
-            LazyColumn(
-                Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                userScrollEnabled = !blockingZoom,
-            ) {
-                items(st.pageCount, key = { it }) { index ->
-                    Card(Modifier.fillMaxWidth()) {
-                        Column {
-                            var bmp by remember(fileId, index) { mutableStateOf<Bitmap?>(pageCache[index]) }
-                            var zoomScale by remember(fileId, index) { mutableFloatStateOf(1f) }
-                            var zoomX by remember(fileId, index) { mutableFloatStateOf(0f) }
-                            var zoomY by remember(fileId, index) { mutableFloatStateOf(0f) }
-                            LaunchedEffect(fileId, index) {
-                                if (bmp == null) {
-                                    val rendered: Bitmap? = withContext(Dispatchers.IO) {
-                                        try {
-                                            synchronized(renderLock) {
-                                                val r = renderer ?: return@synchronized null
-                                                r.openPage(index).use { page ->
-                                                    val targetW = screenW
-                                                    val scale = targetW.toFloat() / page.width.toFloat()
-                                                    val w = targetW
-                                                    val h = (page.height * scale).toInt().coerceAtLeast(1)
-                                                    val b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-                                                    b.eraseColor(Color.WHITE)
-                                                    page.render(b, null, android.graphics.Matrix().apply { setScale(scale, scale) }, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-                                                    val deg = com.hamyareman.ir.platform.feature.study.PdfRotations.degrees[fileId] ?: 0
-                                                    if (deg % 360 != 0) {
-                                                        val m = android.graphics.Matrix().apply { postRotate(deg.toFloat()) }
-                                                        Bitmap.createBitmap(b, 0, 0, b.width, b.height, m, true)
-                                                    } else {
-                                                        b
-                                                    }
-                                                }
-                                            }
-                                        } catch (e: Exception) { null }
-                                    }
-                                    if (rendered != null) {
-                                        synchronized(pageCache) { pageCache[index] = rendered }
-                                        bmp = rendered
-                                        if (seenPages.add(index)) {
-                                            StudyActivity.add(ctx, pack.packId, "pdf", "مشاهده صفحه ${index + 1} کتاب درسی")
-                                        }
+            Text(
+                "📕 کتاب درس — صفحه ${toPersianDigits((pager.currentPage + 1).toString())} از ${toPersianDigits(st.pageCount.toString())}",
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Spacer(Modifier.height(6.dp))
+            VerticalPager(
+                state = pager,
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                userScrollEnabled = !zoomed,
+                beyondViewportPageCount = 1,
+            ) { index ->
+                var bmp by remember(fileId, index) { mutableStateOf<Bitmap?>(pageCache[index]) }
+                LaunchedEffect(fileId, index) {
+                    if (bmp == null) {
+                        val rendered: Bitmap? = withContext(Dispatchers.IO) {
+                            try {
+                                synchronized(renderLock) {
+                                    val r = renderer ?: return@synchronized null
+                                    r.openPage(index).use { page ->
+                                        val targetW = screenW
+                                        val scale = targetW.toFloat() / page.width.toFloat()
+                                        val w = targetW
+                                        val h = (page.height * scale).toInt().coerceAtLeast(1)
+                                        val b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+                                        b.eraseColor(Color.WHITE)
+                                        page.render(b, null, android.graphics.Matrix().apply { setScale(scale, scale) }, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                                        val deg = com.hamyareman.ir.platform.feature.study.PdfRotations.degrees[fileId] ?: 0
+                                        if (deg % 360 != 0) {
+                                            val m = android.graphics.Matrix().apply { postRotate(deg.toFloat()) }
+                                            Bitmap.createBitmap(b, 0, 0, b.width, b.height, m, true)
+                                        } else b
                                     }
                                 }
+                            } catch (e: Exception) { null }
+                        }
+                        if (rendered != null) {
+                            synchronized(pageCache) { pageCache[index] = rendered }
+                            bmp = rendered
+                            if (seenPages.add(index)) {
+                                StudyActivity.add(ctx, pack.packId, "pdf", "مشاهده صفحه ${index + 1} کتاب درسی")
                             }
-                            if (bmp == null) {
-                                Box(Modifier.fillMaxWidth().height(320.dp), contentAlignment = Alignment.Center) {
-                                    CircularProgressIndicator(Modifier.padding(16.dp))
-                                }
-                            } else {
-                                ZoomablePageImage(
-                                    bitmap = bmp!!.asImageBitmap(),
-                                    contentDescription = "صفحه ${index + 1}",
-                                    scale = zoomScale,
-                                    offsetX = zoomX,
-                                    offsetY = zoomY,
-                                    onTransform = { s, x, y ->
-                                        zoomScale = s; zoomX = x; zoomY = y
-                                        blockingZoom = s > 1.01f
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                )
-                            }
-                            Text(
-                                "صفحه ${toPersianDigits((index + 1).toString())} از ${toPersianDigits(st.pageCount.toString())}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(8.dp),
-                            )
                         }
                     }
+                }
+                if (bmp == null) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                } else {
+                    val pageBmp = bmp
+                    AndroidView(
+                        factory = { c ->
+                            PdfPageZoomView(c).apply {
+                                onZoomed = { z -> zoomed = z }
+                                bind(pageBmp)
+                                tag = pageBmp
+                            }
+                        },
+                        update = { v ->
+                            v.onZoomed = { z -> zoomed = z }
+                            if (v.tag !== pageBmp) {
+                                v.tag = pageBmp
+                                v.bind(pageBmp)
+                            }
+                        },
+                        modifier = Modifier.fillMaxSize(),
+                    )
                 }
             }
         }

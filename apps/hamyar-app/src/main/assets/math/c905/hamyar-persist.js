@@ -209,6 +209,18 @@
     try { Hamyar.recordExam(pct, tot, ok, wrong.join(",")); } catch (e) {}
   }
 
+  window.verifySection = function (btn) {
+    var sec = btn && btn.closest ? btn.closest(".section") : null;
+    if (!sec) return;
+    var titleEl = sec.querySelector(".section-title");
+    var title = titleEl ? titleEl.textContent.replace(/\s+/g, " ").trim() : "این صفحه";
+    var list = sec.querySelectorAll(".question[data-q]");
+    var res = gradeList(list);
+    fillScorePanel(res, "📊 نتیجهٔ " + title);
+    reportList(list);
+    try { persist(); } catch (e) {}
+  };
+
   function injectPageChecks() {
     var sections = document.querySelectorAll(".section");
     if (!sections.length) return;

@@ -256,7 +256,21 @@ private fun MathLessonProgressPage(
                             Text(title, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                             Text(line, style = MaterialTheme.typography.bodySmall)
                         }
-                        val log = StudyActivity.rows(ctx, pack.packId).asReversed().take(40)
+                        val ex = runCatching { container.studyProgress.exerciseStats(pack.packId) }.getOrNull()
+                        if (ex != null && ex.length() > 0) {
+                            Text("جزئیات تمرین", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                            ex.keys().forEach { k ->
+                                val item = ex.optJSONObject(k) ?: return@forEach
+                                val ok = item.optInt("ok")
+                                val bad = item.optInt("bad")
+                                val tries = item.optInt("tries")
+                                Text(
+                                    "• $k — تلاش ${toPersianDigits(tries.toString())} · درست ${toPersianDigits(ok.toString())} · نادرست ${toPersianDigits(bad.toString())}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                        }
+                        val log = StudyActivity.rows(ctx, pack.packId).asReversed().take(80)
                         Text("فعالیت‌ها (سطر به سطر)", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                         if (log.isEmpty()) {
                             Text("هنوز ردیفی ثبت نشده.", style = MaterialTheme.typography.bodySmall)

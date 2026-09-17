@@ -87,7 +87,7 @@ object TeachStats {
         o.put("ls", after)
         if (trackDurationSec > o.optInt("ad")) o.put("ad", trackDurationSec)
         write(ctx, packId, o)
-        if (before / 30 != after / 30) {
+        if (before / 10 != after / 10) {
             StudyActivity.add(ctx, packId, "listen", "شنیدن صوت — جمعاً ${after} ثانیه")
         }
     }
@@ -101,7 +101,7 @@ object TeachStats {
         o.put("vs", after)
         if (trackDurationSec > o.optInt("vd")) o.put("vd", trackDurationSec)
         write(ctx, packId, o)
-        if (before / 30 != after / 30) {
+        if (before / 10 != after / 10) {
             StudyActivity.add(ctx, packId, "video", "تماشای ویدیو — جمعاً ${after} ثانیه")
         }
     }

@@ -466,7 +466,8 @@ private fun MathSummaryTab(pack: StudyPack, isSum: Boolean, chapter: Int) {
         pack.sections.filter { it.kind == "exam" }.joinToString("\n\n") { it.body }
     }
     val html = remember(pack.packId, pack.teachHtml, summary, tips, isSum, chapter) {
-        htmlSummaryDocument(
+        if (pack.teachHtml.contains("<html", ignoreCase = true)) pack.teachHtml
+        else htmlSummaryDocument(
             teachHtml = pack.teachHtml,
             isSum = isSum,
             fallback = mathSummaryHtml(pack.title, summary, tips, isSum, chapter),
