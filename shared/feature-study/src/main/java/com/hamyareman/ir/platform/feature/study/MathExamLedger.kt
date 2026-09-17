@@ -69,7 +69,7 @@ object MathExamLedger {
     }
 
     fun mcqOf(pack: StudyPack): List<StudyPack.Question> =
-        pack.questions.filter { it.type == "mcq" }
+        pack.questions.filter { it.type == "mcq" && it.topic != "book" }
 
     /**
      * تصحیح با کلید [QuizGrader]، شماره‌گذاری ۱-پایهٔ سوالات غلط، افزودن نشست جدید.

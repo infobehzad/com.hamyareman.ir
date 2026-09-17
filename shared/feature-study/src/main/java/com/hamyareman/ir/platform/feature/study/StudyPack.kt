@@ -34,6 +34,8 @@ data class StudyPack(
     val examTips: String = "",
     /** تمرین‌های کتاب با جای خالی (سربرگ ۲، بعد از PDF). */
     val exercises: List<Exercise> = emptyList(),
+    /** فقط PDF بدون سربرگ (کارت فهرست کتاب). */
+    val pdfOnly: Boolean = false,
 ) {
     data class Section(val id: String, val title: String, val kind: String, val body: String, val images: List<String> = emptyList())
     data class Flashcard(val id: String, val front: String, val back: String, val topic: String, val hint: String)
@@ -127,6 +129,7 @@ data class StudyPack(
                 summary = o.optString("summary"),
                 examTips = o.optString("examTips"),
                 exercises = exercises,
+                pdfOnly = o.optBoolean("pdfOnly", false),
             )
         }.getOrNull()
     }

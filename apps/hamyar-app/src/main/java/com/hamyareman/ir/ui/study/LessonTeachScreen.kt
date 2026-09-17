@@ -90,12 +90,13 @@ internal data class TeachTrack(val label: String, val fileId: String, val cacheK
  * ترک دوم (اینترو) حذف شد. هر ویدیو هم یک فایل قراردادی «<dash>-V01.mp4» است (StudyMedia).
  */
 internal fun teachTracksOf(pack: StudyPack): List<TeachTrack> {
-    val fid = pack.audioFileId.ifBlank { "${pack.packId}_AUDIO.mp3" }
+    val fid = pack.audioFileId.trim()
+    if (fid.isBlank()) return emptyList()
     return listOf(TeachTrack("صوت درس", fid, fid))
 }
 
-/** شرط بازشدن مطالعه/سرعت تند = اتمام صوت تدریس (ویدیو صفحه‌ی جداست و قفل را نمی‌بندد). */
-internal fun expectedTeachMedia(pack: StudyPack): Int = teachTracksOf(pack).size.coerceAtLeast(1)
+/** شرط بازشدن مطالعه/سرعت تند = اتمام صوت تدریس؛ بدون فایل صوت قفل اعمال نمی‌شود. */
+internal fun expectedTeachMedia(pack: StudyPack): Int = teachTracksOf(pack).size
 
 /**
  * مقصد «لمس اعلان پخش» — سرویس رسانه PendingIntent به MainActivity می‌فرستد،

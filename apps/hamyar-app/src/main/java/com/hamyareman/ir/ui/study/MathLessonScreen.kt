@@ -2,6 +2,10 @@ package com.hamyareman.ir.ui.study
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -46,7 +51,7 @@ import com.hamyareman.ir.platform.feature.study.MathAnswerScript
 import com.hamyareman.ir.platform.feature.study.MathExamLedger
 import com.hamyareman.ir.platform.feature.study.StudyPack
 
-internal val MATH_TABS = listOf("تدریس", "مطالعه", "فلش‌کارت", "خلاصه", "آزمون")
+internal val MATH_TABS = listOf("تدریس", "تمرینات کتابی", "فلش‌کارت", "خلاصه", "آزمون")
 
 /**
  * پنج سربرگ درس ریاضی — هر درس هر فصل جدا.
@@ -68,28 +73,84 @@ fun MathLessonScreen(
         return
     }
     val ctx = androidx.compose.ui.platform.LocalContext.current
+    val hasAudio = teachTracksOf(pack).isNotEmpty()
     val teachDone = remember(packId) {
-        TeachStats.expectMedia(ctx, packId, expectedTeachMedia(pack))
-        TeachStats.isDone(ctx, packId)
+        if (!hasAudio) true else {
+            TeachStats.expectMedia(ctx, packId, expectedTeachMedia(pack))
+            TeachStats.isDone(ctx, packId)
+        }
     }
     var tab by rememberSaveable(packId) {
         val want = initialTab.coerceIn(0, 4)
         mutableIntStateOf(if (!teachDone && want >= 1) 0 else want)
     }
     var lockMsg by remember { mutableStateOf(false) }
+    val chromeStore = remember { com.hamyareman.ir.platform.core.common.LocalStore(ctx, "hamyar_math_ui") }
+    var autoHide by rememberSaveable(packId) { mutableStateOf(chromeStore.getBool("autohide_$packId", true)) }
+    var chromeHidden by remember { mutableStateOf(false) }
+    val nested = remember(autoHide) {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (!autoHide) return Offset.Zero
+                if (available.y < -6f) chromeHidden = true
+                if (available.y > 6f) chromeHidden = false
+                return Offset.Zero
+            }
+        }
+    }
 
-    Column(Modifier.fillMaxSize()) {
-        AppTopBar(title = pack.title, onBack = onBack)
-        ScrollableTabRow(selectedTabIndex = tab, edgePadding = 8.dp) {
-            MATH_TABS.forEachIndexed { i, label ->
-                val locked = i >= 1 && !teachDone
-                Tab(
-                    selected = tab == i,
-                    onClick = {
-                        if (locked) lockMsg = true else tab = i
+    if (pack.pdfOnly || pack.lessonId == "TOC") {
+        Column(Modifier.fillMaxSize()) {
+            AppTopBar(title = pack.title, onBack = onBack)
+            TeachPdfPages(modifier = Modifier.weight(1f), fileId = pack.pdfFileName, pack = pack)
+        }
+        return
+    }
+
+    Column(Modifier.fillMaxSize().nestedScroll(nested)) {
+        if (chromeHidden) {
+            Row(
+                Modifier.fillMaxWidth().clickable { chromeHidden = false }.padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextButton(onClick = { chromeHidden = false }) { Text("▼ باز کردن سربرگ") }
+                Spacer(Modifier.weight(1f))
+                Text(pack.title, style = MaterialTheme.typography.labelMedium, maxLines = 1)
+            }
+        } else {
+            AppTopBar(title = pack.title, onBack = onBack)
+            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = autoHide,
+                    onCheckedChange = {
+                        autoHide = it
+                        chromeStore.putBool("autohide_$packId", it)
+                        if (!it) chromeHidden = false
                     },
-                    text = { Text(if (locked) "🔒 $label" else label, style = MaterialTheme.typography.labelMedium) },
                 )
+                Text("جمع شود", style = MaterialTheme.typography.labelSmall)
+            }
+            ScrollableTabRow(selectedTabIndex = tab, edgePadding = 8.dp) {
+                MATH_TABS.forEachIndexed { i, label ->
+                    val locked = i >= 1 && !teachDone
+                    Tab(
+                        selected = tab == i,
+                        onClick = {
+                            if (locked) lockMsg = true else tab = i
+                        },
+                        text = { Text(if (locked) "🔒 $label" else label, style = MaterialTheme.typography.labelMedium) },
+                    )
+                }
+            }
+        }
+        if (tab == 0) {
+            val tracks = teachTracksOf(pack)
+            if (tracks.isNotEmpty()) {
+                androidx.compose.foundation.layout.Box(
+                    Modifier.then(if (chromeHidden) Modifier.height(0.dp) else Modifier),
+                ) {
+                    TeachAudioBar(packId = pack.packId, screenTitle = pack.title, bookTitle = bookTitle, tracks = tracks)
+                }
             }
         }
         if (lockMsg) {
@@ -97,11 +158,11 @@ fun MathLessonScreen(
                 onDismissRequest = { lockMsg = false },
                 confirmButton = { TextButton(onClick = { lockMsg = false }) { Text("باشه") } },
                 title = { Text("اول تدریس") },
-                text = { Text("مطالعه، فلش‌کارت، خلاصه و آزمون بعد از اتمام صوت تدریس باز می‌شوند.") },
+                text = { Text("تمرینات کتابی، فلش‌کارت، خلاصه و آزمون بعد از اتمام صوت تدریس باز می‌شوند.") },
             )
         }
         when (tab) {
-            0 -> MathTeachTab(pack, bookTitle)
+            0 -> MathTeachTab(pack, bookTitle, showPlayer = false)
             1 -> MathStudyTab(pack)
             2 -> MathFlashTab(pack)
             3 -> MathSummaryTab(pack)
@@ -111,7 +172,7 @@ fun MathLessonScreen(
 }
 
 @Composable
-private fun MathTeachTab(pack: StudyPack, bookTitle: String) {
+private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean = true) {
     val tracks = teachTracksOf(pack)
     val body = pack.teachText.ifBlank {
         pack.sections.filter { it.kind != "exam" }.joinToString("\n\n") { "«${it.title}»\n${it.body}" }
@@ -121,7 +182,7 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String) {
         Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        if (tracks.isNotEmpty()) {
+        if (showPlayer && tracks.isNotEmpty()) {
             TeachAudioBar(packId = pack.packId, screenTitle = pack.title, bookTitle = bookTitle, tracks = tracks)
         }
         Card(Modifier.fillMaxWidth().weight(1f)) {
@@ -241,6 +302,61 @@ private fun MathExercisesPane(pack: StudyPack, modifier: Modifier = Modifier) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { idx = (idx - 1).coerceAtLeast(0) }, enabled = idx > 0, modifier = Modifier.weight(1f)) { Text("قبلی") }
             OutlinedButton(onClick = { idx = (idx + 1).coerceAtMost(pack.exercises.lastIndex) }, enabled = idx < pack.exercises.lastIndex, modifier = Modifier.weight(1f)) { Text("بعدی") }
+        }
+    }
+}
+
+@Composable
+private fun MathBookMcqPane(pack: StudyPack, qs: List<StudyPack.Question>, modifier: Modifier) {
+    val container = LocalAppContainer.current
+    val today = remember { JalaliDate.todayIso() }
+    var idx by rememberSaveable(pack.packId) { mutableIntStateOf(0) }
+    var pick by remember { mutableStateOf<String?>(null) }
+    var feedback by remember { mutableStateOf<String?>(null) }
+    var lastOk by remember { mutableStateOf<Boolean?>(null) }
+    val q = qs[idx.coerceIn(0, qs.lastIndex)]
+    LaunchedEffect(q.id) { pick = null; feedback = null; lastOk = null }
+    Column(modifier.fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(
+            "تمرین کتاب ${toPersianDigits((idx + 1).toString())} از ${toPersianDigits(qs.size.toString())}",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+        )
+        Card(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(q.text, style = MaterialTheme.typography.bodyMedium)
+                q.options.forEach { opt ->
+                    Row(
+                        Modifier.fillMaxWidth().clickable { pick = opt; lastOk = null; feedback = null },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(selected = pick == opt, onClick = { pick = opt; lastOk = null; feedback = null })
+                        Text(opt, style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+                Button(
+                    onClick = {
+                        val ok = com.hamyareman.ir.platform.feature.study.QuizGrader.grade(q, pick.orEmpty()).second
+                        container.studyProgress.recordExercise(pack.packId, q.id, ok, today)
+                        lastOk = ok
+                        feedback = if (ok) "درست بود ✓\n${q.explanation}"
+                        else "نادرست. پاسخ درست: ${q.answer}\n${q.explanation}"
+                    },
+                    enabled = pick != null,
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text("بررسی جواب") }
+                if (feedback != null) {
+                    Text(
+                        feedback!!,
+                        color = if (lastOk == true) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = { idx = (idx - 1).coerceAtLeast(0) }, enabled = idx > 0, modifier = Modifier.weight(1f)) { Text("قبلی") }
+            OutlinedButton(onClick = { idx = (idx + 1).coerceAtMost(qs.lastIndex) }, enabled = idx < qs.lastIndex, modifier = Modifier.weight(1f)) { Text("بعدی") }
         }
     }
 }

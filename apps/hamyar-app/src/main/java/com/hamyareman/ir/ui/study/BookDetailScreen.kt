@@ -261,27 +261,43 @@ private fun LessonCard(
                 color = if (teachDone) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(8.dp))
-            val showLockDialog = remember(packId) { mutableStateOf(false) }
-            if (showLockDialog.value) {
+            val bookCode = pack?.bookCode ?: packId.substringBefore('_')
+            val gate = LessonAccess.gate(ctx, bookCode, packId)
+            var gateDialog by remember(packId) { mutableStateOf<LessonAccess.Gate?>(null) }
+            if (gateDialog == LessonAccess.Gate.NeedSub) {
                 androidx.compose.material3.AlertDialog(
-                    onDismissRequest = { showLockDialog.value = false },
-                    confirmButton = {
-                        androidx.compose.material3.TextButton(onClick = { showLockDialog.value = false }) { Text("متوجه شدم") }
-                    },
-                    title = { Text("🔒 اول تدریس، بعد تمرین") },
-                    text = { Text("برای باز شدن «مطالعه و آزمون»، اول دوره‌ی اول تدریس این درس را تا انتها ببین. همین‌که صوت/ویدیو تمام شود، خودکار فعال می‌شود.") },
+                    onDismissRequest = { gateDialog = null },
+                    confirmButton = { androidx.compose.material3.TextButton(onClick = { gateDialog = null }) { Text("باشه") } },
+                    title = { Text("نیاز به تهیه اشتراک") },
+                    text = { Text("برای باز شدن درس‌های بعدی، اشتراک باید از طرف پشتیبان در پروفایلت از رایگان به پرمیوم تغییر کند.") },
                 )
             }
-            // v1.18: «ویدیوی تدریس» میان تدریس و مطالعه — صفحه‌ی مجزای تمام‌صفحه
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Button(onClick = { onTeach(packId) }, modifier = Modifier.weight(1f)) { Text("📖 تدریس", maxLines = 1) }
-                Button(onClick = { onVideoTeach(packId) }, modifier = Modifier.weight(1f)) { Text("🎬 ویدیوی تدریس", maxLines = 1) }
-                OutlinedButton(
-                    onClick = {
-                        if (teachDone) onStudy(packId) else showLockDialog.value = true
+            if (gateDialog == LessonAccess.Gate.NeedPrev) {
+                androidx.compose.material3.AlertDialog(
+                    onDismissRequest = { gateDialog = null },
+                    confirmButton = { androidx.compose.material3.TextButton(onClick = { gateDialog = null }) { Text("باشه") } },
+                    title = { Text("🔒 قفل است") },
+                    text = { Text("اول دوره‌ی تدریس درس قبلی را تا انتها تمام کن؛ بعد این درس باز می‌شود.") },
+                )
+            }
+            Button(
+                onClick = {
+                    when (gate) {
+                        LessonAccess.Gate.Open -> onTeach(packId)
+                        LessonAccess.Gate.NeedSub -> gateDialog = LessonAccess.Gate.NeedSub
+                        LessonAccess.Gate.NeedPrev -> gateDialog = LessonAccess.Gate.NeedPrev
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    when (gate) {
+                        LessonAccess.Gate.Open -> "ورود به درس"
+                        LessonAccess.Gate.NeedSub -> "نیاز به تهیه اشتراک"
+                        LessonAccess.Gate.NeedPrev -> "🔒 قفل است"
                     },
-                    modifier = Modifier.weight(1f),
-                ) { Text(if (teachDone) "🎯 مطالعه" else "🔒 مطالعه", maxLines = 1) }
+                    maxLines = 1,
+                )
             }
         }
     }

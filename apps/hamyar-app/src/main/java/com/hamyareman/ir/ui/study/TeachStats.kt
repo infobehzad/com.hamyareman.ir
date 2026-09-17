@@ -143,6 +143,11 @@ object TeachStats {
         return (o.optJSONArray("dt")?.length() ?: 0) >= exp
     }
 
+    fun sessionTimes(ctx: Context, packId: String): List<Long> {
+        val sl = read(ctx, packId).optJSONArray("sl") ?: return emptyList()
+        return (0 until sl.length()).map { sl.optLong(it) }
+    }
+
     fun snap(ctx: Context, packId: String): Snap {
         val o = read(ctx, packId)
         val sl = o.optJSONArray("sl")

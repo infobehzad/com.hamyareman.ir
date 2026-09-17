@@ -17,7 +17,10 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -221,24 +224,34 @@ private fun MathLessonProgressPage(
 ) {
     val container = LocalAppContainer.current
     val ctx = LocalContext.current
+    val store = remember { com.hamyareman.ir.platform.core.common.LocalStore(ctx, "hamyar_toc") }
+    var openId by remember { mutableStateOf(store.getString("chart_acc_${module.bookCode}", "")) }
     Column(
         modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Text(
-            "فقط آمار خودکار — قابل ویرایش نیست. هر درس ردیف‌های سربرگ خودش را دارد.",
+            "فقط آمار خودکار — قابل ویرایش نیست. هر درس را باز کن؛ همزمان فقط یکی باز است.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        module.packs.forEach { pack ->
-            Card(Modifier.fillMaxWidth()) {
+        module.packs.filter { !it.pdfOnly }.forEach { pack ->
+            val open = openId == pack.packId
+            Card(Modifier.fillMaxWidth().androidClickable {
+                openId = if (open) "" else pack.packId
+                store.putString("chart_acc_${module.bookCode}", openId)
+            }) {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(pack.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                    MATH_TABS.forEach { title ->
-                        val line = mathTabProgressLine(ctx, container, pack, title)
-                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-                            Text(title, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.width(88.dp))
-                            Text(line, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(if (open) "▼" else "◀", style = MaterialTheme.typography.labelMedium)
+                        Spacer(Modifier.width(6.dp))
+                        Text(pack.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    }
+                    if (open) {
+                        MATH_TABS.forEach { title ->
+                            val line = mathTabProgressLine(ctx, container, pack, title)
+                            Text(title, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                            Text(line, style = MaterialTheme.typography.bodySmall)
                         }
                     }
                 }
@@ -263,7 +276,7 @@ private fun mathTabProgressLine(
                 "نشست ${toPersianDigits(snap.sessions.toString())} · $done"
             }
         }
-        "مطالعه" -> {
+        "تمرینات کتابی" -> {
             val ex = runCatching { container.studyProgress.exerciseStats(pack.packId) }.getOrNull()
             val n = ex?.length() ?: 0
             if (n == 0) "تمرینی ثبت نشده"

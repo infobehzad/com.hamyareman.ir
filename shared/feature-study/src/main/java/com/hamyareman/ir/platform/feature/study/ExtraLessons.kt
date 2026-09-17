@@ -114,7 +114,7 @@ object ExtraLessons {
 
     fun extrasFor(module: BookModule): List<StudyPack> {
         val ids = lessonIds[module.bookCode] ?: return emptyList()
-        return ids.mapIndexed { i, lessonId ->
+        val packs = ids.mapIndexed { i, lessonId ->
             val packId = "${module.bookCode}_$lessonId"
             val n = i + if (ids.any { it == "E01-L01" || it == "L01" }) 1 else 2
             val skeleton = module.bookCode == "C905"
@@ -137,5 +137,44 @@ object ExtraLessons {
                 exercises = emptyList(),
             )
         }
+        if (module.bookCode != "C905") return packs
+        val toc = StudyPack(
+            packId = "C905_TOC",
+            bookCode = "C905",
+            lessonId = "TOC",
+            title = "فهرست",
+            bookTitle = module.title,
+            pdfFileName = "C905-fehrest.pdf",
+            sections = emptyList(),
+            flashcards = emptyList(),
+            questions = emptyList(),
+            solutions = emptyList(),
+            pdfOnly = true,
+        )
+        val byChapter = packs.groupBy { it.lessonId.substringBefore("-") }
+        val ordered = mutableListOf<StudyPack>()
+        ordered += toc
+        byChapter.keys.sorted().forEach { ch ->
+            ordered += byChapter.getValue(ch)
+            val n = ch.removePrefix("E").toIntOrNull() ?: 0
+            ordered += StudyPack(
+                packId = "C905_${ch}-SUM",
+                bookCode = "C905",
+                lessonId = "$ch-SUM",
+                title = "جمع‌بندی فصل ${com.hamyareman.ir.platform.core.common.toPersianDigits(n.toString())}",
+                bookTitle = module.title,
+                pdfFileName = "C905_${ch}-SUM_BOOK.pdf",
+                sections = mathSkeletonSections(),
+                flashcards = emptyList(),
+                questions = emptyList(),
+                solutions = emptyList(),
+                audioFileId = "",
+                teachText = "متن جمع‌بندی این فصل به‌زودی اضافه می‌شود.",
+                teachSpeech = "متن جمع‌بندی این فصل به‌زودی اضافه می‌شود.",
+                summary = "خلاصه‌ی فصل به‌زودی.",
+                examTips = "نکات امتحانی فصل به‌زودی.",
+            )
+        }
+        return ordered.map { com.hamyareman.ir.platform.feature.study.books.MathC905Content.applyTo(it) }
     }
 }
