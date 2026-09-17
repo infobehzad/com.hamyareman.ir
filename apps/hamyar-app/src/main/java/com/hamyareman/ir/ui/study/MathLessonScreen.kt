@@ -578,10 +578,3 @@ internal fun ExamLedgerCard(ledger: MathExamLedger.State) {
         }
     }
 }
- ${toPersianDigits(s.scorePct.toString())}٪ — $wrong",
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        }
-    }
-}
