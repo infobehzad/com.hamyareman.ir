@@ -9,7 +9,7 @@ import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
-import android.widget.ImageView
+import androidx.appcompat.widget.AppCompatImageView
 import kotlin.math.max
 import kotlin.math.min
 
@@ -20,7 +20,7 @@ import kotlin.math.min
 internal class PdfPageZoomView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-) : ImageView(context, attrs) {
+) : AppCompatImageView(context, attrs) {
 
     var onZoomed: ((Boolean) -> Unit)? = null
 
