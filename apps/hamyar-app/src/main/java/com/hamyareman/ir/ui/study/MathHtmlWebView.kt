@@ -16,7 +16,7 @@ import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.LocalStore
 import com.hamyareman.ir.platform.feature.study.StudyProgressRepository
 
-@SuppressLint("SetJavaScriptEnabled")
+@SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
 @Composable
 internal fun MathInteractiveHtml(
     packId: String,
