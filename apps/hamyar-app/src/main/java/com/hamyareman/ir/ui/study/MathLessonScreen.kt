@@ -393,6 +393,7 @@ private fun MathExercisesPane(pack: StudyPack, modifier: Modifier = Modifier) {
 @Composable
 private fun MathBookMcqPane(pack: StudyPack, qs: List<StudyPack.Question>, modifier: Modifier) {
     val container = LocalAppContainer.current
+    val appCtx = androidx.compose.ui.platform.LocalContext.current
     val today = remember { JalaliDate.todayIso() }
     var idx by rememberSaveable(pack.packId) { mutableIntStateOf(0) }
     var pick by remember { mutableStateOf<String?>(null) }
