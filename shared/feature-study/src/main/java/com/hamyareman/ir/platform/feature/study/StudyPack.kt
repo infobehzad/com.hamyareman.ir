@@ -26,6 +26,8 @@ data class StudyPack(
     val audio2Title: String = "",
     /** متن تدریس برای نمایش در سربرگ ۱ (ریاضی). خالی = از سکشن‌ها ساخته می‌شود. */
     val teachText: String = "",
+    /** HTML تدریس (متن + SVG از پوشهٔ Books). اگر پر باشد در WebView نشان داده می‌شود. */
+    val teachHtml: String = "",
     /** متن تدریس برای تبدیل به صوت (TTS بعدی). */
     val teachSpeech: String = "",
     /** خلاصه‌ی چندسطری درس (سربرگ ۴). */
@@ -125,6 +127,7 @@ data class StudyPack(
                 audio2FileId = o.optString("audio2FileId"),
                 audio2Title = o.optString("audio2Title"),
                 teachText = o.optString("teachText"),
+                teachHtml = o.optString("teachHtml"),
                 teachSpeech = o.optString("teachSpeech"),
                 summary = o.optString("summary"),
                 examTips = o.optString("examTips"),

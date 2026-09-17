@@ -42,6 +42,9 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import com.hamyareman.ir.LocalAppContainer
 import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.toPersianDigits
@@ -186,19 +189,35 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
             TeachAudioBar(packId = pack.packId, screenTitle = pack.title, bookTitle = bookTitle, tracks = tracks)
         }
         Card(Modifier.fillMaxWidth().weight(1f)) {
-            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp)) {
-                Text("متن تدریس", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                Text(body, style = MaterialTheme.typography.bodyMedium)
-                if (pack.teachSpeech.isNotBlank()) {
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        "متن تبدیل به صوت (برای ساخت فایل صوتی):",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(pack.teachSpeech, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (pack.teachHtml.isNotBlank()) {
+                AndroidView(
+                    factory = { ctx ->
+                        WebView(ctx).apply {
+                            webViewClient = WebViewClient()
+                            settings.javaScriptEnabled = false
+                            settings.loadWithOverviewMode = true
+                            settings.useWideViewPort = true
+                            settings.builtInZoomControls = true
+                            settings.displayZoomControls = false
+                            setBackgroundColor(android.graphics.Color.WHITE)
+                        }
+                    },
+                    update = { wv ->
+                        wv.loadDataWithBaseURL(
+                            "https://local.hamyar/",
+                            pack.teachHtml,
+                            "text/html",
+                            "utf-8",
+                            null,
+                        )
+                    },
+                    modifier = Modifier.fillMaxSize().padding(4.dp),
+                )
+            } else {
+                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp)) {
+                    Text("متن تدریس", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(8.dp))
+                    Text(body, style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }
@@ -218,7 +237,13 @@ private fun MathExercisesPane(pack: StudyPack, modifier: Modifier = Modifier) {
     val container = LocalAppContainer.current
     val today = remember { JalaliDate.todayIso() }
     val ime = LocalSoftwareKeyboardController.current
-    if (pack.exercises.isEmpty()) {
+    val bookQs = pack.questions.filter { it.topic == "book" && it.type == "mcq" }
+    if (pack.exercises.isNotEmpty()) {
+        /* جای‌خالی + کیبورد نماد — فقط وقتی تمرین تایپی در پک باشد */
+    } else if (bookQs.isNotEmpty()) {
+        MathBookMcqPane(pack, bookQs, modifier)
+        return
+    } else {
         Card(modifier.fillMaxWidth()) {
             Column(Modifier.padding(12.dp)) {
                 Text("تمرین‌های کتاب", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
@@ -490,7 +515,10 @@ private fun MathExamTab(pack: StudyPack) {
         Text("نمونه سوال چهارگزینه‌ای", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         if (mcq.isEmpty()) {
             Text(
-                "ساختار آزمون آماده است؛ سوال‌ها و کلید به‌زودی از پوشهٔ Books می‌آیند. تصحیح، ثبت نتیجه و جایگزینی در نمودار از همین‌جا کار می‌کند.",
+                if (pack.lessonId.contains("SUM"))
+                    "ساختار آزمون آماده است؛ سوال‌های این فصل به‌زودی از پوشهٔ Books می‌آیند."
+                else
+                    "نمونه سوالات این فصل در کارت «جمع‌بندی» همان فصل است — سربرگ آزمون همین درس برای ساختار و نمرهٔ جداست.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

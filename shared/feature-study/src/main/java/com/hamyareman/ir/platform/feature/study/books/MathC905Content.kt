@@ -51,6 +51,7 @@ object MathC905Content {
             pdfFileName = o.optString("pdfFileName").ifBlank { pack.pdfFileName },
             audioFileId = o.optString("audioFileId", pack.audioFileId),
             teachText = o.optString("teachText").ifBlank { pack.teachText },
+            teachHtml = o.optString("teachHtml").ifBlank { pack.teachHtml },
             teachSpeech = o.optString("teachSpeech").ifBlank { pack.teachSpeech },
             summary = o.optString("summary").ifBlank { pack.summary },
             examTips = o.optString("examTips").ifBlank { pack.examTips },
