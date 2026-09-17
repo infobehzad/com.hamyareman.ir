@@ -1,6 +1,5 @@
 package com.hamyareman.ir.ui.home
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,25 +8,37 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.hamyareman.ir.platform.core.common.JalaliDate
+import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.SectionCard
-import com.hamyareman.ir.R
 import com.hamyareman.ir.ui.hub.HubCard
 import com.hamyareman.ir.ui.hub.hubTo
 import com.hamyareman.ir.ui.navigation.Screen
+import com.hamyareman.ir.ui.profile.StudentProfileState
+import kotlinx.coroutines.delay
+import java.time.Instant
+import java.time.LocalDateTime
 import java.util.Calendar
 
 private fun greeting(): String {
@@ -40,13 +51,34 @@ private fun greeting(): String {
     }
 }
 
+private val gregMonth = listOf(
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec",
+)
+
 /**
- * داشبورد «همیار من» — ترکیبی:
- * سربرگ هوشمند (سلام بر اساس ساعت + ماسموت) + ثبت حال
- * + شبکه‌ی میان‌بر ۴گانه + کارت‌های «امروز».
+ * داشبورد: پروفایل+ساعت آنالوگ سمت چپ، تاریخ شمسی سه‌سطری، اشتراک از سرور، حال پایین‌تر.
  */
 @Composable
 fun HomeScreen(nav: NavController) {
+    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            now = System.currentTimeMillis()
+            delay(1000)
+        }
+    }
+    val time = remember(now) { LocalDateTime.ofInstant(Instant.ofEpochMilli(now), JalaliDate.TEHRAN) }
+    val jalali = remember(now) { JalaliDate.toJalali(now) }
+    val iso = remember(now) { JalaliDate.todayIso() }
+    val weekday = JalaliDate.weekDayFa(iso)
+    val row1 = toPersianDigits("$weekday ${jalali.day} ${JalaliDate.monthName(jalali.month)} ${jalali.year}")
+    val h24 = time.hour
+    val h12 = val12(h24)
+    val period = if (h24 < 12) "قبل از ظهر" else "بعد از ظهر"
+    val row2Time = toPersianDigits("%d:%02d".format(h12, time.minute)) + " $period"
+    val row2Greg = "${time.year}/${gregMonth[time.monthValue - 1]}/${time.dayOfMonth}"
+    val holiday = IranOfficialHolidays.occasion(jalali)
+
     Scaffold(floatingActionButton = {
         FloatingActionButton(onClick = { nav.navigate(Screen.Calm.route) }) { Text("💛") }
     }) { pad ->
@@ -54,24 +86,32 @@ fun HomeScreen(nav: NavController) {
             Modifier.fillMaxSize().padding(pad).padding(16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // ---------- سربرگ ----------
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(R.drawable.mascot_hamyar),
-                    contentDescription = "ماسموت همیار من",
-                    modifier = Modifier.size(64.dp),
-                )
-                Spacer(Modifier.width(12.dp))
-                Column {
-                    Text("${greeting()} ${com.hamyareman.ir.ui.profile.StudentProfileState.firstName.ifBlank { "دوست من" }} جان 🌸", style = MaterialTheme.typography.headlineMedium)
-                    Text("همیار من کنارت است؛ از مدرسه تا آرامش", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "${greeting()} ${StudentProfileState.firstName.ifBlank { "دوست من" }} جان 🌸",
+                        style = MaterialTheme.typography.headlineSmall,
+                    )
+                    Text(
+                        "همیار من کنارت است؛ از مدرسه تا آرامش",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    SubscriptionChip(StudentProfileState.subscription)
                 }
+                Spacer(Modifier.width(8.dp))
+                Column(horizontalAlignment = Alignment.Start) {
+                    Text(row1, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    Text("$row2Time  $row2Greg", style = MaterialTheme.typography.bodySmall)
+                    if (!holiday.isNullOrBlank()) {
+                        Text(holiday, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+                Spacer(Modifier.width(6.dp))
+                ProfileClockAvatar(onClick = { nav.navigate(Screen.UserProfile.route) })
             }
 
-            // ---------- حال امروز ----------
-            SectionCard("حالت امروز چطوره؟", "با یک ایموجی ثبتش کن — اختیاریه.") { nav.navigate(Screen.Mood.route) }
-
-            // ---------- شبکه‌ی میان‌بر ۴گانه ----------
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 QuickTile("🎒", "مدرسه", Modifier.weight(1f)) { nav.hubTo(Screen.Study.route) }
                 QuickTile("💚", "سلامتی", Modifier.weight(1f)) { nav.hubTo(Screen.HealthHub.route) }
@@ -81,7 +121,8 @@ fun HomeScreen(nav: NavController) {
                 QuickTile("🤖", "همراه من", Modifier.weight(1f)) { nav.hubTo(Screen.Chat.route) }
             }
 
-            // ---------- کارت‌های امروز ----------
+            SectionCard("حالت امروز چطوره؟", "با یک ایموجی ثبتش کن — اختیاریه.") { nav.navigate(Screen.Mood.route) }
+
             Text("امروز", style = MaterialTheme.typography.titleMedium)
             HubCard("🌤", "روتین امروز", "بلوک‌های روزت را ببین") { nav.navigate(Screen.Routine.route) }
             HubCard("💧", "آب بنوش", "لیوان‌های امروزت را ثبت کن") { nav.navigate(Screen.Water.route) }
@@ -89,6 +130,27 @@ fun HomeScreen(nav: NavController) {
             HubCard("💛", "آرامش سریع", "سه دقیقه تا حال بهتر") { nav.navigate(Screen.Calm.route) }
             Spacer(Modifier.height(8.dp))
         }
+    }
+}
+
+private fun val12(h24: Int): Int {
+    val h = h24 % 12
+    return if (h == 0) 12 else h
+}
+
+@Composable
+internal fun SubscriptionChip(raw: String) {
+    val paid = StudentProfileState.isPaid(raw)
+    val bg = if (paid) Color(0xFFDCFCE7) else Color(0xFFFEE2E2)
+    val fg = if (paid) Color(0xFF166534) else Color(0xFFB91C1C)
+    Surface(shape = RoundedCornerShape(50), color = bg) {
+        Text(
+            if (paid) "پرمیوم" else "رایگان",
+            color = fg,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+        )
     }
 }
 

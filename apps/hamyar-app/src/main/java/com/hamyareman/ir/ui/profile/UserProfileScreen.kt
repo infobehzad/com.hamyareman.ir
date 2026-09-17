@@ -89,6 +89,7 @@ fun UserProfileScreen(
     var gender by remember { mutableStateOf(profile?.gender.orEmpty()) }
     var showErrors by remember { mutableStateOf(false) }
     var saving by remember { mutableStateOf(false) }
+    var confirmLogout by remember { mutableStateOf(false) }
 
     val bad = showErrors && (
         firstName.trim().length < 2 || lastName.trim().length < 2 ||
@@ -208,17 +209,22 @@ fun UserProfileScreen(
             )
 
             // ─── وضعیت اشتراک (فقط نمایش — تغییر از سمت پشتیبانی) ───
-            val sub = com.hamyareman.ir.ui.profile.StudentProfileState.subscription.ifBlank { "free" }
+            val sub = StudentProfileState.subscription.ifBlank { "free" }
+            val paid = StudentProfileState.isPaid(sub)
             Surface(
                 shape = MaterialTheme.shapes.medium,
-                color = if (sub == "yearly") MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                color = if (paid) androidx.compose.ui.graphics.Color(0xFFDCFCE7) else androidx.compose.ui.graphics.Color(0xFFFEE2E2),
+                border = BorderStroke(1.dp, if (paid) androidx.compose.ui.graphics.Color(0xFF166534) else androidx.compose.ui.graphics.Color(0xFFB91C1C)),
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(if (sub == "yearly") "🎫 اشتراک: یک‌ساله" else "🎈 اشتراک: رایگان", fontWeight = FontWeight.Bold)
+                    Text(
+                        if (paid) "اشتراک: پرمیوم" else "اشتراک: رایگان",
+                        fontWeight = FontWeight.Bold,
+                        color = if (paid) androidx.compose.ui.graphics.Color(0xFF166534) else androidx.compose.ui.graphics.Color(0xFFB91C1C),
+                    )
                     Spacer(Modifier.weight(1f))
-                    Text("تغییر از طریق پشتیبانی", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("همگام با سرور — تغییر از پشتیبانی", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -251,10 +257,23 @@ fun UserProfileScreen(
                 else Text("ذخیره‌ی تغییرات", fontWeight = FontWeight.Bold)
             }
             OutlinedButton(
-                onClick = onLogout,
+                onClick = { confirmLogout = true },
                 modifier = Modifier.fillMaxWidth().height(48.dp),
             ) { Text("خروج از حساب") }
             Spacer(Modifier.height(14.dp))
         }
+    }
+    if (confirmLogout) {
+        AlertDialog(
+            onDismissRequest = { confirmLogout = false },
+            title = { Text("خروج از حساب؟") },
+            text = { Text("نشست بسته می‌شود و برای ورود دوباره باید ایمیل یا گوگل را بزنی.") },
+            confirmButton = {
+                TextButton(onClick = { confirmLogout = false; onLogout() }) { Text("خروج") }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmLogout = false }) { Text("انصراف") }
+            },
+        )
     }
 }

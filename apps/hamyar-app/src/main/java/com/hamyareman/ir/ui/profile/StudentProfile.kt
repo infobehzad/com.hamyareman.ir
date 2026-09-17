@@ -49,6 +49,14 @@ object StudentProfileState {
     var gender: String by androidx.compose.runtime.mutableStateOf("")
         private set
 
+    var avatarPath: String by androidx.compose.runtime.mutableStateOf("")
+        private set
+
+    fun isPaid(raw: String = subscription): Boolean {
+        val s = raw.trim().lowercase()
+        return s.isNotBlank() && s != "free"
+    }
+
     fun loadMirror(ctx: Context) {
         val store = LocalStore(ctx, STORE)
         grade = GradeLevel.byId(store.getString(KEY_GRADE, "").ifBlank { null })
@@ -56,6 +64,7 @@ object StudentProfileState {
         firstName = store.getString(KEY_NAME, "").orEmpty()
         subscription = store.getString(KEY_SUB, "free").ifBlank { "free" }
         gender = store.getString(KEY_GENDER, "").orEmpty()
+        avatarPath = store.getString(KEY_AVATAR, "").orEmpty()
     }
 
     fun writeMirror(ctx: Context, g: GradeLevel, done: Boolean) {
@@ -80,9 +89,6 @@ object StudentProfileState {
         subscription = sub.ifBlank { "free" }
         gender = genderId
     }
-
-    /** آواتار محلی (مسیر فایل) — در سرور آپلود نمی‌شود. */
-    @Volatile var avatarPath: String = ""
 
     fun loadAvatarMirror(ctx: Context) {
         avatarPath = LocalStore(ctx, STORE).getString(KEY_AVATAR, "").orEmpty()
