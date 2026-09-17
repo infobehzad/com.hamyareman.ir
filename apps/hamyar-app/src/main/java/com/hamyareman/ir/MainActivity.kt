@@ -152,6 +152,7 @@ class MainActivity : FragmentActivity() {
                             genderId = fetched.gender,
                         )
                         container.uiPrefs.applyDefaultForGender(fetched.gender)
+                        runCatching { com.hamyareman.ir.ui.profile.AvatarSync.pull(activity, uid) }
                     }
                     profileNeeded.value = fetched == null && !com.hamyareman.ir.ui.profile.StudentProfileState.hasProfile
                 }

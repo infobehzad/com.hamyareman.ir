@@ -8,16 +8,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -26,7 +28,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.hamyareman.ir.platform.core.common.JalaliDate
@@ -56,7 +60,7 @@ private val gregMonth = listOf(
 )
 
 /**
- * داشبورد: پروفایل+ساعت آنالوگ سمت چپ، تاریخ شمسی سه‌سطری، اشتراک از سرور، حال پایین‌تر.
+ * داشبورد: دو سطر عنوان بالای کارت؛ داخل کارت تاریخ چپ و ساعت آنالوگ راست.
  */
 @Composable
 fun HomeScreen(nav: NavController) {
@@ -78,6 +82,7 @@ fun HomeScreen(nav: NavController) {
     val row2Time = toPersianDigits("%d:%02d".format(h12, time.minute)) + " $period"
     val row2Greg = "${time.year}/${gregMonth[time.monthValue - 1]}/${time.dayOfMonth}"
     val holiday = IranOfficialHolidays.occasion(jalali)
+    val who = StudentProfileState.firstName.ifBlank { "دوست من" }
 
     Scaffold(floatingActionButton = {
         FloatingActionButton(onClick = { nav.navigate(Screen.Calm.route) }) { Text("💛") }
@@ -86,30 +91,39 @@ fun HomeScreen(nav: NavController) {
             Modifier.fillMaxSize().padding(pad).padding(16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        "${greeting()} ${StudentProfileState.firstName.ifBlank { "دوست من" }} جان 🌸",
-                        style = MaterialTheme.typography.headlineSmall,
-                    )
-                    Text(
-                        "همیار من کنارت است؛ از مدرسه تا آرامش",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    SubscriptionChip(StudentProfileState.subscription)
-                }
-                Spacer(Modifier.width(8.dp))
-                Column(horizontalAlignment = Alignment.Start) {
-                    Text(row1, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                    Text("$row2Time  $row2Greg", style = MaterialTheme.typography.bodySmall)
-                    if (!holiday.isNullOrBlank()) {
-                        Text(holiday, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+            Text(
+                "${greeting()} $who جان 🌸",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                "همیار من کنارت است؛ از مدرسه تا آرامش",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            ) {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(row1, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                            Text("$row2Time  $row2Greg", style = MaterialTheme.typography.bodySmall)
+                            if (!holiday.isNullOrBlank()) {
+                                Text(holiday, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                            }
+                            Spacer(Modifier.height(8.dp))
+                            SubscriptionChip(StudentProfileState.subscription)
+                        }
+                        ProfileClockAvatar(onClick = { nav.navigate(Screen.UserProfile.route) })
                     }
                 }
-                Spacer(Modifier.width(6.dp))
-                ProfileClockAvatar(onClick = { nav.navigate(Screen.UserProfile.route) })
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {

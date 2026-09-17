@@ -78,14 +78,15 @@ object StudentProfileState {
 
     fun writeMirror(ctx: Context, g: GradeLevel, done: Boolean, name: String, sub: String, genderId: String = gender) {
         val store = LocalStore(ctx, STORE)
+        val keepName = if (done && name.isBlank()) firstName.ifBlank { store.getString(KEY_NAME, "").orEmpty() } else name
         store.putString(KEY_GRADE, g.id)
         store.putString(KEY_DONE, if (done) "1" else "0")
-        store.putString(KEY_NAME, name)
+        store.putString(KEY_NAME, keepName)
         store.putString(KEY_SUB, sub.ifBlank { "free" })
         store.putString(KEY_GENDER, genderId)
         grade = g
         hasProfile = done
-        firstName = name
+        firstName = keepName
         subscription = sub.ifBlank { "free" }
         gender = genderId
     }

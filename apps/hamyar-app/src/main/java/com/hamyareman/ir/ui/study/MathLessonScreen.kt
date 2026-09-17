@@ -81,8 +81,9 @@ fun MathLessonScreen(
     val html = remember(packId) { MathHtmlAssets.of(packId) }
     val isSum = html?.isSum == true || pack.lessonId.contains("SUM")
     val chapter = html?.chapter ?: Regex("""E(\d+)""").find(pack.packId)?.groupValues?.getOrNull(1)?.toIntOrNull() ?: 1
-    val tabs = remember(isSum) {
-        if (isSum) listOf(
+    val hasPdf = pack.pdfFileName.isNotBlank()
+    val tabs = remember(isSum, hasPdf) {
+        val base = if (isSum) listOf(
             MathTab("teach", "تدریس"),
             MathTab("flash", "فلش‌کارت"),
             MathTab("summary", "خلاصه"),
@@ -92,6 +93,7 @@ fun MathLessonScreen(
             MathTab("book", "تمرینات کتابی"),
             MathTab("summary", "خلاصه"),
         )
+        if (hasPdf) base + MathTab("pdf", "کتاب درسی") else base
     }
     val hasAudio = teachTracksOf(pack).isNotEmpty()
     val teachDone = remember(packId) {
@@ -167,7 +169,7 @@ fun MathLessonScreen(
             }
             ScrollableTabRow(selectedTabIndex = tab.coerceIn(0, tabs.lastIndex), edgePadding = 8.dp) {
                 tabs.forEachIndexed { i, t ->
-                    val locked = t.key != "teach" && !teachDone
+                    val locked = t.key != "teach" && t.key != "pdf" && !teachDone
                     Tab(
                         selected = tab == i,
                         onClick = {
@@ -201,6 +203,7 @@ fun MathLessonScreen(
             "flash" -> MathFlashHtmlTab(pack, html)
             "summary" -> MathSummaryTab(pack, isSum = isSum, chapter = chapter)
             "exam" -> MathExamHtmlTab(pack, html)
+            "pdf" -> TeachPdfPages(modifier = Modifier.fillMaxSize(), fileId = pack.pdfFileName, pack = pack)
             else -> MathTeachTab(pack, bookTitle, showPlayer = false)
         }
     }
@@ -485,9 +488,6 @@ private fun MathSummaryTab(pack: StudyPack, isSum: Boolean, chapter: Int) {
             },
             modifier = Modifier.weight(1f).padding(4.dp),
         )
-        if (pack.pdfFileName.isNotBlank()) {
-            TeachPdfPages(modifier = Modifier.weight(1f), fileId = pack.pdfFileName, pack = pack)
-        }
     }
 }
 

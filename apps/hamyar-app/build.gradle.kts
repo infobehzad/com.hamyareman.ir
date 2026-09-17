@@ -32,8 +32,8 @@ android {
         applicationId = "com.hamyareman.ir"   // Platform ثبت‌شده در کنسول Appwrite
         minSdk = 26
         targetSdk = 36
-        versionCode = 40
-        versionName = "1.39"
+        versionCode = 41
+        versionName = "1.40"
         buildConfigField("String", "APPWRITE_ENDPOINT", "\"$appwriteEndpoint\"")
         buildConfigField("String", "APPWRITE_PROJECT_ID", "\"$appwriteProjectId\"")
         // برای مانیفستِ ادغام‌شده (اگر نسخه‌ای از SDK اسکیم را با ${appwriteProjectId} بخواهد)
@@ -76,6 +76,7 @@ android {
         // پروژه آگاهانه از APIهای unstable پخش media3 استفاده می‌کند (پلیر/سشن)؛
         // هشدارهای UnstableApi را به‌جای ۷ خطای لینت، یک‌جا بی‌اثر می‌کنیم.
         disable += "UnsafeOptInUsageError"
+        disable += "JavascriptInterface"
     }
 }
 // AGP 9: پلاگین Kotlin Android حذف شده (Kotlin داخلی است)؛

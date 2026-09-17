@@ -10,6 +10,7 @@ object RowPermissions {
         return listOf(
             io.appwrite.Permission.read(role),
             io.appwrite.Permission.update(role),
+            io.appwrite.Permission.write(role),
         )
     }
 }

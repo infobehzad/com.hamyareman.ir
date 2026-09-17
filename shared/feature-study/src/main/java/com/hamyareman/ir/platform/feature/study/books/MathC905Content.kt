@@ -53,7 +53,7 @@ object MathC905Content {
         }
         return pack.copy(
             pdfFileName = o.optString("pdfFileName").ifBlank { derivedPdf ?: pack.pdfFileName },
-            audioFileId = o.optString("audioFileId", pack.audioFileId),
+            audioFileId = o.optString("audioFileId").ifBlank { derivedAudio(pack.packId) ?: pack.audioFileId },
             teachText = o.optString("teachText").ifBlank { pack.teachText },
             teachHtml = o.optString("teachHtml").ifBlank { pack.teachHtml },
             teachSpeech = o.optString("teachSpeech").ifBlank { pack.teachSpeech },

@@ -212,14 +212,6 @@ private fun DownloadsScreenInner(onBack: () -> Unit) {
 
     AppTopBar("مدیریت دانلود کتاب‌ها", onBack)
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(12.dp)) {
-        item {
-            Text(
-                "فقط درس‌هایی که تدریس دارند اینجاست — هر فایل که دانلود شود، بدون اینترنت هم کار می‌کند (صوت رمزشده ذخیره می‌شود).",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(8.dp))
-        }
         items(books.size) { i ->
             BookDlCard(
                 module = books[i],
@@ -272,7 +264,7 @@ private fun BookDlCard(
         fun walk(n: TocNode) {
             n.packId?.let { pid ->
                 BookModuleRegistry.pack(pid)?.let { pack ->
-                    if (kind != "audio") {
+                    if (kind != "audio" && pack.pdfFileName.isNotBlank()) {
                         all.add(Quadruple("$pid:PDF", pack.pdfFileName, "", true))
                         doneFlags.add(pdfCached(ctx, pack.pdfFileName))
                     }
@@ -300,7 +292,9 @@ private fun BookDlCard(
         fun walk(n: TocNode) {
             n.packId?.let { pid ->
                 BookModuleRegistry.pack(pid)?.let { pack ->
-                    pdfCacheFile(ctx, pack.pdfFileName).takeIf { it.exists() }?.let { sum += it.length() }
+                    if (pack.pdfFileName.isNotBlank()) {
+                        pdfCacheFile(ctx, pack.pdfFileName).takeIf { it.exists() }?.let { sum += it.length() }
+                    }
                     teachTracksOf(pack).forEach { t ->
                         if (MediaVault.isCached(ctx, t.cacheKey)) sum += MediaVault.vaultFile(ctx, t.cacheKey).length()
                     }
@@ -317,7 +311,7 @@ private fun BookDlCard(
         fun walk(n: TocNode) {
             n.packId?.let { pid ->
                 BookModuleRegistry.pack(pid)?.let { pack ->
-                    if (!pdfCached(ctx, pack.pdfFileName)) {
+                    if (pack.pdfFileName.isNotBlank() && !pdfCached(ctx, pack.pdfFileName)) {
                         when (val s = remoteSizeCache[pack.pdfFileName]) {
                             null -> probe.add(pack.pdfFileName)
                             else -> if (s > 0) sum += s
@@ -658,7 +652,9 @@ private fun DlLessonRow(
                 .fillMaxWidth()
                 .clickable(enabled = !anyBusy) {
                     val files = mutableListOf<Quadruple>()
-                    if (!pdfCached(ctx, pack.pdfFileName)) files.add(Quadruple("${pack.packId}:PDF", pack.pdfFileName, "", true))
+                    if (pack.pdfFileName.isNotBlank() && !pdfCached(ctx, pack.pdfFileName)) {
+                        files.add(Quadruple("${pack.packId}:PDF", pack.pdfFileName, "", true))
+                    }
                     tracks.forEach { t ->
                         if (!MediaVault.isCached(ctx, t.cacheKey)) files.add(Quadruple("${pack.packId}:${t.cacheKey}", t.fileId, t.cacheKey, false))
                     }

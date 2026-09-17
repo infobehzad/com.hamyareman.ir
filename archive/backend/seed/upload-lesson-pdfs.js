@@ -2,9 +2,8 @@
 /**
  * آپلود PDF کتاب درس‌ها به باکت wellness-media — پرامپت ۰۵ + تصمیم مصوب.
  *  - منبع: پوشه‌ی «PDF/» داخل هر درس از School-books-9 (فایل‌های *_BOOK.pdf)
- *  - fileId = نام کامل فایل (C905_E01-L01_BOOK.pdf) — نمایشگر اپ از همین الگو URL می‌سازد.
+ *  - fileId = نام کامل فایل (C905f01d01.pdf یا C905_E01-L01_BOOK.pdf)
  *  - Idempotent: فایل موجود skip می‌شود. --force = حذف و آپلود مجدد.
- *  - retry نمایی برای خطاهای گذرای سرور.
  * محیط: APPWRITE_ENDPOINT/APPWRITE_PROJECT_ID/APPWRITE_API_KEY/APPWRITE_BUCKET_ID
  */
 process.env.NODE_ENV = 'production';
@@ -18,11 +17,11 @@ const PROJECT = process.env.APPWRITE_PROJECT_ID || '6a9d59e3002751cc3ea8';
 const KEY = process.env.APPWRITE_API_KEY;
 const BUCKET = process.env.APPWRITE_BUCKET_ID || '6aa1eaae00303400117b';
 const ROOT = path.resolve(__dirname, '../../wellness-references/School-books-9');
+const BOOKS09 = path.resolve(__dirname, '../../../Books/Base-09');
 const dryRun = process.argv.includes('--dry-run');
 const force = process.argv.includes('--force');
 
 if (!KEY) { console.error('❌ APPWRITE_API_KEY ست نیست'); process.exit(2); }
-if (!fs.existsSync(ROOT)) { console.error('❌ مسیر کتاب‌ها نیست:', ROOT); process.exit(2); }
 
 const client = new sdk.Client().setEndpoint(ENDPOINT).setProject(PROJECT).setKey(KEY);
 const storage = new sdk.Storage(client);
@@ -49,17 +48,29 @@ function withRetry(fn, tries = 4) {
 (async () => {
     console.log('آپلود PDF کتاب درس‌ها');
     console.log(`endpoint: ${ENDPOINT} | project: ${PROJECT} | bucket: ${BUCKET} ${dryRun ? '| [DRY-RUN]' : ''}`);
-    // پیدا کردن همه‌ی PDFها داخل پوشه‌های PDF/ (فقط BOOK)
     const items = [];
-    (function walk(dir) {
-        for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-            const p = path.join(dir, e.name);
-            if (e.isDirectory()) walk(p);
-            else if (e.isFile() && e.name.endsWith('.pdf') && /BOOK\.pdf$/.test(e.name) && path.basename(dir) === 'PDF') {
-                items.push({ name: e.name, full: p, size: fs.statSync(p).size });
+    if (fs.existsSync(ROOT)) {
+        (function walk(dir) {
+            for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+                const p = path.join(dir, e.name);
+                if (e.isDirectory()) walk(p);
+                else if (e.isFile() && e.name.endsWith('.pdf') && /BOOK\.pdf$/.test(e.name) && path.basename(dir) === 'PDF') {
+                    items.push({ name: e.name, full: p, size: fs.statSync(p).size });
+                }
             }
-        }
-    })(ROOT);
+        })(ROOT);
+    }
+    if (fs.existsSync(BOOKS09)) {
+        (function walk(dir) {
+            for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+                const p = path.join(dir, e.name);
+                if (e.isDirectory()) walk(p);
+                else if (e.isFile() && /^C905.+\.pdf$/i.test(e.name)) {
+                    items.push({ name: e.name, full: p, size: fs.statSync(p).size });
+                }
+            }
+        })(BOOKS09);
+    }
     items.sort((a, b) => a.name.localeCompare(b.name));
     const zero = items.filter(i => i.size < 1024);
     console.log(`📁 مجموع: ${items.length} | صفر بایتی (skip): ${zero.length}`);

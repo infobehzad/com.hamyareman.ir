@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
+import kotlinx.coroutines.launch
 import java.io.File
 
 private fun latinDigits(s: String): String = buildString {
@@ -50,9 +51,11 @@ private fun latinDigits(s: String): String = buildString {
 fun UserProfileScreen(
     profile: StudentProfile?,
     onBack: () -> Unit,
-    onSave: (StudentProfile) -> Unit,
+    onSave: suspend (StudentProfile) -> Boolean,
     onLogout: () -> Unit = {},
 ) {
+    val scope = rememberCoroutineScope()
+    var saveError by remember { mutableStateOf<String?>(null) }
     val ctx = LocalContext.current
     var avatarPath by remember { mutableStateOf(com.hamyareman.ir.ui.profile.StudentProfileState.avatarPath) }
     var cropBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
@@ -231,17 +234,21 @@ fun UserProfileScreen(
                         age != null && age in 5..60 && birthJalali != null && phoneOk && gender.isNotBlank()
                     ) {
                         saving = true
-                        onSave(
-                            (profile ?: StudentProfile(
-                                userId = "", email = email, firstName = "", lastName = "",
-                                age = 0, grade = com.hamyareman.ir.ui.profile.StudentProfileState.grade, phone = "",
-                            )).copy(
-                                firstName = firstName.trim(), lastName = lastName.trim(),
-                                age = age, birthDate = birthJalali.isoLike, email = email.trim(), phone = phone,
-                                schoolName = schoolName.trim(), province = province, county = county, city = city,
-                                gender = gender,
-                            ),
+                        saveError = null
+                        val payload = (profile ?: StudentProfile(
+                            userId = "", email = email, firstName = "", lastName = "",
+                            age = 0, grade = com.hamyareman.ir.ui.profile.StudentProfileState.grade, phone = "",
+                        )).copy(
+                            firstName = firstName.trim(), lastName = lastName.trim(),
+                            age = age, birthDate = birthJalali.isoLike, email = email.trim(), phone = phone,
+                            schoolName = schoolName.trim(), province = province, county = county, city = city,
+                            gender = gender,
                         )
+                        scope.launch {
+                            val ok = runCatching { onSave(payload) }.getOrDefault(false)
+                            saving = false
+                            saveError = if (ok) null else "ذخیره نشد؛ اینترنت را چک کن و دوباره بزن."
+                        }
                     }
                 },
                 enabled = !saving,
@@ -256,6 +263,29 @@ fun UserProfileScreen(
             ) { Text("خروج از حساب") }
             Spacer(Modifier.height(14.dp))
         }
+    }
+    cropBitmap?.let { bmp ->
+        AvatarCircleCropDialog(
+            bitmap = bmp,
+            onCancel = { cropBitmap = null },
+            onCropped = { out ->
+                runCatching {
+                    val f = File(ctx.filesDir, "avatar.jpg")
+                    f.outputStream().use { os -> out.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, os) }
+                    StudentProfileState.saveAvatarMirror(ctx, f.absolutePath)
+                    avatarPath = f.absolutePath
+                    scope.launch {
+                        val uid = profile?.userId.orEmpty()
+                        if (uid.isNotBlank()) {
+                            runCatching {
+                                AvatarSync.push(ctx, com.hamyareman.ir.LocalAppContainer.current.storage, uid)
+                            }
+                        }
+                    }
+                }
+                cropBitmap = null
+            },
+        )
     }
     if (confirmLogout) {
         AlertDialog(

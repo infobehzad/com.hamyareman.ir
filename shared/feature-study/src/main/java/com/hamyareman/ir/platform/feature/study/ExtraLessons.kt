@@ -124,12 +124,12 @@ object ExtraLessons {
                 lessonId = lessonId,
                 title = displayTitle(module.bookCode, lessonId, n),
                 bookTitle = module.title,
-                pdfFileName = "${packId}_BOOK.pdf",
+                pdfFileName = c905PdfName(packId) ?: "${packId}_BOOK.pdf",
                 sections = if (skeleton) mathSkeletonSections() else emptyList(),
                 flashcards = emptyList(),
                 questions = emptyList(),
                 solutions = emptyList(),
-                audioFileId = audioOverride[packId] ?: "${packId}_AUDIO.mp3",
+                audioFileId = audioOverride[packId] ?: c905AudioName(packId) ?: "${packId}_AUDIO.mp3",
                 teachText = if (skeleton) "متن تدریس این درس به‌زودی اضافه می‌شود." else "",
                 teachSpeech = if (skeleton) "متن تدریس این درس به‌زودی اضافه می‌شود." else "",
                 summary = if (skeleton) "خلاصه‌ی چندسطری این درس به‌زودی نوشته می‌شود." else "",
@@ -163,7 +163,7 @@ object ExtraLessons {
                 lessonId = "$ch-SUM",
                 title = "جمع‌بندی فصل ${com.hamyareman.ir.platform.core.common.toPersianDigits(n.toString())}",
                 bookTitle = module.title,
-                pdfFileName = "C905_${ch}-SUM_BOOK.pdf",
+                pdfFileName = "",
                 sections = mathSkeletonSections(),
                 flashcards = emptyList(),
                 questions = emptyList(),
@@ -176,5 +176,22 @@ object ExtraLessons {
             )
         }
         return ordered.map { com.hamyareman.ir.platform.feature.study.books.MathC905Content.applyTo(it) }
+    }
+
+    /** PDF ریاضی نهم: `C905f01d01.pdf` مطابق `Books/Base-09/ریاضی/01-متن کتاب`. */
+    fun c905PdfName(packId: String): String? {
+        if (packId == "C905_TOC") return "C905-fehrest.pdf"
+        Regex("""^C905_E(\d+)-L(\d+)$""").find(packId)?.let { m ->
+            return "C905f%02dd%02d.pdf".format(m.groupValues[1].toInt(), m.groupValues[2].toInt())
+        }
+        return null
+    }
+
+    /** صوت ریاضی نهم: `ryazif01d01.mp3` مطابق `Books/Base-09/ریاضی/04- صوت تدریس`. */
+    fun c905AudioName(packId: String): String? {
+        Regex("""^C905_E(\d+)-L(\d+)$""").find(packId)?.let { m ->
+            return "ryazif%02dd%02d.mp3".format(m.groupValues[1].toInt(), m.groupValues[2].toInt())
+        }
+        return null
     }
 }

@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -49,9 +48,7 @@ internal fun ProfileClockAvatar(
             delay(1000)
         }
     }
-    val primary = MaterialTheme.colorScheme.primary
-    val secondary = MaterialTheme.colorScheme.secondary
-    val tertiary = MaterialTheme.colorScheme.tertiary
+    val ring = MaterialTheme.colorScheme.primary
     val outline = MaterialTheme.colorScheme.outline
     val time = remember(now) { LocalDateTime.ofInstant(Instant.ofEpochMilli(now), JalaliDate.TEHRAN) }
     val avatarPath = StudentProfileState.avatarPath
@@ -61,7 +58,7 @@ internal fun ProfileClockAvatar(
     }
     Box(
         modifier
-            .size(108.dp)
+            .size(118.dp)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -70,52 +67,28 @@ internal fun ProfileClockAvatar(
             val cy = size.height / 2f
             val r = size.minDimension / 2f
             drawCircle(
-                brush = Brush.radialGradient(
-                    listOf(primary.copy(alpha = 0.18f), Color.Transparent),
-                    center = Offset(cx, cy),
-                    radius = r,
-                ),
+                color = ring.copy(alpha = 0.12f),
+                radius = r,
             )
             drawCircle(
-                color = primary.copy(alpha = 0.85f),
+                color = ring,
                 radius = r - 1.5.dp.toPx(),
-                style = Stroke(width = 2.5.dp.toPx()),
+                style = Stroke(width = 3.dp.toPx()),
             )
             for (i in 0 until 12) {
                 val rad = Math.toRadians(i * 30.0 - 90.0)
-                val outer = r - 3.dp.toPx()
-                val inner = outer - if (i % 3 == 0) 8.dp.toPx() else 5.dp.toPx()
+                val outer = r - 4.dp.toPx()
+                val inner = outer - if (i % 3 == 0) 9.dp.toPx() else 5.dp.toPx()
                 drawLine(
-                    color = if (i % 3 == 0) primary else outline,
+                    color = if (i % 3 == 0) ring else outline,
                     start = Offset(cx + cos(rad).toFloat() * inner, cy + sin(rad).toFloat() * inner),
                     end = Offset(cx + cos(rad).toFloat() * outer, cy + sin(rad).toFloat() * outer),
-                    strokeWidth = if (i % 3 == 0) 2.4.dp.toPx() else 1.4.dp.toPx(),
+                    strokeWidth = if (i % 3 == 0) 2.6.dp.toPx() else 1.5.dp.toPx(),
                     cap = StrokeCap.Round,
                 )
             }
-            val sec = time.second + time.nano / 1_000_000_000f
-            val min = time.minute + sec / 60f
-            val hour = (time.hour % 12) + min / 60f
-            fun hand(angleDeg: Float, length: Float, back: Float, color: Color, width: Float) {
-                rotate(angleDeg, Offset(cx, cy)) {
-                    drawLine(
-                        brush = Brush.verticalGradient(
-                            listOf(color.copy(alpha = 0.25f), color.copy(alpha = 0.95f), color.copy(alpha = 0.4f)),
-                        ),
-                        start = Offset(cx, cy + back),
-                        end = Offset(cx, cy - length),
-                        strokeWidth = width,
-                        cap = StrokeCap.Round,
-                    )
-                }
-            }
-            hand(hour * 30f, r * 0.32f, r * 0.10f, primary, 4.2.dp.toPx())
-            hand(min * 6f, r * 0.40f, r * 0.12f, secondary, 3.1.dp.toPx())
-            hand(sec * 6f, r * 0.44f, r * 0.14f, tertiary, 1.6.dp.toPx())
-            drawCircle(color = primary, radius = 4.dp.toPx(), center = Offset(cx, cy))
-            drawCircle(color = Color.White.copy(alpha = 0.55f), radius = 1.8.dp.toPx(), center = Offset(cx, cy))
         }
-        Box(Modifier.size(58.dp), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(64.dp), contentAlignment = Alignment.Center) {
             if (bmp != null) {
                 Image(
                     bmp.asImageBitmap(),
@@ -130,6 +103,37 @@ internal fun ProfileClockAvatar(
                     }
                 }
             }
+        }
+        Canvas(Modifier.fillMaxSize()) {
+            val cx = size.width / 2f
+            val cy = size.height / 2f
+            val r = size.minDimension / 2f
+            val sec = time.second + time.nano / 1_000_000_000f
+            val min = time.minute + sec / 60f
+            val hour = (time.hour % 12) + min / 60f
+            fun hand(angleDeg: Float, length: Float, back: Float, color: Color, width: Float) {
+                rotate(angleDeg, Offset(cx, cy)) {
+                    drawLine(
+                        color = Color.White,
+                        start = Offset(cx, cy + back),
+                        end = Offset(cx, cy - length),
+                        strokeWidth = width + 2.4.dp.toPx(),
+                        cap = StrokeCap.Round,
+                    )
+                    drawLine(
+                        color = color,
+                        start = Offset(cx, cy + back),
+                        end = Offset(cx, cy - length),
+                        strokeWidth = width,
+                        cap = StrokeCap.Round,
+                    )
+                }
+            }
+            hand(hour * 30f, r * 0.56f, r * 0.10f, Color(0xFF0F172A), 5.2.dp.toPx())
+            hand(min * 6f, r * 0.72f, r * 0.12f, Color(0xFF1E293B), 3.6.dp.toPx())
+            hand(sec * 6f, r * 0.86f, r * 0.16f, Color(0xFFDC2626), 1.8.dp.toPx())
+            drawCircle(color = Color.White, radius = 5.4.dp.toPx(), center = Offset(cx, cy))
+            drawCircle(color = Color(0xFF0F172A), radius = 3.4.dp.toPx(), center = Offset(cx, cy))
         }
     }
 }

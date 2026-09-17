@@ -22,7 +22,7 @@ data class StoredFile(val bucketId: String, val fileId: String, val name: String
 
 interface StorageService {
     val isConfigured: Boolean
-    suspend fun upload(bucketId: String, localPath: String, permissions: List<String> = emptyList()): AppResult<StoredFile>
+    suspend fun upload(bucketId: String, localPath: String, permissions: List<String> = emptyList(), fileId: String? = null): AppResult<StoredFile>
     suspend fun viewUrl(bucketId: String, fileId: String): String?
     suspend fun delete(bucketId: String, fileId: String): AppResult<Unit>
 }
@@ -45,6 +45,7 @@ class AppwriteStorageService(
         bucketId: String,
         localPath: String,
         permissions: List<String>,
+        fileId: String?,
     ): AppResult<StoredFile> {
         if (!provider.isConfigured) {
             return AppResult.Err(AppError.Local("در حالت محلی، رسانه فقط روی همین دستگاه می‌ماند."))
@@ -52,7 +53,7 @@ class AppwriteStorageService(
         return runCatching {
             val file = storage.createFile(
                 bucketId = bucketId,
-                fileId = ID.unique(),
+                fileId = fileId?.ifBlank { null } ?: ID.unique(),
                 file = InputFile.fromPath(localPath),
                 permissions = permissions,
             )

@@ -333,6 +333,14 @@ fun ZahraNavHost() {
                     val uid = runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
                     profile = if (uid.isBlank()) null else
                         runCatching { com.hamyareman.ir.ui.profile.StudentProfileRepo.fetch(container.tables, uid) }.getOrNull()
+                    profile?.let { fetched ->
+                        com.hamyareman.ir.ui.profile.StudentProfileState.writeMirror(
+                            ctx, fetched.grade, true, fetched.firstName, fetched.subscription, fetched.gender,
+                        )
+                    }
+                    if (uid.isNotBlank()) {
+                        runCatching { com.hamyareman.ir.ui.profile.AvatarSync.pull(ctx, uid) }
+                    }
                     loading = false
                 }
                 when {
@@ -348,23 +356,23 @@ fun ZahraNavHost() {
                             }
                         },
                         onSave = { p ->
-                            scopeUp.launch {
-                                val uid = runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
-                                val toSave = p.copy(userId = uid, grade = profile?.grade ?: com.hamyareman.ir.ui.profile.StudentProfileState.grade)
-                                val email = toSave.email.ifBlank { runCatching { container.auth.currentUser() }.getOrNull()?.email.orEmpty() }
-                                val ok = runCatching {
-                                    com.hamyareman.ir.ui.profile.StudentProfileRepo.save(container.tables, email, toSave)
-                                }.getOrDefault(false)
-                                if (ok) {
-                                    com.hamyareman.ir.ui.profile.StudentProfileState.writeMirror(
-                                        ctx, toSave.grade, true, toSave.firstName,
-                                        profile?.subscription ?: "free",
-                                        toSave.gender,
-                                    )
-                                    container.uiPrefs.applyDefaultForGender(toSave.gender)
-                                    profile = toSave.copy(subscription = profile?.subscription ?: "free")
-                                }
+                            val uid = runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+                            val toSave = p.copy(userId = uid, grade = profile?.grade ?: com.hamyareman.ir.ui.profile.StudentProfileState.grade)
+                            val email = toSave.email.ifBlank { runCatching { container.auth.currentUser() }.getOrNull()?.email.orEmpty() }
+                            val ok = runCatching {
+                                com.hamyareman.ir.ui.profile.StudentProfileRepo.save(container.tables, email, toSave)
+                            }.getOrDefault(false)
+                            if (ok) {
+                                com.hamyareman.ir.ui.profile.StudentProfileState.writeMirror(
+                                    ctx, toSave.grade, true, toSave.firstName,
+                                    profile?.subscription ?: com.hamyareman.ir.ui.profile.StudentProfileState.subscription.ifBlank { "free" },
+                                    toSave.gender,
+                                )
+                                container.uiPrefs.applyDefaultForGender(toSave.gender)
+                                profile = toSave.copy(subscription = profile?.subscription ?: "free")
+                                runCatching { com.hamyareman.ir.ui.profile.AvatarSync.push(ctx, container.storage, uid) }
                             }
+                            ok
                         },
                     )
                 }
