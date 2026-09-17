@@ -422,7 +422,7 @@ private fun MathBookMcqPane(pack: StudyPack, qs: List<StudyPack.Question>, modif
                     onClick = {
                         val ok = com.hamyareman.ir.platform.feature.study.QuizGrader.grade(q, pick.orEmpty()).second
                         container.studyProgress.recordExercise(pack.packId, q.id, ok, today)
-                        StudyActivity.add(ctx, pack.packId, "item", "تمرین ${q.id} — ${if (ok) "درست" else "نادرست"}")
+                        StudyActivity.add(appCtx, pack.packId, "item", "تمرین ${q.id} — ${if (ok) "درست" else "نادرست"}")
                         lastOk = ok
                         feedback = if (ok) "درست بود ✓\n${q.explanation}"
                         else "نادرست. پاسخ درست: ${q.answer}\n${q.explanation}"
