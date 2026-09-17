@@ -1,12 +1,11 @@
 package com.hamyareman.ir.ui.study
 
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,7 +13,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -24,6 +25,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -43,8 +45,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import com.hamyareman.ir.LocalAppContainer
 import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.toPersianDigits
@@ -53,12 +53,14 @@ import com.hamyareman.ir.platform.feature.study.BookModuleRegistry
 import com.hamyareman.ir.platform.feature.study.MathAnswerScript
 import com.hamyareman.ir.platform.feature.study.MathExamLedger
 import com.hamyareman.ir.platform.feature.study.StudyPack
+import kotlinx.coroutines.delay
 
-internal val MATH_TABS = listOf("تدریس", "تمرینات کتابی", "فلش‌کارت", "خلاصه", "آزمون")
+internal data class MathTab(val key: String, val label: String)
 
 /**
- * پنج سربرگ درس ریاضی — هر درس هر فصل جدا.
- * قفل: فقط تدریس تا اتمام صوت باز است.
+ * سربرگ درس ریاضی.
+ * درس عادی: تدریس / تمرینات کتابی / خلاصه — فلش و آزمون فقط در جمع‌بندی فصل.
+ * جمع‌بندی: تدریس / فلش‌کارت / خلاصه / آزمون — بدون تمرینات کتابی.
  */
 @Composable
 fun MathLessonScreen(
@@ -76,6 +78,21 @@ fun MathLessonScreen(
         return
     }
     val ctx = androidx.compose.ui.platform.LocalContext.current
+    val html = remember(packId) { MathHtmlAssets.of(packId) }
+    val isSum = html?.isSum == true || pack.lessonId.contains("SUM")
+    val chapter = html?.chapter ?: Regex("""E(\d+)""").find(pack.packId)?.groupValues?.getOrNull(1)?.toIntOrNull() ?: 1
+    val tabs = remember(isSum) {
+        if (isSum) listOf(
+            MathTab("teach", "تدریس"),
+            MathTab("flash", "فلش‌کارت"),
+            MathTab("summary", "خلاصه"),
+            MathTab("exam", "آزمون"),
+        ) else listOf(
+            MathTab("teach", "تدریس"),
+            MathTab("book", "تمرینات کتابی"),
+            MathTab("summary", "خلاصه"),
+        )
+    }
     val hasAudio = teachTracksOf(pack).isNotEmpty()
     val teachDone = remember(packId) {
         if (!hasAudio) true else {
@@ -83,23 +100,25 @@ fun MathLessonScreen(
             TeachStats.isDone(ctx, packId)
         }
     }
-    var tab by rememberSaveable(packId) {
-        val want = initialTab.coerceIn(0, 4)
+    var tab by rememberSaveable(packId, isSum) {
+        val want = initialTab.coerceIn(0, tabs.lastIndex)
         mutableIntStateOf(if (!teachDone && want >= 1) 0 else want)
     }
+    if (tab > tabs.lastIndex) tab = 0
     var lockMsg by remember { mutableStateOf(false) }
     val chromeStore = remember { com.hamyareman.ir.platform.core.common.LocalStore(ctx, "hamyar_math_ui") }
     var autoHide by rememberSaveable(packId) { mutableStateOf(chromeStore.getBool("autohide_$packId", true)) }
     var chromeHidden by remember { mutableStateOf(false) }
-    val nested = remember(autoHide) {
-        object : NestedScrollConnection {
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                if (!autoHide) return Offset.Zero
-                if (available.y < -6f) chromeHidden = true
-                if (available.y > 6f) chromeHidden = false
-                return Offset.Zero
-            }
+    var hideGen by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(autoHide, chromeHidden, hideGen, tab) {
+        if (!autoHide) {
+            chromeHidden = false
+            return@LaunchedEffect
         }
+        if (chromeHidden) return@LaunchedEffect
+        delay(3000)
+        chromeHidden = true
     }
 
     if (pack.pdfOnly || pack.lessonId == "TOC") {
@@ -110,15 +129,28 @@ fun MathLessonScreen(
         return
     }
 
-    Column(Modifier.fillMaxSize().nestedScroll(nested)) {
+    Column(Modifier.fillMaxSize()) {
         if (chromeHidden) {
             Row(
-                Modifier.fillMaxWidth().clickable { chromeHidden = false }.padding(horizontal = 8.dp, vertical = 4.dp),
+                Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 2.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                TextButton(onClick = { chromeHidden = false }) { Text("▼ باز کردن سربرگ") }
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clickable {
+                            chromeHidden = false
+                            hideGen++
+                        },
+                ) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("▾", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                    }
+                }
                 Spacer(Modifier.weight(1f))
-                Text(pack.title, style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                Text(pack.title, style = MaterialTheme.typography.labelSmall, maxLines = 1)
             }
         } else {
             AppTopBar(title = pack.title, onBack = onBack)
@@ -128,30 +160,29 @@ fun MathLessonScreen(
                     onCheckedChange = {
                         autoHide = it
                         chromeStore.putBool("autohide_$packId", it)
-                        if (!it) chromeHidden = false
+                        if (!it) chromeHidden = false else hideGen++
                     },
                 )
                 Text("جمع شود", style = MaterialTheme.typography.labelSmall)
             }
-            ScrollableTabRow(selectedTabIndex = tab, edgePadding = 8.dp) {
-                MATH_TABS.forEachIndexed { i, label ->
-                    val locked = i >= 1 && !teachDone
+            ScrollableTabRow(selectedTabIndex = tab.coerceIn(0, tabs.lastIndex), edgePadding = 8.dp) {
+                tabs.forEachIndexed { i, t ->
+                    val locked = t.key != "teach" && !teachDone
                     Tab(
                         selected = tab == i,
                         onClick = {
                             if (locked) lockMsg = true else tab = i
                         },
-                        text = { Text(if (locked) "🔒 $label" else label, style = MaterialTheme.typography.labelMedium) },
+                        text = { Text(if (locked) "🔒 ${t.label}" else t.label, style = MaterialTheme.typography.labelMedium) },
                     )
                 }
             }
         }
-        if (tab == 0) {
+        val currentKey = tabs.getOrNull(tab)?.key ?: "teach"
+        if (currentKey == "teach") {
             val tracks = teachTracksOf(pack)
             if (tracks.isNotEmpty()) {
-                androidx.compose.foundation.layout.Box(
-                    Modifier.then(if (chromeHidden) Modifier.height(0.dp) else Modifier),
-                ) {
+                Box(Modifier.then(if (chromeHidden) Modifier.height(0.dp) else Modifier)) {
                     TeachAudioBar(packId = pack.packId, screenTitle = pack.title, bookTitle = bookTitle, tracks = tracks)
                 }
             }
@@ -161,16 +192,47 @@ fun MathLessonScreen(
                 onDismissRequest = { lockMsg = false },
                 confirmButton = { TextButton(onClick = { lockMsg = false }) { Text("باشه") } },
                 title = { Text("اول تدریس") },
-                text = { Text("تمرینات کتابی، فلش‌کارت، خلاصه و آزمون بعد از اتمام صوت تدریس باز می‌شوند.") },
+                text = { Text("سربرگ‌های دیگر بعد از اتمام صوت تدریس باز می‌شوند.") },
             )
         }
-        when (tab) {
-            0 -> MathTeachTab(pack, bookTitle, showPlayer = false)
-            1 -> MathStudyTab(pack)
-            2 -> MathFlashTab(pack)
-            3 -> MathSummaryTab(pack)
-            else -> MathExamTab(pack)
+        when (currentKey) {
+            "teach" -> MathTeachTab(pack, bookTitle, showPlayer = false)
+            "book" -> MathBookHtmlTab(pack, html)
+            "flash" -> MathFlashHtmlTab(pack, html)
+            "summary" -> MathSummaryTab(pack, isSum = isSum, chapter = chapter)
+            "exam" -> MathExamHtmlTab(pack, html)
+            else -> MathTeachTab(pack, bookTitle, showPlayer = false)
         }
+    }
+}
+
+@Composable
+private fun MathBookHtmlTab(pack: StudyPack, html: MathHtmlAssets.Spec?) {
+    val asset = html?.bookAsset
+    if (!asset.isNullOrBlank()) {
+        MathInteractiveHtml(packId = pack.packId, kind = "book", assetPath = asset, modifier = Modifier.fillMaxSize())
+    } else {
+        MathStudyTab(pack)
+    }
+}
+
+@Composable
+private fun MathFlashHtmlTab(pack: StudyPack, html: MathHtmlAssets.Spec?) {
+    val asset = html?.flashAsset
+    if (!asset.isNullOrBlank()) {
+        MathInteractiveHtml(packId = pack.packId, kind = "flash", assetPath = asset, modifier = Modifier.fillMaxSize())
+    } else {
+        MathFlashTab(pack)
+    }
+}
+
+@Composable
+private fun MathExamHtmlTab(pack: StudyPack, html: MathHtmlAssets.Spec?) {
+    val asset = html?.examAsset
+    if (!asset.isNullOrBlank()) {
+        MathInteractiveHtml(packId = pack.packId, kind = "exam", assetPath = asset, modifier = Modifier.fillMaxSize())
+    } else {
+        MathExamTab(pack)
     }
 }
 
@@ -249,7 +311,7 @@ private fun MathExercisesPane(pack: StudyPack, modifier: Modifier = Modifier) {
                 Text("تمرین‌های کتاب", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "ساختار تمرین آماده است؛ جای‌خالی‌های این درس به‌زودی از پوشهٔ Books پر می‌شود.",
+                    "ساختار تمرین آماده است؛ فایل HTML این درس هنوز در پوشهٔ Books نیست.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -388,117 +450,76 @@ private fun MathBookMcqPane(pack: StudyPack, qs: List<StudyPack.Question>, modif
 
 @Composable
 private fun MathFlashTab(pack: StudyPack) {
-    val container = LocalAppContainer.current
-    val progress = container.studyProgress
-    val today = remember { JalaliDate.todayIso() }
-    var refresh by remember { mutableIntStateOf(0) }
-    var showArchive by remember { mutableStateOf(false) }
-    val archive = remember(refresh, pack.packId) { progress.archivedCards(pack) }
-    val queue = remember(refresh, pack.packId, today) { progress.dueCards(pack, today) }
-
-    if (showArchive) {
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("آرشیو فلش‌کارت", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text("موارد درست‌پاسخ‌داده‌شده — هر وقت خواستی دوباره ببین.", style = MaterialTheme.typography.bodySmall)
-            if (archive.isEmpty()) Text("هنوز کارتی در آرشیو نیست.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            archive.forEach { c ->
-                var open by remember(c.id) { mutableStateOf(false) }
-                Card(Modifier.fillMaxWidth().clickable { open = !open }) {
-                    Column(Modifier.padding(12.dp)) {
-                        Text(c.front, fontWeight = FontWeight.Bold)
-                        if (open) {
-                            Spacer(Modifier.height(6.dp))
-                            Text(c.back)
-                            TextButton(onClick = {
-                                progress.setArchived(pack.packId, c.id, false)
-                                refresh++
-                            }) { Text("برگرداندن به مرور") }
-                        }
-                    }
-                }
-            }
-            OutlinedButton(onClick = { showArchive = false }, modifier = Modifier.fillMaxWidth()) { Text("بازگشت به مرور") }
-        }
-        return
-    }
-
-    val card = queue.firstOrNull()
-    Column(Modifier.fillMaxSize().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text("امروز: ${toPersianDigits(queue.size.toString())} کارت", style = MaterialTheme.typography.bodySmall)
-            Spacer(Modifier.weight(1f))
-            TextButton(onClick = { showArchive = true }) {
-                Text("آرشیو (${toPersianDigits(archive.size.toString())})")
-            }
-        }
-        if (pack.flashcards.isEmpty()) {
-            Text("فلش‌کارت این درس به‌زودی از پوشهٔ Books اضافه می‌شود.", style = MaterialTheme.typography.titleSmall)
-            return
-        }
-        if (card == null) {
-            Text("✓ کارت سررسیدی نمانده.", style = MaterialTheme.typography.titleMedium)
-            Text("از آرشیو می‌توانی دوباره ببینی.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            return
-        }
-        var flipped by remember(card.id, refresh) { mutableStateOf(false) }
-        Spacer(Modifier.height(8.dp))
-        Card(Modifier.fillMaxWidth().height(220.dp).clickable { flipped = !flipped }) {
-            Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                if (card.topic.isNotBlank()) Text(card.topic, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
-                Text(if (flipped) card.back else card.front, style = MaterialTheme.typography.titleMedium, fontWeight = if (flipped) FontWeight.Normal else FontWeight.Bold)
-                if (!flipped) Text("لمس برای پاسخ", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        }
-        Spacer(Modifier.height(12.dp))
-        if (!flipped) {
-            Button(onClick = { flipped = true }, modifier = Modifier.fillMaxWidth()) { Text("نمایش پاسخ") }
-        } else {
-            Text("چقدر خوب یاد داشتی؟", style = MaterialTheme.typography.titleSmall)
-            Spacer(Modifier.height(8.dp))
-            val btns = listOf("بلد نبودم" to 1, "سخت بود" to 3, "خوب" to 4, "عالی" to 5)
-            btns.chunked(2).forEach { row ->
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    row.forEach { (label, q) ->
-                        OutlinedButton(
-                            onClick = {
-                                progress.reviewCardMath(pack.packId, card.id, q, today)
-                                refresh++
-                            },
-                            modifier = Modifier.weight(1f),
-                        ) { Text(label) }
-                    }
-                }
-            }
-        }
-    }
+    Text(
+        "فلش‌کارت این فصل هنوز به‌صورت HTML در پوشهٔ Books نیست.",
+        Modifier.padding(16.dp),
+        style = MaterialTheme.typography.bodyMedium,
+    )
 }
 
 @Composable
-private fun MathSummaryTab(pack: StudyPack) {
+private fun MathSummaryTab(pack: StudyPack, isSum: Boolean, chapter: Int) {
     val summary = pack.summary.ifBlank {
         pack.sections.filter { it.kind == "exam" }.lastOrNull()?.body
             ?: "خلاصه‌ی چندسطری این درس به‌زودی از پوشهٔ Books نوشته می‌شود."
     }
     val tips = pack.examTips.ifBlank {
         pack.sections.filter { it.kind == "exam" }.joinToString("\n\n") { it.body }
-            .ifBlank { "نکات امتحانی به‌زودی اضافه می‌شود." }
     }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Card(Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(14.dp)) {
-                Text("خلاصه درس", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                Text(summary, style = MaterialTheme.typography.bodyMedium)
-            }
-        }
-        Card(Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(14.dp)) {
-                Text("نکات امتحانی", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                Text(tips, style = MaterialTheme.typography.bodyMedium)
-            }
+    val html = remember(pack.packId, summary, tips, isSum, chapter) {
+        mathSummaryHtml(pack.title, summary, tips, isSum, chapter)
+    }
+    Column(Modifier.fillMaxSize()) {
+        AndroidView(
+            factory = { ctx ->
+                WebView(ctx).apply {
+                    webViewClient = WebViewClient()
+                    settings.javaScriptEnabled = false
+                    settings.loadWithOverviewMode = true
+                    settings.useWideViewPort = true
+                    setBackgroundColor(android.graphics.Color.WHITE)
+                }
+            },
+            update = { wv ->
+                wv.loadDataWithBaseURL("https://local.hamyar/", html, "text/html", "utf-8", null)
+            },
+            modifier = Modifier.weight(1f).padding(4.dp),
+        )
+        if (pack.pdfFileName.isNotBlank()) {
+            TeachPdfPages(modifier = Modifier.weight(1f), fileId = pack.pdfFileName, pack = pack)
         }
     }
+}
+
+private fun mathSummaryHtml(title: String, summary: String, tips: String, isSum: Boolean, chapter: Int): String {
+    val ch = toPersianDigits(chapter.toString())
+    val pointer = if (isSum) {
+        "<p>فلش‌کارت و نمونه سوالات همین فصل در سربرگ‌های این جمع‌بندی است.</p>"
+    } else {
+        "<div class='note'>🎴 آزمون و فلش‌کارت این درس در <strong>انتهای فصل $ch</strong> — کارت «جمع‌بندی فصل $ch» — آمده است. خودِ درس فلش و آزمون جدا ندارد.</div>"
+    }
+    val tipsBlock = if (tips.isBlank()) "" else "<h2>نکات امتحانی</h2><p>${tips.replace("\n", "<br>")}</p>"
+    return """
+<!DOCTYPE html><html dir="rtl" lang="fa"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap');
+body{font-family:'Vazirmatn',Tahoma,sans-serif;background:linear-gradient(135deg,#eef2ff,#fdf2f8 50%,#ecfeff);color:#1e293b;margin:0;padding:12px;line-height:1.9}
+.box{max-width:900px;margin:0 auto;background:#fff;border-radius:24px;box-shadow:0 20px 60px rgba(30,41,59,.15);overflow:hidden}
+header{background:linear-gradient(135deg,#4f46e5,#7c3aed,#ec4899);color:#fff;padding:22px 20px;text-align:center}
+h1{font-size:1.25rem;margin:0 0 6px;font-weight:900}
+main{padding:18px 16px 28px}
+h2{color:#4f46e5;font-size:1.05rem;border-bottom:2px dashed #c7d2fe;padding-bottom:6px}
+.note{background:#e0f2fe;border-right:4px solid #0284c7;padding:12px 14px;border-radius:12px;margin:12px 0}
+</style></head><body><div class="box">
+<header><h1>خلاصه — $title</h1></header>
+<main>
+$pointer
+<h2>خلاصه درس</h2>
+<p>${summary.replace("\n", "<br>")}</p>
+$tipsBlock
+</main></div></body></html>
+""".trimIndent()
 }
 
 @Composable
@@ -515,16 +536,11 @@ private fun MathExamTab(pack: StudyPack) {
         Text("نمونه سوال چهارگزینه‌ای", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         if (mcq.isEmpty()) {
             Text(
-                if (pack.lessonId.contains("SUM"))
-                    "ساختار آزمون آماده است؛ سوال‌های این فصل به‌زودی از پوشهٔ Books می‌آیند."
-                else
-                    "نمونه سوالات این فصل در کارت «جمع‌بندی» همان فصل است — سربرگ آزمون همین درس برای ساختار و نمرهٔ جداست.",
+                "نمونه سوالات این فصل در کارت جمع‌بندی همان فصل است.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            if (ledger.repeatCount > 0) {
-                ExamLedgerCard(ledger)
-            }
+            if (ledger.repeatCount > 0) ExamLedgerCard(ledger)
             return
         }
         if (done) {

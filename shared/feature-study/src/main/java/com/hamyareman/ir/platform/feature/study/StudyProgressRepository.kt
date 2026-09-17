@@ -227,6 +227,32 @@ class StudyProgressRepository(
         return next
     }
 
+    /** نمره از HTML تعاملی (فلش/آزمون/تمرین). */
+    fun recordHtmlExam(
+        packId: String,
+        scorePct: Int,
+        total: Int,
+        correctCount: Int,
+        wrongIds: List<String>,
+        dateKey: String,
+        atMs: Long = System.currentTimeMillis(),
+    ): MathExamLedger.State {
+        val prev = examState(packId)
+        val sitting = MathExamLedger.Sitting(
+            n = prev.repeatCount + 1,
+            scorePct = scorePct.coerceIn(0, 100),
+            total = total.coerceAtLeast(0),
+            correctCount = correctCount.coerceAtLeast(0),
+            wrongNumbers = wrongIds.mapNotNull { it.filter { ch -> ch.isDigit() }.toIntOrNull() },
+            wrongIds = wrongIds,
+            atMs = atMs,
+            dateKey = dateKey,
+        )
+        val next = MathExamLedger.State(prev.sittings + sitting)
+        writeExamState(packId, next)
+        return next
+    }
+
     /** آزمون دوره‌ای سررسید شده؟ (۷ روز از آخرین آزمون گذشته باشد) */
     fun periodicQuizDue(packId: String, todayKey: String): Boolean {
         val last = attempts(packId).maxByOrNull { it.dateKey } ?: return false

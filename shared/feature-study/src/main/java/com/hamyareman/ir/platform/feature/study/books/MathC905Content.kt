@@ -13,7 +13,11 @@ object MathC905Content {
     private val byId: Map<String, JSONObject> by lazy { load() }
 
     fun applyTo(pack: StudyPack): StudyPack {
-        val o = byId[pack.packId] ?: return pack
+        val derivedPdf = derivedPdf(pack.packId)
+        val o = byId[pack.packId]
+        if (o == null) {
+            return if (derivedPdf != null) pack.copy(pdfFileName = derivedPdf) else pack
+        }
         fun cards(): List<StudyPack.Flashcard> {
             val a = o.optJSONArray("flashcards") ?: return pack.flashcards
             return (0 until a.length()).map { i ->
@@ -48,7 +52,7 @@ object MathC905Content {
             }
         }
         return pack.copy(
-            pdfFileName = o.optString("pdfFileName").ifBlank { pack.pdfFileName },
+            pdfFileName = o.optString("pdfFileName").ifBlank { derivedPdf ?: pack.pdfFileName },
             audioFileId = o.optString("audioFileId", pack.audioFileId),
             teachText = o.optString("teachText").ifBlank { pack.teachText },
             teachHtml = o.optString("teachHtml").ifBlank { pack.teachHtml },
@@ -59,6 +63,14 @@ object MathC905Content {
             questions = qs().ifEmpty { pack.questions },
             pdfOnly = o.optBoolean("pdfOnly", pack.pdfOnly),
         )
+    }
+
+    private fun derivedPdf(packId: String): String? {
+        if (packId == "C905_TOC") return "C905-fehrest.pdf"
+        Regex("""^C905_E(\d+)-L(\d+)$""").find(packId)?.let { m ->
+            return "C905f%02dd%02d.pdf".format(m.groupValues[1].toInt(), m.groupValues[2].toInt())
+        }
+        return null
     }
 
     private fun load(): Map<String, JSONObject> {

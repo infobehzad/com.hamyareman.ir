@@ -248,7 +248,10 @@ private fun MathLessonProgressPage(
                         Text(pack.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                     }
                     if (open) {
-                        MATH_TABS.forEach { title ->
+                        val isSum = pack.lessonId.contains("SUM")
+                        val labels = if (isSum) listOf("تدریس", "فلش‌کارت", "خلاصه", "آزمون")
+                        else listOf("تدریس", "تمرینات کتابی", "خلاصه")
+                        labels.forEach { title ->
                             val line = mathTabProgressLine(ctx, container, pack, title)
                             Text(title, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                             Text(line, style = MaterialTheme.typography.bodySmall)
