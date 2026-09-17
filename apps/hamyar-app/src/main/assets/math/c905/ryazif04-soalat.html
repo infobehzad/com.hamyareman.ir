@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>سوالات چهارگزینه‌ای – فصل هفتم ریاضی نهم (آمار و احتمال)</title>
+<title>سوالات چهارگزینه‌ای – فصل چهارم ریاضی نهم (توان و ریشه)</title>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -73,6 +73,7 @@
   .badge-lesson-1 { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
   .badge-lesson-2 { background: linear-gradient(135deg, #0891b2, #0ea5e9); }
   .badge-lesson-3 { background: linear-gradient(135deg, #059669, #10b981); }
+  .badge-lesson-4 { background: linear-gradient(135deg, #ea580c, #f59e0b); }
   .badge-bar {
     background: linear-gradient(135deg, #be185d, #ec4899);
     padding: 4px 12px; border-radius: 50px; font-size: .75rem;
@@ -303,9 +304,9 @@
 <body>
 <div class="container">
   <header>
-    <h1>📝 سوالات چهارگزینه‌ای – فصل هفتم ریاضی نهم</h1>
-    <p>آمار و احتمال | ۳۰ سوال منتخب از آزمون‌های نهایی و هماهنگ استانی (تبریز و سایر استان‌ها) | ۱۴۰۰–۱۴۰۵</p>
-    <p style="margin-top:6px;font-size:.78rem;opacity:.8;">منابع: امتحان نهایی و هماهنگ استانی، مدارس تیزهوشان، گاما، قلم‌چی، مدرسان، بیست شو</p>
+    <h1>📝 سوالات چهارگزینه‌ای – فصل چهارم ریاضی نهم</h1>
+    <p>توان و ریشه | ۳۰ سوال منتخب از آزمون‌های نهایی و هماهنگ استانی (تبریز و سایر استان‌ها) | ۱۴۰۰–۱۴۰۵</p>
+    <p style="margin-top:6px;font-size:.78rem;opacity:.8;">منابع: امتحان نهایی و هماهنگ استانی، مدارس تیزهوشان، گاما، قلم‌چی، مدرسان</p>
   </header>
 
   <div class="top-bar">
@@ -337,7 +338,7 @@
   </div>
 
   <div class="stats-panel" id="statsPanel">
-    <div class="stats-title">📊 گزارش نهایی – فصل هفتم آمار و احتمال</div>
+    <div class="stats-title">📊 گزارش نهایی – فصل چهارم توان و ریشه</div>
     <div class="score-summary">
       <div class="score-card total">
         <span class="num" id="statTotal">0</span>
@@ -381,7 +382,7 @@
   </div>
 
   <footer>
-    <strong>📝 سوالات چهارگزینه‌ای فصل هفتم ریاضی نهم – آمار و احتمال</strong><br>
+    <strong>📝 سوالات چهارگزینه‌ای فصل چهارم ریاضی نهم – توان و ریشه</strong><br>
     منتخب از آزمون‌های نهایی و هماهنگ استانی (تبریز و سایر استان‌ها) | ۱۴۰۰–۱۴۰۵<br>
     <strong>* اختصاصی اپلیکیشن همیار من *</strong>
   </footer>
@@ -390,285 +391,285 @@
 <script>
 /* ============================================================
    سوالات منتخب از آزمون‌های نهایی و هماهنگ استانی
-   فصل هفتم: آمار و احتمال
+   فصل چهارم: توان و ریشه
    نکته مهم: تمام عبارات ریاضی داخل <span class="math"> قرار گرفته‌اند
+   تا جهت نمایش آن‌ها از چپ به راست (LTR) صحیح باشد.
    ============================================================ */
 const allCards = [
-  /* ===== درس ۱: مفهوم احتمال و فضای نمونه ===== */
-  { id: 1, lesson: 1, bar: "۰/۵", q: "در پرتاب یک تاس، فضای نمونه (مجموعه همه حالت‌های ممکن) شامل چند عضو است؟",
-    opts: ["<span class=\"math\">۶</span>", "<span class=\"math\">۵</span>", "<span class=\"math\">۱۲</span>", "<span class=\"math\">۳۶</span>"],
-    correct: 0, hint: "تاس ۶ وجه دارد.",
+  /* ===== درس ۱: توان صحیح ===== */
+  { id: 1, lesson: 1, bar: "۰/۵", q: "حاصل <span class=\"math\">۲⁻³</span> کدام است؟",
+    opts: ["<span class=\"math\">−۸</span>", "<span class=\"math\">۸</span>", "<span class=\"math\">۱/۸</span>", "<span class=\"math\">−۱/۸</span>"],
+    correct: 2, hint: "توان منفی یعنی معکوس عدد به توان مثبت.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۰",
       "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
+      "گاما – آزمون تستی فصل ۴ – ۱۴۰۲"
     ],
-    exp: "فضای نمونه پرتاب یک تاس برابر <span class=\"math\">S = {۱, ۲, ۳, ۴, ۵, ۶}</span> است که ۶ عضو دارد." },
+    exp: "طبق قانون توان منفی، a⁻ⁿ = ۱/aⁿ. پس ۲⁻³ برابر ۱/۲³ = ۱/۸ است." },
 
-  { id: 2, lesson: 1, bar: "۰/۵", q: "احتمال رخ دادن یک پیشامد حتمی چقدر است؟",
-    opts: ["<span class=\"math\">۰</span>", "<span class=\"math\">۱</span>", "<span class=\"math\">۰/۵</span>", "تعریف نشده"],
-    correct: 1, hint: "پیشامد حتمی همیشه رخ می‌دهد.",
+  { id: 2, lesson: 1, bar: "۰/۵", q: "حاصل <span class=\"math\">۵⁰</span> کدام است؟",
+    opts: ["<span class=\"math\">۰</span>", "<span class=\"math\">۱</span>", "<span class=\"math\">۵</span>", "تعریف نشده"],
+    correct: 1, hint: "هر عدد غیرصفر به توان صفر.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۳ تبریز) – خرداد ۱۴۰۱",
-      "گاما – آزمون فصل ۷ – ۱۴۰۳"
+      "گاما – آزمون فصل ۴ – ۱۴۰۳"
     ],
-    exp: "احتمال پیشامد حتمی (مطمئن) برابر ۱ است، زیرا این پیشامد همیشه رخ می‌دهد." },
+    exp: "هر عدد غیرصفر به توان صفر برابر ۱ است. پس ۵⁰ = ۱." },
 
-  { id: 3, lesson: 1, bar: "۰/۵", q: "احتمال رخ دادن یک پیشامد غیرممکن چقدر است؟",
-    opts: ["<span class=\"math\">۰</span>", "<span class=\"math\">۱</span>", "<span class=\"math\">۰/۵</span>", "تعریف نشده"],
-    correct: 0, hint: "پیشامد غیرممکن هرگز رخ نمی‌دهد.",
+  { id: 3, lesson: 1, bar: "۰/۵", q: "حاصل <span class=\"math\">۲³ × ۲⁴</span> کدام است؟",
+    opts: ["<span class=\"math\">۲⁷</span>", "<span class=\"math\">۲¹²</span>", "<span class=\"math\">۴⁷</span>", "<span class=\"math\">۴¹²</span>"],
+    correct: 0, hint: "در ضرب توان‌ها با پایه مساوی، توان‌ها جمع می‌شوند.",
     sources: [
       "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
+      "مدرسان – آزمون تستی فصل ۴ – ۱۴۰۳"
     ],
-    exp: "احتمال پیشامد غیرممکن برابر ۰ است، زیرا این پیشامد هرگز رخ نمی‌دهد." },
+    exp: "در ضرب اعداد توان‌دار با پایه مساوی، پایه را نوشته و توان‌ها را جمع می‌کنیم: ۲³ × ۲⁴ = ۲³⁺⁴ = ۲⁷." },
 
-  { id: 4, lesson: 1, bar: "۰/۵", q: "در پرتاب یک تاس، احتمال رو شدن عدد زوج چقدر است؟",
-    opts: ["<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۲/۳</span>"],
-    correct: 2, hint: "اعداد زوج روی تاس: ۲، ۴، ۶",
+  { id: 4, lesson: 1, bar: "۰/۵", q: "حاصل <span class=\"math\">(۳²)³</span> کدام است؟",
+    opts: ["<span class=\"math\">۳⁵</span>", "<span class=\"math\">۳⁶</span>", "<span class=\"math\">۳⁹</span>", "<span class=\"math\">۹⁶</span>"],
+    correct: 1, hint: "توان در توان: پایه را نوشته و توان‌ها را ضرب می‌کنیم.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۲ تبریز) – خرداد ۱۴۰۲",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
+      "گاما – آزمون تستی فصل ۴ – ۱۴۰۲"
     ],
-    exp: "تعداد حالت‌های مطلوب = ۳ (اعداد ۲، ۴، ۶). تعداد کل حالت‌ها = ۶. احتمال = ۳/۶ = ۱/۲." },
+    exp: "در توان در توان، پایه را نوشته و توان‌ها را ضرب می‌کنیم: (۳²)³ = ۳²ˣ³ = ۳⁶." },
 
-  { id: 5, lesson: 1, bar: "۰/۵", q: "در پرتاب یک تاس، احتمال رو شدن عددی بزرگ‌تر از ۴ چقدر است؟",
-    opts: ["<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۲/۳</span>"],
-    correct: 1, hint: "اعداد بزرگ‌تر از ۴: ۵ و ۶",
+  { id: 5, lesson: 1, bar: "۰/۵", q: "حاصل <span class=\"math\">۷⁵ ÷ ۷³</span> کدام است؟",
+    opts: ["<span class=\"math\">۷⁸</span>", "<span class=\"math\">۷²</span>", "<span class=\"math\">۷¹⁵</span>", "<span class=\"math\">۱</span>"],
+    correct: 1, hint: "در تقسیم توان‌ها با پایه مساوی، توان‌ها کم می‌شوند.",
     sources: [
       "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
       "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
     ],
-    exp: "تعداد حالت‌های مطلوب = ۲ (اعداد ۵ و ۶). احتمال = ۲/۶ = ۱/۳." },
+    exp: "در تقسیم اعداد توان‌دار با پایه مساوی، پایه را نوشته و توان‌ها را کم می‌کنیم: ۷⁵ ÷ ۷³ = ۷⁵⁻³ = ۷²." },
 
-  { id: 6, lesson: 1, bar: "۰/۵", q: "در پرتاب یک تاس، احتمال رو شدن عددی که مضرب ۳ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۲/۳</span>"],
-    correct: 1, hint: "اعداد مضرب ۳ روی تاس: ۳ و ۶",
+  { id: 6, lesson: 1, bar: "۰/۵", q: "حاصل <span class=\"math\">۲⁻² × ۲⁵</span> کدام است؟",
+    opts: ["<span class=\"math\">۲⁻¹⁰</span>", "<span class=\"math\">۲³</span>", "<span class=\"math\">۲⁻⁷</span>", "<span class=\"math\">۲¹⁰</span>"],
+    correct: 1, hint: "توان‌ها را جمع کنید.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۳",
-      "گاما – آزمون فصل ۷ – ۱۴۰۲"
+      "گاما – آزمون فصل ۴ – ۱۴۰۲"
     ],
-    exp: "تعداد حالت‌های مطلوب = ۲ (اعداد ۳ و ۶). احتمال = ۲/۶ = ۱/۳." },
+    exp: "۲⁻² × ۲⁵ = ۲⁽⁻²⁾⁺⁵ = ۲³. در ضرب توان‌ها با پایه مساوی، توان‌ها جمع می‌شوند." },
 
-  { id: 7, lesson: 1, bar: "۰/۵", q: "احتمال رو شدن عددی که هم زوج و هم اول باشد در پرتاب یک تاس چقدر است؟",
-    opts: ["<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۰</span>"],
-    correct: 0, hint: "تنها عدد زوج اول، عدد ۲ است.",
+  { id: 7, lesson: 1, bar: "۰/۵", q: "حاصل <span class=\"math\">(−۲)³</span> کدام است؟",
+    opts: ["<span class=\"math\">−۸</span>", "<span class=\"math\">۸</span>", "<span class=\"math\">−۶</span>", "<span class=\"math\">۶</span>"],
+    correct: 0, hint: "پایه منفی و توان فرد.",
     sources: [
       "امتحان نهایی – استان فارس – خرداد ۱۴۰۱",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
+      "مدرسان – آزمون تستی فصل ۴ – ۱۴۰۳"
     ],
-    exp: "تنها عدد زوج اول روی تاس، عدد ۲ است. پس احتمال = ۱/۶." },
+    exp: "(−۲)³ = (−۲) × (−۲) × (−۲) = −۸. چون توان فرد است، حاصل منفی می‌شود." },
 
-  { id: 8, lesson: 1, bar: "۰/۵", q: "اگر دو تاس را با هم بیندازیم، تعداد کل حالت‌های ممکن (فضای نمونه) چقدر است؟",
-    opts: ["<span class=\"math\">۱۲</span>", "<span class=\"math\">۲۴</span>", "<span class=\"math\">۳۶</span>", "<span class=\"math\">۶۴</span>"],
-    correct: 2, hint: "۶ × ۶",
-    sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۰",
-      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
-      "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
-    ],
-    exp: "برای هر تاس ۶ حالت داریم. با اصل ضرب: ۶ × ۶ = ۳۶ حالت." },
-
-  /* ===== درس ۲: محاسبه احتمال ===== */
-  { id: 9, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده برابر ۷ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۳۶</span>", "<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۹</span>"],
-    correct: 2, hint: "حالت‌های مجموع ۷: (۱،۶)، (۲،۵)، (۳،۴)، (۴،۳)، (۵،۲)، (۶،۱)",
-    sources: [
-      "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲",
-      "خیلی سبز – آزمون فصل ۷ – ۱۴۰۲"
-    ],
-    exp: "حالت‌های مجموع ۷ برابر ۶ حالت است. احتمال = ۶/۳۶ = ۱/۶." },
-
-  { id: 10, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده برابر ۵ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۹</span>", "<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۴</span>"],
-    correct: 0, hint: "حالت‌های مجموع ۵: (۱،۴)، (۲،۳)، (۳،۲)، (۴،۱)",
-    sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۳ تبریز) – خرداد ۱۴۰۱",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
-    ],
-    exp: "حالت‌های مجموع ۵ برابر ۴ حالت است. احتمال = ۴/۳۶ = ۱/۹." },
-
-  { id: 11, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده کمتر از ۴ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۹</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>"],
-    correct: 0, hint: "حالت‌ها: (۱،۱)، (۱،۲)، (۲،۱)",
-    sources: [
-      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
-      "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
-    ],
-    exp: "حالت‌های مجموع کمتر از ۴ (یعنی ۲ یا ۳) برابر ۳ حالت است. احتمال = ۳/۳۶ = ۱/۱۲." },
-
-  { id: 12, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه هر دو عدد رو شده زوج باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۴</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۶</span>"],
-    correct: 0, hint: "تعداد حالت‌های زوج در هر تاس = ۳",
-    sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۲",
-      "گاما – آزمون فصل ۷ – ۱۴۰۳"
-    ],
-    exp: "حالت‌های زوج در هر تاس = ۳. با اصل ضرب: ۳ × ۳ = ۹ حالت. احتمال = ۹/۳۶ = ۱/۴." },
-
-  { id: 13, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه هر دو عدد رو شده فرد باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۴</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۶</span>"],
-    correct: 0, hint: "تعداد حالت‌های فرد در هر تاس = ۳",
-    sources: [
-      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
-    ],
-    exp: "حالت‌های فرد در هر تاس = ۳. با اصل ضرب: ۳ × ۳ = ۹ حالت. احتمال = ۹/۳۶ = ۱/۴." },
-
-  { id: 14, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده برابر ۱۲ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۳۶</span>", "<span class=\"math\">۱/۱۸</span>", "<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۶</span>"],
-    correct: 0, hint: "تنها حالت: (۶،۶)",
+  { id: 8, lesson: 1, bar: "۰/۵", q: "حاصل <span class=\"math\">(−۳)²</span> کدام است؟",
+    opts: ["<span class=\"math\">−۹</span>", "<span class=\"math\">۹</span>", "<span class=\"math\">−۶</span>", "<span class=\"math\">۶</span>"],
+    correct: 1, hint: "پایه منفی و توان زوج.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۵ تبریز) – خرداد ۱۴۰۰",
-      "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
+      "گاما – آزمون تستی فصل ۴ – ۱۴۰۲"
     ],
-    exp: "تنها حالت مجموع ۱۲ برابر (۶،۶) است. احتمال = ۱/۳۶." },
+    exp: "(−۳)² = (−۳) × (−۳) = ۹. چون توان زوج است، حاصل مثبت می‌شود." },
 
-  { id: 15, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده بزرگ‌تر از ۱۰ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۱۸</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۹</span>"],
-    correct: 0, hint: "حالت‌های مجموع ۱۱ و ۱۲",
-    sources: [
-      "امتحان نهایی – استان فارس – خرداد ۱۴۰۱",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
-    ],
-    exp: "حالت‌های مجموع ۱۱: (۵،۶)، (۶،۵) و مجموع ۱۲: (۶،۶). مجموعاً ۳ حالت. احتمال = ۳/۳۶ = ۱/۱۲." },
-
-  /* ===== درس ۳: احتمال در مسائل ترکیبی ===== */
-  { id: 16, lesson: 3, bar: "۰/۵", q: "در یک کیسه ۳ مهره قرمز و ۵ مهره آبی وجود دارد. احتمال خارج کردن یک مهره قرمز چقدر است؟",
-    opts: ["<span class=\"math\">۳/۸</span>", "<span class=\"math\">۳/۵</span>", "<span class=\"math\">۵/۸</span>", "<span class=\"math\">۱/۳</span>"],
-    correct: 0, hint: "تعداد کل مهره‌ها = ۳ + ۵ = ۸",
-    sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۱",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
-    ],
-    exp: "تعداد کل مهره‌ها = ۸. تعداد مهره‌های قرمز = ۳. احتمال = ۳/۸." },
-
-  { id: 17, lesson: 3, bar: "۰/۵", q: "در یک جعبه ۴ مهره قرمز، ۳ مهره آبی و ۵ مهره سبز وجود دارد. اگر یک مهره تصادفی خارج کنیم، احتمال اینکه آبی یا سبز باشد چقدر است؟",
-    opts: ["<span class=\"math\">۲/۳</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۵/۱۲</span>", "<span class=\"math\">۱/۴</span>"],
-    correct: 0, hint: "تعداد کل = ۱۲، تعداد آبی + سبز = ۳ + ۵ = ۸",
+  { id: 9, lesson: 1, bar: "۰/۵", q: "حاصل <span class=\"math\">(۲/۳)⁻²</span> کدام است؟",
+    opts: ["<span class=\"math\">۴/۹</span>", "<span class=\"math\">۹/۴</span>", "<span class=\"math\">−۴/۹</span>", "<span class=\"math\">−۹/۴</span>"],
+    correct: 1, hint: "کسر را معکوس کرده و توان را مثبت کنید.",
     sources: [
       "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
-      "گاما – آزمون فصل ۷ – ۱۴۰۲"
+      "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
     ],
-    exp: "تعداد کل = ۱۲. تعداد حالت‌های مطلوب (آبی یا سبز) = ۸. احتمال = ۸/۱۲ = ۲/۳." },
+    exp: "(۲/۳)⁻² = (۳/۲)² = ۹/۴. طبق قانون پایه معکوس، کسر را معکوس و توان را قرینه می‌کنیم." },
 
-  { id: 18, lesson: 3, bar: "۰/۵", q: "در یک کیسه ۴ مهره قرمز و ۵ مهره سفید داریم. دو مهره با هم بیرون می‌آوریم. احتمال اینکه هر دو سفید باشند چقدر است؟",
-    opts: ["<span class=\"math\">۵/۱۸</span>", "<span class=\"math\">۵/۹</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>"],
-    correct: 0, hint: "تعداد کل = ۹ مهره. حالت‌های انتخاب ۲ سفید از ۵ = ۱۰",
+  { id: 10, lesson: 1, bar: "۰/۵", q: "حاصل <span class=\"math\">۳⁻¹ + ۴⁻¹</span> کدام است؟",
+    opts: ["<span class=\"math\">۷/۱۲</span>", "<span class=\"math\">۱/۷</span>", "<span class=\"math\">۱۲/۷</span>", "<span class=\"math\">۱/۱۲</span>"],
+    correct: 0, hint: "هر توان منفی را جداگانه محاسبه کنید.",
     sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۳",
-      "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
+      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۱",
+      "مدرسان – آزمون تستی فصل ۴ – ۱۴۰۳"
     ],
-    exp: "تعداد کل حالت‌ها = انتخاب ۲ از ۹ = ۳۶. تعداد حالت‌های مطلوب = انتخاب ۲ از ۵ = ۱۰. احتمال = ۱۰/۳۶ = ۵/۱۸." },
+    exp: "۳⁻¹ = ۱/۳ و ۴⁻¹ = ۱/۴. حاصل جمع: ۱/۳ + ۱/۴ = ۴/۱۲ + ۳/۱۲ = ۷/۱۲." },
 
-  { id: 19, lesson: 3, bar: "۰/۵", q: "در یک خانواده ۳ فرزند وجود دارد. احتمال اینکه دقیقاً دو پسر داشته باشد چقدر است؟",
-    opts: ["<span class=\"math\">۳/۸</span>", "<span class=\"math\">۱/۸</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۴</span>"],
-    correct: 0, hint: "حالت‌های ممکن: (پ،پ،پ)، (پ،پ،د)، (پ،د،پ)، (د،پ،پ)، (پ،د،د)، (د،پ،د)، (د،د،پ)، (د،د،د)",
+  { id: 11, lesson: 1, bar: "۰/۵", q: "حاصل <span class=\"math\">۱۰⁻³</span> به صورت عدد اعشاری کدام است؟",
+    opts: ["<span class=\"math\">۰/۱</span>", "<span class=\"math\">۰/۰۱</span>", "<span class=\"math\">۰/۰۰۱</span>", "<span class=\"math\">۰/۰۰۰۱</span>"],
+    correct: 2, hint: "۱۰ به توان منفی n یعنی ممیز n رقم به سمت چپ.",
+    sources: [
+      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
+      "گاما – آزمون فصل ۴ – ۱۴۰۳"
+    ],
+    exp: "۱۰⁻³ = ۱/۱۰³ = ۱/۱۰۰۰ = ۰/۰۰۱. توان منفی ۱۰ به معنای جابجایی ممیز به سمت چپ است." },
+
+  { id: 12, lesson: 1, bar: "۰/۵", q: "حاصل <span class=\"math\">(۲⁻¹ + ۳⁻¹)⁻¹</span> کدام است؟",
+    opts: ["<span class=\"math\">۵</span>", "<span class=\"math\">۶/۵</span>", "<span class=\"math\">۵/۶</span>", "<span class=\"math\">۱/۵</span>"],
+    correct: 1, hint: "ابتدا داخل پرانتز را حساب کنید.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۲",
+      "گاما – آزمون تستی فصل ۴ – ۱۴۰۲"
+    ],
+    exp: "۲⁻¹ + ۳⁻¹ = ۱/۲ + ۱/۳ = ۵/۶. سپس (۵/۶)⁻¹ = ۶/۵." },
+
+  /* ===== درس ۲: نماد علمی ===== */
+  { id: 13, lesson: 2, bar: "۰/۵", q: "عدد <span class=\"math\">۵٬۲۰۰٬۰۰۰</span> به صورت نماد علمی کدام است؟",
+    opts: ["<span class=\"math\">۵/۲ × ۱۰⁶</span>", "<span class=\"math\">۵۲ × ۱۰⁵</span>", "<span class=\"math\">۰/۵۲ × ۱۰⁷</span>", "<span class=\"math\">۵/۲ × ۱۰⁵</span>"],
+    correct: 0, hint: "در نماد علمی، عدد بین ۱ و ۱۰ ضرب در توانی از ۱۰.",
     sources: [
       "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
+      "مدرسان – آزمون تستی فصل ۴ – ۱۴۰۳"
     ],
-    exp: "حالت‌های دقیقاً دو پسر: (پ،پ،د)، (پ،د،پ)، (د،پ،پ) = ۳ حالت از ۸. احتمال = ۳/۸." },
+    exp: "۵٬۲۰۰٬۰۰۰ = ۵/۲ × ۱۰⁶. در نماد علمی، عدد باید به صورت a × ۱۰ⁿ نوشته شود که ۱ ≤ a < ۱۰." },
 
-  { id: 20, lesson: 3, bar: "۰/۵", q: "در یک خانواده ۳ فرزند وجود دارد. احتمال اینکه حداقل یک پسر داشته باشد چقدر است؟",
-    opts: ["<span class=\"math\">۷/۸</span>", "<span class=\"math\">۱/۸</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۳/۴</span>"],
-    correct: 0, hint: "از متمم استفاده کنید: احتمال حداقل یک پسر = ۱ − احتمال هیچ پسری",
+  { id: 14, lesson: 2, bar: "۰/۵", q: "عدد <span class=\"math\">۰/۰۰۰۳۲</span> به صورت نماد علمی کدام است؟",
+    opts: ["<span class=\"math\">۳/۲ × ۱۰⁻⁴</span>", "<span class=\"math\">۳۲ × ۱۰⁻⁵</span>", "<span class=\"math\">۳/۲ × ۱۰⁴</span>", "<span class=\"math\">۰/۳۲ × ۱۰⁻³</span>"],
+    correct: 0, hint: "ممیز را بعد از اولین رقم غیرصفر قرار دهید.",
     sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۲ تبریز) – خرداد ۱۴۰۰",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۲ تبریز) – خرداد ۱۴۰۳",
+      "گاما – آزمون فصل ۴ – ۱۴۰۲"
     ],
-    exp: "احتمال هیچ پسری (یعنی سه دختر) = ۱/۸. پس احتمال حداقل یک پسر = ۱ − ۱/۸ = ۷/۸." },
+    exp: "۰/۰۰۰۳۲ = ۳/۲ × ۱۰⁻⁴. ممیز را بعد از رقم ۳ قرار می‌دهیم و چون ۴ رقم به راست جابجا شده، توان ۱۰⁻⁴ می‌شود." },
 
-  { id: 21, lesson: 3, bar: "۰/۵", q: "دو سکه را با هم پرتاب می‌کنیم. احتمال اینکه هر دو شیر بیاید چقدر است؟",
-    opts: ["<span class=\"math\">۱/۴</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۸</span>"],
-    correct: 0, hint: "فضای نمونه: {شش، شر، رش، رر}",
+  { id: 15, lesson: 2, bar: "۰/۵", q: "نماد علمی عدد <span class=\"math\">۷۸۹۰۰۰</span> کدام است؟",
+    opts: ["<span class=\"math\">۷/۸۹ × ۱۰⁵</span>", "<span class=\"math\">۷۸/۹ × ۱۰⁴</span>", "<span class=\"math\">۰/۷۸۹ × ۱۰⁶</span>", "<span class=\"math\">۷/۸۹ × ۱۰⁶</span>"],
+    correct: 0, hint: "۵ رقم بعد از ۷ قرار دارد.",
+    sources: [
+      "امتحان نهایی – استان فارس – خرداد ۱۴۰۱",
+      "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
+    ],
+    exp: "۷۸۹۰۰۰ = ۷/۸۹ × ۱۰⁵. عدد را به صورت ۷/۸۹ نوشته و ممیز ۵ رقم جابجا شده است." },
+
+  { id: 16, lesson: 2, bar: "۰/۵", q: "نماد علمی عدد <span class=\"math\">۰/۰۰۰۴۵۶</span> کدام است؟",
+    opts: ["<span class=\"math\">۴/۵۶ × ۱۰⁻⁴</span>", "<span class=\"math\">۴۵/۶ × ۱۰⁻⁵</span>", "<span class=\"math\">۴/۵۶ × ۱۰⁴</span>", "<span class=\"math\">۰/۴۵۶ × ۱۰⁻³</span>"],
+    correct: 0, hint: "ممیز را بعد از رقم ۴ قرار دهید.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۰",
+      "گاما – آزمون تستی فصل ۴ – ۱۴۰۲"
+    ],
+    exp: "۰/۰۰۰۴۵۶ = ۴/۵۶ × ۱۰⁻⁴. ممیز ۴ رقم به راست جابجا شده است." },
+
+  { id: 17, lesson: 2, bar: "۰/۵", q: "کدام‌یک از اعداد زیر به صورت نماد علمی نوشته شده است؟",
+    opts: ["<span class=\"math\">۲۳ × ۱۰⁵</span>", "<span class=\"math\">۰/۲۳ × ۱۰⁶</span>", "<span class=\"math\">۲/۳ × ۱۰⁵</span>", "<span class=\"math\">۲۳۰ × ۱۰³</span>"],
+    correct: 2, hint: "عدد باید بین ۱ و ۱۰ باشد.",
+    sources: [
+      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
+      "مدرسان – آزمون تستی فصل ۴ – ۱۴۰۳"
+    ],
+    exp: "در نماد علمی، عدد a باید بین ۱ و ۱۰ باشد (۱ ≤ a < ۱۰). گزینه ۲/۳ × ۱۰⁵ تنها گزینه‌ای است که این شرط را دارد." },
+
+  { id: 18, lesson: 2, bar: "۰/۵", q: "حاصل ضرب <span class=\"math\">(۳ × ۱۰⁴) × (۲ × ۱۰⁻²)</span> به صورت نماد علمی کدام است؟",
+    opts: ["<span class=\"math\">۶ × ۱۰²</span>", "<span class=\"math\">۶ × ۱۰⁶</span>", "<span class=\"math\">۵ × ۱۰²</span>", "<span class=\"math\">۶ × ۱۰⁻⁸</span>"],
+    correct: 0, hint: "اعداد را جداگانه ضرب کنید.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۳ تبریز) – خرداد ۱۴۰۱",
+      "گاما – آزمون فصل ۴ – ۱۴۰۲"
+    ],
+    exp: "(۳ × ۱۰⁴) × (۲ × ۱۰⁻²) = (۳×۲) × ۱۰⁴⁺⁽⁻²⁾ = ۶ × ۱۰²." },
+
+  { id: 19, lesson: 2, bar: "۰/۵", q: "عدد <span class=\"math\">۰/۰۰۵ × ۱۰⁴</span> برابر کدام عدد است؟",
+    opts: ["<span class=\"math\">۵۰</span>", "<span class=\"math\">۵۰۰</span>", "<span class=\"math\">۵۰۰۰</span>", "<span class=\"math\">۰/۵</span>"],
+    correct: 0, hint: "۰/۰۰۵ = ۵ × ۱۰⁻³",
     sources: [
       "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
       "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
     ],
-    exp: "فضای نمونه = {شش، شر، رش، رر} که ۴ حالت دارد. فقط ۱ حالت هر دو شیر است. احتمال = ۱/۴." },
+    exp: "۰/۰۰۵ × ۱۰⁴ = ۵ × ۱۰⁻³ × ۱۰⁴ = ۵ × ۱۰¹ = ۵۰." },
 
-  { id: 22, lesson: 3, bar: "۰/۵", q: "دو سکه را با هم پرتاب می‌کنیم. احتمال اینکه حداکثر یک شیر بیاید چقدر است؟",
-    opts: ["<span class=\"math\">۳/۴</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۴</span>", "<span class=\"math\">۱/۳</span>"],
-    correct: 0, hint: "از متمم استفاده کنید: احتمال حداکثر یک شیر = ۱ − احتمال دو شیر",
+  /* ===== درس ۳: ریشه‌گیری ===== */
+  { id: 20, lesson: 3, bar: "۰/۵", q: "ریشه دوم عدد <span class=\"math\">۱۶</span> کدام است؟",
+    opts: ["<span class=\"math\">۴</span>", "<span class=\"math\">۴</span> و <span class=\"math\">−۴</span>", "<span class=\"math\">۸</span>", "<span class=\"math\">۲۵۶</span>"],
+    correct: 1, hint: "هر عدد نامنفی دو ریشه دوم دارد.",
     sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۱",
-      "گاما – آزمون فصل ۷ – ۱۴۰۲"
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۰",
+      "مدرسان – آزمون تستی فصل ۴ – ۱۴۰۳"
     ],
-    exp: "احتمال دو شیر = ۱/۴. پس احتمال حداکثر یک شیر = ۱ − ۱/۴ = ۳/۴." },
+    exp: "عدد ۱۶ دو ریشه دوم دارد: ۴ و −۴. زیرا ۴² = ۱۶ و (−۴)² = ۱۶. دقت کنید که جذر اصلی (√) فقط ریشه مثبت را می‌دهد." },
 
-  { id: 23, lesson: 3, bar: "۰/۵", q: "یک تاس را دو بار پرتاب می‌کنیم. احتمال اینکه مجموع اعداد رو شده برابر ۸ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۵/۳۶</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۹</span>", "<span class=\"math\">۱/۱۲</span>"],
-    correct: 0, hint: "حالت‌های مجموع ۸: (۲،۶)، (۳،۵)، (۴،۴)، (۵،۳)، (۶،۲)",
-    sources: [
-      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
-    ],
-    exp: "حالت‌های مجموع ۸ برابر ۵ حالت است. احتمال = ۵/۳۶." },
-
-  { id: 24, lesson: 3, bar: "۰/۵", q: "در یک کیسه ۱۰ دکمه قرمز، ۸ دکمه آبی و ۴ دکمه سفید وجود دارد. احتمال خارج کردن یک دکمه آبی یا سفید چقدر است؟",
-    opts: ["<span class=\"math\">۶/۱۱</span>", "<span class=\"math\">۲/۱۱</span>", "<span class=\"math\">۸/۲۲</span>", "<span class=\"math\">۱/۲</span>"],
-    correct: 0, hint: "تعداد کل = ۲۲، تعداد آبی + سفید = ۱۲",
-    sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۲",
-      "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
-    ],
-    exp: "تعداد کل = ۱۰ + ۸ + ۴ = ۲۲. تعداد مطلوب = ۸ + ۴ = ۱۲. احتمال = ۱۲/۲۲ = ۶/۱۱." },
-
-  { id: 25, lesson: 3, bar: "۰/۵", q: "سه تاس را همزمان می‌اندازیم. احتمال اینکه حداقل دو بار عدد ۵ بیاید چقدر است؟",
-    opts: ["<span class=\"math\">۱۶/۲۱۶</span>", "<span class=\"math\">۱۵/۲۱۶</span>", "<span class=\"math\">۱۲/۲۱۶</span>", "<span class=\"math\">۶/۲۱۶</span>"],
-    correct: 0, hint: "حالت‌های دقیقاً دو ۵ و دقیقاً سه ۵",
-    sources: [
-      "آزمون تیزهوشان – مدرسه علامه جعفری تبریز – دی ۱۴۰۳",
-      "گاما – آزمون تستی تیزهوشان فصل ۷ – ۱۴۰۲"
-    ],
-    exp: "حالت‌های دقیقاً دو ۵: ۳ حالت (۵،۵،غ)، (۵،غ،۵)، (غ،۵،۵) که غ ≠ ۵ و ۵ حالت دارد → ۱۵ حالت. حالت سه ۵: ۱ حالت. مجموع = ۱۶ حالت. احتمال = ۱۶/۲۱۶." },
-
-  { id: 26, lesson: 3, bar: "۰/۵", q: "با ارقام ۰ تا ۴ تمام اعداد پنج‌رقمی بدون تکرار ساخته شده‌اند. یکی از این اعداد را تصادفی انتخاب می‌کنیم. احتمال اینکه عدد زوج باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۴</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۲/۳</span>"],
-    correct: 0, hint: "تعداد کل = ۹۶، تعداد زوج = ۴۸",
-    sources: [
-      "آزمون تیزهوشان – مدرسه علامه جعفری تبریز – دی ۱۴۰۳",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
-    ],
-    exp: "تعداد کل اعداد پنج‌رقمی = ۴ × ۴ × ۳ × ۲ × ۱ = ۹۶. تعداد اعداد زوج = ۲ × ۴ × ۳ × ۲ × ۱ = ۴۸. احتمال = ۴۸/۹۶ = ۱/۲." },
-
-  { id: 27, lesson: 3, bar: "۰/۵", q: "در یک کیسه ۵ مهره قرمز و تعدادی مهره سفید وجود دارد. احتمال سفید بودن هر دو مهره (بدون جایگذاری) برابر ۱/۴ است. تعداد مهره‌های سفید چقدر است؟",
-    opts: ["<span class=\"math\">۵</span>", "<span class=\"math\">۴</span>", "<span class=\"math\">۳</span>", "<span class=\"math\">۶</span>"],
-    correct: 0, hint: "با فرض n مهره سفید، معادله را حل کنید.",
-    sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۳",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
-    ],
-    exp: "اگر تعداد مهره‌های سفید = n باشد، تعداد کل = n + ۵. احتمال دو سفید = [n/(n+۵)] × [(n−۱)/(n+۴)] = ۱/۴. با حل معادله، n = ۵ به دست می‌آید." },
-
-  { id: 28, lesson: 3, bar: "۰/۵", q: "در یک جعبه ۳ مهره قرمز، ۴ مهره آبی و ۵ مهره سبز وجود دارد. اگر ۱ مهره تصادفی خارج کنیم، احتمال اینکه سبز نباشد چقدر است؟",
-    opts: ["<span class=\"math\">۷/۱۲</span>", "<span class=\"math\">۵/۱۲</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۳</span>"],
-    correct: 0, hint: "از متمم استفاده کنید: احتمال سبز نبودن = ۱ − احتمال سبز",
+  { id: 21, lesson: 3, bar: "۰/۵", q: "حاصل <span class=\"math\">√۴۹</span> کدام است؟",
+    opts: ["<span class=\"math\">۷</span>", "<span class=\"math\">−۷</span>", "<span class=\"math\">۷</span> و <span class=\"math\">−۷</span>", "<span class=\"math\">۲۴/۵</span>"],
+    correct: 0, hint: "علامت رادیکال فقط ریشه مثبت را می‌دهد.",
     sources: [
       "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
+      "گاما – آزمون تستی فصل ۴ – ۱۴۰۲"
     ],
-    exp: "احتمال سبز = ۵/۱۲. پس احتمال سبز نبودن = ۱ − ۵/۱۲ = ۷/۱۲." },
+    exp: "√۴۹ = ۷. علامت رادیکال (√) فقط ریشه دوم مثبت را نشان می‌دهد. ریشه دوم منفی با −√ نشان داده می‌شود." },
 
-  { id: 29, lesson: 3, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده برابر ۹ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۹</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۵/۳۶</span>"],
-    correct: 0, hint: "حالت‌های مجموع ۹: (۳،۶)، (۴،۵)، (۵،۴)، (۶،۳)",
+  { id: 22, lesson: 3, bar: "۰/۵", q: "حاصل <span class=\"math\">∛۲۷</span> کدام است؟",
+    opts: ["<span class=\"math\">۳</span>", "<span class=\"math\">−۳</span>", "<span class=\"math\">۹</span>", "<span class=\"math\">۳</span> و <span class=\"math\">−۳</span>"],
+    correct: 0, hint: "ریشه سوم عددی است که سه بار در خودش ضرب شود.",
     sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۳ تبریز) – خرداد ۱۴۰۱",
-      "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۲ تبریز) – خرداد ۱۴۰۲",
+      "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
     ],
-    exp: "حالت‌های مجموع ۹ برابر ۴ حالت است. احتمال = ۴/۳۶ = ۱/۹." },
+    exp: "∛۲۷ = ۳، زیرا ۳³ = ۲۷. ریشه سوم اعداد مثبت، عددی مثبت است." },
 
-  { id: 30, lesson: 3, bar: "۰/۵", q: "در پرتاب دو سکه و یک تاس، احتمال اینکه هر دو سکه شیر و تاس عددی اول بیاورد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۸</span>", "<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۴</span>"],
-    correct: 0, hint: "احتمال هر دو شیر = ۱/۴ و احتمال عدد اول روی تاس = ۱/۲",
+  { id: 23, lesson: 3, bar: "۰/۵", q: "کدام عدد ریشه دوم ندارد؟",
+    opts: ["<span class=\"math\">۰</span>", "<span class=\"math\">۹</span>", "<span class=\"math\">−۴</span>", "<span class=\"math\">۰/۲۵</span>"],
+    correct: 2, hint: "اعداد منفی ریشه دوم حقیقی ندارند.",
     sources: [
       "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
+      "مدرسان – آزمون تستی فصل ۴ – ۱۴۰۳"
     ],
-    exp: "احتمال دو شیر = ۱/۴. اعداد اول روی تاس = {۲، ۳، ۵} → احتمال = ۳/۶ = ۱/۲. احتمال کل = ۱/۴ × ۱/۲ = ۱/۸." }
+    exp: "عدد −۴ ریشه دوم حقیقی ندارد، زیرا مربع هیچ عدد حقیقی منفی نمی‌شود. اعداد ۰، ۹ و ۰/۲۵ ریشه دوم دارند." },
+
+  { id: 24, lesson: 3, bar: "۰/۵", q: "حاصل <span class=\"math\">∛(−۸)</span> کدام است؟",
+    opts: ["<span class=\"math\">−۲</span>", "<span class=\"math\">۲</span>", "<span class=\"math\">−۴</span>", "<span class=\"math\">۴</span>"],
+    correct: 0, hint: "(−۲)³ = −۸",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۳",
+      "گاما – آزمون فصل ۴ – ۱۴۰۲"
+    ],
+    exp: "∛(−۸) = −۲، زیرا (−۲)³ = −۸. برخلاف ریشه دوم، ریشه سوم اعداد منفی نیز حقیقی است." },
+
+  { id: 25, lesson: 3, bar: "۰/۵", q: "حاصل <span class=\"math\">√۰/۰۹</span> کدام است؟",
+    opts: ["<span class=\"math\">۰/۳</span>", "<span class=\"math\">۰/۰۳</span>", "<span class=\"math\">۰/۹</span>", "<span class=\"math\">۳</span>"],
+    correct: 0, hint: "۰/۳ × ۰/۳ = ۰/۰۹",
+    sources: [
+      "امتحان نهایی – استان فارس – خرداد ۱۴۰۱",
+      "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
+    ],
+    exp: "√۰/۰۹ = ۰/۳، زیرا ۰/۳ × ۰/۳ = ۰/۰۹." },
+
+  /* ===== درس ۴: جمع و تفریق رادیکال‌ها ===== */
+  { id: 26, lesson: 4, bar: "۰/۵", q: "حاصل <span class=\"math\">۳√۲ + ۵√۲</span> کدام است؟",
+    opts: ["<span class=\"math\">۸√۲</span>", "<span class=\"math\">۸√۴</span>", "<span class=\"math\">۱۵√۲</span>", "<span class=\"math\">۸</span>"],
+    correct: 0, hint: "ضریب‌ها را جمع کنید و رادیکال را نگه دارید.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۵ تبریز) – خرداد ۱۴۰۰",
+      "مدرسان – آزمون تستی فصل ۴ – ۱۴۰۳"
+    ],
+    exp: "۳√۲ + ۵√۲ = (۳+۵)√۲ = ۸√۲. وقتی قسمت رادیکالی یکسان باشد، ضرایب را جمع می‌کنیم." },
+
+  { id: 27, lesson: 4, bar: "۰/۵", q: "حاصل <span class=\"math\">√۱۲</span> کدام است؟",
+    opts: ["<span class=\"math\">۲√۳</span>", "<span class=\"math\">۳√۲</span>", "<span class=\"math\">۴√۳</span>", "<span class=\"math\">۶√۲</span>"],
+    correct: 0, hint: "۱۲ = ۴ × ۳",
+    sources: [
+      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
+      "گاما – آزمون تستی فصل ۴ – ۱۴۰۲"
+    ],
+    exp: "√۱۲ = √(۴×۳) = √۴ × √۳ = ۲√۳. برای ساده کردن رادیکال، بزرگترین مربع کامل را از زیر رادیکال خارج می‌کنیم." },
+
+  { id: 28, lesson: 4, bar: "۰/۵", q: "حاصل <span class=\"math\">√۵۰ − √۱۸</span> کدام است؟",
+    opts: ["<span class=\"math\">۲√۲</span>", "<span class=\"math\">۸√۲</span>", "<span class=\"math\">۲√۳۲</span>", "<span class=\"math\">√۳۲</span>"],
+    correct: 0, hint: "هر رادیکال را جداگانه ساده کنید.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۱",
+      "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
+    ],
+    exp: "√۵۰ = √(۲۵×۲) = ۵√۲ و √۱۸ = √(۹×۲) = ۳√۲. پس √۵۰ − √۱۸ = ۵√۲ − ۳√۲ = ۲√۲." },
+
+  { id: 29, lesson: 4, bar: "۰/۵", q: "حاصل <span class=\"math\">۲√۳ × ۴√۲</span> کدام است؟",
+    opts: ["<span class=\"math\">۸√۶</span>", "<span class=\"math\">۶√۶</span>", "<span class=\"math\">۸√۵</span>", "<span class=\"math\">۲۴</span>"],
+    correct: 0, hint: "ضرایب را در هم و رادیکال‌ها را در هم ضرب کنید.",
+    sources: [
+      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
+      "مدرسان – آزمون تستی فصل ۴ – ۱۴۰۳"
+    ],
+    exp: "۲√۳ × ۴√۲ = (۲×۴) × (√۳×√۲) = ۸√۶." },
+
+  { id: 30, lesson: 4, bar: "۰/۵", q: "اگر مخرج کسر <span class=\"math\">۵/√۷</span> را گویا کنیم، حاصل کدام است؟",
+    opts: ["<span class=\"math\">۵√۷/۷</span>", "<span class=\"math\">√۷/۵</span>", "<span class=\"math\">۵/۷</span>", "<span class=\"math\">۳۵</span>"],
+    correct: 0, hint: "صورت و مخرج را در √۷ ضرب کنید.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۲",
+      "گاما – آزمون فصل ۴ – ۱۴۰۲"
+    ],
+    exp: "۵/√۷ = (۵×√۷)/(√۷×√۷) = ۵√۷/۷. برای گویا کردن مخرج، صورت و مخرج را در مخرج رادیکالی ضرب می‌کنیم." }
 ];
 
 /* ===== State ===== */
@@ -685,9 +686,10 @@ let archive = [];
 /* ===== Helpers ===== */
 function getLessonLabel(lesson) {
   const map = {
-    1: "درس ۱: مفهوم احتمال و فضای نمونه",
-    2: "درس ۲: محاسبه احتمال",
-    3: "درس ۳: احتمال در مسائل ترکیبی"
+    1: "درس ۱: توان صحیح",
+    2: "درس ۲: نماد علمی",
+    3: "درس ۳: ریشه‌گیری",
+    4: "درس ۴: جمع و تفریق رادیکال‌ها"
   };
   return map[lesson] || "";
 }
@@ -940,10 +942,9 @@ function renderArchiveList() {
   archive.forEach(c => {
     const row = document.createElement('div');
     row.className = 'card-row correct-row';
-    const plainText = c.q.replace(/<[^>]*>/g, '');
     row.innerHTML = `
       <span class="qnum">#${c.id}</span>
-      <span class="qshort" title="${plainText}">${plainText.length > 55 ? plainText.substring(0, 55) + '...' : plainText}</span>
+      <span class="qshort" title="${c.q.replace(/<[^>]*>/g, '')}">${c.q.length > 55 ? c.q.replace(/<[^>]*>/g, '').substring(0, 55) + '...' : c.q.replace(/<[^>]*>/g, '')}</span>
       <span class="repeat-tag done">✅ در آرشیو</span>`;
     list.appendChild(row);
   });
@@ -961,10 +962,9 @@ function renderWrongList() {
   wrongCards.forEach(c => {
     const row = document.createElement('div');
     row.className = 'card-row wrong-row';
-    const plainText = c.q.replace(/<[^>]*>/g, '');
     row.innerHTML = `
       <span class="qnum">#${c.id}</span>
-      <span class="qshort" title="${plainText}">${plainText.length > 55 ? plainText.substring(0, 55) + '...' : plainText}</span>
+      <span class="qshort" title="${c.q.replace(/<[^>]*>/g, '')}">${c.q.length > 55 ? c.q.replace(/<[^>]*>/g, '').substring(0, 55) + '...' : c.q.replace(/<[^>]*>/g, '')}</span>
       <span class="repeat-tag need">🔁 ${repeatCount[c.id] || 0} بار</span>`;
     list.appendChild(row);
   });
@@ -1022,7 +1022,7 @@ function showArchive() {
     row.innerHTML = `
       <div style="display:flex;gap:8px;align-items:center;width:100%;">
         <span class="qnum">#${c.id}</span>
-        <span class="qshort">${c.q}</span>
+        <span class="qshort" title="${c.q.replace(/<[^>]*>/g, '')}">${c.q}</span>
         <span class="repeat-tag done">${getLessonLabel(c.lesson)}</span>
       </div>
       <div style="margin-top:6px;padding-right:52px;width:100%;">
@@ -1068,123 +1068,6 @@ document.addEventListener('keydown', function(e) {
 });
 </script>
 
-<script>
-/* همیار: ذخیرهٔ پاسخ/آرشیو/نمره روی دستگاه */
-(function () {
-  if (window.__hamyarHooked) return;
-  window.__hamyarHooked = true;
-
-  function persist() {
-    var payload = {
-      stats: typeof stats !== "undefined" ? stats : {},
-      repeatCount: typeof repeatCount !== "undefined" ? repeatCount : {},
-      archive: typeof archive !== "undefined" ? archive : [],
-      currentIndex: typeof currentIndex !== "undefined" ? currentIndex : 0,
-      currentMode: typeof currentMode !== "undefined" ? currentMode : "all",
-      currentRound: typeof currentRound !== "undefined" ? currentRound : 1,
-      radios: {}
-    };
-    document.querySelectorAll('input[type="radio"]:checked').forEach(function (r) {
-      payload.radios[r.name] = r.value;
-    });
-    var raw = JSON.stringify(payload);
-    try { localStorage.setItem("hamyar_html_state", raw); } catch (e) {}
-    if (window.Hamyar) {
-      try { Hamyar.saveState(raw); } catch (e) {}
-    }
-  }
-
-  function restore() {
-    var raw = "";
-    if (window.Hamyar) {
-      try { raw = Hamyar.loadState() || ""; } catch (e) {}
-    }
-    if (!raw) {
-      try { raw = localStorage.getItem("hamyar_html_state") || ""; } catch (e) {}
-    }
-    if (!raw) return;
-    try {
-      var p = JSON.parse(raw);
-      if (p.stats && typeof stats !== "undefined") stats = p.stats;
-      if (p.repeatCount && typeof repeatCount !== "undefined") repeatCount = p.repeatCount;
-      if (p.archive && typeof archive !== "undefined") archive = p.archive;
-      if (typeof currentIndex !== "undefined" && typeof p.currentIndex === "number") currentIndex = p.currentIndex;
-      if (p.currentMode && typeof currentMode !== "undefined") currentMode = p.currentMode;
-      if (typeof currentRound !== "undefined" && typeof p.currentRound === "number") currentRound = p.currentRound;
-      if (p.radios) {
-        Object.keys(p.radios).forEach(function (name) {
-          var el = document.querySelector('input[name="' + name + '"][value="' + p.radios[name] + '"]');
-          if (!el) return;
-          el.checked = true;
-          var opt = el.closest(".mc-option");
-          if (opt) opt.classList.add("selected");
-        });
-      }
-      if (typeof renderCard === "function") renderCard();
-    } catch (e) {}
-  }
-
-  function wrap(name, after) {
-    if (typeof window[name] !== "function") return;
-    var orig = window[name];
-    window[name] = function () {
-      var cardId = null;
-      try {
-        if (typeof cardsOrder !== "undefined" && typeof currentIndex !== "undefined" && cardsOrder[currentIndex]) {
-          cardId = String(cardsOrder[currentIndex].id);
-        }
-      } catch (e) {}
-      var r = orig.apply(this, arguments);
-      try { persist(); } catch (e) {}
-      try { if (after) after(cardId); } catch (e) {}
-      return r;
-    };
-  }
-
-  wrap("confirmAnswer", function (cardId) {
-    if (!window.Hamyar || !cardId || typeof stats === "undefined") return;
-    var s = stats[cardId] || stats[parseInt(cardId, 10)];
-    if (s && s.answered) Hamyar.recordItem(cardId, !!s.correct);
-  });
-  wrap("nextCard", null);
-  wrap("showStats", function () {
-    if (!window.Hamyar || typeof allCards === "undefined" || typeof stats === "undefined") return;
-    var ok = 0, wrong = [], tot = allCards.length;
-    allCards.forEach(function (c) {
-      var s = stats[c.id];
-      if (s && s.answered) {
-        if (s.correct) ok++;
-        else wrong.push(String(c.id));
-      }
-    });
-    var pct = tot > 0 ? Math.round((ok * 100) / tot) : 0;
-    Hamyar.recordExam(pct, tot, ok, wrong.join(","));
-  });
-  wrap("verifyAll", function () {
-    if (!window.Hamyar) return;
-    var ok = 0, tot = 0, wrong = [];
-    document.querySelectorAll(".question[data-q]").forEach(function (q) {
-      tot++;
-      var id = q.getAttribute("data-q");
-      var sel = q.querySelector('input[type="radio"]:checked');
-      var fb = q.querySelector(".feedback");
-      var correct = fb ? fb.getAttribute("data-correct") : "";
-      var good = !!(sel && correct && sel.value === correct);
-      if (sel) Hamyar.recordItem(id, good);
-      if (good) ok++;
-      else if (sel) wrong.push(id);
-    });
-    var pct = tot > 0 ? Math.round((ok * 100) / tot) : 0;
-    Hamyar.recordExam(pct, tot, ok, wrong.join(","));
-  });
-  wrap("saveAnswers", null);
-  wrap("restartAll", null);
-  wrap("startRepeatRound", null);
-
-  document.addEventListener("change", function () { try { persist(); } catch (e) {} });
-  restore();
-})();
-
-</script>
+<script src="hamyar-persist.js"></script>
 </body>
 </html>

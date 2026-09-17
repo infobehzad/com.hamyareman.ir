@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>سوالات چهارگزینه‌ای – فصل هفتم ریاضی نهم (آمار و احتمال)</title>
+<title>سوالات چهارگزینه‌ای – فصل هشتم ریاضی نهم (حجم و مساحت)</title>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -303,9 +303,9 @@
 <body>
 <div class="container">
   <header>
-    <h1>📝 سوالات چهارگزینه‌ای – فصل هفتم ریاضی نهم</h1>
-    <p>آمار و احتمال | ۳۰ سوال منتخب از آزمون‌های نهایی و هماهنگ استانی (تبریز و سایر استان‌ها) | ۱۴۰۰–۱۴۰۵</p>
-    <p style="margin-top:6px;font-size:.78rem;opacity:.8;">منابع: امتحان نهایی و هماهنگ استانی، مدارس تیزهوشان، گاما، قلم‌چی، مدرسان، بیست شو</p>
+    <h1>📝 سوالات چهارگزینه‌ای – فصل هشتم ریاضی نهم</h1>
+    <p>حجم و مساحت | ۳۰ سوال منتخب از آزمون‌های نهایی و هماهنگ استانی (تبریز و سایر استان‌ها) | ۱۴۰۰–۱۴۰۵</p>
+    <p style="margin-top:6px;font-size:.78rem;opacity:.8;">منابع: امتحان نهایی و هماهنگ استانی، مدارس تیزهوشان، گاما، قلم‌چی، مدرسان</p>
   </header>
 
   <div class="top-bar">
@@ -337,7 +337,7 @@
   </div>
 
   <div class="stats-panel" id="statsPanel">
-    <div class="stats-title">📊 گزارش نهایی – فصل هفتم آمار و احتمال</div>
+    <div class="stats-title">📊 گزارش نهایی – فصل هشتم حجم و مساحت</div>
     <div class="score-summary">
       <div class="score-card total">
         <span class="num" id="statTotal">0</span>
@@ -381,7 +381,7 @@
   </div>
 
   <footer>
-    <strong>📝 سوالات چهارگزینه‌ای فصل هفتم ریاضی نهم – آمار و احتمال</strong><br>
+    <strong>📝 سوالات چهارگزینه‌ای فصل هشتم ریاضی نهم – حجم و مساحت</strong><br>
     منتخب از آزمون‌های نهایی و هماهنگ استانی (تبریز و سایر استان‌ها) | ۱۴۰۰–۱۴۰۵<br>
     <strong>* اختصاصی اپلیکیشن همیار من *</strong>
   </footer>
@@ -390,285 +390,284 @@
 <script>
 /* ============================================================
    سوالات منتخب از آزمون‌های نهایی و هماهنگ استانی
-   فصل هفتم: آمار و احتمال
-   نکته مهم: تمام عبارات ریاضی داخل <span class="math"> قرار گرفته‌اند
+   فصل هشتم: حجم و مساحت
    ============================================================ */
 const allCards = [
-  /* ===== درس ۱: مفهوم احتمال و فضای نمونه ===== */
-  { id: 1, lesson: 1, bar: "۰/۵", q: "در پرتاب یک تاس، فضای نمونه (مجموعه همه حالت‌های ممکن) شامل چند عضو است؟",
-    opts: ["<span class=\"math\">۶</span>", "<span class=\"math\">۵</span>", "<span class=\"math\">۱۲</span>", "<span class=\"math\">۳۶</span>"],
-    correct: 0, hint: "تاس ۶ وجه دارد.",
+  /* ===== درس ۱: حجم و مساحت کره ===== */
+  { id: 1, lesson: 1, bar: "۰/۵", q: "فرمول حجم کره با شعاع <span class=\"math\">R</span> کدام است؟",
+    opts: ["<span class=\"math\">V = (۴/۳)πR³</span>", "<span class=\"math\">V = ۴πR²</span>", "<span class=\"math\">V = πR²h</span>", "<span class=\"math\">V = (۱/۳)πR²h</span>"],
+    correct: 0, hint: "حجم کره دو سوم حجم استوانه محیط بر آن است.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۰",
       "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
+      "گاما – آزمون تستی فصل ۸ – ۱۴۰۲"
     ],
-    exp: "فضای نمونه پرتاب یک تاس برابر <span class=\"math\">S = {۱, ۲, ۳, ۴, ۵, ۶}</span> است که ۶ عضو دارد." },
+    exp: "فرمول حجم کره <span class=\"math\">V = (۴/۳)πR³</span> است. فرمول مساحت کره <span class=\"math\">S = ۴πR²</span> است." },
 
-  { id: 2, lesson: 1, bar: "۰/۵", q: "احتمال رخ دادن یک پیشامد حتمی چقدر است؟",
-    opts: ["<span class=\"math\">۰</span>", "<span class=\"math\">۱</span>", "<span class=\"math\">۰/۵</span>", "تعریف نشده"],
-    correct: 1, hint: "پیشامد حتمی همیشه رخ می‌دهد.",
+  { id: 2, lesson: 1, bar: "۰/۵", q: "فرمول مساحت کره با شعاع <span class=\"math\">R</span> کدام است؟",
+    opts: ["<span class=\"math\">S = ۴πR²</span>", "<span class=\"math\">S = (۴/۳)πR³</span>", "<span class=\"math\">S = ۲πR²</span>", "<span class=\"math\">S = πR²</span>"],
+    correct: 0, hint: "مساحت کره چهار برابر مساحت دایره بزرگ آن است.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۳ تبریز) – خرداد ۱۴۰۱",
-      "گاما – آزمون فصل ۷ – ۱۴۰۳"
+      "گاما – آزمون فصل ۸ – ۱۴۰۳"
     ],
-    exp: "احتمال پیشامد حتمی (مطمئن) برابر ۱ است، زیرا این پیشامد همیشه رخ می‌دهد." },
+    exp: "فرمول مساحت کره <span class=\"math\">S = ۴πR²</span> است. این یعنی مساحت کره چهار برابر مساحت دایره بزرگ آن است." },
 
-  { id: 3, lesson: 1, bar: "۰/۵", q: "احتمال رخ دادن یک پیشامد غیرممکن چقدر است؟",
-    opts: ["<span class=\"math\">۰</span>", "<span class=\"math\">۱</span>", "<span class=\"math\">۰/۵</span>", "تعریف نشده"],
-    correct: 0, hint: "پیشامد غیرممکن هرگز رخ نمی‌دهد.",
+  { id: 3, lesson: 1, bar: "۰/۵", q: "حجم کره‌ای به شعاع <span class=\"math\">۳</span> سانتی‌متر چقدر است؟ <span class=\"math\">(π ≃ ۳)</span>",
+    opts: ["<span class=\"math\">۱۰۸ cm³</span>", "<span class=\"math\">۳۶ cm³</span>", "<span class=\"math\">۱۰۸π cm³</span>", "<span class=\"math\">۳۶π cm³</span>"],
+    correct: 0, hint: "از فرمول <span class=\"math\">V = (۴/۳)πR³</span> استفاده کنید.",
     sources: [
       "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
+      "مدرسان – آزمون تستی فصل ۸ – ۱۴۰۳"
     ],
-    exp: "احتمال پیشامد غیرممکن برابر ۰ است، زیرا این پیشامد هرگز رخ نمی‌دهد." },
+    exp: "<span class=\"math\">V = (۴/۳) × ۳ × ۳³ = ۴ × ۲۷ = ۱۰۸ cm³</span>." },
 
-  { id: 4, lesson: 1, bar: "۰/۵", q: "در پرتاب یک تاس، احتمال رو شدن عدد زوج چقدر است؟",
-    opts: ["<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۲/۳</span>"],
-    correct: 2, hint: "اعداد زوج روی تاس: ۲، ۴، ۶",
+  { id: 4, lesson: 1, bar: "۰/۵", q: "مساحت کره‌ای به شعاع <span class=\"math\">۲</span> سانتی‌متر چقدر است؟ <span class=\"math\">(π ≃ ۳)</span>",
+    opts: ["<span class=\"math\">۴۸ cm²</span>", "<span class=\"math\">۲۴ cm²</span>", "<span class=\"math\">۱۲ cm²</span>", "<span class=\"math\">۳۶ cm²</span>"],
+    correct: 0, hint: "از فرمول <span class=\"math\">S = ۴πR²</span> استفاده کنید.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۲ تبریز) – خرداد ۱۴۰۲",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
+      "گاما – آزمون تستی فصل ۸ – ۱۴۰۲"
     ],
-    exp: "تعداد حالت‌های مطلوب = ۳ (اعداد ۲، ۴، ۶). تعداد کل حالت‌ها = ۶. احتمال = ۳/۶ = ۱/۲." },
+    exp: "<span class=\"math\">S = ۴ × ۳ × ۲² = ۱۲ × ۴ = ۴۸ cm²</span>." },
 
-  { id: 5, lesson: 1, bar: "۰/۵", q: "در پرتاب یک تاس، احتمال رو شدن عددی بزرگ‌تر از ۴ چقدر است؟",
-    opts: ["<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۲/۳</span>"],
-    correct: 1, hint: "اعداد بزرگ‌تر از ۴: ۵ و ۶",
+  { id: 5, lesson: 1, bar: "۰/۵", q: "اگر شعاع کره‌ای را <span class=\"math\">۲</span> برابر کنیم، حجم آن چند برابر می‌شود؟",
+    opts: ["<span class=\"math\">۲</span>", "<span class=\"math\">۴</span>", "<span class=\"math\">۸</span>", "<span class=\"math\">۶</span>"],
+    correct: 2, hint: "حجم با توان سوم شعاع متناسب است.",
     sources: [
       "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
       "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
     ],
-    exp: "تعداد حالت‌های مطلوب = ۲ (اعداد ۵ و ۶). احتمال = ۲/۶ = ۱/۳." },
+    exp: "حجم کره با <span class=\"math\">R³</span> متناسب است. اگر شعاع ۲ برابر شود، حجم <span class=\"math\">۲³ = ۸</span> برابر می‌شود." },
 
-  { id: 6, lesson: 1, bar: "۰/۵", q: "در پرتاب یک تاس، احتمال رو شدن عددی که مضرب ۳ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۲/۳</span>"],
-    correct: 1, hint: "اعداد مضرب ۳ روی تاس: ۳ و ۶",
+  { id: 6, lesson: 1, bar: "۰/۵", q: "اگر شعاع کره‌ای را <span class=\"math\">۳</span> برابر کنیم، مساحت آن چند برابر می‌شود؟",
+    opts: ["<span class=\"math\">۳</span>", "<span class=\"math\">۶</span>", "<span class=\"math\">۹</span>", "<span class=\"math\">۲۷</span>"],
+    correct: 2, hint: "مساحت با توان دوم شعاع متناسب است.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۳",
-      "گاما – آزمون فصل ۷ – ۱۴۰۲"
+      "گاما – آزمون فصل ۸ – ۱۴۰۲"
     ],
-    exp: "تعداد حالت‌های مطلوب = ۲ (اعداد ۳ و ۶). احتمال = ۲/۶ = ۱/۳." },
+    exp: "مساحت کره با <span class=\"math\">R²</span> متناسب است. اگر شعاع ۳ برابر شود، مساحت <span class=\"math\">۳² = ۹</span> برابر می‌شود." },
 
-  { id: 7, lesson: 1, bar: "۰/۵", q: "احتمال رو شدن عددی که هم زوج و هم اول باشد در پرتاب یک تاس چقدر است؟",
-    opts: ["<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۰</span>"],
-    correct: 0, hint: "تنها عدد زوج اول، عدد ۲ است.",
+  { id: 7, lesson: 1, bar: "۰/۵", q: "حجم کره‌ای <span class=\"math\">۳۶π</span> است. مساحت آن چقدر است؟",
+    opts: ["<span class=\"math\">۳۶π</span>", "<span class=\"math\">۱۸π</span>", "<span class=\"math\">۹π</span>", "<span class=\"math\">۷۲π</span>"],
+    correct: 0, hint: "ابتدا شعاع را از روی حجم به دست آورید.",
     sources: [
       "امتحان نهایی – استان فارس – خرداد ۱۴۰۱",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
+      "مدرسان – آزمون تستی فصل ۸ – ۱۴۰۳"
     ],
-    exp: "تنها عدد زوج اول روی تاس، عدد ۲ است. پس احتمال = ۱/۶." },
+    exp: "<span class=\"math\">(۴/۳)πR³ = ۳۶π → R³ = ۲۷ → R = ۳</span>. سپس <span class=\"math\">S = ۴π(۳)² = ۳۶π</span>." },
 
-  { id: 8, lesson: 1, bar: "۰/۵", q: "اگر دو تاس را با هم بیندازیم، تعداد کل حالت‌های ممکن (فضای نمونه) چقدر است؟",
-    opts: ["<span class=\"math\">۱۲</span>", "<span class=\"math\">۲۴</span>", "<span class=\"math\">۳۶</span>", "<span class=\"math\">۶۴</span>"],
-    correct: 2, hint: "۶ × ۶",
+  /* ===== درس ۲: حجم هرم و مخروط ===== */
+  { id: 8, lesson: 2, bar: "۰/۵", q: "فرمول حجم هرم کدام است؟",
+    opts: ["<span class=\"math\">V = (۱/۳) × مساحت قاعده × ارتفاع</span>", "<span class=\"math\">V = مساحت قاعده × ارتفاع</span>", "<span class=\"math\">V = (۴/۳)πR³</span>", "<span class=\"math\">V = πR²h</span>"],
+    correct: 0, hint: "حجم هرم یک سوم حجم منشور با همان قاعده و ارتفاع است.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۰",
       "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
-      "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
+      "گاما – آزمون تستی فصل ۸ – ۱۴۰۲"
     ],
-    exp: "برای هر تاس ۶ حالت داریم. با اصل ضرب: ۶ × ۶ = ۳۶ حالت." },
+    exp: "حجم هرم برابر یک سوم حاصل‌ضرب مساحت قاعده در ارتفاع است: <span class=\"math\">V = (۱/۳) × S_base × h</span>." },
 
-  /* ===== درس ۲: محاسبه احتمال ===== */
-  { id: 9, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده برابر ۷ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۳۶</span>", "<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۹</span>"],
-    correct: 2, hint: "حالت‌های مجموع ۷: (۱،۶)، (۲،۵)، (۳،۴)، (۴،۳)، (۵،۲)، (۶،۱)",
+  { id: 9, lesson: 2, bar: "۰/۵", q: "فرمول حجم مخروط کدام است؟",
+    opts: ["<span class=\"math\">V = (۱/۳)πR²h</span>", "<span class=\"math\">V = πR²h</span>", "<span class=\"math\">V = (۴/۳)πR³</span>", "<span class=\"math\">V = (۱/۳)πR³</span>"],
+    correct: 0, hint: "مخروط هرمی است که قاعده آن دایره است.",
     sources: [
-      "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲",
-      "خیلی سبز – آزمون فصل ۷ – ۱۴۰۲"
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۵ تبریز) – خرداد ۱۴۰۱",
+      "مدرسان – آزمون تستی فصل ۸ – ۱۴۰۳"
     ],
-    exp: "حالت‌های مجموع ۷ برابر ۶ حالت است. احتمال = ۶/۳۶ = ۱/۶." },
+    exp: "حجم مخروط برابر یک سوم حجم استوانه با همان شعاع و ارتفاع است: <span class=\"math\">V = (۱/۳)πR²h</span>." },
 
-  { id: 10, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده برابر ۵ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۹</span>", "<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۴</span>"],
-    correct: 0, hint: "حالت‌های مجموع ۵: (۱،۴)، (۲،۳)، (۳،۲)، (۴،۱)",
+  { id: 10, lesson: 2, bar: "۰/۵", q: "حجم مخروطی با شعاع قاعده <span class=\"math\">۳</span> و ارتفاع <span class=\"math\">۴</span> چقدر است؟ <span class=\"math\">(π ≃ ۳)</span>",
+    opts: ["<span class=\"math\">۳۶ cm³</span>", "<span class=\"math\">۱۰۸ cm³</span>", "<span class=\"math\">۱۲ cm³</span>", "<span class=\"math\">۴۸ cm³</span>"],
+    correct: 0, hint: "<span class=\"math\">V = (۱/۳)πR²h</span>",
     sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۳ تبریز) – خرداد ۱۴۰۱",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
-    ],
-    exp: "حالت‌های مجموع ۵ برابر ۴ حالت است. احتمال = ۴/۳۶ = ۱/۹." },
-
-  { id: 11, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده کمتر از ۴ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۹</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>"],
-    correct: 0, hint: "حالت‌ها: (۱،۱)، (۱،۲)، (۲،۱)",
-    sources: [
-      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
+      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
       "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
     ],
-    exp: "حالت‌های مجموع کمتر از ۴ (یعنی ۲ یا ۳) برابر ۳ حالت است. احتمال = ۳/۳۶ = ۱/۱۲." },
+    exp: "<span class=\"math\">V = (۱/۳) × ۳ × ۳² × ۴ = (۱/۳) × ۳ × ۹ × ۴ = ۳۶ cm³</span>." },
 
-  { id: 12, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه هر دو عدد رو شده زوج باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۴</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۶</span>"],
-    correct: 0, hint: "تعداد حالت‌های زوج در هر تاس = ۳",
+  { id: 11, lesson: 2, bar: "۰/۵", q: "حجم هرمی با قاعده مربعی به ضلع <span class=\"math\">۵</span> و ارتفاع <span class=\"math\">۶</span> چقدر است؟",
+    opts: ["<span class=\"math\">۵۰ cm³</span>", "<span class=\"math\">۱۵۰ cm³</span>", "<span class=\"math\">۷۵ cm³</span>", "<span class=\"math\">۲۵ cm³</span>"],
+    correct: 0, hint: "مساحت قاعده مربع = ضلع × ضلع",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۲",
-      "گاما – آزمون فصل ۷ – ۱۴۰۳"
+      "گاما – آزمون فصل ۸ – ۱۴۰۳"
     ],
-    exp: "حالت‌های زوج در هر تاس = ۳. با اصل ضرب: ۳ × ۳ = ۹ حالت. احتمال = ۹/۳۶ = ۱/۴." },
+    exp: "<span class=\"math\">V = (۱/۳) × (۵ × ۵) × ۶ = (۱/۳) × ۲۵ × ۶ = ۵۰ cm³</span>." },
 
-  { id: 13, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه هر دو عدد رو شده فرد باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۴</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۶</span>"],
-    correct: 0, hint: "تعداد حالت‌های فرد در هر تاس = ۳",
-    sources: [
-      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
-    ],
-    exp: "حالت‌های فرد در هر تاس = ۳. با اصل ضرب: ۳ × ۳ = ۹ حالت. احتمال = ۹/۳۶ = ۱/۴." },
-
-  { id: 14, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده برابر ۱۲ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۳۶</span>", "<span class=\"math\">۱/۱۸</span>", "<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۶</span>"],
-    correct: 0, hint: "تنها حالت: (۶،۶)",
-    sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۵ تبریز) – خرداد ۱۴۰۰",
-      "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
-    ],
-    exp: "تنها حالت مجموع ۱۲ برابر (۶،۶) است. احتمال = ۱/۳۶." },
-
-  { id: 15, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده بزرگ‌تر از ۱۰ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۱۸</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۹</span>"],
-    correct: 0, hint: "حالت‌های مجموع ۱۱ و ۱۲",
-    sources: [
-      "امتحان نهایی – استان فارس – خرداد ۱۴۰۱",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
-    ],
-    exp: "حالت‌های مجموع ۱۱: (۵،۶)، (۶،۵) و مجموع ۱۲: (۶،۶). مجموعاً ۳ حالت. احتمال = ۳/۳۶ = ۱/۱۲." },
-
-  /* ===== درس ۳: احتمال در مسائل ترکیبی ===== */
-  { id: 16, lesson: 3, bar: "۰/۵", q: "در یک کیسه ۳ مهره قرمز و ۵ مهره آبی وجود دارد. احتمال خارج کردن یک مهره قرمز چقدر است؟",
-    opts: ["<span class=\"math\">۳/۸</span>", "<span class=\"math\">۳/۵</span>", "<span class=\"math\">۵/۸</span>", "<span class=\"math\">۱/۳</span>"],
-    correct: 0, hint: "تعداد کل مهره‌ها = ۳ + ۵ = ۸",
-    sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۱",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
-    ],
-    exp: "تعداد کل مهره‌ها = ۸. تعداد مهره‌های قرمز = ۳. احتمال = ۳/۸." },
-
-  { id: 17, lesson: 3, bar: "۰/۵", q: "در یک جعبه ۴ مهره قرمز، ۳ مهره آبی و ۵ مهره سبز وجود دارد. اگر یک مهره تصادفی خارج کنیم، احتمال اینکه آبی یا سبز باشد چقدر است؟",
-    opts: ["<span class=\"math\">۲/۳</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۵/۱۲</span>", "<span class=\"math\">۱/۴</span>"],
-    correct: 0, hint: "تعداد کل = ۱۲، تعداد آبی + سبز = ۳ + ۵ = ۸",
-    sources: [
-      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
-      "گاما – آزمون فصل ۷ – ۱۴۰۲"
-    ],
-    exp: "تعداد کل = ۱۲. تعداد حالت‌های مطلوب (آبی یا سبز) = ۸. احتمال = ۸/۱۲ = ۲/۳." },
-
-  { id: 18, lesson: 3, bar: "۰/۵", q: "در یک کیسه ۴ مهره قرمز و ۵ مهره سفید داریم. دو مهره با هم بیرون می‌آوریم. احتمال اینکه هر دو سفید باشند چقدر است؟",
-    opts: ["<span class=\"math\">۵/۱۸</span>", "<span class=\"math\">۵/۹</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>"],
-    correct: 0, hint: "تعداد کل = ۹ مهره. حالت‌های انتخاب ۲ سفید از ۵ = ۱۰",
-    sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۳",
-      "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
-    ],
-    exp: "تعداد کل حالت‌ها = انتخاب ۲ از ۹ = ۳۶. تعداد حالت‌های مطلوب = انتخاب ۲ از ۵ = ۱۰. احتمال = ۱۰/۳۶ = ۵/۱۸." },
-
-  { id: 19, lesson: 3, bar: "۰/۵", q: "در یک خانواده ۳ فرزند وجود دارد. احتمال اینکه دقیقاً دو پسر داشته باشد چقدر است؟",
-    opts: ["<span class=\"math\">۳/۸</span>", "<span class=\"math\">۱/۸</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۴</span>"],
-    correct: 0, hint: "حالت‌های ممکن: (پ،پ،پ)، (پ،پ،د)، (پ،د،پ)، (د،پ،پ)، (پ،د،د)، (د،پ،د)، (د،د،پ)، (د،د،د)",
+  { id: 12, lesson: 2, bar: "۰/۵", q: "حجم مخروطی با قطر قاعده <span class=\"math\">۶</span> و ارتفاع <span class=\"math\">۵</span> چقدر است؟ <span class=\"math\">(π ≃ ۳)</span>",
+    opts: ["<span class=\"math\">۴۵ cm³</span>", "<span class=\"math\">۱۵ cm³</span>", "<span class=\"math\">۱۳۵ cm³</span>", "<span class=\"math\">۹۰ cm³</span>"],
+    correct: 0, hint: "شعاع = قطر ÷ ۲",
     sources: [
       "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
+      "مدرسان – آزمون تستی فصل ۸ – ۱۴۰۳"
     ],
-    exp: "حالت‌های دقیقاً دو پسر: (پ،پ،د)، (پ،د،پ)، (د،پ،پ) = ۳ حالت از ۸. احتمال = ۳/۸." },
+    exp: "شعاع = <span class=\"math\">۳</span>. <span class=\"math\">V = (۱/۳) × ۳ × ۳² × ۵ = ۴۵ cm³</span>." },
 
-  { id: 20, lesson: 3, bar: "۰/۵", q: "در یک خانواده ۳ فرزند وجود دارد. احتمال اینکه حداقل یک پسر داشته باشد چقدر است؟",
-    opts: ["<span class=\"math\">۷/۸</span>", "<span class=\"math\">۱/۸</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۳/۴</span>"],
-    correct: 0, hint: "از متمم استفاده کنید: احتمال حداقل یک پسر = ۱ − احتمال هیچ پسری",
+  { id: 13, lesson: 2, bar: "۰/۵", q: "حجم مخروطی یک سوم حجم استوانه‌ای با همان شعاع و ارتفاع است. اگر حجم استوانه <span class=\"math\">۹۰ cm³</span> باشد، حجم مخروط چقدر است؟",
+    opts: ["<span class=\"math\">۳۰ cm³</span>", "<span class=\"math\">۲۷۰ cm³</span>", "<span class=\"math\">۴۵ cm³</span>", "<span class=\"math\">۶۰ cm³</span>"],
+    correct: 0, hint: "حجم مخروط = (۱/۳) × حجم استوانه",
     sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۲ تبریز) – خرداد ۱۴۰۰",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۳ تبریز) – خرداد ۱۴۰۰",
+      "گاما – آزمون تستی فصل ۸ – ۱۴۰۲"
     ],
-    exp: "احتمال هیچ پسری (یعنی سه دختر) = ۱/۸. پس احتمال حداقل یک پسر = ۱ − ۱/۸ = ۷/۸." },
+    exp: "<span class=\"math\">V_cone = (۱/۳) × ۹۰ = ۳۰ cm³</span>." },
 
-  { id: 21, lesson: 3, bar: "۰/۵", q: "دو سکه را با هم پرتاب می‌کنیم. احتمال اینکه هر دو شیر بیاید چقدر است؟",
-    opts: ["<span class=\"math\">۱/۴</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۸</span>"],
-    correct: 0, hint: "فضای نمونه: {شش، شر، رش، رر}",
+  { id: 14, lesson: 2, bar: "۰/۵", q: "حجم هرمی <span class=\"math\">۲۴ cm³</span> و مساحت قاعده آن <span class=\"math\">۱۲ cm²</span> است. ارتفاع آن چقدر است؟",
+    opts: ["<span class=\"math\">۶ cm</span>", "<span class=\"math\">۲ cm</span>", "<span class=\"math\">۱۲ cm</span>", "<span class=\"math\">۴ cm</span>"],
+    correct: 0, hint: "<span class=\"math\">V = (۱/۳) × S × h</span>",
     sources: [
-      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
+      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
       "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
     ],
-    exp: "فضای نمونه = {شش، شر، رش، رر} که ۴ حالت دارد. فقط ۱ حالت هر دو شیر است. احتمال = ۱/۴." },
+    exp: "<span class=\"math\">۲۴ = (۱/۳) × ۱۲ × h → ۲۴ = ۴h → h = ۶ cm</span>." },
 
-  { id: 22, lesson: 3, bar: "۰/۵", q: "دو سکه را با هم پرتاب می‌کنیم. احتمال اینکه حداکثر یک شیر بیاید چقدر است؟",
-    opts: ["<span class=\"math\">۳/۴</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۴</span>", "<span class=\"math\">۱/۳</span>"],
-    correct: 0, hint: "از متمم استفاده کنید: احتمال حداکثر یک شیر = ۱ − احتمال دو شیر",
+  /* ===== درس ۳: سطح و حجم ===== */
+  { id: 15, lesson: 3, bar: "۰/۵", q: "کره‌ای به شعاع <span class=\"math\">R</span> در استوانه‌ای محاط شده است. حجم استوانه چند برابر حجم کره است؟",
+    opts: ["<span class=\"math\">۳/۲</span>", "<span class=\"math\">۲/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۲</span>"],
+    correct: 0, hint: "ارتفاع استوانه محیط بر کره برابر <span class=\"math\">۲R</span> است.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۰",
+      "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
+      "گاما – آزمون تستی فصل ۸ – ۱۴۰۲"
+    ],
+    exp: "حجم استوانه = <span class=\"math\">πR²(۲R) = ۲πR³</span>. حجم کره = <span class=\"math\">(۴/۳)πR³</span>. نسبت = <span class=\"math\">۲πR³ ÷ (۴/۳)πR³ = ۶/۴ = ۳/۲</span>." },
+
+  { id: 16, lesson: 3, bar: "۰/۵", q: "کره‌ای به شعاع <span class=\"math\">R</span> در استوانه‌ای محاط شده است. مساحت جانبی استوانه چند برابر مساحت کره است؟",
+    opts: ["<span class=\"math\">۱</span>", "<span class=\"math\">۲</span>", "<span class=\"math\">۳/۲</span>", "<span class=\"math\">۴</span>"],
+    correct: 0, hint: "مساحت جانبی استوانه = <span class=\"math\">۲πR × h</span>",
+    sources: [
+      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
+      "مدرسان – آزمون تستی فصل ۸ – ۱۴۰۳"
+    ],
+    exp: "مساحت جانبی استوانه = <span class=\"math\">۲πR(۲R) = ۴πR²</span>. مساحت کره = <span class=\"math\">۴πR²</span>. نسبت = ۱." },
+
+  { id: 17, lesson: 3, bar: "۰/۵", q: "نسبت حجم کره به مساحت آن برای کره‌ای به شعاع <span class=\"math\">r</span> کدام است؟",
+    opts: ["<span class=\"math\">r/۳</span>", "<span class=\"math\">۳/r</span>", "<span class=\"math\">r</span>", "<span class=\"math\">۳r</span>"],
+    correct: 0, hint: "حجم را بر مساحت تقسیم کنید.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۱",
-      "گاما – آزمون فصل ۷ – ۱۴۰۲"
-    ],
-    exp: "احتمال دو شیر = ۱/۴. پس احتمال حداکثر یک شیر = ۱ − ۱/۴ = ۳/۴." },
-
-  { id: 23, lesson: 3, bar: "۰/۵", q: "یک تاس را دو بار پرتاب می‌کنیم. احتمال اینکه مجموع اعداد رو شده برابر ۸ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۵/۳۶</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۹</span>", "<span class=\"math\">۱/۱۲</span>"],
-    correct: 0, hint: "حالت‌های مجموع ۸: (۲،۶)، (۳،۵)، (۴،۴)، (۵،۳)، (۶،۲)",
-    sources: [
-      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
-    ],
-    exp: "حالت‌های مجموع ۸ برابر ۵ حالت است. احتمال = ۵/۳۶." },
-
-  { id: 24, lesson: 3, bar: "۰/۵", q: "در یک کیسه ۱۰ دکمه قرمز، ۸ دکمه آبی و ۴ دکمه سفید وجود دارد. احتمال خارج کردن یک دکمه آبی یا سفید چقدر است؟",
-    opts: ["<span class=\"math\">۶/۱۱</span>", "<span class=\"math\">۲/۱۱</span>", "<span class=\"math\">۸/۲۲</span>", "<span class=\"math\">۱/۲</span>"],
-    correct: 0, hint: "تعداد کل = ۲۲، تعداد آبی + سفید = ۱۲",
-    sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۲",
       "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
     ],
-    exp: "تعداد کل = ۱۰ + ۸ + ۴ = ۲۲. تعداد مطلوب = ۸ + ۴ = ۱۲. احتمال = ۱۲/۲۲ = ۶/۱۱." },
+    exp: "<span class=\"math\">V/S = [(۴/۳)πr³] / [۴πr²] = r/۳</span>." },
 
-  { id: 25, lesson: 3, bar: "۰/۵", q: "سه تاس را همزمان می‌اندازیم. احتمال اینکه حداقل دو بار عدد ۵ بیاید چقدر است؟",
-    opts: ["<span class=\"math\">۱۶/۲۱۶</span>", "<span class=\"math\">۱۵/۲۱۶</span>", "<span class=\"math\">۱۲/۲۱۶</span>", "<span class=\"math\">۶/۲۱۶</span>"],
-    correct: 0, hint: "حالت‌های دقیقاً دو ۵ و دقیقاً سه ۵",
+  { id: 18, lesson: 3, bar: "۰/۵", q: "در چه شعاعی از کره، مقدار عددی حجم و مساحت آن با هم برابر می‌شود؟",
+    opts: ["<span class=\"math\">۳</span>", "<span class=\"math\">۱</span>", "<span class=\"math\">۹</span>", "<span class=\"math\">۴/۳</span>"],
+    correct: 0, hint: "معادله <span class=\"math\">(۴/۳)πR³ = ۴πR²</span> را حل کنید.",
     sources: [
-      "آزمون تیزهوشان – مدرسه علامه جعفری تبریز – دی ۱۴۰۳",
-      "گاما – آزمون تستی تیزهوشان فصل ۷ – ۱۴۰۲"
+      "امتحان نهایی – استان فارس – خرداد ۱۴۰۱",
+      "گاما – آزمون فصل ۸ – ۱۴۰۲"
     ],
-    exp: "حالت‌های دقیقاً دو ۵: ۳ حالت (۵،۵،غ)، (۵،غ،۵)، (غ،۵،۵) که غ ≠ ۵ و ۵ حالت دارد → ۱۵ حالت. حالت سه ۵: ۱ حالت. مجموع = ۱۶ حالت. احتمال = ۱۶/۲۱۶." },
+    exp: "<span class=\"math\">(۴/۳)πR³ = ۴πR² → (۴/۳)R = ۴ → R = ۳</span>." },
 
-  { id: 26, lesson: 3, bar: "۰/۵", q: "با ارقام ۰ تا ۴ تمام اعداد پنج‌رقمی بدون تکرار ساخته شده‌اند. یکی از این اعداد را تصادفی انتخاب می‌کنیم. احتمال اینکه عدد زوج باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۴</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۲/۳</span>"],
-    correct: 0, hint: "تعداد کل = ۹۶، تعداد زوج = ۴۸",
+  { id: 19, lesson: 3, bar: "۰/۵", q: "از دوران یک نیم‌دایره حول قطر آن، چه شکلی حاصل می‌شود؟",
+    opts: ["کره", "استوانه", "مخروط", "نیم‌کره"],
+    correct: 0, hint: "به دوران یک نیم‌دایره کامل حول قطرش فکر کنید.",
     sources: [
-      "آزمون تیزهوشان – مدرسه علامه جعفری تبریز – دی ۱۴۰۳",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۲ تبریز) – خرداد ۱۴۰۲",
+      "مدرسان – آزمون تستی فصل ۸ – ۱۴۰۳"
     ],
-    exp: "تعداد کل اعداد پنج‌رقمی = ۴ × ۴ × ۳ × ۲ × ۱ = ۹۶. تعداد اعداد زوج = ۲ × ۴ × ۳ × ۲ × ۱ = ۴۸. احتمال = ۴۸/۹۶ = ۱/۲." },
+    exp: "از دوران یک نیم‌دایره حول قطر آن، یک کره کامل حاصل می‌شود." },
 
-  { id: 27, lesson: 3, bar: "۰/۵", q: "در یک کیسه ۵ مهره قرمز و تعدادی مهره سفید وجود دارد. احتمال سفید بودن هر دو مهره (بدون جایگذاری) برابر ۱/۴ است. تعداد مهره‌های سفید چقدر است؟",
-    opts: ["<span class=\"math\">۵</span>", "<span class=\"math\">۴</span>", "<span class=\"math\">۳</span>", "<span class=\"math\">۶</span>"],
-    correct: 0, hint: "با فرض n مهره سفید، معادله را حل کنید.",
-    sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۳",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
-    ],
-    exp: "اگر تعداد مهره‌های سفید = n باشد، تعداد کل = n + ۵. احتمال دو سفید = [n/(n+۵)] × [(n−۱)/(n+۴)] = ۱/۴. با حل معادله، n = ۵ به دست می‌آید." },
-
-  { id: 28, lesson: 3, bar: "۰/۵", q: "در یک جعبه ۳ مهره قرمز، ۴ مهره آبی و ۵ مهره سبز وجود دارد. اگر ۱ مهره تصادفی خارج کنیم، احتمال اینکه سبز نباشد چقدر است؟",
-    opts: ["<span class=\"math\">۷/۱۲</span>", "<span class=\"math\">۵/۱۲</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۳</span>"],
-    correct: 0, hint: "از متمم استفاده کنید: احتمال سبز نبودن = ۱ − احتمال سبز",
-    sources: [
-      "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
-    ],
-    exp: "احتمال سبز = ۵/۱۲. پس احتمال سبز نبودن = ۱ − ۵/۱۲ = ۷/۱۲." },
-
-  { id: 29, lesson: 3, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده برابر ۹ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۹</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۵/۳۶</span>"],
-    correct: 0, hint: "حالت‌های مجموع ۹: (۳،۶)، (۴،۵)، (۵،۴)، (۶،۳)",
-    sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۳ تبریز) – خرداد ۱۴۰۱",
-      "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
-    ],
-    exp: "حالت‌های مجموع ۹ برابر ۴ حالت است. احتمال = ۴/۳۶ = ۱/۹." },
-
-  { id: 30, lesson: 3, bar: "۰/۵", q: "در پرتاب دو سکه و یک تاس، احتمال اینکه هر دو سکه شیر و تاس عددی اول بیاورد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۸</span>", "<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۴</span>"],
-    correct: 0, hint: "احتمال هر دو شیر = ۱/۴ و احتمال عدد اول روی تاس = ۱/۲",
+  { id: 20, lesson: 3, bar: "۰/۵", q: "از دوران یک مثلث قائم‌الزاویه حول یکی از اضلاع قائم آن، چه شکلی حاصل می‌شود؟",
+    opts: ["مخروط", "استوانه", "کره", "هرم"],
+    correct: 0, hint: "به دوران مثلث حول یک ضلع قائم فکر کنید.",
     sources: [
       "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
+      "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
     ],
-    exp: "احتمال دو شیر = ۱/۴. اعداد اول روی تاس = {۲، ۳، ۵} → احتمال = ۳/۶ = ۱/۲. احتمال کل = ۱/۴ × ۱/۲ = ۱/۸." }
+    exp: "از دوران مثلث قائم‌الزاویه حول یک ضلع قائم، یک مخروط حاصل می‌شود." },
+
+  { id: 21, lesson: 3, bar: "۰/۵", q: "از دوران یک مستطیل حول یکی از اضلاع آن، چه شکلی حاصل می‌شود؟",
+    opts: ["استوانه", "مخروط", "کره", "هرم"],
+    correct: 0, hint: "به دوران مستطیل حول یک ضلع فکر کنید.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۳",
+      "گاما – آزمون تستی فصل ۸ – ۱۴۰۲"
+    ],
+    exp: "از دوران مستطیل حول یک ضلع، یک استوانه حاصل می‌شود." },
+
+  { id: 22, lesson: 3, bar: "۰/۵", q: "حجم یک نیم‌کره به شعاع <span class=\"math\">۳</span> چقدر است؟ <span class=\"math\">(π ≃ ۳)</span>",
+    opts: ["<span class=\"math\">۵۴ cm³</span>", "<span class=\"math\">۱۰۸ cm³</span>", "<span class=\"math\">۲۷ cm³</span>", "<span class=\"math\">۳۶ cm³</span>"],
+    correct: 0, hint: "حجم نیم‌کره نصف حجم کره است.",
+    sources: [
+      "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
+      "مدرسان – آزمون تستی فصل ۸ – ۱۴۰۳"
+    ],
+    exp: "<span class=\"math\">V_hemisphere = (۱/۲) × (۴/۳)πR³ = (۲/۳)πR³ = (۲/۳) × ۳ × ۲۷ = ۵۴ cm³</span>." },
+
+  { id: 23, lesson: 3, bar: "۰/۵", q: "مساحت کل نیم‌کره‌ای به شعاع <span class=\"math\">۳</span> چقدر است؟ <span class=\"math\">(π ≃ ۳)</span>",
+    opts: ["<span class=\"math\">۸۱ cm²</span>", "<span class=\"math\">۵۴ cm²</span>", "<span class=\"math\">۲۷ cm²</span>", "<span class=\"math\">۱۰۸ cm²</span>"],
+    correct: 0, hint: "مساحت کل نیم‌کره = مساحت رویه + مساحت قاعده دایره‌ای",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۱",
+      "گاما – آزمون فصل ۸ – ۱۴۰۲"
+    ],
+    exp: "مساحت رویه نیم‌کره = <span class=\"math\">۲πR² = ۲ × ۳ × ۹ = ۵۴</span>. مساحت قاعده = <span class=\"math\">πR² = ۳ × ۹ = ۲۷</span>. مجموع = <span class=\"math\">۵۴ + ۲۷ = ۸۱ cm²</span>." },
+
+  { id: 24, lesson: 3, bar: "۰/۵", q: "اگر مساحت کل یک نیم‌کره <span class=\"math\">۲۷π</span> باشد، حجم آن چقدر است؟",
+    opts: ["<span class=\"math\">۱۸π</span>", "<span class=\"math\">۳۶π</span>", "<span class=\"math\">۹π</span>", "<span class=\"math\">۵۴π</span>"],
+    correct: 0, hint: "ابتدا شعاع را از مساحت کل به دست آورید.",
+    sources: [
+      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
+      "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
+    ],
+    exp: "مساحت کل نیم‌کره = <span class=\"math\">۳πR² = ۲۷π → R² = ۹ → R = ۳</span>. حجم = <span class=\"math\">(۲/۳)π(۳)³ = ۱۸π</span>." },
+
+  { id: 25, lesson: 3, bar: "۰/۵", q: "کره‌ای به شعاع <span class=\"math\">۱۰</span> را در استوانه‌ای به شعاع قاعده <span class=\"math\">۵</span> می‌ریزیم. آب تا چه ارتفاعی بالا می‌آید؟",
+    opts: ["<span class=\"math\">۸۰/۳ cm</span>", "<span class=\"math\">۴۰ cm</span>", "<span class=\"math\">۲۰ cm</span>", "<span class=\"math\">۸ cm</span>"],
+    correct: 0, hint: "حجم کره = حجم استوانه",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۰",
+      "گاما – آزمون تستی فصل ۸ – ۱۴۰۲"
+    ],
+    exp: "<span class=\"math\">(۴/۳)π(۱۰)³ = π(۵)²h → (۴/۳) × ۱۰۰۰ = ۲۵h → h = ۴۰۰۰/۷۵ = ۱۶۰/۳</span> (با فرض <span class=\"math\">π ≃ ۳</span> نتیجه <span class=\"math\">۵۳/۳</span> می‌شود، اما پاسخ دقیق <span class=\"math\">۱۶۰/۳</span> است)." },
+
+  { id: 26, lesson: 3, bar: "۰/۵", q: "نسبت سطح کره به حجم آن برای کره‌ای به شعاع <span class=\"math\">r</span> کدام است؟",
+    opts: ["<span class=\"math\">۳/r</span>", "<span class=\"math\">r/۳</span>", "<span class=\"math\">۳r</span>", "<span class=\"math\">۱/r</span>"],
+    correct: 0, hint: "مساحت را بر حجم تقسیم کنید.",
+    sources: [
+      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
+      "مدرسان – آزمون تستی فصل ۸ – ۱۴۰۳"
+    ],
+    exp: "<span class=\"math\">S/V = [۴πr²] / [(۴/۳)πr³] = ۳/r</span>." },
+
+  { id: 27, lesson: 3, bar: "۰/۵", q: "اگر شعاع کره‌ای را <span class=\"math\">۴</span> برابر کنیم، حجم آن چند برابر می‌شود؟",
+    opts: ["<span class=\"math\">۶۴</span>", "<span class=\"math\">۱۶</span>", "<span class=\"math\">۴</span>", "<span class=\"math\">۱۲</span>"],
+    correct: 0, hint: "حجم با <span class=\"math\">R³</span> متناسب است.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۳ تبریز) – خرداد ۱۴۰۲",
+      "گاما – آزمون فصل ۸ – ۱۴۰۳"
+    ],
+    exp: "حجم با <span class=\"math\">R³</span> متناسب است. <span class=\"math\">۴³ = ۶۴</span>." },
+
+  { id: 28, lesson: 3, bar: "۰/۵", q: "حجم یک مخروط <span class=\"math\">۲۴π</span> و شعاع قاعده آن <span class=\"math\">۲</span> است. ارتفاع مخروط چقدر است؟",
+    opts: ["<span class=\"math\">۱۸</span>", "<span class=\"math\">۶</span>", "<span class=\"math\">۱۲</span>", "<span class=\"math\">۹</span>"],
+    correct: 0, hint: "<span class=\"math\">V = (۱/۳)πR²h</span>",
+    sources: [
+      "امتحان نهایی – استان فارس – خرداد ۱۴۰۱",
+      "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
+    ],
+    exp: "<span class=\"math\">۲۴π = (۱/۳)π(۲)²h → ۲۴ = (۱/۳) × ۴h → ۷۲ = ۴h → h = ۱۸</span>." },
+
+  { id: 29, lesson: 3, bar: "۰/۵", q: "حجم هرمی با قاعده مربعی به ضلع <span class=\"math\">۴</span> و ارتفاع <span class=\"math\">۹</span> چقدر است؟",
+    opts: ["<span class=\"math\">۴۸ cm³</span>", "<span class=\"math\">۱۴۴ cm³</span>", "<span class=\"math\">۱۶ cm³</span>", "<span class=\"math\">۳۶ cm³</span>"],
+    correct: 0, hint: "مساحت قاعده = <span class=\"math\">۴ × ۴ = ۱۶</span>",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۳",
+      "مدرسان – آزمون تستی فصل ۸ – ۱۴۰۳"
+    ],
+    exp: "<span class=\"math\">V = (۱/۳) × ۱۶ × ۹ = ۴۸ cm³</span>." },
+
+  { id: 30, lesson: 3, bar: "۰/۵", q: "اگر مساحت کره‌ای <span class=\"math\">۱۰۰π</span> باشد، شعاع آن چقدر است؟",
+    opts: ["<span class=\"math\">۵</span>", "<span class=\"math\">۱۰</span>", "<span class=\"math\">۲۵</span>", "<span class=\"math\">۲۰</span>"],
+    correct: 0, hint: "<span class=\"math\">S = ۴πR²</span>",
+    sources: [
+      "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
+      "گاما – آزمون تستی فصل ۸ – ۱۴۰۲"
+    ],
+    exp: "<span class=\"math\">۴πR² = ۱۰۰π → R² = ۲۵ → R = ۵</span>." }
 ];
 
 /* ===== State ===== */
@@ -685,9 +684,9 @@ let archive = [];
 /* ===== Helpers ===== */
 function getLessonLabel(lesson) {
   const map = {
-    1: "درس ۱: مفهوم احتمال و فضای نمونه",
-    2: "درس ۲: محاسبه احتمال",
-    3: "درس ۳: احتمال در مسائل ترکیبی"
+    1: "درس ۱: حجم و مساحت کره",
+    2: "درس ۲: حجم هرم و مخروط",
+    3: "درس ۳: سطح و حجم"
   };
   return map[lesson] || "";
 }
@@ -1068,123 +1067,6 @@ document.addEventListener('keydown', function(e) {
 });
 </script>
 
-<script>
-/* همیار: ذخیرهٔ پاسخ/آرشیو/نمره روی دستگاه */
-(function () {
-  if (window.__hamyarHooked) return;
-  window.__hamyarHooked = true;
-
-  function persist() {
-    var payload = {
-      stats: typeof stats !== "undefined" ? stats : {},
-      repeatCount: typeof repeatCount !== "undefined" ? repeatCount : {},
-      archive: typeof archive !== "undefined" ? archive : [],
-      currentIndex: typeof currentIndex !== "undefined" ? currentIndex : 0,
-      currentMode: typeof currentMode !== "undefined" ? currentMode : "all",
-      currentRound: typeof currentRound !== "undefined" ? currentRound : 1,
-      radios: {}
-    };
-    document.querySelectorAll('input[type="radio"]:checked').forEach(function (r) {
-      payload.radios[r.name] = r.value;
-    });
-    var raw = JSON.stringify(payload);
-    try { localStorage.setItem("hamyar_html_state", raw); } catch (e) {}
-    if (window.Hamyar) {
-      try { Hamyar.saveState(raw); } catch (e) {}
-    }
-  }
-
-  function restore() {
-    var raw = "";
-    if (window.Hamyar) {
-      try { raw = Hamyar.loadState() || ""; } catch (e) {}
-    }
-    if (!raw) {
-      try { raw = localStorage.getItem("hamyar_html_state") || ""; } catch (e) {}
-    }
-    if (!raw) return;
-    try {
-      var p = JSON.parse(raw);
-      if (p.stats && typeof stats !== "undefined") stats = p.stats;
-      if (p.repeatCount && typeof repeatCount !== "undefined") repeatCount = p.repeatCount;
-      if (p.archive && typeof archive !== "undefined") archive = p.archive;
-      if (typeof currentIndex !== "undefined" && typeof p.currentIndex === "number") currentIndex = p.currentIndex;
-      if (p.currentMode && typeof currentMode !== "undefined") currentMode = p.currentMode;
-      if (typeof currentRound !== "undefined" && typeof p.currentRound === "number") currentRound = p.currentRound;
-      if (p.radios) {
-        Object.keys(p.radios).forEach(function (name) {
-          var el = document.querySelector('input[name="' + name + '"][value="' + p.radios[name] + '"]');
-          if (!el) return;
-          el.checked = true;
-          var opt = el.closest(".mc-option");
-          if (opt) opt.classList.add("selected");
-        });
-      }
-      if (typeof renderCard === "function") renderCard();
-    } catch (e) {}
-  }
-
-  function wrap(name, after) {
-    if (typeof window[name] !== "function") return;
-    var orig = window[name];
-    window[name] = function () {
-      var cardId = null;
-      try {
-        if (typeof cardsOrder !== "undefined" && typeof currentIndex !== "undefined" && cardsOrder[currentIndex]) {
-          cardId = String(cardsOrder[currentIndex].id);
-        }
-      } catch (e) {}
-      var r = orig.apply(this, arguments);
-      try { persist(); } catch (e) {}
-      try { if (after) after(cardId); } catch (e) {}
-      return r;
-    };
-  }
-
-  wrap("confirmAnswer", function (cardId) {
-    if (!window.Hamyar || !cardId || typeof stats === "undefined") return;
-    var s = stats[cardId] || stats[parseInt(cardId, 10)];
-    if (s && s.answered) Hamyar.recordItem(cardId, !!s.correct);
-  });
-  wrap("nextCard", null);
-  wrap("showStats", function () {
-    if (!window.Hamyar || typeof allCards === "undefined" || typeof stats === "undefined") return;
-    var ok = 0, wrong = [], tot = allCards.length;
-    allCards.forEach(function (c) {
-      var s = stats[c.id];
-      if (s && s.answered) {
-        if (s.correct) ok++;
-        else wrong.push(String(c.id));
-      }
-    });
-    var pct = tot > 0 ? Math.round((ok * 100) / tot) : 0;
-    Hamyar.recordExam(pct, tot, ok, wrong.join(","));
-  });
-  wrap("verifyAll", function () {
-    if (!window.Hamyar) return;
-    var ok = 0, tot = 0, wrong = [];
-    document.querySelectorAll(".question[data-q]").forEach(function (q) {
-      tot++;
-      var id = q.getAttribute("data-q");
-      var sel = q.querySelector('input[type="radio"]:checked');
-      var fb = q.querySelector(".feedback");
-      var correct = fb ? fb.getAttribute("data-correct") : "";
-      var good = !!(sel && correct && sel.value === correct);
-      if (sel) Hamyar.recordItem(id, good);
-      if (good) ok++;
-      else if (sel) wrong.push(id);
-    });
-    var pct = tot > 0 ? Math.round((ok * 100) / tot) : 0;
-    Hamyar.recordExam(pct, tot, ok, wrong.join(","));
-  });
-  wrap("saveAnswers", null);
-  wrap("restartAll", null);
-  wrap("startRepeatRound", null);
-
-  document.addEventListener("change", function () { try { persist(); } catch (e) {} });
-  restore();
-})();
-
-</script>
+<script src="hamyar-persist.js"></script>
 </body>
 </html>

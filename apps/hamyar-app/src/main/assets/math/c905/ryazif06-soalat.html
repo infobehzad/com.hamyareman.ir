@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>سوالات چهارگزینه‌ای – فصل هفتم ریاضی نهم (آمار و احتمال)</title>
+<title>سوالات چهارگزینه‌ای – فصل ششم ریاضی نهم (خط و معادله‌های خطی)</title>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -73,6 +73,7 @@
   .badge-lesson-1 { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
   .badge-lesson-2 { background: linear-gradient(135deg, #0891b2, #0ea5e9); }
   .badge-lesson-3 { background: linear-gradient(135deg, #059669, #10b981); }
+  .badge-lesson-4 { background: linear-gradient(135deg, #ea580c, #f59e0b); }
   .badge-bar {
     background: linear-gradient(135deg, #be185d, #ec4899);
     padding: 4px 12px; border-radius: 50px; font-size: .75rem;
@@ -303,9 +304,9 @@
 <body>
 <div class="container">
   <header>
-    <h1>📝 سوالات چهارگزینه‌ای – فصل هفتم ریاضی نهم</h1>
-    <p>آمار و احتمال | ۳۰ سوال منتخب از آزمون‌های نهایی و هماهنگ استانی (تبریز و سایر استان‌ها) | ۱۴۰۰–۱۴۰۵</p>
-    <p style="margin-top:6px;font-size:.78rem;opacity:.8;">منابع: امتحان نهایی و هماهنگ استانی، مدارس تیزهوشان، گاما، قلم‌چی، مدرسان، بیست شو</p>
+    <h1>📝 سوالات چهارگزینه‌ای – فصل ششم ریاضی نهم</h1>
+    <p>خط و معادله‌های خطی | ۳۰ سوال منتخب از آزمون‌های نهایی و هماهنگ استانی (تبریز و سایر استان‌ها) | ۱۴۰۰–۱۴۰۵</p>
+    <p style="margin-top:6px;font-size:.78rem;opacity:.8;">منابع: امتحان نهایی و هماهنگ استانی، مدارس تیزهوشان، گاما، قلم‌چی، مدرسان</p>
   </header>
 
   <div class="top-bar">
@@ -337,7 +338,7 @@
   </div>
 
   <div class="stats-panel" id="statsPanel">
-    <div class="stats-title">📊 گزارش نهایی – فصل هفتم آمار و احتمال</div>
+    <div class="stats-title">📊 گزارش نهایی – فصل ششم خط و معادله‌های خطی</div>
     <div class="score-summary">
       <div class="score-card total">
         <span class="num" id="statTotal">0</span>
@@ -381,7 +382,7 @@
   </div>
 
   <footer>
-    <strong>📝 سوالات چهارگزینه‌ای فصل هفتم ریاضی نهم – آمار و احتمال</strong><br>
+    <strong>📝 سوالات چهارگزینه‌ای فصل ششم ریاضی نهم – خط و معادله‌های خطی</strong><br>
     منتخب از آزمون‌های نهایی و هماهنگ استانی (تبریز و سایر استان‌ها) | ۱۴۰۰–۱۴۰۵<br>
     <strong>* اختصاصی اپلیکیشن همیار من *</strong>
   </footer>
@@ -390,285 +391,286 @@
 <script>
 /* ============================================================
    سوالات منتخب از آزمون‌های نهایی و هماهنگ استانی
-   فصل هفتم: آمار و احتمال
-   نکته مهم: تمام عبارات ریاضی داخل <span class="math"> قرار گرفته‌اند
+   فصل ششم: خط و معادله‌های خطی
    ============================================================ */
 const allCards = [
-  /* ===== درس ۱: مفهوم احتمال و فضای نمونه ===== */
-  { id: 1, lesson: 1, bar: "۰/۵", q: "در پرتاب یک تاس، فضای نمونه (مجموعه همه حالت‌های ممکن) شامل چند عضو است؟",
-    opts: ["<span class=\"math\">۶</span>", "<span class=\"math\">۵</span>", "<span class=\"math\">۱۲</span>", "<span class=\"math\">۳۶</span>"],
-    correct: 0, hint: "تاس ۶ وجه دارد.",
+  /* ===== درس ۱: معادله خط ===== */
+  { id: 1, lesson: 1, bar: "۰/۵", q: "معادله خطی که از دو نقطه <span class=\"math\">A(۱, ۲)</span> و <span class=\"math\">B(۳, ۶)</span> می‌گذرد، کدام است؟",
+    opts: ["<span class=\"math\">y = ۲x</span>", "<span class=\"math\">y = ۲x + ۱</span>", "<span class=\"math\">y = x + ۱</span>", "<span class=\"math\">y = ۳x − ۱</span>"],
+    correct: 0, hint: "ابتدا شیب را حساب کنید، سپس از فرمول y − y₁ = m(x − x₁) استفاده کنید.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۰",
       "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
+      "گاما – آزمون تستی فصل ۶ – ۱۴۰۲"
     ],
-    exp: "فضای نمونه پرتاب یک تاس برابر <span class=\"math\">S = {۱, ۲, ۳, ۴, ۵, ۶}</span> است که ۶ عضو دارد." },
+    exp: "شیب: m = (۶−۲)/(۳−۱) = ۴/۲ = ۲. با فرمول y − y₁ = m(x − x₁): y − ۲ = ۲(x − ۱) → y = ۲x − ۲ + ۲ = ۲x." },
 
-  { id: 2, lesson: 1, bar: "۰/۵", q: "احتمال رخ دادن یک پیشامد حتمی چقدر است؟",
-    opts: ["<span class=\"math\">۰</span>", "<span class=\"math\">۱</span>", "<span class=\"math\">۰/۵</span>", "تعریف نشده"],
-    correct: 1, hint: "پیشامد حتمی همیشه رخ می‌دهد.",
+  { id: 2, lesson: 1, bar: "۰/۵", q: "معادله خطی که شیب آن <span class=\"math\">۳</span> و از نقطه <span class=\"math\">(۰, ۵)</span> می‌گذرد، کدام است؟",
+    opts: ["<span class=\"math\">y = ۳x + ۵</span>", "<span class=\"math\">y = ۳x − ۵</span>", "<span class=\"math\">y = ۵x + ۳</span>", "<span class=\"math\">y = −۳x + ۵</span>"],
+    correct: 0, hint: "نقطه (۰, ۵) روی محور yهاست، پس عرض از مبدأ است.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۳ تبریز) – خرداد ۱۴۰۱",
-      "گاما – آزمون فصل ۷ – ۱۴۰۳"
+      "گاما – آزمون فصل ۶ – ۱۴۰۳"
     ],
-    exp: "احتمال پیشامد حتمی (مطمئن) برابر ۱ است، زیرا این پیشامد همیشه رخ می‌دهد." },
+    exp: "فرم کلی خط: y = mx + b. شیب m = ۳ و عرض از مبدأ b = ۵. پس y = ۳x + ۵." },
 
-  { id: 3, lesson: 1, bar: "۰/۵", q: "احتمال رخ دادن یک پیشامد غیرممکن چقدر است؟",
-    opts: ["<span class=\"math\">۰</span>", "<span class=\"math\">۱</span>", "<span class=\"math\">۰/۵</span>", "تعریف نشده"],
-    correct: 0, hint: "پیشامد غیرممکن هرگز رخ نمی‌دهد.",
+  { id: 3, lesson: 1, bar: "۰/۵", q: "معادله خطی که شیب آن <span class=\"math\">−۲</span> و از نقطه <span class=\"math\">(۱, ۳)</span> می‌گذرد، کدام است؟",
+    opts: ["<span class=\"math\">y = −۲x + ۵</span>", "<span class=\"math\">y = −۲x + ۳</span>", "<span class=\"math\">y = ۲x + ۵</span>", "<span class=\"math\">y = −۲x − ۵</span>"],
+    correct: 0, hint: "از فرمول y − y₁ = m(x − x₁) استفاده کنید.",
     sources: [
       "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
+      "مدرسان – آزمون تستی فصل ۶ – ۱۴۰۳"
     ],
-    exp: "احتمال پیشامد غیرممکن برابر ۰ است، زیرا این پیشامد هرگز رخ نمی‌دهد." },
+    exp: "y − ۳ = −۲(x − ۱) → y − ۳ = −۲x + ۲ → y = −۲x + ۵." },
 
-  { id: 4, lesson: 1, bar: "۰/۵", q: "در پرتاب یک تاس، احتمال رو شدن عدد زوج چقدر است؟",
-    opts: ["<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۲/۳</span>"],
-    correct: 2, hint: "اعداد زوج روی تاس: ۲، ۴، ۶",
+  { id: 4, lesson: 1, bar: "۰/۵", q: "کدام معادله یک خط افقی را نشان می‌دهد؟",
+    opts: ["<span class=\"math\">y = ۴</span>", "<span class=\"math\">x = ۴</span>", "<span class=\"math\">y = x</span>", "<span class=\"math\">y = ۴x</span>"],
+    correct: 0, hint: "خط افقی موازی محور xهاست و شیب صفر دارد.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۲ تبریز) – خرداد ۱۴۰۲",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
-    ],
-    exp: "تعداد حالت‌های مطلوب = ۳ (اعداد ۲، ۴، ۶). تعداد کل حالت‌ها = ۶. احتمال = ۳/۶ = ۱/۲." },
-
-  { id: 5, lesson: 1, bar: "۰/۵", q: "در پرتاب یک تاس، احتمال رو شدن عددی بزرگ‌تر از ۴ چقدر است؟",
-    opts: ["<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۲/۳</span>"],
-    correct: 1, hint: "اعداد بزرگ‌تر از ۴: ۵ و ۶",
-    sources: [
-      "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
       "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
     ],
-    exp: "تعداد حالت‌های مطلوب = ۲ (اعداد ۵ و ۶). احتمال = ۲/۶ = ۱/۳." },
+    exp: "معادله y = ۴ یک خط افقی است که تمام نقاط آن عرض ۴ دارند. برخلاف x = ۴ که یک خط عمودی است." },
 
-  { id: 6, lesson: 1, bar: "۰/۵", q: "در پرتاب یک تاس، احتمال رو شدن عددی که مضرب ۳ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۲/۳</span>"],
-    correct: 1, hint: "اعداد مضرب ۳ روی تاس: ۳ و ۶",
+  { id: 5, lesson: 1, bar: "۰/۵", q: "کدام معادله یک خط عمودی را نشان می‌دهد؟",
+    opts: ["<span class=\"math\">x = ۳</span>", "<span class=\"math\">y = ۳</span>", "<span class=\"math\">y = ۳x</span>", "<span class=\"math\">x = y</span>"],
+    correct: 0, hint: "خط عمودی موازی محور yهاست.",
+    sources: [
+      "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
+      "گاما – آزمون تستی فصل ۶ – ۱۴۰۲"
+    ],
+    exp: "معادله x = ۳ یک خط عمودی است که تمام نقاط آن طول ۳ دارند. برخلاف y = ۳ که خط افقی است." },
+
+  { id: 6, lesson: 1, bar: "۰/۵", q: "خط <span class=\"math\">y = ۲x + ۱</span> از کدام نقطه می‌گذرد؟",
+    opts: ["<span class=\"math\">(۱, ۳)</span>", "<span class=\"math\">(۱, ۲)</span>", "<span class=\"math\">(۲, ۳)</span>", "<span class=\"math\">(۳, ۵)</span>"],
+    correct: 0, hint: "مختصات نقطه را در معادله خط جایگذاری کنید.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۳",
-      "گاما – آزمون فصل ۷ – ۱۴۰۲"
+      "مدرسان – آزمون تستی فصل ۶ – ۱۴۰۳"
     ],
-    exp: "تعداد حالت‌های مطلوب = ۲ (اعداد ۳ و ۶). احتمال = ۲/۶ = ۱/۳." },
+    exp: "در نقطه (۱, ۳): x = ۱ و y = ۳. جایگذاری: ۳ = ۲(۱) + ۱ = ۳ ✓. پس این نقطه روی خط قرار دارد." },
 
-  { id: 7, lesson: 1, bar: "۰/۵", q: "احتمال رو شدن عددی که هم زوج و هم اول باشد در پرتاب یک تاس چقدر است؟",
-    opts: ["<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۰</span>"],
-    correct: 0, hint: "تنها عدد زوج اول، عدد ۲ است.",
+  { id: 7, lesson: 1, bar: "۰/۵", q: "نقطه <span class=\"math\">(۲, ۷)</span> روی کدام خط قرار دارد؟",
+    opts: ["<span class=\"math\">y = ۳x + ۱</span>", "<span class=\"math\">y = ۲x + ۳</span>", "<span class=\"math\">y = ۴x − ۱</span>", "<span class=\"math\">y = x + ۵</span>"],
+    correct: 0, hint: "در هر گزینه x = ۲ را جایگذاری کنید و ببینید y = ۷ می‌شود یا نه.",
     sources: [
       "امتحان نهایی – استان فارس – خرداد ۱۴۰۱",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
-    ],
-    exp: "تنها عدد زوج اول روی تاس، عدد ۲ است. پس احتمال = ۱/۶." },
-
-  { id: 8, lesson: 1, bar: "۰/۵", q: "اگر دو تاس را با هم بیندازیم، تعداد کل حالت‌های ممکن (فضای نمونه) چقدر است؟",
-    opts: ["<span class=\"math\">۱۲</span>", "<span class=\"math\">۲۴</span>", "<span class=\"math\">۳۶</span>", "<span class=\"math\">۶۴</span>"],
-    correct: 2, hint: "۶ × ۶",
-    sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۰",
-      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
       "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
     ],
-    exp: "برای هر تاس ۶ حالت داریم. با اصل ضرب: ۶ × ۶ = ۳۶ حالت." },
+    exp: "در y = ۳x + ۱ با x = ۲: y = ۳(۲) + ۱ = ۷ ✓. پس نقطه (۲, ۷) روی این خط است." },
 
-  /* ===== درس ۲: محاسبه احتمال ===== */
-  { id: 9, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده برابر ۷ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۳۶</span>", "<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۹</span>"],
-    correct: 2, hint: "حالت‌های مجموع ۷: (۱،۶)، (۲،۵)، (۳،۴)، (۴،۳)، (۵،۲)، (۶،۱)",
-    sources: [
-      "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲",
-      "خیلی سبز – آزمون فصل ۷ – ۱۴۰۲"
-    ],
-    exp: "حالت‌های مجموع ۷ برابر ۶ حالت است. احتمال = ۶/۳۶ = ۱/۶." },
-
-  { id: 10, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده برابر ۵ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۹</span>", "<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۴</span>"],
-    correct: 0, hint: "حالت‌های مجموع ۵: (۱،۴)، (۲،۳)، (۳،۲)، (۴،۱)",
-    sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۳ تبریز) – خرداد ۱۴۰۱",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
-    ],
-    exp: "حالت‌های مجموع ۵ برابر ۴ حالت است. احتمال = ۴/۳۶ = ۱/۹." },
-
-  { id: 11, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده کمتر از ۴ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۹</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>"],
-    correct: 0, hint: "حالت‌ها: (۱،۱)، (۱،۲)، (۲،۱)",
-    sources: [
-      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
-      "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
-    ],
-    exp: "حالت‌های مجموع کمتر از ۴ (یعنی ۲ یا ۳) برابر ۳ حالت است. احتمال = ۳/۳۶ = ۱/۱۲." },
-
-  { id: 12, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه هر دو عدد رو شده زوج باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۴</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۶</span>"],
-    correct: 0, hint: "تعداد حالت‌های زوج در هر تاس = ۳",
-    sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۲",
-      "گاما – آزمون فصل ۷ – ۱۴۰۳"
-    ],
-    exp: "حالت‌های زوج در هر تاس = ۳. با اصل ضرب: ۳ × ۳ = ۹ حالت. احتمال = ۹/۳۶ = ۱/۴." },
-
-  { id: 13, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه هر دو عدد رو شده فرد باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۴</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۶</span>"],
-    correct: 0, hint: "تعداد حالت‌های فرد در هر تاس = ۳",
-    sources: [
-      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
-    ],
-    exp: "حالت‌های فرد در هر تاس = ۳. با اصل ضرب: ۳ × ۳ = ۹ حالت. احتمال = ۹/۳۶ = ۱/۴." },
-
-  { id: 14, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده برابر ۱۲ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۳۶</span>", "<span class=\"math\">۱/۱۸</span>", "<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۶</span>"],
-    correct: 0, hint: "تنها حالت: (۶،۶)",
-    sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۵ تبریز) – خرداد ۱۴۰۰",
-      "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
-    ],
-    exp: "تنها حالت مجموع ۱۲ برابر (۶،۶) است. احتمال = ۱/۳۶." },
-
-  { id: 15, lesson: 2, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده بزرگ‌تر از ۱۰ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۱۸</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۹</span>"],
-    correct: 0, hint: "حالت‌های مجموع ۱۱ و ۱۲",
-    sources: [
-      "امتحان نهایی – استان فارس – خرداد ۱۴۰۱",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
-    ],
-    exp: "حالت‌های مجموع ۱۱: (۵،۶)، (۶،۵) و مجموع ۱۲: (۶،۶). مجموعاً ۳ حالت. احتمال = ۳/۳۶ = ۱/۱۲." },
-
-  /* ===== درس ۳: احتمال در مسائل ترکیبی ===== */
-  { id: 16, lesson: 3, bar: "۰/۵", q: "در یک کیسه ۳ مهره قرمز و ۵ مهره آبی وجود دارد. احتمال خارج کردن یک مهره قرمز چقدر است؟",
-    opts: ["<span class=\"math\">۳/۸</span>", "<span class=\"math\">۳/۵</span>", "<span class=\"math\">۵/۸</span>", "<span class=\"math\">۱/۳</span>"],
-    correct: 0, hint: "تعداد کل مهره‌ها = ۳ + ۵ = ۸",
+  { id: 8, lesson: 1, bar: "۰/۵", q: "معادله خطی که از مبدأ مختصات می‌گذرد و شیب آن <span class=\"math\">۴</span> است، کدام است؟",
+    opts: ["<span class=\"math\">y = ۴x</span>", "<span class=\"math\">y = ۴x + ۱</span>", "<span class=\"math\">y = x + ۴</span>", "<span class=\"math\">y = −۴x</span>"],
+    correct: 0, hint: "خط گذرنده از مبدأ عرض از مبدأ صفر دارد.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۱",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
+      "گاما – آزمون فصل ۶ – ۱۴۰۲"
     ],
-    exp: "تعداد کل مهره‌ها = ۸. تعداد مهره‌های قرمز = ۳. احتمال = ۳/۸." },
+    exp: "خط گذرنده از مبدأ به شکل y = mx است. با شیب m = ۴: y = ۴x." },
 
-  { id: 17, lesson: 3, bar: "۰/۵", q: "در یک جعبه ۴ مهره قرمز، ۳ مهره آبی و ۵ مهره سبز وجود دارد. اگر یک مهره تصادفی خارج کنیم، احتمال اینکه آبی یا سبز باشد چقدر است؟",
-    opts: ["<span class=\"math\">۲/۳</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۵/۱۲</span>", "<span class=\"math\">۱/۴</span>"],
-    correct: 0, hint: "تعداد کل = ۱۲، تعداد آبی + سبز = ۳ + ۵ = ۸",
+  /* ===== درس ۲: شیب خط و عرض از مبدأ ===== */
+  { id: 9, lesson: 2, bar: "۰/۵", q: "شیب خطی که از دو نقطه <span class=\"math\">(۲, ۱)</span> و <span class=\"math\">(۴, ۷)</span> می‌گذرد، کدام است؟",
+    opts: ["<span class=\"math\">۳</span>", "<span class=\"math\">۲</span>", "<span class=\"math\">۶</span>", "<span class=\"math\">۱/۳</span>"],
+    correct: 0, hint: "فرمول شیب: m = (y₂ − y₁)/(x₂ − x₁)",
     sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۵ تبریز) – خرداد ۱۴۰۰",
       "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
-      "گاما – آزمون فصل ۷ – ۱۴۰۲"
+      "گاما – آزمون تستی فصل ۶ – ۱۴۰۲"
     ],
-    exp: "تعداد کل = ۱۲. تعداد حالت‌های مطلوب (آبی یا سبز) = ۸. احتمال = ۸/۱۲ = ۲/۳." },
+    exp: "m = (y₂ − y₁)/(x₂ − x₁) = (۷ − ۱)/(۴ − ۲) = ۶/۲ = ۳." },
 
-  { id: 18, lesson: 3, bar: "۰/۵", q: "در یک کیسه ۴ مهره قرمز و ۵ مهره سفید داریم. دو مهره با هم بیرون می‌آوریم. احتمال اینکه هر دو سفید باشند چقدر است؟",
-    opts: ["<span class=\"math\">۵/۱۸</span>", "<span class=\"math\">۵/۹</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۳</span>"],
-    correct: 0, hint: "تعداد کل = ۹ مهره. حالت‌های انتخاب ۲ سفید از ۵ = ۱۰",
+  { id: 10, lesson: 2, bar: "۰/۵", q: "شیب خط <span class=\"math\">y = −۳x + ۲</span> کدام است؟",
+    opts: ["<span class=\"math\">−۳</span>", "<span class=\"math\">۳</span>", "<span class=\"math\">۲</span>", "<span class=\"math\">−۲</span>"],
+    correct: 0, hint: "در معادله y = mx + b، ضریب x همان شیب است.",
+    sources: [
+      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
+      "مدرسان – آزمون تستی فصل ۶ – ۱۴۰۳"
+    ],
+    exp: "در معادله y = −۳x + ۲، ضریب x برابر −۳ است، پس شیب m = −۳." },
+
+  { id: 11, lesson: 2, bar: "۰/۵", q: "شیب خط <span class=\"math\">y = ۵</span> کدام است؟",
+    opts: ["<span class=\"math\">صفر</span>", "<span class=\"math\">۵</span>", "<span class=\"math\">تعریف نشده</span>", "<span class=\"math\">۱</span>"],
+    correct: 0, hint: "خط y = ۵ افقی است.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۳",
       "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
     ],
-    exp: "تعداد کل حالت‌ها = انتخاب ۲ از ۹ = ۳۶. تعداد حالت‌های مطلوب = انتخاب ۲ از ۵ = ۱۰. احتمال = ۱۰/۳۶ = ۵/۱۸." },
+    exp: "خط y = ۵ یک خط افقی است و شیب تمام خطوط افقی صفر است." },
 
-  { id: 19, lesson: 3, bar: "۰/۵", q: "در یک خانواده ۳ فرزند وجود دارد. احتمال اینکه دقیقاً دو پسر داشته باشد چقدر است؟",
-    opts: ["<span class=\"math\">۳/۸</span>", "<span class=\"math\">۱/۸</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۴</span>"],
-    correct: 0, hint: "حالت‌های ممکن: (پ،پ،پ)، (پ،پ،د)، (پ،د،پ)، (د،پ،پ)، (پ،د،د)، (د،پ،د)، (د،د،پ)، (د،د،د)",
+  { id: 12, lesson: 2, bar: "۰/۵", q: "شیب خط <span class=\"math\">x = ۴</span> چگونه است؟",
+    opts: ["<span class=\"math\">تعریف نشده</span>", "<span class=\"math\">صفر</span>", "<span class=\"math\">۴</span>", "<span class=\"math\">۱</span>"],
+    correct: 0, hint: "خط x = ۴ عمودی است.",
     sources: [
       "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
+      "مدرسان – آزمون تستی فصل ۶ – ۱۴۰۳"
     ],
-    exp: "حالت‌های دقیقاً دو پسر: (پ،پ،د)، (پ،د،پ)، (د،پ،پ) = ۳ حالت از ۸. احتمال = ۳/۸." },
+    exp: "خط x = ۴ عمودی است. شیب خطوط عمودی تعریف نشده است، زیرا در فرمول شیب، مخرج کسر (x₂ − x₁) صفر می‌شود." },
 
-  { id: 20, lesson: 3, bar: "۰/۵", q: "در یک خانواده ۳ فرزند وجود دارد. احتمال اینکه حداقل یک پسر داشته باشد چقدر است؟",
-    opts: ["<span class=\"math\">۷/۸</span>", "<span class=\"math\">۱/۸</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۳/۴</span>"],
-    correct: 0, hint: "از متمم استفاده کنید: احتمال حداقل یک پسر = ۱ − احتمال هیچ پسری",
+  { id: 13, lesson: 2, bar: "۰/۵", q: "دو خط موازی چه ویژگی در شیب دارند؟",
+    opts: ["شیب‌های مساوی", "شیب‌های قرینه", "حاصل‌ضرب شیب‌ها ۱−", "شیب‌های معکوس"],
+    correct: 0, hint: "خطوط موازی هرگز یکدیگر را قطع نمی‌کنند.",
     sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۲ تبریز) – خرداد ۱۴۰۰",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۲ تبریز) – خرداد ۱۴۰۱",
+      "گاما – آزمون فصل ۶ – ۱۴۰۲"
     ],
-    exp: "احتمال هیچ پسری (یعنی سه دختر) = ۱/۸. پس احتمال حداقل یک پسر = ۱ − ۱/۸ = ۷/۸." },
+    exp: "دو خط موازی شیب‌های مساوی دارند. اگر دو خط هم شیب باشند و عرض از مبدأ متفاوت داشته باشند، موازی هستند." },
 
-  { id: 21, lesson: 3, bar: "۰/۵", q: "دو سکه را با هم پرتاب می‌کنیم. احتمال اینکه هر دو شیر بیاید چقدر است؟",
-    opts: ["<span class=\"math\">۱/۴</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۱/۸</span>"],
-    correct: 0, hint: "فضای نمونه: {شش، شر، رش، رر}",
+  { id: 14, lesson: 2, bar: "۰/۵", q: "اگر حاصل‌ضرب شیب دو خط برابر <span class=\"math\">−۱</span> باشد، دو خط چه وضعیتی دارند؟",
+    opts: ["عمود", "موازی", "منطبق", "متقاطع غیرعمود"],
+    correct: 0, hint: "مثال: ۲ × (−۱/۲) = −۱",
     sources: [
-      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
+      "امتحان نهایی – استان فارس – خرداد ۱۴۰۱",
       "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
     ],
-    exp: "فضای نمونه = {شش، شر، رش، رر} که ۴ حالت دارد. فقط ۱ حالت هر دو شیر است. احتمال = ۱/۴." },
+    exp: "اگر حاصل‌ضرب شیب دو خط برابر −۱ باشد، دو خط عمود بر هم هستند. مثلاً خطوط با شیب‌های ۲ و −۱/۲ عمودند." },
 
-  { id: 22, lesson: 3, bar: "۰/۵", q: "دو سکه را با هم پرتاب می‌کنیم. احتمال اینکه حداکثر یک شیر بیاید چقدر است؟",
-    opts: ["<span class=\"math\">۳/۴</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۴</span>", "<span class=\"math\">۱/۳</span>"],
-    correct: 0, hint: "از متمم استفاده کنید: احتمال حداکثر یک شیر = ۱ − احتمال دو شیر",
+  { id: 15, lesson: 2, bar: "۰/۵", q: "شیب خط <span class=\"math\">۲x + ۳y = ۶</span> کدام است؟",
+    opts: ["<span class=\"math\">−۲/۳</span>", "<span class=\"math\">۲/۳</span>", "<span class=\"math\">−۳/۲</span>", "<span class=\"math\">۳/۲</span>"],
+    correct: 0, hint: "معادله را به صورت y = mx + b بنویسید.",
     sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۱",
-      "گاما – آزمون فصل ۷ – ۱۴۰۲"
+      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۰",
+      "مدرسان – آزمون تستی فصل ۶ – ۱۴۰۳"
     ],
-    exp: "احتمال دو شیر = ۱/۴. پس احتمال حداکثر یک شیر = ۱ − ۱/۴ = ۳/۴." },
+    exp: "۲x + ۳y = ۶ → ۳y = −۲x + ۶ → y = (−۲/۳)x + ۲. پس شیب m = −۲/۳." },
 
-  { id: 23, lesson: 3, bar: "۰/۵", q: "یک تاس را دو بار پرتاب می‌کنیم. احتمال اینکه مجموع اعداد رو شده برابر ۸ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۵/۳۶</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۹</span>", "<span class=\"math\">۱/۱۲</span>"],
-    correct: 0, hint: "حالت‌های مجموع ۸: (۲،۶)، (۳،۵)، (۴،۴)، (۵،۳)، (۶،۲)",
+  { id: 16, lesson: 2, bar: "۰/۵", q: "عرض از مبدأ خط <span class=\"math\">y = ۳x − ۴</span> کدام است؟",
+    opts: ["<span class=\"math\">−۴</span>", "<span class=\"math\">۴</span>", "<span class=\"math\">۳</span>", "<span class=\"math\">−۳</span>"],
+    correct: 0, hint: "عرض از مبدأ همان مقدار ثابت در معادله y = mx + b است.",
     sources: [
       "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
+      "گاما – آزمون تستی فصل ۶ – ۱۴۰۲"
     ],
-    exp: "حالت‌های مجموع ۸ برابر ۵ حالت است. احتمال = ۵/۳۶." },
+    exp: "در معادله y = ۳x − ۴، مقدار ثابت (عرض از مبدأ) برابر −۴ است. یعنی خط محور yها را در نقطه (۰, −۴) قطع می‌کند." },
 
-  { id: 24, lesson: 3, bar: "۰/۵", q: "در یک کیسه ۱۰ دکمه قرمز، ۸ دکمه آبی و ۴ دکمه سفید وجود دارد. احتمال خارج کردن یک دکمه آبی یا سفید چقدر است؟",
-    opts: ["<span class=\"math\">۶/۱۱</span>", "<span class=\"math\">۲/۱۱</span>", "<span class=\"math\">۸/۲۲</span>", "<span class=\"math\">۱/۲</span>"],
-    correct: 0, hint: "تعداد کل = ۲۲، تعداد آبی + سفید = ۱۲",
+  { id: 17, lesson: 2, bar: "۰/۵", q: "خط <span class=\"math\">y = ۲x + ۳</span> محور yها را در چه نقطه‌ای قطع می‌کند؟",
+    opts: ["<span class=\"math\">(۰, ۳)</span>", "<span class=\"math\">(۳, ۰)</span>", "<span class=\"math\">(۰, ۲)</span>", "<span class=\"math\">(۲, ۰)</span>"],
+    correct: 0, hint: "روی محور yها، x = ۰ است.",
     sources: [
       "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۲",
       "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
     ],
-    exp: "تعداد کل = ۱۰ + ۸ + ۴ = ۲۲. تعداد مطلوب = ۸ + ۴ = ۱۲. احتمال = ۱۲/۲۲ = ۶/۱۱." },
+    exp: "برای یافتن نقطه برخورد با محور yها، x = ۰ را جایگذاری می‌کنیم: y = ۲(۰) + ۳ = ۳. پس نقطه (۰, ۳)." },
 
-  { id: 25, lesson: 3, bar: "۰/۵", q: "سه تاس را همزمان می‌اندازیم. احتمال اینکه حداقل دو بار عدد ۵ بیاید چقدر است؟",
-    opts: ["<span class=\"math\">۱۶/۲۱۶</span>", "<span class=\"math\">۱۵/۲۱۶</span>", "<span class=\"math\">۱۲/۲۱۶</span>", "<span class=\"math\">۶/۲۱۶</span>"],
-    correct: 0, hint: "حالت‌های دقیقاً دو ۵ و دقیقاً سه ۵",
+  { id: 18, lesson: 2, bar: "۰/۵", q: "خط <span class=\"math\">y = ۳x − ۶</span> محور xها را در چه نقطه‌ای قطع می‌کند؟",
+    opts: ["<span class=\"math\">(۲, ۰)</span>", "<span class=\"math\">(۰, ۲)</span>", "<span class=\"math\">(−۲, ۰)</span>", "<span class=\"math\">(۰, −۲)</span>"],
+    correct: 0, hint: "روی محور xها، y = ۰ است.",
     sources: [
-      "آزمون تیزهوشان – مدرسه علامه جعفری تبریز – دی ۱۴۰۳",
-      "گاما – آزمون تستی تیزهوشان فصل ۷ – ۱۴۰۲"
+      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
+      "مدرسان – آزمون تستی فصل ۶ – ۱۴۰۳"
     ],
-    exp: "حالت‌های دقیقاً دو ۵: ۳ حالت (۵،۵،غ)، (۵،غ،۵)، (غ،۵،۵) که غ ≠ ۵ و ۵ حالت دارد → ۱۵ حالت. حالت سه ۵: ۱ حالت. مجموع = ۱۶ حالت. احتمال = ۱۶/۲۱۶." },
+    exp: "برای یافتن نقطه برخورد با محور xها، y = ۰ را قرار می‌دهیم: ۰ = ۳x − ۶ → ۳x = ۶ → x = ۲. پس نقطه (۲, ۰)." },
 
-  { id: 26, lesson: 3, bar: "۰/۵", q: "با ارقام ۰ تا ۴ تمام اعداد پنج‌رقمی بدون تکرار ساخته شده‌اند. یکی از این اعداد را تصادفی انتخاب می‌کنیم. احتمال اینکه عدد زوج باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۴</span>", "<span class=\"math\">۱/۳</span>", "<span class=\"math\">۲/۳</span>"],
-    correct: 0, hint: "تعداد کل = ۹۶، تعداد زوج = ۴۸",
+  /* ===== درس ۳: دستگاه معادله‌های خطی ===== */
+  { id: 19, lesson: 3, bar: "۰/۵", q: "دستگاه معادلات <span class=\"math\">x + y = ۵</span> و <span class=\"math\">x − y = ۱</span> چه جوابی دارد؟",
+    opts: ["<span class=\"math\">x = ۳</span> و <span class=\"math\">y = ۲</span>", "<span class=\"math\">x = ۲</span> و <span class=\"math\">y = ۳</span>", "<span class=\"math\">x = ۴</span> و <span class=\"math\">y = ۱</span>", "<span class=\"math\">x = ۱</span> و <span class=\"math\">y = ۴</span>"],
+    correct: 0, hint: "دو معادله را با هم جمع کنید.",
     sources: [
-      "آزمون تیزهوشان – مدرسه علامه جعفری تبریز – دی ۱۴۰۳",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۳ تبریز) – خرداد ۱۴۰۰",
+      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
+      "گاما – آزمون تستی فصل ۶ – ۱۴۰۲"
     ],
-    exp: "تعداد کل اعداد پنج‌رقمی = ۴ × ۴ × ۳ × ۲ × ۱ = ۹۶. تعداد اعداد زوج = ۲ × ۴ × ۳ × ۲ × ۱ = ۴۸. احتمال = ۴۸/۹۶ = ۱/۲." },
+    exp: "با جمع دو معادله: ۲x = ۶ → x = ۳. با جایگذاری در معادله اول: ۳ + y = ۵ → y = ۲." },
 
-  { id: 27, lesson: 3, bar: "۰/۵", q: "در یک کیسه ۵ مهره قرمز و تعدادی مهره سفید وجود دارد. احتمال سفید بودن هر دو مهره (بدون جایگذاری) برابر ۱/۴ است. تعداد مهره‌های سفید چقدر است؟",
-    opts: ["<span class=\"math\">۵</span>", "<span class=\"math\">۴</span>", "<span class=\"math\">۳</span>", "<span class=\"math\">۶</span>"],
-    correct: 0, hint: "با فرض n مهره سفید، معادله را حل کنید.",
-    sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۳",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
-    ],
-    exp: "اگر تعداد مهره‌های سفید = n باشد، تعداد کل = n + ۵. احتمال دو سفید = [n/(n+۵)] × [(n−۱)/(n+۴)] = ۱/۴. با حل معادله، n = ۵ به دست می‌آید." },
-
-  { id: 28, lesson: 3, bar: "۰/۵", q: "در یک جعبه ۳ مهره قرمز، ۴ مهره آبی و ۵ مهره سبز وجود دارد. اگر ۱ مهره تصادفی خارج کنیم، احتمال اینکه سبز نباشد چقدر است؟",
-    opts: ["<span class=\"math\">۷/۱۲</span>", "<span class=\"math\">۵/۱۲</span>", "<span class=\"math\">۱/۲</span>", "<span class=\"math\">۱/۳</span>"],
-    correct: 0, hint: "از متمم استفاده کنید: احتمال سبز نبودن = ۱ − احتمال سبز",
+  { id: 20, lesson: 3, bar: "۰/۵", q: "دستگاه معادلات <span class=\"math\">۲x + y = ۷</span> و <span class=\"math\">x − y = ۲</span> چه جوابی دارد؟",
+    opts: ["<span class=\"math\">x = ۳</span> و <span class=\"math\">y = ۱</span>", "<span class=\"math\">x = ۱</span> و <span class=\"math\">y = ۳</span>", "<span class=\"math\">x = ۲</span> و <span class=\"math\">y = ۳</span>", "<span class=\"math\">x = ۳</span> و <span class=\"math\">y = ۲</span>"],
+    correct: 0, hint: "دو معادله را با هم جمع کنید تا y حذف شود.",
     sources: [
       "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
-      "مدرسان – آزمون تستی فصل ۷ – ۱۴۰۳"
+      "مدرسان – آزمون تستی فصل ۶ – ۱۴۰۳"
     ],
-    exp: "احتمال سبز = ۵/۱۲. پس احتمال سبز نبودن = ۱ − ۵/۱۲ = ۷/۱۲." },
+    exp: "با جمع: ۳x = ۹ → x = ۳. جایگذاری: ۳ − y = ۲ → y = ۱." },
 
-  { id: 29, lesson: 3, bar: "۰/۵", q: "در پرتاب دو تاس، احتمال اینکه مجموع اعداد رو شده برابر ۹ باشد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۹</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۵/۳۶</span>"],
-    correct: 0, hint: "حالت‌های مجموع ۹: (۳،۶)، (۴،۵)، (۵،۴)، (۶،۳)",
+  { id: 21, lesson: 3, bar: "۰/۵", q: "اگر دستگاه معادلات خطی جواب نداشته باشد، دو خط چه وضعیتی دارند؟",
+    opts: ["موازی", "متقاطع", "منطبق", "عمود"],
+    correct: 0, hint: "خطوط موازی هرگز یکدیگر را قطع نمی‌کنند.",
     sources: [
-      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۳ تبریز) – خرداد ۱۴۰۱",
+      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۱",
       "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
     ],
-    exp: "حالت‌های مجموع ۹ برابر ۴ حالت است. احتمال = ۴/۳۶ = ۱/۹." },
+    exp: "اگر دستگاه معادلات خطی جواب نداشته باشد، دو خط موازی هستند و هیچ نقطه مشترکی ندارند." },
 
-  { id: 30, lesson: 3, bar: "۰/۵", q: "در پرتاب دو سکه و یک تاس، احتمال اینکه هر دو سکه شیر و تاس عددی اول بیاورد چقدر است؟",
-    opts: ["<span class=\"math\">۱/۸</span>", "<span class=\"math\">۱/۱۲</span>", "<span class=\"math\">۱/۶</span>", "<span class=\"math\">۱/۴</span>"],
-    correct: 0, hint: "احتمال هر دو شیر = ۱/۴ و احتمال عدد اول روی تاس = ۱/۲",
+  { id: 22, lesson: 3, bar: "۰/۵", q: "اگر دستگاه معادلات خطی بی‌شمار جواب داشته باشد، دو خط چه وضعیتی دارند؟",
+    opts: ["منطبق", "موازی", "متقاطع", "عمود"],
+    correct: 0, hint: "دو خط روی هم می‌افتند.",
+    sources: [
+      "امتحان نهایی – استان فارس – خرداد ۱۴۰۱",
+      "گاما – آزمون فصل ۶ – ۱۴۰۲"
+    ],
+    exp: "اگر دستگاه معادلات خطی بی‌شمار جواب داشته باشد، دو خط منطبق هستند (روی هم می‌افتند) و بی‌شمار نقطه مشترک دارند." },
+
+  { id: 23, lesson: 3, bar: "۰/۵", q: "دستگاه <span class=\"math\">x + y = ۳</span> و <span class=\"math\">۲x + ۲y = ۷</span> چه نوع دستگاهی است؟",
+    opts: ["بدون جواب (ناسازگار)", "یک جواب", "بی‌شمار جواب", "دو جواب"],
+    correct: 0, hint: "معادله دوم را بر ۲ تقسیم کنید و با معادله اول مقایسه کنید.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۱ تبریز) – خرداد ۱۴۰۳",
+      "مدرسان – آزمون تستی فصل ۶ – ۱۴۰۳"
+    ],
+    exp: "اگر معادله دوم را بر ۲ تقسیم کنیم: x + y = ۳/۵ که با معادله اول (x + y = ۳) در تناقض است. پس دستگاه جواب ندارد و دو خط موازی هستند." },
+
+  { id: 24, lesson: 3, bar: "۰/۵", q: "دو خط <span class=\"math\">y = ۲x + ۱</span> و <span class=\"math\">y = ۲x − ۳</span> چه وضعیتی دارند؟",
+    opts: ["موازی", "متقاطع", "منطبق", "عمود"],
+    correct: 0, hint: "شیب‌ها را مقایسه کنید.",
     sources: [
       "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
-      "گاما – آزمون تستی فصل ۷ – ۱۴۰۲"
+      "قلم‌چی – آزمون آزمایشی – آبان ۱۴۰۳"
     ],
-    exp: "احتمال دو شیر = ۱/۴. اعداد اول روی تاس = {۲، ۳، ۵} → احتمال = ۳/۶ = ۱/۲. احتمال کل = ۱/۴ × ۱/۲ = ۱/۸." }
+    exp: "هر دو خط شیب ۲ دارند، اما عرض از مبدأ آن‌ها متفاوت است (۱ و −۳). پس موازی هستند." },
+
+  { id: 25, lesson: 3, bar: "۰/۵", q: "دو خط <span class=\"math\">y = ۳x + ۲</span> و <span class=\"math\">y = (−۱/۳)x + ۱</span> چه وضعیتی دارند؟",
+    opts: ["عمود", "موازی", "منطبق", "متقاطع غیرعمود"],
+    correct: 0, hint: "حاصل‌ضرب شیب‌ها را حساب کنید.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۲",
+      "گاما – آزمون تستی فصل ۶ – ۱۴۰۲"
+    ],
+    exp: "حاصل‌ضرب شیب‌ها: ۳ × (−۱/۳) = −۱. پس دو خط عمود بر هم هستند." },
+
+  /* ===== درس ۴: حل دستگاه معادله‌های خطی ===== */
+  { id: 26, lesson: 4, bar: "۰/۵", q: "حل دستگاه <span class=\"math\">۳x + ۲y = ۱۲</span> و <span class=\"math\">x = ۲</span> کدام است؟",
+    opts: ["<span class=\"math\">x = ۲</span> و <span class=\"math\">y = ۳</span>", "<span class=\"math\">x = ۲</span> و <span class=\"math\">y = ۴</span>", "<span class=\"math\">x = ۳</span> و <span class=\"math\">y = ۲</span>", "<span class=\"math\">x = ۲</span> و <span class=\"math\">y = ۶</span>"],
+    correct: 0, hint: "مقدار x را در معادله اول جایگذاری کنید.",
+    sources: [
+      "امتحان نهایی – استان اصفهان – خرداد ۱۴۰۲",
+      "مدرسان – آزمون تستی فصل ۶ – ۱۴۰۳"
+    ],
+    exp: "با جایگذاری x = ۲ در معادله اول: ۳(۲) + ۲y = ۱۲ → ۶ + ۲y = ۱۲ → ۲y = ۶ → y = ۳." },
+
+  { id: 27, lesson: 4, bar: "۰/۵", q: "حل دستگاه <span class=\"math\">y = ۲x</span> و <span class=\"math\">x + y = ۹</span> کدام است؟",
+    opts: ["<span class=\"math\">x = ۳</span> و <span class=\"math\">y = ۶</span>", "<span class=\"math\">x = ۲</span> و <span class=\"math\">y = ۴</span>", "<span class=\"math\">x = ۴</span> و <span class=\"math\">y = ۸</span>", "<span class=\"math\">x = ۱</span> و <span class=\"math\">y = ۲</span>"],
+    correct: 0, hint: "از روش جایگذاری استفاده کنید.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (ناحیه ۲ تبریز) – خرداد ۱۴۰۱",
+      "گاما – آزمون فصل ۶ – ۱۴۰۲"
+    ],
+    exp: "با جایگذاری y = ۲x در معادله دوم: x + ۲x = ۹ → ۳x = ۹ → x = ۳. سپس y = ۲(۳) = ۶." },
+
+  { id: 28, lesson: 4, bar: "۰/۵", q: "حل دستگاه <span class=\"math\">۲x + y = ۸</span> و <span class=\"math\">۲x − y = ۴</span> کدام است؟",
+    opts: ["<span class=\"math\">x = ۳</span> و <span class=\"math\">y = ۲</span>", "<span class=\"math\">x = ۲</span> و <span class=\"math\">y = ۴</span>", "<span class=\"math\">x = ۴</span> و <span class=\"math\">y = ۰</span>", "<span class=\"math\">x = ۳</span> و <span class=\"math\">y = ۱</span>"],
+    correct: 0, hint: "دو معادله را با هم جمع کنید تا y حذف شود.",
+    sources: [
+      "امتحان نهایی – استان خراسان رضوی – خرداد ۱۴۰۳",
+      "قلم‌چی – آزمون آزمایشی – دی ۱۴۰۲"
+    ],
+    exp: "با جمع دو معادله: ۴x = ۱۲ → x = ۳. با جایگذاری در معادله اول: ۲(۳) + y = ۸ → ۶ + y = ۸ → y = ۲." },
+
+  { id: 29, lesson: 4, bar: "۰/۵", q: "حل دستگاه <span class=\"math\">x − y = ۳</span> و <span class=\"math\">x + y = ۷</span> کدام است؟",
+    opts: ["<span class=\"math\">x = ۵</span> و <span class=\"math\">y = ۲</span>", "<span class=\"math\">x = ۴</span> و <span class=\"math\">y = ۳</span>", "<span class=\"math\">x = ۲</span> و <span class=\"math\">y = ۵</span>", "<span class=\"math\">x = ۶</span> و <span class=\"math\">y = ۱</span>"],
+    correct: 0, hint: "دو معادله را با هم جمع کنید.",
+    sources: [
+      "امتحان هماهنگ استانی – آذربایجان شرقی (تبریز) – خرداد ۱۴۰۳",
+      "مدرسان – آزمون تستی فصل ۶ – ۱۴۰۳"
+    ],
+    exp: "با جمع دو معادله: ۲x = ۱۰ → x = ۵. با جایگذاری: ۵ + y = ۷ → y = ۲." },
+
+  { id: 30, lesson: 4, bar: "۰/۵", q: "در دستگاه معادلات <span class=\"math\">۳x − y = ۵</span> و <span class=\"math\">۶x − ۲y = ۱۰</span>، چند جواب وجود دارد؟",
+    opts: ["بی‌شمار", "یک", "دو", "بدون جواب"],
+    correct: 0, hint: "معادله دوم را با معادله اول مقایسه کنید.",
+    sources: [
+      "امتحان نهایی – استان تهران – خرداد ۱۴۰۳",
+      "آزمون تیزهوشان – مدرسه علامه جعفری تبریز – دی ۱۴۰۳",
+      "گاما – آزمون تستی فصل ۶ – ۱۴۰۲"
+    ],
+    exp: "معادله دوم دو برابر معادله اول است: ۲(۳x − y) = ۶x − ۲y = ۱۰. پس دو معادله معادل هم هستند و دو خط منطبق‌اند. بنابراین دستگاه بی‌شمار جواب دارد." }
 ];
 
 /* ===== State ===== */
@@ -685,9 +687,10 @@ let archive = [];
 /* ===== Helpers ===== */
 function getLessonLabel(lesson) {
   const map = {
-    1: "درس ۱: مفهوم احتمال و فضای نمونه",
-    2: "درس ۲: محاسبه احتمال",
-    3: "درس ۳: احتمال در مسائل ترکیبی"
+    1: "درس ۱: معادله خط",
+    2: "درس ۲: شیب خط و عرض از مبدأ",
+    3: "درس ۳: دستگاه معادله‌های خطی",
+    4: "درس ۴: حل دستگاه معادله‌ها"
   };
   return map[lesson] || "";
 }
@@ -1068,123 +1071,6 @@ document.addEventListener('keydown', function(e) {
 });
 </script>
 
-<script>
-/* همیار: ذخیرهٔ پاسخ/آرشیو/نمره روی دستگاه */
-(function () {
-  if (window.__hamyarHooked) return;
-  window.__hamyarHooked = true;
-
-  function persist() {
-    var payload = {
-      stats: typeof stats !== "undefined" ? stats : {},
-      repeatCount: typeof repeatCount !== "undefined" ? repeatCount : {},
-      archive: typeof archive !== "undefined" ? archive : [],
-      currentIndex: typeof currentIndex !== "undefined" ? currentIndex : 0,
-      currentMode: typeof currentMode !== "undefined" ? currentMode : "all",
-      currentRound: typeof currentRound !== "undefined" ? currentRound : 1,
-      radios: {}
-    };
-    document.querySelectorAll('input[type="radio"]:checked').forEach(function (r) {
-      payload.radios[r.name] = r.value;
-    });
-    var raw = JSON.stringify(payload);
-    try { localStorage.setItem("hamyar_html_state", raw); } catch (e) {}
-    if (window.Hamyar) {
-      try { Hamyar.saveState(raw); } catch (e) {}
-    }
-  }
-
-  function restore() {
-    var raw = "";
-    if (window.Hamyar) {
-      try { raw = Hamyar.loadState() || ""; } catch (e) {}
-    }
-    if (!raw) {
-      try { raw = localStorage.getItem("hamyar_html_state") || ""; } catch (e) {}
-    }
-    if (!raw) return;
-    try {
-      var p = JSON.parse(raw);
-      if (p.stats && typeof stats !== "undefined") stats = p.stats;
-      if (p.repeatCount && typeof repeatCount !== "undefined") repeatCount = p.repeatCount;
-      if (p.archive && typeof archive !== "undefined") archive = p.archive;
-      if (typeof currentIndex !== "undefined" && typeof p.currentIndex === "number") currentIndex = p.currentIndex;
-      if (p.currentMode && typeof currentMode !== "undefined") currentMode = p.currentMode;
-      if (typeof currentRound !== "undefined" && typeof p.currentRound === "number") currentRound = p.currentRound;
-      if (p.radios) {
-        Object.keys(p.radios).forEach(function (name) {
-          var el = document.querySelector('input[name="' + name + '"][value="' + p.radios[name] + '"]');
-          if (!el) return;
-          el.checked = true;
-          var opt = el.closest(".mc-option");
-          if (opt) opt.classList.add("selected");
-        });
-      }
-      if (typeof renderCard === "function") renderCard();
-    } catch (e) {}
-  }
-
-  function wrap(name, after) {
-    if (typeof window[name] !== "function") return;
-    var orig = window[name];
-    window[name] = function () {
-      var cardId = null;
-      try {
-        if (typeof cardsOrder !== "undefined" && typeof currentIndex !== "undefined" && cardsOrder[currentIndex]) {
-          cardId = String(cardsOrder[currentIndex].id);
-        }
-      } catch (e) {}
-      var r = orig.apply(this, arguments);
-      try { persist(); } catch (e) {}
-      try { if (after) after(cardId); } catch (e) {}
-      return r;
-    };
-  }
-
-  wrap("confirmAnswer", function (cardId) {
-    if (!window.Hamyar || !cardId || typeof stats === "undefined") return;
-    var s = stats[cardId] || stats[parseInt(cardId, 10)];
-    if (s && s.answered) Hamyar.recordItem(cardId, !!s.correct);
-  });
-  wrap("nextCard", null);
-  wrap("showStats", function () {
-    if (!window.Hamyar || typeof allCards === "undefined" || typeof stats === "undefined") return;
-    var ok = 0, wrong = [], tot = allCards.length;
-    allCards.forEach(function (c) {
-      var s = stats[c.id];
-      if (s && s.answered) {
-        if (s.correct) ok++;
-        else wrong.push(String(c.id));
-      }
-    });
-    var pct = tot > 0 ? Math.round((ok * 100) / tot) : 0;
-    Hamyar.recordExam(pct, tot, ok, wrong.join(","));
-  });
-  wrap("verifyAll", function () {
-    if (!window.Hamyar) return;
-    var ok = 0, tot = 0, wrong = [];
-    document.querySelectorAll(".question[data-q]").forEach(function (q) {
-      tot++;
-      var id = q.getAttribute("data-q");
-      var sel = q.querySelector('input[type="radio"]:checked');
-      var fb = q.querySelector(".feedback");
-      var correct = fb ? fb.getAttribute("data-correct") : "";
-      var good = !!(sel && correct && sel.value === correct);
-      if (sel) Hamyar.recordItem(id, good);
-      if (good) ok++;
-      else if (sel) wrong.push(id);
-    });
-    var pct = tot > 0 ? Math.round((ok * 100) / tot) : 0;
-    Hamyar.recordExam(pct, tot, ok, wrong.join(","));
-  });
-  wrap("saveAnswers", null);
-  wrap("restartAll", null);
-  wrap("startRepeatRound", null);
-
-  document.addEventListener("change", function () { try { persist(); } catch (e) {} });
-  restore();
-})();
-
-</script>
+<script src="hamyar-persist.js"></script>
 </body>
 </html>
