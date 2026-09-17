@@ -57,6 +57,7 @@ fun UserProfileScreen(
     val scope = rememberCoroutineScope()
     var saveError by remember { mutableStateOf<String?>(null) }
     val ctx = LocalContext.current
+    val storage = com.hamyareman.ir.LocalAppContainer.current.storage
     var avatarPath by remember { mutableStateOf(com.hamyareman.ir.ui.profile.StudentProfileState.avatarPath) }
     var cropBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
 
@@ -224,6 +225,9 @@ fun UserProfileScreen(
                     Text("همگام با سرور — تغییر از پشتیبانی", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
+            if (!saveError.isNullOrBlank()) {
+                Text(saveError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            }
 
             Button(
                 onClick = {
@@ -277,9 +281,7 @@ fun UserProfileScreen(
                     scope.launch {
                         val uid = profile?.userId.orEmpty()
                         if (uid.isNotBlank()) {
-                            runCatching {
-                                AvatarSync.push(ctx, com.hamyareman.ir.LocalAppContainer.current.storage, uid)
-                            }
+                            runCatching { AvatarSync.push(ctx, storage, uid) }
                         }
                     }
                 }
