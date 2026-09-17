@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -58,48 +59,28 @@ internal fun ProfileClockAvatar(
     }
     Box(
         modifier
-            .size(118.dp)
+            .size(124.dp)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Canvas(Modifier.fillMaxSize()) {
-            val cx = size.width / 2f
-            val cy = size.height / 2f
-            val r = size.minDimension / 2f
-            drawCircle(
-                color = ring.copy(alpha = 0.12f),
-                radius = r,
-            )
-            drawCircle(
-                color = ring,
-                radius = r - 1.5.dp.toPx(),
-                style = Stroke(width = 3.dp.toPx()),
-            )
-            for (i in 0 until 12) {
-                val rad = Math.toRadians(i * 30.0 - 90.0)
-                val outer = r - 4.dp.toPx()
-                val inner = outer - if (i % 3 == 0) 9.dp.toPx() else 5.dp.toPx()
-                drawLine(
-                    color = if (i % 3 == 0) ring else outline,
-                    start = Offset(cx + cos(rad).toFloat() * inner, cy + sin(rad).toFloat() * inner),
-                    end = Offset(cx + cos(rad).toFloat() * outer, cy + sin(rad).toFloat() * outer),
-                    strokeWidth = if (i % 3 == 0) 2.6.dp.toPx() else 1.5.dp.toPx(),
-                    cap = StrokeCap.Round,
-                )
-            }
-        }
-        Box(Modifier.size(64.dp), contentAlignment = Alignment.Center) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .padding(3.dp)
+                .clip(CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
             if (bmp != null) {
                 Image(
                     bmp.asImageBitmap(),
                     contentDescription = "عکس پروفایل",
-                    modifier = Modifier.fillMaxSize().clip(CircleShape),
+                    modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
                 )
             } else {
                 Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primaryContainer, modifier = Modifier.fillMaxSize()) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(initial, style = MaterialTheme.typography.titleLarge)
+                        Text(initial, style = MaterialTheme.typography.headlineMedium)
                     }
                 }
             }
@@ -108,6 +89,23 @@ internal fun ProfileClockAvatar(
             val cx = size.width / 2f
             val cy = size.height / 2f
             val r = size.minDimension / 2f
+            drawCircle(
+                color = ring,
+                radius = r - 1.5.dp.toPx(),
+                style = Stroke(width = 3.dp.toPx()),
+            )
+            for (i in 0 until 12) {
+                val rad = Math.toRadians(i * 30.0 - 90.0)
+                val outer = r - 3.dp.toPx()
+                val inner = outer - if (i % 3 == 0) 8.dp.toPx() else 4.dp.toPx()
+                drawLine(
+                    color = if (i % 3 == 0) ring else outline,
+                    start = Offset(cx + cos(rad).toFloat() * inner, cy + sin(rad).toFloat() * inner),
+                    end = Offset(cx + cos(rad).toFloat() * outer, cy + sin(rad).toFloat() * outer),
+                    strokeWidth = if (i % 3 == 0) 2.6.dp.toPx() else 1.5.dp.toPx(),
+                    cap = StrokeCap.Round,
+                )
+            }
             val sec = time.second + time.nano / 1_000_000_000f
             val min = time.minute + sec / 60f
             val hour = (time.hour % 12) + min / 60f
@@ -129,9 +127,9 @@ internal fun ProfileClockAvatar(
                     )
                 }
             }
-            hand(hour * 30f, r * 0.56f, r * 0.10f, Color(0xFF0F172A), 5.2.dp.toPx())
-            hand(min * 6f, r * 0.72f, r * 0.12f, Color(0xFF1E293B), 3.6.dp.toPx())
-            hand(sec * 6f, r * 0.86f, r * 0.16f, Color(0xFFDC2626), 1.8.dp.toPx())
+            hand(hour * 30f, r * 0.52f, r * 0.10f, Color(0xFF0F172A), 5.2.dp.toPx())
+            hand(min * 6f, r * 0.70f, r * 0.12f, Color(0xFF1E293B), 3.6.dp.toPx())
+            hand(sec * 6f, r * 0.82f, r * 0.16f, Color(0xFFDC2626), 1.8.dp.toPx())
             drawCircle(color = Color.White, radius = 5.4.dp.toPx(), center = Offset(cx, cy))
             drawCircle(color = Color(0xFF0F172A), radius = 3.4.dp.toPx(), center = Offset(cx, cy))
         }

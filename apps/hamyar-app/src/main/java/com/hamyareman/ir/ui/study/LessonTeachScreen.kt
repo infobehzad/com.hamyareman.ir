@@ -252,13 +252,16 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                 return@launch
             }
             // صف همه‌ی ترک‌های درس — اعلان سیستمی دکمه‌ی قبلی/بعدی می‌دهد.
-            val items = tracks.map { tr ->
-                val useLocal = !forceServer && MediaVault.isCached(context, tr.cacheKey) && !(fromServer && tr.cacheKey == t.cacheKey)
-                MediaItem.Builder()
-                    .setMediaId(tr.cacheKey)
-                    .setUri(if (useLocal) MediaVault.localUrl(context, tr.cacheKey) else StudyMedia.viewUrl(tr.fileId))
-                    .setMediaMetadata(MediaMetadata.Builder().setTitle(screenTitle).setArtist(bookTitle.ifBlank { tr.label }).build())
-                    .build()
+            val items = withContext(Dispatchers.IO) {
+                tracks.map { tr ->
+                    val useLocal = !forceServer && MediaVault.isCached(context, tr.cacheKey) && !(fromServer && tr.cacheKey == t.cacheKey)
+                    val remoteId = if (useLocal) tr.fileId else StudyMedia.resolveFileId(tr.fileId)
+                    MediaItem.Builder()
+                        .setMediaId(tr.cacheKey)
+                        .setUri(if (useLocal) MediaVault.localUrl(context, tr.cacheKey) else StudyMedia.viewUrl(remoteId))
+                        .setMediaMetadata(MediaMetadata.Builder().setTitle(screenTitle).setArtist(bookTitle.ifBlank { tr.label }).build())
+                        .build()
+                }
             }
             playback.setMediaItems(items, tracks.indexOf(t).coerceAtLeast(0), if (cached(t) && !fromServer) savedPos(t) else 0L)
             com.hamyareman.ir.platform.feature.playback.TeachGate.currentPack = packId
@@ -499,9 +502,10 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                         scope.launch {
                             try {
                                 withContext(Dispatchers.IO) {
+                                    val remoteId = StudyMedia.resolveFileId(track.fileId)
                                     MediaVault.downloadEncrypted(
                                         context,
-                                        StudyMedia.viewUrl(track.fileId),
+                                        StudyMedia.viewUrl(remoteId),
                                         track.cacheKey,
                                     ) { pct -> progressPct = pct }
                                 }
@@ -629,6 +633,7 @@ private fun ZoomablePageImage(
     }
     Box(
         modifier
+            .fillMaxWidth()
             .onSizeChanged { size = it }
             .pointerInput(scale, offsetX, offsetY, size) {
                 detectTransformGestures { centroid, pan, zoom, _ ->
@@ -658,9 +663,9 @@ private fun ZoomablePageImage(
         Image(
             bitmap = bitmap,
             contentDescription = contentDescription,
-            contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+            contentScale = androidx.compose.ui.layout.ContentScale.FillWidth,
             modifier = Modifier
-                .matchParentSize()
+                .fillMaxWidth()
                 .graphicsLayer {
                     scaleX = scale
                     scaleY = scale
@@ -679,7 +684,8 @@ private fun openTeachPdf(ctx: android.content.Context, fileId: String, onProgres
     }.getOrDefault(false)
     if (!isValid(target)) {
         target.delete()
-        val conn = (URL(StudyMedia.viewUrl(fileId)).openConnection() as HttpURLConnection).apply {
+        val remoteId = StudyMedia.resolveFileId(fileId)
+        val conn = (URL(StudyMedia.viewUrl(remoteId)).openConnection() as HttpURLConnection).apply {
             connectTimeout = 15000; readTimeout = 30000; instanceFollowRedirects = true
         }
         conn.connect()

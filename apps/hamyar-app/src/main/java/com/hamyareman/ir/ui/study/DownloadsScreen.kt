@@ -105,7 +105,8 @@ private val remoteSizeCache = mutableMapOf<String, Long>()
 
 private fun headSizeBlocking(fileId: String): Long {
     remoteSizeCache[fileId]?.let { return it }
-    val conn = (URL(StudyMedia.viewUrl(fileId)).openConnection() as HttpURLConnection).apply {
+    val remoteId = StudyMedia.resolveFileId(fileId)
+    val conn = (URL(StudyMedia.viewUrl(remoteId)).openConnection() as HttpURLConnection).apply {
         connectTimeout = 10000; readTimeout = 10000; instanceFollowRedirects = true
         requestMethod = "HEAD"
     }
@@ -128,7 +129,8 @@ private fun headSizeBlocking(fileId: String): Long {
 private fun downloadPdfBlocking(ctx: android.content.Context, fileId: String, onProgress: (Int) -> Unit) {
     val target = pdfCacheFile(ctx, fileId)
     val tmp = File(target.parentFile, "$fileId.part")
-    val conn = (URL(StudyMedia.viewUrl(fileId)).openConnection() as HttpURLConnection).apply {
+    val remoteId = StudyMedia.resolveFileId(fileId)
+    val conn = (URL(StudyMedia.viewUrl(remoteId)).openConnection() as HttpURLConnection).apply {
         connectTimeout = 15000; readTimeout = 30000; instanceFollowRedirects = true
     }
     conn.connect()
@@ -189,7 +191,10 @@ private fun DownloadsScreenInner(onBack: () -> Unit) {
         try {
             withContext(Dispatchers.IO) {
                 if (asPdf) downloadPdfBlocking(ctx, fileId) { busy[key] = it }
-                else MediaVault.downloadEncrypted(ctx, StudyMedia.viewUrl(fileId), cacheKey) { busy[key] = it }
+                else {
+                    val remoteId = StudyMedia.resolveFileId(fileId)
+                    MediaVault.downloadEncrypted(ctx, StudyMedia.viewUrl(remoteId), cacheKey) { busy[key] = it }
+                }
             }
             tick++
         } catch (e: NotFoundOnServer) {
@@ -668,7 +673,9 @@ private fun DlLessonRow(
             modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ChipView(chipOf(true, null)) { clickChip(it) }
+            if (pack.pdfFileName.isNotBlank()) {
+                ChipView(chipOf(true, null)) { clickChip(it) }
+            }
             tracks.forEach { t ->
                 Spacer(Modifier.width(10.dp))
                 ChipView(chipOf(false, t)) { clickChip(it) }

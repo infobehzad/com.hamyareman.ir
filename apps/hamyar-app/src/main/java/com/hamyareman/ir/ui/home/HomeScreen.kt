@@ -112,18 +112,35 @@ fun HomeScreen(nav: NavController) {
                         Modifier.fillMaxWidth().padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Column(Modifier.weight(1f)) {
-                            Text(row1, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                            Text("$row2Time  $row2Greg", style = MaterialTheme.typography.bodySmall)
-                            if (!holiday.isNullOrBlank()) {
-                                Text(holiday, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                            Column(Modifier.weight(1f).padding(end = 8.dp)) {
+                                Text(
+                                    row1,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Text(
+                                    row2Time,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                                    Text(row2Greg, style = MaterialTheme.typography.bodyLarge)
+                                }
+                                if (!holiday.isNullOrBlank()) {
+                                    Text(holiday, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+                                }
+                                Spacer(Modifier.height(8.dp))
+                                SubscriptionChip(StudentProfileState.subscription)
                             }
-                            Spacer(Modifier.height(8.dp))
-                            SubscriptionChip(StudentProfileState.subscription)
                         }
                         ProfileClockAvatar(onClick = { nav.navigate(Screen.UserProfile.route) })
                     }
                 }
+            }
+
+            HubCard("👤", "پروفایل من", "نام، عکس، مدرسه و وضعیت اشتراک") {
+                nav.navigate(Screen.UserProfile.route)
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
