@@ -55,17 +55,11 @@ fun UserProfileScreen(
 ) {
     val ctx = LocalContext.current
     var avatarPath by remember { mutableStateOf(com.hamyareman.ir.ui.profile.StudentProfileState.avatarPath) }
+    var cropBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
 
     val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
-            runCatching {
-                val f = File(ctx.filesDir, "avatar.jpg")
-                ctx.contentResolver.openInputStream(uri)?.use { input ->
-                    f.outputStream().use { input.copyTo(it) }
-                }
-                com.hamyareman.ir.ui.profile.StudentProfileState.saveAvatarMirror(ctx, f.absolutePath)
-                avatarPath = f.absolutePath
-            }
+            cropBitmap = loadOrientedBitmap(ctx, uri)
         }
     }
 
@@ -125,7 +119,7 @@ fun UserProfileScreen(
                     }
                 }
             }
-            TextButton(onClick = { pickImage.launch("image/*") }) { Text("انتخاب عکس پروفایل") }
+            TextButton(onClick = { pickImage.launch("image/*") }) { Text("انتخاب عکس — زوم و برش دایره‌ای") }
 
             OutlinedTextField(
                 value = firstName, onValueChange = { firstName = it },
