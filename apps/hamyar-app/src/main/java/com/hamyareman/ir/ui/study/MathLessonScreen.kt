@@ -95,19 +95,10 @@ fun MathLessonScreen(
         )
         if (hasPdf) base + MathTab("pdf", "کتاب درسی") else base
     }
-    val hasAudio = teachTracksOf(pack).isNotEmpty()
-    val teachDone = remember(packId) {
-        if (!hasAudio) true else {
-            TeachStats.expectMedia(ctx, packId, expectedTeachMedia(pack))
-            TeachStats.isDone(ctx, packId)
-        }
-    }
     var tab by rememberSaveable(packId, isSum) {
-        val want = initialTab.coerceIn(0, tabs.lastIndex)
-        mutableIntStateOf(if (!teachDone && want >= 1) 0 else want)
+        mutableIntStateOf(initialTab.coerceIn(0, tabs.lastIndex))
     }
     if (tab > tabs.lastIndex) tab = 0
-    var lockMsg by remember { mutableStateOf(false) }
     val chromeStore = remember { com.hamyareman.ir.platform.core.common.LocalStore(ctx, "hamyar_math_ui") }
     var autoHide by rememberSaveable(packId) { mutableStateOf(chromeStore.getBool("autohide_$packId", true)) }
     var chromeHidden by remember { mutableStateOf(false) }
@@ -169,13 +160,10 @@ fun MathLessonScreen(
             }
             ScrollableTabRow(selectedTabIndex = tab.coerceIn(0, tabs.lastIndex), edgePadding = 8.dp) {
                 tabs.forEachIndexed { i, t ->
-                    val locked = t.key != "teach" && t.key != "pdf" && !teachDone
                     Tab(
                         selected = tab == i,
-                        onClick = {
-                            if (locked) lockMsg = true else tab = i
-                        },
-                        text = { Text(if (locked) "🔒 ${t.label}" else t.label, style = MaterialTheme.typography.labelMedium) },
+                        onClick = { tab = i },
+                        text = { Text(t.label, style = MaterialTheme.typography.labelMedium) },
                     )
                 }
             }
@@ -188,14 +176,6 @@ fun MathLessonScreen(
                     TeachAudioBar(packId = pack.packId, screenTitle = pack.title, bookTitle = bookTitle, tracks = tracks)
                 }
             }
-        }
-        if (lockMsg) {
-            androidx.compose.material3.AlertDialog(
-                onDismissRequest = { lockMsg = false },
-                confirmButton = { TextButton(onClick = { lockMsg = false }) { Text("باشه") } },
-                title = { Text("اول تدریس") },
-                text = { Text("سربرگ‌های دیگر بعد از اتمام صوت تدریس باز می‌شوند.") },
-            )
         }
         when (currentKey) {
             "teach" -> MathTeachTab(pack, bookTitle, showPlayer = false)
@@ -592,6 +572,13 @@ internal fun ExamLedgerCard(ledger: MathExamLedger.State) {
                 else "غلط: ${s.wrongNumbers.joinToString("، ") { toPersianDigits(it.toString()) }}"
                 Text(
                     "نشست ${toPersianDigits(s.n.toString())}: ${toPersianDigits(s.scorePct.toString())}٪ — $wrong",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+    }
+}
+ ${toPersianDigits(s.scorePct.toString())}٪ — $wrong",
                     style = MaterialTheme.typography.bodySmall,
                 )
             }

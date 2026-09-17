@@ -37,19 +37,7 @@ object LessonAccess {
     }
 
     fun gate(ctx: Context, bookCode: String, packId: String): Gate {
-        if (isAlwaysOpen(packId)) return Gate.Open
-        if (!isPremium()) return Gate.NeedSub
-        val ids = orderedPackIds(bookCode)
-        val i = ids.indexOf(packId)
-        var j = i - 1
-        while (j >= 0 && (isToc(ids[j]) || BookModuleRegistry.pack(ids[j])?.pdfOnly == true)) j--
-        if (j < 0) return Gate.Open
-        val prev = ids[j]
-        val prevPack = BookModuleRegistry.pack(prev)
-        if (prevPack != null && teachTracksOf(prevPack).isNotEmpty()) {
-            TeachStats.expectMedia(ctx, prev, expectedTeachMedia(prevPack))
-            return if (TeachStats.isDone(ctx, prev)) Gate.Open else Gate.NeedPrev
-        }
+        // قفل درس/اشتراک/تدریس قبلی برداشته شد — همه درس‌ها بازند.
         return Gate.Open
     }
 }

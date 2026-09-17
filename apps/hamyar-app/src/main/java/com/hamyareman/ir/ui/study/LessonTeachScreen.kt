@@ -193,8 +193,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
     // v1.14: تا اتمام اولین دوره، سرعت‌های تندتر از ۱x فعال نیستند (حتی اگر قبلاً ذخیره شده بود).
     var speed by remember {
         val saved = store.getString("teach_${packId}_speed", "1").toFloatOrNull() ?: 1f
-        val firstPassDone = TeachStats.isDone(context, packId)
-        mutableFloatStateOf(if (TEACH_SPEEDS.contains(saved) && (saved <= 1f || firstPassDone)) saved else 1f)
+        mutableFloatStateOf(if (TEACH_SPEEDS.contains(saved)) saved else 1f)
     }
     var posMs by remember { mutableLongStateOf(0L) }
     var downloading by remember { mutableStateOf(false) }
@@ -529,54 +528,26 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                 }
                 Spacer(Modifier.weight(1f))
             }
-            val seekUnlocked = remember { mutableStateOf(TeachStats.isDone(context, packId)) }
-            LaunchedEffect(state.ended, state.playing, posMs, state.durationMs) {
-                if (TeachStats.isDone(context, packId)) seekUnlocked.value = true
-            }
-            var showSeekDialog by remember { mutableStateOf(false) }
-            if (showSeekDialog) {
-                androidx.compose.material3.AlertDialog(
-                    onDismissRequest = { showSeekDialog = false },
-                    confirmButton = {
-                        TextButton(onClick = { showSeekDialog = false }) { Text("باشه") }
+            if (loadedKey == track.cacheKey && state.durationMs > 0) {
+                Slider(
+                    value = (((if (dragMs >= 0) dragMs else posMs).toFloat()) / state.durationMs).coerceIn(0f, 1f),
+                    onValueChange = { dragMs = (it * state.durationMs).toLong() },
+                    onValueChangeFinished = {
+                        if (dragMs >= 0) {
+                            if (abs(dragMs - posMs) > 3000) TeachStats.addJump(context, packId)
+                            playback.seekTo(dragMs)
+                            posMs = dragMs
+                            savePos(track, dragMs)
+                            dragMs = -1
+                        }
                     },
-                    title = { Text("تا یک بار کامل نشده، سیک قفل است 🔒") },
-                    text = { Text("یک‌بار که تا آخر گوشش کنی، جابه‌جایی آزاد می‌شود — همون‌جوری که دوست داری 🌱") },
+                    modifier = Modifier.fillMaxWidth().height(26.dp),
                 )
             }
-            if (loadedKey == track.cacheKey && state.durationMs > 0) {
-                Box {
-                    Slider(
-                        value = (((if (dragMs >= 0) dragMs else posMs).toFloat()) / state.durationMs).coerceIn(0f, 1f),
-                        enabled = seekUnlocked.value,
-                        onValueChange = { dragMs = (it * state.durationMs).toLong() },
-                        onValueChangeFinished = {
-                            if (dragMs >= 0) {
-                                if (abs(dragMs - posMs) > 3000) TeachStats.addJump(context, packId)
-                                playback.seekTo(dragMs)
-                                posMs = dragMs
-                                savePos(track, dragMs)
-                                dragMs = -1
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth().height(26.dp),
-                    )
-                    if (!seekUnlocked.value) {
-                        // لایه‌ی لمس برای دیالوگِ قفلِ سیک (تا اتمام اولین دوره).
-                        Box(
-                            Modifier.matchParentSize().padding(vertical = 2.dp)
-                                .androidClickable { showSeekDialog = true },
-                        )
-                    }
-                } // Box
-            } // if(loadedKey)
-            // سرعت‌های پخش — زیر نوار سیک (v1.9).
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
                 TEACH_SPEEDS.forEach { v ->
                     FilterChip(
                         selected = speed == v,
-                        // v1.14: x1.5 و x2 فقط بعد از اتمام اولین دوره فعال می‌شوند.
-                        enabled = seekUnlocked.value || v <= 1f,
                         onClick = {
                             speed = v
                             runCatching { playback.setSpeed(v) }

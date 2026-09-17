@@ -242,16 +242,10 @@ fun VideoTeachScreen(packId: String, onBack: () -> Unit) {
                     FilterChip(
                         selected = speed == v,
                         onClick = {
-                            val allowed = v <= 1f || TeachStats.isDone(context, packId)
-                            if (allowed) {
-                                speed = v
-                                store.putString("vid_${packId}_speed", v.toString())
-                                player?.setPlaybackSpeed(v)
-                            } else {
-                                msg = "🔒 سرعت تند بعد از اتمام دوره‌ی اول این درس باز می‌شود."
-                            }
+                            speed = v
+                            store.putString("vid_${packId}_speed", v.toString())
+                            player?.setPlaybackSpeed(v)
                         },
-                        enabled = v <= 1f || TeachStats.isDone(context, packId),
                         label = { Text("${toPersianDigits(if (v == v.toInt().toFloat()) v.toInt().toString() else v.toString())}x") },
                     )
                 }

@@ -83,18 +83,13 @@ import com.hamyareman.ir.ui.study.LessonPdfScreen
 import com.hamyareman.ir.ui.study.LessonStudyScreen
 import com.hamyareman.ir.ui.study.LessonTeachScreen
 import com.hamyareman.ir.ui.study.LibraryScreen
-import com.hamyareman.ir.ui.study.LockedStudyScreen
 import com.hamyareman.ir.ui.study.PdfUploadScreen
 import com.hamyareman.ir.ui.study.ProgressChartsScreen
 import com.hamyareman.ir.ui.study.QuizReviewScreen
 import com.hamyareman.ir.ui.study.QuizScreen
 import com.hamyareman.ir.ui.study.SchoolScheduleScreen
 import com.hamyareman.ir.ui.study.StudyHomeScreen
-import com.hamyareman.ir.ui.study.StudyMedia
-import com.hamyareman.ir.ui.study.TeachStats
 import com.hamyareman.ir.ui.study.VideoTeachScreen
-import com.hamyareman.ir.ui.study.expectedTeachMedia
-import com.hamyareman.ir.ui.study.teachTracksOf
 import com.hamyareman.ir.ui.water.WaterScreen
 import com.hamyareman.ir.ui.wellness.SketchGalleryScreen
 import com.hamyareman.ir.ui.wellness.WellnessScreen
@@ -213,22 +208,10 @@ fun ZahraNavHost() {
                 listOf(navArgument("packId") { type = NavType.StringType }),
             ) { entry ->
                 val packId = entry.arguments?.getString("packId").orEmpty()
-                val pack = remember(packId) { BookModuleRegistry.pack(packId) }
-                // قفل سراسری: مطالعه فقط پس از اتمام اولین دوره‌ی تدریس باز می‌شود
-                // (هیچ ورودیِ دیگری به این بخش راه ندارد).
-                val expected = if (pack == null) 1 else expectedTeachMedia(pack)
-                val done = pack != null && run {
-                    TeachStats.expectMedia(LocalContext.current, packId, expected)
-                    TeachStats.isDone(LocalContext.current, packId)
-                }
-                if (done) {
-                    LessonStudyScreen(
-                        packId = packId,
-                        onBack = { nav.popBackStack() },
-                    )
-                } else {
-                    LockedStudyScreen(onBack = { nav.popBackStack() })
-                }
+                LessonStudyScreen(
+                    packId = packId,
+                    onBack = { nav.popBackStack() },
+                )
             }
             composable(
                 Screen.LessonPdf.route,

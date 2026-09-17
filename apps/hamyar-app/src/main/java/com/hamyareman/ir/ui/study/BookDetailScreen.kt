@@ -253,51 +253,18 @@ private fun LessonCard(
                     Text("🔔 ${toPersianDigits(due.toString())} کارت امروز باید مرور شود", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                 }
             }
-            // وضعیت دوره‌ی اول تدریس (v1.14).
             Text(
-                if (teachDone) "✅ دوره‌ی اول تدریس کامل شده — مطالعه و آزمون باز است"
-                else "⏳ دوره‌ی اول تدریس ناقص — تا کامل شود، مطالعه قفل است",
+                if (teachDone) "✅ دوره‌ی اول تدریس کامل شده"
+                else "ورود به درس و سربرگ‌ها باز است",
                 style = MaterialTheme.typography.labelSmall,
                 color = if (teachDone) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(8.dp))
-            val bookCode = pack?.bookCode ?: packId.substringBefore('_')
-            val gate = LessonAccess.gate(ctx, bookCode, packId)
-            var gateDialog by remember(packId) { mutableStateOf<LessonAccess.Gate?>(null) }
-            if (gateDialog == LessonAccess.Gate.NeedSub) {
-                androidx.compose.material3.AlertDialog(
-                    onDismissRequest = { gateDialog = null },
-                    confirmButton = { androidx.compose.material3.TextButton(onClick = { gateDialog = null }) { Text("باشه") } },
-                    title = { Text("نیاز به تهیه اشتراک") },
-                    text = { Text("برای باز شدن درس‌های بعدی، اشتراک باید از طرف پشتیبان در پروفایلت از رایگان به پرمیوم تغییر کند.") },
-                )
-            }
-            if (gateDialog == LessonAccess.Gate.NeedPrev) {
-                androidx.compose.material3.AlertDialog(
-                    onDismissRequest = { gateDialog = null },
-                    confirmButton = { androidx.compose.material3.TextButton(onClick = { gateDialog = null }) { Text("باشه") } },
-                    title = { Text("🔒 قفل است") },
-                    text = { Text("اول دوره‌ی تدریس درس قبلی را تا انتها تمام کن؛ بعد این درس باز می‌شود.") },
-                )
-            }
             Button(
-                onClick = {
-                    when (gate) {
-                        LessonAccess.Gate.Open -> onTeach(packId)
-                        LessonAccess.Gate.NeedSub -> gateDialog = LessonAccess.Gate.NeedSub
-                        LessonAccess.Gate.NeedPrev -> gateDialog = LessonAccess.Gate.NeedPrev
-                    }
-                },
+                onClick = { onTeach(packId) },
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(
-                    when (gate) {
-                        LessonAccess.Gate.Open -> "ورود به درس"
-                        LessonAccess.Gate.NeedSub -> "نیاز به تهیه اشتراک"
-                        LessonAccess.Gate.NeedPrev -> "🔒 قفل است"
-                    },
-                    maxLines = 1,
-                )
+                Text("ورود به درس", maxLines = 1)
             }
         }
     }
