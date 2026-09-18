@@ -4,10 +4,10 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
-internal enum class Shift(val label: String) { MORNING("صبح"), EVENING("بعدازظهر") }
+enum class Shift(val label: String) { MORNING("صبح"), EVENING("بعدازظهر") }
 
 /** ریاضی تقویم مدرسه — شنبه=۱ … جمعه=۷؛ چرخه‌ی شیفت از لنگر. */
-internal object SchoolShift {
+object SchoolShift {
 
     fun dayIndex(date: LocalDate): Int = when (date.dayOfWeek) {
         DayOfWeek.SATURDAY -> 1
