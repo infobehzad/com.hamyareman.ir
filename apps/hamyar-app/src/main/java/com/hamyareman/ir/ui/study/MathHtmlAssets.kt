@@ -50,6 +50,17 @@ internal object MathHtmlAssets {
         return null
     }
 
+    /** HTML تدریس داخل assets/math/c905 — بدون متن خلاصه/فلش/آزمون. */
+    fun teachAsset(packId: String): String? {
+        Regex("""^C905_E(\d+)-SUM$""").find(packId)?.let { m ->
+            return "math/c905/ryazif%02dreview.html".format(m.groupValues[1].toInt())
+        }
+        Regex("""^C905_E(\d+)-L(\d+)$""").find(packId)?.let { m ->
+            return "math/c905/ryazif%02dd%02d.html".format(m.groupValues[1].toInt(), m.groupValues[2].toInt())
+        }
+        return null
+    }
+
     private fun chapterFile(ch: Int, kind: String): String =
         "math/c905/ryazif%02d-%s.html".format(ch, kind)
 

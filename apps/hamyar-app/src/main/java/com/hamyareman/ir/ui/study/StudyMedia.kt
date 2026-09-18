@@ -26,6 +26,9 @@ object StudyMedia {
         Regex("""^ryazif(\d{2})d(\d{2})\.mp3$""").find(fileId)?.let { m ->
             out += "C905_E%02d-L%02d_AUDIO.mp3".format(m.groupValues[1].toInt(), m.groupValues[2].toInt())
         }
+        Regex("""^ryazif(\d{2})review\.mp3$""").find(fileId)?.let { m ->
+            out += "C905_E%02d-SUM_AUDIO.mp3".format(m.groupValues[1].toInt())
+        }
         Regex("""^C905f(\d{2})d(\d{2})\.pdf$""").find(fileId)?.let { m ->
             out += "C905_E%02d-L%02d_BOOK.pdf".format(m.groupValues[1].toInt(), m.groupValues[2].toInt())
         }

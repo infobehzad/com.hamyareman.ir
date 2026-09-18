@@ -234,6 +234,13 @@ private fun MathExamHtmlTab(pack: StudyPack, html: MathHtmlAssets.Spec?) {
 @Composable
 private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean = true) {
     val tracks = teachTracksOf(pack)
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val htmlFromAsset = remember(pack.packId) {
+        MathHtmlAssets.teachAsset(pack.packId)?.let { path ->
+            runCatching { ctx.assets.open(path).bufferedReader(Charsets.UTF_8).use { it.readText() } }.getOrNull()
+        }.orEmpty()
+    }
+    val teachHtml = pack.teachHtml.ifBlank { htmlFromAsset }
     val body = pack.teachText.ifBlank {
         pack.sections.filter { it.kind != "exam" }.joinToString("\n\n") { "«${it.title}»\n${it.body}" }
             .ifBlank { "متن تدریس این درس به‌زودی از پوشهٔ Books اضافه می‌شود." }
@@ -246,12 +253,13 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
             TeachAudioBar(packId = pack.packId, screenTitle = pack.title, bookTitle = bookTitle, tracks = tracks)
         }
         Card(Modifier.fillMaxWidth().weight(1f)) {
-            if (pack.teachHtml.isNotBlank()) {
+            if (teachHtml.isNotBlank()) {
                 AndroidView(
-                    factory = { ctx ->
-                        WebView(ctx).apply {
+                    factory = { c ->
+                        WebView(c).apply {
                             webViewClient = WebViewClient()
-                            settings.javaScriptEnabled = false
+                            settings.javaScriptEnabled = true
+                            settings.domStorageEnabled = true
                             settings.loadWithOverviewMode = true
                             settings.useWideViewPort = true
                             settings.builtInZoomControls = true
@@ -262,7 +270,7 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
                     update = { wv ->
                         wv.loadDataWithBaseURL(
                             "https://local.hamyar/",
-                            pack.teachHtml,
+                            teachHtml,
                             "text/html",
                             "utf-8",
                             null,
