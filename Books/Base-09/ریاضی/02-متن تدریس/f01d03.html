@@ -55,8 +55,9 @@ main { padding: 40px 30px 60px; }
 .toc h3::before { content: "📋"; }
 .toc ol { padding-right: 22px; margin: 0; }
 .toc li { padding: 4px 0; color: #3730a3; font-weight: 600; font-size: 0.95rem; }
-.toc a { color: #3730a3; text-decoration: none; }
+.toc a { color: #3730a3; text-decoration: none; cursor: pointer; }
 .toc a:hover { text-decoration: underline; }
+.toc .t { color: #6366f1; font-weight: 700; font-size: 0.85rem; margin-right: 6px; }
 
 .section-title {
   font-size: 1.3rem; font-weight: 800; color: #6d28d9;
@@ -307,17 +308,17 @@ footer strong { color: #a855f7; }
     <div class="toc">
       <h3>فهرست مطالب</h3>
       <ol>
-        <li><a href="#sec1">پیش‌نیاز: مرور سریع درس قبل</a></li>
-        <li><a href="#sec2">درس اصلی ۱: شمارش زیرمجموعه‌ها به روش سیستماتیک</a></li>
-        <li><a href="#sec3">درس اصلی ۲: فرمول طلایی 2ⁿ</a></li>
-        <li><a href="#sec4">درس اصلی ۳: اجتماع دو مجموعه (A ∪ B)</a></li>
-        <li><a href="#sec5">درس اصلی ۴: اشتراک دو مجموعه (A ∩ B)</a></li>
-        <li><a href="#sec6">درس اصلی ۵: تفاضل دو مجموعه (A − B)</a></li>
-        <li><a href="#sec7">درس اصلی ۶: مجموعه‌های جدا از هم و تهی</a></li>
-        <li><a href="#sec8">درس اصلی ۷: خاصیت‌های عمل‌ها</a></li>
-        <li><a href="#sec9">درس اصلی ۸: مسئله‌های کلامی و اصل شمول</a></li>
-        <li><a href="#sec10">تمرین‌های جامع با حل گام‌به‌گام</a></li>
-        <li><a href="#sec11">جدول خلاصه و نکات امتحانی</a></li>
+        <li><a href="#sec1" data-seek-ms="79000">پیش‌نیاز: مرور سریع درس قبل <span class="t">۱:۱۹</span></a></li>
+        <li><a href="#sec2" data-seek-ms="139000">درس اصلی ۱: شمارش زیرمجموعه‌ها به روش سیستماتیک <span class="t">۲:۱۹</span></a></li>
+        <li><a href="#sec3" data-seek-ms="243000">درس اصلی ۲: فرمول طلایی 2ⁿ <span class="t">۴:۰۳</span></a></li>
+        <li><a href="#sec4" data-seek-ms="491000">درس اصلی ۳: اجتماع دو مجموعه (A ∪ B) <span class="t">۸:۱۱</span></a></li>
+        <li><a href="#sec5" data-seek-ms="615000">درس اصلی ۴: اشتراک دو مجموعه (A ∩ B) <span class="t">۱۰:۱۵</span></a></li>
+        <li><a href="#sec6" data-seek-ms="730000">درس اصلی ۵: تفاضل دو مجموعه (A − B) <span class="t">۱۲:۱۰</span></a></li>
+        <li><a href="#sec7" data-seek-ms="910000">درس اصلی ۶: مجموعه‌های جدا از هم و تهی <span class="t">۱۵:۱۰</span></a></li>
+        <li><a href="#sec8" data-seek-ms="980000">درس اصلی ۷: خاصیت‌های عمل‌ها <span class="t">۱۶:۲۰</span></a></li>
+        <li><a href="#sec9" data-seek-ms="1073000">درس اصلی ۸: مسئله‌های کلامی و اصل شمول <span class="t">۱۷:۵۳</span></a></li>
+        <li><a href="#sec10" data-seek-ms="1350000">تمرین‌های جامع با حل گام‌به‌گام <span class="t">۲۲:۳۰</span></a></li>
+        <li><a href="#sec11" data-seek-ms="1786000">جدول خلاصه و نکات امتحانی <span class="t">۲۹:۴۶</span></a></li>
       </ol>
     </div>
 
@@ -1491,5 +1492,26 @@ footer strong { color: #a855f7; }
     موفق باشی! ✨
   </footer>
 </div>
+
+<script>
+(function () {
+  function seekFrom(a) {
+    var ms = parseInt(a.getAttribute('data-seek-ms') || '0', 10);
+    try { if (window.HamyarPlayer && HamyarPlayer.seek) HamyarPlayer.seek(ms); } catch (e) {}
+  }
+  document.querySelectorAll('.toc a[data-seek-ms]').forEach(function (a) {
+    a.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      seekFrom(a);
+      var id = a.getAttribute('href');
+      if (id && id.charAt(0) === '#') {
+        var el = document.querySelector(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+})();
+</script>
+
 </body>
 </html>

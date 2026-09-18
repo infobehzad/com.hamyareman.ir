@@ -55,8 +55,9 @@ main { padding: 40px 30px 60px; }
 .toc h3::before { content: "📋"; }
 .toc ol { padding-right: 22px; margin: 0; }
 .toc li { padding: 4px 0; color: #3730a3; font-weight: 600; font-size: 0.95rem; }
-.toc a { color: #3730a3; text-decoration: none; }
+.toc a { color: #3730a3; text-decoration: none; cursor: pointer; }
 .toc a:hover { text-decoration: underline; }
+.toc .t { color: #6366f1; font-weight: 700; font-size: 0.85rem; margin-right: 6px; }
 
 .section-title {
   font-size: 1.3rem; font-weight: 800; color: #047857;
@@ -273,17 +274,17 @@ footer strong { color: #34d399; }
     <div class="toc">
       <h3>فهرست مطالب</h3>
       <ol>
-        <li><a href="#sec1">پیش‌نیاز ۱: آزمایش تصادفی چیست؟</a></li>
-        <li><a href="#sec2">پیش‌نیاز ۲: فضای نمونه (S) چیست؟</a></li>
-        <li><a href="#sec3">پیش‌نیاز ۳: پیشامد چیست؟</a></li>
-        <li><a href="#sec4">درس اصلی ۱: فرمول طلایی احتمال</a></li>
-        <li><a href="#sec5">درس اصلی ۲: احتمال با تاس</a></li>
-        <li><a href="#sec6">درس اصلی ۳: احتمال با سکه</a></li>
-        <li><a href="#sec7">درس اصلی ۴: احتمال با کارت‌های شماره‌دار</a></li>
-        <li><a href="#sec8">درس اصلی ۵: حالت‌های خاص (تهی و کل)</a></li>
-        <li><a href="#sec9">درس اصلی ۶: دو پیشامد هم‌شانس و مقایسه‌ی احتمال</a></li>
-        <li><a href="#sec10">تمرین‌های جامع با حل گام‌به‌گام</a></li>
-        <li><a href="#sec11">جدول خلاصه و نکات امتحانی</a></li>
+        <li><a href="#sec1" data-seek-ms="82000">پیش‌نیاز ۱: آزمایش تصادفی چیست؟ <span class="t">۱:۲۲</span></a></li>
+        <li><a href="#sec2" data-seek-ms="166000">پیش‌نیاز ۲: فضای نمونه (S) چیست؟ <span class="t">۲:۴۶</span></a></li>
+        <li><a href="#sec3" data-seek-ms="272000">پیش‌نیاز ۳: پیشامد چیست؟ <span class="t">۴:۳۲</span></a></li>
+        <li><a href="#sec4" data-seek-ms="383000">درس اصلی ۱: فرمول طلایی احتمال <span class="t">۶:۲۳</span></a></li>
+        <li><a href="#sec5" data-seek-ms="456000">درس اصلی ۲: احتمال با تاس <span class="t">۷:۳۶</span></a></li>
+        <li><a href="#sec6" data-seek-ms="567000">درس اصلی ۳: احتمال با سکه <span class="t">۹:۲۷</span></a></li>
+        <li><a href="#sec7" data-seek-ms="702000">درس اصلی ۴: احتمال با کارت‌های شماره‌دار <span class="t">۱۱:۴۲</span></a></li>
+        <li><a href="#sec8" data-seek-ms="826000">درس اصلی ۵: حالت‌های خاص (تهی و کل) <span class="t">۱۳:۴۶</span></a></li>
+        <li><a href="#sec9" data-seek-ms="910000">درس اصلی ۶: دو پیشامد هم‌شانس و مقایسه‌ی احتمال <span class="t">۱۵:۱۰</span></a></li>
+        <li><a href="#sec10" data-seek-ms="1114000">تمرین‌های جامع با حل گام‌به‌گام <span class="t">۱۸:۳۴</span></a></li>
+        <li><a href="#sec11" data-seek-ms="1664000">جدول خلاصه و نکات امتحانی <span class="t">۲۷:۴۴</span></a></li>
       </ol>
     </div>
 
@@ -1320,5 +1321,26 @@ footer strong { color: #34d399; }
     موفق باشی! ✨
   </footer>
 </div>
+
+<script>
+(function () {
+  function seekFrom(a) {
+    var ms = parseInt(a.getAttribute('data-seek-ms') || '0', 10);
+    try { if (window.HamyarPlayer && HamyarPlayer.seek) HamyarPlayer.seek(ms); } catch (e) {}
+  }
+  document.querySelectorAll('.toc a[data-seek-ms]').forEach(function (a) {
+    a.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      seekFrom(a);
+      var id = a.getAttribute('href');
+      if (id && id.charAt(0) === '#') {
+        var el = document.querySelector(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+})();
+</script>
+
 </body>
 </html>

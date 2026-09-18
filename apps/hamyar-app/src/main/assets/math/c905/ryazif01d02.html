@@ -62,8 +62,9 @@ main { padding: 40px 30px 60px; }
 .toc ol { padding-right: 22px; margin: 0; }
 .toc li { padding: 4px 0; color: #3730a3; font-weight: 600;
   font-size: 0.95rem; }
-.toc a { color: #3730a3; text-decoration: none; }
+.toc a { color: #3730a3; text-decoration: none; cursor: pointer; }
 .toc a:hover { text-decoration: underline; }
+.toc .t { color: #6366f1; font-weight: 700; font-size: 0.85rem; margin-right: 6px; }
 
 .section-title {
   font-size: 1.3rem; font-weight: 800; color: #0e7490;
@@ -264,15 +265,15 @@ footer strong { color: #22d3ee; }
     <div class="toc">
       <h3>فهرست مطالب</h3>
       <ol>
-        <li><a href="#sec1">پیش‌نیاز ۱: مرور سریع درس قبل</a></li>
-        <li><a href="#sec2">پیش‌نیاز ۲: عدد گویا و عدد گنگ</a></li>
-        <li><a href="#sec3">درس اصلی ۱: دو مجموعه‌ی برابر</a></li>
-        <li><a href="#sec4">درس اصلی ۲: تعریف زیرمجموعه</a></li>
-        <li><a href="#sec5">درس اصلی ۳: دو نکته‌ی طلایی زیرمجموعه</a></li>
-        <li><a href="#sec6">درس اصلی ۴: رابطه‌ی انواع اعداد با زیرمجموعه</a></li>
-        <li><a href="#sec7">درس اصلی ۵: نمایش مجموعه‌ها با نمادهای ریاضی</a></li>
-        <li><a href="#sec8">تمرین‌های جامع با حل گام‌به‌گام</a></li>
-        <li><a href="#sec9">جدول خلاصه و نکات امتحانی</a></li>
+        <li><a href="#sec1" data-seek-ms="68000">پیش‌نیاز ۱: مرور سریع درس قبل <span class="t">۱:۰۸</span></a></li>
+        <li><a href="#sec2" data-seek-ms="134000">پیش‌نیاز ۲: عدد گویا و عدد گنگ <span class="t">۲:۱۴</span></a></li>
+        <li><a href="#sec3" data-seek-ms="296000">درس اصلی ۱: دو مجموعه‌ی برابر <span class="t">۴:۵۶</span></a></li>
+        <li><a href="#sec4" data-seek-ms="479000">درس اصلی ۲: تعریف زیرمجموعه <span class="t">۷:۵۹</span></a></li>
+        <li><a href="#sec5" data-seek-ms="670000">درس اصلی ۳: دو نکته‌ی طلایی زیرمجموعه <span class="t">۱۱:۱۰</span></a></li>
+        <li><a href="#sec6" data-seek-ms="808000">درس اصلی ۴: رابطه‌ی انواع اعداد با زیرمجموعه <span class="t">۱۳:۲۸</span></a></li>
+        <li><a href="#sec7" data-seek-ms="946000">درس اصلی ۵: نمایش مجموعه‌ها با نمادهای ریاضی <span class="t">۱۵:۴۶</span></a></li>
+        <li><a href="#sec8" data-seek-ms="1194000">تمرین‌های جامع با حل گام‌به‌گام <span class="t">۱۹:۵۴</span></a></li>
+        <li><a href="#sec9" data-seek-ms="1632000">جدول خلاصه و نکات امتحانی <span class="t">۲۷:۱۲</span></a></li>
       </ol>
     </div>
 
@@ -1309,5 +1310,26 @@ footer strong { color: #22d3ee; }
     موفق باشی! ✨
   </footer>
 </div>
+
+<script>
+(function () {
+  function seekFrom(a) {
+    var ms = parseInt(a.getAttribute('data-seek-ms') || '0', 10);
+    try { if (window.HamyarPlayer && HamyarPlayer.seek) HamyarPlayer.seek(ms); } catch (e) {}
+  }
+  document.querySelectorAll('.toc a[data-seek-ms]').forEach(function (a) {
+    a.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      seekFrom(a);
+      var id = a.getAttribute('href');
+      if (id && id.charAt(0) === '#') {
+        var el = document.querySelector(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+})();
+</script>
+
 </body>
 </html>

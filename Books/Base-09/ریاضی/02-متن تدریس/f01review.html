@@ -399,6 +399,8 @@ footer strong { color: #a855f7; }
   .lesson-card { padding: 18px; }
   .lesson-title { font-size: 1.1rem; }
 }
+.toc a, .toc-item { cursor: pointer; }
+.toc .t { color: #6366f1; font-weight: 700; font-size: 0.85rem; margin-right: 6px; }
 </style>
 </head>
 <body>
@@ -429,15 +431,15 @@ footer strong { color: #a855f7; }
     <div class="toc">
       <h3>فهرست مطالب</h3>
       <div class="toc-grid">
-        <a href="#lesson1" class="toc-item">📍 درس ۱: مفهوم مجموعه</a>
-        <a href="#lesson2" class="toc-item">📍 درس ۲: برابری و زیرمجموعه</a>
-        <a href="#lesson3" class="toc-item">📍 درس ۳: عمل‌های مجموعه</a>
-        <a href="#lesson4" class="toc-item">📍 درس ۴: احتمال</a>
-        <a href="#mindmap" class="toc-item">🧠 نقشه ذهنی کل فصل</a>
-        <a href="#quickref" class="toc-item">⚡ مرجع سریع فرمول‌ها</a>
-        <a href="#exercises" class="toc-item">📝 ۱۵ نمونه سؤال</a>
-        <a href="#tips" class="toc-item">🏆 نکات امتحانی</a>
-        <a href="#checklist" class="toc-item">✅ چک‌لیست مطالعه</a>
+        <a href="#lesson1" class="toc-item" data-seek-ms="76000">📍 درس ۱: مفهوم مجموعه <span class="t">۱:۱۶</span></a>
+        <a href="#lesson2" class="toc-item" data-seek-ms="178000">📍 درس ۲: برابری و زیرمجموعه <span class="t">۲:۵۸</span></a>
+        <a href="#lesson3" class="toc-item" data-seek-ms="247000">📍 درس ۳: عمل‌های مجموعه <span class="t">۴:۰۷</span></a>
+        <a href="#lesson4" class="toc-item" data-seek-ms="389000">📍 درس ۴: احتمال <span class="t">۶:۲۹</span></a>
+        <a href="#mindmap" class="toc-item" data-seek-ms="477000">🧠 نقشه ذهنی کل فصل <span class="t">۷:۵۷</span></a>
+        <a href="#quickref" class="toc-item" data-seek-ms="552000">⚡ مرجع سریع فرمول‌ها <span class="t">۹:۱۲</span></a>
+        <a href="#exercises" class="toc-item" data-seek-ms="660000">📝 ۱۵ نمونه سؤال <span class="t">۱۱:۰۰</span></a>
+        <a href="#tips" class="toc-item" data-seek-ms="1146000">🏆 نکات امتحانی <span class="t">۱۹:۰۶</span></a>
+        <a href="#checklist" class="toc-item" data-seek-ms="1267000">✅ چک‌لیست مطالعه <span class="t">۲۱:۰۷</span></a>
       </div>
     </div>
 
@@ -1199,5 +1201,26 @@ footer strong { color: #a855f7; }
     موفق باشی! ✨
   </footer>
 </div>
+
+<script>
+(function () {
+  function seekFrom(a) {
+    var ms = parseInt(a.getAttribute('data-seek-ms') || '0', 10);
+    try { if (window.HamyarPlayer && HamyarPlayer.seek) HamyarPlayer.seek(ms); } catch (e) {}
+  }
+  document.querySelectorAll('.toc a[data-seek-ms]').forEach(function (a) {
+    a.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      seekFrom(a);
+      var id = a.getAttribute('href');
+      if (id && id.charAt(0) === '#') {
+        var el = document.querySelector(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
