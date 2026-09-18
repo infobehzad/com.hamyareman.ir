@@ -219,6 +219,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
     var dragMs by remember { mutableLongStateOf(-1L) }
     var quiet by remember { mutableStateOf(false) }
     var pendingStartKey by remember { mutableStateOf<String?>(null) }
+    var pendingSeekMs by remember { mutableLongStateOf(-1L) }
 
     val track = tracks[activeIdx]
     LaunchedEffect(packId, tracks.size) {
@@ -818,10 +819,6 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
         }
         TeachPdfState.Idle -> Card(modifier.fillMaxWidth()) {
             Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-        }
-    }
-}
-CircularProgressIndicator() }
         }
     }
 }

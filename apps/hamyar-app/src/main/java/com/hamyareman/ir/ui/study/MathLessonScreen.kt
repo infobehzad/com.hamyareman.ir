@@ -265,17 +265,22 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
                             settings.useWideViewPort = true
                             settings.builtInZoomControls = true
                             settings.displayZoomControls = false
+                            addJavascriptInterface(TeachHtmlBridge(), "HamyarPlayer")
                             setBackgroundColor(android.graphics.Color.WHITE)
                         }
                     },
                     update = { wv ->
-                        wv.loadDataWithBaseURL(
-                            "https://local.hamyar/",
-                            teachHtml,
-                            "text/html",
-                            "utf-8",
-                            null,
-                        )
+                        val tag = teachHtml.hashCode()
+                        if (wv.tag != tag) {
+                            wv.tag = tag
+                            wv.loadDataWithBaseURL(
+                                "https://local.hamyar/",
+                                teachHtml,
+                                "text/html",
+                                "utf-8",
+                                null,
+                            )
+                        }
                     },
                     modifier = Modifier.fillMaxSize().padding(4.dp),
                 )
@@ -615,7 +620,6 @@ private fun MathExamTab(pack: StudyPack) {
     }
 }
 
-@Composable
 /** پل JS فهرست HTML → سیک پلیر تدریس. */
 private class TeachHtmlBridge {
     @JavascriptInterface
@@ -624,6 +628,7 @@ private class TeachHtmlBridge {
     }
 }
 
+@Composable
 internal fun ExamLedgerCard(ledger: MathExamLedger.State) {
     val last = ledger.latest ?: return
     Card(Modifier.fillMaxWidth()) {
