@@ -105,12 +105,12 @@ fun SchoolHubScreen(nav: NavController) {
 
         HubMenuGroup(
             "🗓 برنامه‌ی هفتگی",
-            "چرخش شیفت و درس‌های هر روز",
+            "برنامهٔ شخصی تو و شیفت مدرسه",
             open = openGroup == "schedule",
             onToggle = { toggleGroup("schedule") },
         ) {
-            HubCard("⏰", "برنامه‌ی هفتگی من", "شیفت صبح/عصر/شب + جدول درس هر روز (با ورزش)") { nav.hubTo(Screen.WeeklySchedule.route) }
-            HubCard("🏫", "برنامه‌ی مدرسه", "زنگ‌ها و برنامه‌ی کلاسی") { nav.hubTo(Screen.School.route) }
+            HubCard("⏰", "برنامه‌ی هفتگی من", "جدول زمانی شخصی شنبه تا جمعه — درس، تکلیف، مرور، ورزش") { nav.hubTo(Screen.WeeklySchedule.route) }
+            HubCard("🏫", "برنامه‌ی مدرسه", "شیفت چرخشی و زنگ‌های کلاسی") { nav.hubTo(Screen.School.route) }
         }
 
         HubMenuGroup(
@@ -119,7 +119,7 @@ fun SchoolHubScreen(nav: NavController) {
             open = openGroup == "quiz",
             onToggle = { toggleGroup("quiz") },
         ) {
-            HubCard("🧪", "جزوه‌ها و آپلود PDF", "جزوه‌ی معلم را بده تا سوال ساخته شود") { nav.hubTo(Screen.Pdf.route) }
+            HubCard("🧪", "جزوه‌های شخصی و آزمونی", "دفتر نکات + گالری فایل روی گوشی") { nav.hubTo(Screen.Pdf.route) }
             HubCard("📈", "نمودار پیشرفت دروس", "رشدت در هر درس — طبق آزمون‌ها و فلش‌کارت‌ها") { nav.hubTo(Screen.Charts.of(null)) }
         }
     }

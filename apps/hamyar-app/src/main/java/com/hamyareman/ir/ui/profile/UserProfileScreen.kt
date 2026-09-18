@@ -215,7 +215,7 @@ fun UserProfileScreen(
             ) {
                 Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        if (paid) "اشتراک: پرمیوم" else "اشتراک: رایگان",
+                        if (paid) "اشتراک فعال" else "مهمان همیار من",
                         fontWeight = FontWeight.Bold,
                         color = if (paid) androidx.compose.ui.graphics.Color(0xFF166534) else androidx.compose.ui.graphics.Color(0xFFB91C1C),
                     )

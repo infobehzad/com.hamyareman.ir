@@ -89,7 +89,6 @@ import com.hamyareman.ir.ui.study.PdfUploadScreen
 import com.hamyareman.ir.ui.study.ProgressChartsScreen
 import com.hamyareman.ir.ui.study.QuizReviewScreen
 import com.hamyareman.ir.ui.study.QuizScreen
-import com.hamyareman.ir.ui.study.SchoolScheduleScreen
 import com.hamyareman.ir.ui.study.StudyHomeScreen
 import com.hamyareman.ir.ui.study.VideoTeachScreen
 import com.hamyareman.ir.ui.water.WaterScreen
@@ -187,7 +186,9 @@ fun ZahraNavHost() {
             }
             composable(Screen.AwarenessHub.route) { AwarenessHubScreen(nav) }
             composable(Screen.HealthProgress.route) { HealthProgressScreen(onBack = { nav.popBackStack() }) }
-            composable(Screen.WeeklySchedule.route) { ClassPlanScreen(onBack = { nav.popBackStack() }, initialTab = 0) }
+            composable(Screen.WeeklySchedule.route) { WeeklyScheduleScreen { nav.popBackStack() } }
+            composable(Screen.ClassPlan.route) { ClassPlanScreen(onBack = { nav.popBackStack() }, initialTab = 0) }
+            composable(Screen.TomorrowPrep.route) { TomorrowPrepScreen { nav.popBackStack() } }
             composable(Screen.Meds.route) { MedsScreen { nav.popBackStack() } }
             composable(Screen.SleepLog.route) { SleepLogScreen { nav.popBackStack() } }
             composable(Screen.ReadingCorner.route) { ReadingCornerScreen { nav.popBackStack() } }
@@ -207,7 +208,7 @@ fun ZahraNavHost() {
             composable(Screen.Helplines.route) { HelplinesScreen { nav.popBackStack() } }
             composable(Screen.Library.route) { LibraryScreen { nav.popBackStack() } }
             composable(Screen.Audiobook.route) { AudiobookScreen { nav.popBackStack() } }
-            composable(Screen.School.route) { SchoolScheduleScreen { nav.popBackStack() } }
+            composable(Screen.School.route) { ClassPlanScreen(onBack = { nav.popBackStack() }, initialTab = 2) }
             composable(
                 Screen.Quiz.route,
                 listOf(navArgument("lessonId") { type = NavType.StringType; defaultValue = "" }),

@@ -51,6 +51,8 @@ object TableIds {
     // --- پرامپت ۰۱: حافظه‌ی پیشرفت پلیر ویدیو/صوت ---
     const val LESSON_MEDIA_PROGRESS = "lesson_media_progress"
     const val STUDY_PROGRESS = "study_progress"
+    /** نکات درسی دفتر ۵خط — متن؛ فایل جزوه سینک نمی‌شود. */
+    const val LESSON_NOTES = "lesson_notes"
 
     // --- پرامپت ۰۲: ماژول ورزش/یوگا/تنفس/یادگیری ---
     const val WELLNESS_MOVES = "wellness_moves"

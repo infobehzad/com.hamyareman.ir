@@ -7,4 +7,5 @@
     <cache-path name="heart" path="heart/" />
     <cache-path name="voice" path="voice/" />
     <files-path name="private_media" path="media/" />
+    <files-path name="notes_gallery" path="notes_gallery/" />
 </paths>

@@ -163,7 +163,7 @@ fun HomeScreen(nav: NavController) {
             }
 
             ClassPlanCard(
-                onOpenPlan = { nav.navigate(Screen.WeeklySchedule.route) },
+                onOpenPlan = { nav.navigate(Screen.ClassPlan.route) },
                 onOpenPrep = { nav.navigate(Screen.TomorrowPrep.route) },
             )
 
@@ -172,7 +172,6 @@ fun HomeScreen(nav: NavController) {
             Text("امروز", style = MaterialTheme.typography.titleMedium)
             HubCard("🌤", "روتین امروز", "بلوک‌های روزت را ببین") { nav.navigate(Screen.Routine.route) }
             HubCard("💧", "آب بنوش", "لیوان‌های امروزت را ثبت کن") { nav.navigate(Screen.Water.route) }
-            HubCard("💬", "حرف دل با بابا", "پیام، ویس، عکس یا تماس") { nav.navigate(Screen.Heart.route) }
             HubCard("💛", "آرامش سریع", "سه دقیقه تا حال بهتر") { nav.navigate(Screen.Calm.route) }
             Spacer(Modifier.height(8.dp))
         }
@@ -268,7 +267,7 @@ internal fun SubscriptionChip(raw: String) {
     val fg = if (paid) Color(0xFF166534) else Color(0xFFB91C1C)
     Surface(shape = RoundedCornerShape(50), color = bg) {
         Text(
-            if (paid) "پرمیوم" else "رایگان",
+            if (paid) "اشتراک فعال" else "مهمان همیار من",
             color = fg,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.labelMedium,
