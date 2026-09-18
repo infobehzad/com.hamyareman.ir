@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>درس سوم جامع: تعداد زیرمجموعه‌ها و عمل‌های مجموعه</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Vazirmatn', Tahoma, sans-serif;
+  background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 50%, #ecfeff 100%);
+  color: #1e293b; line-height: 1.95; padding: 20px; font-size: 16px;
+}
+.container { max-width: 1150px; margin: 0 auto; background: #fff;
+  border-radius: 24px; box-shadow: 0 20px 60px rgba(30,41,59,0.15); overflow: hidden; }
+
+header {
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%);
+  color: #fff; padding: 42px 30px; text-align: center; position: relative;
+}
+header::after {
+  content: ""; position: absolute; bottom: -20px; left: 0; right: 0;
+  height: 40px; background: #fff;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+header h1 { font-size: 2rem; font-weight: 900; margin-bottom: 10px;
+  text-shadow: 0 3px 8px rgba(0,0,0,0.2); }
+header p { font-size: 1rem; opacity: 0.95; }
+
+main { padding: 40px 30px 60px; }
+
+.intro-box {
+  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+  border-right: 6px solid #f59e0b; padding: 22px 26px;
+  border-radius: 16px; margin-bottom: 30px; font-size: 1.02rem;
+}
+.intro-box strong { color: #92400e; }
+
+.toc {
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+  border: 2px solid #6366f1; border-radius: 18px;
+  padding: 22px 26px; margin-bottom: 35px;
+}
+.toc h3 { color: #3730a3; font-size: 1.15rem; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px; }
+.toc h3::before { content: "📋"; }
+.toc ol { padding-right: 22px; margin: 0; }
+.toc li { padding: 4px 0; color: #3730a3; font-weight: 600; font-size: 0.95rem; }
+.toc a { color: #3730a3; text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+
+.section-title {
+  font-size: 1.3rem; font-weight: 800; color: #6d28d9;
+  margin: 40px 0 16px; padding-right: 12px;
+  border-right: 5px solid #7c3aed;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title::before { content: "◆"; color: #a855f7; font-size: 0.9rem; }
+.subsection-title {
+  font-size: 1.1rem; font-weight: 800; color: #1e40af;
+  margin: 26px 0 12px; padding-right: 10px;
+  border-right: 4px solid #3b82f6;
+  display: flex; align-items: center; gap: 6px;
+}
+.subsection-title::before { content: "▸"; color: #60a5fa; font-size: 0.85rem; }
+
+.dialog { display: flex; gap: 14px; margin: 16px 0;
+  align-items: flex-start; animation: fadeIn 0.4s ease; }
+.avatar {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; color: #fff; font-size: 0.9rem;
+  flex-shrink: 0; box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+.avatar.sarvnaz { background: linear-gradient(135deg, #ec4899, #f43f5e); }
+.avatar.farsam  { background: linear-gradient(135deg, #0ea5e9, #3b82f6); }
+
+.bubble { flex: 1; padding: 14px 18px; border-radius: 18px; font-size: 1rem; }
+.bubble.sarvnaz {
+  background: #fce7f3; border-top-right-radius: 4px;
+  color: #831843; border: 1px solid #fbcfe8;
+}
+.bubble.farsam {
+  background: #dbeafe; border-top-right-radius: 4px;
+  color: #1e3a8a; border: 1px solid #bfdbfe;
+}
+.speaker { font-weight: 800; display: block; margin-bottom: 4px; font-size: 0.9rem; }
+.speaker.sarvnaz { color: #be185d; }
+.speaker.farsam  { color: #1d4ed8; }
+
+.formula-box {
+  background: #fff7ed; border: 2px solid #fb923c;
+  border-radius: 14px; padding: 16px 22px;
+  margin: 16px 0; text-align: center;
+  font-size: 1.15rem; font-weight: 700; color: #9a3412;
+  direction: ltr; font-family: 'KaTeX_Main', 'Cambria Math', serif;
+}
+.formula-box.big {
+  font-size: 1.4rem; padding: 22px 26px;
+  background: linear-gradient(135deg, #fff7ed, #fed7aa);
+  border-width: 3px;
+}
+
+.note-box {
+  background: #ecfdf5; border-right: 5px solid #10b981;
+  padding: 14px 20px; border-radius: 12px;
+  margin: 16px 0; color: #065f46; font-size: 0.98rem;
+}
+.warning-box {
+  background: #fef2f2; border-right: 5px solid #ef4444;
+  padding: 14px 20px; border-radius: 12px;
+  margin: 16px 0; color: #991b1b; font-size: 0.98rem;
+}
+.def-box {
+  background: #e0e7ff; border: 2px solid #4f46e5;
+  border-radius: 16px; padding: 18px 22px; margin: 18px 0;
+}
+.def-box::before {
+  content: "تعریف رسمی";
+  display: inline-block; background: #4f46e5; color: #fff;
+  padding: 2px 12px; border-radius: 8px;
+  font-size: 0.82rem; font-weight: 700; margin-bottom: 10px;
+}
+.def-box.green { background: #d1fae5; border-color: #059669; }
+.def-box.green::before { background: #059669; }
+.def-box.orange { background: #fed7aa; border-color: #ea580c; }
+.def-box.orange::before { background: #ea580c; }
+.def-box.pink { background: #fce7f3; border-color: #db2777; }
+.def-box.pink::before { background: #db2777; }
+
+.highlight {
+  background: linear-gradient(120deg, #f4ff5b 0%, #fde047 100%);
+  padding: 2px 6px; border-radius: 6px;
+  font-weight: 700; color: #713f12;
+}
+
+.example-box {
+  background: #f5f3ff; border: 2px solid #a78bfa;
+  border-radius: 16px; padding: 20px 24px; margin: 20px 0;
+}
+.example-box h4 {
+  color: #6d28d9; font-size: 1.05rem; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.example-box h4::before { content: "📌"; font-size: 1.15rem; }
+
+.step {
+  background: #fff; border-radius: 10px;
+  padding: 10px 14px; margin: 8px 0;
+  border-right: 4px solid #7c3aed; font-size: 0.98rem;
+}
+.step b { color: #6d28d9; }
+
+.exercise {
+  background: #fff; border: 2px dashed #7c3aed;
+  border-radius: 16px; padding: 22px 26px; margin: 24px 0;
+}
+.exercise-title {
+  font-weight: 800; color: #6d28d9; font-size: 1.05rem;
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+}
+.exercise-title .num {
+  display: inline-flex; width: 30px; height: 30px;
+  background: linear-gradient(135deg, #7c3aed, #ec4899);
+  color: #fff; border-radius: 50%;
+  align-items: center; justify-content: center;
+  font-size: 0.9rem; font-weight: 900;
+}
+.result-box {
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 2px solid #10b981; border-radius: 12px;
+  padding: 14px 18px; margin-top: 12px;
+  text-align: center; font-weight: 700; color: #065f46;
+}
+
+.svg-wrapper {
+  background: #fff; border-radius: 16px; padding: 20px;
+  margin: 22px 0; text-align: center;
+  border: 2px solid #e0e7ff;
+  box-shadow: 0 8px 20px rgba(99,102,241,0.08);
+}
+.svg-wrapper svg { max-width: 100%; height: auto; }
+.svg-caption { font-size: 0.9rem; color: #64748b; margin-top: 10px; font-style: italic; }
+
+.summary-table {
+  width: 100%; border-collapse: collapse; margin: 20px 0;
+  background: #fff; border-radius: 14px; overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+.summary-table th {
+  background: linear-gradient(135deg, #7c3aed, #ec4899);
+  color: #fff; padding: 12px; font-size: 0.95rem;
+}
+.summary-table td {
+  padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-size: 0.95rem;
+}
+.summary-table tr:nth-child(even) td { background: #f8fafc; }
+.summary-table tr:last-child td { border-bottom: none; }
+
+.power-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px; margin: 20px 0;
+}
+.power-card {
+  background: #fff; border-radius: 14px; padding: 14px;
+  text-align: center; border: 2px solid #a78bfa;
+  box-shadow: 0 4px 14px rgba(124,58,237,0.08);
+  transition: transform 0.2s ease;
+}
+.power-card:hover { transform: translateY(-4px); }
+.power-card .pw { font-size: 1.1rem; font-weight: 900; color: #6d28d9;
+  font-family: 'KaTeX_Main', serif; margin-bottom: 6px; direction: ltr; }
+.power-card .val { font-size: 1.6rem; font-weight: 900; color: #be185d;
+  margin-bottom: 4px; }
+.power-card .lbl { font-size: 0.78rem; color: #64748b; }
+
+.op-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px; margin: 22px 0;
+}
+.op-card {
+  background: #fff; border-radius: 16px; padding: 20px;
+  text-align: center; border: 2px solid #e2e8f0;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+.op-card:hover { transform: translateY(-4px); }
+.op-card .symbol { font-size: 2.4rem; font-weight: 900;
+  font-family: 'KaTeX_Main', serif; margin-bottom: 8px; direction: ltr; }
+.op-card .label { font-size: 1rem; font-weight: 800; margin-bottom: 8px; }
+.op-card .desc { font-size: 0.88rem; color: #475569; line-height: 1.7; }
+.op-card.union { border-color: #3b82f6; background: linear-gradient(135deg, #eff6ff, #dbeafe); }
+.op-card.union .symbol { color: #1d4ed8; }
+.op-card.union .label { color: #1e3a8a; }
+.op-card.inter { border-color: #f59e0b; background: linear-gradient(135deg, #fffbeb, #fde68a); }
+.op-card.inter .symbol { color: #b45309; }
+.op-card.inter .label { color: #92400e; }
+.op-card.diff { border-color: #10b981; background: linear-gradient(135deg, #ecfdf5, #d1fae5); }
+.op-card.diff .symbol { color: #047857; }
+.op-card.diff .label { color: #065f46; }
+
+.big-quote {
+  background: linear-gradient(135deg, #fef9c3, #fde68a);
+  border: 2px dashed #eab308; border-radius: 16px;
+  padding: 18px 22px; margin: 20px 0; text-align: center;
+  font-weight: 700; color: #713f12; font-size: 1.05rem;
+}
+
+footer {
+  text-align: center; padding: 30px 20px;
+  background: #1e293b; color: #cbd5e1; font-size: 0.9rem;
+}
+footer strong { color: #a855f7; }
+
+.math, .katex { direction: ltr !important; unicode-bidi: isolate !important; }
+.math-inline { direction: ltr; unicode-bidi: isolate; display: inline-block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 640px) {
+  body { padding: 8px; font-size: 15px; }
+  main { padding: 20px 14px 40px; }
+  header h1 { font-size: 1.4rem; }
+  .avatar { width: 42px; height: 42px; font-size: 0.78rem; }
+  .bubble { padding: 12px 14px; font-size: 0.95rem; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>📘 درس سوم جامع: تعداد زیرمجموعه‌ها و عمل‌های مجموعه</h1>
+    <p>فصل اول ریاضی نهم — از فرمول طلایی 2ⁿ تا اجتماع، اشتراک و تفاضل</p>
+  </header>
+
+  <main>
+
+    <div class="intro-box">
+      <strong>سلام دانش‌آموز عزیز! 🌟</strong><br>
+      در درس قبل یاد گرفتیم زیرمجموعه چیست و چطور آن را تشخیص دهیم.
+      حالا در این درس، دو موضوع مهم را یاد می‌گیریم:
+      <br>
+      <strong>۱) تعداد زیرمجموعه‌های یک مجموعه</strong> و فرمول طلایی 2ⁿ.
+      <br>
+      <strong>۲) سه عمل اصلی روی مجموعه‌ها:</strong> اجتماع، اشتراک و تفاضل.
+      <br><br>
+      این درس، <b>پرکاربردترین درس فصل اول</b> است و در امتحانات نهایی همیشه از آن سؤال می‌آید.
+      پس با دقت بخوان.
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- فهرست مطالب -->
+    <!-- ============================================================= -->
+    <div class="toc">
+      <h3>فهرست مطالب</h3>
+      <ol>
+        <li><a href="#sec1">پیش‌نیاز: مرور سریع درس قبل</a></li>
+        <li><a href="#sec2">درس اصلی ۱: شمارش زیرمجموعه‌ها به روش سیستماتیک</a></li>
+        <li><a href="#sec3">درس اصلی ۲: فرمول طلایی 2ⁿ</a></li>
+        <li><a href="#sec4">درس اصلی ۳: اجتماع دو مجموعه (A ∪ B)</a></li>
+        <li><a href="#sec5">درس اصلی ۴: اشتراک دو مجموعه (A ∩ B)</a></li>
+        <li><a href="#sec6">درس اصلی ۵: تفاضل دو مجموعه (A − B)</a></li>
+        <li><a href="#sec7">درس اصلی ۶: مجموعه‌های جدا از هم و تهی</a></li>
+        <li><a href="#sec8">درس اصلی ۷: خاصیت‌های عمل‌ها</a></li>
+        <li><a href="#sec9">درس اصلی ۸: مسئله‌های کلامی و اصل شمول</a></li>
+        <li><a href="#sec10">تمرین‌های جامع با حل گام‌به‌گام</a></li>
+        <li><a href="#sec11">جدول خلاصه و نکات امتحانی</a></li>
+      </ol>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۱: مرور درس قبل -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec1">پیش‌نیاز: مرور سریع درس قبل</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        سلام سروناز جان. قبل از هر چیز، بگذار سه سؤال کوتاه بپرسم تا مطمئن شویم درس قبل را خوب یاد گرفته‌ای.
+        <br><br>
+        <b>سؤال ۱:</b> زیرمجموعه یعنی چه؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        می‌گوییم A زیرمجموعه‌ی B است اگر هر عضو A، عضوی از B هم باشد. نمادش <span class="math-inline">A ⊆ B</span> است.
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        آفرین. <b>سؤال ۲:</b> آیا تهی زیرمجموعه‌ی هر مجموعه‌ای است؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        بله! <span class="math-inline">∅ ⊆ A</span> برای هر مجموعه‌ی A.
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        دقیقاً. <b>سؤال ۳:</b> آیا هر مجموعه زیرمجموعه‌ی خودش است؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        بله، <span class="math-inline">A ⊆ A</span>. این دو نکته را «دو نکته‌ی طلایی» می‌نامیم.
+      </div>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 یادآوری:</strong> پس همیشه دو زیرمجموعه‌ی «ثابت» داریم:
+      <ul style="margin-top:8px; padding-right:20px;">
+        <li><b>تهی</b> — همیشه زیرمجموعه است.</li>
+        <li><b>خود مجموعه</b> — همیشه زیرمجموعه است.</li>
+      </ul>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۲: شمارش سیستماتیک -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec2">درس اصلی ۱: شمارش زیرمجموعه‌ها به روش سیستماتیک</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        سروناز جان، یک سؤال: اگر مجموعه‌ای داشته باشیم، چطور می‌توانیم <b>تمام زیرمجموعه‌هایش</b> را بشماریم
+        بدون اینکه چیزی جا بیفتد یا تکراری نوشته شود؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        هوم... فکر کنم باید منظم عمل کنیم.
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        دقیقاً! به آن می‌گوییم <span class="highlight">روش سیستماتیک</span>.
+        بگذار با مجموعه‌ی <span class="math-inline">A = {1, 2, 3}</span> شروع کنیم.
+      </div>
+    </div>
+
+    <div class="subsection-title">روش سیستماتیک: بر اساس تعداد اعضا</div>
+
+    <div class="example-box">
+      <h4>زیرمجموعه‌های A = {1, 2, 3}</h4>
+      <div class="step"><b>گام ۱ — زیرمجموعه‌های صفر عضو:</b>
+        <br>
+        فقط تهی: <span class="math-inline">∅</span>
+        <br>
+        <b>تعداد: ۱</b>
+      </div>
+      <div class="step"><b>گام ۲ — زیرمجموعه‌های یک عضو:</b>
+        <br>
+        هر عضو را یک بار جدا می‌نویسیم: <span class="math-inline">{1}</span>، <span class="math-inline">{2}</span>، <span class="math-inline">{3}</span>
+        <br>
+        <b>تعداد: ۳</b>
+      </div>
+      <div class="step"><b>گام ۳ — زیرمجموعه‌های دو عضو:</b>
+        <br>
+        ترکیب‌های دو عضوی: <span class="math-inline">{1,2}</span>، <span class="math-inline">{1,3}</span>، <span class="math-inline">{2,3}</span>
+        <br>
+        <b>تعداد: ۳</b>
+      </div>
+      <div class="step"><b>گام ۴ — زیرمجموعه‌های سه عضو:</b>
+        <br>
+        فقط خود مجموعه: <span class="math-inline">{1, 2, 3}</span>
+        <br>
+        <b>تعداد: ۱</b>
+      </div>
+      <div class="result-box">
+        جمع کل: ۱ + ۳ + ۳ + ۱ = <b>۸ زیرمجموعه</b>
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        جالب بود! پس با این روش مطمئن می‌شویم هیچ‌کدام جا نمی‌افتد.
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        دقیقاً. حالا یک نکته‌ی جالب: عدد <b>۸</b> که به دست آوردیم، خودش یک الگو دارد.
+      </div>
+    </div>
+
+    <!-- SVG روش سیستماتیک -->
+    <div class="svg-wrapper">
+      <svg viewBox="0 0 740 380" xmlns="http://www.w3.org/2000/svg">
+        <rect width="740" height="380" fill="#faf5ff" rx="18"/>
+        <text x="370" y="34" text-anchor="middle" font-size="16"
+          font-weight="900" fill="#4c1d95" font-family="Vazirmatn, sans-serif">
+          تمام زیرمجموعه‌های A = {1, 2, 3}
+        </text>
+        <!-- Set A -->
+        <rect x="280" y="55" width="180" height="55"
+          fill="#a78bfa" stroke="#4c1d95" stroke-width="2.5" rx="12"/>
+        <text x="370" y="90" text-anchor="middle" font-size="18"
+          font-weight="900" fill="#fff" font-family="monospace">A = {1, 2, 3}</text>
+        <!-- Category 1: 0 members -->
+        <rect x="30" y="135" width="160" height="200"
+          fill="#fce7f3" stroke="#db2777" stroke-width="2" rx="12"/>
+        <text x="110" y="165" text-anchor="middle" font-size="13"
+          font-weight="900" fill="#9d174d" font-family="Vazirmatn, sans-serif">صفر عضو</text>
+        <line x1="50" y1="180" x2="170" y2="180" stroke="#db2777"
+          stroke-dasharray="3" stroke-width="1.5"/>
+        <text x="110" y="220" text-anchor="middle" font-size="28"
+          font-weight="900" fill="#831843" font-family="serif">∅</text>
+        <text x="110" y="270" text-anchor="middle" font-size="12"
+          fill="#831843" font-family="Vazirmatn, sans-serif">تعداد: ۱</text>
+        <text x="110" y="310" text-anchor="middle" font-size="12"
+          fill="#831843" font-family="Vazirmatn, sans-serif">۲⁰ = ۱</text>
+        <!-- Category 2: 1 member -->
+        <rect x="205" y="135" width="160" height="200"
+          fill="#dbeafe" stroke="#2563eb" stroke-width="2" rx="12"/>
+        <text x="285" y="165" text-anchor="middle" font-size="13"
+          font-weight="900" fill="#1e3a8a" font-family="Vazirmatn, sans-serif">یک عضو</text>
+        <line x1="225" y1="180" x2="345" y2="180" stroke="#2563eb"
+          stroke-dasharray="3" stroke-width="1.5"/>
+        <text x="285" y="215" text-anchor="middle" font-size="15"
+          font-weight="700" fill="#1e3a8a" font-family="monospace">{1}</text>
+        <text x="285" y="245" text-anchor="middle" font-size="15"
+          font-weight="700" fill="#1e3a8a" font-family="monospace">{2}</text>
+        <text x="285" y="275" text-anchor="middle" font-size="15"
+          font-weight="700" fill="#1e3a8a" font-family="monospace">{3}</text>
+        <text x="285" y="315" text-anchor="middle" font-size="12"
+          fill="#1e3a8a" font-family="Vazirmatn, sans-serif">تعداد: ۳</text>
+        <!-- Category 3: 2 members -->
+        <rect x="380" y="135" width="160" height="200"
+          fill="#fef3c7" stroke="#ea580c" stroke-width="2" rx="12"/>
+        <text x="460" y="165" text-anchor="middle" font-size="13"
+          font-weight="900" fill="#9a3412" font-family="Vazirmatn, sans-serif">دو عضو</text>
+        <line x1="400" y1="180" x2="520" y2="180" stroke="#ea580c"
+          stroke-dasharray="3" stroke-width="1.5"/>
+        <text x="460" y="215" text-anchor="middle" font-size="15"
+          font-weight="700" fill="#9a3412" font-family="monospace">{1,2}</text>
+        <text x="460" y="245" text-anchor="middle" font-size="15"
+          font-weight="700" fill="#9a3412" font-family="monospace">{1,3}</text>
+        <text x="460" y="275" text-anchor="middle" font-size="15"
+          font-weight="700" fill="#9a3412" font-family="monospace">{2,3}</text>
+        <text x="460" y="315" text-anchor="middle" font-size="12"
+          fill="#9a3412" font-family="Vazirmatn, sans-serif">تعداد: ۳</text>
+        <!-- Category 4: 3 members -->
+        <rect x="555" y="135" width="160" height="200"
+          fill="#d1fae5" stroke="#059669" stroke-width="2" rx="12"/>
+        <text x="635" y="165" text-anchor="middle" font-size="13"
+          font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">سه عضو</text>
+        <line x1="575" y1="180" x2="695" y2="180" stroke="#059669"
+          stroke-dasharray="3" stroke-width="1.5"/>
+        <text x="635" y="230" text-anchor="middle" font-size="15"
+          font-weight="700" fill="#065f46" font-family="monospace">{1,2,3}</text>
+        <text x="635" y="270" text-anchor="middle" font-size="12"
+          fill="#065f46" font-family="Vazirmatn, sans-serif">تعداد: ۱</text>
+        <text x="635" y="310" text-anchor="middle" font-size="12"
+          fill="#065f46" font-family="Vazirmatn, sans-serif">خود مجموعه</text>
+        <!-- Total -->
+        <rect x="150" y="348" width="440" height="25"
+          fill="#fef3c7" stroke="#f59e0b" stroke-width="2" rx="8"/>
+        <text x="370" y="366" text-anchor="middle" font-size="13"
+          font-weight="900" fill="#92400e" font-family="Vazirmatn, sans-serif">
+          جمع: ۱ + ۳ + ۳ + ۱ = ۸ = 2³
+        </text>
+      </svg>
+      <div class="svg-caption">شکل ۱: روش سیستماتیک شمارش زیرمجموعه‌ها</div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۳: فرمول طلایی -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec3">درس اصلی ۲: فرمول طلایی 2ⁿ</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        ببین سروناز، متوجه شدی که همیشه الگو تکرار می‌شود؟ بیا دو حالت دیگر را هم چک کنیم.
+      </div>
+    </div>
+
+    <div class="subsection-title">شمارش برای مجموعه‌ی خالی (∅)</div>
+    <div class="note-box">
+      اگر مجموعه‌ای هیچ عضوی نداشته باشد، تنها زیرمجموعه‌اش خودش (یعنی تهی) است:
+      <div class="formula-box">تعداد زیرمجموعه‌های ∅ = ۱</div>
+    </div>
+
+    <div class="subsection-title">شمارش برای مجموعه‌ی یک‌عضوی {a}</div>
+    <div class="note-box">
+      زیرمجموعه‌ها: <span class="math-inline">∅</span> و <span class="math-inline">{a}</span>.
+      <div class="formula-box">تعداد زیرمجموعه‌های {a} = ۲</div>
+    </div>
+
+    <div class="subsection-title">شمارش برای مجموعه‌ی دو عضوی {a, b}</div>
+    <div class="example-box">
+      <h4>زیرمجموعه‌ها:</h4>
+      <div class="step"><b>صفر عضو:</b> <span class="math-inline">∅</span></div>
+      <div class="step"><b>یک عضو:</b> <span class="math-inline">{a}</span>، <span class="math-inline">{b}</span></div>
+      <div class="step"><b>دو عضو:</b> <span class="math-inline">{a, b}</span></div>
+      <div class="result-box">تعداد کل: ۱ + ۲ + ۱ = ۴ = 2²</div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        یعنی برای هر تعداد عضو، یک الگو داریم:
+        <ul style="padding-right:20px; margin-top:8px;">
+          <li>۰ عضو → ۱ زیرمجموعه</li>
+          <li>۱ عضو → ۲ زیرمجموعه</li>
+          <li>۲ عضو → ۴ زیرمجموعه</li>
+          <li>۳ عضو → ۸ زیرمجموعه</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        دقیقاً! این الگو یک <b>فرمول طلایی</b> دارد:
+        <div class="formula-box big">تعداد زیرمجموعه‌های یک مجموعه‌ی n عضوی = 2ⁿ</div>
+      </div>
+    </div>
+
+    <div class="def-box green">
+      <b>فرمول تعداد زیرمجموعه‌ها:</b> اگر مجموعه‌ای n عضو داشته باشد، تعداد زیرمجموعه‌هایش
+      <span class="math-inline">2ⁿ</span> است. <br>
+      در اینجا <span class="math-inline">n</span> = تعداد اعضای مجموعه.
+    </div>
+
+    <div class="subsection-title">جدول توان‌های دو (حتماً حفظ کن)</div>
+
+    <div class="power-grid">
+      <div class="power-card"><div class="pw">2⁰</div><div class="val">1</div><div class="lbl">۰ عضو</div></div>
+      <div class="power-card"><div class="pw">2¹</div><div class="val">2</div><div class="lbl">۱ عضو</div></div>
+      <div class="power-card"><div class="pw">2²</div><div class="val">4</div><div class="lbl">۲ عضو</div></div>
+      <div class="power-card"><div class="pw">2³</div><div class="val">8</div><div class="lbl">۳ عضو</div></div>
+      <div class="power-card"><div class="pw">2⁴</div><div class="val">16</div><div class="lbl">۴ عضو</div></div>
+      <div class="power-card"><div class="pw">2⁵</div><div class="val">32</div><div class="lbl">۵ عضو</div></div>
+      <div class="power-card"><div class="pw">2⁶</div><div class="val">64</div><div class="lbl">۶ عضو</div></div>
+      <div class="power-card"><div class="pw">2⁷</div><div class="val">128</div><div class="lbl">۷ عضو</div></div>
+      <div class="power-card"><div class="pw">2⁸</div><div class="val">256</div><div class="lbl">۸ عضو</div></div>
+      <div class="power-card"><div class="pw">2⁹</div><div class="val">512</div><div class="lbl">۹ عضو</div></div>
+      <div class="power-card"><div class="pw">2¹⁰</div><div class="val">1024</div><div class="lbl">۱۰ عضو</div></div>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 نکته‌ی کلیدی:</strong> اگر در امتحان پرسیدند «مجموعه‌ای با ۶ عضو، چند زیرمجموعه دارد؟»
+      سریع بگو: <b>64</b>. چون <span class="math-inline">2⁶ = 64</span>.
+    </div>
+
+    <div class="subsection-title">مثال ۱: مجموعه‌ی ۴ عضوی</div>
+    <div class="example-box">
+      <h4>A = {2, 4, 6, 8} چند زیرمجموعه دارد؟</h4>
+      <div class="step"><b>گام ۱:</b> تعداد اعضا: <span class="math-inline">n(A) = 4</span></div>
+      <div class="step"><b>گام ۲:</b> از فرمول 2ⁿ استفاده می‌کنیم: <span class="math-inline">2⁴ = 16</span></div>
+      <div class="result-box">A دارای <b>۱۶ زیرمجموعه</b> است</div>
+    </div>
+
+    <div class="subsection-title">مثال ۲ (سؤال معکوس): تعداد اعضا را پیدا کنیم</div>
+    <div class="example-box">
+      <h4>مجموعه‌ای دارای ۳۲ زیرمجموعه است. چند عضو دارد؟</h4>
+      <div class="step"><b>گام ۱:</b> می‌دانیم <span class="math-inline">2ⁿ = 32</span>.</div>
+      <div class="step"><b>گام ۲:</b> با توجه به جدول: <span class="math-inline">2⁵ = 32</span>.</div>
+      <div class="step"><b>گام ۳:</b> پس <span class="math-inline">n = 5</span>.</div>
+      <div class="result-box">این مجموعه <b>۵ عضو</b> دارد</div>
+    </div>
+
+    <div class="warning-box">
+      <strong>⚠️ اشتباه رایج:</strong> بعضی از دانش‌آموزان <span class="math-inline">2ⁿ</span> را با
+      <span class="math-inline">2 × n</span> اشتباه می‌گیرند. این دو کاملاً متفاوت هستند!
+      <ul style="padding-right:20px; margin-top:8px;">
+        <li><b>درست:</b> <span class="math-inline">n = 4 → 2⁴ = 16</span></li>
+        <li><b>غلط:</b> <span class="math-inline">n = 4 → 2 × 4 = 8</span></li>
+      </ul>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۴: اجتماع -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec4">درس اصلی ۳: اجتماع دو مجموعه (A ∪ B)</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        سروناز جان، حالا می‌رویم سراغ یک موضوع کاملاً جدید: <span class="highlight">عمل‌های روی مجموعه‌ها</span>.
+        بیا اول با یک مثال از زندگی روزمره شروع کنیم.
+        <br><br>
+        فرض کن دو سبد میوه داری:
+        <ul style="padding-right:20px; margin-top:8px;">
+          <li><b>سبد اول:</b> سیب، پرتقال، موز</li>
+          <li><b>سبد دوم:</b> موز، انگور، هندوانه</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        حالا اگر بخواهی همه‌ی میوه‌های دو سبد را در یک سبد بزرگ بریزی، چه می‌شود؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        می‌شود: سیب، پرتقال، موز، انگور، هندوانه. توجه کن که «موز» را یک بار می‌گوییم.
+        <br>
+        به این کار در ریاضی می‌گوییم <b>اجتماع</b>.
+      </div>
+    </div>
+
+    <div class="def-box">
+      <b>اجتماع دو مجموعه:</b> اجتماع A و B، مجموعه‌ای است شامل <b>همه‌ی اعضای A و همه‌ی اعضای B</b>،
+      بدون نوشتن اعضای تکراری.
+      <br><br>
+      نماد آن: <span class="math-inline">A ∪ B</span> (خوانده می‌شود «A اجتماع B»)
+    </div>
+
+    <div class="example-box">
+      <h4>مثال عددی: A = {1, 2, 3} و B = {3, 4, 5}</h4>
+      <div class="step"><b>گام ۱:</b> اعضای A را می‌نویسیم: ۱، ۲، ۳.</div>
+      <div class="step"><b>گام ۲:</b> اعضای B را می‌نویسیم: ۳، ۴، ۵.</div>
+      <div class="step"><b>گام ۳:</b> عضو ۳ در هر دو مجموعه هست، ولی فقط <b>یک بار</b> نوشته می‌شود.</div>
+      <div class="result-box">A ∪ B = {1, 2, 3, 4, 5}</div>
+    </div>
+
+    <div class="subsection-title">روش گام‌به‌گام برای محاسبه‌ی اجتماع</div>
+
+    <div class="note-box">
+      <ol style="padding-right:20px;">
+        <li>اول همه‌ی اعضای A را در یک ردیف بنویس.</li>
+        <li>بعد اعضای B را بنویس، ولی <b>فقط آن‌هایی که در A نبودند</b>.</li>
+        <li>نتیجه را داخل آکولاد بگذار.</li>
+      </ol>
+    </div>
+
+    <div class="svg-wrapper">
+      <svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="uFill" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#bfdbfe"/>
+            <stop offset="100%" stop-color="#60a5fa"/>
+          </linearGradient>
+        </defs>
+        <rect width="720" height="340" fill="#f0f9ff" rx="18"/>
+        <text x="360" y="34" text-anchor="middle" font-size="17"
+          font-weight="900" fill="#0c4a6e" font-family="Vazirmatn, sans-serif">
+          اجتماع: A ∪ B = همه‌ی اعضا بدون تکرار
+        </text>
+        <circle cx="260" cy="180" r="90" fill="url(#uFill)" stroke="#1d4ed8" stroke-width="2.5"/>
+        <circle cx="390" cy="180" r="90" fill="url(#uFill)" stroke="#1d4ed8" stroke-width="2.5"/>
+        <text x="200" y="130" font-size="20" font-weight="900"
+          fill="#1e3a8a" font-family="monospace">A</text>
+        <text x="450" y="130" font-size="20" font-weight="900"
+          fill="#1e3a8a" font-family="monospace">B</text>
+        <text x="230" y="170" font-size="16" font-weight="700"
+          fill="#fff" font-family="monospace">1</text>
+        <text x="230" y="200" font-size="16" font-weight="700"
+          fill="#fff" font-family="monospace">2</text>
+        <text x="315" y="185" font-size="16" font-weight="700"
+          fill="#fff" font-family="monospace">3</text>
+        <text x="420" y="170" font-size="16" font-weight="700"
+          fill="#fff" font-family="monospace">4</text>
+        <text x="420" y="200" font-size="16" font-weight="700"
+          fill="#fff" font-family="monospace">5</text>
+        <rect x="200" y="290" width="320" height="35"
+          fill="#fef9c3" stroke="#eab308" stroke-width="2" rx="10"/>
+        <text x="360" y="312" text-anchor="middle" font-size="14"
+          font-weight="900" fill="#854d0e" font-family="monospace">
+          A ∪ B = {1, 2, 3, 4, 5}
+        </text>
+      </svg>
+      <div class="svg-caption">شکل ۲: نمودار ون اجتماع — همه‌ی ناحیه‌ی دو دایره رنگی می‌شود</div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۵: اشتراک -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec5">درس اصلی ۴: اشتراک دو مجموعه (A ∩ B)</div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        فرسام جان، اگر بخواهم ببینم چه میوه‌هایی <b>در هر دو سبد</b> هستند، چه کار کنم؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        یعنی می‌خواهی <span class="highlight">اشتراک</span> دو مجموعه را پیدا کنی.
+        در مثال سبدها، اشتراک دو سبد می‌شود: <b>{موز}</b> چون فقط موز در هر دو بود.
+      </div>
+    </div>
+
+    <div class="def-box orange">
+      <b>اشتراک دو مجموعه:</b> اشتراک A و B، مجموعه‌ای است شامل <b>فقط اعضای مشترک</b> بین A و B.
+      <br><br>
+      نماد آن: <span class="math-inline">A ∩ B</span> (خوانده می‌شود «A اشتراک B»)
+    </div>
+
+    <div class="example-box">
+      <h4>مثال عددی: A = {1, 2, 3} و B = {3, 4, 5}</h4>
+      <div class="step"><b>گام ۱:</b> اعضای A را با B مقایسه می‌کنیم:
+        <ul style="padding-right:20px; margin-top:6px;">
+          <li>آیا ۱ در B هست؟ خیر ❌</li>
+          <li>آیا ۲ در B هست؟ خیر ❌</li>
+          <li>آیا ۳ در B هست؟ بله ✅</li>
+        </ul>
+      </div>
+      <div class="step"><b>گام ۲:</b> پس فقط ۳ عضو مشترک است.</div>
+      <div class="result-box">A ∩ B = {3}</div>
+    </div>
+
+    <div class="svg-wrapper">
+      <svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="lensFill" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#fde68a"/>
+            <stop offset="100%" stop-color="#f59e0b"/>
+          </linearGradient>
+        </defs>
+        <rect width="720" height="340" fill="#fffbeb" rx="18"/>
+        <text x="360" y="34" text-anchor="middle" font-size="17"
+          font-weight="900" fill="#78350f" font-family="Vazirmatn, sans-serif">
+          اشتراک: A ∩ B = فقط اعضای مشترک
+        </text>
+        <circle cx="260" cy="180" r="90" fill="none" stroke="#1d4ed8" stroke-width="2.5"/>
+        <circle cx="390" cy="180" r="90" fill="none" stroke="#be185d" stroke-width="2.5"/>
+        <path d="M 325 113.31 A 90 90 0 0 1 325 246.69 A 90 90 0 0 1 325 113.31 Z"
+          fill="url(#lensFill)" stroke="#a16207" stroke-width="1.5"/>
+        <text x="200" y="130" font-size="20" font-weight="900"
+          fill="#1e3a8a" font-family="monospace">A</text>
+        <text x="450" y="130" font-size="20" font-weight="900"
+          fill="#831843" font-family="monospace">B</text>
+        <text x="230" y="170" font-size="16" font-weight="700"
+          fill="#1e3a8a" font-family="monospace">1</text>
+        <text x="230" y="200" font-size="16" font-weight="700"
+          fill="#1e3a8a" font-family="monospace">2</text>
+        <text x="322" y="185" font-size="16" font-weight="700"
+          fill="#78350f" font-family="monospace">3</text>
+        <text x="420" y="170" font-size="16" font-weight="700"
+          fill="#831843" font-family="monospace">4</text>
+        <text x="420" y="200" font-size="16" font-weight="700"
+          fill="#831843" font-family="monospace">5</text>
+        <rect x="200" y="290" width="320" height="35"
+          fill="#fef9c3" stroke="#eab308" stroke-width="2" rx="10"/>
+        <text x="360" y="312" text-anchor="middle" font-size="14"
+          font-weight="900" fill="#854d0e" font-family="monospace">
+          A ∩ B = {3}
+        </text>
+      </svg>
+      <div class="svg-caption">شکل ۳: نمودار ون اشتراک — فقط ناحیه‌ی مشترک (عدسی شکل) رنگی می‌شود</div>
+    </div>
+
+    <div class="subsection-title">مثال کلامی: اشتراک شمارنده‌ها</div>
+    <div class="example-box">
+      <h4>شمارنده‌های ۱۲ و شمارنده‌های ۱۸ — اشتراکشان چیست؟</h4>
+      <div class="step"><b>گام ۱ — شمارنده‌های ۱۲:</b> {1, 2, 3, 4, 6, 12}</div>
+      <div class="step"><b>گام ۲ — شمارنده‌های ۱۸:</b> {1, 2, 3, 6, 9, 18}</div>
+      <div class="step"><b>گام ۳ — پیدا کردن اعضای مشترک:</b>
+        <ul style="padding-right:20px; margin-top:6px;">
+          <li>۱ در هر دو ✅</li>
+          <li>۲ در هر دو ✅</li>
+          <li>۳ در هر دو ✅</li>
+          <li>۶ در هر دو ✅</li>
+          <li>۴، ۱۲، ۹، ۱۸ فقط در یکی از دو هستند ❌</li>
+        </ul>
+      </div>
+      <div class="result-box">اشتراک: {1, 2, 3, 6}</div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۶: تفاضل -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec6">درس اصلی ۵: تفاضل دو مجموعه (A − B)</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        سروناز جان، یک سؤال: اگر بخواهیم ببینیم چه میوه‌هایی <b>فقط در سبد اول</b> هستند، یعنی در سبد دوم نیستند، چه کار کنیم؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        باید اعضای سبد اول را با سبد دوم مقایسه کنیم و آن‌هایی که در دومی نیستند را نگه داریم.
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        دقیقاً! به این کار می‌گوییم <span class="highlight">تفاضل</span>.
+        در مثال سبدها، فقط سیب و پرتقال در سبد اول هستند و در سبد دوم نیستند، پس:
+        <br>
+        A − B = {سیب، پرتقال}
+      </div>
+    </div>
+
+    <div class="def-box pink">
+      <b>تفاضل دو مجموعه:</b> A منهای B، مجموعه‌ای است شامل <b>اعضایی از A که در B نیستند</b>.
+      <br><br>
+      نماد: <span class="math-inline">A − B</span>
+    </div>
+
+    <div class="example-box">
+      <h4>مثال عددی: A = {1, 2, 3} و B = {3, 4, 5}</h4>
+      <div class="step"><b>A − B:</b> اعضای A که در B نیستند:
+        <ul style="padding-right:20px; margin-top:6px;">
+          <li>۱ در B نیست ✅ نگه می‌داریم</li>
+          <li>۲ در B نیست ✅ نگه می‌داریم</li>
+          <li>۳ در B هست ❌ حذف می‌کنیم</li>
+        </ul>
+        <b>نتیجه: A − B = {1, 2}</b>
+      </div>
+      <div class="step"><b>B − A:</b> اعضای B که در A نیستند:
+        <ul style="padding-right:20px; margin-top:6px;">
+          <li>۳ در A هست ❌ حذف می‌کنیم</li>
+          <li>۴ در A نیست ✅ نگه می‌داریم</li>
+          <li>۵ در A نیست ✅ نگه می‌داریم</li>
+        </ul>
+        <b>نتیجه: B − A = {4, 5}</b>
+      </div>
+      <div class="result-box">
+        A − B = {1, 2} &nbsp;|&nbsp; B − A = {4, 5}
+      </div>
+    </div>
+
+    <div class="warning-box">
+      <strong>⚠️ نکته‌ی مهم:</strong> تفاضل، <b>خاصیت جابجایی ندارد</b>!
+      <br>
+      یعنی <span class="math-inline">A − B ≠ B − A</span> (در حالت کلی).
+      <br>
+      در مثال بالا می‌بینی: A − B = {1, 2} ولی B − A = {4, 5}. کاملاً متفاوت!
+    </div>
+
+    <div class="svg-wrapper">
+      <svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="crescentFill" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#86efac"/>
+            <stop offset="100%" stop-color="#22c55e"/>
+          </linearGradient>
+        </defs>
+        <rect width="720" height="340" fill="#f0fdf4" rx="18"/>
+        <text x="360" y="34" text-anchor="middle" font-size="17"
+          font-weight="900" fill="#14532d" font-family="Vazirmatn, sans-serif">
+          تفاضل: A − B = اعضای A که در B نیستند
+        </text>
+        <circle cx="260" cy="180" r="90" fill="none" stroke="#1d4ed8" stroke-width="2.5"/>
+        <circle cx="390" cy="180" r="90" fill="none" stroke="#be185d" stroke-width="2.5"/>
+        <path d="M 325 113.31 A 90 90 0 1 0 325 246.69 A 90 90 0 0 1 325 113.31 Z"
+          fill="url(#crescentFill)" stroke="#166534" stroke-width="1.5"/>
+        <text x="200" y="130" font-size="20" font-weight="900"
+          fill="#1e3a8a" font-family="monospace">A</text>
+        <text x="450" y="130" font-size="20" font-weight="900"
+          fill="#831843" font-family="monospace">B</text>
+        <text x="230" y="170" font-size="16" font-weight="700"
+          fill="#065f46" font-family="monospace">1</text>
+        <text x="230" y="200" font-size="16" font-weight="700"
+          fill="#065f46" font-family="monospace">2</text>
+        <text x="322" y="185" font-size="16" font-weight="700"
+          fill="#64748b" font-family="monospace">3</text>
+        <text x="420" y="170" font-size="16" font-weight="700"
+          fill="#831843" font-family="monospace">4</text>
+        <text x="420" y="200" font-size="16" font-weight="700"
+          fill="#831843" font-family="monospace">5</text>
+        <rect x="200" y="290" width="320" height="35"
+          fill="#fef9c3" stroke="#eab308" stroke-width="2" rx="10"/>
+        <text x="360" y="312" text-anchor="middle" font-size="14"
+          font-weight="900" fill="#854d0e" font-family="monospace">
+          A − B = {1, 2}
+        </text>
+      </svg>
+      <div class="svg-caption">شکل ۴: نمودار ون تفاضل — فقط هلال سمت چپ (A) رنگی می‌شود</div>
+    </div>
+
+    <div class="subsection-title">مثال کلامی: تفاضل شمارنده‌ها</div>
+    <div class="example-box">
+      <h4>شمارنده‌های ۱۲ منهای شمارنده‌های ۱۸ چیست؟</h4>
+      <div class="step"><b>گام ۱:</b> شمارنده‌های ۱۲: {1, 2, 3, 4, 6, 12}</div>
+      <div class="step"><b>گام ۲:</b> شمارنده‌های ۱۸: {1, 2, 3, 6, 9, 18}</div>
+      <div class="step"><b>گام ۳:</b> اعضای اولی که در دومی نیستند:
+        <ul style="padding-right:20px; margin-top:6px;">
+          <li>۱ در دومی هست ❌</li>
+          <li>۲ در دومی هست ❌</li>
+          <li>۳ در دومی هست ❌</li>
+          <li>۴ در دومی نیست ✅</li>
+          <li>۶ در دومی هست ❌</li>
+          <li>۱۲ در دومی نیست ✅</li>
+        </ul>
+      </div>
+      <div class="result-box">شمارنده‌های ۱۲ − شمارنده‌های ۱۸ = {4, 12}</div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۷: مجموعه‌های جدا از هم -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec7">درس اصلی ۶: مجموعه‌های جدا از هم و تهی</div>
+
+    <div class="subsection-title">مجموعه‌های جدا از هم</div>
+
+    <div class="def-box">
+      <b>مجموعه‌های جدا از هم:</b> اگر دو مجموعه <b>هیچ عضو مشترکی نداشته باشند</b>،
+      می‌گوییم آن دو <b>جدا از هم</b> هستند و اشتراکشان تهی است:
+      <div class="formula-box">A ∩ B = ∅</div>
+    </div>
+
+    <div class="example-box">
+      <h4>مثال: A = {1, 2, 3} و B = {4, 5, 6}</h4>
+      <div class="step"><b>گام ۱:</b> اعضای A: ۱، ۲، ۳.</div>
+      <div class="step"><b>گام ۲:</b> اعضای B: ۴، ۵، ۶.</div>
+      <div class="step"><b>گام ۳:</b> هیچ عضوی مشترک نیست.</div>
+      <div class="result-box">A ∩ B = ∅ — این دو جدا از هم هستند</div>
+    </div>
+
+    <div class="subsection-title">حالت‌های خاص با تهی</div>
+
+    <div class="def-box green">
+      وقتی تهی در عمل‌های مجموعه وارد شود:
+      <div class="formula-box">
+        A ∪ ∅ = A &nbsp;|&nbsp; A ∩ ∅ = ∅
+      </div>
+      <div class="formula-box">
+        A − ∅ = A &nbsp;|&nbsp; ∅ − A = ∅
+      </div>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 چرا؟</strong>
+      <ul style="padding-right:20px; margin-top:8px;">
+        <li><b>A ∪ ∅ = A:</b> تهی چیزی اضافه نمی‌کند، پس اجتماع همان A است.</li>
+        <li><b>A ∩ ∅ = ∅:</b> تهی عضوی ندارد، پس اشتراک هم تهی است.</li>
+        <li><b>A − ∅ = A:</b> هیچ عضوی از A در تهی نیست، پس همه می‌مانند.</li>
+        <li><b>∅ − A = ∅:</b> تهی هیچ عضوی ندارد که بخواهیم نگه داریم.</li>
+      </ul>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۸: خاصیت‌ها -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec8">درس اصلی ۷: خاصیت‌های عمل‌ها</div>
+
+    <div class="subsection-title">خاصیت جابجایی در اجتماع و اشتراک</div>
+
+    <div class="note-box">
+      <b>جابجایی در اجتماع:</b> <span class="math-inline">A ∪ B = B ∪ A</span>
+      <br>
+      <b>جابجایی در اشتراک:</b> <span class="math-inline">A ∩ B = B ∩ A</span>
+      <br><br>
+      یعنی ترتیب نوشتن مجموعه‌ها در ∪ و ∩ مهم نیست.
+    </div>
+
+    <div class="subsection-title">عدم جابجایی در تفاضل</div>
+
+    <div class="warning-box">
+      <b>تفاضل جابجا نمی‌شود:</b> <span class="math-inline">A − B ≠ B − A</span> (در حالت کلی)
+    </div>
+
+    <div class="subsection-title">رابطه‌ی زیرمجموعه با عمل‌ها</div>
+
+    <div class="note-box">
+      اگر <span class="math-inline">A ⊆ B</span> باشد (یعنی A زیرمجموعه‌ی B)، آنگاه:
+      <ul style="padding-right:20px; margin-top:8px;">
+        <li><b>A ∪ B = B</b> (چون همه‌ی A در B هست، اجتماع همان B است)</li>
+        <li><b>A ∩ B = A</b> (چون همه‌ی A در B هست، اشتراک همان A است)</li>
+        <li><b>A − B = ∅</b> (چون هیچ عضوی از A در B نیست؟ نه، چون همه در B هستند، پس چیزی نمی‌ماند)</li>
+      </ul>
+    </div>
+
+    <div class="example-box">
+      <h4>مثال: A = {2, 4} و B = {2, 4, 6, 8}</h4>
+      <div class="step">A زیرمجموعه‌ی B است (هر عضو A در B هم هست).</div>
+      <div class="step"><b>A ∪ B =</b> {2, 4, 6, 8} <b>= B</b></div>
+      <div class="step"><b>A ∩ B =</b> {2, 4} <b>= A</b></div>
+      <div class="step"><b>A − B =</b> ∅</div>
+      <div class="step"><b>B − A =</b> {6, 8}</div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۹: مسئله‌های کلامی -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec9">درس اصلی ۸: مسئله‌های کلامی و اصل شمول</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        سروناز جان، یکی از رایج‌ترین سؤال‌های امتحانی این است:
+        <br><br>
+        «در یک کلاس، چند نفر فوتبال دوست دارند، چند نفر والیبال، چند نفر هر دو را دوست دارند.
+        حالا چند نفر فقط فوتبال دوست دارند؟ چند نفر هیچ‌کدام را دوست ندارند؟»
+        <br><br>
+        برای حل این سؤال‌ها، یک فرمول طلایی داریم.
+      </div>
+    </div>
+
+    <div class="def-box">
+      <b>اصل شمول و عدم شمول:</b> اگر A و B دو مجموعه‌ی متناهی باشند، تعداد اعضای اجتماعشان برابر است با:
+      <div class="formula-box big">|A ∪ B| = |A| + |B| − |A ∩ B|</div>
+      یعنی: (تعداد کل) = (تعداد A) + (تعداد B) − (تعداد مشترک)
+    </div>
+
+    <div class="subsection-title">مثال ۱: مسئله‌ی کلاس</div>
+
+    <div class="example-box">
+      <h4>در یک کلاس ۳۰ نفره، ۱۸ نفر فوتبال، ۱۵ نفر والیبال و ۸ نفر هر دو را دوست دارند.</h4>
+      <div class="step"><b>گام ۱ — تعریف مجموعه‌ها:</b>
+        <ul style="padding-right:20px; margin-top:6px;">
+          <li>F: کسانی که فوتبال دوست دارند → ۱۸ نفر</li>
+          <li>V: کسانی که والیبال دوست دارند → ۱۵ نفر</li>
+          <li>F ∩ V: کسانی که هر دو را دوست دارند → ۸ نفر</li>
+        </ul>
+      </div>
+      <div class="step"><b>گام ۲ — کسانی که حداقل یکی را دوست دارند (اجتماع):</b>
+        <br>
+        <span class="math-inline">|F ∪ V| = 18 + 15 − 8 = 25</span>
+      </div>
+      <div class="step"><b>گام ۳ — فقط فوتبال:</b>
+        <br>
+        <span class="math-inline">18 − 8 = 10</span> نفر
+      </div>
+      <div class="step"><b>گام ۴ — فقط والیبال:</b>
+        <br>
+        <span class="math-inline">15 − 8 = 7</span> نفر
+      </div>
+      <div class="step"><b>گام ۵ — هیچ‌کدام:</b>
+        <br>
+        <span class="math-inline">30 − 25 = 5</span> نفر
+      </div>
+      <div class="result-box">
+        فقط فوتبال: ۱۰ نفر | فقط والیبال: ۷ نفر | هیچ‌کدام: ۵ نفر
+      </div>
+    </div>
+
+    <div class="subsection-title">مثال ۲: مسئله‌ی انتخاب درس</div>
+
+    <div class="example-box">
+      <h4>از ۵۰ دانش‌آموز، ۳۰ نفر ریاضی و ۲۵ نفر علوم و ۱۵ نفر هر دو را انتخاب کرده‌اند. چند نفر هیچ‌کدام را انتخاب نکرده‌اند؟</h4>
+      <div class="step"><b>گام ۱:</b> با اصل شمول:
+        <br>
+        <span class="math-inline">|R ∪ S| = 30 + 25 − 15 = 40</span>
+      </div>
+      <div class="step"><b>گام ۲:</b> هیچ‌کدام = <span class="math-inline">50 − 40 = 10</span> نفر</div>
+      <div class="result-box">پاسخ: ۱۰ نفر</div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۱۰: تمرین‌ها -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec10">تمرین‌های جامع با حل گام‌به‌گام</div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۱</span>
+        مجموعه‌ی A = {5, 10, 15} چند زیرمجموعه دارد؟
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#6d28d9;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>گام ۱:</b> تعداد اعضا: n(A) = 3.</div>
+        <div class="step"><b>گام ۲:</b> از فرمول: 2³ = 8.</div>
+        <div class="result-box">پاسخ: ۸ زیرمجموعه</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۲</span>
+        مجموعه‌ای دارای ۱۲۸ زیرمجموعه است. این مجموعه چند عضو دارد؟
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#6d28d9;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>گام ۱:</b> باید 2ⁿ = 128 باشد.</div>
+        <div class="step"><b>گام ۲:</b> از جدول: 2⁷ = 128.</div>
+        <div class="step"><b>گام ۳:</b> پس n = 7.</div>
+        <div class="result-box">پاسخ: ۷ عضو</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۳</span>
+        با A = {1, 2, 3, 4} و B = {3, 4, 5, 6}، حاصل‌های زیر را بنویسید:
+        <br>
+        A ∪ B، A ∩ B، A − B، B − A
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#6d28d9;font-weight:700;padding:8px 0;">نمایش پاسخ گام‌به‌گام</summary>
+        <div class="step"><b>گام ۱ — اجتماع:</b> همه‌ی اعضا بدون تکرار.
+          <br>
+          <b>A ∪ B = {1, 2, 3, 4, 5, 6}</b>
+        </div>
+        <div class="step"><b>گام ۲ — اشتراک:</b> اعضای مشترک ۳ و ۴ هستند.
+          <br>
+          <b>A ∩ B = {3, 4}</b>
+        </div>
+        <div class="step"><b>گام ۳ — تفاضل A − B:</b> اعضای A که در B نیستند: ۱ و ۲.
+          <br>
+          <b>A − B = {1, 2}</b>
+        </div>
+        <div class="step"><b>گام ۴ — تفاضل B − A:</b> اعضای B که در A نیستند: ۵ و ۶.
+          <br>
+          <b>B − A = {5, 6}</b>
+        </div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۴</span>
+        با A = {2, 4, 6, 8} و B = {1, 3, 5, 7}، حاصل A ∩ B چیست؟
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#6d28d9;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>گام ۱:</b> A فقط اعداد زوج دارد، B فقط اعداد فرد.</div>
+        <div class="step"><b>گام ۲:</b> هیچ عددی نمی‌تواند هم زوج باشد هم فرد.</div>
+        <div class="result-box">A ∩ B = ∅ — این دو جدا از هم هستند</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۵</span>
+        اگر A ⊆ B و B = {1, 2, 3, 4, 5} و A = {2, 4}، حاصل‌های زیر را بنویسید:
+        <br>
+        A ∪ B، A ∩ B، A − B، B − A
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#6d28d9;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>چون A ⊆ B، پس:</b></div>
+        <div class="step"><b>A ∪ B =</b> {1, 2, 3, 4, 5} <b>= B</b></div>
+        <div class="step"><b>A ∩ B =</b> {2, 4} <b>= A</b></div>
+        <div class="step"><b>A − B =</b> ∅</div>
+        <div class="step"><b>B − A =</b> {1, 3, 5}</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۶</span>
+        در یک کلاس ۴۰ نفره، ۲۵ نفر ریاضی دوست دارند، ۲۰ نفر علوم دوست دارند و ۱۲ نفر هر دو را دوست دارند. چند نفر فقط ریاضی دوست دارند؟ چند نفر هیچ‌کدام را دوست ندارند؟
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#6d28d9;font-weight:700;padding:8px 0;">نمایش پاسخ گام‌به‌گام</summary>
+        <div class="step"><b>گام ۱ — فقط ریاضی:</b>
+          <br>
+          25 − 12 = 13 نفر
+        </div>
+        <div class="step"><b>گام ۲ — فقط علوم:</b>
+          <br>
+          20 − 12 = 8 نفر
+        </div>
+        <div class="step"><b>گام ۳ — حداقل یکی (اجتماع):</b>
+          <br>
+          |R ∪ S| = 25 + 20 − 12 = 33 نفر
+        </div>
+        <div class="step"><b>گام ۴ — هیچ‌کدام:</b>
+          <br>
+          40 − 33 = 7 نفر
+        </div>
+        <div class="result-box">
+          فقط ریاضی: ۱۳ نفر | هیچ‌کدام: ۷ نفر
+        </div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۷</span>
+        درستی یا نادرستی هر عبارت را مشخص کنید:
+      </div>
+      <p>الف) A ∪ B = B ∪ A</p>
+      <p>ب) A − B = B − A</p>
+      <p>پ) A ∩ ∅ = ∅</p>
+      <p>ت) A ∪ ∅ = ∅</p>
+      <details>
+        <summary style="cursor:pointer;color:#6d28d9;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>الف) درست ✅</b> — اجتماع خاصیت جابجایی دارد.</div>
+        <div class="step"><b>ب) نادرست ❌</b> — تفاضل جابجایی ندارد.</div>
+        <div class="step"><b>پ) درست ✅</b> — اشتراک با تهی، تهی است.</div>
+        <div class="step"><b>ت) نادرست ❌</b> — اجتماع با تهی برابر خود A است، نه تهی.</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۸</span>
+        ثابت کنید که تهی زیرمجموعه‌ی هر مجموعه‌ای است.
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#6d28d9;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>گام ۱:</b> برای اثبات زیرمجموعه بودن، باید نشان دهیم هر عضو تهی، عضوی از A است.</div>
+        <div class="step"><b>گام ۲:</b> تهی هیچ عضوی ندارد.</div>
+        <div class="step"><b>گام ۳:</b> پس شرط «هر عضو تهی، عضوی از A» به‌طور خودکار برقرار است.</div>
+        <div class="result-box">∎</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۹</span>
+        مجموعه‌ی شمارنده‌های ۲۴ را بنویسید و بگویید چند زیرمجموعه دارد؟
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#6d28d9;font-weight:700;padding:8px 0;">نمایش پاسخ گام‌به‌گام</summary>
+        <div class="step"><b>گام ۱ — پیدا کردن شمارنده‌ها:</b>
+          <br>
+          24 ÷ 1 = 24، 24 ÷ 2 = 12، 24 ÷ 3 = 8، 24 ÷ 4 = 6،
+          24 ÷ 6 = 4، 24 ÷ 8 = 3، 24 ÷ 12 = 2، 24 ÷ 24 = 1.
+        </div>
+        <div class="step"><b>گام ۲ — مجموعه:</b>
+          <br>
+          {1, 2, 3, 4, 6, 8, 12, 24}
+        </div>
+        <div class="step"><b>گام ۳ — تعداد اعضا:</b> n = 8.</div>
+        <div class="step"><b>گام ۴ — تعداد زیرمجموعه‌ها:</b> 2⁸ = 256.</div>
+        <div class="result-box">پاسخ: ۲۵۶ زیرمجموعه</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۱۰</span>
+        اگر A = {a, b, c} و B = {b, c, d, e}، حاصل‌های زیر را بنویسید:
+        <br>
+        A ∪ B، A ∩ B، A − B، B − A
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#6d28d9;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>A ∪ B =</b> {a, b, c, d, e}</div>
+        <div class="step"><b>A ∩ B =</b> {b, c}</div>
+        <div class="step"><b>A − B =</b> {a}</div>
+        <div class="step"><b>B − A =</b> {d, e}</div>
+      </details>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۱۱: جدول و نکات -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec11">جدول خلاصه و نکات امتحانی</div>
+
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>مفهوم</th>
+          <th>نماد / فرمول</th>
+          <th>توضیح</th>
+          <th>مثال</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>تعداد زیرمجموعه‌ها</td>
+          <td class="math-inline">2ⁿ</td>
+          <td>n = تعداد اعضا</td>
+          <td>n = 4 → 16</td>
+        </tr>
+        <tr>
+          <td>اجتماع</td>
+          <td class="math-inline">A ∪ B</td>
+          <td>همه‌ی اعضا، بدون تکرار</td>
+          <td class="math-inline">{1,2}∪{2,3}={1,2,3}</td>
+        </tr>
+        <tr>
+          <td>اشتراک</td>
+          <td class="math-inline">A ∩ B</td>
+          <td>فقط اعضای مشترک</td>
+          <td class="math-inline">{1,2}∩{2,3}={2}</td>
+        </tr>
+        <tr>
+          <td>تفاضل</td>
+          <td class="math-inline">A − B</td>
+          <td>اعضای A که در B نیستند</td>
+          <td class="math-inline">{1,2}−{2,3}={1}</td>
+        </tr>
+        <tr>
+          <td>جدا از هم</td>
+          <td class="math-inline">A ∩ B = ∅</td>
+          <td>هیچ عضو مشترکی ندارند</td>
+          <td class="math-inline">{1,2} ∩ {3,4} = ∅</td>
+        </tr>
+        <tr>
+          <td>جابجایی اجتماع</td>
+          <td class="math-inline">A ∪ B = B ∪ A</td>
+          <td>ترتیب مهم نیست</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>جابجایی اشتراک</td>
+          <td class="math-inline">A ∩ B = B ∩ A</td>
+          <td>ترتیب مهم نیست</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>عدم جابجایی تفاضل</td>
+          <td class="math-inline">A − B ≠ B − A</td>
+          <td>ترتیب مهم است</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>اجتماع با تهی</td>
+          <td class="math-inline">A ∪ ∅ = A</td>
+          <td>تهی چیزی اضافه نمی‌کند</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>اشتراک با تهی</td>
+          <td class="math-inline">A ∩ ∅ = ∅</td>
+          <td>هیچ اشتراکی نیست</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>تفاضل با تهی</td>
+          <td class="math-inline">A − ∅ = A</td>
+          <td>همه باقی می‌مانند</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>زیرمجموعه در عمل‌ها</td>
+          <td class="math-inline">A ⊆ B</td>
+          <td>⇒ A∪B=B، A∩B=A، A−B=∅</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>اصل شمول</td>
+          <td class="math-inline">|A∪B| = |A|+|B|−|A∩B|</td>
+          <td>برای مسائل کلامی</td>
+          <td>18+15−8=25</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="big-quote">
+      «در اجتماع، همه چیز جمع می‌شود. در اشتراک، فقط وجه مشترک. در تفاضل، فقط اولی.»
+    </div>
+
+    <div class="warning-box">
+      <strong>⚠️ شش اشتباه رایج در این درس:</strong>
+      <ol style="margin-top:10px; padding-right:20px;">
+        <li>فکر کنی <span class="math-inline">2ⁿ = 2×n</span>. این غلط است!</li>
+        <li>فراموش کنی اعضای تکراری در اجتماع یک بار نوشته می‌شوند.</li>
+        <li>تفاضل را جابجا کنی (A−B = B−A بنویسی).</li>
+        <li>نماد <span class="math-inline">∪</span> را با <span class="math-inline">∩</span> اشتباه بگیری.</li>
+        <li>فراموش کنی تهی زیرمجموعه‌ی هر مجموعه‌ای است.</li>
+        <li>در مسئله‌های کلامی، اشتراک (چند نفر هر دو) را حساب نکنی.</li>
+      </ol>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 روش تشخیص اجتماع از اشتراک:</strong>
+      <ul style="margin-top:8px; padding-right:20px;">
+        <li><b>∪ (اجتماع):</b> کاسه‌ی رو به بالا — همه چیز را می‌گیرد.</li>
+        <li><b>∩ (اشتراک):</b> کاسه‌ی رو به پایین — فقط وجه مشترک را نگه می‌دارد.</li>
+      </ul>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 توصیه‌ی نهایی برای امتحان:</strong>
+      <ul style="margin-top:8px; padding-right:20px;">
+        <li>جدول توان‌های دو (۱ تا ۱۰۲۴) را حتماً حفظ کن.</li>
+        <li>قبل از هر سؤال، ابتدا اعضای هر مجموعه را با دقت بنویس.</li>
+        <li>در مسئله‌های کلامی، ابتدا مجموعه‌ها را تعریف کن و از فرمول استفاده کن.</li>
+        <li>در نوشتن جواب، همیشه از آکولاد استفاده کن.</li>
+      </ul>
+    </div>
+
+    <!-- جمع‌بندی -->
+    <div class="dialog" style="margin-top:30px;">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        خب فرسام جان، امروز کلی چیز یاد گرفتیم:
+        <ul style="margin-top:8px; padding-right:20px;">
+          <li>روش سیستماتیک شمارش زیرمجموعه‌ها.</li>
+          <li>فرمول طلایی <b>2ⁿ</b>.</li>
+          <li>سه عمل اصلی: <b>اجتماع (∪)</b>، <b>اشتراک (∩)</b>، <b>تفاضل (−)</b>.</li>
+          <li>مجموعه‌های جدا از هم و حالت‌های خاص با تهی.</li>
+          <li>خاصیت‌های جابجایی و عدم جابجایی.</li>
+          <li>اصل شمول برای مسئله‌های کلامی.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        آفرین! این درس یکی از مهم‌ترین درس‌های فصل اول است. تمرین‌های کتاب را کامل حل کن
+        و اگر جایی گیر کردی، به همین صفحه برگرد.
+        <br><br>
+        <strong>موفق باشی! 🌟</strong>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <strong>📘 آموزش جامع ریاضی نهم — فصل اول، درس سوم (کامل)</strong><br>
+    تهیه‌شده با ❤️ برای دانش‌آموزان عزیز | مدرسان: خانم سروناز و آقای فرسام<br>
+    <strong>اپلیکیشن همیار من (فراتر از آموزش)</strong><br>
+    موفق باشی! ✨
+  </footer>
+</div>
+</body>
+</html>
