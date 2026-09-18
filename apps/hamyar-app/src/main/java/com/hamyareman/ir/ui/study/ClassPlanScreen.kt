@@ -112,13 +112,13 @@ private fun WeeklyTimetableSection() {
                         onPick = { picked ->
                             val next = slots.toMutableList()
                             next[si] = picked
-                            days = days + (di to next)
+                            days = days.toMutableMap().also { it[di] = next }
                         },
                     )
                 }
                 if (!locked) {
                     TextButton(onClick = {
-                        days = days + (di to (slots + ""))
+                        days = days.toMutableMap().also { it[di] = (slots + "").toMutableList() }
                     }) { Text("افزودن خانه", fontFamily = DashboardFonts.quote) }
                 }
             }

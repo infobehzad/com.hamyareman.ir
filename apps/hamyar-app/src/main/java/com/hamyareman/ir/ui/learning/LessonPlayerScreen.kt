@@ -107,7 +107,7 @@ fun LessonPlayerScreen(
 
     // هرگز در پس‌زمینه: هوم/مینیمایز/جابجایی اپ/قفل گوشی → مکث فوری؛
     // برگشت به صفحه → ادامه از همان جایی که مانده بود.
-    com.hamyareman.ir.ui.study.PauseOnStopEffect { player.pause() }
+    com.hamyareman.ir.ui.study.PauseOnStopEffect(pause = { player.pause() })
 
     val state by player.state.collectAsState()
 

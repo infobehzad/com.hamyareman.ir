@@ -135,7 +135,7 @@ fun VideoTeachScreen(packId: String, onBack: () -> Unit) {
     LaunchedEffect(packId) { TeachStats.enter(context, packId) }
 
     // v1.25 — خروج از صفحه‌ی ویدیو (هوم/پنجره‌ها/قفل صفحه) = مکث پخش.
-    PauseOnStopEffect { player?.pause() }
+    PauseOnStopEffect(pause = { player?.pause() })
 
     DisposableEffect(fileId, uri) {
         val p = ExoPlayer.Builder(context).build().apply {
