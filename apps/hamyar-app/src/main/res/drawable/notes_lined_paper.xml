@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- دفتر ۵خط — وکتور/SVG برای «ثبت نکات درسی». خط‌ها هر ۴۴ واحد؛ متن روی خط می‌نشیند. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="360dp"
+    android:height="236dp"
+    android:viewportWidth="360"
+    android:viewportHeight="236">
+    <path
+        android:fillColor="#FFFBEB"
+        android:pathData="M16,8c0,-4.4 3.6,-8 8,-8h312c4.4,0 8,3.6 8,8v220c0,4.4 -3.6,8 -8,8H24c-4.4,0 -8,-3.6 -8,-8z" />
+    <path
+        android:pathData="M20,52h320"
+        android:strokeWidth="1.6"
+        android:strokeColor="#93C5FD"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M20,96h320"
+        android:strokeWidth="1.6"
+        android:strokeColor="#93C5FD"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M20,140h320"
+        android:strokeWidth="1.6"
+        android:strokeColor="#93C5FD"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M20,184h320"
+        android:strokeWidth="1.6"
+        android:strokeColor="#93C5FD"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M20,228h320"
+        android:strokeWidth="1.6"
+        android:strokeColor="#93C5FD"
+        android:fillColor="#00000000" />
+</vector>

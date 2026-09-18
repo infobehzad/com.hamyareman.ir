@@ -42,7 +42,7 @@ fun StudyHomeScreen(nav: NavController) {
         SectionCard("مرور غلط‌ها", "فاصله‌دار، بدون تنبیه.") { nav.navigate(Screen.QuizReview.route) }
         SectionCard("کتابخانه", "ژانر را خودت انتخاب می‌کنی.") { nav.navigate(Screen.Library.route) }
         SectionCard("کتاب صوتی", "پخش، بوکمارک، تایمر خواب.") { nav.navigate(Screen.Audiobook.route) }
-        SectionCard("آپلود PDF", "جزوه‌ی امروز.") { nav.navigate(Screen.Pdf.route) }
+        SectionCard("جزوه‌های شخصی و آزمونی", "دفتر نکات و گالری فایل روی گوشی.") { nav.navigate(Screen.Pdf.route) }
         SectionCard("نمودار پیشرفت", "فقط تشویق داده‌محور.") { nav.navigate(Screen.Charts.of(null)) }
         SectionCard("آموزش آزاد", "از مبتدی تا حرفه‌ای.") { nav.navigate(Screen.Learning.route) }
     }

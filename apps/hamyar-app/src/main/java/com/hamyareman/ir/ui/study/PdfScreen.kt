@@ -6,10 +6,11 @@ import android.graphics.BitmapFactory
 import android.webkit.MimeTypeMap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +32,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -39,23 +42,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.FileProvider
 import com.hamyareman.ir.LocalAppContainer
 import com.hamyareman.ir.R
 import com.hamyareman.ir.platform.core.appwrite.AppwriteAuthService
+import com.hamyareman.ir.platform.core.appwrite.AppwriteClientProvider
+import com.hamyareman.ir.platform.core.common.AppResult
 import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.LocalStore
 import com.hamyareman.ir.platform.core.common.TableIds
@@ -88,7 +97,9 @@ internal data class NoteFile(
 
 private const val KEY_FILES = "study_pdfs"
 private const val KEY_NOTES = "lesson_notes_text"
+private const val KEY_NOTES_AT = "lesson_notes_at"
 private const val FREE_FILE_CAP = 10
+private val GalleryGroups = listOf("عکس", "PDF", "متن", "سایر")
 
 
 private val Lalezar = FontFamily(Font(R.font.lalezar))
@@ -151,6 +162,13 @@ private fun guessMime(ext: String): String =
 
 private fun isImageMime(mime: String) = mime.startsWith("image/")
 
+private fun fileGroup(item: NoteFile): String = when {
+    isImageMime(item.mime) -> "عکس"
+    item.mime == "application/pdf" || item.ext.equals("pdf", true) -> "PDF"
+    item.mime.startsWith("text/") || item.ext.lowercase() in setOf("txt", "md", "rtf") -> "متن"
+    else -> "سایر"
+}
+
 @Composable
 fun PdfUploadScreen(onBack: () -> Unit) {
     val context = LocalContext.current
@@ -167,6 +185,27 @@ fun PdfUploadScreen(onBack: () -> Unit) {
     var titleDraft by remember { mutableStateOf<Pair<File, String>?>(null) }
     var titleText by remember { mutableStateOf("") }
     var needSubMsg by remember { mutableStateOf<String?>(null) }
+    var imageAlbum by remember { mutableStateOf<List<NoteFile>?>(null) }
+    var imageStart by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        val uid = store.getString(AppwriteAuthService.KEY_USER_ID)
+        if (uid.isBlank()) return@LaunchedEffect
+        when (val remote = container.tables.get(TableIds.LESSON_NOTES, "notes_$uid")) {
+            is AppResult.Ok -> {
+                val row = remote.value ?: return@LaunchedEffect
+                val remoteText = row.string("text")
+                val remoteAt = row.long("updatedAt")
+                val localAt = store.getLong(KEY_NOTES_AT, 0L)
+                if (remoteText.isNotBlank() && remoteAt >= localAt) {
+                    notes = remoteText
+                    store.putString(KEY_NOTES, remoteText)
+                    store.putLong(KEY_NOTES_AT, remoteAt)
+                }
+            }
+            is AppResult.Err -> { }
+        }
+    }
 
     fun canAddMore(): Boolean {
         if (paid || items.size < FREE_FILE_CAP) return true
@@ -337,19 +376,30 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                 onValueChange = { notes = it },
             )
             PrimaryButton("ذخیره نکات و همگام با سرور") {
+                val now = System.currentTimeMillis()
                 store.putString(KEY_NOTES, notes)
-                val uid = store.getString(AppwriteAuthService.KEY_USER_ID).ifBlank { "local" }
-                container.sync.enqueue(
-                    TableIds.LESSON_NOTES,
-                    "notes_$uid",
-                    mapOf(
+                store.putLong(KEY_NOTES_AT, now)
+                val uid = store.getString(AppwriteAuthService.KEY_USER_ID)
+                if (uid.isBlank()) {
+                    notice = "نکات روی دستگاه ذخیره شد. برای سینک با سرور وارد شو."
+                } else {
+                    val payload = mapOf(
                         "userId" to uid,
                         "text" to notes,
-                        "updatedAt" to System.currentTimeMillis(),
-                    ),
-                )
-                scope.launch { runCatching { container.sync.pushAll() } }
-                notice = "نکات روی دستگاه ذخیره شد و برای سینک با سرور در صف رفت."
+                        "updatedAt" to now,
+                    )
+                    scope.launch {
+                        val perms = AppwriteClientProvider.ownerOnly(uid)
+                        when (val saved = container.tables.upsert(TableIds.LESSON_NOTES, "notes_$uid", payload, perms)) {
+                            is AppResult.Ok -> notice = "نکات ذخیره شد و با سرور همگام شد."
+                            is AppResult.Err -> {
+                                container.sync.enqueue(TableIds.LESSON_NOTES, "notes_$uid", payload)
+                                runCatching { container.sync.pushAll() }
+                                notice = "نکات روی دستگاه ماند؛ سینک بعدی: ${saved.error.userMessage}"
+                            }
+                        }
+                    }
+                }
             }
 
             Text("گالری جزوه — فقط همین گوشی", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -395,33 +445,48 @@ fun PdfUploadScreen(onBack: () -> Unit) {
             if (items.isEmpty()) {
                 Text("گالری خالی است.", style = MaterialTheme.typography.bodySmall)
             }
-            items.chunked(3).forEach { row ->
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    row.forEach { item ->
-                        GalleryTile(
-                            item = item,
-                            modifier = Modifier.weight(1f),
-                            onOpen = {
-                                runCatching {
-                                    val file = File(item.localPath)
-                                    val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-                                    context.startActivity(
-                                        Intent(Intent.ACTION_VIEW).setDataAndType(uri, item.mime)
-                                            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION),
-                                    )
-                                }.onFailure { notice = "برنامه‌ای برای بازکردن این فایل پیدا نشد." }
-                            },
-                            onDelete = {
-                                scope.launch {
-                                    withContext(Dispatchers.IO) { runCatching { File(item.localPath).delete() } }
-                                    items = items.filterNot { it.id == item.id }
-                                    writeNoteFiles(store, items)
-                                    notice = "از گالری حذف شد."
-                                }
-                            },
-                        )
+            GalleryGroups.forEach { group ->
+                val groupItems = items.filter { fileGroup(it) == group }
+                if (groupItems.isEmpty()) return@forEach
+                Text(
+                    "$group · ${toPersianDigits(groupItems.size.toString())}",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                )
+                groupItems.chunked(3).forEach { row ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        row.forEach { item ->
+                            GalleryTile(
+                                item = item,
+                                modifier = Modifier.weight(1f),
+                                onOpen = {
+                                    if (isImageMime(item.mime)) {
+                                        val album = groupItems.filter { isImageMime(it.mime) }
+                                        imageStart = album.indexOfFirst { it.id == item.id }.coerceAtLeast(0)
+                                        imageAlbum = album
+                                    } else {
+                                        runCatching {
+                                            val file = File(item.localPath)
+                                            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+                                            context.startActivity(
+                                                Intent(Intent.ACTION_VIEW).setDataAndType(uri, item.mime)
+                                                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION),
+                                            )
+                                        }.onFailure { notice = "برنامه‌ای برای بازکردن این فایل پیدا نشد." }
+                                    }
+                                },
+                                onDelete = {
+                                    scope.launch {
+                                        withContext(Dispatchers.IO) { runCatching { File(item.localPath).delete() } }
+                                        items = items.filterNot { it.id == item.id }
+                                        writeNoteFiles(store, items)
+                                        notice = "از گالری حذف شد."
+                                    }
+                                },
+                            )
+                        }
+                        repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
                     }
-                    repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
                 }
             }
             Spacer(Modifier.height(12.dp))
@@ -447,6 +512,24 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                         titleText = "عکس جزوه"
                         titleDraft = saved to "image/jpeg"
                     }
+                }
+            },
+        )
+    }
+
+    imageAlbum?.let { album ->
+        ImageGalleryPager(
+            album = album,
+            start = imageStart,
+            onClose = { imageAlbum = null },
+            onDelete = { gone ->
+                scope.launch {
+                    withContext(Dispatchers.IO) { runCatching { File(gone.localPath).delete() } }
+                    items = items.filterNot { it.id == gone.id }
+                    writeNoteFiles(store, items)
+                    val next = album.filterNot { it.id == gone.id }
+                    imageAlbum = next.ifEmpty { null }
+                    notice = "از گالری حذف شد."
                 }
             },
         )
@@ -493,23 +576,19 @@ fun PdfUploadScreen(onBack: () -> Unit) {
 @Composable
 private fun LinedNotesPaper(value: String, onValueChange: (String) -> Unit) {
     val density = LocalDensity.current
-    val lineH = with(density) { 44.dp.toPx() }
-    val paper = Color(0xFFFFFBEB)
-    val lineColor = Color(0xFF93C5FD)
+    val lineSp = with(density) { 44.dp.toSp() }
     Box(
         Modifier
             .fillMaxWidth()
-            .height(44.dp * 5 + 16.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(paper)
-            .padding(horizontal = 14.dp, vertical = 8.dp),
+            .height(236.dp)
+            .clip(RoundedCornerShape(16.dp)),
     ) {
-        Canvas(Modifier.fillMaxSize()) {
-            repeat(5) { i ->
-                val y = lineH * (i + 1) - 6f
-                drawLine(lineColor, Offset(0f, y), Offset(size.width, y), strokeWidth = 2f)
-            }
-        }
+        Image(
+            painter = painterResource(R.drawable.notes_lined_paper),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds,
+        )
         BasicTextField(
             value = value,
             onValueChange = { raw ->
@@ -519,12 +598,75 @@ private fun LinedNotesPaper(value: String, onValueChange: (String) -> Unit) {
             textStyle = TextStyle(
                 fontFamily = Lalezar,
                 fontSize = 18.sp,
-                lineHeight = 44.sp,
+                lineHeight = lineSp,
                 color = Color(0xFF1E3A5F),
+                platformStyle = PlatformTextStyle(includeFontPadding = false),
+                lineHeightStyle = LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Bottom,
+                    trim = LineHeightStyle.Trim.None,
+                ),
             ),
             cursorBrush = SolidColor(Color(0xFF1E3A5F)),
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 18.dp, vertical = 8.dp),
         )
+    }
+}
+
+@Composable
+private fun ImageGalleryPager(
+    album: List<NoteFile>,
+    start: Int,
+    onClose: () -> Unit,
+    onDelete: (NoteFile) -> Unit,
+) {
+    val pager = rememberPagerState(
+        initialPage = start.coerceIn(0, (album.size - 1).coerceAtLeast(0)),
+        pageCount = { album.size.coerceAtLeast(1) },
+    )
+    Dialog(
+        onDismissRequest = onClose,
+        properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true),
+    ) {
+        Box(Modifier.fillMaxSize().background(Color(0xFF0F172A))) {
+            HorizontalPager(state = pager, modifier = Modifier.fillMaxSize()) { page ->
+                val item = album.getOrNull(page)
+                val bmp = remember(item?.localPath) {
+                    item?.localPath?.let { runCatching { BitmapFactory.decodeFile(it) }.getOrNull() }
+                }
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    if (bmp != null) {
+                        Image(
+                            bitmap = bmp.asImageBitmap(),
+                            contentDescription = item?.title,
+                            modifier = Modifier.fillMaxSize().padding(8.dp),
+                            contentScale = ContentScale.Fit,
+                        )
+                    } else {
+                        Text("خوانده نشد", color = Color.White)
+                    }
+                }
+            }
+            Column(
+                Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                val cur = album.getOrNull(pager.currentPage)
+                Text(cur?.title.orEmpty(), color = Color.White, fontWeight = FontWeight.Bold)
+                Text(
+                    "${toPersianDigits((pager.currentPage + 1).toString())} از ${toPersianDigits(album.size.toString())}",
+                    color = Color.White.copy(alpha = 0.8f),
+                )
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = onClose, modifier = Modifier.weight(1f)) { Text("بستن") }
+                    OutlinedButton(
+                        onClick = { cur?.let(onDelete) },
+                        modifier = Modifier.weight(1f),
+                    ) { Text("حذف") }
+                }
+            }
+        }
     }
 }
 
