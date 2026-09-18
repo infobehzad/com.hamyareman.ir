@@ -81,7 +81,7 @@ class PlaybackService : MediaSessionService() {
                     controller: MediaSession.ControllerInfo,
                 ): MediaSession.ConnectionResult {
                     val base = super.onConnect(session, controller)
-                    if (base !is MediaSession.ConnectionResult.Accepted) return base
+                    if (!base.isAccepted) return base
                     return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
                         .setAvailableSessionCommands(
                             base.availableSessionCommands.buildUpon().add(STOP_COMMAND).build(),
