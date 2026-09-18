@@ -2,17 +2,22 @@ package com.hamyareman.ir.platform.feature.playback
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.os.Bundle
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
-import androidx.media3.common.MediaItem
 import androidx.media3.common.ForwardingPlayer
+import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.CommandButton
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionResult
+import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.ListenableFuture
 
 /**
  * وضعیت «صفحه‌ی تدریس باز است» — پل بین سرویس رسانه و UI (همان پروسه).
@@ -32,16 +37,10 @@ object TeachGate {
 /**
  * سرویس پخش کتاب صوتی (Media3).
  *
- * چرا سرویس و نه `MediaPlayer` داخل صفحه:
- *  - با خاموش‌شدن صفحه، رفتن به اپ دیگر یا بستن اپ از recents، **پخش ادامه دارد**؛
- *  - اعلان سیستمی با کنترل پخش/توقف و جابه‌جایی ساخته می‌شود (`DefaultMediaNotificationProvider`)؛
- *  - مدیریت AudioFocus و «کشیدن هدفون = توقف» به خود Media3 سپرده می‌شود.
+ * اعلان: پلی/مکث + سیک + نام‌ها + دکمهٔ خروج (توقف و بستن اعلان).
+ * فرمان‌های session را برای کنترلر اپ فیلتر نکن — setMediaItems نباید بشکند.
  *
- * حریم خصوصی: سرویس در منیفست `exported="false"` است، یعنی هیچ اپ دیگری نمی‌تواند به
- * session وصل شود و فایل‌های خصوصی زهرا را بخواند.
- *
- * `@UnstableApi` چون `MediaSessionService`/`DefaultMediaNotificationProvider` در Media3
- * با این علامت آمده‌اند؛ این یک قرارداد نسخه‌گذاری است، نه نشانه‌ی ناپایداری عملکرد.
+ * `@UnstableApi` قرارداد نسخه‌گذاری Media3 است.
  */
 @UnstableApi
 class PlaybackService : MediaSessionService() {
@@ -51,7 +50,6 @@ class PlaybackService : MediaSessionService() {
     override fun onCreate() {
         super.onCreate()
 
-        // کتاب صوتی یعنی «گفتار»: اکولایزر/افکت سیستم با این نوع محتوا درست رفتار می‌کند.
         val audioAttributes = AudioAttributes.Builder()
             .setUsage(C.USAGE_MEDIA)
             .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
@@ -59,15 +57,11 @@ class PlaybackService : MediaSessionService() {
 
         val exo = ExoPlayer.Builder(this)
             .setAudioAttributes(audioAttributes, /* handleAudioFocus = */ true)
-            // کشیدن هدفون/قطع بلوتوث ⇒ توقف؛ نه پخش ناگهانی با بلندگو در جمع.
             .setHandleAudioBecomingNoisy(true)
-            // فایل‌ها محلی‌اند (از حافظه‌ی گوشی)؛ wake lock محلی کافی است.
             .setWakeMode(C.WAKE_MODE_LOCAL)
             .setSeekBackIncrementMs(SEEK_INCREMENT_MS)
             .setSeekForwardIncrementMs(SEEK_INCREMENT_MS)
             .build()
-        // فقط پلی/مکث روی اعلان — prev/next را از فرمان‌های پلیر برمی‌داریم،
-        // بدون فیلتر session (setMediaItems را هرگز محدود نکن).
         val player = object : ForwardingPlayer(exo) {
             override fun getAvailableCommands(): Player.Commands =
                 Player.Commands.Builder()
@@ -80,10 +74,36 @@ class PlaybackService : MediaSessionService() {
         }
 
         mediaSession = MediaSession.Builder(this, player)
-            // لمس خود اعلان → باز شدن صفحه‌ی تدریس همان درس (حتی وقتی اپ بسته است).
             .setSessionActivity(teachPendingIntent(currentPackOf(player)))
-            // دکمه‌ی پلی اعلان هم مثل لمس اعلان: اول صفحه‌ی پلیر (تدریس) باز شود، بعد پخش.
             .setCallback(object : MediaSession.Callback {
+                override fun onConnect(
+                    session: MediaSession,
+                    controller: MediaSession.ControllerInfo,
+                ): MediaSession.ConnectionResult {
+                    val base = super.onConnect(session, controller)
+                    if (base !is MediaSession.ConnectionResult.Accepted) return base
+                    return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
+                        .setAvailableSessionCommands(
+                            base.availableSessionCommands.buildUpon().add(STOP_COMMAND).build(),
+                        )
+                        .setAvailablePlayerCommands(base.availablePlayerCommands)
+                        .setCustomLayout(listOf(stopButton()))
+                        .build()
+                }
+
+                override fun onCustomCommand(
+                    session: MediaSession,
+                    controller: MediaSession.ControllerInfo,
+                    customCommand: SessionCommand,
+                    args: Bundle,
+                ): ListenableFuture<SessionResult> {
+                    if (customCommand.customAction == ACTION_STOP_TEACH) {
+                        halt(session.player)
+                        return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+                    }
+                    return super.onCustomCommand(session, controller, customCommand, args)
+                }
+
                 override fun onPlayerCommandRequest(
                     mediaSession: MediaSession,
                     controllerInfo: MediaSession.ControllerInfo,
@@ -93,7 +113,6 @@ class PlaybackService : MediaSessionService() {
                     if (playerCommand == Player.COMMAND_PLAY_PAUSE && pack != null && !TeachGate.teachPageOpen) {
                         TeachGate.requestedPack = pack
                         mediaSession.setSessionActivity(teachPendingIntent(pack))
-                        // PendingIntent تازه با packId همین رسانه — نه نسخه‌ی قدیمیِ کش‌شده
                         runCatching { teachPendingIntent(pack).send() }
                         return SessionResult.RESULT_ERROR_UNKNOWN
                     }
@@ -101,6 +120,7 @@ class PlaybackService : MediaSessionService() {
                 }
             })
             .build()
+        mediaSession?.setCustomLayout(listOf(stopButton()))
         player.addListener(object : Player.Listener {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 val pack = currentPackOf(player)
@@ -145,10 +165,6 @@ class PlaybackService : MediaSessionService() {
         )
     }
 
-    /**
-     * packId از mediaId (مثل «C903_E01-L02_AUDIO.mp3» → «C903_E01-L02»).
-     * ترک‌های بخش‌بندی‌شده‌ی فارسی (…-1/…-2) هم به پک درسِ مادر برمی‌گردند.
-     */
     private fun currentPackOf(player: Player?): String? {
         val id = player?.currentMediaItem?.mediaId ?: return null
         var pid = id.removeSuffix("_AUDIO.mp3").removeSuffix("_INTRO.mp3")
@@ -156,7 +172,6 @@ class PlaybackService : MediaSessionService() {
         return pid.takeIf { it.isNotBlank() }
     }
 
-    /** لمس اعلان → MainActivity با extra درس جاری؛ بقیه‌اش را nav اپ انجام می‌دهد. */
     private fun teachPendingIntent(packId: String?): PendingIntent =
         PendingIntent.getActivity(
             this,
@@ -180,11 +195,15 @@ class PlaybackService : MediaSessionService() {
         }
     }
 
-    /**
-     * بستن اپ از recents = توقف کامل پخش (قانون: هرگز در پس‌زمینه).
-     */
+    private fun halt(player: Player) {
+        runCatching { player.pause() }
+        runCatching { player.stop() }
+        runCatching { player.clearMediaItems() }
+        TeachGate.currentPack = null
+    }
+
     override fun onTaskRemoved(rootIntent: Intent?) {
-        mediaSession?.player?.pause()
+        mediaSession?.player?.let { halt(it) }
         stopSelf()
     }
 
@@ -198,13 +217,19 @@ class PlaybackService : MediaSessionService() {
     }
 
     companion object {
-        /** ۳۰ ثانیه — همان مقداری که UI هم برای دکمه‌های «عقب/جلو» استفاده می‌کند. */
         const val SEEK_INCREMENT_MS = 30_000L
-
-        /** لمس اعلان پخش → باز شدن صفحه‌ی تدریس همان درس (v1.9). */
         const val TEACH_OPEN_ACTION = "com.hamyareman.ir.OPEN_TEACH"
         const val TEACH_OPEN_EXTRA = "open_pack"
         const val TEACH_OPEN_AUTOPLAY = "open_pack_autoplay"
         const val TEACH_ACTIVITY = "com.hamyareman.ir.MainActivity"
+        const val ACTION_STOP_TEACH = "com.hamyareman.ir.STOP_TEACH"
+        val STOP_COMMAND = SessionCommand(ACTION_STOP_TEACH, Bundle.EMPTY)
+
+        fun stopButton(): CommandButton =
+            CommandButton.Builder(CommandButton.ICON_STOP)
+                .setDisplayName("خروج")
+                .setSessionCommand(STOP_COMMAND)
+                .setEnabled(true)
+                .build()
     }
 }

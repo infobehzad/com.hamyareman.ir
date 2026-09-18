@@ -399,7 +399,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
     DisposableEffect(packId) {
         onDispose {
             loadedKey?.let { key -> tracks.firstOrNull { it.cacheKey == key }?.let { savePos(it, posMs) } }
-            runCatching { playback.pause() }
+            runCatching { playback.stop() }
             playback.release()
         }
     }

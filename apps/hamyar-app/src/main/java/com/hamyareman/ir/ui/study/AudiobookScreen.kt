@@ -207,7 +207,7 @@ fun AudiobookScreen(onBack: () -> Unit) {
         com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = true
         onDispose {
             store.putInt(KEY_POSITION, playback.positionMs.toInt())
-            runCatching { playback.pause() }
+            runCatching { playback.stop() }
             com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = false
             playback.release()
         }

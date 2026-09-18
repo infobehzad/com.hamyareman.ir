@@ -32,8 +32,7 @@ data class PlaybackState(
  * کلاینتِ [PlaybackService] — چیزی که صفحه‌ی UI با آن حرف می‌زند.
  *
  * نکته‌ی مهم درباره‌ی چرخه‌ی عمر: `release()` فقط **اتصال این صفحه** را قطع می‌کند،
- * نه پخش را؛ اگر کتاب صوتی در حال پخش باشد، سرویس و اعلان آن زنده می‌مانند.
- * به همین دلیل بستن صفحه = قطع‌نشدن صدا.
+ * نه پخش را. برای قطع صدا قبل از release باید [stop] صدا زده شود.
  */
 class PlaybackController(context: Context) {
 
@@ -128,6 +127,15 @@ class PlaybackController(context: Context) {
 
     fun pause() {
         controller?.pause()
+    }
+
+    /** توقف کامل + خالی‌کردن صف تا اعلان هم بسته شود. */
+    fun stop() {
+        controller?.let { c ->
+            runCatching { c.pause() }
+            runCatching { c.stop() }
+            runCatching { c.clearMediaItems() }
+        }
     }
 
     fun seekTo(ms: Long) {

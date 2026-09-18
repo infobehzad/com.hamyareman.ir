@@ -1,5 +1,6 @@
 package com.hamyareman.ir.ui.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -136,13 +137,19 @@ fun HomeScreen(nav: NavController) {
                             }
                         }
                         Spacer(Modifier.width(28.dp))
-                        ProfileClockAvatar(onClick = { nav.navigate(Screen.UserProfile.route) })
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            ProfileClockAvatar(onClick = { nav.navigate(Screen.UserProfile.route) })
+                            Text(
+                                "پروفایل من",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .padding(top = 4.dp)
+                                    .clickable { nav.navigate(Screen.UserProfile.route) },
+                            )
+                        }
                     }
                 }
-            }
-
-            HubCard("👤", "پروفایل من", "نام، عکس، مدرسه و وضعیت اشتراک") {
-                nav.navigate(Screen.UserProfile.route)
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
