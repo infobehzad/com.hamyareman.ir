@@ -214,7 +214,7 @@ fun AudiobookScreen(onBack: () -> Unit) {
     }
 
     // هرگز در پس‌زمینه: هوم/مینیمایز/جابجایی اپ/قفل گوشی → مکث؛ برگشت → ادامه از همان‌جا.
-    com.hamyareman.ir.ui.study.PauseOnStopEffect { runCatching { playback.pause() } }
+    com.hamyareman.ir.ui.study.PauseOnStopEffect(pause = { runCatching { playback.pause() } }, stop = { runCatching { playback.stop() } })
 
     fun seekTo(ms: Long) {
         val target = ms.coerceIn(0L, (if (state.durationMs > 0L) state.durationMs else ms).coerceAtLeast(0L))

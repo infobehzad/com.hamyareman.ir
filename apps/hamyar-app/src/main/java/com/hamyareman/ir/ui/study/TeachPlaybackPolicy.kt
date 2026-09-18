@@ -13,21 +13,23 @@ import androidx.lifecycle.LifecycleEventObserver
  * برگشت به صفحه پخش را از سر نمی‌گیرد؛ کاربر خودش پلی می‌زند (موقعیت حافظه‌دار است).
  */
 @Composable
-fun PauseOnStopEffect(pause: () -> Unit) {
+fun PauseOnStopEffect(pause: () -> Unit, stop: (() -> Unit)? = null) {
     val owner = LocalLifecycleOwner.current
+    val halt = stop ?: pause
     DisposableEffect(owner) {
         com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = true
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
-                // صفحه واقعاً دیده می‌شود — پخش فقط در این حالت مجاز است.
                 Lifecycle.Event.ON_START -> {
                     com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = true
                 }
-                // هوم / مینیمایز / سوییچ اپ / قفل صفحه / ترک کامپوزیشن:
-                // فوراً مکث + پرچم بسته تا اعلان نتواند در پس‌زمینه پلی کند.
-                Lifecycle.Event.ON_PAUSE, Lifecycle.Event.ON_STOP -> {
+                Lifecycle.Event.ON_PAUSE -> {
                     com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = false
                     pause()
+                }
+                Lifecycle.Event.ON_STOP -> {
+                    com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = false
+                    halt()
                 }
                 else -> Unit
             }
@@ -36,7 +38,7 @@ fun PauseOnStopEffect(pause: () -> Unit) {
         onDispose {
             owner.lifecycle.removeObserver(observer)
             com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = false
-            pause()
+            halt()
         }
     }
 }

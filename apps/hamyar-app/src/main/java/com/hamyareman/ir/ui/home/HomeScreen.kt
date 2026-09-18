@@ -1,7 +1,10 @@
 package com.hamyareman.ir.ui.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,15 +28,22 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.toPersianDigits
@@ -61,9 +71,6 @@ private val gregMonth = listOf(
     "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec",
 )
 
-/**
- * داشبورد: دو سطر عنوان بالای کارت؛ داخل کارت تاریخ چپ و ساعت آنالوگ راست.
- */
 @Composable
 fun HomeScreen(nav: NavController) {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -93,16 +100,7 @@ fun HomeScreen(nav: NavController) {
             Modifier.fillMaxSize().padding(pad).padding(16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text(
-                "${greeting()} $who جان 🌸",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-            )
-            Text(
-                "همیار من کنارت است؛ از مدرسه تا آرامش",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            GreetingBanner(title = "${greeting()} $who جان", subtitle = "همیار من کنارت است؛ از مدرسه تا آرامش")
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -137,20 +135,23 @@ fun HomeScreen(nav: NavController) {
                             }
                         }
                         Spacer(Modifier.width(28.dp))
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.clickable { nav.navigate(Screen.UserProfile.route) },
+                        ) {
                             ProfileClockAvatar(onClick = { nav.navigate(Screen.UserProfile.route) })
                             Text(
                                 "پروفایل من",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier
-                                    .padding(top = 4.dp)
-                                    .clickable { nav.navigate(Screen.UserProfile.route) },
+                                modifier = Modifier.padding(top = 4.dp),
                             )
                         }
                     }
                 }
             }
+
+            WisdomCard()
 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 QuickTile("🎒", "مدرسه", Modifier.weight(1f)) { nav.hubTo(Screen.Study.route) }
@@ -169,6 +170,83 @@ fun HomeScreen(nav: NavController) {
             HubCard("💬", "حرف دل با بابا", "پیام، ویس، عکس یا تماس") { nav.navigate(Screen.Heart.route) }
             HubCard("💛", "آرامش سریع", "سه دقیقه تا حال بهتر") { nav.navigate(Screen.Calm.route) }
             Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+@Composable
+private fun GreetingBanner(title: String, subtitle: String) {
+    val shape = RoundedCornerShape(28.dp)
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = shape,
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+    ) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .background(
+                    Brush.linearGradient(
+                        listOf(Color(0xFF0F766E), Color(0xFF115E59), Color(0xFF1E3A8A)),
+                    ),
+                )
+                .padding(horizontal = 22.dp, vertical = 20.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    title,
+                    color = Color.White,
+                    fontFamily = DashboardFonts.greeting,
+                    fontSize = 26.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text(
+                    subtitle,
+                    color = Color.White.copy(alpha = 0.92f),
+                    fontFamily = DashboardFonts.quote,
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun WisdomCard() {
+    val ctx = LocalContext.current
+    val all = remember { WisdomQuotes.load(ctx) }
+    var line by remember { mutableStateOf(WisdomQuotes.current(ctx, all)) }
+    LaunchedEffect(line) {
+        delay(WisdomQuotes.remainingMs(ctx))
+        line = WisdomQuotes.current(ctx, all)
+    }
+    val body = if (line.author.isBlank()) line.text else line.oneLine()
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF7ED)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp)) {
+            val n = body.length.coerceAtLeast(1)
+            val sp = (maxWidth.value / (n * 0.62f)).coerceIn(11f, 18f)
+            Text(
+                body,
+                fontFamily = DashboardFonts.quote,
+                fontSize = sp.sp,
+                color = Color(0xFF9A3412),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Clip,
+                softWrap = false,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

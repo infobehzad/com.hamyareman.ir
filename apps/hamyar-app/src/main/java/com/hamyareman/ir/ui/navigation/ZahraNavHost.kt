@@ -115,13 +115,27 @@ fun ZahraNavHost() {
             com.hamyareman.ir.ui.study.TeachLaunch.pendingTeachPack = null
         }
     }
+    val hideBar = route?.startsWith("study-teach") == true ||
+        route?.startsWith("video-teach") == true ||
+        route == Screen.Call.route
     Scaffold(bottomBar = {
-        if (route in TopRoutes) {
+        if (!hideBar) {
             NavigationBar {
                 Tabs.forEach { tab ->
                     NavigationBarItem(
-                        selected = route == tab.route,
-                        onClick = { nav.navigate(tab.route) { popUpTo(Screen.Home.route) { saveState = true }; launchSingleTop = true; restoreState = true } },
+                        selected = route == tab.route ||
+                            (tab.route == Screen.Study.route && (route?.startsWith("study-book") == true || route == Screen.StudyHome.route)),
+                        onClick = {
+                            if (tab.route == Screen.Home.route) {
+                                nav.popBackStack(Screen.Home.route, inclusive = false)
+                            } else {
+                                nav.navigate(tab.route) {
+                                    popUpTo(Screen.Home.route) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        },
                         icon = { Icon(tab.icon, tab.label) },
                         label = { Text(tab.label) },
                     )

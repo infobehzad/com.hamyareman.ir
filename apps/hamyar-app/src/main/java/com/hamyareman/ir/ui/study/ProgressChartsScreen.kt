@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -68,13 +69,17 @@ fun ProgressChartsScreen(bookCode: String?, onBack: () -> Unit, onPickBook: (Str
                     Card(
                         Modifier.fillMaxWidth().androidClickable { onPickBook(m.bookCode) },
                     ) {
-                        Column(Modifier.padding(14.dp)) {
-                            Text("📘 ${m.title}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                            Text(
-                                "${toPersianDigits(started.toString())} درس شروع شده · دوره‌ی اولِ ${toPersianDigits(done.toString())} درس کامل شده",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                            BookLeadIcon(m, size = 52.dp)
+                            Spacer(Modifier.width(12.dp))
+                            Column(Modifier.weight(1f)) {
+                                Text(m.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                Text(
+                                    "${toPersianDigits(started.toString())} درس شروع شده · دوره‌ی اولِ ${toPersianDigits(done.toString())} درس کامل شده",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                         }
                     }
                 }
@@ -130,7 +135,7 @@ fun ProgressChartsScreen(bookCode: String?, onBack: () -> Unit, onPickBook: (Str
                     return@forEach
                 }
 
-                Text("📘 ${module.title}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text("${bookGlyph(module.bookCode, module.title)} ${module.title}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 if (teachActive.isNotEmpty()) {
                     Text(
                         "دوره‌ی اول کامل شده: ${toPersianDigits(doneHere.toString())} از ${toPersianDigits(teachActive.size.toString())} درس شروع‌شده",

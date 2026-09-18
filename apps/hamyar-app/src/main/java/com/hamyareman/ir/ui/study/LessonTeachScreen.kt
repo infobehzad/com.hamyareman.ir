@@ -248,7 +248,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
         onDispose { com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = false }
     }
     // v1.25 — خروج از صفحه با هوم/پنجره‌ها/قفل صفحه هم = مکث پخش (شرط بازبودن صفحه).
-    PauseOnStopEffect { playback.pause() }
+    PauseOnStopEffect(pause = { playback.pause() }, stop = { playback.stop() })
 
     var forceServer by remember { mutableStateOf(false) }
 
