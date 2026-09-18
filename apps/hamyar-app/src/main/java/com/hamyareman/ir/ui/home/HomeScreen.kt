@@ -162,6 +162,11 @@ fun HomeScreen(nav: NavController) {
                 QuickTile("🤖", "همراه من", Modifier.weight(1f)) { nav.hubTo(Screen.Chat.route) }
             }
 
+            ClassPlanCard(
+                onOpenPlan = { nav.navigate(Screen.WeeklySchedule.route) },
+                onOpenPrep = { nav.navigate(Screen.TomorrowPrep.route) },
+            )
+
             SectionCard("حالت امروز چطوره؟", "با یک ایموجی ثبتش کن — اختیاریه.") { nav.navigate(Screen.Mood.route) }
 
             Text("امروز", style = MaterialTheme.typography.titleMedium)

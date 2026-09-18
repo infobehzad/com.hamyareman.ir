@@ -55,6 +55,8 @@ import com.hamyareman.ir.ui.hub.ReadingCornerScreen
 import com.hamyareman.ir.ui.hub.SchoolHubScreen
 import com.hamyareman.ir.ui.hub.SleepLogScreen
 import com.hamyareman.ir.ui.hub.WeeklyScheduleScreen
+import com.hamyareman.ir.ui.study.ClassPlanScreen
+import com.hamyareman.ir.ui.study.TomorrowPrepScreen
 import com.hamyareman.ir.ui.learning.LearningHomeScreen
 import com.hamyareman.ir.ui.learning.LessonScreen
 import com.hamyareman.ir.ui.learning.PlacementTestScreen
@@ -185,7 +187,7 @@ fun ZahraNavHost() {
             }
             composable(Screen.AwarenessHub.route) { AwarenessHubScreen(nav) }
             composable(Screen.HealthProgress.route) { HealthProgressScreen(onBack = { nav.popBackStack() }) }
-            composable(Screen.WeeklySchedule.route) { WeeklyScheduleScreen { nav.popBackStack() } }
+            composable(Screen.WeeklySchedule.route) { ClassPlanScreen(onBack = { nav.popBackStack() }, initialTab = 0) }
             composable(Screen.Meds.route) { MedsScreen { nav.popBackStack() } }
             composable(Screen.SleepLog.route) { SleepLogScreen { nav.popBackStack() } }
             composable(Screen.ReadingCorner.route) { ReadingCornerScreen { nav.popBackStack() } }

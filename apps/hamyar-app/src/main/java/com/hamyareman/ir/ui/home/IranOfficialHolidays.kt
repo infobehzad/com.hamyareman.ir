@@ -10,9 +10,12 @@ internal object IranOfficialHolidays {
 
     fun occasion(j: JalaliDate.Jalali): String? {
         solar[j.month to j.day]?.let { return it }
-        yearly["${j.year}-${j.month}-${j.day}"]?.let { return it }
+        lunarOn(j)?.let { return it }
         return null
     }
+
+    /** فقط مناسبت قمریِ همان روز شمسی (برای جابه‌جایی ±۲ روز). */
+    fun lunarOn(j: JalaliDate.Jalali): String? = yearly["${j.year}-${j.month}-${j.day}"]
 
     private val solar = mapOf(
         (1 to 1) to "عید نوروز",

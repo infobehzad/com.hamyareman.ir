@@ -46,7 +46,7 @@ import java.time.temporal.ChronoUnit
  * درس‌های هر روز/شیفت را زهرا می‌نویسد، و چک‌لیست‌های «امروز» و «آماده‌سازی فردا»
  * روی دستگاه ذخیره می‌شوند. هیچ‌کدام Sync نمی‌شوند (برنامه‌ی مدرسه داده‌ی خصوصی است).
  */
-internal enum class Shift(val label: String) { MORNING("صبح"), EVENING("عصر") }
+internal enum class Shift(val label: String) { MORNING("صبح"), EVENING("بعدازظهر") }
 
 /**
  * ریاضیِ خالصِ تقویم مدرسه — جدا از SharedPreferences تا قابل تست باشد.
@@ -68,11 +68,35 @@ internal object SchoolShift {
      * شیفت یک تاریخ با چرخه‌ی دوهفته‌ای از «لنگر» (اولین روز یک هفته‌ی صبح).
      * هفته‌های زوج = صبح، فرد = عصر؛ قبل از لنگر هم درست است.
      */
-    fun shiftOn(anchorIso: String, date: LocalDate): Shift {
+    fun weekIndex(anchorIso: String, date: LocalDate): Long {
         val anchor = runCatching { LocalDate.parse(anchorIso) }.getOrDefault(date)
         val days = ChronoUnit.DAYS.between(anchor, date)
-        val weekIndex = Math.floorDiv(days, 7L)
-        return if (Math.floorMod(weekIndex, 2L) == 0L) Shift.MORNING else Shift.EVENING
+        return Math.floorDiv(days, 7L)
+    }
+
+    fun shiftOn(anchorIso: String, date: LocalDate): Shift = shiftOn(anchorIso, date, 2)
+
+    /**
+     * [cycleWeeks] ۱ = بدون چرخش (همیشه صبحِ لنگر؛ شیفت ثابت از بیرون ست می‌شود)،
+     * ۲ = یک هفته در میان، ۴ = دو هفته صبح / دو هفته بعدازظهر.
+     */
+    fun shiftOn(anchorIso: String, date: LocalDate, cycleWeeks: Int): Shift {
+        val cycle = cycleWeeks.coerceIn(1, 8)
+        if (cycle == 1) return Shift.MORNING
+        val pos = Math.floorMod(weekIndex(anchorIso, date), cycle.toLong())
+        val morningSlots = (cycle + 1) / 2
+        return if (pos < morningSlots) Shift.MORNING else Shift.EVENING
+    }
+
+    fun cycleCaption(anchorIso: String, date: LocalDate, cycleWeeks: Int): String {
+        val cycle = cycleWeeks.coerceIn(1, 8)
+        val pos = Math.floorMod(weekIndex(anchorIso, date), cycle.toLong()).toInt()
+        return when (cycle) {
+            1 -> "هفته جاری"
+            2 -> if (pos == 0) "هفته اول" else "هفته دوم"
+            4 -> "ماه اول"
+            else -> "هفتهٔ ${pos + 1}"
+        }
     }
 
     /** شنبه‌ی همان هفته‌ای که `date` در آن است. */

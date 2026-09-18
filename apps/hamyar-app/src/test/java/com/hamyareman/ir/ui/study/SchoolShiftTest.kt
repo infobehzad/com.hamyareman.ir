@@ -46,4 +46,14 @@ class SchoolShiftTest {
     fun `a broken anchor falls back to today instead of crashing`() {
         assertEquals(Shift.MORNING, SchoolShift.shiftOn("not-a-date", friday))
     }
+
+    @Test
+    fun `four week cycle is two morning then two afternoon`() {
+        val a = saturday.toString()
+        assertEquals(Shift.MORNING, SchoolShift.shiftOn(a, saturday, 4))
+        assertEquals(Shift.MORNING, SchoolShift.shiftOn(a, saturday.plusDays(7), 4))
+        assertEquals(Shift.EVENING, SchoolShift.shiftOn(a, saturday.plusDays(14), 4))
+        assertEquals(Shift.EVENING, SchoolShift.shiftOn(a, saturday.plusDays(21), 4))
+        assertEquals("ماه اول", SchoolShift.cycleCaption(a, saturday, 4))
+    }
 }
