@@ -1,5 +1,6 @@
 package com.hamyareman.ir.ui.study
 
+import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.clickable
@@ -615,6 +616,14 @@ private fun MathExamTab(pack: StudyPack) {
 }
 
 @Composable
+/** پل JS فهرست HTML → سیک پلیر تدریس. */
+private class TeachHtmlBridge {
+    @JavascriptInterface
+    fun seek(ms: Int) {
+        TeachSeekBus.seekMs(ms.toLong())
+    }
+}
+
 internal fun ExamLedgerCard(ledger: MathExamLedger.State) {
     val last = ledger.latest ?: return
     Card(Modifier.fillMaxWidth()) {

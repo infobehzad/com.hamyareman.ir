@@ -105,6 +105,16 @@ object TeachLaunch {
     var pendingTeachPack by mutableStateOf<String?>(null)
 }
 
+/** سیک از فهرست HTML تدریس → پلیر بالای صفحه. */
+object TeachSeekBus {
+    var requestMs by mutableStateOf<Long?>(null)
+    fun seekMs(ms: Long) {
+        android.os.Handler(android.os.Looper.getMainLooper()).post {
+            requestMs = ms.coerceAtLeast(0L)
+        }
+    }
+}
+
 internal fun teachMmss(ms: Long): String {
     val s = ms.coerceAtLeast(0L) / 1000
     return toPersianDigits(String.format(Locale.US, "%d:%02d", s / 60, s % 60))
@@ -241,7 +251,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
 
     var forceServer by remember { mutableStateOf(false) }
 
-    fun startTrack(t: TeachTrack, autoplay: Boolean, fromServer: Boolean = false) {
+    fun startTrack(t: TeachTrack, autoplay: Boolean, fromServer: Boolean = false, startMs: Long? = null) {
         msg = null
         if (quietOn()) {
             msg = "🔇 «زمان درس» روشن است — تا خاموشش کنی، پخش صدا فعال نمی‌شود."
@@ -265,14 +275,15 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                         .build()
                 }
             }
-            playback.setMediaItems(items, tracks.indexOf(t).coerceAtLeast(0), if (cached(t) && !fromServer) savedPos(t) else 0L)
+            val pos = startMs ?: if (cached(t) && !fromServer) savedPos(t) else 0L
+            playback.setMediaItems(items, tracks.indexOf(t).coerceAtLeast(0), pos)
             com.hamyareman.ir.platform.feature.playback.TeachGate.currentPack = packId
             playback.setSpeed(speed)
             // v1.12: فوراً ترکِ جاری را ثبت کن — تا فال‌بکِ خطا (سرور) همیشه زنده باشد
             // و اگر پخش محلی شروع شد، واتچ‌داگ بتواند نتیجه را بسنجد.
             loadedKey = t.cacheKey
             lastSaveMs = 0L
-            posMs = if (cached(t) && !fromServer) savedPos(t) else 0L
+            posMs = pos
             pendingStartKey = if (autoplay) t.cacheKey else null
             if (autoplay) playback.play()
         }
@@ -283,6 +294,33 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
         if (TeachLaunch.pendingTeachPack == packId) {
             TeachLaunch.pendingTeachPack = null
             startTrack(track, autoplay = true)
+        }
+    }
+
+    val tocSeekMs = TeachSeekBus.requestMs
+    LaunchedEffect(tocSeekMs) {
+        val ms = tocSeekMs ?: return@LaunchedEffect
+        TeachSeekBus.requestMs = null
+        if (quietOn()) return@LaunchedEffect
+        if (abs(ms - posMs) > 3000) TeachStats.addJump(context, packId)
+        savePos(track, ms)
+        pendingSeekMs = ms
+        if (loadedKey == track.cacheKey && state.hasMedia && state.durationMs > 0) {
+            playback.seekTo(ms)
+            posMs = ms
+            pendingSeekMs = -1L
+            if (!state.playing) playback.play()
+        } else {
+            startTrack(track, autoplay = true, startMs = ms)
+        }
+    }
+    LaunchedEffect(state.durationMs, pendingSeekMs, loadedKey) {
+        val want = pendingSeekMs
+        if (want >= 0 && loadedKey == track.cacheKey && state.durationMs > 0) {
+            playback.seekTo(want)
+            posMs = want
+            pendingSeekMs = -1L
+            if (!state.playing) playback.play()
         }
     }
 
@@ -780,6 +818,10 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
         }
         TeachPdfState.Idle -> Card(modifier.fillMaxWidth()) {
             Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+        }
+    }
+}
+CircularProgressIndicator() }
         }
     }
 }

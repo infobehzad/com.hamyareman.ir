@@ -63,8 +63,9 @@ main { padding: 40px 30px 60px; }
 .toc ol { padding-right: 22px; margin: 0; }
 .toc li { padding: 4px 0; color: #3730a3; font-weight: 600;
   font-size: 0.95rem; }
-.toc a { color: #3730a3; text-decoration: none; }
+.toc a { color: #3730a3; text-decoration: none; cursor: pointer; }
 .toc a:hover { text-decoration: underline; }
+.toc .t { color: #6366f1; font-weight: 700; font-size: 0.85rem; margin-right: 6px; }
 
 .section-title {
   font-size: 1.3rem; font-weight: 800; color: #6d28d9;
@@ -1216,5 +1217,24 @@ footer strong { color: #a855f7; }
     موفق باشی! ✨
   </footer>
 </div>
+<script>
+(function () {
+  function seekFrom(a) {
+    var ms = parseInt(a.getAttribute('data-seek-ms') || '0', 10);
+    try { if (window.HamyarPlayer && HamyarPlayer.seek) HamyarPlayer.seek(ms); } catch (e) {}
+  }
+  document.querySelectorAll('.toc a[data-seek-ms]').forEach(function (a) {
+    a.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      seekFrom(a);
+      var id = a.getAttribute('href');
+      if (id && id.charAt(0) === '#') {
+        var el = document.querySelector(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+})();
+</script>
 </body>
 </html>
