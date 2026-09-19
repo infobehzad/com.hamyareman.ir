@@ -6,6 +6,24 @@ import android.graphics.BitmapFactory
 import android.webkit.MimeTypeMap
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.border
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Card
+import androidx.compose.ui.text.style.TextAlign
+import com.hamyareman.ir.ui.home.DashboardFonts
+import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -151,6 +169,87 @@ private fun writeNoteFiles(store: LocalStore, items: List<NoteFile>) {
 private fun galleryDir(context: android.content.Context): File =
     File(context.filesDir, "notes_gallery").apply { mkdirs() }
 
+// ------------------------------------------------------------------ نکات درسی
+
+internal const val KEY_NOTES_ITEMS = "lesson_notes_items"
+
+/** یک نکته‌ی ذخیره‌شده: عنوان + متن (دفتر ۸خط). */
+internal data class LessonNote(
+    val id: String,
+    val title: String,
+    val text: String,
+    val updatedAt: Long,
+)
+
+internal fun readNotes(store: LocalStore): List<LessonNote> = runCatching {
+    val arr = JSONArray(store.getString(KEY_NOTES_ITEMS, "[]"))
+    buildList {
+        for (i in 0 until arr.length()) {
+            val o = arr.getJSONObject(i)
+            add(
+                LessonNote(
+                    id = o.optString("id"),
+                    title = o.optString("title"),
+                    text = o.optString("text"),
+                    updatedAt = o.optLong("updatedAt"),
+                ),
+            )
+        }
+    }.sortedByDescending { it.updatedAt }
+}.getOrDefault(emptyList())
+
+internal fun writeNotes(store: LocalStore, notes: List<LessonNote>) {
+    val arr = JSONArray()
+    notes.forEach { n ->
+        arr.put(
+            JSONObject()
+                .put("id", n.id)
+                .put("title", n.title)
+                .put("text", n.text)
+                .put("updatedAt", n.updatedAt),
+        )
+    }
+    store.putString(KEY_NOTES_ITEMS, arr.toString())
+}
+
+/** متنِ دفتر نکات روی سرور: آرایه‌ی JSON (سازگار با نسخه‌ی قدیمی که متنِ ساده بود). */
+internal fun encodeNotesForServer(notes: List<LessonNote>): String {
+    val arr = JSONArray()
+    notes.forEach { n ->
+        arr.put(
+            JSONObject()
+                .put("id", n.id)
+                .put("title", n.title)
+                .put("text", n.text)
+                .put("updatedAt", n.updatedAt),
+        )
+    }
+    return arr.toString()
+}
+
+internal fun decodeNotesFromServer(raw: String): List<LessonNote> {
+    if (raw.isBlank()) return emptyList()
+    val parsed = runCatching {
+        val arr = JSONArray(raw)
+        buildList {
+            for (i in 0 until arr.length()) {
+                val o = arr.getJSONObject(i)
+                add(
+                    LessonNote(
+                        id = o.optString("id").ifBlank { "n_${System.currentTimeMillis()}_$i" },
+                        title = o.optString("title"),
+                        text = o.optString("text"),
+                        updatedAt = o.optLong("updatedAt"),
+                    ),
+                )
+            }
+        }
+    }.getOrNull()
+    if (!parsed.isNullOrEmpty()) return parsed
+    // نسخه‌ی قدیمی: یک متنِ ساده بدون عنوان
+    return listOf(LessonNote("n_legacy", "بدون عنوان", raw, System.currentTimeMillis()))
+}
+
 private fun guessMime(ext: String): String =
     MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext.lowercase())
         ?: when (ext.lowercase()) {
@@ -176,8 +275,11 @@ private fun isPlainTextItem(item: NoteFile): Boolean {
     return item.mime.startsWith("text/") || ext in setOf("txt", "md", "rtf")
 }
 
+private fun isPdfItem(item: NoteFile): Boolean =
+    item.mime == "application/pdf" || item.ext.equals("pdf", ignoreCase = true)
+
 private fun needsOpenChoice(item: NoteFile): Boolean =
-    isImageMime(item.mime) || isHtmlItem(item) || isPlainTextItem(item)
+    isImageMime(item.mime) || isHtmlItem(item) || isPlainTextItem(item) || isPdfItem(item)
 
 private fun fileGroup(item: NoteFile): String = when {
     isImageMime(item.mime) -> "عکس"
@@ -206,6 +308,13 @@ fun PdfUploadScreen(onBack: () -> Unit) {
     var imageStart by remember { mutableIntStateOf(0) }
     var openPick by remember { mutableStateOf<NoteFile?>(null) }
     var internalView by remember { mutableStateOf<NoteFile?>(null) }
+    var noteItems by remember { mutableStateOf(readNotes(store)) }
+    var noteTitle by remember { mutableStateOf("") }
+    var editingNoteId by remember { mutableStateOf<String?>(null) }
+    var notesOpen by remember { mutableStateOf(false) }
+    var askDeleteNote by remember { mutableStateOf<LessonNote?>(null) }
+    var pdfView by remember { mutableStateOf<NoteFile?>(null) }
+    var editTarget by remember { mutableStateOf<NoteFile?>(null) }
 
     fun openExternal(item: NoteFile) {
         runCatching {
@@ -234,8 +343,13 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                 val remoteAt = row.long("updatedAt")
                 val localAt = store.getLong(KEY_NOTES_AT, 0L)
                 if (remoteText.isNotBlank() && remoteAt >= localAt) {
-                    notes = remoteText
-                    store.putString(KEY_NOTES, remoteText)
+                    val remoteNotes = decodeNotesFromServer(remoteText)
+                    val localNotes = readNotes(store)
+                    val merged = (remoteNotes + localNotes)
+                        .distinctBy { it.id }
+                        .sortedByDescending { it.updatedAt }
+                    noteItems = merged
+                    writeNotes(store, merged)
                     store.putLong(KEY_NOTES_AT, remoteAt)
                 }
             }
@@ -413,15 +527,34 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text("ثبت نکات درسی", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(
+                "ثبت نکات درسی",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Right,
+            )
+            OutlinedTextField(
+                value = noteTitle,
+                onValueChange = { noteTitle = it },
+                label = { Text("عنوان نکته") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = androidx.compose.ui.text.TextStyle(textAlign = TextAlign.Right),
+            )
             LinedNotesPaper(
                 value = notes,
                 onValueChange = { notes = it },
             )
-            PrimaryButton("ذخیره نکات و همگام با سرور") {
+            PrimaryButton(if (editingNoteId == null) "ذخیره نکات و همگام با سرور" else "به‌روزرسانی نکته") {
                 val now = System.currentTimeMillis()
-                store.putString(KEY_NOTES, notes)
-                store.putLong(KEY_NOTES_AT, now)
+                val title = noteTitle.trim().ifBlank { "بدون عنوان" }
+                val id = editingNoteId ?: "n_${System.currentTimeMillis()}"
+                val next = listOf(LessonNote(id, title, notes, now)) +
+                    noteItems.filterNot { it.id == id }
+                noteItems = next.sortedByDescending { it.updatedAt }
+                writeNotes(store, noteItems)
+                editingNoteId = null
                 scope.launch {
                     val uid = container.auth.cachedUserId()
                         ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
@@ -431,7 +564,7 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                     }
                     val payload = mapOf(
                         "userId" to uid,
-                        "text" to notes,
+                        "text" to encodeNotesForServer(noteItems),
                         "updatedAt" to now,
                     )
                     val perms = AppwriteClientProvider.ownerOnly(uid)
@@ -445,17 +578,47 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                     }
                 }
             }
+            if (editingNoteId != null) {
+                TextButton(onClick = {
+                    editingNoteId = null
+                    noteTitle = ""
+                    notes = ""
+                }) { Text("لغو ویرایش") }
+            }
 
-            Text("گالری جزوه — فقط همین گوشی", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            NotesAccordion(
+                notes = noteItems,
+                expanded = notesOpen,
+                onToggle = { notesOpen = !notesOpen },
+                onPick = { n ->
+                    editingNoteId = n.id
+                    noteTitle = n.title
+                    notes = n.text
+                    notice = "«${n.title}» در دفتر بارگذاری شد."
+                },
+                onDelete = { askDeleteNote = it },
+            )
+
+            Text(
+                "گالری جزوه — فقط همین گوشی",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Right,
+            )
             Text(
                 "عکس جزوه و کتاب، متن، PDF یا هر فرمت دیگر. فایل‌ها هرگز به سرور نمی‌روند. مهمان همیار من تا ۱۰ فایل؛ از یازدهم اشتراک فعال. بکاپ و بازگردانی هم با اشتراک فعال.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Right,
             )
             Text(
                 "الان ${toPersianDigits(items.size.toString())} فایل" +
                     if (!paid) " از ${toPersianDigits(FREE_FILE_CAP.toString())} سهمیهٔ مهمان" else "",
                 style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Right,
             )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(
@@ -496,6 +659,8 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                     "$group · ${toPersianDigits(groupItems.size.toString())}",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Right,
                 )
                 groupItems.chunked(3).forEach { row ->
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -543,15 +708,25 @@ fun PdfUploadScreen(onBack: () -> Unit) {
             onCancel = { cropBmp = null },
             onCropped = { out ->
                 scope.launch {
+                    val replace = editTarget
                     val saved = withContext(Dispatchers.IO) {
                         val (scaled, q) = compressReadableJpeg(out)
-                        val target = File(galleryDir(context), "img_${System.currentTimeMillis()}.jpg")
-                        target.outputStream().use { os -> scaled.compress(Bitmap.CompressFormat.JPEG, q, os) }
+                        val target = if (replace != null) File(replace.localPath)
+                        else File(galleryDir(context), "img_${System.currentTimeMillis()}.jpg")
+                        runCatching {
+                            target.outputStream().use { os -> scaled.compress(Bitmap.CompressFormat.JPEG, q, os) }
+                        }
                         target.takeIf { it.exists() && it.length() > 0 }
                     }
                     cropBmp = null
                     if (saved == null) {
                         notice = "ذخیرهٔ عکس ممکن نشد."
+                    } else if (replace != null) {
+                        // همان فایل جایگزین شد — فقط اندازه در فهرست به‌روز می‌شود.
+                        items = items.map { if (it.id == replace.id) it.copy(sizeKb = (saved.length() / 1024).coerceAtLeast(1)) else it }
+                        writeNoteFiles(store, items)
+                        editTarget = null
+                        notice = "ویرایش عکس ذخیره شد."
                     } else {
                         titleText = "عکس جزوه"
                         titleDraft = saved to "image/jpeg"
@@ -574,6 +749,21 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                     val next = album.filterNot { it.id == gone.id }
                     imageAlbum = next.ifEmpty { null }
                     notice = "از گالری حذف شد."
+                }
+            },
+            onEdit = { target ->
+                // ویرایش با همان اسکریپتِ کات و چرخش؛ خروجی جایگزینِ همان فایل می‌شود.
+                imageAlbum = null
+                scope.launch {
+                    val bmp = withContext(Dispatchers.IO) {
+                        runCatching { BitmapFactory.decodeFile(target.localPath) }.getOrNull()
+                    }
+                    if (bmp == null) {
+                        notice = "خواندن عکس ممکن نشد."
+                    } else {
+                        editTarget = target
+                        cropBmp = bmp
+                    }
                 }
             },
         )
@@ -607,6 +797,71 @@ fun PdfUploadScreen(onBack: () -> Unit) {
         )
     }
 
+    pdfView?.let { item ->
+        Dialog(
+            onDismissRequest = { pdfView = null },
+            properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true),
+        ) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(12.dp),
+            ) {
+                Text(
+                    item.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Right,
+                )
+                Spacer(Modifier.height(8.dp))
+                InternalPdfViewer(file = File(item.localPath), modifier = Modifier.weight(1f).fillMaxWidth())
+                OutlinedButton(onClick = { pdfView = null }, modifier = Modifier.fillMaxWidth()) {
+                    Text("بستن")
+                }
+            }
+        }
+    }
+
+    askDeleteNote?.let { n ->
+        AlertDialog(
+            onDismissRequest = { askDeleteNote = null },
+            title = { Text("حذف نکته؟") },
+            text = { Text("«${n.title}» برای همیشه از دفتر و سرور پاک می‌شود.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    val next = noteItems.filterNot { it.id == n.id }
+                    noteItems = next
+                    writeNotes(store, next)
+                    if (editingNoteId == n.id) {
+                        editingNoteId = null
+                        noteTitle = ""
+                        notes = ""
+                    }
+                    askDeleteNote = null
+                    scope.launch {
+                        val uid = container.auth.cachedUserId()
+                            ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+                        if (uid.isBlank()) return@launch
+                        container.tables.upsert(
+                            TableIds.LESSON_NOTES,
+                            "notes_$uid",
+                            mapOf(
+                                "userId" to uid,
+                                "text" to encodeNotesForServer(next),
+                                "updatedAt" to System.currentTimeMillis(),
+                            ),
+                            AppwriteClientProvider.ownerOnly(uid),
+                        )
+                    }
+                    notice = "نکته حذف شد."
+                }) { Text("حذف", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = { TextButton(onClick = { askDeleteNote = null }) { Text("انصراف") } },
+        )
+    }
+
     needSubMsg?.let { msg ->
         AlertDialog(
             onDismissRequest = { needSubMsg = null },
@@ -624,12 +879,14 @@ fun PdfUploadScreen(onBack: () -> Unit) {
             confirmButton = {
                 TextButton(onClick = {
                     openPick = null
-                    if (isImageMime(item.mime)) {
-                        val album = items.filter { isImageMime(it.mime) }
-                        imageStart = album.indexOfFirst { it.id == item.id }.coerceAtLeast(0)
-                        imageAlbum = album
-                    } else {
-                        internalView = item
+                    when {
+                        isImageMime(item.mime) -> {
+                            val album = items.filter { isImageMime(it.mime) }
+                            imageStart = album.indexOfFirst { it.id == item.id }.coerceAtLeast(0)
+                            imageAlbum = album
+                        }
+                        isPdfItem(item) -> pdfView = item
+                        else -> internalView = item
                     }
                 }) { Text("داخل اپ") }
             },
@@ -683,15 +940,21 @@ fun PdfUploadScreen(onBack: () -> Unit) {
     }
 }
 
+/**
+ * دفتر نکات (دفتر ۸خطِ وکتور با قاب) — فونت هیلدا و اندازه‌ی همسان با خط‌ها.
+ */
 @Composable
 private fun LinedNotesPaper(value: String, onValueChange: (String) -> Unit) {
     val density = LocalDensity.current
-    val lineSp = with(density) { 44.dp.toSp() }
+    // ۸ خطِ دفتر در ۲۳۶dp ⇒ گامِ هر خط ۲۴sp (فونت ۱۶sp روی همان گام می‌نشیند).
+    val lineSp = with(density) { 24.dp.toSp() }
     Box(
         Modifier
             .fillMaxWidth()
             .height(236.dp)
-            .clip(RoundedCornerShape(16.dp)),
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0xFFFFFBEB), RoundedCornerShape(16.dp))
+            .border(2.dp, Color(0xFFF59E0B), RoundedCornerShape(16.dp)),
     ) {
         Image(
             painter = painterResource(R.drawable.notes_lined_paper),
@@ -703,13 +966,14 @@ private fun LinedNotesPaper(value: String, onValueChange: (String) -> Unit) {
             value = value,
             onValueChange = { raw ->
                 val lines = raw.replace("\r", "").split('\n')
-                onValueChange(lines.take(5).joinToString("\n"))
+                onValueChange(lines.take(8).joinToString("\n"))
             },
             textStyle = TextStyle(
-                fontFamily = Lalezar,
-                fontSize = 18.sp,
+                fontFamily = DashboardFonts.hilda,
+                fontSize = 16.sp,
                 lineHeight = lineSp,
                 color = Color(0xFF1E3A5F),
+                textAlign = TextAlign.Right,
                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                 lineHeightStyle = LineHeightStyle(
                     alignment = LineHeightStyle.Alignment.Bottom,
@@ -719,17 +983,121 @@ private fun LinedNotesPaper(value: String, onValueChange: (String) -> Unit) {
             cursorBrush = SolidColor(Color(0xFF1E3A5F)),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 18.dp, vertical = 8.dp),
+                .padding(horizontal = 18.dp, vertical = 6.dp),
         )
     }
 }
 
+/**
+ * آکاردیونِ نکات — پیش‌فرض بسته؛ نکته‌ها بر حسب عنوان دسته‌بندی می‌شوند.
+ * لمسِ هر نکته آن را در همان دفترِ بالا بار می‌کند.
+ */
+@Composable
+private fun NotesAccordion(
+    notes: List<LessonNote>,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    onPick: (LessonNote) -> Unit,
+    onDelete: (LessonNote) -> Unit,
+) {
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onToggle),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+                    contentDescription = null,
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    "نکته‌های ذخیره‌شده (${toPersianDigits(notes.size.toString())})",
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Right,
+                )
+            }
+            AnimatedVisibility(visible = expanded) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (notes.isEmpty()) {
+                        Text(
+                            "هنوز نکته‌ای ذخیره نشده است.",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Right,
+                        )
+                    }
+                    notes.groupBy { it.title.ifBlank { "بدون عنوان" } }.forEach { (title, group) ->
+                        Text(
+                            "$title · ${toPersianDigits(group.size.toString())}",
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Right,
+                        )
+                        group.forEach { n ->
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                        RoundedCornerShape(10.dp),
+                                    )
+                                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                IconButton(onClick = { onDelete(n) }) {
+                                    Icon(
+                                        Icons.Outlined.Delete,
+                                        contentDescription = "حذف نکته",
+                                        tint = MaterialTheme.colorScheme.error,
+                                    )
+                                }
+                                IconButton(onClick = { onPick(n) }) {
+                                    Icon(Icons.Outlined.Edit, contentDescription = "ویرایش نکته")
+                                }
+                                Column(
+                                    Modifier
+                                        .weight(1f)
+                                        .clickable { onPick(n) },
+                                    horizontalAlignment = Alignment.End,
+                                ) {
+                                    Text(
+                                        n.text.take(60),
+                                        maxLines = 2,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        textAlign = TextAlign.Right,
+                                    )
+                                    Text(
+                                        JalaliDate.toJalali(
+                                            java.time.Instant.ofEpochMilli(n.updatedAt)
+                                                .atZone(JalaliDate.TEHRAN).toLocalDate().toString(),
+                                        )?.fa ?: "",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * نمایشگر عکس‌های گالری — زوم دو انگشتی + دکمه‌ی ویرایش (همان اسکریپت کات و چرخش).
+ */
 @Composable
 private fun ImageGalleryPager(
     album: List<NoteFile>,
     start: Int,
     onClose: () -> Unit,
     onDelete: (NoteFile) -> Unit,
+    onEdit: (NoteFile) -> Unit,
 ) {
     val pager = rememberPagerState(
         initialPage = start.coerceIn(0, (album.size - 1).coerceAtLeast(0)),
@@ -745,12 +1113,38 @@ private fun ImageGalleryPager(
                 val bmp = remember(item?.localPath) {
                     item?.localPath?.let { runCatching { BitmapFactory.decodeFile(it) }.getOrNull() }
                 }
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                var scale by remember(page) { mutableFloatStateOf(1f) }
+                var ox by remember(page) { mutableFloatStateOf(0f) }
+                var oy by remember(page) { mutableFloatStateOf(0f) }
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .pointerInput(page) {
+                            detectTransformGestures { _, pan, zoom, _ ->
+                                scale = (scale * zoom).coerceIn(1f, 6f)
+                                ox += pan.x
+                                oy += pan.y
+                            }
+                        }
+                        .clickable {
+                            // لمسِ ساده: برگشت به اندازه‌ی اولیه
+                            scale = 1f; ox = 0f; oy = 0f
+                        },
+                    contentAlignment = Alignment.Center,
+                ) {
                     if (bmp != null) {
                         Image(
                             bitmap = bmp.asImageBitmap(),
                             contentDescription = item?.title,
-                            modifier = Modifier.fillMaxSize().padding(8.dp),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp)
+                                .graphicsLayer {
+                                    scaleX = scale
+                                    scaleY = scale
+                                    translationX = ox
+                                    translationY = oy
+                                },
                             contentScale = ContentScale.Fit,
                         )
                     } else {
@@ -768,8 +1162,17 @@ private fun ImageGalleryPager(
                     "${toPersianDigits((pager.currentPage + 1).toString())} از ${toPersianDigits(album.size.toString())}",
                     color = Color.White.copy(alpha = 0.8f),
                 )
+                Text(
+                    "دو انگشت برای زوم؛ لمس برای برگشت",
+                    color = Color.White.copy(alpha = 0.7f),
+                    style = MaterialTheme.typography.labelSmall,
+                )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(onClick = onClose, modifier = Modifier.weight(1f)) { Text("بستن") }
+                    OutlinedButton(
+                        onClick = { cur?.let(onEdit) },
+                        modifier = Modifier.weight(1f),
+                    ) { Text("ویرایش") }
                     OutlinedButton(
                         onClick = { cur?.let(onDelete) },
                         modifier = Modifier.weight(1f),
@@ -787,14 +1190,6 @@ private fun GalleryTile(
     onOpen: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val thumb = remember(item.localPath) {
-        if (isImageMime(item.mime)) {
-            runCatching {
-                val opts = BitmapFactory.Options().apply { inSampleSize = 4 }
-                BitmapFactory.decodeFile(item.localPath, opts)
-            }.getOrNull()
-        } else null
-    }
     Column(modifier.clickable(onClick = onOpen)) {
         Box(
             Modifier
@@ -804,24 +1199,152 @@ private fun GalleryTile(
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center,
         ) {
-            if (thumb != null) {
-                Image(
-                    bitmap = thumb.asImageBitmap(),
-                    contentDescription = item.title,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                )
-            } else {
-                Text(item.ext.uppercase().ifBlank { "FILE" }, fontWeight = FontWeight.Bold)
-            }
+            GalleryThumb(item = item)
         }
-        Text(item.title, style = MaterialTheme.typography.labelMedium, maxLines = 1)
+        Text(
+            item.title,
+            style = MaterialTheme.typography.labelMedium,
+            maxLines = 1,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Right,
+        )
         Text(
             "${item.ext.uppercase()} · ${toPersianDigits(item.sizeKb.toString())}کب",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Right,
         )
-        TextButton(onClick = onDelete) { Text("حذف") }
+        TextButton(onClick = onDelete, modifier = Modifier.fillMaxWidth()) { Text("حذف") }
+    }
+}
+
+/**
+ * نمایشگر PDFِ داخل اپ — صفحه‌به‌صفحه با PdfRenderer (بدون نیاز به برنامه‌ی بیرونی).
+ */
+@Composable
+private fun InternalPdfViewer(file: File, modifier: Modifier = Modifier) {
+    var pages by remember(file.absolutePath) { mutableStateOf<List<Bitmap>>(emptyList()) }
+    var error by remember(file.absolutePath) { mutableStateOf<String?>(null) }
+    LaunchedEffect(file.absolutePath) {
+        withContext(Dispatchers.IO) {
+            val out = mutableListOf<Bitmap>()
+            val renderer = runCatching {
+                android.graphics.pdf.PdfRenderer(
+                    android.os.ParcelFileDescriptor.open(
+                        file,
+                        android.os.ParcelFileDescriptor.MODE_READ_ONLY,
+                    ),
+                )
+            }.getOrNull()
+            if (renderer == null) {
+                error = "این PDF روی گوشی باز نشد."
+                return@withContext
+            }
+            runCatching {
+                val count = renderer.pageCount.coerceAtMost(40)
+                for (i in 0 until count) {
+                    val page = renderer.openPage(i)
+                    val scale = 900f / page.width.coerceAtLeast(1)
+                    val bmp = Bitmap.createBitmap(
+                        (page.width * scale).toInt().coerceAtLeast(1),
+                        (page.height * scale).toInt().coerceAtLeast(1),
+                        Bitmap.Config.ARGB_8888,
+                    )
+                    page.render(bmp, null, null, android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                    out += bmp
+                    page.close()
+                }
+            }
+            runCatching { renderer.close() }
+            pages = out
+            if (out.isEmpty()) error = "صفحه‌ای از این PDF خوانده نشد."
+        }
+    }
+    Box(modifier.fillMaxSize()) {
+        when {
+            !error.isNullOrBlank() -> Text(
+                error!!,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.align(Alignment.Center),
+                textAlign = TextAlign.Center,
+            )
+            pages.isEmpty() -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            else -> {
+                val pager = rememberPagerState(pageCount = { pages.size })
+                VerticalPager(state = pager, modifier = Modifier.fillMaxSize()) { idx ->
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Image(
+                            bitmap = pages[idx].asImageBitmap(),
+                            contentDescription = "صفحه ${toPersianDigits((idx + 1).toString())}",
+                            modifier = Modifier.fillMaxWidth().padding(4.dp),
+                            contentScale = ContentScale.Fit,
+                        )
+                    }
+                }
+                Text(
+                    "${toPersianDigits((pager.currentPage + 1).toString())} از ${toPersianDigits(pages.size.toString())}",
+                    modifier = Modifier.align(Alignment.BottomCenter).padding(8.dp),
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
+        }
+    }
+}
+
+/** تامبنیل متنی/پی‌دی‌اف برای کادرِ گالری. */
+@Composable
+private fun GalleryThumb(item: NoteFile) {
+    val bmp = remember(item.localPath) {
+        when {
+            isImageMime(item.mime) -> runCatching {
+                BitmapFactory.decodeFile(item.localPath, BitmapFactory.Options().apply { inSampleSize = 4 })
+            }.getOrNull()
+            isPdfItem(item) -> runCatching {
+                val renderer = android.graphics.pdf.PdfRenderer(
+                    android.os.ParcelFileDescriptor.open(
+                        File(item.localPath),
+                        android.os.ParcelFileDescriptor.MODE_READ_ONLY,
+                    ),
+                )
+                val page = renderer.openPage(0)
+                val scale = 320f / page.width.coerceAtLeast(1)
+                val out = Bitmap.createBitmap(
+                    (page.width * scale).toInt().coerceAtLeast(1),
+                    (page.height * scale).toInt().coerceAtLeast(1),
+                    Bitmap.Config.ARGB_8888,
+                )
+                page.render(out, null, null, android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                page.close()
+                renderer.close()
+                out
+            }.getOrNull()
+            else -> null
+        }
+    }
+    val previewText = remember(item.localPath) {
+        if (bmp == null && !isImageMime(item.mime)) {
+            runCatching { File(item.localPath).readText(Charsets.UTF_8).take(160) }.getOrDefault("")
+        } else ""
+    }
+    when {
+        bmp != null -> Image(
+            bitmap = bmp.asImageBitmap(),
+            contentDescription = item.title,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+        )
+        previewText.isNotBlank() -> Text(
+            previewText,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontFamily = DashboardFonts.hilda,
+                fontSize = 11.sp,
+                textAlign = TextAlign.Right,
+            ),
+            maxLines = 8,
+            modifier = Modifier.fillMaxSize().padding(6.dp),
+        )
+        else -> Text(item.ext.uppercase().ifBlank { "FILE" }, fontWeight = FontWeight.Bold)
     }
 }

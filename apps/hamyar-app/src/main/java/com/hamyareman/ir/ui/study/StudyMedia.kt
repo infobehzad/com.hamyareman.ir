@@ -36,6 +36,23 @@ object StudyMedia {
     }
 
     private val resolved = ConcurrentHashMap<String, String>()
+    /** فایل‌هایی که روی سرور نیستند — تا هر بار درخواستِ بیهوده نفرستیم. */
+    private val missing = ConcurrentHashMap.newKeySet<String>()
+
+    /**
+     * آیا هیچ‌کدام از نام‌های محتمل این صوت روی باکت هست؟
+     * (پیش‌نمایش قبل از پخش تا پلیر روی فایلِ غایب گیر نکند.)
+     */
+    fun audioExists(fileId: String): Boolean {
+        if (fileId.isBlank()) return false
+        if (missing.contains(fileId)) return false
+        val ok = candidateIds(fileId).any { existsOnServer(it) }
+        if (!ok) missing += fileId
+        return ok
+    }
+
+    /** پاک‌کردن حافظه‌ی «نیست» — برای دکمه‌ی بررسی دوباره. */
+    fun forgetMissing(fileId: String) { missing.remove(fileId) }
 
     fun resolveFileId(fileId: String): String {
         if (fileId.isBlank()) return fileId

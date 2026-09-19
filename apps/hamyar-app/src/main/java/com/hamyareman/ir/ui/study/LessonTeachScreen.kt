@@ -252,8 +252,25 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
 
     var forceServer by remember { mutableStateOf(false) }
 
+    /**
+     * آیا صوتِ این درس واقعاً روی باکت هست؟ (پیش‌نمایشِ HEAD)
+     * null = هنوز بررسی نشده؛ false = فایل روی سرور نیست (پلیر قفل می‌ماند).
+     */
+    var availability by remember(packId) { mutableStateOf<Boolean?>(null) }
+    LaunchedEffect(packId, tracks.size) {
+        availability = withContext(Dispatchers.IO) {
+            tracks.any { t ->
+                MediaVault.isCached(context, t.cacheKey) || StudyMedia.audioExists(t.fileId)
+            }
+        }
+    }
+
     fun startTrack(t: TeachTrack, autoplay: Boolean, fromServer: Boolean = false, startMs: Long? = null) {
         msg = null
+        if (availability == false) {
+            msg = "صوت این درس هنوز روی سرور نیست؛ به‌زودی اضافه می‌شود."
+            return
+        }
         if (quietOn()) {
             msg = "🔇 «زمان درس» روشن است — تا خاموشش کنی، پخش صدا فعال نمی‌شود."
             return
@@ -461,6 +478,8 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                     } else if (state.playing) {
                         playback.pause()
                         savePos(track, posMs)
+                    } else if (availability == false) {
+                        msg = "صوت این درس هنوز روی سرور نیست؛ به‌زودی اضافه می‌شود."
                     } else {
                         // اگر سرویس/اتصال افتاده باشد (مثلاً بعد از مکث طولانی)،
                         // اول دوباره وصل و آماده می‌کنیم و بعد پخش — از همان جای حافظه.
@@ -570,6 +589,37 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                     )
                 }
                 Spacer(Modifier.weight(1f))
+            }
+            // وضعیتِ واقعیِ صوت به کاربر نشان داده می‌شود (قبلاً خطاها بی‌صدا قورت می‌شدند).
+            val shownMsg = msg ?: state.error
+            if (availability == false) {
+                Text(
+                    "صوت این درس هنوز روی سرور نیست — متن تدریس در دسترس است.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+                TextButton(onClick = {
+                    tracks.forEach { StudyMedia.forgetMissing(it.fileId) }
+                    availability = null
+                    msg = null
+                }) { Text("بررسی دوباره") }
+            } else if (availability == null) {
+                Text(
+                    "در حال بررسی صوتِ درس…",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else if (!shownMsg.isNullOrBlank()) {
+                Text(
+                    shownMsg,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+                TextButton(onClick = {
+                    msg = null
+                    forceServer = false
+                    startTrack(track, autoplay = true, fromServer = true)
+                }) { Text("تلاش دوباره") }
             }
             if (loadedKey == track.cacheKey && state.durationMs > 0) {
                 Slider(
