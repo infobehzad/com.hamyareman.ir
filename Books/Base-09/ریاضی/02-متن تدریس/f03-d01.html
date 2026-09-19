@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>درس اول فصل سوم جامع: استدلال</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Vazirmatn', Tahoma, sans-serif;
+  background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 50%, #ecfeff 100%);
+  color: #1e293b; line-height: 1.95; padding: 20px; font-size: 16px;
+}
+.container { max-width: 1150px; margin: 0 auto; background: #fff;
+  border-radius: 24px; box-shadow: 0 20px 60px rgba(30,41,59,0.15); overflow: hidden; }
+
+header {
+  background: linear-gradient(135deg, #dc2626 0%, #ea580c 50%, #f59e0b 100%);
+  color: #fff; padding: 42px 30px; text-align: center; position: relative;
+}
+header::after {
+  content: ""; position: absolute; bottom: -20px; left: 0; right: 0;
+  height: 40px; background: #fff;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+header h1 { font-size: 2rem; font-weight: 900; margin-bottom: 10px;
+  text-shadow: 0 3px 8px rgba(0,0,0,0.2); }
+header p { font-size: 1rem; opacity: 0.95; }
+
+main { padding: 40px 30px 60px; }
+
+.intro-box {
+  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+  border-right: 6px solid #f59e0b; padding: 22px 26px;
+  border-radius: 16px; margin-bottom: 30px; font-size: 1.02rem;
+}
+.intro-box strong { color: #92400e; }
+
+.toc {
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+  border: 2px solid #6366f1; border-radius: 18px;
+  padding: 22px 26px; margin-bottom: 35px;
+}
+.toc h3 { color: #3730a3; font-size: 1.15rem; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px; }
+.toc h3::before { content: "📋"; }
+.toc ol { padding-right: 22px; margin: 0; }
+.toc li { padding: 4px 0; color: #3730a3; font-weight: 600; font-size: 0.95rem; }
+.toc a { color: #3730a3; text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+
+.section-title {
+  font-size: 1.3rem; font-weight: 800; color: #b91c1c;
+  margin: 40px 0 16px; padding-right: 12px;
+  border-right: 5px solid #dc2626;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title::before { content: "◆"; color: #ea580c; font-size: 0.9rem; }
+.subsection-title {
+  font-size: 1.1rem; font-weight: 800; color: #9a3412;
+  margin: 26px 0 12px; padding-right: 10px;
+  border-right: 4px solid #ea580c;
+  display: flex; align-items: center; gap: 6px;
+}
+.subsection-title::before { content: "▸"; color: #f59e0b; font-size: 0.85rem; }
+
+.dialog { display: flex; gap: 14px; margin: 16px 0;
+  align-items: flex-start; animation: fadeIn 0.4s ease; }
+.avatar {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; color: #fff; font-size: 0.9rem;
+  flex-shrink: 0; box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+.avatar.sarvnaz { background: linear-gradient(135deg, #ec4899, #f43f5e); }
+.avatar.farsam  { background: linear-gradient(135deg, #0ea5e9, #3b82f6); }
+
+.bubble { flex: 1; padding: 14px 18px; border-radius: 18px; font-size: 1rem; }
+.bubble.sarvnaz {
+  background: #fce7f3; border-top-right-radius: 4px;
+  color: #831843; border: 1px solid #fbcfe8;
+}
+.bubble.farsam {
+  background: #dbeafe; border-top-right-radius: 4px;
+  color: #1e3a8a; border: 1px solid #bfdbfe;
+}
+.speaker { font-weight: 800; display: block; margin-bottom: 4px; font-size: 0.9rem; }
+.speaker.sarvnaz { color: #be185d; }
+.speaker.farsam  { color: #1d4ed8; }
+
+.formula-box {
+  background: #fff7ed; border: 2px solid #fb923c;
+  border-radius: 14px; padding: 16px 22px;
+  margin: 16px 0; text-align: center;
+  font-size: 1.15rem; font-weight: 700; color: #9a3412;
+  direction: ltr; font-family: 'KaTeX_Main', 'Cambria Math', serif;
+}
+.formula-box.big {
+  font-size: 1.35rem; padding: 22px 26px;
+  background: linear-gradient(135deg, #fff7ed, #fed7aa);
+  border-width: 3px;
+}
+
+.note-box {
+  background: #ecfdf5; border-right: 5px solid #10b981;
+  padding: 14px 20px; border-radius: 12px;
+  margin: 16px 0; color: #065f46; font-size: 0.98rem;
+}
+.warning-box {
+  background: #fef2f2; border-right: 5px solid #ef4444;
+  padding: 14px 20px; border-radius: 12px;
+  margin: 16px 0; color: #991b1b; font-size: 0.98rem;
+}
+.def-box {
+  background: #e0e7ff; border: 2px solid #4f46e5;
+  border-radius: 16px; padding: 18px 22px; margin: 18px 0;
+}
+.def-box::before {
+  content: "تعریف رسمی";
+  display: inline-block; background: #4f46e5; color: #fff;
+  padding: 2px 12px; border-radius: 8px;
+  font-size: 0.82rem; font-weight: 700; margin-bottom: 10px;
+}
+.def-box.green { background: #d1fae5; border-color: #059669; }
+.def-box.green::before { background: #059669; }
+.def-box.orange { background: #fed7aa; border-color: #ea580c; }
+.def-box.orange::before { background: #ea580c; }
+.def-box.pink { background: #fce7f3; border-color: #db2777; }
+.def-box.pink::before { background: #db2777; }
+
+.highlight {
+  background: linear-gradient(120deg, #f4ff5b 0%, #fde047 100%);
+  padding: 2px 6px; border-radius: 6px;
+  font-weight: 700; color: #713f12;
+}
+
+.example-box {
+  background: #f5f3ff; border: 2px solid #a78bfa;
+  border-radius: 16px; padding: 20px 24px; margin: 20px 0;
+}
+.example-box h4 {
+  color: #6d28d9; font-size: 1.05rem; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.example-box h4::before { content: "📌"; font-size: 1.15rem; }
+
+.step {
+  background: #fff; border-radius: 10px;
+  padding: 10px 14px; margin: 8px 0;
+  border-right: 4px solid #7c3aed; font-size: 0.98rem;
+}
+.step b { color: #6d28d9; }
+
+.exercise {
+  background: #fff; border: 2px dashed #dc2626;
+  border-radius: 16px; padding: 22px 26px; margin: 24px 0;
+}
+.exercise-title {
+  font-weight: 800; color: #b91c1c; font-size: 1.05rem;
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+}
+.exercise-title .num {
+  display: inline-flex; width: 30px; height: 30px;
+  background: linear-gradient(135deg, #dc2626, #ea580c);
+  color: #fff; border-radius: 50%;
+  align-items: center; justify-content: center;
+  font-size: 0.9rem; font-weight: 900;
+}
+.result-box {
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 2px solid #10b981; border-radius: 12px;
+  padding: 14px 18px; margin-top: 12px;
+  text-align: center; font-weight: 700; color: #065f46;
+}
+
+.svg-wrapper {
+  background: #fff; border-radius: 16px; padding: 20px;
+  margin: 22px 0; text-align: center;
+  border: 2px solid #e0e7ff;
+  box-shadow: 0 8px 20px rgba(99,102,241,0.08);
+}
+.svg-wrapper svg { max-width: 100%; height: auto; }
+.svg-caption { font-size: 0.9rem; color: #64748b; margin-top: 10px; font-style: italic; }
+
+.summary-table {
+  width: 100%; border-collapse: collapse; margin: 20px 0;
+  background: #fff; border-radius: 14px; overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+.summary-table th {
+  background: linear-gradient(135deg, #dc2626, #ea580c);
+  color: #fff; padding: 12px; font-size: 0.95rem;
+}
+.summary-table td {
+  padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-size: 0.95rem;
+}
+.summary-table tr:nth-child(even) td { background: #f8fafc; }
+.summary-table tr:last-child td { border-bottom: none; }
+
+.big-quote {
+  background: linear-gradient(135deg, #fef9c3, #fde68a);
+  border: 2px dashed #eab308; border-radius: 16px;
+  padding: 18px 22px; margin: 20px 0; text-align: center;
+  font-weight: 700; color: #713f12; font-size: 1.05rem;
+}
+
+footer {
+  text-align: center; padding: 30px 20px;
+  background: #1e293b; color: #cbd5e1; font-size: 0.9rem;
+}
+footer strong { color: #fbbf24; }
+
+.math, .katex { direction: ltr !important; unicode-bidi: isolate !important; }
+.math-inline { direction: ltr; unicode-bidi: isolate; display: inline-block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 640px) {
+  body { padding: 8px; font-size: 15px; }
+  main { padding: 20px 14px 40px; }
+  header h1 { font-size: 1.4rem; }
+  .avatar { width: 42px; height: 42px; font-size: 0.78rem; }
+  .bubble { padding: 12px 14px; font-size: 0.95rem; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>📘 درس اول فصل سوم جامع: استدلال</h1>
+    <p>فصل سوم ریاضی نهم — از شهود حسی تا استدلال منطقی</p>
+  </header>
+
+  <main>
+
+    <div class="intro-box">
+      <strong>سلام دانش‌آموز عزیز! 🌟</strong><br>
+      تا حالا در فصل‌های قبل با عددها و مجموعه‌ها کار کردیم. اما در این فصل،
+      می‌خواهیم با <strong>روش تفکر ریاضی</strong> آشنا شویم. یعنی یاد می‌گیریم چطور
+      «درست فکر کنیم» و «چطور یک ادعا را اثبات کنیم». این فصل، پایه‌ی کل ریاضیات است.
+      <br><br>
+      در این درس یاد می‌گیریم:
+      <br>
+      <strong>۱)</strong> چرا نمی‌توان فقط به چشم و گوش اعتماد کرد.
+      <br>
+      <strong>۲)</strong> استدلال چیست و دو نوع اصلی آن چه هستند.
+      <br>
+      <strong>۳)</strong> چه موقع یک استدلال «قابل اعتماد» است.
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- فهرست مطالب -->
+    <!-- ============================================================= -->
+    <div class="toc">
+      <h3>فهرست مطالب</h3>
+      <ol>
+        <li><a href="#sec1">پیش‌نیاز ۱: حس‌های پنج‌گانه و خطای آن‌ها</a></li>
+        <li><a href="#sec2">پیش‌نیاز ۲: مشاهده و آزمایش</a></li>
+        <li><a href="#sec3">درس اصلی ۱: چرا حس‌ها کافی نیستند؟</a></li>
+        <li><a href="#sec4">درس اصلی ۲: استدلال چیست؟</a></li>
+        <li><a href="#sec5">درس اصلی ۳: استدلال استقرایی</a></li>
+        <li><a href="#sec6">درس اصلی ۴: استدلال قیاسی</a></li>
+        <li><a href="#sec7">درس اصلی ۵: تفاوت استقرا و قیاس</a></li>
+        <li><a href="#sec8">درس اصلی ۶: کدام استدلال قابل اعتمادتر است؟</a></li>
+        <li><a href="#sec9">تمرین‌های جامع با حل گام‌به‌گام</a></li>
+        <li><a href="#sec10">جدول خلاصه و نکات امتحانی</a></li>
+      </ol>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۱: حس‌های پنج‌گانه -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec1">پیش‌نیاز ۱: حس‌های پنج‌گانه و خطای آن‌ها</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        سلام سروناز جان. امروز می‌خواهیم بفهمیم که آیا <b>دیدن</b> و <b>شنیدن</b> برای رسیدن به حقیقت کافی است؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        خب... معمولاً چیزهایی که می‌بینیم، درست هستند، نه؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        نه همیشه! بگذار با یک آزمایش شروع کنم. این دو تصویر را نگاه کن:
+        <br>
+        در تصویر اول، یک دایره‌ی کوچک در وسط دایره‌های بزرگ است. در تصویر دوم، همان دایره‌ی کوچک در وسط دایره‌های کوچک قرار دارد.
+      </div>
+    </div>
+
+    <!-- SVG 1: Optical illusion circles -->
+    <div class="svg-wrapper">
+      <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg">
+        <rect width="720" height="320" fill="#f8fafc" rx="18"/>
+        <text x="360" y="32" text-anchor="middle" font-size="16"
+          font-weight="900" fill="#1e293b" font-family="Vazirmatn, sans-serif">
+          خطای دید: کدام دایره‌ی وسط بزرگ‌تر است؟
+        </text>
+        <!-- Left group -->
+        <g>
+          <circle cx="120" cy="130" r="32" fill="#7c3aed"/>
+          <circle cx="180" cy="130" r="32" fill="#7c3aed"/>
+          <circle cx="80" cy="180" r="32" fill="#7c3aed"/>
+          <circle cx="220" cy="180" r="32" fill="#7c3aed"/>
+          <circle cx="120" cy="230" r="32" fill="#7c3aed"/>
+          <circle cx="180" cy="230" r="32" fill="#7c3aed"/>
+          <circle cx="150" cy="180" r="20" fill="#ec4899"/>
+        </g>
+        <!-- Right group -->
+        <g>
+          <circle cx="400" cy="130" r="18" fill="#7c3aed"/>
+          <circle cx="440" cy="130" r="18" fill="#7c3aed"/>
+          <circle cx="480" cy="130" r="18" fill="#7c3aed"/>
+          <circle cx="380" cy="170" r="18" fill="#7c3aed"/>
+          <circle cx="500" cy="170" r="18" fill="#7c3aed"/>
+          <circle cx="380" cy="210" r="18" fill="#7c3aed"/>
+          <circle cx="500" cy="210" r="18" fill="#7c3aed"/>
+          <circle cx="400" cy="250" r="18" fill="#7c3aed"/>
+          <circle cx="440" cy="250" r="18" fill="#7c3aed"/>
+          <circle cx="480" cy="250" r="18" fill="#7c3aed"/>
+          <circle cx="440" cy="190" r="20" fill="#ec4899"/>
+        </g>
+        <text x="150" y="290" text-anchor="middle" font-size="12"
+          fill="#475569" font-family="Vazirmatn, sans-serif">
+          دایره‌ی وسط با دایره‌های بزرگ احاطه شده
+        </text>
+        <text x="440" y="290" text-anchor="middle" font-size="12"
+          fill="#475569" font-family="Vazirmatn, sans-serif">
+          دایره‌ی وسط با دایره‌های کوچک احاطه شده
+        </text>
+      </svg>
+      <div class="svg-caption">شکل ۱: هر دو دایره‌ی وسط دقیقاً هم‌اندازه هستند! ولی چشم ما فریب می‌خورد</div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        وای! دایره‌ی وسط سمت راست بزرگ‌تر به نظر می‌رسد!
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        ولی اگر با خط‌کش اندازه بگیری، می‌بینی هر دو دایره‌ی وسط <b>دقیقاً هم‌اندازه</b> هستند.
+        <br>
+        این یک <span class="highlight">خطای دید</span> است. چشم ما فریب می‌خورد!
+      </div>
+    </div>
+
+    <!-- SVG 2: Two shapes A and B -->
+    <div class="svg-wrapper">
+      <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg">
+        <rect width="720" height="260" fill="#f8fafc" rx="18"/>
+        <text x="360" y="32" text-anchor="middle" font-size="16"
+          font-weight="900" fill="#1e293b" font-family="Vazirmatn, sans-serif">
+          کدام قطعه بزرگ‌تر است: A یا B؟
+        </text>
+        <!-- Shape A -->
+        <path d="M 80 100 Q 360 60 640 100 L 620 200 Q 360 180 100 200 Z"
+          fill="#60a5fa" stroke="#1d4ed8" stroke-width="2"/>
+        <text x="360" y="155" text-anchor="middle" font-size="22"
+          font-weight="900" fill="#fff" font-family="Vazirmatn, sans-serif">A</text>
+        <!-- Shape B -->
+        <path d="M 80 170 Q 360 130 640 170 L 620 240 Q 360 220 100 240 Z"
+          fill="#f472b6" stroke="#be185d" stroke-width="2"/>
+        <text x="360" y="215" text-anchor="middle" font-size="22"
+          font-weight="900" fill="#fff" font-family="Vazirmatn, sans-serif">B</text>
+      </svg>
+      <div class="svg-caption">شکل ۲: این دو قطعه را روی هم بگذار — دقیقاً هم‌اندازه هستند!</div>
+    </div>
+
+    <div class="def-box orange">
+      <b>خطای حسی:</b> گاهی چشم، گوش یا سایر حس‌های ما چیزهایی را <b>طور دیگری</b> نشان می‌دهند.
+      این خطاها به‌خصوص در هندسه و شکل‌ها خیلی رایج‌اند.
+      <br><br>
+      <b>نتیجه:</b> برای رسیدن به حقیقت، فقط به حس‌ها <b>نمی‌توان</b> اعتماد کرد.
+    </div>
+
+    <div class="note-box">
+      <strong>💡 مثال‌های دیگر خطای حسی:</strong>
+      <ul style="padding-right:20px; margin-top:8px;">
+        <li>دو خط موازی که با خط‌های اریب احاطه شده‌اند، کج به نظر می‌رسند.</li>
+        <li>دو خط هم‌اندازه که یکی عمودی و دیگری افقی است، یکی بلندتر به نظر می‌رسد.</li>
+        <li>در آزمایش آب گرم و سرد، دستی که در آب گرم بوده، آب ولرم را سردتر حس می‌کند.</li>
+      </ul>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۲: مشاهده و آزمایش -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec2">پیش‌نیاز ۲: مشاهده و آزمایش</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        سروناز جان، پس اگر حس‌ها قابل اعتماد نیستند، چه کار کنیم؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        می‌توانیم اندازه‌گیری کنیم. مثلاً با خط‌کش یا ترازو.
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        آفرین! این یک قدم بزرگ جلوتر است. به این کار می‌گوییم <span class="highlight">مشاهده و آزمایش</span>.
+        <br>
+        ولی حتی مشاهده و آزمایش هم کافی نیست. چرا؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        فکر کنم چون ممکن است فقط چند حالت خاص را آزمایش کرده باشیم.
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        دقیقاً! بگذار با یک مثال نشان بدهم. فرض کن کسی ادعا کند:
+        <br>
+        <b>«مجموع زوایای داخلی هر مثلث ۱۸۰ درجه است.»</b>
+        <br>
+        ما چند مثلث می‌کشیم، زوایا را با نقاله اندازه می‌گیریم، و می‌بینیم مجموعشان ۱۸۰ درجه است.
+        <br>
+        آیا این کافی است که بگوییم «این ادعا برای <b>همه‌ی</b> مثلث‌ها درست است»؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        فکر کنم نه! چون ممکن است مثلثی وجود داشته باشد که با آن‌ها فرق داشته باشد.
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        دقیقاً! پس نتیجه می‌گیریم: <b>اندازه‌گیری چند نمونه، برای اثبات یک ادعای کلی کافی نیست</b>.
+      </div>
+    </div>
+
+    <div class="warning-box">
+      <strong>⚠️ نکته‌ی مهم:</strong> حتی اگر ۱۰۰۰ مثلث اندازه‌گیری کنیم و همه ۱۸۰ درجه باشند،
+      باز هم <b>نمی‌توانیم</b> بگوییم «همه‌ی مثلث‌ها این خاصیت را دارند».
+      چون ممکن است مثلث ۱۰۰۱ اُم فرق داشته باشد.
+      <br><br>
+      برای اثبات یک ادعای کلی، به <b>استدلال منطقی</b> نیاز داریم.
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۳: چرا حس‌ها کافی نیستند؟ -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec3">درس اصلی ۱: چرا حس‌ها کافی نیستند؟</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        حالا بیایید جمع‌بندی کنیم که چرا حس‌ها به‌تنهایی برای رسیدن به حقیقت کافی نیستند:
+      </div>
+    </div>
+
+    <div class="def-box pink">
+      <b>چرا حس‌ها قابل اعتماد نیستند؟</b>
+      <ol style="padding-right:20px; margin-top:10px;">
+        <li><b>خطای حسی:</b> چشم و گوش ما ممکن است فریب بخورند (مثل دایره‌ها و شکل‌ها).</li>
+        <li><b>محدودیت:</b> ما نمی‌توانیم همه‌ی حالت‌ها را ببینیم یا اندازه بگیریم.</li>
+        <li><b>خطای اندازه‌گیری:</b> ابزارهای اندازه‌گیری دقت محدودی دارند.</li>
+        <li><b>عدم عمومیت:</b> مشاهده‌ی چند نمونه، اثبات یک ادعای کلی نیست.</li>
+      </ol>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 نتیجه:</strong> پس برای رسیدن به حقیقت، به چیزی فراتر از حس نیاز داریم:
+      <span class="highlight">استدلال منطقی</span>.
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۴: استدلال چیست؟ -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec4">درس اصلی ۲: استدلال چیست؟</div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        فرسام جان، «استدلال» دقیقاً چیست؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        استدلال یعنی <b>زنجیره‌ای از فکرها</b> که از اطلاعات معلوم شروع می‌شود و
+        با گام‌های منطقی به یک نتیجه می‌رسد.
+      </div>
+    </div>
+
+    <div class="def-box green">
+      <b>استدلال:</b> فرایند رسیدن از <b>معلوم</b> به <b>مجهول</b>،
+      با استفاده از <b>گام‌های منطقی</b>.
+      <br><br>
+      در استدلال ریاضی، سه چیز مهم است:
+      <ul style="padding-right:20px; margin-top:8px;">
+        <li><b>فرض (داده‌ها):</b> چیزهایی که از قبل می‌دانیم.</li>
+        <li><b>استدلال:</b> گام‌های منطقی که از فرض به حکم می‌رسند.</li>
+        <li><b>حکم (نتیجه):</b> چیزی که می‌خواهیم ثابت کنیم.</li>
+      </ul>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        یک مثال ساده بزنم. فرض کن می‌دانیم:
+        <br>
+        <b>فرض:</b> امروز دوشنبه است.
+        <br>
+        <b>استدلال:</b> فردای دوشنبه سه‌شنبه است.
+        <br>
+        <b>حکم:</b> پس فردا سه‌شنبه است.
+        <br>
+        این یک استدلال ساده است.
+      </div>
+    </div>
+
+    <div class="subsection-title">دو نوع استدلال</div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        فرسام جان، آیا همه‌ی استدلال‌ها یک نوع هستند؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        نه! دو نوع اصلی داریم: <b>استقرایی</b> و <b>قیاسی</b>. بگذار هر دو را جدا توضیح دهم.
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۵: استدلال استقرایی -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec5">درس اصلی ۳: استدلال استقرایی</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        <b>استدلال استقرایی</b> یعنی از <b>چند مثال خاص</b> نتیجه‌ای <b>کلی</b> بگیریم.
+      </div>
+    </div>
+
+    <div class="def-box">
+      <b>استدلال استقرایی:</b> روشی که در آن از <b>مشاهده‌ی چند نمونه</b>
+      به یک <b>نتیجه‌ی کلی</b> می‌رسیم.
+      <br><br>
+      <b>مشخصه:</b> این نوع استدلال، نتیجه‌ی <b>قطعی</b> نمی‌دهد. ممکن است درست باشد،
+      ممکن هم است غلط از آب دربیاید.
+    </div>
+
+    <div class="subsection-title">مثال‌های استدلال استقرایی</div>
+
+    <div class="example-box">
+      <h4>مثال ۱: مشاهده‌ی خورشید</h4>
+      <div class="step">هر روز صبح خورشید از شرق طلوع کرده است.</div>
+      <div class="step">پس نتیجه می‌گیرم: فردا هم خورشید از شرق طلوع می‌کند.</div>
+      <div class="result-box">این استدلال استقرایی است. ولی آیا <b>قطعی</b> است؟ نه!</div>
+    </div>
+
+    <div class="example-box">
+      <h4>مثال ۲: قد بلند بودن یک خانواده</h4>
+      <div class="step">فرض کن تمام پسرعموهای یک خانواده قدبلند هستند.</div>
+      <div class="step">نتیجه می‌گیرم: پسرعموی کوچک‌تر که تازه به دنیا آمده هم قدبلند می‌شود.</div>
+      <div class="result-box">این یک استدلال استقرایی است. ولی ممکن است غلط باشد!</div>
+    </div>
+
+    <div class="example-box">
+      <h4>مثال ۳: آزمون‌های گذشته</h4>
+      <div class="step">در امتحان‌های فصل قبل، هر بار از فرمول ۲ⁿ سؤال آمده است.</div>
+      <div class="step">پس در امتحان این فصل هم از ۲ⁿ سؤال می‌آید.</div>
+      <div class="result-box">این استدلال استقرایی است. قطعی نیست.</div>
+    </div>
+
+    <div class="warning-box">
+      <strong>⚠️ مشکل استدلال استقرایی:</strong> نمی‌تواند یک ادعا را <b>قطعی</b> ثابت کند.
+      <br><br>
+      <b>مثال معروف:</b> کسی که تا حالا هیچ‌وقت تصادف نکرده، استدلال می‌کند:
+      «چون من تا حالا تصادف نکرده‌ام، در سفر بعدی هم تصادف نمی‌کنم.»
+      <br>
+      ولی می‌دانیم این استدلال درست نیست! ممکن است در سفر بعدی تصادف کند.
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۶: استدلال قیاسی -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec6">درس اصلی ۴: استدلال قیاسی</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        <b>استدلال قیاسی</b> یعنی از <b>یک قاعده‌ی کلی</b> نتیجه‌ای برای <b>یک مورد خاص</b> بگیریم.
+      </div>
+    </div>
+
+    <div class="def-box orange">
+      <b>استدلال قیاسی:</b> روشی که در آن از <b>یک اصل کلی</b>
+      به <b>یک نتیجه‌ی خاص</b> می‌رسیم.
+      <br><br>
+      <b>مشخصه:</b> اگر مقدمات درست باشند و گام‌ها منطقی باشند،
+      نتیجه <b>قطعی</b> است.
+    </div>
+
+    <div class="subsection-title">مثال‌های استدلال قیاسی</div>
+
+    <div class="example-box">
+      <h4>مثال ۱: قاعده‌ی کلی، نتیجه‌ی خاص</h4>
+      <div class="step"><b>فرض ۱ (کلی):</b> تمام انسان‌ها فانی هستند.</div>
+      <div class="step"><b>فرض ۲ (خاص):</b> سقراط یک انسان است.</div>
+      <div class="step"><b>نتیجه:</b> پس سقراط فانی است.</div>
+      <div class="result-box">این استدلال <b>قطعی</b> است. اگر فرض‌ها درست باشند، نتیجه حتماً درست است.</div>
+    </div>
+
+    <div class="example-box">
+      <h4>مثال ۲: استدلال در ریاضی</h4>
+      <div class="step"><b>فرض ۱ (کلی):</b> در هر مثلث متساوی‌الساقین، دو زاویه‌ی مجاور قاعده برابرند.</div>
+      <div class="step"><b>فرض ۲ (خاص):</b> مثلث ABC متساوی‌الساقین است.</div>
+      <div class="step"><b>نتیجه:</b> پس دو زاویه‌ی مجاور قاعده‌ی مثلث ABC برابرند.</div>
+      <div class="result-box">این استدلال قیاسی و <b>قطعی</b> است.</div>
+    </div>
+
+    <div class="example-box">
+      <h4>مثال ۳: استدلال حمید و وحید</h4>
+      <p>حمید و وحید می‌دانستند که علی، حسن، حسین و باقر برادرند و:</p>
+      <ul style="padding-right:20px;">
+        <li>علی از حسین بزرگ‌تر است.</li>
+        <li>حسن از باقر کوچک‌تر است.</li>
+        <li>باقر از علی کوچک‌تر است.</li>
+        <li>حسن نیز از حسین کوچک‌تر است.</li>
+      </ul>
+      <p><b>استدلال حمید:</b> «در تمام خانواده‌هایی که دو فرزند به نام‌های علی و حسن داشته‌اند، علی فرزند بزرگ‌تر بوده است.»</p>
+      <p><b>استدلال وحید:</b> «چون علی از حسین بزرگ‌تر و حسن از حسین کوچک‌تر است، پس علی از حسن بزرگ‌تر است.»</p>
+      <div class="result-box">
+        <b>تحلیل:</b> استدلال حمید <b>استقرایی</b> است (چند نمونه دیده).
+        استدلال وحید <b>قیاسی</b> است (از یک قاعده‌ی منطقی استفاده کرده).
+        <br>
+        پس استدلال وحید <b>قابل اعتمادتر</b> است.
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۷: تفاوت استقرا و قیاس -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec7">درس اصلی ۵: تفاوت استقرا و قیاس</div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        فرسام جان، تفاوت اصلی این دو نوع استدلال چیست؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        بگذار با یک مثال ساده نشان دهم:
+        <br><br>
+        <b>استقرا:</b> از <b>جزء</b> به <b>کل</b> می‌رود.
+        <br>
+        مثال: «این گربه سیاه است، آن گربه سیاه است... پس همه‌ی گربه‌ها سیاه هستند.» (غلط!)
+        <br><br>
+        <b>قیاس:</b> از <b>کل</b> به <b>جزء</b> می‌رود.
+        <br>
+        مثال: «همه‌ی گربه‌ها پستاندار هستند. این حیوان یک گربه است. پس پستاندار است.»
+      </div>
+    </div>
+
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>ویژگی</th>
+          <th>استدلال استقرایی</th>
+          <th>استدلال قیاسی</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>جهت</td>
+          <td>از جزء به کل</td>
+          <td>از کل به جزء</td>
+        </tr>
+        <tr>
+          <td>مبنای استدلال</td>
+          <td>مشاهده‌ی چند نمونه</td>
+          <td>یک قاعده‌ی کلی</td>
+        </tr>
+        <tr>
+          <td>نتیجه</td>
+          <td>غیرقطعی (احتمالی)</td>
+          <td>قطعی</td>
+        </tr>
+        <tr>
+          <td>اعتبار</td>
+          <td>ممکن است غلط باشد</td>
+          <td>اگر فرض‌ها درست باشند، حتماً درست</td>
+        </tr>
+        <tr>
+          <td>مثال</td>
+          <td>«هر روز خورشید طلوع کرده، پس فردا هم طلوع می‌کند.»</td>
+          <td>«همه‌ی انسان‌ها فانی هستند. سقراط انسان است. پس فانی است.»</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۸: کدام استدلال قابل اعتمادتر است؟ -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec8">درس اصلی ۶: کدام استدلال قابل اعتمادتر است؟</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        سروناز جان، حالا یک سؤال مهم: بین دو استدلال زیر، کدام را قبول می‌کنی؟
+        <br><br>
+        <b>شخص اول:</b> «من ده تا قوی سفید دیده‌ام. پس همه‌ی قوها سفید هستند.»
+        <br><br>
+        <b>شخص دوم:</b> «در یک کتاب مرجع پرنده‌شناسی نوشته شده که برخی قوها سیاه هستند. این پرنده یک قو است. پس ممکن است سیاه باشد.»
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        استدلال دوم قیاسی است و بر یک مرجع معتبر تکیه دارد. پس قابل اعتمادتر است.
+      </div>
+    </div>
+
+    <div class="def-box green">
+      <b>قاعده‌ی طلایی:</b> در ریاضی و علوم،
+      <br>
+      <span class="highlight">استدلال قیاسی</span> بر <span class="highlight">استدلال استقرایی</span> ترجیح دارد.
+      <br><br>
+      چرا؟ چون استدلال قیاسی، اگر فرض‌ها درست باشند، نتیجه‌ی <b>قطعی</b> می‌دهد.
+      ولی استدلال استقرایی، فقط احتمال می‌دهد.
+    </div>
+
+    <div class="subsection-title">مثال از درس علوم: وزنه‌برداری</div>
+
+    <div class="example-box">
+      <h4>دو استدلال برای یک ادعا</h4>
+      <p>فرض کن یک وزنه‌بردار می‌خواهد وزنه‌ی ۱۰۰ کیلویی را بلند کند.</p>
+      <p><b>نیما:</b> «هفته‌ی پیش این وزنه‌بردار تمرینات بهتری انجام داده بود، ولی نتوانست وزنه‌ی ۹۰ کیلویی را بلند کند.»</p>
+      <p><b>پژمان:</b> «امروز دوشنبه است. من بارها مسابقات این وزنه‌بردار را دیده‌ام. او هیچ‌گاه در روزهای زوج موفق نبوده است.»</p>
+      <div class="result-box">
+        <b>تحلیل:</b> هر دو استدلال، استقرایی هستند (بر اساس مشاهده‌های قبلی).
+        <br>
+        ولی استدلال نیما بر <b>یک مورد مشابه</b> تکیه دارد (هفته‌ی پیش)،
+        و استدلال پژمان بر <b>الگوی روزهای هفته</b>.
+        <br>
+        در واقع <b>هیچ‌کدام قطعی نیستند</b>. برای اثبات قطعی، به استدلال قیاسی نیاز داریم.
+      </div>
+    </div>
+
+    <div class="warning-box">
+      <strong>⚠️ اشتباه رایج:</strong> بعضی‌ها فکر می‌کنند چون در چند مورد چیزی درست بوده، همیشه درست است.
+      این استدلال استقرایی است و <b>قطعی نیست</b>.
+      <br><br>
+      <b>مثال:</b> «من تا حالا مریض نشده‌ام، پس هیچ‌وقت مریض نمی‌شوم.» (استدلال غلط)
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۹: تمرین‌ها -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec9">تمرین‌های جامع با حل گام‌به‌گام</div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۱</span>
+        کدام‌یک از موارد زیر، استدلال استقرایی و کدام قیاسی است؟
+      </div>
+      <p>الف) «همه‌ی دانش‌آموزان کلاس نهم باید ریاضی بخوانند. علی دانش‌آموز نهم است. پس علی باید ریاضی بخواند.»</p>
+      <p>ب) «من تا حالا هر زمستانی که دیده‌ام، سرد بوده. پس زمستان امسال هم سرد خواهد بود.»</p>
+      <p>پ) «همه‌ی مربع‌ها چهار ضلع دارند. این شکل یک مربع است. پس چهار ضلع دارد.»</p>
+      <details>
+        <summary style="cursor:pointer;color:#b91c1c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>الف) قیاسی ✅</b> — از یک قاعده‌ی کلی (همه‌ی دانش‌آموزان نهم) نتیجه‌ی خاص (علی) گرفته شده.</div>
+        <div class="step"><b>ب) استقرایی ✅</b> — از مشاهده‌ی چند نمونه (زمستان‌های گذشته) نتیجه‌ی کلی گرفته شده.</div>
+        <div class="step"><b>پ) قیاسی ✅</b> — از قاعده‌ی کلی (مربع‌ها ۴ ضلع دارند) نتیجه‌ی خاص گرفته شده.</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۲</span>
+        کدام استدلال زیر قابل اعتمادتر است؟ چرا؟
+      </div>
+      <p><b>الف)</b> «در خانواده‌ای همه‌ی بچه‌ها پسر بودند. پس بچه‌ی بعدی هم پسر خواهد بود.»</p>
+      <p><b>ب)</b> «اگر امروز سه‌شنبه باشد، فردا چهارشنبه است. امروز سه‌شنبه است. پس فردا چهارشنبه است.»</p>
+      <details>
+        <summary style="cursor:pointer;color:#b91c1c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>الف) استقرایی</b> — غیرقطعی، ممکن است بچه‌ی بعدی دختر باشد.</div>
+        <div class="step"><b>ب) قیاسی</b> — قطعی، اگر فرض‌ها درست باشند، نتیجه حتماً درست است.</div>
+        <div class="result-box">
+          پس <b>ب قابل اعتمادتر است</b> چون قیاسی و قطعی است.
+        </div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۳</span>
+        آیا استدلال زیر درست است؟ چرا؟
+        <br>
+        «من تا حالا ۵ بار برف دیده‌ام. هر بار برف سفید بوده. پس تمام برف‌ها سفید هستند.»
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#b91c1c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>گام ۱:</b> این یک استدلال استقرایی است (از چند نمونه به نتیجه‌ی کلی).</div>
+        <div class="step"><b>گام ۲:</b> نمی‌توان قطعی گفت همه‌ی برف‌ها سفید هستند. در برخی مناطق برف رنگی وجود دارد.</div>
+        <div class="result-box">استدلال <b>غیرقابل اعتماد</b> است، چون قیاسی نیست.</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۴</span>
+        چرا اندازه‌گیری چند مثلث، برای اثبات «مجموع زوایای داخلی هر مثلث ۱۸۰ درجه است» کافی نیست؟
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#b91c1c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>گام ۱:</b> اندازه‌گیری چند مثلث، فقط چند نمونه‌ی خاص را بررسی می‌کند.</div>
+        <div class="step"><b>گام ۲:</b> ممکن است مثلث دیگری وجود داشته باشد که این خاصیت را نداشته باشد.</div>
+        <div class="step"><b>گام ۳:</b> همچنین ابزار اندازه‌گیری خطا دارد.</div>
+        <div class="result-box">
+          برای اثبات قطعی، به <b>استدلال قیاسی</b> نیاز داریم، نه فقط اندازه‌گیری.
+        </div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۵</span>
+        دو استدلال زیر را مقایسه کنید و بگویید کدام قابل اعتمادتر است:
+      </div>
+      <p><b>استدلال اول:</b> «من هر روز که به مدرسه رفته‌ام، ترافیک نبوده. پس فردا هم ترافیک نخواهد بود.»</p>
+      <p><b>استدلال دوم:</b> «اگر امروز باران بیاید، خیابان‌ها خیس می‌شوند. امروز باران می‌آید. پس خیابان‌ها خیس می‌شوند.»</p>
+      <details>
+        <summary style="cursor:pointer;color:#b91c1c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>استدلال اول:</b> استقرایی است. ممکن است فردا به دلیل تصادف یا تعطیلی ترافیک باشد.</div>
+        <div class="step"><b>استدلال دوم:</b> قیاسی است. اگر هر دو فرض درست باشند، نتیجه قطعی است.</div>
+        <div class="result-box">
+          <b>استدلال دوم قابل اعتمادتر است</b>، چون قیاسی و قطعی است.
+        </div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۶</span>
+        در مسئله‌ی «ثابت کنید در مثلث متساوی‌الساقین، دو زاویه‌ی مجاور به قاعده با هم برابرند»،
+        احمد زاویه‌ها را با نقاله اندازه‌گیری کرد و نتیجه گرفت برابرند. چرا این روش نادرست است؟
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#b91c1c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>گام ۱:</b> احمد فقط یک مثلث خاص را اندازه‌گیری کرده است.</div>
+        <div class="step"><b>گام ۲:</b> این استدلال استقرایی است و نمی‌تواند برای همه‌ی مثلث‌های متساوی‌الساقین ثابت کند.</div>
+        <div class="step"><b>گام ۳:</b> برای اثبات قطعی، به استدلال قیاسی و منطقی نیاز داریم.</div>
+        <div class="result-box">اندازه‌گیری برای <b>اثبات</b> کافی نیست.</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۷</span>
+        سه مورد از خطاهای حسی را نام ببرید.
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#b91c1c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>۱)</b> خطای دید با شکل‌های هندسی و دایره‌ها.</div>
+        <div class="step"><b>۲)</b> خطای لمس با آب گرم و سرد (دست سرد، آب ولرم را گرم‌تر حس می‌کند).</div>
+        <div class="step"><b>۳)</b> خطای چشایی یا بویایی در اثر شرایط محیطی.</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۸</span>
+        کدام‌یک از جملات زیر، <b>فرض</b>، <b>استدلال</b> یا <b>حکم</b> است؟
+      </div>
+      <p>«در شکل روبه‌رو، ABCD یک مستطیل است. پس قطرهای آن برابرند.»</p>
+      <details>
+        <summary style="cursor:pointer;color:#b91c1c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>فرض:</b> ABCD یک مستطیل است.</div>
+        <div class="step"><b>حکم:</b> قطرهای ABCD برابرند.</div>
+        <div class="step"><b>استدلال:</b> در هر مستطیل قطرها برابرند (قاعده‌ی از قبل می‌دانیم).</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۹</span>
+        یکی از استدلال‌های زیر را به‌عنوان «قابل اعتمادتر» انتخاب کنید و دلیل بیاورید:
+        <br>
+        <b>الف)</b> «تمام مثلث‌هایی که تا حالا دیده‌ام، مجموع زوایایشان ۱۸۰ درجه بوده. پس همه‌ی مثلث‌ها همین‌طور هستند.»
+        <br>
+        <b>ب)</b> «در کتاب ریاضی اثبات شده که مجموع زوایای داخلی هر مثلث ۱۸۰ درجه است. این شکل هم یک مثلث است. پس مجموع زوایای آن ۱۸۰ درجه است.»
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#b91c1c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>الف) استقرایی</b> — غیرقطعی. فقط از مشاهده‌ی چند نمونه نتیجه گرفته.</div>
+        <div class="step"><b>ب) قیاسی</b> — بر یک اثبات قطعی تکیه دارد.</div>
+        <div class="result-box">
+          <b>ب قابل اعتمادتر است</b>، چون قیاسی و قطعی است.
+        </div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۱۰</span>
+        ثابت کنید که اگر a = b و b = c، آنگاه a = c. (این یک استدلال قیاسی است)
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#b91c1c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>گام ۱:</b> فرض: a = b و b = c.</div>
+        <div class="step"><b>گام ۲:</b> در تساوی، می‌توان مقدار مساوی را جایگزین کرد.</div>
+        <div class="step"><b>گام ۳:</b> چون a = b و b = c، پس a = c.</div>
+        <div class="result-box">حکم ثابت شد ✅</div>
+      </details>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۱۰: جدول و نکات -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec10">جدول خلاصه و نکات امتحانی</div>
+
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>مفهوم</th>
+          <th>توضیح</th>
+          <th>مثال</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>خطای حسی</td>
+          <td>حس‌ها ما را فریب می‌دهند</td>
+          <td>دایره‌های وسط</td>
+        </tr>
+        <tr>
+          <td>مشاهده و اندازه‌گیری</td>
+          <td>قدم بعدی، ولی کافی نیست</td>
+          <td>اندازه‌گیری چند مثلث</td>
+        </tr>
+        <tr>
+          <td>استدلال</td>
+          <td>فرایند رسیدن از معلوم به مجهول</td>
+          <td>از فرض به حکم</td>
+        </tr>
+        <tr>
+          <td>فرض</td>
+          <td>اطلاعات از قبل معلوم</td>
+          <td>ABCD مستطیل است</td>
+        </tr>
+        <tr>
+          <td>حکم</td>
+          <td>چیزی که می‌خواهیم ثابت کنیم</td>
+          <td>قطرهای مستطیل برابرند</td>
+        </tr>
+        <tr>
+          <td>استدلال استقرایی</td>
+          <td>از جزء به کل، غیرقطعی</td>
+          <td>خورشید هر روز طلوع کرده</td>
+        </tr>
+        <tr>
+          <td>استدلال قیاسی</td>
+          <td>از کل به جزء، قطعی</td>
+          <td>همه‌ی انسان‌ها فانی هستند</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="big-quote">
+      «حس‌ها ما را فریب می‌دهند. فقط استدلال منطقی، حقیقت را نشان می‌دهد.»
+    </div>
+
+    <div class="warning-box">
+      <strong>⚠️ پنج اشتباه رایج در این درس:</strong>
+      <ol style="margin-top:10px; padding-right:20px;">
+        <li>فکر کنی چون چیزی را دیدی، پس حتماً درست است. (خطای حسی!)</li>
+        <li>فکر کنی اندازه‌گیری چند نمونه، اثبات قطعی است.</li>
+        <li>اشتباه گرفتن استدلال استقرایی با قیاسی.</li>
+        <li>فکر کنی استدلال استقرایی همیشه غلط است. (نه! فقط قطعی نیست)</li>
+        <li>در استدلال قیاسی، فرض‌های غلط را نادیده بگیری.</li>
+      </ol>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 نکته‌ی طلایی:</strong> در ریاضی، هدف <b>اثبات قطعی</b> است.
+      <br>
+      پس همیشه از <b>استدلال قیاسی</b> استفاده کن.
+      <br>
+      استدلال استقرایی، فقط برای <b>حدس زدن</b> خوب است، نه برای <b>اثبات کردن</b>.
+    </div>
+
+    <div class="note-box">
+      <strong>💡 یادآوری مهم برای کل فصل:</strong>
+      <ul style="padding-right:20px; margin-top:8px;">
+        <li>در فصل‌های قبل با «عدد» و «مجموعه» کار کردیم.</li>
+        <li>در این فصل با «استدلال و اثبات» کار می‌کنیم.</li>
+        <li>در درس‌های بعدی این فصل، وارد <b>استدلال در هندسه</b> می‌شویم.</li>
+      </ul>
+    </div>
+
+    <!-- جمع‌بندی -->
+    <div class="dialog" style="margin-top:30px;">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        خب فرسام جان، امروز در این درس یاد گرفتیم:
+        <ul style="margin-top:8px; padding-right:20px;">
+          <li>حس‌های ما ممکن است <b>فریب</b> بخورند.</li>
+          <li>اندازه‌گیری و مشاهده هم <b>کافی نیستند</b>.</li>
+          <li>برای اثبات، به <b>استدلال منطقی</b> نیاز داریم.</li>
+          <li><b>استدلال استقرایی:</b> از جزء به کل، غیرقطعی.</li>
+          <li><b>استدلال قیاسی:</b> از کل به جزء، قطعی.</li>
+          <li>در ریاضی، <b>قیاس</b> بر استقرا ترجیح دارد.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        آفرین! این درس، <b>پایه‌ی کل استدلال در هندسه</b> است. در درس‌های بعدی یاد می‌گیریم
+        چطور در هندسه استدلال کنیم و یک ادعا را اثبات کنیم.
+        <br><br>
+        حالا تمرین‌های کتاب را حل کن.
+        <br><br>
+        <strong>موفق باشی! 🌟</strong>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <strong>📘 آموزش جامع ریاضی نهم — فصل سوم، درس اول (کامل)</strong><br>
+    تهیه‌شده با ❤️ برای دانش‌آموزان عزیز | مدرسان: خانم سروناز و آقای فرسام<br>
+    <strong>اپلیکیشن همیار من (فراتر از آموزش)</strong><br>
+    موفق باشی! ✨
+  </footer>
+</div>
+</body>
+</html>

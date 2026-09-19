@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>درس پنجم فصل سوم: شکل‌های متشابه</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Vazirmatn', Tahoma, sans-serif;
+  background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 50%, #ecfeff 100%);
+  color: #1e293b; line-height: 1.95; padding: 20px; font-size: 16px; }
+.container { max-width: 1150px; margin: 0 auto; background: #fff;
+  border-radius: 24px; box-shadow: 0 20px 60px rgba(30,41,59,0.15); overflow: hidden; }
+header { background: linear-gradient(135deg, #0d9488 0%, #14b8a6 50%, #06b6d4 100%);
+  color: #fff; padding: 42px 30px; text-align: center; position: relative; }
+header::after { content: ""; position: absolute; bottom: -20px; left: 0; right: 0;
+  height: 40px; background: #fff;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+header h1 { font-size: 2rem; font-weight: 900; margin-bottom: 10px;
+  text-shadow: 0 3px 8px rgba(0,0,0,0.2); }
+header p { font-size: 1rem; opacity: 0.95; }
+main { padding: 40px 30px 60px; }
+.intro-box { background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+  border-right: 6px solid #f59e0b; padding: 22px 26px;
+  border-radius: 16px; margin-bottom: 30px; font-size: 1.02rem; }
+.intro-box strong { color: #92400e; }
+.section-title { font-size: 1.3rem; font-weight: 800; color: #0f766e;
+  margin: 40px 0 16px; padding-right: 12px;
+  border-right: 5px solid #14b8a6;
+  display: flex; align-items: center; gap: 8px; }
+.section-title::before { content: "◆"; color: #06b6d4; font-size: 0.9rem; }
+.subsection-title { font-size: 1.1rem; font-weight: 800; color: #1e40af;
+  margin: 26px 0 12px; padding-right: 10px;
+  border-right: 4px solid #3b82f6;
+  display: flex; align-items: center; gap: 6px; }
+.subsection-title::before { content: "▸"; color: #60a5fa; font-size: 0.85rem; }
+.dialog { display: flex; gap: 14px; margin: 16px 0; align-items: flex-start; }
+.avatar { width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; color: #fff; font-size: 0.9rem;
+  flex-shrink: 0; box-shadow: 0 6px 14px rgba(0,0,0,0.15); }
+.avatar.sarvnaz { background: linear-gradient(135deg, #ec4899, #f43f5e); }
+.avatar.farsam  { background: linear-gradient(135deg, #0ea5e9, #3b82f6); }
+.bubble { flex: 1; padding: 14px 18px; border-radius: 18px; font-size: 1rem; }
+.bubble.sarvnaz { background: #fce7f3; border-top-right-radius: 4px;
+  color: #831843; border: 1px solid #fbcfe8; }
+.bubble.farsam { background: #dbeafe; border-top-right-radius: 4px;
+  color: #1e3a8a; border: 1px solid #bfdbfe; }
+.speaker { font-weight: 800; display: block; margin-bottom: 4px; font-size: 0.9rem; }
+.speaker.sarvnaz { color: #be185d; }
+.speaker.farsam  { color: #1d4ed8; }
+.formula-box { background: #fff7ed; border: 2px solid #fb923c;
+  border-radius: 14px; padding: 16px 22px; margin: 16px 0; text-align: center;
+  font-size: 1.15rem; font-weight: 700; color: #9a3412;
+  direction: ltr; font-family: 'Cambria Math', serif; }
+.note-box { background: #ecfdf5; border-right: 5px solid #10b981;
+  padding: 14px 20px; border-radius: 12px; margin: 16px 0;
+  color: #065f46; font-size: 0.98rem; }
+.warning-box { background: #fef2f2; border-right: 5px solid #ef4444;
+  padding: 14px 20px; border-radius: 12px; margin: 16px 0;
+  color: #991b1b; font-size: 0.98rem; }
+.def-box { background: #e0e7ff; border: 2px solid #4f46e5;
+  border-radius: 16px; padding: 18px 22px; margin: 18px 0; }
+.def-box::before { content: "تعریف رسمی"; display: inline-block;
+  background: #4f46e5; color: #fff; padding: 2px 12px;
+  border-radius: 8px; font-size: 0.82rem; font-weight: 700; margin-bottom: 10px; }
+.def-box.green { background: #d1fae5; border-color: #059669; }
+.def-box.green::before { background: #059669; }
+.def-box.orange { background: #fed7aa; border-color: #ea580c; }
+.def-box.orange::before { background: #ea580c; }
+.def-box.pink { background: #fce7f3; border-color: #db2777; }
+.def-box.pink::before { background: #db2777; }
+.highlight { background: linear-gradient(120deg, #f4ff5b 0%, #fde047 100%);
+  padding: 2px 6px; border-radius: 6px; font-weight: 700; color: #713f12; }
+.example-box { background: #f5f3ff; border: 2px solid #a78bfa;
+  border-radius: 16px; padding: 20px 24px; margin: 20px 0; }
+.example-box h4 { color: #6d28d9; font-size: 1.05rem; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px; }
+.example-box h4::before { content: "📌"; font-size: 1.15rem; }
+.step { background: #fff; border-radius: 10px; padding: 10px 14px; margin: 8px 0;
+  border-right: 4px solid #7c3aed; font-size: 0.98rem; }
+.step b { color: #6d28d9; }
+.exercise { background: #fff; border: 2px dashed #14b8a6;
+  border-radius: 16px; padding: 22px 26px; margin: 24px 0; }
+.exercise-title { font-weight: 800; color: #0f766e; font-size: 1.05rem;
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.exercise-title .num { display: inline-flex; width: 30px; height: 30px;
+  background: linear-gradient(135deg, #0d9488, #06b6d4);
+  color: #fff; border-radius: 50%; align-items: center;
+  justify-content: center; font-size: 0.9rem; font-weight: 900; }
+.result-box { background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 2px solid #10b981; border-radius: 12px;
+  padding: 14px 18px; margin-top: 12px;
+  text-align: center; font-weight: 700; color: #065f46; }
+.svg-wrapper { background: #fff; border-radius: 16px; padding: 20px;
+  margin: 22px 0; text-align: center;
+  border: 2px solid #e0e7ff;
+  box-shadow: 0 8px 20px rgba(99,102,241,0.08); }
+.svg-wrapper svg { max-width: 100%; height: auto; }
+.svg-caption { font-size: 0.9rem; color: #64748b; margin-top: 10px;
+  font-style: italic; }
+.summary-table { width: 100%; border-collapse: collapse; margin: 20px 0;
+  background: #fff; border-radius: 14px; overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06); }
+.summary-table th { background: linear-gradient(135deg, #0d9488, #06b6d4);
+  color: #fff; padding: 12px; font-size: 0.95rem; }
+.summary-table td { padding: 10px 14px; border-bottom: 1px solid #e2e8f0;
+  font-size: 0.95rem; }
+.summary-table tr:nth-child(even) td { background: #f8fafc; }
+.big-quote { background: linear-gradient(135deg, #fef9c3, #fde68a);
+  border: 2px dashed #eab308; border-radius: 16px;
+  padding: 18px 22px; margin: 20px 0; text-align: center;
+  font-weight: 700; color: #713f12; font-size: 1.05rem; }
+footer { text-align: center; padding: 30px 20px;
+  background: #1e293b; color: #cbd5e1; font-size: 0.9rem; }
+footer strong { color: #5eead4; }
+.math-inline { direction: ltr; unicode-bidi: isolate; display: inline-block;
+  font-family: 'Cambria Math', serif; }
+@media (max-width: 640px) {
+  body { padding: 8px; font-size: 15px; }
+  main { padding: 20px 14px 40px; }
+  header h1 { font-size: 1.4rem; }
+  .avatar { width: 42px; height: 42px; font-size: 0.78rem; }
+  .bubble { padding: 12px 14px; font-size: 0.95rem; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>📘 درس پنجم فصل سوم: شکل‌های متشابه</h1>
+    <p>از تشابه شکل‌ها تا کاربرد در مسائل هندسی</p>
+  </header>
+
+  <main>
+
+    <div class="intro-box">
+      <strong>سلام دانش‌آموز عزیز! 🌟</strong><br>
+      تا حالا با <strong>هم‌نهشتی</strong> آشنا شدیم — یعنی دو شکل که <strong>دقیقاً</strong> هم‌اندازه هستند.
+      اما در دنیای واقعی، خیلی وقت‌ها دو شکل <strong>هم‌شکل</strong> هستند ولی <strong>اندازه‌شان فرق دارد</strong>.
+      مثلاً دو عکس از یک ساختمان در اندازه‌های مختلف، یا نقشه‌ی یک شهر که کوچک‌شده‌ی واقعیت است.
+      به این مفهوم می‌گوییم <strong>تشابه</strong>. در این درس یاد می‌گیریم:
+      <br>
+      <strong>۱)</strong> تشابه یعنی چه و چه تفاوتی با هم‌نهشتی دارد.
+      <br>
+      <strong>۲)</strong> نسبت تشابه چیست و چطور آن را پیدا کنیم.
+      <br>
+      <strong>۳)</strong> چه وقت دو مثلث متشابه هستند.
+      <br>
+      <strong>۴)</strong> چطور از تشابه در حل مسائل استفاده کنیم.
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ۱. مفهوم تشابه -->
+    <!-- ============================================================ -->
+    <div class="section-title">۱. تشابه یعنی چه؟</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        سروناز جان، فرض کن یک عکس از یک گل داری. اگر همان عکس را در اندازه‌ی کوچک‌تر چاپ کنی،
+        به نظرت دو عکس چه رابطه‌ای با هم دارند؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        هر دو یک شکل دارند، فقط اندازه‌شان فرق دارد.
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        دقیقاً! به این رابطه می‌گوییم <span class="highlight">تشابه</span>.
+      </div>
+    </div>
+
+    <div class="def-box green">
+      <b>دو شکل متشابه:</b> دو شکل هندسی متشابه هستند اگر:
+      <ul style="padding-right:20px; margin-top:10px;">
+        <li>همه‌ی زاویه‌های متناظرشان <b>برابر</b> باشند.</li>
+        <li>همه‌ی ضلع‌های متناظرشان <b>متناسب</b> باشند (یعنی نسبتشان یکسان باشد).</li>
+      </ul>
+      <br>
+      نماد تشابه: <span class="math-inline">∼</span>
+      <br>
+      مثال: <span class="math-inline">△ABC ∼ △DEF</span>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 تفاوت تشابه و هم‌نهشتی:</strong>
+      <ul style="padding-right:20px; margin-top:8px;">
+        <li><b>هم‌نهشتی (≅):</b> شکل‌ها هم‌شکل و <b>هم‌اندازه</b> هستند. نسبت تشابه = ۱.</li>
+        <li><b>تشابه (∼):</b> شکل‌ها هم‌شکل هستند ولی ممکن است <b>اندازه‌شان فرق کند</b>.</li>
+      </ul>
+      پس هر دو شکل هم‌نهشت، متشابه هم هستند؛ ولی عکس آن همیشه درست نیست.
+    </div>
+
+    <!-- SVG: دو شکل متشابه -->
+    <div class="svg-wrapper">
+      <svg viewBox="0 0 780 360" xmlns="http://www.w3.org/2000/svg">
+        <rect width="780" height="360" fill="#f0fdfa" rx="18"/>
+        <text x="390" y="30" text-anchor="middle" font-size="15"
+          font-weight="900" fill="#0f766e" font-family="Vazirmatn, sans-serif">
+          دو مثلث متشابه — هم‌شکل ولی با اندازه‌های متفاوت
+        </text>
+        
+        <!-- مثلث کوچک ABC: A(120,80), B(50,240), C(220,240) -->
+        <polygon points="120,80 50,240 220,240"
+          fill="#a7f3d0" stroke="#059669" stroke-width="2.5"/>
+        
+        <text x="120" y="65" text-anchor="middle" font-size="16"
+          font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">A</text>
+        <text x="34" y="255" text-anchor="middle" font-size="16"
+          font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">B</text>
+        <text x="238" y="255" text-anchor="middle" font-size="16"
+          font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">C</text>
+        
+        <!-- مثلث بزرگ DEF (با نسبت تشابه 2): D(480,60), E(340,300), F(680,300) -->
+        <polygon points="480,60 340,300 680,300"
+          fill="#bae6fd" stroke="#0284c7" stroke-width="2.5"/>
+        
+        <text x="480" y="45" text-anchor="middle" font-size="16"
+          font-weight="900" fill="#075985" font-family="Vazirmatn, sans-serif">D</text>
+        <text x="322" y="318" text-anchor="middle" font-size="16"
+          font-weight="900" fill="#075985" font-family="Vazirmatn, sans-serif">E</text>
+        <text x="698" y="318" text-anchor="middle" font-size="16"
+          font-weight="900" fill="#075985" font-family="Vazirmatn, sans-serif">F</text>
+        
+        <!-- علامت تشابه -->
+        <text x="290" y="180" text-anchor="middle" font-size="48"
+          font-weight="900" fill="#0f766e" font-family="serif">∼</text>
+        
+        <!-- توضیحات -->
+        <text x="390" y="345" text-anchor="middle" font-size="12"
+          fill="#475569" font-family="Vazirmatn, sans-serif">
+          زاویه‌های متناظر برابر | ضلع‌های متناظر متناسب
+        </text>
+      </svg>
+      <div class="svg-caption">شکل ۱: دو مثلث متشابه — شکل یکسان، اندازه‌ی متفاوت</div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ۲. نسبت تشابه -->
+    <!-- ============================================================ -->
+    <div class="section-title">۲. نسبت تشابه چیست؟</div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        فرسام جان، وقتی می‌گوییم ضلع‌ها «متناسب» هستند، یعنی چه؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        یعنی وقتی یک ضلع مثلث اول را به ضلع متناظرش در مثلث دوم تقسیم کنی،
+        همیشه <b>یک عدد ثابت</b> به‌دست می‌آید. به این عدد می‌گوییم <span class="highlight">نسبت تشابه</span>.
+      </div>
+    </div>
+
+    <div class="def-box orange">
+      <b>نسبت تشابه:</b> اگر دو مثلث <span class="math-inline">△ABC ∼ △DEF</span> باشند،
+      نسبت تشابه برابر است با:
+      <div class="formula-box">AB/DE = BC/EF = AC/DF = k</div>
+      عدد <span class="math-inline">k</span> همان نسبت تشابه است.
+    </div>
+
+    <div class="example-box">
+      <h4>مثال: پیدا کردن نسبت تشابه</h4>
+      <p>فرض کن <span class="math-inline">△ABC ∼ △DEF</span> و:</p>
+      <div class="step">AB = 3 cm و DE = 6 cm</div>
+      <div class="step">BC = 4 cm و EF = 8 cm</div>
+      <div class="step">AC = 5 cm و DF = 10 cm</div>
+      <div class="step"><b>نسبت تشابه:</b> 3/6 = 4/8 = 5/10 = <b>1/2</b></div>
+      <div class="result-box">
+        پس مثلث دوم، دو برابر مثلث اول است.
+      </div>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 نکته:</strong> نسبت تشابه می‌تواند هر عدد مثبتی باشد:
+      <ul style="padding-right:20px; margin-top:8px;">
+        <li>اگر <span class="math-inline">k &gt; 1</span>: شکل دوم <b>بزرگ‌تر</b> است.</li>
+        <li>اگر <span class="math-inline">k = 1</span>: شکل‌ها <b>هم‌نهشت</b> هستند.</li>
+        <li>اگر <span class="math-inline">0 &lt; k &lt; 1</span>: شکل دوم <b>کوچک‌تر</b> است.</li>
+      </ul>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ۳. تشابه در چندضلعی‌ها -->
+    <!-- ============================================================ -->
+    <div class="section-title">۳. تشابه در چندضلعی‌های خاص</div>
+
+    <div class="subsection-title">مربع‌ها</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        آیا هر دو مربع دلخواه، متشابه هستند؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        فکر کنم بله! چون همه‌ی زاویه‌هایشان ۹۰ درجه است و اضلاعشان متناسب هستند.
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        دقیقاً! <b>همه‌ی مربع‌ها با هم متشابه هستند.</b>
+      </div>
+    </div>
+
+    <div class="subsection-title">مثلث‌های متساوی‌الاضلاع</div>
+
+    <div class="note-box">
+      <b>همه‌ی مثلث‌های متساوی‌الاضلاع با هم متشابه هستند.</b>
+      <br>
+      چون هر زاویه‌شان ۶۰ درجه است و اضلاعشان متناسب هستند.
+    </div>
+
+    <div class="subsection-title">آیا همه‌ی مستطیل‌ها متشابه هستند؟</div>
+
+    <div class="warning-box">
+      <strong>⚠️ نه!</strong> همه‌ی مستطیل‌ها با هم متشابه <b>نیستند</b>.
+      <br>
+      چون ممکن است طول و عرضشان با یک نسبت ثابت بزرگ نشده باشد.
+      <br><br>
+      مثال: مستطیل ۲×۴ و مستطیل ۳×۵ متشابه نیستند. چون نسبت طول به عرض در اولی ۲ و در دومی ۵/۳ است.
+    </div>
+
+    <!-- SVG: مستطیل‌های متشابه و نامتشابه -->
+    <div class="svg-wrapper">
+      <svg viewBox="0 0 780 380" xmlns="http://www.w3.org/2000/svg">
+        <rect width="780" height="380" fill="#f0fdfa" rx="18"/>
+        <text x="390" y="30" text-anchor="middle" font-size="15"
+          font-weight="900" fill="#0f766e" font-family="Vazirmatn, sans-serif">
+          مستطیل‌های متشابه و نامتشابه
+        </text>
+        
+        <!-- مستطیل اول (2×4) -->
+        <rect x="60" y="70" width="120" height="60"
+          fill="#a7f3d0" stroke="#059669" stroke-width="2.5"/>
+        <text x="120" y="155" text-anchor="middle" font-size="13"
+          font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">۲ × ۴</text>
+        
+        <!-- مستطیل دوم (4×8 = متشابه با اولی) -->
+        <rect x="220" y="70" width="240" height="120"
+          fill="#a7f3d0" stroke="#059669" stroke-width="2.5"/>
+        <text x="340" y="215" text-anchor="middle" font-size="13"
+          font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">۴ × ۸ (متشابه)</text>
+        
+        <!-- مستطیل سوم (3×5 = نامتشابه) -->
+        <rect x="520" y="70" width="90" height="54"
+          fill="#fecaca" stroke="#dc2626" stroke-width="2.5"/>
+        <text x="565" y="150" text-anchor="middle" font-size="13"
+          font-weight="900" fill="#991b1b" font-family="Vazirmatn, sans-serif">۳ × ۵</text>
+        
+        <!-- مستطیل چهارم (6×10) -->
+        <rect x="520" y="180" width="180" height="108"
+          fill="#fecaca" stroke="#dc2626" stroke-width="2.5"/>
+        <text x="610" y="310" text-anchor="middle" font-size="13"
+          font-weight="900" fill="#991b1b" font-family="Vazirmatn, sans-serif">۶ × ۱۰</text>
+        
+        <!-- علامت تشابه -->
+        <text x="195" y="115" text-anchor="middle" font-size="28"
+          font-weight="900" fill="#059669" font-family="serif">∼</text>
+        
+        <!-- علامت نامتشابه -->
+        <text x="490" y="230" text-anchor="middle" font-size="24"
+          font-weight="900" fill="#dc2626" font-family="serif">≁</text>
+        
+        <!-- توضیحات -->
+        <text x="390" y="360" text-anchor="middle" font-size="12"
+          fill="#475569" font-family="Vazirmatn, sans-serif">
+          مستطیل‌های با نسبت طول به عرض یکسان، متشابه هستند. | ۲×۴ ∼ ۴×۸ ✅ &nbsp;|&nbsp; ۳×۵ ≁ ۶×۱۰ ❌
+        </text>
+      </svg>
+      <div class="svg-caption">شکل ۲: مستطیل‌های ۲×۴ و ۴×۸ متشابه‌اند، ولی ۳×۵ و ۶×۱۰ نسبت یکسان ندارند</div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ۴. تشابه مثلث‌ها -->
+    <!-- ============================================================ -->
+    <div class="section-title">۴. تشابه مثلث‌ها</div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        فرسام جان، برای اثبات تشابه دو مثلث، آیا باید همه‌ی زاویه‌ها و همه‌ی ضلع‌ها را چک کنیم؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        نه! مثل هم‌نهشتی، برای تشابه هم <b>حالت‌های کوتاه‌تر</b> وجود دارد.
+        مهم‌ترین آن‌ها <span class="highlight">حالت (ز ز)</span> است.
+      </div>
+    </div>
+
+    <div class="def-box pink">
+      <b>حالت (ز ز) در تشابه مثلث‌ها:</b>
+      <br>
+      اگر <b>دو زاویه</b> از یک مثلث با <b>دو زاویه</b> از مثلث دیگر برابر باشند،
+      آن دو مثلث <b>متشابه</b> هستند.
+      <div class="formula-box">∠A = ∠D &nbsp;و&nbsp; ∠B = ∠E &nbsp;→&nbsp; △ABC ∼ △DEF</div>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 چرا حالت (ز ز) کافی است؟</strong>
+      <br>
+      چون مجموع زوایای هر مثلث ۱۸۰ درجه است. اگر دو زاویه برابر باشند، زاویه‌ی سوم هم
+      خودبه‌خود برابر می‌شود:
+      <div class="formula-box">∠C = 180° − ∠A − ∠B = 180° − ∠D − ∠E = ∠F</div>
+    </div>
+
+    <div class="subsection-title">حالت‌های دیگر تشابه مثلث‌ها</div>
+
+    <div class="note-box">
+      <ul style="padding-right:20px;">
+        <li><b>(ز ز):</b> دو زاویه برابر ← کافی برای تشابه.</li>
+        <li><b>(ض ز ض):</b> دو ضلع متناسب و زاویه‌ی بین آن‌ها برابر.</li>
+        <li><b>(ض ض ض):</b> سه ضلع متناسب (نسبت‌ها برابر).</li>
+      </ul>
+    </div>
+
+    <!-- SVG: تشابه با دو زاویه -->
+    <div class="svg-wrapper">
+      <svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg">
+        <rect width="800" height="380" fill="#f0fdfa" rx="18"/>
+        <text x="400" y="30" text-anchor="middle" font-size="15"
+          font-weight="900" fill="#0f766e" font-family="Vazirmatn, sans-serif">
+          حالت (ز ز): دو زاویه برابر ← تشابه
+        </text>
+        
+        <!-- مثلث ABC -->
+        <polygon points="180,80 60,300 320,300"
+          fill="#a7f3d0" stroke="#059669" stroke-width="2.5"/>
+        
+        <text x="180" y="62" text-anchor="middle" font-size="18"
+          font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">A</text>
+        <text x="40" y="318" text-anchor="middle" font-size="18"
+          font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">B</text>
+        <text x="340" y="318" text-anchor="middle" font-size="18"
+          font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">C</text>
+        
+        <!-- کمان زاویه B -->
+        <path d="M 60 300 L 77.2 269.9 A 35 35 0 0 1 95 300 Z"
+          fill="#fecaca" fill-opacity="0.6" stroke="none"/>
+        <path d="M 77.2 269.9 A 35 35 0 0 1 95 300"
+          fill="none" stroke="#dc2626" stroke-width="3.5" stroke-linecap="round"/>
+        <text x="110" y="280" text-anchor="middle" font-size="14"
+          font-weight="900" fill="#b91c1c" font-family="Cambria Math, serif">β</text>
+        
+        <!-- کمان زاویه C -->
+        <path d="M 320 300 L 285 300 A 35 35 0 0 1 302.8 269.9 Z"
+          fill="#ddd6fe" fill-opacity="0.6" stroke="none"/>
+        <path d="M 285 300 A 35 35 0 0 1 302.8 269.9"
+          fill="none" stroke="#7c3aed" stroke-width="3.5" stroke-linecap="round"/>
+        <text x="270" y="280" text-anchor="middle" font-size="14"
+          font-weight="900" fill="#6d28d9" font-family="Cambria Math, serif">γ</text>
+        
+        <!-- علامت تشابه -->
+        <text x="400" y="200" text-anchor="middle" font-size="48"
+          font-weight="900" fill="#0f766e" font-family="serif">∼</text>
+        
+        <!-- مثلث DEF (بزرگ‌تر) -->
+        <polygon points="620,80 470,300 770,300"
+          fill="#bae6fd" stroke="#0284c7" stroke-width="2.5"/>
+        
+        <text x="620" y="62" text-anchor="middle" font-size="18"
+          font-weight="900" fill="#075985" font-family="Vazirmatn, sans-serif">D</text>
+        <text x="452" y="318" text-anchor="middle" font-size="18"
+          font-weight="900" fill="#075985" font-family="Vazirmatn, sans-serif">E</text>
+        <text x="788" y="318" text-anchor="middle" font-size="18"
+          font-weight="900" fill="#075985" font-family="Vazirmatn, sans-serif">F</text>
+        
+        <!-- کمان زاویه E -->
+        <path d="M 470 300 L 487.2 269.9 A 35 35 0 0 1 505 300 Z"
+          fill="#fecaca" fill-opacity="0.6" stroke="none"/>
+        <path d="M 487.2 269.9 A 35 35 0 0 1 505 300"
+          fill="none" stroke="#dc2626" stroke-width="3.5" stroke-linecap="round"/>
+        <text x="520" y="280" text-anchor="middle" font-size="14"
+          font-weight="900" fill="#b91c1c" font-family="Cambria Math, serif">β</text>
+        
+        <!-- کمان زاویه F -->
+        <path d="M 770 300 L 735 300 A 35 35 0 0 1 752.8 269.9 Z"
+          fill="#ddd6fe" fill-opacity="0.6" stroke="none"/>
+        <path d="M 735 300 A 35 35 0 0 1 752.8 269.9"
+          fill="none" stroke="#7c3aed" stroke-width="3.5" stroke-linecap="round"/>
+        <text x="720" y="280" text-anchor="middle" font-size="14"
+          font-weight="900" fill="#6d28d9" font-family="Cambria Math, serif">γ</text>
+        
+        <!-- توضیحات -->
+        <text x="400" y="360" text-anchor="middle" font-size="12"
+          fill="#475569" font-family="Vazirmatn, sans-serif">
+          ∠B = ∠E = β &nbsp;|&nbsp; ∠C = ∠F = γ &nbsp;→&nbsp; △ABC ∼ △DEF
+        </text>
+      </svg>
+      <div class="svg-caption">شکل ۳: با داشتن دو زاویه‌ی برابر، تشابه ثابت می‌شود</div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ۵. کاربرد در مسائل -->
+    <!-- ============================================================ -->
+    <div class="section-title">۵. کاربرد تشابه در حل مسئله</div>
+
+    <div class="subsection-title">مثال ۱: پیدا کردن ضلع مجهول</div>
+
+    <div class="example-box">
+      <h4>مسئله: اگر △ABC ∼ △DEF باشد و AB = 4، BC = 6، DE = 6 باشد، طول EF را بیابید.</h4>
+      <div class="step"><b>گام ۱:</b> نسبت تشابه را می‌نویسیم:
+        <div class="formula-box">AB/DE = BC/EF</div>
+      </div>
+      <div class="step"><b>گام ۲:</b> جایگذاری:
+        <div class="formula-box">4/6 = 6/EF</div>
+      </div>
+      <div class="step"><b>گام ۳:</b> ضرب ضربدری:
+        <div class="formula-box">4 × EF = 6 × 6 = 36</div>
+        <div class="formula-box">EF = 36/4 = 9</div>
+      </div>
+      <div class="result-box">پس EF = 9</div>
+    </div>
+
+    <div class="subsection-title">مثال ۲: نقشه و مقیاس</div>
+
+    <div class="example-box">
+      <h4>مسئله: مقیاس یک نقشه 1:100,000 است. یعنی هر ۱ سانتی‌متر روی نقشه برابر ۱۰۰,۰۰۰ سانتی‌متر در واقعیت است. اگر فاصله‌ی دو نقطه روی نقشه ۵ سانتی‌متر باشد، فاصله‌ی واقعی چقدر است؟</h4>
+      <div class="step"><b>گام ۱:</b> نسبت تشابه = 100,000</div>
+      <div class="step"><b>گام ۲:</b> فاصله‌ی واقعی = 5 × 100,000 = 500,000 cm</div>
+      <div class="step"><b>گام ۳:</b> تبدیل به متر: 500,000 ÷ 100 = 5000 متر</div>
+      <div class="step"><b>گام ۴:</b> تبدیل به کیلومتر: 5000 ÷ 1000 = 5 کیلومتر</div>
+      <div class="result-box">پس فاصله‌ی واقعی ۵ کیلومتر است.</div>
+    </div>
+
+    <div class="subsection-title">مثال ۳: ارتفاع ساختمان با سایه</div>
+
+    <div class="example-box">
+      <h4>مسئله: طول سایه‌ی یک درخت ۶ متر و طول سایه‌ی یک میله‌ی ۲ متری ۳ متر است. اگر هر دو عمود باشند و سایه‌ها با هم موازی باشند، ارتفاع درخت چقدر است؟</h4>
+
+      <div class="svg-wrapper">
+        <svg viewBox="0 0 700 340" xmlns="http://www.w3.org/2000/svg">
+          <rect width="700" height="340" fill="#fffbeb" rx="18"/>
+          <text x="350" y="30" text-anchor="middle" font-size="15"
+            font-weight="900" fill="#78350f" font-family="Vazirmatn, sans-serif">
+            مسئله‌ی ارتفاع درخت با سایه
+          </text>
+          
+          <!-- زمین (خط افقی) -->
+          <line x1="40" y1="280" x2="660" y2="280"
+            stroke="#78350f" stroke-width="2"/>
+          
+          <!-- درخت (ستون عمودی) -->
+          <line x1="120" y1="280" x2="120" y2="80"
+            stroke="#059669" stroke-width="4"/>
+          <text x="120" y="65" text-anchor="middle" font-size="14"
+            font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">درخت</text>
+          <text x="100" y="180" text-anchor="middle" font-size="14"
+            font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">h</text>
+          
+          <!-- علامت زاویه ۹۰ درجه در پای درخت -->
+          <rect x="120" y="266" width="14" height="14"
+            fill="none" stroke="#065f46" stroke-width="1.5"/>
+          
+          <!-- سایه درخت (خط افقی از پای درخت به راست) -->
+          <line x1="120" y1="280" x2="360" y2="280"
+            stroke="#78350f" stroke-width="3" stroke-dasharray="8,4"/>
+          <!-- خط از سر درخت به نوک سایه -->
+          <line x1="120" y1="80" x2="360" y2="280"
+            stroke="#dc2626" stroke-width="1.5"/>
+          
+          <!-- میله‌ی ۲ متری -->
+          <line x1="500" y1="280" x2="500" y2="200"
+            stroke="#7c3aed" stroke-width="4"/>
+          <text x="500" y="190" text-anchor="middle" font-size="14"
+            font-weight="900" fill="#6d28d9" font-family="Vazirmatn, sans-serif">میله ۲m</text>
+          
+          <!-- علامت زاویه ۹۰ درجه پای میله -->
+          <rect x="500" y="266" width="14" height="14"
+            fill="none" stroke="#6d28d9" stroke-width="1.5"/>
+          
+          <!-- سایه میله -->
+          <line x1="500" y1="280" x2="620" y2="280"
+            stroke="#78350f" stroke-width="3" stroke-dasharray="8,4"/>
+          <line x1="500" y1="200" x2="620" y2="280"
+            stroke="#dc2626" stroke-width="1.5"/>
+          
+          <!-- طول سایه‌ها -->
+          <text x="240" y="305" text-anchor="middle" font-size="14"
+            font-weight="900" fill="#78350f" font-family="Vazirmatn, sans-serif">۶ متر</text>
+          <text x="560" y="305" text-anchor="middle" font-size="14"
+            font-weight="900" fill="#78350f" font-family="Vazirmatn, sans-serif">۳ متر</text>
+        </svg>
+        <div class="svg-caption">شکل ۴: درخت و میله با سایه‌هایشان — دو مثلث قائم‌الزاویه‌ی متشابه</div>
+      </div>
+
+      <div class="step"><b>گام ۱:</b> هر دو مثلث قائم‌الزاویه هستند و زاویه‌ی تابش خورشید یکسان است.
+        پس دو مثلث <b>متشابه</b> هستند.</div>
+      <div class="step"><b>گام ۲:</b> نسبت تشابه:
+        <div class="formula-box">h/2 = 6/3</div>
+      </div>
+      <div class="step"><b>گام ۳:</b> حل:
+        <div class="formula-box">h = (6/3) × 2 = 4</div>
+      </div>
+      <div class="result-box">پس ارتفاع درخت <b>۴ متر</b> است.</div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ۶. تمرین‌ها -->
+    <!-- ============================================================ -->
+    <div class="section-title">۶. تمرین‌های جامع</div>
+
+    <div class="exercise">
+      <div class="exercise-title"><span class="num">۱</span>
+        آیا هر دو مثلث متساوی‌الاضلاع با هم متشابه هستند؟ چرا؟
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#0f766e;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step">بله ✅</div>
+        <div class="step">هر زاویه‌ی آن‌ها ۶۰ درجه است، پس زاویه‌های متناظر برابرند.</div>
+        <div class="step">اضلاع هر کدام از مثلث‌ها مساوی هستند، پس نسبت اضلاع متناظر ثابت است.</div>
+        <div class="result-box">پس همه‌ی مثلث‌های متساوی‌الاضلاع با هم متشابه هستند.</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title"><span class="num">۲</span>
+        آیا هر دو لوزی با هم متشابه هستند؟ چرا؟
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#0f766e;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step">نه ❌</div>
+        <div class="step">در لوزی، همه‌ی اضلاع مساوی‌اند، ولی زاویه‌ها می‌توانند متفاوت باشند.</div>
+        <div class="step">مثال: یک لوزی با زاویه‌های ۶۰°-۱۲۰° و یک لوزی با زاویه‌های ۸۰°-۱۰۰°. این دو متشابه نیستند.</div>
+        <div class="result-box">پس هر دو لوزی دلخواه، متشابه نیستند.</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title"><span class="num">۳</span>
+        در شکل زیر، △ABC ∼ △DEF. اگر AB = 5، BC = 7، DE = 10 باشد، طول EF را پیدا کنید.
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#0f766e;font-weight:700;padding:8px 0;">نمایش پاسخ گام‌به‌گام</summary>
+        <div class="step"><b>گام ۱:</b> نسبت تشابه: AB/DE = 5/10 = 1/2</div>
+        <div class="step"><b>گام ۲:</b> از تساوی BC/EF = 1/2 استفاده می‌کنیم.</div>
+        <div class="step"><b>گام ۳:</b> 7/EF = 1/2 → EF = 14</div>
+        <div class="result-box">پس EF = 14</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title"><span class="num">۴</span>
+        مقیاس یک نقشه ۱:۵۰۰۰۰ است. اگر دو شهر روی نقشه ۸ سانتی‌متر فاصله داشته باشند،
+        فاصله‌ی واقعی آن‌ها چند کیلومتر است؟
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#0f766e;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step">فاصله‌ی واقعی = 8 × 50000 = 400,000 cm</div>
+        <div class="step">تبدیل به کیلومتر: 400,000 ÷ 100,000 = 4 کیلومتر</div>
+        <div class="result-box">پس فاصله‌ی واقعی ۴ کیلومتر است.</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title"><span class="num">۵</span>
+        در شکل زیر، DE || BC. اگر AD = 3، DB = 6 و AE = 4 باشد، طول EC چقدر است؟
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#0f766e;font-weight:700;padding:8px 0;">نمایش پاسخ گام‌به‌گام</summary>
+        <div class="step"><b>گام ۱:</b> چون DE || BC، مثلث‌های ADE و ABC متشابه هستند (حالت ز ز).</div>
+        <div class="step"><b>گام ۲:</b> نسبت تشابه: AD/AB = 3/(3+6) = 3/9 = 1/3</div>
+        <div class="step"><b>گام ۳:</b> AE/AC = 1/3 → 4/AC = 1/3 → AC = 12</div>
+        <div class="step"><b>گام ۴:</b> EC = AC − AE = 12 − 4 = 8</div>
+        <div class="result-box">پس EC = 8</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title"><span class="num">۶</span>
+        در دو مثلث ABC و DEF می‌دانیم ∠A = ∠D و ∠B = ∠E.
+        اگر AB = 6 و DE = 9 و BC = 8 باشد، طول EF را پیدا کنید.
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#0f766e;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step">با حالت (ز ز) نتیجه می‌گیریم △ABC ∼ △DEF.</div>
+        <div class="step">نسبت تشابه: 6/9 = 2/3</div>
+        <div class="step">پس 8/EF = 2/3 → EF = 12</div>
+        <div class="result-box">پس EF = 12</div>
+      </details>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ۷. جدول خلاصه -->
+    <!-- ============================================================ -->
+    <div class="section-title">۷. جدول خلاصه</div>
+
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>مفهوم</th>
+          <th>توضیح</th>
+          <th>مثال</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>شکل‌های متشابه</td>
+          <td>زاویه‌های متناظر برابر + ضلع‌های متناظر متناسب</td>
+          <td>دو مثلث با یک شکل، اندازه‌های مختلف</td>
+        </tr>
+        <tr>
+          <td>نسبت تشابه</td>
+          <td class="math-inline">k = AB/DE = BC/EF = AC/DF</td>
+          <td>k = 1/2</td>
+        </tr>
+        <tr>
+          <td>حالت (ز ز)</td>
+          <td>دو زاویه برابر ← تشابه</td>
+          <td>△ABC ∼ △DEF</td>
+        </tr>
+        <tr>
+          <td>حالت (ض ز ض)</td>
+          <td>دو ضلع متناسب + زاویه‌ی بین برابر</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>حالت (ض ض ض)</td>
+          <td>سه ضلع متناسب</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>هم‌نهشتی</td>
+          <td>حالت خاص تشابه با k = 1</td>
+          <td>△ABC ≅ △DEF</td>
+        </tr>
+        <tr>
+          <td>همه‌ی مربع‌ها</td>
+          <td>متشابه هستند ✅</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>همه‌ی مثلث‌های متساوی‌الاضلاع</td>
+          <td>متشابه هستند ✅</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>همه‌ی مستطیل‌ها</td>
+          <td>متشابه نیستند ❌</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>همه‌ی لوزی‌ها</td>
+          <td>متشابه نیستند ❌</td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="big-quote">
+      «دو شکل متشابه، یک شکل هستند — فقط با اندازه‌ای متفاوت.»
+    </div>
+
+    <div class="warning-box">
+      <strong>⚠️ پنج اشتباه رایج در این درس:</strong>
+      <ol style="margin-top:10px; padding-right:20px;">
+        <li>فکر کردن به این‌که همه‌ی مستطیل‌ها متشابه هستند.</li>
+        <li>فکر کردن به این‌که همه‌ی لوزی‌ها متشابه هستند.</li>
+        <li>اشتباه گرفتن تشابه با هم‌نهشتی. (تشابه اعم است)</li>
+        <li>در پیدا کردن ضلع مجهول، نسبت را وارونه نوشتن.</li>
+        <li>فراموش کردن رعایت ترتیب حروف در نوشتن تشابه.</li>
+      </ol>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 نکات طلایی:</strong>
+      <ul style="padding-right:20px; margin-top:8px;">
+        <li>برای اثبات تشابه دو مثلث، کافی است <b>دو زاویه‌ی برابر</b> پیدا کنی (حالت ز ز).</li>
+        <li>در حل مسائل، ابتدا نسبت تشابه را پیدا کن، سپس ضلع مجهول را حساب کن.</li>
+        <li>در مقیاس نقشه، نسبت تشابه همان مقیاس است.</li>
+        <li>همیشه ترتیب حروف در نوشتن تشابه را رعایت کن:
+          <span class="math-inline">△ABC ∼ △DEF</span> یعنی A↔D، B↔E، C↔F.</li>
+      </ul>
+    </div>
+
+    <div class="dialog" style="margin-top:30px;">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        خب فرسام جان، امروز یاد گرفتیم:
+        <ul style="padding-right:20px; margin-top:8px;">
+          <li><b>تشابه</b> یعنی هم‌شکل بودن با اندازه‌های متفاوت.</li>
+          <li><b>نسبت تشابه</b> نسبت اضلاع متناظر است.</li>
+          <li>برای تشابه دو مثلث، <b>حالت ز ز</b> کافی است.</li>
+          <li>همه‌ی مربع‌ها و مثلث‌های متساوی‌الاضلاع متشابه هستند، ولی مستطیل‌ها و لوزی‌ها نه.</li>
+          <li>از تشابه در حل مسائل (مثل پیدا کردن ضلع مجهول و مسئله‌ی مقیاس) استفاده می‌کنیم.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        آفرین! با این درس، فصل سوم تمام می‌شود. حالا تمرین‌های کتاب را حل کن
+        و مطمئن شو همه‌ی مفاهیم را بلدی.
+        <br><br>
+        <strong>موفق باشی! 🌟</strong>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <strong>📘 آموزش جامع ریاضی نهم — فصل سوم، درس پنجم (کامل)</strong><br>
+    مدرسان: خانم سروناز و آقای فرسام | اپلیکیشن همیار من<br>
+    موفق باشی! ✨
+  </footer>
+</div>
+</body>
+</html>

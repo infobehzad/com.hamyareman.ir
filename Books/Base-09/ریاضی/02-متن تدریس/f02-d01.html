@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>درس اول فصل دوم جامع: عددهای گویا</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Vazirmatn', Tahoma, sans-serif;
+  background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 50%, #ecfeff 100%);
+  color: #1e293b; line-height: 1.95; padding: 20px; font-size: 16px;
+}
+.container { max-width: 1150px; margin: 0 auto; background: #fff;
+  border-radius: 24px; box-shadow: 0 20px 60px rgba(30,41,59,0.15); overflow: hidden; }
+
+header {
+  background: linear-gradient(135deg, #0891b2 0%, #0ea5e9 50%, #6366f1 100%);
+  color: #fff; padding: 42px 30px; text-align: center; position: relative;
+}
+header::after {
+  content: ""; position: absolute; bottom: -20px; left: 0; right: 0;
+  height: 40px; background: #fff;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+header h1 { font-size: 2rem; font-weight: 900; margin-bottom: 10px;
+  text-shadow: 0 3px 8px rgba(0,0,0,0.2); }
+header p { font-size: 1rem; opacity: 0.95; }
+
+main { padding: 40px 30px 60px; }
+
+.intro-box {
+  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+  border-right: 6px solid #f59e0b; padding: 22px 26px;
+  border-radius: 16px; margin-bottom: 30px; font-size: 1.02rem;
+}
+.intro-box strong { color: #92400e; }
+
+.toc {
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+  border: 2px solid #6366f1; border-radius: 18px;
+  padding: 22px 26px; margin-bottom: 35px;
+}
+.toc h3 { color: #3730a3; font-size: 1.15rem; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px; }
+.toc h3::before { content: "📋"; }
+.toc ol { padding-right: 22px; margin: 0; }
+.toc li { padding: 4px 0; color: #3730a3; font-weight: 600; font-size: 0.95rem; }
+.toc a { color: #3730a3; text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+
+.section-title {
+  font-size: 1.3rem; font-weight: 800; color: #0e7490;
+  margin: 40px 0 16px; padding-right: 12px;
+  border-right: 5px solid #0891b2;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title::before { content: "◆"; color: #06b6d4; font-size: 0.9rem; }
+.subsection-title {
+  font-size: 1.1rem; font-weight: 800; color: #1e40af;
+  margin: 26px 0 12px; padding-right: 10px;
+  border-right: 4px solid #3b82f6;
+  display: flex; align-items: center; gap: 6px;
+}
+.subsection-title::before { content: "▸"; color: #60a5fa; font-size: 0.85rem; }
+
+.dialog { display: flex; gap: 14px; margin: 16px 0;
+  align-items: flex-start; animation: fadeIn 0.4s ease; }
+.avatar {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; color: #fff; font-size: 0.9rem;
+  flex-shrink: 0; box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+.avatar.sarvnaz { background: linear-gradient(135deg, #ec4899, #f43f5e); }
+.avatar.farsam  { background: linear-gradient(135deg, #0ea5e9, #3b82f6); }
+
+.bubble { flex: 1; padding: 14px 18px; border-radius: 18px; font-size: 1rem; }
+.bubble.sarvnaz {
+  background: #fce7f3; border-top-right-radius: 4px;
+  color: #831843; border: 1px solid #fbcfe8;
+}
+.bubble.farsam {
+  background: #dbeafe; border-top-right-radius: 4px;
+  color: #1e3a8a; border: 1px solid #bfdbfe;
+}
+.speaker { font-weight: 800; display: block; margin-bottom: 4px; font-size: 0.9rem; }
+.speaker.sarvnaz { color: #be185d; }
+.speaker.farsam  { color: #1d4ed8; }
+
+.formula-box {
+  background: #fff7ed; border: 2px solid #fb923c;
+  border-radius: 14px; padding: 16px 22px;
+  margin: 16px 0; text-align: center;
+  font-size: 1.15rem; font-weight: 700; color: #9a3412;
+  direction: ltr; font-family: 'KaTeX_Main', 'Cambria Math', serif;
+}
+.formula-box.big {
+  font-size: 1.4rem; padding: 22px 26px;
+  background: linear-gradient(135deg, #fff7ed, #fed7aa);
+  border-width: 3px;
+}
+
+.note-box {
+  background: #ecfdf5; border-right: 5px solid #10b981;
+  padding: 14px 20px; border-radius: 12px;
+  margin: 16px 0; color: #065f46; font-size: 0.98rem;
+}
+.warning-box {
+  background: #fef2f2; border-right: 5px solid #ef4444;
+  padding: 14px 20px; border-radius: 12px;
+  margin: 16px 0; color: #991b1b; font-size: 0.98rem;
+}
+.def-box {
+  background: #e0e7ff; border: 2px solid #4f46e5;
+  border-radius: 16px; padding: 18px 22px; margin: 18px 0;
+}
+.def-box::before {
+  content: "تعریف رسمی";
+  display: inline-block; background: #4f46e5; color: #fff;
+  padding: 2px 12px; border-radius: 8px;
+  font-size: 0.82rem; font-weight: 700; margin-bottom: 10px;
+}
+.def-box.green { background: #d1fae5; border-color: #059669; }
+.def-box.green::before { background: #059669; }
+.def-box.orange { background: #fed7aa; border-color: #ea580c; }
+.def-box.orange::before { background: #ea580c; }
+.def-box.pink { background: #fce7f3; border-color: #db2777; }
+.def-box.pink::before { background: #db2777; }
+
+.highlight {
+  background: linear-gradient(120deg, #f4ff5b 0%, #fde047 100%);
+  padding: 2px 6px; border-radius: 6px;
+  font-weight: 700; color: #713f12;
+}
+
+.example-box {
+  background: #f5f3ff; border: 2px solid #a78bfa;
+  border-radius: 16px; padding: 20px 24px; margin: 20px 0;
+}
+.example-box h4 {
+  color: #6d28d9; font-size: 1.05rem; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.example-box h4::before { content: "📌"; font-size: 1.15rem; }
+
+.step {
+  background: #fff; border-radius: 10px;
+  padding: 10px 14px; margin: 8px 0;
+  border-right: 4px solid #7c3aed; font-size: 0.98rem;
+}
+.step b { color: #6d28d9; }
+
+.exercise {
+  background: #fff; border: 2px dashed #0891b2;
+  border-radius: 16px; padding: 22px 26px; margin: 24px 0;
+}
+.exercise-title {
+  font-weight: 800; color: #0e7490; font-size: 1.05rem;
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+}
+.exercise-title .num {
+  display: inline-flex; width: 30px; height: 30px;
+  background: linear-gradient(135deg, #0891b2, #6366f1);
+  color: #fff; border-radius: 50%;
+  align-items: center; justify-content: center;
+  font-size: 0.9rem; font-weight: 900;
+}
+.result-box {
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 2px solid #10b981; border-radius: 12px;
+  padding: 14px 18px; margin-top: 12px;
+  text-align: center; font-weight: 700; color: #065f46;
+}
+
+.svg-wrapper {
+  background: #fff; border-radius: 16px; padding: 20px;
+  margin: 22px 0; text-align: center;
+  border: 2px solid #e0e7ff;
+  box-shadow: 0 8px 20px rgba(99,102,241,0.08);
+}
+.svg-wrapper svg { max-width: 100%; height: auto; }
+.svg-caption { font-size: 0.9rem; color: #64748b; margin-top: 10px; font-style: italic; }
+
+.summary-table {
+  width: 100%; border-collapse: collapse; margin: 20px 0;
+  background: #fff; border-radius: 14px; overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+.summary-table th {
+  background: linear-gradient(135deg, #0891b2, #6366f1);
+  color: #fff; padding: 12px; font-size: 0.95rem;
+}
+.summary-table td {
+  padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-size: 0.95rem;
+}
+.summary-table tr:nth-child(even) td { background: #f8fafc; }
+.summary-table tr:last-child td { border-bottom: none; }
+
+.big-quote {
+  background: linear-gradient(135deg, #fef9c3, #fde68a);
+  border: 2px dashed #eab308; border-radius: 16px;
+  padding: 18px 22px; margin: 20px 0; text-align: center;
+  font-weight: 700; color: #713f12; font-size: 1.05rem;
+}
+
+footer {
+  text-align: center; padding: 30px 20px;
+  background: #1e293b; color: #cbd5e1; font-size: 0.9rem;
+}
+footer strong { color: #22d3ee; }
+
+.math, .katex { direction: ltr !important; unicode-bidi: isolate !important; }
+.math-inline { direction: ltr; unicode-bidi: isolate; display: inline-block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 640px) {
+  body { padding: 8px; font-size: 15px; }
+  main { padding: 20px 14px 40px; }
+  header h1 { font-size: 1.4rem; }
+  .avatar { width: 42px; height: 42px; font-size: 0.78rem; }
+  .bubble { padding: 12px 14px; font-size: 0.95rem; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>📘 درس اول فصل دوم جامع: عددهای گویا</h1>
+    <p>فصل دوم ریاضی نهم — از کسرهای مساوی تا نمایش اعشاری</p>
+  </header>
+
+  <main>
+
+    <div class="intro-box">
+      <strong>سلام دانش‌آموز عزیز! 🌟</strong><br>
+      در فصل اول با مجموعه‌ها آشنا شدیم. حالا در فصل دوم می‌خواهیم یک نوع خاص از اعداد را
+      عمیق‌تر بررسی کنیم: <strong>عددهای گویا</strong>. در این درس یاد می‌گیریم که:
+      <br>
+      <strong>۱)</strong> عدد گویا چیست و چه تفاوتی با عدد صحیح دارد.
+      <br>
+      <strong>۲)</strong> بین هر دو کسر، بی‌شمار کسر دیگر وجود دارد.
+      <br>
+      <strong>۳)</strong> کسرها چطور به عدد اعشاری تبدیل می‌شوند و چه زمانی مختوم یا متناوب هستند.
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- فهرست مطالب -->
+    <!-- ============================================================= -->
+    <div class="toc">
+      <h3>فهرست مطالب</h3>
+      <ol>
+        <li><a href="#sec1">پیش‌نیاز ۱: مرور انواع اعداد</a></li>
+        <li><a href="#sec2">پیش‌نیاز ۲: کسرهای مساوی</a></li>
+        <li><a href="#sec3">پیش‌نیاز ۳: عدد اعشاری و انواع آن</a></li>
+        <li><a href="#sec4">درس اصلی ۱: تعریف عدد گویا</a></li>
+        <li><a href="#sec5">درس اصلی ۲: بین دو کسر، بی‌شمار کسر وجود دارد</a></li>
+        <li><a href="#sec6">درس اصلی ۳: تبدیل کسر به اعشار</a></li>
+        <li><a href="#sec7">درس اصلی ۴: شرط مختوم بودن اعشار</a></li>
+        <li><a href="#sec8">درس اصلی ۵: تبدیل اعشار به کسر</a></li>
+        <li><a href="#sec9">تمرین‌های جامع با حل گام‌به‌گام</a></li>
+        <li><a href="#sec10">جدول خلاصه و نکات امتحانی</a></li>
+      </ol>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۱: مرور انواع اعداد -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec1">پیش‌نیاز ۱: مرور انواع اعداد</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        سلام سروناز جان. امروز می‌خواهیم یک نوع مهم از اعداد را یاد بگیریم: <span class="highlight">عددهای گویا</span>.
+        ولی قبل از آن، بگذار انواع اعداد را که در فصل قبل یاد گرفتیم، با هم مرور کنیم.
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        باشه! یادم هست که N یعنی عددهای طبیعی، W یعنی حسابی و Z یعنی صحیح.
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        دقیقاً. حالا بیایید همه‌ی این‌ها را کنار هم ببینیم:
+      </div>
+    </div>
+
+    <div class="def-box">
+      <b>مرور سریع:</b>
+      <ul style="padding-right:20px; margin-top:8px;">
+        <li><b>N (طبیعی):</b> {1, 2, 3, 4, ...}</li>
+        <li><b>W (حسابی):</b> {0, 1, 2, 3, ...}</li>
+        <li><b>Z (صحیح):</b> {..., −3, −2, −1, 0, 1, 2, 3, ...}</li>
+      </ul>
+      <br>
+      رابطه‌ی زیرمجموعه بودن:
+      <div class="formula-box">N ⊆ W ⊆ Z</div>
+    </div>
+
+    <div class="subsection-title">مثال سریع</div>
+    <div class="note-box">
+      <ul style="padding-right:20px;">
+        <li><b>۳:</b> طبیعی، حسابی و صحیح ✅</li>
+        <li><b>۰:</b> حسابی و صحیح (طبیعی نیست) ✅</li>
+        <li><b>−۷:</b> فقط صحیح ✅</li>
+        <li><b>۱/۲:</b> هیچ‌کدام! این یک عدد <b>کسری</b> است.</li>
+      </ul>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۲: کسرهای مساوی -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec2">پیش‌نیاز ۲: کسرهای مساوی</div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        فرسام جان، چرا می‌گوییم ۱/۲ و ۲/۴ و ۳/۶ با هم برابرند؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        سؤال خوبی! این‌ها <span class="highlight">کسرهای مساوی</span> هستند. یعنی مقدارشان یکسان است.
+        <br>
+        اگر یک کیک را به ۲ قسمت مساوی تقسیم کنی و ۱ قسمت را برداری، همان مقدار را داری
+        که یک کیک به ۴ قسمت تقسیم کنی و ۲ قسمت برداری.
+      </div>
+    </div>
+
+    <div class="def-box green">
+      <b>کسرهای مساوی:</b> اگر صورت و مخرج یک کسر را در <b>یک عدد غیرصفر</b> ضرب یا تقسیم کنیم،
+      کسر جدید با کسر اصلی برابر است:
+      <div class="formula-box">a/b = (a×k)/(b×k) &nbsp;&nbsp; و &nbsp;&nbsp; a/b = (a÷k)/(b÷k)</div>
+      (به شرطی که k ≠ 0 باشد)
+    </div>
+
+    <div class="subsection-title">مثال‌های کسرهای مساوی</div>
+
+    <div class="example-box">
+      <h4>۱) ۱/۲ = ۲/۴ = ۳/۶ = ۴/۸</h4>
+      <div class="step"><b>از ۱/۲ به ۲/۴:</b> صورت و مخرج را در ۲ ضرب می‌کنیم: (1×2)/(2×2) = 2/4 ✅</div>
+      <div class="step"><b>از ۲/۴ به ۱/۲:</b> صورت و مخرج را بر ۲ تقسیم می‌کنیم: (2÷2)/(4÷2) = 1/2 ✅</div>
+      <div class="step"><b>از ۳/۶ به ۱/۲:</b> صورت و مخرج را بر ۳ تقسیم می‌کنیم: (3÷3)/(6÷3) = 1/2 ✅</div>
+      <div class="result-box">همه‌ی این کسرها مقدار یکسان دارند: ۰/۵</div>
+    </div>
+
+    <div class="subsection-title">ساده کردن کسر</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        گاهی یک کسر را می‌توان <b>ساده‌تر</b> نوشت. مثلاً ۱۲/۱۸ را چطور ساده می‌کنیم؟
+      </div>
+    </div>
+
+    <div class="example-box">
+      <h4>ساده کردن ۱۲/۱۸</h4>
+      <div class="step"><b>گام ۱:</b> شمارنده‌های مشترک ۱۲ و ۱۸ را پیدا می‌کنیم: ۱، ۲، ۳، ۶.</div>
+      <div class="step"><b>گام ۲:</b> بزرگ‌ترین آن‌ها (ب.م.م) برابر ۶ است.</div>
+      <div class="step"><b>گام ۳:</b> صورت و مخرج را بر ۶ تقسیم می‌کنیم: (12÷6)/(18÷6) = <b>۲/۳</b>.</div>
+      <div class="result-box">۱۲/۱۸ = ۲/۳</div>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 نکته:</strong> اگر ب.م.م صورت و مخرج ۱ باشد، کسر <b>ساده‌شده</b> یا <b>تحت‌ترین شکل</b> است.
+      مثال: ۳/۷ دیگر ساده‌تر نمی‌شود.
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۳: عدد اعشاری -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec3">پیش‌نیاز ۳: عدد اعشاری و انواع آن</div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        فرسام جان، یادم هست وقتی ۱ را بر ۲ تقسیم می‌کنیم، می‌شود ۰/۵. ولی وقتی ۱ را بر ۳ تقسیم می‌کنیم، می‌شود ۰/۳۳۳۳... . این‌ها چه فرقی دارند؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        سؤال خیلی خوبی! این دو نوع اعشار کاملاً متفاوت هستند.
+      </div>
+    </div>
+
+    <div class="def-box orange">
+      <b>انواع اعشار:</b>
+      <ul style="padding-right:20px; margin-top:8px;">
+        <li><b>۱) اعشار مختوم:</b> اعشاری که تعداد رقم‌های اعشاری‌اش محدود است. مثال: ۰/۵ ، ۰/۲۵ ، ۳/۷۵.</li>
+        <li><b>۲) اعشار متناوب:</b> اعشاری که یک یا چند رقم بعد از ممیز مرتب تکرار می‌شوند. مثال: ۰/۳۳۳... ، ۰/۱۶۶۶... .</li>
+        <li><b>۳) اعشار نامتناوب:</b> اعشاری که نه مختوم است، نه الگوی تکرارشونده دارد. مثل عدد π.</li>
+      </ul>
+    </div>
+
+    <div class="subsection-title">نحوه‌ی نمایش اعشار متناوب</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        برای این‌که اعشار متناوب را کوتاه‌تر بنویسیم، از یک <b>خط کوچک روی ارقام تکرارشونده</b> استفاده می‌کنیم:
+        <div class="formula-box">
+          0/333... = 0/3̄ &nbsp;&nbsp;&nbsp;&nbsp; 1/1666... = 1/16̄
+        </div>
+        یعنی ۳ یا ۶ هر بار تکرار می‌شود.
+      </div>
+    </div>
+
+    <div class="svg-wrapper">
+      <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg">
+        <rect width="720" height="280" fill="#f0f9ff" rx="18"/>
+        <text x="360" y="34" text-anchor="middle" font-size="16"
+          font-weight="900" fill="#0c4a6e" font-family="Vazirmatn, sans-serif">
+          سه نوع اعشار
+        </text>
+        <!-- Card 1 -->
+        <rect x="30" y="60" width="210" height="180"
+          fill="#dbeafe" stroke="#2563eb" stroke-width="2.5" rx="14"/>
+        <text x="135" y="95" text-anchor="middle" font-size="15"
+          font-weight="900" fill="#1e3a8a" font-family="Vazirmatn, sans-serif">مختوم</text>
+        <line x1="50" y1="110" x2="220" y2="110" stroke="#2563eb"
+          stroke-dasharray="3" stroke-width="1.5"/>
+        <text x="135" y="150" text-anchor="middle" font-size="22"
+          font-weight="900" fill="#1d4ed8" font-family="monospace">0/5</text>
+        <text x="135" y="185" text-anchor="middle" font-size="22"
+          font-weight="900" fill="#1d4ed8" font-family="monospace">0/25</text>
+        <text x="135" y="220" text-anchor="middle" font-size="12"
+          fill="#1e3a8a" font-family="Vazirmatn, sans-serif">
+          تعداد رقم‌ها محدود
+        </text>
+        <!-- Card 2 -->
+        <rect x="255" y="60" width="210" height="180"
+          fill="#fef3c7" stroke="#ea580c" stroke-width="2.5" rx="14"/>
+        <text x="360" y="95" text-anchor="middle" font-size="15"
+          font-weight="900" fill="#9a3412" font-family="Vazirmatn, sans-serif">متناوب</text>
+        <line x1="275" y1="110" x2="445" y2="110" stroke="#ea580c"
+          stroke-dasharray="3" stroke-width="1.5"/>
+        <text x="360" y="150" text-anchor="middle" font-size="22"
+          font-weight="900" fill="#9a3412" font-family="monospace">0/333...</text>
+        <text x="360" y="185" text-anchor="middle" font-size="22"
+          font-weight="900" fill="#9a3412" font-family="monospace">0/1666...</text>
+        <text x="360" y="220" text-anchor="middle" font-size="12"
+          fill="#9a3412" font-family="Vazirmatn, sans-serif">
+          الگوی تکرارشونده
+        </text>
+        <!-- Card 3 -->
+        <rect x="480" y="60" width="210" height="180"
+          fill="#fce7f3" stroke="#db2777" stroke-width="2.5" rx="14"/>
+        <text x="585" y="95" text-anchor="middle" font-size="15"
+          font-weight="900" fill="#831843" font-family="Vazirmatn, sans-serif">نامتناوب</text>
+        <line x1="500" y1="110" x2="670" y2="110" stroke="#db2777"
+          stroke-dasharray="3" stroke-width="1.5"/>
+        <text x="585" y="150" text-anchor="middle" font-size="22"
+          font-weight="900" fill="#831843" font-family="monospace">π = 3/14159...</text>
+        <text x="585" y="185" text-anchor="middle" font-size="22"
+          font-weight="900" fill="#831843" font-family="monospace">√2 = 1/41421...</text>
+        <text x="585" y="220" text-anchor="middle" font-size="12"
+          fill="#831843" font-family="Vazirmatn, sans-serif">
+          نه مختوم، نه متناوب
+        </text>
+      </svg>
+      <div class="svg-caption">شکل ۱: سه نوع اعشار — مختوم، متناوب و نامتناوب</div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۴: تعریف عدد گویا -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec4">درس اصلی ۱: تعریف عدد گویا</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        حالا که همه‌ی مقدمات را یاد گرفتیم، برویم سراغ تعریف اصلی.
+      </div>
+    </div>
+
+    <div class="def-box pink">
+      <b>عدد گویا:</b> هر عددی که بتوان آن را به‌صورت کسری نوشت که <b>صورت</b> و <b>مخرج</b> آن
+      <b>عدد صحیح</b> باشند و <b>مخرج صفر نباشد</b>.
+      <div class="formula-box big">Q = { a/b | a, b ∈ Z , b ≠ 0 }</div>
+      <br>
+      مجموعه‌ی عددهای گویا را با <span class="math-inline">Q</span> نمایش می‌دهیم.
+    </div>
+
+    <div class="subsection-title">چرا هر عدد صحیح، گویا هم هست؟</div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        فرسام جان، یعنی عدد ۵ هم گویاست؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        بله! چون می‌توانیم بنویسیم <span class="math-inline">5 = 5/1</span>.
+        صورت ۵ و مخرج ۱، هر دو صحیح هستند.
+        <div class="formula-box">5 = 5/1 &nbsp;&nbsp; , &nbsp;&nbsp; −7 = −7/1 &nbsp;&nbsp; , &nbsp;&nbsp; 0 = 0/1</div>
+        پس هر عدد صحیح، خودش هم یک عدد گویاست.
+      </div>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 نکته‌ی مهم:</strong>
+      <div class="formula-box">Z ⊆ Q</div>
+      یعنی هر عدد صحیح، یک عدد گویا هم هست. اما هر عدد گویا لازم نیست صحیح باشد.
+      مثلاً ۱/۲ گویاست ولی صحیح نیست.
+    </div>
+
+    <div class="subsection-title">مثال‌های عدد گویا</div>
+
+    <div class="example-box">
+      <h4>کدام‌یک از موارد زیر، عدد گویا هستند؟</h4>
+      <div class="step"><b>۳:</b> گویا ✅ چون 3/1 = ۳ (صورت ۳، مخرج ۱)</div>
+      <div class="step"><b>−۵:</b> گویا ✅ چون −5/1</div>
+      <div class="step"><b>۰:</b> گویا ✅ چون 0/1</div>
+      <div class="step"><b>۱/۲:</b> گویا ✅ چون صورت ۱، مخرج ۲</div>
+      <div class="step"><b>−۷/۵:</b> گویا ✅</div>
+      <div class="step"><b>۰/۲۵:</b> گویا ✅ چون 25/100 = 1/4</div>
+      <div class="step"><b>۰/۳۳۳...:</b> گویا ✅ چون برابر 1/3 است</div>
+      <div class="step"><b>√۲:</b> گنگ ❌ (در درس‌های بعدی می‌بینیم)</div>
+      <div class="step"><b>π:</b> گنگ ❌</div>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 نکته:</strong> عددهای گویا را نمی‌توان با نوشتن اعضا نشان داد،
+      چون بین هر دو عدد گویا، بی‌شمار عدد گویای دیگر وجود دارد.
+      پس آن‌ها را با <b>نماد ریاضی</b> تعریف می‌کنیم: <span class="math-inline">Q = {a/b | a, b ∈ Z, b ≠ 0}</span>.
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۵: بین دو کسر بی‌شمار کسر -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec5">درس اصلی ۲: بین دو کسر، بی‌شمار کسر وجود دارد</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        سروناز جان، اگر بگویم بین ۱/۳ و ۱/۲ چند کسر وجود دارد، چه جوابی می‌دهی؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        شاید یکی دو تا؟ مثلاً ۲/۵؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        نه سروناز! بین هر دو کسر متمایز، <span class="highlight">بی‌شمار کسر</span> وجود دارد.
+        بگذار با چند روش نشان بدهم.
+      </div>
+    </div>
+
+    <div class="subsection-title">روش ۱: نوشتن کسرهای مساوی با مخرج بزرگ‌تر</div>
+
+    <div class="example-box">
+      <h4>بین ۱/۳ و ۱/۲ چند کسر پیدا کنیم؟</h4>
+      <div class="step"><b>گام ۱:</b> هر دو کسر را با مخرج مشترک بنویسیم:
+        <br>
+        <span class="math-inline">1/3 = 2/6 &nbsp;&nbsp; , &nbsp;&nbsp; 1/2 = 3/6</span>
+      </div>
+      <div class="step"><b>گام ۲:</b> بین ۲/۶ و ۳/۶ هیچ کسر با مخرج ۶ نیست.
+        پس مخرج را بزرگ‌تر می‌کنیم:
+        <br>
+        <span class="math-inline">1/3 = 4/12 &nbsp;&nbsp; , &nbsp;&nbsp; 1/2 = 6/12</span>
+      </div>
+      <div class="step"><b>گام ۳:</b> حالا بین ۴/۱۲ و ۶/۱۲ می‌شود کسر ۵/۱۲ را نوشت:
+        <br>
+        <span class="math-inline">4/12 &lt; 5/12 &lt; 6/12</span>
+      </div>
+      <div class="result-box">پس یک کسر پیدا کردیم: ۵/۱۲</div>
+    </div>
+
+    <div class="example-box">
+      <h4>ادامه: چند کسر دیگر پیدا کنیم</h4>
+      <div class="step">اگر مخرج را ۱۸ بگیریم:
+        <br>
+        <span class="math-inline">1/3 = 6/18 &nbsp;&nbsp; , &nbsp;&nbsp; 1/2 = 9/18</span>
+        <br>
+        کسرهای بین آن‌ها: <span class="math-inline">7/18, 8/18</span>
+      </div>
+      <div class="step">اگر مخرج را ۲۴ بگیریم:
+        <br>
+        <span class="math-inline">1/3 = 8/24 &nbsp;&nbsp; , &nbsp;&nbsp; 1/2 = 12/24</span>
+        <br>
+        کسرهای بین آن‌ها: <span class="math-inline">9/24, 10/24, 11/24</span>
+      </div>
+      <div class="step">هرچه مخرج را بزرگ‌تر کنیم، کسرهای بیشتری بین آن‌ها پیدا می‌شود.</div>
+      <div class="result-box">
+        نتیجه: بین هر دو کسر متمایز، بی‌شمار کسر وجود دارد.
+      </div>
+    </div>
+
+    <div class="subsection-title">روش ۲: میانگین‌گیری</div>
+
+    <div class="note-box">
+      برای پیدا کردن یک کسر بین دو کسر، می‌توان <b>میانگین</b> آن‌ها را گرفت:
+      <div class="formula-box">(a/b + c/d) ÷ 2</div>
+      <br>
+      مثال: بین ۱/۳ و ۱/۲:
+      <div class="formula-box">
+        (1/3 + 1/2) ÷ 2 = (2/6 + 3/6) ÷ 2 = 5/6 ÷ 2 = 5/12
+      </div>
+      پاسخ: <b>۵/۱۲</b>.
+    </div>
+
+    <!-- SVG روی محور -->
+    <div class="svg-wrapper">
+      <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg">
+        <rect width="720" height="220" fill="#faf5ff" rx="18"/>
+        <text x="360" y="30" text-anchor="middle" font-size="15"
+          font-weight="900" fill="#4c1d95" font-family="Vazirmatn, sans-serif">
+          نمایش ۱/۳، ۱/۲ و چند کسر بین آن‌ها روی محور
+        </text>
+        <!-- Axis -->
+        <line x1="60" y1="120" x2="660" y2="120" stroke="#334155" stroke-width="2"/>
+        <!-- Ticks -->
+        <line x1="60" y1="110" x2="60" y2="130" stroke="#334155" stroke-width="2"/>
+        <text x="60" y="150" text-anchor="middle" font-size="14"
+          fill="#1e293b" font-family="Vazirmatn, sans-serif">0</text>
+        <line x1="660" y1="110" x2="660" y2="130" stroke="#334155" stroke-width="2"/>
+        <text x="660" y="150" text-anchor="middle" font-size="14"
+          fill="#1e293b" font-family="Vazirmatn, sans-serif">1</text>
+        <!-- 1/3 -->
+        <line x1="260" y1="105" x2="260" y2="135" stroke="#1d4ed8" stroke-width="2.5"/>
+        <circle cx="260" cy="120" r="5" fill="#1d4ed8"/>
+        <text x="260" y="100" text-anchor="middle" font-size="14"
+          font-weight="900" fill="#1d4ed8" font-family="Vazirmatn, sans-serif">1/3</text>
+        <!-- 1/2 -->
+        <line x1="360" y1="105" x2="360" y2="135" stroke="#be185d" stroke-width="2.5"/>
+        <circle cx="360" cy="120" r="5" fill="#be185d"/>
+        <text x="360" y="100" text-anchor="middle" font-size="14"
+          font-weight="900" fill="#be185d" font-family="Vazirmatn, sans-serif">1/2</text>
+        <!-- 5/12 -->
+        <line x1="310" y1="105" x2="310" y2="135" stroke="#059669" stroke-width="2.5"/>
+        <circle cx="310" cy="120" r="5" fill="#059669"/>
+        <text x="310" y="165" text-anchor="middle" font-size="14"
+          font-weight="900" fill="#059669" font-family="Vazirmatn, sans-serif">5/12</text>
+        <!-- 9/24 -->
+        <line x1="285" y1="105" x2="285" y2="135" stroke="#ea580c" stroke-width="2"/>
+        <circle cx="285" cy="120" r="4" fill="#ea580c"/>
+        <text x="285" y="185" text-anchor="middle" font-size="12"
+          font-weight="900" fill="#ea580c" font-family="Vazirmatn, sans-serif">9/24</text>
+        <!-- 11/24 -->
+        <line x1="335" y1="105" x2="335" y2="135" stroke="#ea580c" stroke-width="2"/>
+        <circle cx="335" cy="120" r="4" fill="#ea580c"/>
+        <text x="335" y="185" text-anchor="middle" font-size="12"
+          font-weight="900" fill="#ea580c" font-family="Vazirmatn, sans-serif">11/24</text>
+      </svg>
+      <div class="svg-caption">شکل ۲: بین ۱/۳ و ۱/۲ می‌توان بی‌شمار کسر پیدا کرد</div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۶: تبدیل کسر به اعشار -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec6">درس اصلی ۳: تبدیل کسر به اعشار</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        برای این‌که بفهمیم یک کسر، اعشارش مختوم است یا متناوب،
+        کافی است صورت را بر مخرج <b>تقسیم</b> کنیم. بگذار چند مثال بزنیم.
+      </div>
+    </div>
+
+    <div class="subsection-title">مثال ۱: کسر با اعشار مختوم</div>
+
+    <div class="example-box">
+      <h4>۵/۸ = ؟</h4>
+      <div class="step"><b>گام ۱:</b> ۵ را بر ۸ تقسیم می‌کنیم.</div>
+      <div class="step"><b>گام ۲:</b> ۵ ÷ ۸ = ۰/۶۲۵ (بدون ادامه).</div>
+      <div class="step"><b>گام ۳:</b> اینجا تقسیم تمام می‌شود.</div>
+      <div class="result-box">۵/۸ = ۰/۶۲۵ → اعشار مختوم</div>
+    </div>
+
+    <div class="subsection-title">مثال ۲: کسر با اعشار متناوب</div>
+
+    <div class="example-box">
+      <h4>۱/۳ = ؟</h4>
+      <div class="step"><b>گام ۱:</b> ۱ ÷ ۳ = ۰/۳۳۳۳... .</div>
+      <div class="step"><b>گام ۲:</b> این تقسیم هرگز تمام نمی‌شود، ولی رقم ۳ تکرار می‌شود.</div>
+      <div class="result-box">۱/۳ = ۰/۳̄ → اعشار متناوب</div>
+    </div>
+
+    <div class="example-box">
+      <h4>۵/۶ = ؟</h4>
+      <div class="step"><b>گام ۱:</b> ۵ ÷ ۶ = ۰/۸۳۳۳۳... .</div>
+      <div class="step"><b>گام ۲:</b> بعد از رقم ۸، رقم ۳ مرتب تکرار می‌شود.</div>
+      <div class="result-box">۵/۶ = ۰/۸۳̄ → اعشار متناوب</div>
+    </div>
+
+    <div class="example-box">
+      <h4>۷/۹ = ؟</h4>
+      <div class="step"><b>گام ۱:</b> ۷ ÷ ۹ = ۰/۷۷۷۷... .</div>
+      <div class="step"><b>گام ۲:</b> رقم ۷ تکرار می‌شود.</div>
+      <div class="result-box">۷/۹ = ۰/۷̄ → اعشار متناوب</div>
+    </div>
+
+    <div class="subsection-title">مثال‌های بیشتر</div>
+
+    <div class="example-box">
+      <h4>۱) ۳/۲۰ = ؟</h4>
+      <div class="step">۳ ÷ ۲۰ = ۰/۱۵ → مختوم</div>
+    </div>
+
+    <div class="example-box">
+      <h4>۲) ۵/۱۶ = ؟</h4>
+      <div class="step">۵ ÷ ۱۶ = ۰/۳۱۲۵ → مختوم</div>
+    </div>
+
+    <div class="example-box">
+      <h4>۳) ۵/۱۱ = ؟</h4>
+      <div class="step">۵ ÷ ۱۱ = ۰/۴۵۴۵۴۵... → متناوب (۴۵ تکرار می‌شود)</div>
+    </div>
+
+    <div class="example-box">
+      <h4>۴) ۷/۲۲ = ؟</h4>
+      <div class="step">۷ ÷ ۲۲ = ۰/۳۱۸۱۸۱۸... → متناوب (۱۸ تکرار می‌شود)</div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۷: شرط مختوم بودن -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec7">درس اصلی ۴: شرط مختوم بودن اعشار</div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        فرسام جان، آیا راهی هست که از قبل بفهمیم یک کسر، اعشارش مختوم است یا متناوب؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        بله! یک <span class="highlight">قانون طلایی</span> وجود دارد.
+      </div>
+    </div>
+
+    <div class="def-box green">
+      <b>شرط مختوم بودن اعشار یک کسر:</b> اگر یک کسر را <b>ساده کنیم</b>،
+      آنگاه اعشارش <b>مختوم</b> است اگر و تنها اگر مخرج کسر ساده‌شده،
+      <b>فقط شمارنده‌ی اول ۲ و ۵</b> داشته باشد.
+      <br><br>
+      یعنی مخرج به‌صورت <span class="math-inline">2ᵃ × 5ᵇ</span> باشد.
+    </div>
+
+    <div class="subsection-title">مثال: بررسی شرط</div>
+
+    <div class="example-box">
+      <h4>۱) ۷/۲۰ — آیا اعشارش مختوم است؟</h4>
+      <div class="step"><b>گام ۱:</b> ساده‌شده است: ۷/۲۰.</div>
+      <div class="step"><b>گام ۲:</b> ۲۰ را به شمارنده‌های اول تجزیه می‌کنیم: <span class="math-inline">20 = 2² × 5</span>.</div>
+      <div class="step"><b>گام ۳:</b> فقط ۲ و ۵ وجود دارند. پس مختوم است ✅.</div>
+      <div class="result-box">۷/۲۰ = ۰/۳۵</div>
+    </div>
+
+    <div class="example-box">
+      <h4>۲) ۵/۱۲ — آیا اعشارش مختوم است؟</h4>
+      <div class="step"><b>گام ۱:</b> ساده‌شده است: ۵/۱۲.</div>
+      <div class="step"><b>گام ۲:</b> ۱۲ = <span class="math-inline">2² × 3</span>.</div>
+      <div class="step"><b>گام ۳:</b> عدد اول ۳ در مخرج هست. پس مختوم نیست ❌ (متناوب است).</div>
+      <div class="result-box">۵/۱۲ = ۰/۴۱۶۶۶... → متناوب</div>
+    </div>
+
+    <div class="example-box">
+      <h4>۳) ۷/۱۵ — آیا اعشارش مختوم است؟</h4>
+      <div class="step"><b>گام ۱:</b> ساده‌شده است: ۷/۱۵.</div>
+      <div class="step"><b>گام ۲:</b> ۱۵ = <span class="math-inline">3 × 5</span>.</div>
+      <div class="step"><b>گام ۳:</b> عدد ۳ در مخرج هست. پس مختوم نیست ❌.</div>
+      <div class="result-box">۷/۱۵ = ۰/۴۶۶۶... → متناوب</div>
+    </div>
+
+    <div class="example-box">
+      <h4>۴) ۹/۲۴ — آیا اعشارش مختوم است؟ (توجه: اول ساده کن!)</h4>
+      <div class="step"><b>گام ۱:</b> ابتدا ساده می‌کنیم: (9÷3)/(24÷3) = ۳/۸.</div>
+      <div class="step"><b>گام ۲:</b> ۸ = <span class="math-inline">2³</span>.</div>
+      <div class="step"><b>گام ۳:</b> فقط ۲ وجود دارد. پس مختوم است ✅.</div>
+      <div class="result-box">۹/۲۴ = ۳/۸ = ۰/۳۷۵</div>
+    </div>
+
+    <div class="warning-box">
+      <strong>⚠️ اشتباه رایج:</strong> خیلی از دانش‌آموزان فراموش می‌کنند کسر را <b>اول ساده کنند</b>.
+      مثال: ۹/۲۴ اگر ساده نشود، مخرجش ۲۴ است که شامل ۳ می‌شود.
+      ولی بعد از ساده شدن، مخرج ۸ می‌شود که فقط شامل ۲ است. پس مختوم است.
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۸: تبدیل اعشار به کسر -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec8">درس اصلی ۵: تبدیل اعشار به کسر</div>
+
+    <div class="subsection-title">حالت ۱: اعشار مختوم</div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        برای تبدیل اعشار مختوم به کسر، از <b>مخرج‌های ۱۰، ۱۰۰، ۱۰۰۰</b> استفاده می‌کنیم.
+      </div>
+    </div>
+
+    <div class="example-box">
+      <h4>۰/۲۵ = ؟</h4>
+      <div class="step"><b>گام ۱:</b> دو رقم بعد از ممیز داریم، پس مخرج ۱۰۰ می‌شود.</div>
+      <div class="step"><b>گام ۲:</b> ۰/۲۵ = ۲۵/۱۰۰.</div>
+      <div class="step"><b>گام ۳:</b> ساده می‌کنیم: ۲۵/۱۰۰ = ۱/۴.</div>
+      <div class="result-box">۰/۲۵ = ۱/۴</div>
+    </div>
+
+    <div class="example-box">
+      <h4>۰/۱۲۵ = ؟</h4>
+      <div class="step">سه رقم اعشار داریم → مخرج ۱۰۰۰ → ۱۲۵/۱۰۰۰ = ۱/۸.</div>
+      <div class="result-box">۰/۱۲۵ = ۱/۸</div>
+    </div>
+
+    <div class="example-box">
+      <h4>۳/۷۵ = ؟ (عدد مخلوط)</h4>
+      <div class="step">۳/۷۵ = ۳ + ۰/۷۵ = ۳ + ۷۵/۱۰۰ = ۳ + ۳/۴ = ۳ و ۳/۴.</div>
+      <div class="step">یا به‌صورت کسر: ۱۵/۴.</div>
+      <div class="result-box">۳/۷۵ = ۱۵/۴</div>
+    </div>
+
+    <div class="subsection-title">حالت ۲: اعشار متناوب</div>
+
+    <div class="dialog">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        اگر اعشار متناوب باشد، چطور به کسر تبدیل کنیم؟
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        از یک ترفند استفاده می‌کنیم. بگذار با مثال نشان بدهم.
+      </div>
+    </div>
+
+    <div class="example-box">
+      <h4>۰/۳̄ = ؟ (عدد ۳ تکرار می‌شود)</h4>
+      <div class="step"><b>گام ۱:</b> فرض کن x = ۰/۳۳۳۳... .</div>
+      <div class="step"><b>گام ۲:</b> دو طرف را در ۱۰ ضرب می‌کنیم: 10x = ۳/۳۳۳۳... .</div>
+      <div class="step"><b>گام ۳:</b> طرف دوم را می‌نویسیم: 10x = ۳ + x.</div>
+      <div class="step"><b>گام ۴:</b> حل می‌کنیم: 9x = ۳ → x = ۳/۹ = ۱/۳.</div>
+      <div class="result-box">۰/۳̄ = ۱/۳</div>
+    </div>
+
+    <div class="example-box">
+      <h4>۰/۷̄ = ؟</h4>
+      <div class="step">مشابه قبل: x = ۰/۷۷۷... ، 10x = ۷ + x → 9x = ۷ → x = ۷/۹.</div>
+      <div class="result-box">۰/۷̄ = ۷/۹</div>
+    </div>
+
+    <div class="example-box">
+      <h4>۰/۲۷۲۷۲۷... = ؟ (دو رقم ۲۷ تکرار می‌شوند)</h4>
+      <div class="step"><b>گام ۱:</b> x = ۰/۲۷۲۷۲۷... .</div>
+      <div class="step"><b>گام ۲:</b> این بار در ۱۰۰ ضرب می‌کنیم (چون دو رقم تکرار می‌شود):
+        <br>
+        100x = ۲۷/۲۷۲۷۲۷... .
+      </div>
+      <div class="step"><b>گام ۳:</b> طرف دوم: 100x = ۲۷ + x.</div>
+      <div class="step"><b>گام ۴:</b> 99x = ۲۷ → x = ۲۷/۹۹ = ۳/۱۱.</div>
+      <div class="result-box">۰/۲۷۲۷۲۷... = ۳/۱۱</div>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 قانون کلی:</strong>
+      <ul style="padding-right:20px; margin-top:8px;">
+        <li>اگر <b>یک رقم</b> تکرار می‌شود، در ۱۰ ضرب کن.</li>
+        <li>اگر <b>دو رقم</b> تکرار می‌شوند، در ۱۰۰ ضرب کن.</li>
+        <li>اگر <b>سه رقم</b> تکرار می‌شوند، در ۱۰۰۰ ضرب کن.</li>
+      </ul>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۹: تمرین‌ها -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec9">تمرین‌های جامع با حل گام‌به‌گام</div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۱</span>
+        کدام‌یک از موارد زیر، عدد گویا است؟ (با ذکر دلیل)
+      </div>
+      <p>الف) ۷</p>
+      <p>ب) −۹</p>
+      <p>پ) ۰</p>
+      <p>ت) ۳/۵</p>
+      <p>ث) √۲</p>
+      <details>
+        <summary style="cursor:pointer;color:#0e7490;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>الف) ۷:</b> گویا ✅ چون 7/1.</div>
+        <div class="step"><b>ب) −۹:</b> گویا ✅ چون −9/1.</div>
+        <div class="step"><b>پ) ۰:</b> گویا ✅ چون 0/1.</div>
+        <div class="step"><b>ت) ۳/۵:</b> گویا ✅ چون صورت و مخرج صحیح هستند.</div>
+        <div class="step"><b>ث) √۲:</b> گنگ ❌ (کسر نیست).</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۲</span>
+        بین ۱/۴ و ۱/۳ دو کسر پیدا کنید.
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#0e7490;font-weight:700;padding:8px 0;">نمایش پاسخ گام‌به‌گام</summary>
+        <div class="step"><b>گام ۱:</b> مخرج مشترک بگیریم: 1/4 = 3/12 و 1/3 = 4/12.</div>
+        <div class="step"><b>گام ۲:</b> مخرج را بزرگ‌تر می‌کنیم: 1/4 = 6/24 و 1/3 = 8/24.</div>
+        <div class="step"><b>گام ۳:</b> کسرهای بین آن‌ها: 7/24.</div>
+        <div class="step"><b>گام ۴:</b> بازهم بزرگ‌تر: 1/4 = 9/36 و 1/3 = 12/36.</div>
+        <div class="step"><b>گام ۵:</b> کسرهای بین: 10/36, 11/36.</div>
+        <div class="result-box">دو نمونه: <b>۷/۲۴ و ۱۰/۳۶</b></div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۳</span>
+        نمایش اعشاری هر یک از کسرهای زیر را بنویسید و مشخص کنید مختوم است یا متناوب.
+      </div>
+      <p>الف) ۳/۴</p>
+      <p>ب) ۲/۳</p>
+      <p>پ) ۷/۸</p>
+      <p>ت) ۵/۶</p>
+      <details>
+        <summary style="cursor:pointer;color:#0e7490;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>الف) ۳/۴:</b> 3 ÷ 4 = 0/75 → <b>مختوم</b></div>
+        <div class="step"><b>ب) ۲/۳:</b> 2 ÷ 3 = 0/666... = 0/6̄ → <b>متناوب</b></div>
+        <div class="step"><b>پ) ۷/۸:</b> 7 ÷ 8 = 0/875 → <b>مختوم</b></div>
+        <div class="step"><b>ت) ۵/۶:</b> 5 ÷ 6 = 0/8333... = 0/83̄ → <b>متناوب</b></div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۴</span>
+        با استفاده از شرط مختوم بودن، مشخص کنید کدام یک از کسرهای زیر اعشارشان مختوم است:
+      </div>
+      <p>الف) ۷/۲۰</p>
+      <p>ب) ۵/۱۲</p>
+      <p>پ) ۹/۲۴</p>
+      <p>ت) ۱۱/۱۵</p>
+      <details>
+        <summary style="cursor:pointer;color:#0e7490;font-weight:700;padding:8px 0;">نمایش پاسخ گام‌به‌گام</summary>
+        <div class="step"><b>الف) ۷/۲۰:</b> 20 = 2² × 5 → <b>مختوم ✅</b></div>
+        <div class="step"><b>ب) ۵/۱۲:</b> 12 = 2² × 3 → شامل ۳ است → <b>متناوب ❌</b></div>
+        <div class="step"><b>پ) ۹/۲۴:</b> اول ساده: 9/24 = 3/8. 8 = 2³ → <b>مختوم ✅</b></div>
+        <div class="step"><b>ت) ۱۱/۱۵:</b> 15 = 3 × 5 → شامل ۳ است → <b>متناوب ❌</b></div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۵</span>
+        اعشارهای زیر را به کسر تبدیل کنید:
+      </div>
+      <p>الف) ۰/۶</p>
+      <p>ب) ۰/۳۵</p>
+      <p>پ) ۱/۲۵</p>
+      <details>
+        <summary style="cursor:pointer;color:#0e7490;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>الف) ۰/۶:</b> 6/10 = 3/5</div>
+        <div class="step"><b>ب) ۰/۳۵:</b> 35/100 = 7/20</div>
+        <div class="step"><b>پ) ۱/۲۵:</b> 1 + 0/25 = 1 + 25/100 = 1 + 1/4 = 5/4</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۶</span>
+        اعشار متناوب ۰/۴̄ را به کسر تبدیل کنید.
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#0e7490;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>گام ۱:</b> x = 0/444... .</div>
+        <div class="step"><b>گام ۲:</b> 10x = 4/444... = 4 + x.</div>
+        <div class="step"><b>گام ۳:</b> 9x = 4 → x = 4/9.</div>
+        <div class="result-box">۰/۴̄ = ۴/۹</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۷</span>
+        ثابت کنید که هر عدد صحیح، یک عدد گویا است.
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#0e7490;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>گام ۱:</b> فرض کن n یک عدد صحیح دلخواه باشد.</div>
+        <div class="step"><b>گام ۲:</b> می‌توانیم بنویسیم n = n/1.</div>
+        <div class="step"><b>گام ۳:</b> صورت n و مخرج ۱، هر دو صحیح هستند و مخرج صفر نیست.</div>
+        <div class="step"><b>گام ۴:</b> پس n یک عدد گویاست.</div>
+        <div class="result-box">Z ⊆ Q ∎</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۸</span>
+        بین ۱/۲ و ۲/۳ یک کسر پیدا کنید.
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#0e7490;font-weight:700;padding:8px 0;">نمایش پاسخ گام‌به‌گام</summary>
+        <div class="step"><b>روش ۱ (میانگین):</b> (1/2 + 2/3) ÷ 2 = (3/6 + 4/6) ÷ 2 = 7/6 ÷ 2 = 7/12.</div>
+        <div class="step"><b>روش ۲ (مخرج بزرگ‌تر):</b> 1/2 = 6/12، 2/3 = 8/12 → کسر وسط: 7/12.</div>
+        <div class="result-box">پاسخ: ۷/۱۲</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۹</span>
+        کدام‌یک از کسرهای زیر، اعشارشان مختوم است؟
+      </div>
+      <p>۱) ۵/۷</p>
+      <p>۲) ۳/۱۶</p>
+      <p>۳) ۹/۱۱</p>
+      <p>۴) ۲/۹</p>
+      <details>
+        <summary style="cursor:pointer;color:#0e7490;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>گزینه ۱ (۵/۷):</b> مخرج ۷ → ۷ شمارنده‌ی ۲ یا ۵ نیست → متناوب ❌</div>
+        <div class="step"><b>گزینه ۲ (۳/۱۶):</b> 16 = 2⁴ → فقط ۲ دارد → <b>مختوم ✅</b></div>
+        <div class="step"><b>گزینه ۳ (۹/۱۱):</b> ۱۱ شمارنده‌ی ۲ یا ۵ نیست → متناوب ❌</div>
+        <div class="step"><b>گزینه ۴ (۲/۹):</b> ۹ = 3² → شامل ۳ است → متناوب ❌</div>
+        <div class="result-box">پاسخ: گزینه ۲</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title">
+        <span class="num">۱۰</span>
+        اعشار متناوب ۰/۱۲̄ را به کسر تبدیل کنید. (توجه: ۱ تکرار نمی‌شود ولی ۲ تکرار می‌شود)
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#0e7490;font-weight:700;padding:8px 0;">نمایش پاسخ گام‌به‌گام</summary>
+        <div class="step"><b>گام ۱:</b> x = 0/1222... .</div>
+        <div class="step"><b>گام ۲:</b> دو طرف را در ۱۰ ضرب می‌کنیم تا رقم غیرتکراری از ممیز خارج شود:
+          <br>
+          10x = 1/222... .
+        </div>
+        <div class="step"><b>گام ۳:</b> حالا دو طرف را در ۱۰ ضرب می‌کنیم:
+          <br>
+          100x = 12/222... .
+        </div>
+        <div class="step"><b>گام ۴:</b> تفریق می‌کنیم: 100x − 10x = 12/222... − 1/222... = 11.</div>
+        <div class="step"><b>گام ۵:</b> 90x = 11 → x = 11/90.</div>
+        <div class="result-box">۰/۱۲̄ = ۱۱/۹۰</div>
+      </details>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- بخش ۱۰: جدول و نکات -->
+    <!-- ============================================================= -->
+    <div class="section-title" id="sec10">جدول خلاصه و نکات امتحانی</div>
+
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>مفهوم</th>
+          <th>تعریف / فرمول</th>
+          <th>مثال</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>عدد گویا</td>
+          <td class="math-inline">Q = {a/b | a,b∈Z, b≠0}</td>
+          <td>1/2، 3، −5، 0</td>
+        </tr>
+        <tr>
+          <td>رابطه‌ی Z و Q</td>
+          <td class="math-inline">Z ⊆ Q</td>
+          <td>هر صحیح، گویا هم هست</td>
+        </tr>
+        <tr>
+          <td>کسرهای مساوی</td>
+          <td class="math-inline">a/b = (a×k)/(b×k)</td>
+          <td>1/2 = 2/4 = 3/6</td>
+        </tr>
+        <tr>
+          <td>ساده کردن کسر</td>
+          <td>تقسیم صورت و مخرج بر ب.م.م</td>
+          <td>12/18 = 2/3</td>
+        </tr>
+        <tr>
+          <td>بین دو کسر</td>
+          <td>بی‌شمار کسر وجود دارد</td>
+          <td>بین 1/3 و 1/2</td>
+        </tr>
+        <tr>
+          <td>اعشار مختوم</td>
+          <td>تعداد رقم‌ها محدود</td>
+          <td>0/5، 0/25، 3/75</td>
+        </tr>
+        <tr>
+          <td>اعشار متناوب</td>
+          <td>الگوی تکرارشونده دارد</td>
+          <td>0/333...، 0/1666...</td>
+        </tr>
+        <tr>
+          <td>شرط مختوم بودن</td>
+          <td>مخرج ساده‌شده فقط ۲ و ۵</td>
+          <td>7/20 مختوم، 5/12 متناوب</td>
+        </tr>
+        <tr>
+          <td>اعشار → کسر (مختوم)</td>
+          <td class="math-inline">x/10، x/100، ...</td>
+          <td>0/25 = 25/100 = 1/4</td>
+        </tr>
+        <tr>
+          <td>اعشار → کسر (متناوب)</td>
+          <td>ضرب در ۱۰، ۱۰۰، ۱۰۰۰ ...</td>
+          <td>0/3̄ = 1/3</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="big-quote">
+      «بین هر دو عدد گویا، بی‌شمار عدد گویای دیگر وجود دارد.»
+    </div>
+
+    <div class="warning-box">
+      <strong>⚠️ شش اشتباه رایج در این درس:</strong>
+      <ol style="margin-top:10px; padding-right:20px;">
+        <li>فکر کنی هر عدد، گویاست. (نه! √2 و π گنگ هستند)</li>
+        <li>فراموش کنی که هر عدد صحیح، یک عدد گویا هم هست.</li>
+        <li>در شرط مختوم بودن، اول کسر را ساده نکنی.</li>
+        <li>فکر کنی بین دو کسر فقط یکی دو کسر وجود دارد.</li>
+        <li>مخرج را در ساده‌کردن کسر، اشتباه محاسبه کنی.</li>
+        <li>در تبدیل اعشار متناوب، تعداد رقم‌های تکراری را اشتباه بشمری.</li>
+      </ol>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 روش گام‌به‌گام حل هر مسئله:</strong>
+      <ol style="padding-right:20px; margin-top:8px;">
+        <li><b>گام ۱:</b> مسئله را بخوان و بفهم چه می‌خواهد.</li>
+        <li><b>گام ۲:</b> اگر لازم است، کسرها را ساده کن.</li>
+        <li><b>گام ۳:</b> برای تشخیص مختوم بودن، مخرج را به شمارنده‌های اول تجزیه کن.</li>
+        <li><b>گام ۴:</b> برای تبدیل اعشار به کسر، ببین مختوم است یا متناوب.</li>
+        <li><b>گام ۵:</b> جواب را ساده کن و به‌صورت کسر بنویس.</li>
+      </ol>
+    </div>
+
+    <div class="note-box">
+      <strong>💡 جدول شمارنده‌های اول کوچک (به خاطر بسپار):</strong>
+      <br>
+      2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, ...
+      <br><br>
+      <b>در تجزیه‌ی مخرج:</b>
+      <ul style="padding-right:20px;">
+        <li>۸ = 2³</li>
+        <li>۱۰ = 2 × 5</li>
+        <li>۱۶ = 2⁴</li>
+        <li>۲۰ = 2² × 5</li>
+        <li>۲۵ = 5²</li>
+        <li>۱۲ = 2² × 3</li>
+        <li>۱۵ = 3 × 5</li>
+        <li>۱۸ = 2 × 3²</li>
+      </ul>
+    </div>
+
+    <!-- جمع‌بندی -->
+    <div class="dialog" style="margin-top:30px;">
+      <div class="avatar sarvnaz">سروناز</div>
+      <div class="bubble sarvnaz">
+        <span class="speaker sarvnaz">خانم سروناز:</span>
+        خب فرسام جان، امروز در این درس یاد گرفتیم:
+        <ul style="margin-top:8px; padding-right:20px;">
+          <li><b>عدد گویا</b> عددی است که می‌توان آن را به‌صورت a/b نوشت.</li>
+          <li>هر <b>عدد صحیح</b>، خودش هم یک عدد گویاست.</li>
+          <li>بین هر دو کسر متمایز، <b>بی‌شمار کسر</b> دیگر وجود دارد.</li>
+          <li>اعشار به سه دسته تقسیم می‌شود: <b>مختوم</b>، <b>متناوب</b> و <b>نامتناوب</b>.</li>
+          <li>کسر اعشار مختوم دارد اگر مخرج ساده‌شده‌اش فقط شمارنده‌ی اول ۲ و ۵ داشته باشد.</li>
+          <li>با روش‌های خاص می‌توان اعشار متناوب را به کسر تبدیل کرد.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="dialog">
+      <div class="avatar farsam">فرسام</div>
+      <div class="bubble farsam">
+        <span class="speaker farsam">آقای فرسام:</span>
+        آفرین! این درس پایه‌ی فصل دوم است. در درس بعدی یاد می‌گیریم که
+        عددهای گویا و گنگ با هم چه چیزی می‌سازند: <b>عددهای حقیقی</b>.
+        <br><br>
+        حالا تمرین‌های کتاب را کامل حل کن.
+        <br><br>
+        <strong>موفق باشی! 🌟</strong>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <strong>📘 آموزش جامع ریاضی نهم — فصل دوم، درس اول (کامل)</strong><br>
+    تهیه‌شده با ❤️ برای دانش‌آموزان عزیز | مدرسان: خانم سروناز و آقای فرسام<br>
+    <strong>اپلیکیشن همیار من (فراتر از آموزش)</strong><br>
+    موفق باشی! ✨
+  </footer>
+</div>
+</body>
+</html>

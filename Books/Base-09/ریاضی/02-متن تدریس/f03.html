@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جمع‌بندی جامع فصل سوم: استدلال و اثبات در هندسه</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Vazirmatn', Tahoma, sans-serif;
+  background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 50%, #ecfeff 100%);
+  color: #1e293b; line-height: 1.95; padding: 20px; font-size: 16px; }
+.container { max-width: 1200px; margin: 0 auto; background: #fff;
+  border-radius: 24px; box-shadow: 0 20px 60px rgba(30,41,59,0.15); overflow: hidden; }
+header { background: linear-gradient(135deg, #dc2626 0%, #ea580c 50%, #f59e0b 100%);
+  color: #fff; padding: 50px 30px; text-align: center; position: relative; }
+header::after { content: ""; position: absolute; bottom: -20px; left: 0; right: 0;
+  height: 40px; background: #fff;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+header h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 12px;
+  text-shadow: 0 3px 8px rgba(0,0,0,0.2); }
+header p { font-size: 1rem; opacity: 0.95; }
+.badges { display: flex; justify-content: center; gap: 10px;
+  flex-wrap: wrap; margin-top: 20px; }
+.badge { background: rgba(255,255,255,0.25);
+  border: 1px solid rgba(255,255,255,0.4);
+  padding: 6px 14px; border-radius: 50px;
+  font-size: 0.85rem; font-weight: 500; }
+main { padding: 45px 30px 60px; }
+.intro-box { background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+  border-right: 6px solid #f59e0b; padding: 22px 26px;
+  border-radius: 16px; margin-bottom: 30px; font-size: 1.02rem; }
+.intro-box strong { color: #92400e; }
+.toc { background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+  border: 2px solid #6366f1; border-radius: 18px;
+  padding: 22px 26px; margin-bottom: 40px; }
+.toc h3 { color: #3730a3; font-size: 1.15rem; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px; }
+.toc h3::before { content: "📋"; }
+.toc-grid { display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px; }
+.toc-item { background: #fff; border-radius: 12px; padding: 12px 16px;
+  border-right: 4px solid #6366f1; font-weight: 700;
+  color: #3730a3; font-size: 0.92rem;
+  text-decoration: none; transition: transform 0.2s ease; }
+.toc-item:hover { transform: translateX(-4px); }
+.section-title { font-size: 1.35rem; font-weight: 800; color: #c2410c;
+  margin: 45px 0 18px; padding-right: 14px;
+  border-right: 5px solid #ea580c;
+  display: flex; align-items: center; gap: 8px; }
+.section-title::before { content: "◆"; color: #f59e0b; font-size: 0.9rem; }
+.section-title.blue { color: #0e7490; border-right-color: #0891b2; }
+.section-title.blue::before { color: #06b6d4; }
+.section-title.pink { color: #9d174d; border-right-color: #db2777; }
+.section-title.pink::before { color: #ec4899; }
+.section-title.green { color: #047857; border-right-color: #059669; }
+.section-title.green::before { color: #10b981; }
+.subsection-title { font-size: 1.1rem; font-weight: 800; color: #1e40af;
+  margin: 26px 0 12px; padding-right: 10px;
+  border-right: 4px solid #3b82f6;
+  display: flex; align-items: center; gap: 6px; }
+.subsection-title::before { content: "▸"; color: #60a5fa; font-size: 0.85rem; }
+.formula-box { background: #fff7ed; border: 2px solid #fb923c;
+  border-radius: 14px; padding: 14px 20px; margin: 14px 0; text-align: center;
+  font-size: 1.1rem; font-weight: 700; color: #9a3412;
+  direction: ltr; font-family: 'Cambria Math', serif; }
+.note-box { background: #ecfdf5; border-right: 5px solid #10b981;
+  padding: 14px 20px; border-radius: 12px; margin: 16px 0;
+  color: #065f46; font-size: 0.98rem; }
+.warning-box { background: #fef2f2; border-right: 5px solid #ef4444;
+  padding: 14px 20px; border-radius: 12px; margin: 16px 0;
+  color: #991b1b; font-size: 0.98rem; }
+.def-box { background: #e0e7ff; border: 2px solid #4f46e5;
+  border-radius: 16px; padding: 16px 22px; margin: 16px 0; }
+.def-box::before { content: "📌 خلاصه"; display: inline-block;
+  background: #4f46e5; color: #fff; padding: 2px 12px;
+  border-radius: 8px; font-size: 0.82rem; font-weight: 700; margin-bottom: 10px; }
+.lesson-card { background: #f8fafc; border-radius: 20px;
+  padding: 26px 30px; margin-bottom: 30px;
+  border: 2px solid #e2e8f0; }
+.lesson-header { display: flex; align-items: center; gap: 15px;
+  margin-bottom: 20px; padding-bottom: 16px;
+  border-bottom: 3px dashed #cbd5e1; }
+.lesson-number { width: 60px; height: 60px; border-radius: 16px;
+  color: #fff; font-size: 1.5rem; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; }
+.lesson-number.l1 { background: linear-gradient(135deg, #dc2626, #ea580c);
+  box-shadow: 0 8px 20px rgba(220,38,38,0.35); }
+.lesson-number.l2 { background: linear-gradient(135deg, #7c3aed, #a855f7);
+  box-shadow: 0 8px 20px rgba(124,58,237,0.35); }
+.lesson-number.l3 { background: linear-gradient(135deg, #0891b2, #0ea5e9);
+  box-shadow: 0 8px 20px rgba(8,145,178,0.35); }
+.lesson-number.l4 { background: linear-gradient(135deg, #059669, #06b6d4);
+  box-shadow: 0 8px 20px rgba(5,150,105,0.35); }
+.lesson-title { font-size: 1.3rem; font-weight: 800; color: #1e293b; }
+.lesson-sub { font-size: 0.88rem; color: #64748b; font-weight: 500; }
+.svg-wrapper { background: #fff; border-radius: 16px; padding: 20px;
+  margin: 20px 0; text-align: center;
+  border: 2px solid #e0e7ff;
+  box-shadow: 0 8px 20px rgba(99,102,241,0.08); }
+.svg-wrapper svg { max-width: 100%; height: auto; }
+.svg-caption { font-size: 0.88rem; color: #64748b;
+  margin-top: 10px; font-style: italic; }
+.summary-table { width: 100%; border-collapse: collapse; margin: 20px 0;
+  background: #fff; border-radius: 14px; overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06); font-size: 0.94rem; }
+.summary-table th { background: linear-gradient(135deg, #dc2626, #ea580c);
+  color: #fff; padding: 12px 10px; font-size: 0.92rem; }
+.summary-table td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0;
+  font-size: 0.93rem; }
+.summary-table tr:nth-child(even) td { background: #f8fafc; }
+.summary-table tr:last-child td { border-bottom: none; }
+.mind-map { background: linear-gradient(135deg, #fef9c3 0%, #fde68a 100%);
+  border: 3px solid #eab308; border-radius: 20px;
+  padding: 30px; margin: 30px 0; }
+.mind-map h2 { color: #713f12; font-size: 1.5rem; margin-bottom: 20px;
+  text-align: center; display: flex; align-items: center;
+  justify-content: center; gap: 10px; }
+.mind-map h2::before { content: "🧠"; font-size: 1.6rem; }
+.mind-branches { display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px; margin-top: 20px; }
+.mind-branch { background: #fff; border-radius: 16px;
+  padding: 18px 20px; border-top: 5px solid #eab308;
+  box-shadow: 0 4px 14px rgba(234,179,8,0.15); }
+.mind-branch h4 { color: #92400e; font-size: 1.02rem;
+  margin-bottom: 10px; font-weight: 900; }
+.mind-branch ul { list-style: none; padding-right: 0;
+  font-size: 0.9rem; color: #713f12; }
+.mind-branch li { padding: 5px 0; border-bottom: 1px dashed #fde68a; }
+.mind-branch li:last-child { border-bottom: none; }
+.mind-branch li::before { content: "◄"; color: #eab308;
+  margin-left: 6px; font-size: 0.75rem; }
+.quick-ref { background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-radius: 20px; padding: 32px; margin: 40px 0; color: #f1f5f9; }
+.quick-ref h2 { color: #fbbf24; font-size: 1.4rem; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px; }
+.quick-ref h2::before { content: "⚡"; font-size: 1.5rem; }
+.qr-grid { display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px; margin-top: 16px; }
+.qr-item { background: rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 14px 18px;
+  border-right: 4px solid #fbbf24; font-size: 0.9rem; }
+.qr-item strong { color: #fbbf24; display: block;
+  margin-bottom: 6px; font-size: 0.98rem; }
+.qr-item span { direction: ltr; display: inline-block;
+  font-family: 'Cambria Math', serif; color: #cbd5e1; font-weight: 700; }
+.exercise { background: #fff; border: 2px dashed #ea580c;
+  border-radius: 16px; padding: 22px 26px; margin: 24px 0; }
+.exercise-title { font-weight: 800; color: #c2410c; font-size: 1.05rem;
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.exercise-title .num { display: inline-flex; width: 30px; height: 30px;
+  background: linear-gradient(135deg, #ea580c, #f59e0b);
+  color: #fff; border-radius: 50%; align-items: center;
+  justify-content: center; font-size: 0.9rem; font-weight: 900;
+  flex-shrink: 0; }
+.step { background: #fff; border-radius: 10px; padding: 10px 14px;
+  margin: 8px 0; border-right: 4px solid #ea580c; font-size: 0.96rem; }
+.step b { color: #c2410c; }
+.result-box { background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 2px solid #10b981; border-radius: 12px;
+  padding: 14px 18px; margin-top: 12px; text-align: center;
+  font-weight: 700; color: #065f46; }
+.exam-tips { background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+  border: 3px solid #4f46e5; border-radius: 20px;
+  padding: 30px; margin: 40px 0; }
+.exam-tips h2 { color: #3730a3; font-size: 1.5rem;
+  margin-bottom: 22px; display: flex; align-items: center; gap: 10px; }
+.exam-tips h2::before { content: "🏆"; font-size: 1.6rem; }
+.tip-card { background: #fff; border-radius: 16px;
+  padding: 20px 24px; margin: 16px 0;
+  border-right: 5px solid #6366f1;
+  box-shadow: 0 4px 14px rgba(99,102,241,0.08); }
+.tip-card h3 { color: #3730a3; font-size: 1.08rem;
+  margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.tip-card.danger { border-right-color: #dc2626; }
+.tip-card.danger h3 { color: #991b1b; }
+.tip-card.success { border-right-color: #16a34a; }
+.tip-card.success h3 { color: #166534; }
+.tip-card.warning { border-right-color: #f59e0b; }
+.tip-card.warning h3 { color: #92400e; }
+.checklist { background: #fff; border-radius: 16px;
+  padding: 22px 26px; margin: 22px 0;
+  border: 2px dashed #6366f1; }
+.checklist h3 { color: #3730a3; font-size: 1.12rem;
+  margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.checklist h3::before { content: "✅"; font-size: 1.15rem; }
+.checklist label { display: flex; align-items: flex-start;
+  gap: 10px; padding: 8px 0; cursor: pointer;
+  font-size: 0.96rem; border-bottom: 1px dashed #e0e7ff; }
+.checklist label:last-child { border-bottom: none; }
+.checklist input[type="checkbox"] { width: 20px; height: 20px;
+  margin-top: 4px; accent-color: #6366f1;
+  cursor: pointer; flex-shrink: 0; }
+.big-quote { background: linear-gradient(135deg, #fef9c3, #fde68a);
+  border: 2px dashed #eab308; border-radius: 16px;
+  padding: 18px 22px; margin: 20px 0; text-align: center;
+  font-weight: 700; color: #713f12; font-size: 1.05rem; }
+footer { text-align: center; padding: 30px 20px;
+  background: #1e293b; color: #cbd5e1; font-size: 0.9rem; }
+footer strong { color: #fbbf24; }
+.math-inline { direction: ltr; unicode-bidi: isolate; display: inline-block;
+  font-family: 'Cambria Math', serif; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>📘 جمع‌بندی جامع فصل سوم: استدلال و اثبات در هندسه</h1>
+    <p>مرور کامل چهار درس + نقشه‌ی ذهنی + نمونه سؤال + چک‌لیست</p>
+    <div class="badges">
+      <span class="badge">📚 مرور کل فصل</span>
+      <span class="badge">🧠 نقشه‌ی ذهنی</span>
+      <span class="badge">⚡ مرجع سریع</span>
+      <span class="badge">📝 نمونه سؤال</span>
+      <span class="badge">✅ چک‌لیست مطالعه</span>
+    </div>
+  </header>
+
+  <main>
+
+    <div class="intro-box">
+      <strong>سلام دانش‌آموز عزیز! 🌟</strong><br>
+      این فایل، <strong>جمع‌بندی کامل فصل سوم</strong> است. همه‌ی آن‌چه در چهار درس یاد گرفتی
+      (استدلال، فرض و حکم، هم‌نهشتی مثلث‌ها و حل مسئله) در یک نگاه خلاصه شده.
+      از این فایل برای <b>مرور سریع قبل از امتحان</b> استفاده کن.
+    </div>
+
+    <!-- فهرست مطالب -->
+    <div class="toc">
+      <h3>فهرست مطالب</h3>
+      <div class="toc-grid">
+        <a href="#lesson1" class="toc-item">📍 درس ۱: استدلال</a>
+        <a href="#lesson2" class="toc-item">📍 درس ۲: آشنایی با اثبات</a>
+        <a href="#lesson3" class="toc-item">📍 درس ۳: هم‌نهشتی مثلث‌ها</a>
+        <a href="#lesson4" class="toc-item">📍 درس ۴: حل مسئله در هندسه</a>
+        <a href="#mindmap" class="toc-item">🧠 نقشه‌ی ذهنی کل فصل</a>
+        <a href="#quickref" class="toc-item">⚡ مرجع سریع فرمول‌ها</a>
+        <a href="#exercises" class="toc-item">📝 نمونه سؤال</a>
+        <a href="#tips" class="toc-item">🏆 نکات امتحانی</a>
+        <a href="#checklist" class="toc-item">✅ چک‌لیست مطالعه</a>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- درس ۱ -->
+    <!-- ============================================================ -->
+    <div class="section-title" id="lesson1">درس ۱: استدلال</div>
+
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-number l1">۱</div>
+        <div>
+          <div class="lesson-title">استقرا و قیاس</div>
+          <div class="lesson-sub">چرا استدلال قیاسی معتبرتر است؟</div>
+        </div>
+      </div>
+
+      <div class="def-box">
+        <b>استدلال استقرایی:</b> از چند نمونه‌ی خاص، نتیجه‌ی کلی می‌گیریم.
+        <br>
+        <b>استدلال قیاسی:</b> از یک قاعده‌ی کلی، نتیجه‌ی خاص می‌گیریم.
+        <br><br>
+        <b>نتیجه:</b> در ریاضی، قیاس معتبرتر است چون نتیجه‌ی <b>قطعی</b> می‌دهد.
+      </div>
+
+      <div class="subsection-title">چرا حس‌ها کافی نیستند؟</div>
+      <div class="note-box">
+        <ul style="padding-right:20px;">
+          <li><b>خطای حسی:</b> چشم و گوش ممکن است فریب بخورند.</li>
+          <li><b>محدودیت:</b> نمی‌توان همه‌ی حالت‌ها را اندازه گرفت.</li>
+          <li><b>عدم عمومیت:</b> مشاهده‌ی چند نمونه، اثبات یک ادعای کلی نیست.</li>
+        </ul>
+      </div>
+
+      <div class="subsection-title">مثال کلاسیک: خطای دید</div>
+
+      <div class="svg-wrapper">
+        <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg">
+          <rect width="720" height="260" fill="#f8fafc" rx="18"/>
+          <text x="360" y="30" text-anchor="middle" font-size="15"
+            font-weight="900" fill="#1e293b" font-family="Vazirmatn, sans-serif">
+            خطای دید: دو دایره‌ی وسط دقیقاً هم‌اندازه هستند
+          </text>
+          <g>
+            <circle cx="120" cy="120" r="30" fill="#7c3aed"/>
+            <circle cx="180" cy="120" r="30" fill="#7c3aed"/>
+            <circle cx="70" cy="180" r="30" fill="#7c3aed"/>
+            <circle cx="230" cy="180" r="30" fill="#7c3aed"/>
+            <circle cx="120" cy="230" r="30" fill="#7c3aed"/>
+            <circle cx="180" cy="230" r="30" fill="#7c3aed"/>
+            <circle cx="150" cy="175" r="22" fill="#ec4899"/>
+          </g>
+          <g>
+            <circle cx="430" cy="120" r="16" fill="#7c3aed"/>
+            <circle cx="470" cy="120" r="16" fill="#7c3aed"/>
+            <circle cx="510" cy="120" r="16" fill="#7c3aed"/>
+            <circle cx="410" cy="160" r="16" fill="#7c3aed"/>
+            <circle cx="530" cy="160" r="16" fill="#7c3aed"/>
+            <circle cx="410" cy="200" r="16" fill="#7c3aed"/>
+            <circle cx="530" cy="200" r="16" fill="#7c3aed"/>
+            <circle cx="430" cy="240" r="16" fill="#7c3aed"/>
+            <circle cx="470" cy="240" r="16" fill="#7c3aed"/>
+            <circle cx="510" cy="240" r="16" fill="#7c3aed"/>
+            <circle cx="470" cy="180" r="22" fill="#ec4899"/>
+          </g>
+        </svg>
+        <div class="svg-caption">شکل ۱: اگر با خط‌کش اندازه بگیرید، هر دو دایره‌ی وسط دقیقاً شعاع یکسان دارند</div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- درس ۲ -->
+    <!-- ============================================================ -->
+    <div class="section-title blue" id="lesson2">درس ۲: آشنایی با اثبات در هندسه</div>
+
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-number l2">۲</div>
+        <div>
+          <div class="lesson-title">فرض، حکم، اصل موضوع، قضیه</div>
+          <div class="lesson-sub">پایه‌ی هر اثبات هندسی</div>
+        </div>
+      </div>
+
+      <div class="def-box">
+        <b>فرض:</b> اطلاعات داده‌شده (آن‌چه از قبل می‌دانیم).
+        <br>
+        <b>حکم:</b> چیزی که باید اثبات کنیم.
+        <br>
+        <b>تعریف:</b> توضیح دقیق یک مفهوم.
+        <br>
+        <b>اصل موضوع:</b> حقیقتی که بدون اثبات می‌پذیریم.
+        <br>
+        <b>قضیه:</b> گزاره‌ای که با استدلال اثبات شده است.
+      </div>
+
+      <div class="subsection-title">مراحل پنج‌گانه‌ی اثبات</div>
+      <div class="note-box">
+        <ol style="padding-right:20px;">
+          <li>مسئله را دقیق بخوان.</li>
+          <li>شکل مناسب رسم کن.</li>
+          <li>فرض و حکم را بنویس.</li>
+          <li>با استدلال، از فرض به حکم برس.</li>
+          <li>در پایان با علامت <b>∎</b> اثبات را ببند.</li>
+        </ol>
+      </div>
+
+      <div class="subsection-title">مثال: اثبات قضیه‌ی زاویه‌ی خارجی مثلث</div>
+
+      <div class="svg-wrapper">
+        <svg viewBox="0 0 620 340" xmlns="http://www.w3.org/2000/svg">
+          <rect width="620" height="340" fill="#fffbeb" rx="18"/>
+          <text x="310" y="30" text-anchor="middle" font-size="15"
+            font-weight="900" fill="#78350f" font-family="Vazirmatn, sans-serif">
+            زاویه‌ی خارجی مثلث = مجموع دو زاویه‌ی داخلی غیرمجاور
+          </text>
+          <polygon points="280,80 100,270 400,270"
+            fill="#e9d5ff" stroke="#4c1d95" stroke-width="2.5"/>
+          <line x1="400" y1="270" x2="560" y2="270"
+            stroke="#dc2626" stroke-width="2.5"/>
+          <path d="M 280 80 L 256.29 104.58 A 34 34 0 0 0 299.14 108.65 Z"
+            fill="#f9a8d4" fill-opacity="0.55" stroke="none"/>
+          <path d="M 256.29 104.58 A 34 34 0 0 0 299.14 108.65"
+            fill="none" stroke="#db2777" stroke-width="3" stroke-linecap="round"/>
+          <path d="M 100 270 L 122.22 247.78 A 34 34 0 0 1 134 270 Z"
+            fill="#93c5fd" fill-opacity="0.55" stroke="none"/>
+          <path d="M 122.22 247.78 A 34 34 0 0 1 134 270"
+            fill="none" stroke="#1d4ed8" stroke-width="3" stroke-linecap="round"/>
+          <path d="M 400 270 L 366 270 A 34 34 0 0 1 381.86 241.28 Z"
+            fill="#ddd6fe" fill-opacity="0.55" stroke="none"/>
+          <path d="M 366 270 A 34 34 0 0 1 381.86 241.28"
+            fill="none" stroke="#6d28d9" stroke-width="3" stroke-linecap="round"/>
+          <path d="M 400 270 L 442 270 A 42 42 0 0 0 377.57 234.51 Z"
+            fill="#fca5a5" fill-opacity="0.55" stroke="none"/>
+          <path d="M 442 270 A 42 42 0 0 0 377.57 234.51"
+            fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/>
+          <text x="280" y="65" text-anchor="middle" font-size="18"
+            font-weight="900" fill="#4c1d95" font-family="Vazirmatn, sans-serif">A</text>
+          <text x="80" y="290" text-anchor="middle" font-size="18"
+            font-weight="900" fill="#4c1d95" font-family="Vazirmatn, sans-serif">B</text>
+          <text x="400" y="295" text-anchor="middle" font-size="18"
+            font-weight="900" fill="#4c1d95" font-family="Vazirmatn, sans-serif">C</text>
+          <text x="575" y="275" text-anchor="middle" font-size="18"
+            font-weight="900" fill="#dc2626" font-family="Vazirmatn, sans-serif">D</text>
+          <text x="278" y="130" text-anchor="middle" font-size="16"
+            font-weight="900" fill="#db2777" font-family="Vazirmatn, sans-serif">A</text>
+          <text x="124" y="240" text-anchor="middle" font-size="16"
+            font-weight="900" fill="#1d4ed8" font-family="Vazirmatn, sans-serif">B</text>
+          <text x="376" y="240" text-anchor="middle" font-size="16"
+            font-weight="900" fill="#6d28d9" font-family="Vazirmatn, sans-serif">C</text>
+          <text x="440" y="252" text-anchor="middle" font-size="14"
+            font-weight="900" fill="#dc2626" font-family="Vazirmatn, sans-serif">خارجی</text>
+        </svg>
+        <div class="svg-caption">شکل ۲: زاویه‌ی A با کمان صورتی، زاویه‌ی خارجی در C با کمان قرمز</div>
+      </div>
+
+      <div class="formula-box">
+        زاویه‌ی خارجی C = A + B
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- درس ۳ -->
+    <!-- ============================================================ -->
+    <div class="section-title pink" id="lesson3">درس ۳: هم‌نهشتی مثلث‌ها</div>
+
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-number l3">۳</div>
+        <div>
+          <div class="lesson-title">چهار حالت هم‌نهشتی و CPCTC</div>
+          <div class="lesson-sub">پرکاربردترین ابزار اثبات در هندسه</div>
+        </div>
+      </div>
+
+      <div class="def-box">
+        <b>چهار حالت هم‌نهشتی:</b>
+        <ul style="padding-right:20px; margin-top:8px;">
+          <li><b>(ض ض ض):</b> سه ضلع برابر</li>
+          <li><b>(ض ز ض):</b> دو ضلع و زاویه‌ی بین</li>
+          <li><b>(ز ض ز):</b> دو زاویه و ضلع بین</li>
+          <li><b>(ز ز ض):</b> دو زاویه و ضلع مقابل</li>
+        </ul>
+        <br>
+        <b>⚠️ (ز ز ز) وجود ندارد!</b>
+        <br><br>
+        <b>CPCTC:</b> اجزای متناظر دو مثلث هم‌نهشت با هم برابرند.
+      </div>
+
+      <div class="subsection-title">حالت (ز ض ز) با کمان‌های ضخیم</div>
+
+      <div class="svg-wrapper">
+        <svg viewBox="0 0 780 400" xmlns="http://www.w3.org/2000/svg">
+          <rect width="780" height="400" fill="#ecfdf5" rx="18"/>
+          <text x="390" y="30" text-anchor="middle" font-size="15"
+            font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">
+            حالت (ز ض ز): دو زاویه و ضلع بین
+          </text>
+
+          <!-- مثلث ABC: A(180,90), B(60,300), C(300,300) -->
+          <polygon points="180,90 60,300 300,300"
+            fill="#d1fae5" stroke="#059669" stroke-width="2.5"/>
+
+          <!-- زاویه β در B -->
+          <path d="M 60 300 L 77.86 268.75 A 36 36 0 0 1 96 300 Z"
+            fill="#fca5a5" fill-opacity="0.55" stroke="none"/>
+          <path d="M 77.86 268.75 A 36 36 0 0 1 96 300"
+            fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/>
+          <text x="110" y="282" text-anchor="middle" font-size="20"
+            font-weight="900" fill="#b91c1c" font-family="Cambria Math, serif">β</text>
+
+          <!-- زاویه γ در C -->
+          <path d="M 300 300 L 264 300 A 36 36 0 0 1 282.14 268.75 Z"
+            fill="#ddd6fe" fill-opacity="0.55" stroke="none"/>
+          <path d="M 264 300 A 36 36 0 0 1 282.14 268.75"
+            fill="none" stroke="#7c3aed" stroke-width="3" stroke-linecap="round"/>
+          <text x="250" y="282" text-anchor="middle" font-size="20"
+            font-weight="900" fill="#6d28d9" font-family="Cambria Math, serif">γ</text>
+
+          <line x1="175" y1="294" x2="185" y2="294" stroke="#1d4ed8" stroke-width="3"/>
+
+          <text x="180" y="75" text-anchor="middle" font-size="18"
+            font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">A</text>
+          <text x="40" y="318" text-anchor="middle" font-size="18"
+            font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">B</text>
+          <text x="320" y="318" text-anchor="middle" font-size="18"
+            font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">C</text>
+
+          <text x="390" y="220" text-anchor="middle" font-size="50"
+            font-weight="900" fill="#059669" font-family="serif">≅</text>
+
+          <!-- مثلث DEF: D(600,90), E(480,300), F(720,300) -->
+          <polygon points="600,90 480,300 720,300"
+            fill="#d1fae5" stroke="#059669" stroke-width="2.5"/>
+
+          <!-- زاویه β در E -->
+          <path d="M 480 300 L 497.86 268.75 A 36 36 0 0 1 516 300 Z"
+            fill="#fca5a5" fill-opacity="0.55" stroke="none"/>
+          <path d="M 497.86 268.75 A 36 36 0 0 1 516 300"
+            fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/>
+          <text x="530" y="282" text-anchor="middle" font-size="20"
+            font-weight="900" fill="#b91c1c" font-family="Cambria Math, serif">β</text>
+
+          <!-- زاویه γ در F -->
+          <path d="M 720 300 L 684 300 A 36 36 0 0 1 702.14 268.75 Z"
+            fill="#ddd6fe" fill-opacity="0.55" stroke="none"/>
+          <path d="M 684 300 A 36 36 0 0 1 702.14 268.75"
+            fill="none" stroke="#7c3aed" stroke-width="3" stroke-linecap="round"/>
+          <text x="670" y="282" text-anchor="middle" font-size="20"
+            font-weight="900" fill="#6d28d9" font-family="Cambria Math, serif">γ</text>
+
+          <line x1="595" y1="294" x2="605" y2="294" stroke="#1d4ed8" stroke-width="3"/>
+
+          <text x="600" y="75" text-anchor="middle" font-size="18"
+            font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">D</text>
+          <text x="460" y="318" text-anchor="middle" font-size="18"
+            font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">E</text>
+          <text x="740" y="318" text-anchor="middle" font-size="18"
+            font-weight="900" fill="#065f46" font-family="Vazirmatn, sans-serif">F</text>
+
+          <text x="390" y="370" text-anchor="middle" font-size="12"
+            fill="#475569" font-family="Vazirmatn, sans-serif">
+            ∠B=∠E=β (کمان قرمز) | ∠C=∠F=γ (کمان بنفش) | BC=EF (آبی)
+          </text>
+        </svg>
+        <div class="svg-caption">شکل ۳: کمان‌های β و γ در رأس‌های B، C، E، F</div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- درس ۴ -->
+    <!-- ============================================================ -->
+    <div class="section-title green" id="lesson4">درس ۴: حل مسئله در هندسه</div>
+
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-number l4">۴</div>
+        <div>
+          <div class="lesson-title">روش پنج‌مرحله‌ای حل مسئله</div>
+          <div class="lesson-sub">از خواندن تا نوشتن اثبات</div>
+        </div>
+      </div>
+
+      <div class="def-box">
+        <b>مراحل پنج‌گانه:</b>
+        <ol style="padding-right:20px; margin-top:8px;">
+          <li>خواندن دقیق مسئله</li>
+          <li>رسم شکل و علامت‌گذاری</li>
+          <li>تعیین فرض و حکم</li>
+          <li>یافتن راه‌حل</li>
+          <li>نوشتن اثبات با ذکر دلیل</li>
+        </ol>
+      </div>
+
+      <div class="subsection-title">مثال: مسئله‌ی جاده</div>
+
+      <div class="svg-wrapper">
+        <svg viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg">
+          <rect width="720" height="400" fill="#fff7ed" rx="18"/>
+          <text x="360" y="30" text-anchor="middle" font-size="15"
+            font-weight="900" fill="#78350f" font-family="Vazirmatn, sans-serif">
+            مسئله‌ی دو روستا و جاده — اثبات AH = BH′
+          </text>
+
+          <!-- جاده d: از (40,351) تا (680,49) -->
+          <line x1="40" y1="351" x2="680" y2="49"
+            stroke="#64748b" stroke-width="14" stroke-linecap="round"/>
+          <text x="690" y="40" text-anchor="middle" font-size="16"
+            font-weight="900" fill="#334155" font-family="Vazirmatn, sans-serif">d</text>
+
+          <!-- AB (جاده‌ی خاکی) از A(240,80) به B(480,320) -->
+          <line x1="240" y1="80" x2="480" y2="320"
+            stroke="#92400e" stroke-width="3" stroke-dasharray="8,4"/>
+
+          <!-- نقطه‌ی M وسط AB -->
+          <circle cx="360" cy="200" r="6" fill="#dc2626"/>
+          <text x="372" y="198" font-size="15" font-weight="900"
+            fill="#dc2626" font-family="Vazirmatn, sans-serif">M</text>
+
+          <!-- روستای A و B -->
+          <circle cx="240" cy="80" r="8" fill="#1d4ed8"/>
+          <text x="222" y="70" text-anchor="middle" font-size="17"
+            font-weight="900" fill="#1e3a8a" font-family="Vazirmatn, sans-serif">A</text>
+
+          <circle cx="480" cy="320" r="8" fill="#7c3aed"/>
+          <text x="498" y="338" text-anchor="middle" font-size="17"
+            font-weight="900" fill="#6d28d9" font-family="Vazirmatn, sans-serif">B</text>
+
+          <!-- ارتفاع AH از A(240,80) به H(308.25,224.44) -->
+          <line x1="240" y1="80" x2="308.25" y2="224.44"
+            stroke="#059669" stroke-width="2.5"/>
+          <circle cx="308.25" cy="224.44" r="5" fill="#059669"/>
+          <text x="293" y="243" font-size="15" font-weight="900"
+            fill="#065f46" font-family="Vazirmatn, sans-serif">H</text>
+
+          <!-- علامت راست‌گوشه در H — چسبیده به جاده -->
+          <polygon points="308.25,224.44 302.27,211.78 314.93,205.80 320.91,218.46"
+            fill="none" stroke="#059669" stroke-width="2"/>
+
+          <!-- ارتفاع BH' از B(480,320) به H'(411.75,175.56) -->
+          <line x1="480" y1="320" x2="411.75" y2="175.56"
+            stroke="#be185d" stroke-width="2.5"/>
+          <circle cx="411.75" cy="175.56" r="5" fill="#be185d"/>
+          <text x="428" y="164" font-size="15" font-weight="900"
+            fill="#831843" font-family="Vazirmatn, sans-serif">H′</text>
+
+          <!-- علامت راست‌گوشه در H' — چسبیده به جاده -->
+          <polygon points="411.75,175.56 417.73,188.22 405.07,194.20 399.09,181.54"
+            fill="none" stroke="#be185d" stroke-width="2"/>
+
+          <!-- تیک دوتایی روی AM -->
+          <line x1="296" y1="143" x2="300" y2="139" stroke="#dc2626" stroke-width="2.5"/>
+          <line x1="300" y1="145" x2="304" y2="141" stroke="#dc2626" stroke-width="2.5"/>
+          <!-- تیک دوتایی روی MB -->
+          <line x1="416" y1="263" x2="420" y2="259" stroke="#dc2626" stroke-width="2.5"/>
+          <line x1="420" y1="265" x2="424" y2="261" stroke="#dc2626" stroke-width="2.5"/>
+
+          <text x="360" y="390" text-anchor="middle" font-size="12"
+            fill="#475569" font-family="Vazirmatn, sans-serif">
+            AM=MB (دوتیک قرمز) | AH ⊥ d و BH′ ⊥ d | AH = 4
+          </text>
+        </svg>
+        <div class="svg-caption">شکل ۴: مسئله‌ی جاده — AH و BH' هر دو عمود بر جاده‌ی d</div>
+      </div>
+
+      <div class="step"><b>فرض:</b> M وسط AB، AH ⊥ d، BH' ⊥ d، AH = 4</div>
+      <div class="step"><b>حکم:</b> BH' = 4</div>
+      <div class="step"><b>گام ۱:</b> ∠AHM = ∠BH'M = ۹۰°</div>
+      <div class="step"><b>گام ۲:</b> ∠AMH = ∠BMH' ← متقابل به رأس</div>
+      <div class="step"><b>گام ۳:</b> MA = MB ← فرض</div>
+      <div class="step"><b>گام ۴:</b> △AMH ≅ △BMH' ← (ز ض ز)</div>
+      <div class="step"><b>گام ۵:</b> AH = BH' ← CPCTC</div>
+      <div class="result-box">BH' = 4 کیلومتر ∎</div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- نقشه‌ی ذهنی -->
+    <!-- ============================================================ -->
+    <div class="mind-map" id="mindmap">
+      <h2>نقشه‌ی ذهنی کل فصل سوم</h2>
+      <div class="mind-branches">
+        <div class="mind-branch">
+          <h4>📍 درس ۱: استدلال</h4>
+          <ul>
+            <li>استقرا: از جزء به کل</li>
+            <li>قیاس: از کل به جزء</li>
+            <li>قیاس معتبرتر است</li>
+            <li>حس‌ها قابل اعتماد نیستند</li>
+            <li>خطای دید را بشناس</li>
+          </ul>
+        </div>
+        <div class="mind-branch">
+          <h4>📍 درس ۲: اثبات</h4>
+          <ul>
+            <li>فرض = داده‌ها</li>
+            <li>حکم = هدف اثبات</li>
+            <li>تعریف ≠ اصل موضوع ≠ قضیه</li>
+            <li>اصل بدون اثبات</li>
+            <li>قضیه باید اثبات شود</li>
+            <li>پایان اثبات: ∎</li>
+          </ul>
+        </div>
+        <div class="mind-branch">
+          <h4>📍 درس ۳: هم‌نهشتی</h4>
+          <ul>
+            <li>(ض ض ض): سه ضلع</li>
+            <li>(ض ز ض): زاویه‌ی بین</li>
+            <li>(ز ض ز): ضلع بین</li>
+            <li>(ز ز ض): ضلع مقابل</li>
+            <li>(ز ز ز): ❌ وجود ندارد</li>
+            <li>CPCTC: اجزای متناظر</li>
+          </ul>
+        </div>
+        <div class="mind-branch">
+          <h4>📍 درس ۴: حل مسئله</h4>
+          <ul>
+            <li>۱. خواندن دقیق</li>
+            <li>۲. رسم شکل</li>
+            <li>۳. تعیین فرض و حکم</li>
+            <li>۴. یافتن راه‌حل</li>
+            <li>۵. نوشتن اثبات</li>
+            <li>خط کمکی رسم کن</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- مرجع سریع -->
+    <!-- ============================================================ -->
+    <div class="quick-ref" id="quickref">
+      <h2>مرجع سریع — همه‌ی مفاهیم در یک نگاه</h2>
+      <div class="qr-grid">
+        <div class="qr-item"><strong>استقرا</strong><span>جزء → کل</span></div>
+        <div class="qr-item"><strong>قیاس</strong><span>کل → جزء</span></div>
+        <div class="qr-item"><strong>فرض</strong><span>داده‌های مسئله</span></div>
+        <div class="qr-item"><strong>حکم</strong><span>هدف اثبات</span></div>
+        <div class="qr-item"><strong>تعریف</strong><span>توضیح دقیق مفهوم</span></div>
+        <div class="qr-item"><strong>اصل موضوع</strong><span>بدون اثبات پذیرفته</span></div>
+        <div class="qr-item"><strong>قضیه</strong><span>با استدلال اثبات‌شده</span></div>
+        <div class="qr-item"><strong>(ض ض ض)</strong><span>سه ضلع برابر</span></div>
+        <div class="qr-item"><strong>(ض ز ض)</strong><span>دو ضلع + زاویه‌ی بین</span></div>
+        <div class="qr-item"><strong>(ز ض ز)</strong><span>دو زاویه + ضلع بین</span></div>
+        <div class="qr-item"><strong>(ز ز ض)</strong><span>دو زاویه + ضلع مقابل</span></div>
+        <div class="qr-item"><strong>CPCTC</strong><span>اجزای متناظر برابر</span></div>
+        <div class="qr-item"><strong>مجموع زوایای مثلث</strong><span>۱۸۰°</span></div>
+        <div class="qr-item"><strong>زاویه‌ی خارجی</strong><span>مجموع دو زاویه‌ی غیرمجاور</span></div>
+        <div class="qr-item"><strong>متساوی‌الساقین</strong><span>دو زاویه‌ی قاعده برابر</span></div>
+        <div class="qr-item"><strong>عمودمنصف</strong><span>فاصله‌ی مساوی از دو سر</span></div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- نمونه سؤال -->
+    <!-- ============================================================ -->
+    <div class="section-title" id="exercises">نمونه سؤال از کل فصل سوم</div>
+
+    <div class="exercise">
+      <div class="exercise-title"><span class="num">۱</span>
+        کدام استدلال قابل اعتمادتر است: استقرایی یا قیاسی؟ چرا؟
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#c2410c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>قیاسی</b> — چون از یک قاعده‌ی کلی نتیجه‌ی قطعی می‌دهد. اگر فرض‌ها درست باشند، نتیجه قطعاً درست است.</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title"><span class="num">۲</span>
+        فرض و حکم مسئله‌ی «قطرهای مستطیل برابرند» را مشخص کنید.
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#c2410c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>فرض:</b> ABCD مستطیل است.</div>
+        <div class="step"><b>حکم:</b> AC = BD</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title"><span class="num">۳</span>
+        تفاوت اصل موضوع و قضیه چیست؟ با مثال.
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#c2410c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>اصل موضوع:</b> بدون اثبات پذیرفته می‌شود. مثال: «از دو نقطه، یک خط می‌گذرد».</div>
+        <div class="step"><b>قضیه:</b> باید اثبات شود. مثال: «مجموع زوایای مثلث ۱۸۰°».</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title"><span class="num">۴</span>
+        در دو مثلث ABC و DEF: AB=DE، BC=EF، AC=DF. کدام حالت هم‌نهشتی؟
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#c2410c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step">سه ضلع برابرند → (ض ض ض)</div>
+        <div class="result-box">△ABC ≅ △DEF</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title"><span class="num">۵</span>
+        در دو مثلث ABC و DEF: AB=DE، AC=DF، ∠A=∠D. کدام حالت؟
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#c2410c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step">دو ضلع + زاویه‌ی بین → (ض ز ض)</div>
+        <div class="result-box">△ABC ≅ △DEF</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title"><span class="num">۶</span>
+        چرا حالت (ز ز ز) هم‌نهشتی نیست؟ با مثال توضیح دهید.
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#c2410c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step">دو مثلث متساوی‌الاضلاع با اندازه‌های مختلف (مثلاً یکی ضلع ۳ و دیگری ضلع ۵)، زاویه‌هایشان ۶۰° است.</div>
+        <div class="step">پس سه زاویه برابرند ولی مثلث‌ها هم‌نهشت <b>نیستند</b>.</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title"><span class="num">۷</span>
+        در مثلث متساوی‌الساقین ABC (AB=AC)، نیمساز AD رسم شده. ثابت کنید BD=DC.
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#c2410c;font-weight:700;padding:8px 0;">نمایش پاسخ گام‌به‌گام</summary>
+        <div class="step"><b>گام ۱:</b> AB = AC ← فرض</div>
+        <div class="step"><b>گام ۲:</b> ∠BAD = ∠CAD ← نیمساز</div>
+        <div class="step"><b>گام ۳:</b> AD = AD ← مشترک</div>
+        <div class="step"><b>گام ۴:</b> △ABD ≅ △ACD ← (ض ز ض)</div>
+        <div class="step"><b>گام ۵:</b> BD = DC ← CPCTC. ∎</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title"><span class="num">۸</span>
+        ثابت کنید در هر مثلث متساوی‌الساقین، ارتفاع وارد بر قاعده، میانه‌ی قاعده هم هست.
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#c2410c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>فرض:</b> AB = AC، AH ⊥ BC</div>
+        <div class="step"><b>حکم:</b> BH = HC</div>
+        <div class="step"><b>گام ۱:</b> AB = AC ← فرض</div>
+        <div class="step"><b>گام ۲:</b> ∠AHB = ∠AHC = ۹۰° ← ارتفاع</div>
+        <div class="step"><b>گام ۳:</b> AH = AH ← مشترک</div>
+        <div class="step"><b>گام ۴:</b> △ABH ≅ △ACH ← (ض ز ض)</div>
+        <div class="step"><b>گام ۵:</b> BH = HC ← CPCTC. ∎</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title"><span class="num">۹</span>
+        چرا برای اثبات یک قضیه‌ی هندسی، اندازه‌گیری چند نمونه کافی نیست؟
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#c2410c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>گام ۱:</b> اندازه‌گیری فقط چند مورد خاص را بررسی می‌کند.</div>
+        <div class="step"><b>گام ۲:</b> ممکن است موردی باشد که این خاصیت را نداشته باشد.</div>
+        <div class="step"><b>گام ۳:</b> ابزار اندازه‌گیری هم خطا دارد.</div>
+        <div class="result-box">برای اثبات قطعی، به استدلال قیاسی نیاز داریم.</div>
+      </details>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-title"><span class="num">۱۰</span>
+        در مثلث ABC، از B و C دو ارتفاع BE و CF بر ساق‌ها رسم شده. اگر AB=AC،
+        ثابت کنید BE=CF.
+      </div>
+      <details>
+        <summary style="cursor:pointer;color:#c2410c;font-weight:700;padding:8px 0;">نمایش پاسخ</summary>
+        <div class="step"><b>گام ۱:</b> ∠BEC = ∠CFB = ۹۰° ← ارتفاع</div>
+        <div class="step"><b>گام ۲:</b> ∠B = ∠C ← متساوی‌الساقین</div>
+        <div class="step"><b>گام ۳:</b> BC = BC ← مشترک</div>
+        <div class="step"><b>گام ۴:</b> △BEC ≅ △CFB ← (ز ض ز)</div>
+        <div class="step"><b>گام ۵:</b> BE = CF ← CPCTC. ∎</div>
+      </details>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- نکات امتحانی -->
+    <!-- ============================================================ -->
+    <div class="exam-tips" id="tips">
+      <h2>نکات طلایی امتحانی فصل سوم</h2>
+
+      <div class="tip-card danger">
+        <h3>⚠️ اشتباهاتی که نمره‌ات را می‌خورند</h3>
+        <ul style="padding-right:20px;">
+          <li>استفاده از حالت (ز ز ز) به‌عنوان هم‌نهشتی. (وجود ندارد!)</li>
+          <li>در (ض ز ض)، زاویه‌ی خارج از دو ضلع را گرفتن.</li>
+          <li>در (ز ض ز)، ضلع خارج از دو زاویه را گرفتن.</li>
+          <li>رعایت نکردن ترتیب حروف در نوشتن هم‌نهشتی.</li>
+          <li>فراموش کردن CPCTC در نتیجه‌گیری.</li>
+          <li>نوشتن فرض و حکم به‌جای هم.</li>
+          <li>استفاده از شکل به‌تنهایی برای اثبات.</li>
+        </ul>
+      </div>
+
+      <div class="tip-card success">
+        <h3>🎯 ترفندهای سریع</h3>
+        <ul style="padding-right:20px;">
+          <li>به یادسپاری حالت‌ها: «ض ض ض» — «ض ز ض» — «ز ض ز» — «ز ز ض».</li>
+          <li>در (ض ز ض)، زاویه باید بین دو ضلع باشد.</li>
+          <li>در (ز ض ز)، ضلع باید بین دو زاویه باشد.</li>
+          <li>برای تشخیص: از شکل، ترتیب ضلع/زاویه/ضلع یا زاویه/ضلع/زاویه را دنبال کن.</li>
+          <li>در هر مسئله، به دنبال مثلث‌های هم‌نهشت باش.</li>
+        </ul>
+      </div>
+
+      <div class="tip-card warning">
+        <h3>📌 نکات طلایی که باید حفظ باشی</h3>
+        <div class="formula-box" style="font-size:0.95rem; line-height:2.2; direction: rtl;">
+          استقرا: جزء → کل (غیرقطعی)
+          <br>
+          قیاس: کل → جزء (قطعی)
+          <br>
+          فرض = داده‌ها | حکم = هدف
+          <br>
+          (ض ض ض)، (ض ز ض)، (ز ض ز)، (ز ز ض)
+          <br>
+          (ز ز ز) ❌
+          <br>
+          CPCTC: اجزای متناظر برابرند
+          <br>
+          مجموع زوایای مثلث = ۱۸۰°
+        </div>
+      </div>
+
+      <div class="tip-card">
+        <h3>🎓 استراتژی روز امتحان</h3>
+        <ol style="padding-right:20px;">
+          <li>قبل از شروع، یک بار کل برگه را نگاه کن.</li>
+          <li>اول سؤالات آسان را حل کن، بعد سراغ سخت‌ها برو.</li>
+          <li>در سؤالات اثباتی، فرض و حکم را واضح بنویس.</li>
+          <li>در هر گام، <b>دلیل</b> استفاده‌شده را ذکر کن.</li>
+          <li>در پایان، علامت ∎ را فراموش نکن.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- چک‌لیست -->
+    <!-- ============================================================ -->
+    <div class="section-title" id="checklist">چک‌لیست مطالعه قبل از امتحان</div>
+
+    <div class="checklist">
+      <h3>درس ۱: استدلال</h3>
+      <label><input type="checkbox"> تفاوت استقرا و قیاس را می‌دانم.</label>
+      <label><input type="checkbox"> می‌دانم چرا قیاس معتبرتر است.</label>
+      <label><input type="checkbox"> نمونه‌های خطای دید را می‌شناسم.</label>
+    </div>
+
+    <div class="checklist">
+      <h3>درس ۲: آشنایی با اثبات</h3>
+      <label><input type="checkbox"> فرض و حکم را در مسائل تشخیص می‌دهم.</label>
+      <label><input type="checkbox"> تفاوت تعریف، اصل موضوع و قضیه را می‌دانم.</label>
+      <label><input type="checkbox"> مراحل پنج‌گانه‌ی اثبات را بلدم.</label>
+      <label><input type="checkbox"> می‌توانم قضیه‌ی زاویه‌ی خارجی مثلث را اثبات کنم.</label>
+    </div>
+
+    <div class="checklist">
+      <h3>درس ۳: هم‌نهشتی</h3>
+      <label><input type="checkbox"> چهار حالت هم‌نهشتی را حفظ هستم.</label>
+      <label><input type="checkbox"> می‌دانم (ز ز ز) وجود ندارد.</label>
+      <label><input type="checkbox"> CPCTC را بلدم و به کار می‌برم.</label>
+      <label><input type="checkbox"> ترتیب حروف در نوشتن هم‌نهشتی را رعایت می‌کنم.</label>
+      <label><input type="checkbox"> می‌توانم با هم‌نهشتی، تساوی دو ضلع یا دو زاویه را ثابت کنم.</label>
+    </div>
+
+    <div class="checklist">
+      <h3>درس ۴: حل مسئله</h3>
+      <label><input type="checkbox"> مراحل پنج‌گانه‌ی حل مسئله را بلدم.</label>
+      <label><input type="checkbox"> می‌توانم شکل مناسب رسم کنم.</label>
+      <label><input type="checkbox"> از خط کمکی برای حل مسئله استفاده می‌کنم.</label>
+      <label><input type="checkbox"> در اثبات، دلیل هر گام را می‌نویسم.</label>
+    </div>
+
+    <div class="checklist">
+      <h3>مهارت‌های کلی</h3>
+      <label><input type="checkbox"> تمام تمرین‌های کتاب را حل کرده‌ام.</label>
+      <label><input type="checkbox"> نمونه سؤالات این فایل را بدون نگاه به پاسخ حل کرده‌ام.</label>
+      <label><input type="checkbox"> با آرامش به امتحان می‌روم.</label>
+    </div>
+
+    <div class="big-quote">
+      «ریاضی با تمرین یاد گرفته می‌شود، نه با نگاه کردن. تو تمرین کردی، پس یاد گرفتی!»
+    </div>
+
+  </main>
+
+  <footer>
+    <strong>📘 جمع‌بندی جامع فصل سوم — استدلال و اثبات در هندسه</strong><br>
+    مدرسان: خانم سروناز و آقای فرسام | اپلیکیشن همیار من<br>
+    موفق باشی! ✨
+  </footer>
+</div>
+</body>
+</html>
