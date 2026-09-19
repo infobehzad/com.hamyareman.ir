@@ -222,19 +222,29 @@ object MediaVault {
         }
     }
 
-    /** اندازه‌ی کلِ فایل از هدرِ `Content-Range` (پاسخِ ۲۰۶ به `Range: bytes=0-0`). */
+    /**
+     * اندازه‌ی کلِ فایل از هدرِ `Content-Range`.
+     *
+     * باکتِ Appwrite پاسخِ chunked می‌دهد (بدونِ `Content-Length`) و rangeِ
+     * تک‌بایتی `bytes=0-0` را با **416** رد می‌کند، ولی `bytes=0-1023` را با
+     * `206` و هدرِ `Content-Range: bytes 0-1023/<total>` جواب می‌دهد؛ پس کاوش
+     * با ۱ کیلوبایت انجام می‌شود (و اگر پاسخِ ۴۱۶ هم «ستاره/اندازه» برگرداند،
+     * همان خوانده می‌شود).
+     */
     private fun probeSize(url: String): Long = runCatching {
         val c = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
             connectTimeout = 8000
             readTimeout = 8000
             instanceFollowRedirects = true
-            setRequestProperty("Range", "bytes=0-0")
+            setRequestProperty("Range", "bytes=0-1023")
         }
         c.connect()
-        val range = c.getHeaderField("Content-Range").orEmpty()
+        val range = c.getHeaderField("Content-Range")
+        val len = c.contentLengthLong
         runCatching { c.inputStream.close() }
         c.disconnect()
-        range.substringAfterLast('/', "").trim().toLongOrNull() ?: -1L
+        val total = totalFromContentRange(range)
+        if (total > 0) total else if (c.responseCode == 200) len else -1L
     }.getOrDefault(-1L)
 
     /**
@@ -285,6 +295,17 @@ object MediaVault {
      * بدون سوکت/پورت/توکن خوانده می‌شود (نگاه کنید به VaultDataSource).
      */
     fun localUrl(ctx: Context, cacheKey: String): String = "vault://$cacheKey"
+}
+
+/**
+ * تجزیه‌ی هدرِ `Content-Range` برای گرفتنِ اندازه‌ی کل:
+ * `bytes 0-1023/23947850` ⇒ 23947850 و `bytes */12345` ⇒ 12345؛
+ * در نبودِ عدد (`*` یا هدرِ غایب) ⇒ 1-.
+ */
+internal fun totalFromContentRange(header: String?): Long {
+    val total = header?.substringAfterLast('/', "")?.trim()
+    if (total.isNullOrEmpty() || total == "*") return -1L
+    return total.toLongOrNull()?.takeIf { it > 0 } ?: -1L
 }
 
 /**
