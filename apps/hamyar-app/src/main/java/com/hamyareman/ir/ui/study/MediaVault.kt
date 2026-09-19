@@ -299,8 +299,8 @@ object MediaVault {
 
 /**
  * تجزیه‌ی هدرِ `Content-Range` برای گرفتنِ اندازه‌ی کل:
- * `bytes 0-1023/23947850` ⇒ 23947850 و `bytes */12345` ⇒ 12345؛
- * در نبودِ عدد (`*` یا هدرِ غایب) ⇒ 1-.
+ * «bytes 0-1023/23947850» ⇒ 23947850 و «bytes ستاره/12345» ⇒ 12345؛
+ * در نبودِ عدد (ستاره یا هدرِ غایب) ⇒ 1-.
  */
 internal fun totalFromContentRange(header: String?): Long {
     val total = header?.substringAfterLast('/', "")?.trim()

@@ -41,7 +41,7 @@ class MediaVaultRangeTest {
         if (!asset.exists()) return
         val times = TeachSeekMap.times("C905_E01-L01")
         assertEquals(10, times.size)
-        val inHtml = Regex("""data-seek-ms="(\d+)"""")
+        val inHtml = Regex("data-seek-ms=\"(\\d+)\"")
             .findAll(asset.readText())
             .map { it.groupValues[1].toLong() }
             .toList()
@@ -51,10 +51,10 @@ class MediaVaultRangeTest {
         assertEquals(1_495_000L, times.last())
     }
     /**
-     * نگهبانِ همگامی: `data-seek-ms`های HTML تدریس باید دقیقاً همان فهرستِ
-     * زمان‌بندیِ `Books/Base-09/ریاضی/04- صوت تدریس/*.txt` باشند — وگرنه لمسِ
-     * فهرست، پلیر را به دقیقه‌ثانیه‌ی غلط می‌برد. (اگر پوشه‌ی Books در دسترس
-     * نبود — مثلاً اجرای محلی از زیرماژول — تست رد نمی‌شود.)
+     * نگهبانِ همگامی: `data-seek-ms`های HTML تدریس باید دقیقاً همان فهرست‌های
+     * زمان‌بندیِ پوشهٔ «Books/Base-09/ریاضی/04- صوت تدریس» (فایل‌های
+     * `ryazif01….txt`) باشند — وگرنه لمسِ فهرست، پلیر را به دقیقه‌ثانیه‌ی غلط
+     * می‌برد. (اگر پوشه‌ی Books در دسترس نبود، تست سکوت می‌کند.)
      */
     @Test
     fun `html seek times match the Books timing lists`() {
@@ -65,7 +65,7 @@ class MediaVaultRangeTest {
             val html = File("src/main/assets/math/c905/$n.html")
             if (!txt.exists() || !html.exists()) continue
             val want = parseTimingList(txt.readText())
-            val got = Regex("""data-seek-ms="(\d+)"""")
+            val got = Regex("data-seek-ms=\"(\\d+)\"")
                 .findAll(html.readText())
                 .map { it.groupValues[1].toLong() }
                 .toList()
