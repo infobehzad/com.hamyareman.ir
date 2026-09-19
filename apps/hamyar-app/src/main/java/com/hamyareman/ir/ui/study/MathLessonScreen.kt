@@ -33,6 +33,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -130,9 +131,40 @@ fun MathLessonScreen(
 
     Column(Modifier.fillMaxSize()) {
         val tracksForBar = teachTracksOf(pack)
+        if (!chromeHidden) {
+            AppTopBar(title = pack.title, onBack = onBack)
+            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = autoHide,
+                    onCheckedChange = {
+                        autoHide = it
+                        chromeStore.putBool("autohide_$packId", it)
+                        if (!it) chromeHidden = false else hideGen++
+                    },
+                )
+                Text("جمع شود", style = MaterialTheme.typography.labelMedium)
+            }
+        }
+        // ۴) کارتِ پلیر «بالای سربرگ‌ها» و برای همه‌ی سربرگ‌ها.
+        // نکته: کارت همیشه در ترکیب می‌ماند (فقط ارتفاعش صفر می‌شود) تا با جمع‌شدنِ
+        // نوار، صوتِ در حالِ پخش قطع نشود.
+        if (tracksForBar.isNotEmpty()) {
+            Box(
+                Modifier.then(
+                    if (chromeHidden) Modifier.height(0.dp).clipToBounds() else Modifier,
+                ),
+            ) {
+                TeachAudioBar(
+                    packId = pack.packId,
+                    screenTitle = pack.title,
+                    bookTitle = bookTitle,
+                    tracks = tracksForBar,
+                )
+            }
+        }
+        // ۷) سربرگ‌ها هرگز جمع نمی‌شوند — همیشه بالای محتوا و بالای فلش، قابلِ انتخاب.
+        MathChromeTabRow(tabs, tab) { tab = it }
         if (chromeHidden) {
-            // ۷) سربرگ‌ها هرگز جمع نمی‌شوند — همیشه بالای محتوا و بالای فلش، قابلِ انتخاب.
-            MathChromeTabRow(tabs, tab) { tab = it }
             // ۶) فلشِ بازکننده: وسطِ صفحه، بزرگ‌تر، با «نفس» آرام + سایه و حلقه.
             val breath = remember { androidx.compose.animation.core.Animatable(1f) }
             LaunchedEffect(Unit) {
@@ -164,29 +196,6 @@ fun MathLessonScreen(
                     }
                 }
             }
-        } else {
-            AppTopBar(title = pack.title, onBack = onBack)
-            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
-                    checked = autoHide,
-                    onCheckedChange = {
-                        autoHide = it
-                        chromeStore.putBool("autohide_$packId", it)
-                        if (!it) chromeHidden = false else hideGen++
-                    },
-                )
-                Text("جمع شود", style = MaterialTheme.typography.labelMedium)
-            }
-            // ۴) کارتِ پلیر «بالای سربرگ‌ها» و برای همه‌ی سربرگ‌ها.
-            if (tracksForBar.isNotEmpty()) {
-                TeachAudioBar(
-                    packId = pack.packId,
-                    screenTitle = pack.title,
-                    bookTitle = bookTitle,
-                    tracks = tracksForBar,
-                )
-            }
-            MathChromeTabRow(tabs, tab) { tab = it }
         }
         val currentKey = tabs.getOrNull(tab)?.key ?: "teach"
         val currentLabel = tabs.getOrNull(tab)?.label ?: "تدریس"

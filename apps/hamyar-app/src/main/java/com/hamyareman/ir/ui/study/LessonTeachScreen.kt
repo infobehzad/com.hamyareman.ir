@@ -485,7 +485,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                             },
                             label = { Text(t.label) },
                         )
-                    )
+                    }
                 }
                 Spacer(Modifier.height(4.dp))
             }
