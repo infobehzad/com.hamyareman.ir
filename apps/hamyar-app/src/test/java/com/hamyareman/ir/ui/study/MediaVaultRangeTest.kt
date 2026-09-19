@@ -47,7 +47,38 @@ class MediaVaultRangeTest {
             .toList()
         // ۱۰ لینکِ فهرست؛ دو «data-seek-ms» باقی‌مانده داخلِ اسکریپتِ خودِ فایل است.
         assertTrue("HTML times: $inHtml vs map: $times", inHtml.containsAll(times))
-        assertEquals(65_000L, times.first())
-        assertEquals(1_430_000L, times.last())
+        assertEquals(57_000L, times.first())
+        assertEquals(1_495_000L, times.last())
     }
+    /**
+     * نگهبانِ همگامی: `data-seek-ms`های HTML تدریس باید دقیقاً همان فهرستِ
+     * زمان‌بندیِ `Books/Base-09/ریاضی/04- صوت تدریس/*.txt` باشند — وگرنه لمسِ
+     * فهرست، پلیر را به دقیقه‌ثانیه‌ی غلط می‌برد. (اگر پوشه‌ی Books در دسترس
+     * نبود — مثلاً اجرای محلی از زیرماژول — تست رد نمی‌شود.)
+     */
+    @Test
+    fun `html seek times match the Books timing lists`() {
+        val names = listOf("ryazif01d01", "ryazif01d02", "ryazif01d03", "ryazif01d04", "ryazif01review")
+        var checked = 0
+        for (n in names) {
+            val txt = File("../../Books/Base-09/ریاضی/04- صوت تدریس/$n.txt")
+            val html = File("src/main/assets/math/c905/$n.html")
+            if (!txt.exists() || !html.exists()) continue
+            val want = parseTimingList(txt.readText())
+            val got = Regex("""data-seek-ms="(\d+)"""")
+                .findAll(html.readText())
+                .map { it.groupValues[1].toLong() }
+                .toList()
+            assertEquals("$n — فهرستِ زمان‌بندیِ Books با HTML یکی نیست", want, got)
+            checked++
+        }
+        assertTrue("هیچ فهرستِ زمان‌بندی پیدا نشد", checked >= 1)
+    }
+
+    /** «۱. 0:57 — عنوان» ⇒ 57000 (میلی‌ثانیه) — با ارقامِ فارسی یا لاتین. */
+    private fun parseTimingList(text: String): List<Long> = text.lineSequence().mapNotNull { line ->
+        val s = line.map { c -> if (c in '\u06F0'..'\u06F9') '0' + (c - '\u06F0') else c }.joinToString("")
+        Regex("""(\d{1,3}):(\d{2})""").find(s)
+            ?.let { m -> m.groupValues[1].toLong() * 60_000 + m.groupValues[2].toLong() * 1000 }
+    }.toList()
 }
