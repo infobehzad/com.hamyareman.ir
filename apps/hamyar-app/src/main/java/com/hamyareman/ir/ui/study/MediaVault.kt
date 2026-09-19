@@ -289,7 +289,7 @@ object MediaVault {
             )
             // doFinal روی کل بافر: در CTR/NoPadding ته‌بایتِ ناکامل هم با update برنمی‌گردد.
             val dec = cipher.doFinal(tmp)
-            val n = minOf(len.toLong(), (dec.size - pre).coerceAtLeast(0)).toInt()
+            val n = minOf(len.toLong(), (dec.size - pre).coerceAtLeast(0).toLong()).toInt()
             if (n <= 0) return -1
             System.arraycopy(dec, pre, dst, off, n)
             return n
