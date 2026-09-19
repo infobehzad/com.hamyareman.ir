@@ -241,7 +241,8 @@ object MediaVault {
                 raf.close()
                 return null
             }
-            PlainVaultStream(raf, header.copyOfRange(4, 20), key(ctx), f.length() - 20)
+            val raw = key(ctx).encoded ?: return null
+            com.hamyareman.ir.platform.feature.playback.CtrPlainReader(raw, header.copyOfRange(4, 20), 20L, f.length() - 20, raf)
         }.getOrNull()
     }
 
@@ -256,60 +257,6 @@ object MediaVault {
         val cipher = Cipher.getInstance("AES/CTR/NoPadding")
         cipher.init(Cipher.DECRYPT_MODE, key(ctx), IvParameterSpec(iv))
         return cipher.doFinal(all, 20, all.size - 20)
-    }
-
-    /**
-     * جریانِ Plainِ روی فایلِ CTR: برای موقعیتِ p، بلاکِ هم‌ترازِ زیرش را پیدا می‌کنیم،
-     * IV را به تعدادِ بلاک جابه‌جا می‌کنیم (CTR شمارنده‌اش در IV است) و فقط مقداری که
-     * لازم است می‌خوانیم. حالتِ NoPadding یعنی طولِ رمزنگاری = طولِ متن.
-     */
-    private class PlainVaultStream(
-        private val raf: java.io.RandomAccessFile,
-        private val iv: ByteArray,
-        private val dataKey: javax.crypto.SecretKey,
-        override val size: Long,
-    ) : com.hamyareman.ir.platform.feature.playback.VaultStream {
-
-        override fun read(pos: Long, dst: ByteArray, off: Int, len: Int): Int {
-            if (len <= 0 || pos >= size) return -1
-            val aligned = (pos / 16) * 16
-            val pre = (pos - aligned).toInt()
-            val encLen = minOf(size - aligned, (len + pre).toLong()).toInt()
-            if (encLen <= 0) return -1
-            val tmp = ByteArray(encLen)
-            synchronized(raf) {
-                raf.seek(20L + aligned)
-                raf.readFully(tmp)
-            }
-            val cipher = javax.crypto.Cipher.getInstance("AES/CTR/NoPadding")
-            cipher.init(
-                javax.crypto.Cipher.DECRYPT_MODE,
-                dataKey,
-                javax.crypto.spec.IvParameterSpec(shiftIv(iv, aligned / 16)),
-            )
-            // doFinal روی کل بافر: در CTR/NoPadding ته‌بایتِ ناکامل هم با update برنمی‌گردد.
-            val dec = cipher.doFinal(tmp)
-            val n = minOf(len.toLong(), (dec.size - pre).coerceAtLeast(0).toLong()).toInt()
-            if (n <= 0) return -1
-            System.arraycopy(dec, pre, dst, off, n)
-            return n
-        }
-
-        override fun close() {
-            runCatching { raf.close() }
-        }
-
-        private fun shiftIv(iv: ByteArray, blocks: Long): ByteArray {
-            val out = iv.copyOf()
-            var x = blocks
-            for (i in out.size - 1 downTo out.size - 8) {
-                val sum = (out[i].toInt() and 0xFF) + (x and 0xFF)
-                out[i] = (sum and 0xFF).toByte()
-                x = (x shr 8) + (sum shr 8)
-                if (x == 0L) break
-            }
-            return out
-        }
     }
 
     private fun ByteArray.startsWith(prefix: ByteArray): Boolean {
