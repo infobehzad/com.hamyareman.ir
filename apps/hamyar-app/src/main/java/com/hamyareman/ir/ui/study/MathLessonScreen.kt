@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -102,8 +104,13 @@ fun MathLessonScreen(
         )
         if (hasPdf) base + MathTab("pdf", "کتاب درسی") else base
     }
+    val startTab = if (pack.pdfOnly) {
+        tabs.indexOfFirst { it.key == "pdf" }.takeIf { it >= 0 } ?: initialTab
+    } else {
+        initialTab
+    }
     var tab by rememberSaveable(packId, isSum) {
-        mutableIntStateOf(initialTab.coerceIn(0, tabs.lastIndex))
+        mutableIntStateOf(startTab.coerceIn(0, tabs.lastIndex))
     }
     if (tab > tabs.lastIndex) tab = 0
     val chromeStore = remember { com.hamyareman.ir.platform.core.common.LocalStore(ctx, "hamyar_math_ui") }
@@ -121,7 +128,9 @@ fun MathLessonScreen(
         chromeHidden = true
     }
 
-    if (pack.pdfOnly || pack.lessonId == "TOC") {
+    // فقط «فهرست» کتاب، صفحه‌ی ساده‌ی PDF می‌ماند؛ همه‌ی درس‌ها و جمع‌بندیِ فصل‌ها
+    // پلیرِ صوت + سربرگ‌ها را دارند (حتی اگر صوتشان هنوز روی سرور نباشد).
+    if (pack.lessonId == "TOC" || pack.packId == "C905_TOC") {
         Column(Modifier.fillMaxSize()) {
             AppTopBar(title = pack.title, onBack = onBack)
             TeachPdfPages(modifier = Modifier.weight(1f), fileId = pack.pdfFileName, pack = pack)
@@ -199,6 +208,17 @@ fun MathLessonScreen(
         }
         val currentKey = tabs.getOrNull(tab)?.key ?: "teach"
         val currentLabel = tabs.getOrNull(tab)?.label ?: "تدریس"
+        val pagerState = rememberPagerState(
+            initialPage = tab.coerceIn(0, tabs.lastIndex),
+        ) { tabs.size }
+        // سوایپِ چپ/راست = جابه‌جایی بینِ سربرگ‌ها (و برعکس: لمسِ سربرگ = سوایپِ نرم).
+        LaunchedEffect(tab) {
+            val target = tab.coerceIn(0, tabs.lastIndex)
+            if (pagerState.currentPage != target) pagerState.animateScrollToPage(target)
+        }
+        LaunchedEffect(pagerState.settledPage) {
+            if (pagerState.settledPage in tabs.indices && pagerState.settledPage != tab) tab = pagerState.settledPage
+        }
         DisposableEffect(pack.packId, currentKey) {
             val start = System.currentTimeMillis()
             StudyActivity.add(ctx, pack.packId, "tab", "باز کردن سربرگ $currentLabel")
@@ -209,14 +229,16 @@ fun MathLessonScreen(
                 }
             }
         }
-        when (currentKey) {
-            "teach" -> MathTeachTab(pack, bookTitle, showPlayer = false)
-            "book" -> MathBookHtmlTab(pack, html)
-            "flash" -> MathFlashHtmlTab(pack, html)
-            "summary" -> MathSummaryTab(pack, isSum = isSum, chapter = chapter)
-            "exam" -> MathExamHtmlTab(pack, html)
-            "pdf" -> TeachPdfPages(modifier = Modifier.fillMaxSize(), fileId = pack.pdfFileName, pack = pack)
-            else -> MathTeachTab(pack, bookTitle, showPlayer = false)
+        HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
+            when (tabs.getOrNull(page)?.key) {
+                "teach" -> MathTeachTab(pack, bookTitle, showPlayer = false)
+                "book" -> MathBookHtmlTab(pack, html)
+                "flash" -> MathFlashHtmlTab(pack, html)
+                "summary" -> MathSummaryTab(pack, isSum = isSum, chapter = chapter)
+                "exam" -> MathExamHtmlTab(pack, html)
+                "pdf" -> TeachPdfPages(modifier = Modifier.fillMaxSize(), fileId = pack.pdfFileName, pack = pack)
+                else -> MathTeachTab(pack, bookTitle, showPlayer = false)
+            }
         }
     }
 }
@@ -276,7 +298,7 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
     }
     // اگر HTML (نسخه‌ی ریموت یا قدیمی) پل سیک نداشت، شیم را می‌چسبانیم تا
     // لینک‌های فهرست با data-seek-ms همیشه به پلیر برسند.
-    val teachHtml = ensureSeekShim(pack.teachHtml.ifBlank { htmlFromAsset })
+    val teachHtml = ensureSeekShim(pack.teachHtml.ifBlank { htmlFromAsset }, TeachSeekMap.times(pack.packId))
     val body = pack.teachText.ifBlank {
         pack.sections.filter { it.kind != "exam" }.joinToString("\n\n") { "«${it.title}»\n${it.body}" }
             .ifBlank { "متن تدریس این درس به‌زودی از پوشهٔ Books اضافه می‌شود." }
@@ -656,34 +678,97 @@ private fun MathExamTab(pack: StudyPack) {
 }
 
 /**
- * اسکریپتِ پخشِ لینک‌های فهرست به پلیر: هر `<a data-seek-ms>` (یا `#t=mm:ss`
- * در href/متن) با لمس، `HamyarPlayer.seek(ms)` را صدا می‌زند و همان بند را
- * اسکرول می‌کند. اگر خودِ HTML پل را داشته باشد (نسخه‌های جدید Books) دست
- * نمی‌زنیم؛ اگر نداشت (ریموت/قدیمی) همین شیم اضافه می‌شود.
+ * زمانِ شروعِ هر سرفصل (میلی‌ثانیه) به ترتیبِ آیتم‌های فهرستِ HTML — پشتیبانِ
+ * HTMLهایی که `data-seek-ms` ندارند (نسخهٔ ریموت/قدیمی). کلید = packId.
+ * همه‌ی پنج صوتِ فصلِ ۱ (درس ۱ تا ۴ + جمع‌بندی) زمان‌هایشان کامل است.
  */
-internal fun ensureSeekShim(html: String): String {
+internal object TeachSeekMap {
+    // منبع: فهرست‌های زمان‌بندیِ `Books/Base-09/ریاضی/04- صوت تدریس/ryazif01d0X.txt`
+    // (و `ryazif01review.txt`) — همان زمان‌هایی که در HTML درس‌های ۲/۳/۴/جمع‌بندی
+    // به‌صورت `data-seek-ms` هست. درسِ ۱ هم با همین زمان‌ها در HTML نوشته شد.
+    private val table: Map<String, List<Long>> = mapOf(
+        "C905_E01-L01" to listOf(
+            65_000, 253_000, 368_000, 481_000, 549_000,
+            719_000, 775_000, 915_000, 1_079_000, 1_430_000,
+        ),
+        "C905_E01-L02" to listOf(
+            68_000, 134_000, 296_000, 479_000, 670_000,
+            808_000, 946_000, 1_194_000, 1_632_000,
+        ),
+        "C905_E01-L03" to listOf(
+            79_000, 139_000, 243_000, 491_000, 615_000, 730_000,
+            910_000, 980_000, 1_073_000, 1_350_000, 1_786_000,
+        ),
+        "C905_E01-L04" to listOf(
+            82_000, 166_000, 272_000, 383_000, 456_000, 567_000,
+            702_000, 826_000, 910_000, 1_114_000, 1_664_000,
+        ),
+        "C905_E01-SUM" to listOf(
+            76_000, 178_000, 247_000, 389_000, 477_000,
+            552_000, 660_000, 1_146_000, 1_267_000,
+        ),
+    )
+
+    fun times(packId: String): List<Long> = table[packId].orEmpty()
+}
+
+/**
+ * شیمِ سیکِ فهرست/سرفصل‌های HTML تدریس:
+ *  ۱) زمان‌های [times] (به ترتیبِ فهرست) به لینک‌هایِ بدونِ `data-seek-ms` داده می‌شود؛
+ *  ۲) نقشهٔ `#id → ms` از هر عنصرِ زمان‌دار ساخته می‌شود و **سرفصل‌های داخلِ متن**
+ *     (`.section-title` / `.subsection-title` / هر `id="secN"`) هم همان زمان را
+ *     می‌گیرند و کلیک‌پذیر می‌شوند — یعنی خودِ سرفصل هم پلیر را می‌برد؛
+ *  ۳) کنارِ هر آیتمِ فهرست، برچسبِ زمان (`m:ss`) نمایش داده می‌شود (`.toc .t`)؛
+ *  ۴) شنوندهٔ کلیک روی هر عنصرِ زمان‌دار (نه فقط `<a>`) `HamyarPlayer.seek(ms)`
+ *     را صدا می‌زند و همان بند را اسکرول می‌کند؛ اگر زمانی نبود، از href/متن
+ *     (`#t=5:32` یا `۵:۳۲`) استخراج می‌شود.
+ */
+internal fun ensureSeekShim(html: String, times: List<Long> = emptyList()): String {
     if (html.isBlank()) return html
-    // همیشه تزریق می‌شود (حتی اگر خودِ HTML پل داشته باشد): نسخه‌ی ریموت ممکن است
-    // اسکریپتِ نصفه/استریپ‌شده داشته باشد. شنونده‌ی capture ما پیش از اسکریپتِ خودِ
-    // فایل اجرا می‌شود و سیکِ دوباره روی همان میلی‌ثانیه بی‌ضرر است.
-    val shim = "<script>(function(){" +
+    val arr = times.joinToString(",") { it.toString() }
+    val shim = "<script>(function(){\"use strict\";" +
         "function digits(s){return String(s).replace(/[\u06F0-\u06F9]/g,function(d){return String(d.charCodeAt(0)-0x06F0);})" +
             ".replace(/[\u0660-\u0669]/g,function(d){return String(d.charCodeAt(0)-0x0660);});}" +
-        "function msOf(a){" +
-        "var v=a.getAttribute&&a.getAttribute('data-seek-ms');" +
-        "if(v){var x=parseInt(digits(v).replace(/[^0-9]/g,''),10);if(x>=0)return x;}" +
-        "var h=(a.getAttribute&&a.getAttribute('href'))||'';" +
+        "function parseMs(v){if(v==null)return null;var x=parseInt(digits(v).replace(/[^0-9]/g,''),10);" +
+            "return (isNaN(x)||x<0)?null:x;}" +
+        "function label(ms){var m=Math.floor(ms/60000),s=Math.floor((ms%60000)/1000);" +
+            "return m+':'+(s<10?'0':'')+s;}" +
+        "function msOfText(el){" +
+        "var h=(el.getAttribute&&el.getAttribute('href'))||'';" +
         "var m=digits(h).match(/(?:t=|#t)([0-9]{1,3}):([0-9]{1,2})(?::([0-9]{1,2}))?/);" +
-        "if(m){var mm=parseInt(m[1],10),ss=parseInt(m[2],10);if(m[3]){mm=mm*60+ss;ss=parseInt(m[3],10);}return (mm*60+ss)*1000;}" +
-        "var t=digits(a.textContent||'').match(/([0-9]{1,3}):([0-9]{2})(?::([0-9]{2}))?/);" +
-        "if(t){var mm2=parseInt(t[1],10),ss2=parseInt(t[2],10);if(t[3]){mm2=mm2*60+ss2;ss2=parseInt(t[3],10);}return (mm2*60+ss2)*1000;}" +
-        "return 0;}" +
+        "if(m){var a=parseInt(m[1],10),b=parseInt(m[2],10);if(m[3]){a=a*60+b;b=parseInt(m[3],10);}return (a*60+b)*1000;}" +
+        "var t=digits((el.textContent||'').slice(0,120)).match(/([0-9]{1,3}):([0-9]{1,2})(?::([0-9]{1,2}))?/);" +
+        "if(t){var c=parseInt(t[1],10),d=parseInt(t[2],10);if(t[3]){c=c*60+d;d=parseInt(t[3],10);}return (c*60+d)*1000;}" +
+        "return null;}" +
+        "var TIMES=[$arr];" +
+        "var links=document.querySelectorAll('.toc ol li a, .toc li a, .toc a');" +
+        "for(var i=0;i<links.length;i++){var a0=links[i];" +
+        "if(!a0.getAttribute('data-seek-ms')&&i<TIMES.length&&TIMES[i]>0){a0.setAttribute('data-seek-ms',String(TIMES[i]));}}" +
+        "var map={};" +
+        "document.querySelectorAll('[data-seek-ms]').forEach(function(el){" +
+        "var ms=parseMs(el.getAttribute('data-seek-ms'));if(ms==null)return;" +
+        "var h=el.getAttribute('href')||'';if(h.charAt(0)==='#'&&h.length>1){map[h.slice(1)]=ms;}" +
+        "if(el.id){map[el.id]=ms;}});" +
+        "document.querySelectorAll('.section-title,.subsection-title,[id^="sec"]').forEach(function(el){" +
+        "if(el.getAttribute('data-seek-ms'))return;var ms=map[el.id];if(ms==null)return;" +
+        "el.setAttribute('data-seek-ms',String(ms));el.style.cursor='pointer';});" +
+        "document.querySelectorAll('.toc a[data-seek-ms]').forEach(function(a){" +
+        "if(a.querySelector('.t'))return;var ms=parseMs(a.getAttribute('data-seek-ms'));if(ms==null)return;" +
+        "var sp=document.createElement('span');sp.className='t';sp.textContent=label(ms);" +
+        "sp.style.marginLeft='6px';a.insertBefore(sp,a.firstChild);});" +
+        "function go(el,ms,ev){if(ev)ev.preventDefault();" +
+        "try{if(window.HamyarPlayer&&HamyarPlayer.seek){HamyarPlayer.seek(ms);}}catch(_){}" +
+        "var id=(el.getAttribute&&el.getAttribute('href'))||'';" +
+        "if(id.charAt(0)==='#'&&id.length>1){try{var t=document.querySelector(id);if(t)t.scrollIntoView({behavior:'smooth',block:'start'});}catch(_){}}" +
+        "else if(el.id){try{el.scrollIntoView({behavior:'smooth',block:'start'});}catch(_){}}}" +
         "document.addEventListener('click',function(e){" +
+        "var el=e.target,hops=0;" +
+        "while(el&&hops<6){" +
+        "var v=el.getAttribute?el.getAttribute('data-seek-ms'):null;" +
+        "if(v!=null){var ms=parseMs(v);if(ms!=null){go(el,ms,e);return;}}" +
+        "el=el.parentElement;hops++;}" +
         "var a=e.target;while(a&&a.tagName!=='A')a=a.parentElement;if(!a)return;" +
-        "var ms=msOf(a);if(!ms)return;e.preventDefault();" +
-        "try{if(window.HamyarPlayer&&HamyarPlayer.seek)HamyarPlayer.seek(ms);}catch(_){}" +
-        "var id=(a.getAttribute('href')||'');" +
-        "if(id.charAt(0)==='#'){try{var el=document.querySelector(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}catch(_){}}" +
+        "var ms2=msOfText(a);if(ms2!=null){go(a,ms2,e);}" +
         "},true);})();</script>"
     val i = html.lastIndexOf("</body>")
     return if (i >= 0) html.substring(0, i) + shim + html.substring(i) else html + shim

@@ -229,6 +229,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
     var lastSaveMs by remember { mutableLongStateOf(0L) }
     var dragMs by remember { mutableLongStateOf(-1L) }
     var quiet by remember { mutableStateOf(false) }
+    var note by remember { mutableStateOf<String?>(null) }
 
     val track = tracks[activeIdx]
     LaunchedEffect(packId, tracks.size) {
@@ -452,12 +453,15 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
     var sysVol by remember { mutableIntStateOf(runCatching { am?.getStreamVolume(android.media.AudioManager.STREAM_MUSIC) ?: 5 }.getOrDefault(5)) }
     var lastUnmuted by remember { mutableIntStateOf(if (sysVol > 0) sysVol else (sysMax / 2).coerceAtLeast(1)) }
     var volOpen by remember { mutableStateOf(false) }
+    var volTick by remember { mutableIntStateOf(0) }
     fun applyVol(v: Int) {
         sysVol = v.coerceIn(0, sysMax)
         if (sysVol > 0) lastUnmuted = sysVol
         runCatching { am?.setStreamVolume(android.media.AudioManager.STREAM_MUSIC, sysVol, 0) }
     }
-    LaunchedEffect(volOpen) { if (volOpen) { delay(2600); volOpen = false } }
+    LaunchedEffect(volOpen, volTick) { if (volOpen) { delay(2600); volOpen = false } }
+    // پیامِ کوتاه (نتیجه‌ی دانلود) خودش بعدِ چند ثانیه پاک می‌شود.
+    LaunchedEffect(note) { if (note != null) { delay(6000); note = null } }
     // کلیدهایِ فیزیکیِ ولوم → همگام‌سازیِ آیکون/اسلایدر.
     LaunchedEffect(Unit) {
         while (true) {
@@ -524,19 +528,22 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                 )
                 when {
                     downloading -> {
-                        if (totalBytes > 0) {
-                            LinearProgressIndicator(
-                                progress = { (doneBytes.toFloat() / totalBytes.toFloat()).coerceIn(0f, 1f) },
-                                modifier = Modifier.width(72.dp).height(6.dp),
-                            )
-                            Text(
-                                "${humanSize(doneBytes)} از ${humanSize(totalBytes)}",
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 1,
-                            )
-                        } else {
-                            LinearProgressIndicator(modifier = Modifier.width(72.dp).height(6.dp))
-                        }
+                        LinearProgressIndicator(
+                            progress = {
+                                if (totalBytes > 0) (doneBytes.toFloat() / totalBytes.toFloat()).coerceIn(0f, 1f) else 0f
+                            },
+                            modifier = Modifier.width(64.dp).height(6.dp),
+                        )
+                        Text(
+                            if (totalBytes > 0) {
+                                toPersianDigits(((doneBytes * 100L) / totalBytes).toString()) + "٪ — " +
+                                    humanSize(doneBytes) + " از " + humanSize(totalBytes)
+                            } else {
+                                humanSize(doneBytes)
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1,
+                        )
                     }
                     cached(track) -> {
                         var confirmDelete by remember { mutableStateOf(false) }
@@ -583,10 +590,12 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                                         totalBytes = total
                                     }
                                 }
+                                note = "دانلود کامل شد؛ پخشِ بعدی آفلاین است."
                                 // دانلود که تمام، آیتمِ آنلاینِ کهنه را با همان ترکِ محلی عوض کن.
                                 if (loadedKey == track.cacheKey) startTrack(track, autoplay = playing)
                             } catch (e: Exception) {
-                                // بی‌صدا: دکمه سر جایش می‌ماند و کاربر دوباره می‌زند.
+                                android.util.Log.w("TeachVault", "download failed: ${track.fileId}", e)
+                                note = "دانلود کامل نشد؛ دوباره تلاش کن."
                             }
                             downloading = false
                             cacheTick++
@@ -605,12 +614,17 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                     )
                 }
                 Spacer(Modifier.weight(1f))
-                // ولوم: لمسِ آیکون = میوت/لغو + نمایشِ اسلایدر؛ نگه‌داشتن = باز/بسته‌کردن اسلایدر.
+                // ولوم به سبکِ یوتیوب: وقتی نوار بسته است، لمسِ آیکون فقط نوار را باز
+                // می‌کند (بی‌صدا نمی‌کند)؛ میوت/لغوِ میوت فقط وقتی نوار باز است.
                 Box(
                     Modifier
                         .clickable {
-                            volOpen = true
-                            if (sysVol > 0) { lastUnmuted = sysVol; applyVol(0) } else applyVol(lastUnmuted.coerceAtLeast(1))
+                            if (volOpen) {
+                                if (sysVol > 0) { lastUnmuted = sysVol; applyVol(0) } else applyVol(lastUnmuted.coerceAtLeast(1))
+                                volTick++
+                            } else {
+                                volOpen = true
+                            }
                         }
                         .padding(horizontal = 2.dp),
                     contentAlignment = Alignment.Center,
@@ -627,13 +641,18 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                     enter = androidx.compose.animation.expandHorizontally() + androidx.compose.animation.fadeIn(),
                     exit = androidx.compose.animation.shrinkHorizontally() + androidx.compose.animation.fadeOut(),
                 ) {
-                    Slider(
-                        value = sysVol.toFloat(),
-                        onValueChange = { applyVol(it.roundToInt()) },
-                        valueRange = 0f..sysMax.toFloat(),
-                        steps = sysMax - 1,
-                        modifier = Modifier.width(96.dp).height(26.dp),
-                    )
+                    androidx.compose.runtime.CompositionLocalProvider(
+                        androidx.compose.ui.platform.LocalLayoutDirection provides
+                            androidx.compose.ui.unit.LayoutDirection.Ltr,
+                    ) {
+                        Slider(
+                            value = sysVol.toFloat(),
+                            onValueChange = { applyVol(it.roundToInt()) },
+                            valueRange = 0f..sysMax.toFloat(),
+                            steps = sysMax - 1,
+                            modifier = Modifier.width(96.dp).height(26.dp),
+                        )
+                    }
                 }
             }
             if (quietOn()) {
@@ -660,12 +679,9 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                     tracks.forEach { StudyMedia.forgetMissing(it.fileId) }
                     availability = null
                 }) { Text("بررسی دوباره") }
-            } else if (availability == null) {
-                Text(
-                    "در حال بررسی صوتِ درس…",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            }
+            note?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall, maxLines = 1)
             }
             if (durMs > 0) {
                 Slider(

@@ -74,7 +74,18 @@ object MediaVault {
         val all = vaultFile(ctx, cacheKey)
         if (!all.exists() || all.length() <= 20) return null
         return runCatching {
-            val raw = all.inputStream().use { it.readBytes().copyOf((20 + bytes).coerceAtMost(all.length().toInt())) }
+            // فقط همان چند کیلوبایتِ اول خوانده می‌شود (نه کل فایل) — در CTR
+            // رمزگشاییِprefix معتبر است و حافظه هم مصرف نمی‌شود.
+            val want = (20 + bytes).coerceAtMost(all.length().toInt())
+            val raw = ByteArray(want)
+            java.io.FileInputStream(all).use { fin ->
+                var off = 0
+                while (off < want) {
+                    val n = fin.read(raw, off, want - off)
+                    if (n <= 0) break
+                    off += n
+                }
+            }
             if (!raw.startsWith(MAGIC.toByteArray(Charsets.US_ASCII))) return@runCatching null
             val iv = raw.copyOfRange(4, 20)
             val cipher = Cipher.getInstance("AES/CTR/NoPadding")
@@ -165,29 +176,17 @@ object MediaVault {
         }
         conn.connect()
         if (conn.responseCode !in 200..299) error("HTTP ${conn.responseCode}")
-        // سرور معمولاً Content-Length نمی‌فرستد (پاسخ chunked)؛ در این صورت
-        // فقط حجمِ دریافت‌شده گزارش می‌شود و درصد نمایش داده نمی‌شود.
+        // باکت پاسخِ chunked می‌دهد: نه GET و نه HEAD هدرِ Content-Length ندارند،
+        // پس اندازه‌ی کل از «Content-Range» یک درخواستِ ۱بایتی خوانده می‌شود تا
+        // درصدِ دانلود واقعاً نمایش داده شود.
         var total = conn.contentLengthLong
-        if (total <= 0) {
-            val head = runCatching {
-                val c = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
-                    connectTimeout = 8000
-                    readTimeout = 8000
-                    requestMethod = "HEAD"
-                    instanceFollowRedirects = true
-                }
-                c.connect()
-                val len = c.getHeaderFieldLong("Content-Length", -1L)
-                c.disconnect()
-                len
-            }.getOrDefault(-1L)
-            if (head > 0) total = head
-        }
+        if (total <= 0) total = probeSize(url)
         val cipher = Cipher.getInstance("AES/CTR/NoPadding")
         val iv = ByteArray(16).also { SecureRandom().nextBytes(it) }
         cipher.init(Cipher.ENCRYPT_MODE, key(ctx), IvParameterSpec(iv))
         val target = vaultFile(ctx, cacheKey)
         val part = File(vaultDir(ctx), "$cacheKey.enc.part")
+        var done = 0L
         try {
             java.io.FileOutputStream(part).use { out ->
                 out.write(MAGIC.toByteArray(Charsets.US_ASCII))
@@ -195,7 +194,6 @@ object MediaVault {
                 conn.inputStream.use { input ->
                     val buf = ByteArray(32 * 1024)
                     var read: Int
-                    var done = 0L
                     while (input.read(buf).also { read = it } > 0) {
                         val enc = cipher.update(buf, 0, read)
                         if (enc != null) out.write(enc)
@@ -206,6 +204,7 @@ object MediaVault {
                     if (tail != null) out.write(tail)
                 }
             }
+            if (total > 0 && done < total) error("دانلود کامل نشد ($done از $total بایت).")
             if (!part.renameTo(target)) {
                 part.copyTo(target, overwrite = true)
                 part.delete()
@@ -222,6 +221,21 @@ object MediaVault {
             part.delete()
         }
     }
+
+    /** اندازه‌ی کلِ فایل از هدرِ `Content-Range` (پاسخِ ۲۰۶ به `Range: bytes=0-0`). */
+    private fun probeSize(url: String): Long = runCatching {
+        val c = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
+            connectTimeout = 8000
+            readTimeout = 8000
+            instanceFollowRedirects = true
+            setRequestProperty("Range", "bytes=0-0")
+        }
+        c.connect()
+        val range = c.getHeaderField("Content-Range").orEmpty()
+        runCatching { c.inputStream.close() }
+        c.disconnect()
+        range.substringAfterLast('/', "").trim().toLongOrNull() ?: -1L
+    }.getOrDefault(-1L)
 
     /**
      * بازکردنِ جریانِ خوانشِ جسته‌گریخته روی فایلِ گاوصندوق (برای پخش).

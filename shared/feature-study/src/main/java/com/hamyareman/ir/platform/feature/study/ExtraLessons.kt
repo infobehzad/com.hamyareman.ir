@@ -187,10 +187,16 @@ object ExtraLessons {
         return null
     }
 
-    /** صوت ریاضی نهم: `ryazif01d01.mp3` مطابق `Books/Base-09/ریاضی/04- صوت تدریس`. */
+    /**
+     * صوت ریاضی نهم: `ryazif01d01.mp3` مطابق `Books/Base-09/ریاضی/04- صوت تدریس`.
+     * جمع‌بندیِ هر فصل هم صوت دارد: `ryazif01review.mp3`.
+     */
     fun c905AudioName(packId: String): String? {
         Regex("""^C905_E(\d+)-L(\d+)$""").find(packId)?.let { m ->
             return "ryazif%02dd%02d.mp3".format(m.groupValues[1].toInt(), m.groupValues[2].toInt())
+        }
+        Regex("""^C905_E(\d+)-SUM$""").find(packId)?.let { m ->
+            return "ryazif%02dreview.mp3".format(m.groupValues[1].toInt())
         }
         return null
     }
