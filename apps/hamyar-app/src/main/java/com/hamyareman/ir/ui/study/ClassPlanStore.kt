@@ -44,7 +44,49 @@ object ClassPlanStore {
         val virtualMorningMinute: Int,
         val virtualNoonHour: Int,
         val virtualNoonMinute: Int,
+        /** ساعت خروج از مدرسه — شیفت صبح (HH:MM). */
+        val exitMorning: String = "13:30",
+        /** ساعت خروج از مدرسه — شیفت ظهر (HH:MM). */
+        val exitNoon: String = "17:30",
     )
+
+    /** ساعت خروجِ شیفتِ داده‌شده به صورت «HH:MM». */
+    fun exitOf(snap: Snapshot, shift: Shift): String =
+        if (shift == Shift.MORNING) snap.exitMorning.ifBlank { "13:30" } else snap.exitNoon.ifBlank { "17:30" }
+
+    /** دقیقه‌های گذشته از نیمه‌شب برای یک زمانِ «HH:MM». */
+    fun minutesOf(hhmm: String): Int {
+        val p = hhmm.split(":")
+        val h = p.getOrNull(0)?.trim()?.toIntOrNull() ?: 0
+        val m = p.getOrNull(1)?.trim()?.toIntOrNull() ?: 0
+        return h * 60 + m
+    }
+
+    /**
+     * آیا «رفرشِ بعد از مدرسه» برای امروز انجام شده؟ (تیک‌های فردا آزاد می‌شوند)
+     */
+    fun refreshedToday(ctx: Context, today: LocalDate = LocalDate.now(JalaliDate.TEHRAN)): Boolean =
+        store(ctx).getBool("refreshed_$today", false)
+
+    /**
+     * رفرشِ اطلاع‌رسانی‌های فردا در ساعتِ خروج (یا پایانِ کلاس مجازی):
+     * تیک‌های قفل‌شده آزاد می‌شوند تا برای روز بعد آماده شوند.
+     */
+    fun maybeRefreshAtExit(ctx: Context, now: LocalDateTime = LocalDateTime.now(JalaliDate.TEHRAN)) {
+        val today = now.toLocalDate()
+        val s = store(ctx)
+        if (s.getBool("refreshed_$today", false)) return
+        val snap = load(ctx)
+        val shift = shiftOf(snap, today)
+        val exitMin = minutesOf(exitOf(snap, shift))
+        // روزهای مجازی: پایانِ کلاس مجازی جای ساعت خروج را می‌گیرد.
+        val endMin = virtualSessions(ctx).firstOrNull { it.dayIndex == SchoolShift.dayIndex(today) }
+            ?.let { it.endH * 60 + it.endM }
+        val gate = endMin ?: exitMin
+        if (now.hour * 60 + now.minute < gate) return
+        s.keysWithPrefix("lock_").forEach { s.remove(it) }
+        s.putBool("refreshed_$today", true)
+    }
 
     fun store(ctx: Context) = LocalStore(ctx, PREF)
 
@@ -85,7 +127,21 @@ object ClassPlanStore {
             virtualMorningMinute = s.getInt("virt_m_m", 0),
             virtualNoonHour = s.getInt("virt_n_h", 14),
             virtualNoonMinute = s.getInt("virt_n_m", 0),
+            exitMorning = s.getString("exit_am").ifBlank { "13:30" },
+            exitNoon = s.getString("exit_pm").ifBlank { "17:30" },
         )
+    }
+
+    /** حذفِ یک خانه (درس) از یک روزِ برنامهٔ هفتگی. */
+    fun removeSlot(ctx: Context, dayIndex: Int, slotIndex: Int) {
+        val s = store(ctx)
+        val arr = runCatching { JSONArray(s.getString("day_$dayIndex", "[]")) }.getOrDefault(JSONArray())
+        val out = JSONArray()
+        for (i in 0 until arr.length()) {
+            if (i == slotIndex) continue
+            out.put(arr.optString(i))
+        }
+        s.putString("day_$dayIndex", out.toString())
     }
 
     fun saveDays(ctx: Context, days: Map<Int, List<String>>, locked: Boolean) {
@@ -122,6 +178,12 @@ object ClassPlanStore {
         s.putInt("wake_lead", wakeLeadMin)
         s.putInt("n_hour", noonHour); s.putInt("n_min", noonMinute)
         s.putString("sleep_am", sleepMorning); s.putString("sleep_pm", sleepEvening)
+    }
+
+    fun saveExitTimes(ctx: Context, morning: String, noon: String) {
+        val s = store(ctx)
+        s.putString("exit_am", morning)
+        s.putString("exit_pm", noon)
     }
 
     fun saveLunarOffset(ctx: Context, offset: Int) {
@@ -206,8 +268,35 @@ object ClassPlanStore {
 
     fun prepBag(ctx: Context, iso: String) = store(ctx).getBool("bag_$iso", false)
     fun prepHw(ctx: Context, iso: String) = store(ctx).getBool("hw_$iso", false)
-    fun setPrepBag(ctx: Context, iso: String, v: Boolean) { store(ctx).putBool("bag_$iso", v) }
-    fun setPrepHw(ctx: Context, iso: String, v: Boolean) { store(ctx).putBool("hw_$iso", v) }
+
+    /**
+     * تیکِ «کیف/تکالیف» بعد از یک‌بار زدن **قفل** می‌شود تا ساعتِ خروج؛
+     * آن‌وقت [maybeRefreshAtExit] قفل‌ها را برای روز بعد باز می‌کند.
+     */
+    fun bagLocked(ctx: Context, iso: String) = store(ctx).getBool("lock_bag_$iso", false)
+    fun hwLocked(ctx: Context, iso: String) = store(ctx).getBool("lock_hw_$iso", false)
+
+    fun setPrepBag(ctx: Context, iso: String, v: Boolean) {
+        store(ctx).putBool("bag_$iso", v)
+        if (v) store(ctx).putBool("lock_bag_$iso", true) else store(ctx).remove("lock_bag_$iso")
+    }
+
+    fun setPrepHw(ctx: Context, iso: String, v: Boolean) {
+        store(ctx).putBool("hw_$iso", v)
+        if (v) store(ctx).putBool("lock_hw_$iso", true) else store(ctx).remove("lock_hw_$iso")
+    }
+
+    // --- آمادگیِ امتحان (فقط وقتی امتحان وجود دارد) ---
+    private val EXAM_PREP = listOf("مرور خلاصهٔ درس", "حل تمرین‌های کلیدی", "فلش‌کارت‌ها", "یک نمونه‌سؤال")
+
+    fun examPrepOptions(): List<String> = EXAM_PREP
+
+    fun examPrepDone(ctx: Context, iso: String, option: String): Boolean =
+        store(ctx).getBool("examprep_${iso}_$option", false)
+
+    fun setExamPrepDone(ctx: Context, iso: String, option: String, v: Boolean) {
+        store(ctx).putBool("examprep_${iso}_$option", v)
+    }
     fun examOf(ctx: Context, iso: String) = store(ctx).getString("exam_$iso")
     fun setExam(ctx: Context, iso: String, subject: String) { store(ctx).putString("exam_$iso", subject) }
     fun reportOf(ctx: Context, iso: String) = store(ctx).getString("rep_$iso")
@@ -401,4 +490,141 @@ object ClassPlanStore {
             .take(14)
             .firstOrNull { !isSchoolHoliday(snap, it) }
             ?: from
+
+
+    // ------------------------------------------------------- سینک با سرور
+
+    /** وضعیتِ یک کلید را به صورت JSON بیرون می‌دهد (برای `app_state`). */
+    fun exportState(ctx: Context, key: String): String {
+        val snap = load(ctx)
+        return when (key) {
+            StateSync.KEY_WEEK -> JSONObject().apply {
+                put("locked", snap.locked)
+                val days = JSONObject()
+                snap.days.forEach { (d, list) -> days.put(d.toString(), JSONArray().apply { list.forEach { put(it) } }) }
+                put("days", days)
+            }.toString()
+
+            StateSync.KEY_SHIFT -> JSONObject().apply {
+                put("cycleWeeks", snap.cycleWeeks)
+                put("anchorIso", snap.anchorIso)
+                put("fixedEvening", snap.fixedEvening)
+                put("weekPattern", JSONArray().apply { snap.weekPattern.forEach { put(it) } }.toString())
+                put("morningHour", snap.morningHour)
+                put("morningMinute", snap.morningMinute)
+                put("noonHour", snap.noonHour)
+                put("noonMinute", snap.noonMinute)
+                put("wakeLeadMin", snap.wakeLeadMin)
+                put("sleepMorning", snap.sleepMorning)
+                put("sleepEvening", snap.sleepEvening)
+                put("exitMorning", snap.exitMorning)
+                put("exitNoon", snap.exitNoon)
+            }.toString()
+
+            StateSync.KEY_VIRTUAL -> JSONObject().apply {
+                put("sessions", JSONArray().apply {
+                    virtualSessions(ctx).forEach { s ->
+                        put(
+                            JSONObject()
+                                .put("dayIndex", s.dayIndex)
+                                .put("startH", s.startH).put("startM", s.startM)
+                                .put("endH", s.endH).put("endM", s.endM)
+                                .put("subject", s.subject),
+                        )
+                    }
+                })
+                put("ranges", JSONArray().apply {
+                    virtualRanges(ctx).forEach { r ->
+                        put(JSONObject().put("id", r.id).put("from", r.fromIso).put("to", r.toIso))
+                    }
+                })
+                put("days", JSONArray().apply { virtualDays(ctx).sorted().forEach { put(it) } })
+            }.toString()
+
+            StateSync.KEY_CHECKS -> JSONObject().apply {
+                val s = store(ctx)
+                val bag = JSONObject(); val hw = JSONObject(); val exam = JSONObject(); val rep = JSONObject()
+                s.keysWithPrefix("bag_").forEach { k -> bag.put(k.removePrefix("bag_"), s.getBool(k)) }
+                s.keysWithPrefix("hw_").forEach { k -> hw.put(k.removePrefix("hw_"), s.getBool(k)) }
+                s.keysWithPrefix("exam_").forEach { k -> exam.put(k.removePrefix("exam_"), s.getString(k)) }
+                s.keysWithPrefix("rep_").forEach { k -> rep.put(k.removePrefix("rep_"), s.getString(k)) }
+                put("bag", bag); put("hw", hw); put("exam", exam); put("report", rep)
+            }.toString()
+
+            else -> "{}"
+        }
+    }
+
+    /** اِعمالِ وضعیتِ رسیده از سرور روی دستگاه (آخرین نوشته برنده است). */
+    fun importState(ctx: Context, key: String, payload: String) {
+        val o = runCatching { JSONObject(payload) }.getOrNull() ?: return
+        when (key) {
+            StateSync.KEY_WEEK -> {
+                val daysObj = o.optJSONObject("days") ?: return
+                val days = (1..5).associate { d ->
+                    d to runCatching {
+                        val arr = daysObj.optJSONArray(d.toString()) ?: JSONArray()
+                        (0 until arr.length()).map { arr.optString(it) }.filter { it.isNotBlank() }
+                    }.getOrDefault(emptyList())
+                }
+                if (days.values.any { it.isNotEmpty() }) {
+                    saveDays(ctx, days, o.optBoolean("locked", false))
+                }
+            }
+
+            StateSync.KEY_SHIFT -> {
+                val cycle = o.optInt("cycleWeeks", 2).let { if (it in listOf(1, 2, 4)) it else 2 }
+                val anchor = o.optString("anchorIso")
+                val pattern = runCatching {
+                    val arr = JSONArray(o.optString("weekPattern", "[]"))
+                    (0 until arr.length()).map { arr.optString(it) }.filter { it == "morning" || it == "evening" }
+                }.getOrDefault(emptyList())
+                if (anchor.isNotBlank()) {
+                    saveShift(ctx, cycle, anchor, o.optBoolean("fixedEvening", false), pattern)
+                }
+                saveTimes(
+                    ctx,
+                    o.optInt("morningHour", 7), o.optInt("morningMinute", 30), o.optInt("wakeLeadMin", 60),
+                    o.optInt("noonHour", 12), o.optInt("noonMinute", 0),
+                    o.optString("sleepMorning").ifBlank { "21:30" },
+                    o.optString("sleepEvening").ifBlank { "23:00" },
+                )
+                saveExitTimes(
+                    ctx,
+                    o.optString("exitMorning").ifBlank { "13:30" },
+                    o.optString("exitNoon").ifBlank { "17:30" },
+                )
+            }
+
+            StateSync.KEY_VIRTUAL -> {
+                runCatching {
+                    val arr = o.optJSONArray("sessions") ?: JSONArray()
+                    val sessions = (0 until arr.length()).mapNotNull { i ->
+                        val so = arr.optJSONObject(i) ?: return@mapNotNull null
+                        VirtualSession(
+                            dayIndex = so.optInt("dayIndex", 1),
+                            startH = so.optInt("startH", 8), startM = so.optInt("startM", 0),
+                            endH = so.optInt("endH", 9), endM = so.optInt("endM", 0),
+                            subject = so.optString("subject"),
+                        )
+                    }
+                    if (sessions.isNotEmpty()) saveVirtualSessions(ctx, sessions)
+                }
+                runCatching {
+                    val days = o.optJSONArray("days") ?: JSONArray()
+                    val set = (0 until days.length()).map { days.optString(it) }.filter { it.isNotBlank() }.toSet()
+                    set.forEach { setVirtual(ctx, it, true) }
+                }
+            }
+
+            StateSync.KEY_CHECKS -> {
+                val s = store(ctx)
+                fun obj(name: String) = o.optJSONObject(name)
+                obj("bag")?.keys()?.forEach { k -> s.putBool("bag_$k", obj("bag")!!.optBoolean(k)) }
+                obj("hw")?.keys()?.forEach { k -> s.putBool("hw_$k", obj("hw")!!.optBoolean(k)) }
+                obj("exam")?.keys()?.forEach { k -> s.putString("exam_$k", obj("exam")!!.optString(k)) }
+                obj("report")?.keys()?.forEach { k -> s.putString("rep_$k", obj("report")!!.optString(k)) }
+            }
+        }
+    }
 }

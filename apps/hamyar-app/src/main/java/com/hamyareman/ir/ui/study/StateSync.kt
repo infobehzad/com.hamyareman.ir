@@ -117,3 +117,59 @@ object StateSync {
 
     fun localAt(ctx: Context, key: String): Long = store(ctx).getLong("at_$key", 0L)
 }
+
+/**
+ * هماهنگ‌کردنِ تنظیماتِ برنامهٔ کلاسی با سرور — هر کلید یک سطر در `app_state`.
+ */
+object ClassPlanSync {
+
+    val keys = listOf(
+        StateSync.KEY_WEEK,
+        StateSync.KEY_SHIFT,
+        StateSync.KEY_VIRTUAL,
+        StateSync.KEY_CHECKS,
+    )
+
+    /** کشیدنِ همهٔ کلیدها از سرور (اگر سرور جدیدتر باشد روی دستگاه اعمال می‌شود). */
+    suspend fun pullAll(
+        ctx: android.content.Context,
+        tables: com.hamyareman.ir.platform.core.appwrite.TablesDbService,
+        uid: String,
+    ): Boolean {
+        if (uid.isBlank()) return false
+        var any = false
+        keys.forEach { key ->
+            val remote = StateSync.pull(ctx, tables, uid, key)
+            if (remote != null) {
+                val local = ClassPlanStore.exportState(ctx, key)
+                if (remote.second >= StateSync.localAt(ctx, key) && remote.first != local) {
+                    ClassPlanStore.importState(ctx, key, remote.first)
+                    any = true
+                }
+            }
+        }
+        return any
+    }
+
+    /** فرستادنِ یک کلید به سرور (بعد از هر تغییرِ محلی). */
+    suspend fun push(
+        ctx: android.content.Context,
+        tables: com.hamyareman.ir.platform.core.appwrite.TablesDbService,
+        uid: String,
+        key: String,
+    ): Boolean {
+        if (uid.isBlank()) return false
+        return StateSync.push(ctx, tables, uid, key, ClassPlanStore.exportState(ctx, key))
+    }
+
+    suspend fun pushAll(
+        ctx: android.content.Context,
+        tables: com.hamyareman.ir.platform.core.appwrite.TablesDbService,
+        uid: String,
+    ): Boolean {
+        if (uid.isBlank()) return false
+        var ok = true
+        keys.forEach { key -> ok = ok && push(ctx, tables, uid, key) }
+        return ok
+    }
+}

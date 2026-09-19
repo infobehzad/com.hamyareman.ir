@@ -38,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +57,56 @@ import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 import com.hamyareman.ir.ui.home.DashboardFonts
 import com.hamyareman.ir.ui.home.IranOfficialHolidays
 import java.time.LocalDate
+
+private fun effectivePattern(
+    snap: ClassPlanStore.Snapshot,
+    weeks: Int,
+    current: Shift,
+): List<String> {
+    if (snap.weekPattern.size == weeks && snap.weekPattern.isNotEmpty()) return snap.weekPattern
+    val first = if (current == Shift.EVENING) "evening" else "morning"
+    val second = if (first == "morning") "evening" else "morning"
+    return (0 until weeks).map { i -> if (i % 2 == 0) first else second }
+}
+
+/** ساعت به صورت «HH:MM» با یک انتخابگرِ ساده. */
+@Composable
+private fun TimePickText(label: String, value: String, onPick: (String) -> Unit) {
+    val ctx = LocalContext.current
+    val parts = value.split(":")
+    val h = parts.getOrNull(0)?.toIntOrNull() ?: 8
+    val m = parts.getOrNull(1)?.toIntOrNull() ?: 0
+    OutlinedButton(
+        onClick = {
+            android.app.TimePickerDialog(ctx, { _, hh, mm -> onPick("%d:%02d".format(hh, mm)) }, h, m, true).show()
+        },
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text(
+            "$label  ${toPersianDigits("%d:%02d".format(h, m))}",
+            fontFamily = DashboardFonts.quote,
+        )
+    }
+}
+
+/** انتخابِ شیفتِ یک هفته از چرخه. */
+@Composable
+private fun ShiftWeekRow(label: String, value: Shift, onPick: (Shift) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box(Modifier.fillMaxWidth()) {
+        OutlinedButton(onClick = { open = true }, modifier = Modifier.fillMaxWidth()) {
+            Text("$label ${value.label}", fontFamily = DashboardFonts.quote)
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            listOf(Shift.MORNING, Shift.EVENING).forEach { sh ->
+                DropdownMenuItem(
+                    text = { Text(sh.label, fontFamily = DashboardFonts.quote) },
+                    onClick = { onPick(sh); open = false },
+                )
+            }
+        }
+    }
+}
 
 @Composable
 fun ClassPlanScreen(onBack: () -> Unit, initialTab: Int = 0, onVirtualHours: (() -> Unit)? = null) {
@@ -84,6 +135,19 @@ fun ClassPlanScreen(onBack: () -> Unit, initialTab: Int = 0, onVirtualHours: (()
 @Composable
 private fun WeeklyTimetableSection() {
     val ctx = LocalContext.current
+    val container = LocalAppContainer.current
+    val syncScope = rememberCoroutineScope()
+    var syncNotice by remember { mutableStateOf<String?>(null) }
+    fun uidNow(): String = container.auth.cachedUserId()
+        ?: runCatching { kotlinx.coroutines.runBlocking { container.auth.currentUserId() } }.getOrNull().orEmpty()
+    LaunchedEffect(Unit) {
+        val uid = runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+        if (uid.isNotBlank()) {
+            val changed = ClassPlanSync.pullAll(ctx, container.tables, uid)
+            if (changed) syncNotice = "برنامه از سرور به‌روز شد."
+            ClassPlanSync.push(ctx, container.tables, uid, StateSync.KEY_WEEK)
+        }
+    }
     val options = remember { ClassPlanStore.subjectOptions(ctx) }
     var snap by remember { mutableStateOf(ClassPlanStore.load(ctx)) }
     var days by remember {
@@ -146,9 +210,22 @@ private fun WeeklyTimetableSection() {
                     )
                 }
                 if (!locked) {
-                    TextButton(onClick = {
-                        days = days.toMutableMap().also { it[di] = (slots + "").toMutableList() }
-                    }) { Text("افزودن خانه", fontFamily = DashboardFonts.quote) }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        TextButton(onClick = {
+                            days = days.toMutableMap().also { it[di] = (slots + "").toMutableList() }
+                        }) { Text("افزودن خانه", fontFamily = DashboardFonts.quote) }
+                        if (slots.size > 1) {
+                            TextButton(onClick = {
+                                ClassPlanStore.removeSlot(ctx, di, slots.size - 1)
+                                snap = ClassPlanStore.load(ctx)
+                                days = days.toMutableMap().also {
+                                    it[di] = (ClassPlanStore.load(ctx).days[di].orEmpty()).toMutableList()
+                                }
+                                persist(lock = false, map = days)
+                                syncScope.launch { ClassPlanSync.push(ctx, container.tables, uidNow(), StateSync.KEY_WEEK) }
+                            }) { Text("حذف آخرین خانه", fontFamily = DashboardFonts.quote) }
+                        }
+                    }
                 }
             }
         }
@@ -310,10 +387,27 @@ private fun ShamsiCalendarSection() {
 @Composable
 private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
     val ctx = LocalContext.current
-    val reminders = LocalAppContainer.current.reminders
+    val container = LocalAppContainer.current
+    val reminders = container.reminders
+    val syncScope = rememberCoroutineScope()
+    var syncNotice by remember { mutableStateOf<String?>(null) }
+    fun syncUid(): String = container.auth.cachedUserId()
+        ?: runCatching { kotlinx.coroutines.runBlocking { container.auth.currentUserId() } }.getOrNull().orEmpty()
     var snap by remember { mutableStateOf(ClassPlanStore.load(ctx)) }
     val today = LocalDate.now(JalaliDate.TEHRAN)
     var cycle by remember { mutableIntStateOf(snap.cycleWeeks) }
+    var pattern by remember { mutableStateOf(effectivePattern(snap, snap.cycleWeeks, ClassPlanStore.shiftOf(snap, today))) }
+    LaunchedEffect(Unit) {
+        val uid = runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+        if (uid.isNotBlank()) {
+            val changed = ClassPlanSync.pullAll(ctx, container.tables, uid)
+            snap = ClassPlanStore.load(ctx)
+            cycle = snap.cycleWeeks
+            pattern = effectivePattern(snap, cycle, ClassPlanStore.shiftOf(snap, today))
+            if (changed) syncNotice = "تنظیمات از سرور به‌روز شد."
+            ClassPlanSync.pushAll(ctx, container.tables, uid)
+        }
+    }
     var alarm by remember { mutableStateOf(SchoolAlarmStore.load(ctx)) }
     var settingsOpen by remember { mutableStateOf(false) }
     var shiftSettings by remember { mutableStateOf(false) }
@@ -398,6 +492,7 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        syncNotice?.let { Text(it, fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary) }
         val sessions = ClassPlanStore.virtualSessions(ctx)
         if (sessions.isNotEmpty()) {
             Text("ساعت‌های ثبت‌شده", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
@@ -427,6 +522,7 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                                     ClassPlanStore.setCurrentWeekShift(ctx, sh)
                                     snap = ClassPlanStore.load(ctx)
                                     cycle = snap.cycleWeeks
+                                    pattern = effectivePattern(snap, cycle, ClassPlanStore.shiftOf(snap, today))
                                 },
                                 label = { Text(sh.label, fontFamily = DashboardFonts.quote) },
                             )
@@ -438,7 +534,12 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                             FilterChip(
                                 selected = snap.cycleWeeks == w,
                                 onClick = {
-                                    ClassPlanStore.saveShift(ctx, w, snap.anchorIso, snap.fixedEvening)
+                                    val cur = ClassPlanStore.shiftOf(snap, today)
+                                    pattern = effectivePattern(snap, w, cur)
+                                    ClassPlanStore.saveShift(
+                                        ctx, w, SchoolShift.startOfPersianWeek(today).toString(),
+                                        w == 1 && cur == Shift.EVENING, pattern,
+                                    )
                                     cycle = w
                                     snap = ClassPlanStore.load(ctx)
                                 },
@@ -446,7 +547,22 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                             )
                         }
                     }
-                    if (snap.cycleWeeks == 1) {
+                    if (snap.cycleWeeks > 1) {
+                        Text(
+                            "شیفتِ هر هفته (هفتهٔ اول = هفتهٔ جاری)",
+                            fontFamily = DashboardFonts.quote,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        pattern.forEachIndexed { i, value ->
+                            ShiftWeekRow(
+                                label = "هفتهٔ ${toPersianDigits((i + 1).toString())} شیفت",
+                                value = if (value == "evening") Shift.EVENING else Shift.MORNING,
+                                onPick = { sh ->
+                                    pattern = pattern.toMutableList().also { it[i] = if (sh == Shift.MORNING) "morning" else "evening" }
+                                },
+                            )
+                        }
+                    } else {
                         Text("شیفت ثابت", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             listOf(false to "همیشه صبح", true to "همیشه ظهر").forEach { (ev, label) ->
@@ -476,6 +592,15 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                         )
                         snap = ClassPlanStore.load(ctx)
                     }
+                    Text("ساعت خروج از مدرسه", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+                    TimePickText("خروج شیفت صبح", snap.exitMorning) { hhmm ->
+                        ClassPlanStore.saveExitTimes(ctx, hhmm, snap.exitNoon)
+                        snap = ClassPlanStore.load(ctx)
+                    }
+                    TimePickText("خروج شیفت ظهر", snap.exitNoon) { hhmm ->
+                        ClassPlanStore.saveExitTimes(ctx, snap.exitMorning, hhmm)
+                        snap = ClassPlanStore.load(ctx)
+                    }
                     Text(
                         "آماده‌سازیِ پیش از حرکت: ${toPersianDigits(snap.wakeLeadMin.toString())} دقیقه",
                         fontFamily = DashboardFonts.quote,
@@ -500,8 +625,22 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
             },
             confirmButton = {
                 TextButton(onClick = {
+                    if (snap.cycleWeeks > 1 && pattern.isNotEmpty()) {
+                        ClassPlanStore.saveShift(
+                            ctx, snap.cycleWeeks,
+                            SchoolShift.startOfPersianWeek(today).toString(),
+                            false, pattern,
+                        )
+                        snap = ClassPlanStore.load(ctx)
+                    }
                     shiftSettings = false
                     ClassPlanStore.syncAlarms(ctx, reminders, snap, today)
+                    syncScope.launch {
+                        val uid = syncUid()
+                        ClassPlanSync.push(ctx, container.tables, uid, StateSync.KEY_SHIFT)
+                        ClassPlanSync.push(ctx, container.tables, uid, StateSync.KEY_WEEK)
+                        syncNotice = if (uid.isBlank()) "تنظیمات روی دستگاه ذخیره شد (برای سینک وارد شو)." else "تنظیمات ذخیره و با سرور همگام شد."
+                    }
                 }) { Text("ذخیره", fontFamily = DashboardFonts.quote) }
             },
             dismissButton = { TextButton(onClick = { shiftSettings = false }) { Text("بستن", fontFamily = DashboardFonts.quote) } },

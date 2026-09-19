@@ -41,6 +41,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import com.hamyareman.ir.LocalAppContainer
 import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
@@ -54,9 +57,36 @@ import java.time.LocalDate
 @Composable
 fun VirtualClassScreen(onBack: () -> Unit) {
     val ctx = LocalContext.current
+    val container = LocalAppContainer.current
+    val syncScope = rememberCoroutineScope()
+    var syncNotice by remember { mutableStateOf<String?>(null) }
     var sessions by remember { mutableStateOf(ClassPlanStore.virtualSessions(ctx)) }
     var ranges by remember { mutableStateOf(ClassPlanStore.virtualRanges(ctx)) }
     val today = LocalDate.now(JalaliDate.TEHRAN)
+
+    fun pushVirtual() {
+        syncScope.launch {
+            val uid = container.auth.cachedUserId()
+                ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+            if (uid.isBlank()) {
+                syncNotice = "روی دستگاه ذخیره شد؛ برای سینک وارد شو."
+                return@launch
+            }
+            val ok = ClassPlanSync.push(ctx, container.tables, uid, StateSync.KEY_VIRTUAL)
+            syncNotice = if (ok) "ذخیره و با سرور همگام شد." else "ذخیره شد؛ سینک ناموفق بود."
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        val uid = runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+        if (uid.isBlank()) return@LaunchedEffect
+        val changed = ClassPlanSync.pull(ctx, container.tables, uid, StateSync.KEY_VIRTUAL)
+        if (changed) {
+            sessions = ClassPlanStore.virtualSessions(ctx)
+            ranges = ClassPlanStore.virtualRanges(ctx)
+            syncNotice = "ساعت‌ها از سرور به‌روز شد."
+        }
+    }
 
     Column(Modifier.fillMaxSize()) {
         AppTopBar("تنظیم ساعت کلاس‌های مجازی", onBack)
@@ -86,10 +116,12 @@ fun VirtualClassScreen(onBack: () -> Unit) {
                         TimePick("شروع", s.startH, s.startM) { h, m ->
                             sessions = upsertSession(sessions, s.copy(startH = h, startM = m))
                             ClassPlanStore.saveVirtualSessions(ctx, sessions)
+                            pushVirtual()
                         }
                         TimePick("پایان", s.endH, s.endM) { h, m ->
                             sessions = upsertSession(sessions, s.copy(endH = h, endM = m))
                             ClassPlanStore.saveVirtualSessions(ctx, sessions)
+                            pushVirtual()
                         }
                         OutlinedTextField(
                             value = s.subject,
@@ -119,12 +151,24 @@ fun VirtualClassScreen(onBack: () -> Unit) {
                 onAdd = { from, to ->
                     ClassPlanStore.addVirtualRange(ctx, from, to)
                     ranges = ClassPlanStore.virtualRanges(ctx)
+                    pushVirtual()
                 },
                 onDelete = { id ->
                     ClassPlanStore.removeVirtualRange(ctx, id)
                     ranges = ClassPlanStore.virtualRanges(ctx)
+                    pushVirtual()
                 },
             )
+            syncNotice?.let { notice ->
+                Text(
+                    notice,
+                    fontFamily = DashboardFonts.quote,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Right,
+                )
+            }
         }
     }
 }
