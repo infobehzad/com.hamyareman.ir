@@ -26,6 +26,8 @@ sealed class Screen(val route: String) {
     data object ScreenTime : Screen("screentime")
     data object Focus : Screen("focus")
     data object Calm : Screen("calm")
+    data object CalmHub : Screen("calm-hub")
+    data object FreeReading : Screen("free-reading")
     data object Journal : Screen("journal")
     data object Breath : Screen("breath")
     data object Routine : Screen("routine")

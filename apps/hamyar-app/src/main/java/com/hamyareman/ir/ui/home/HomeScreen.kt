@@ -155,11 +155,11 @@ fun HomeScreen(nav: NavController) {
 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 QuickTile("🎒", "مدرسه", Modifier.weight(1f)) { nav.hubTo(Screen.Study.route) }
-                QuickTile("💚", "سلامتی", Modifier.weight(1f)) { nav.hubTo(Screen.HealthHub.route) }
+                QuickTile("📖", "مطالعه آزاد", Modifier.weight(1f)) { nav.navigate(Screen.FreeReading.route) }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 QuickTile("🪷", "آگاهی", Modifier.weight(1f)) { nav.hubTo(Screen.AwarenessHub.route) }
-                QuickTile("🤖", "همراه من", Modifier.weight(1f)) { nav.hubTo(Screen.Chat.route) }
+                QuickTile("💛", "آرامش", Modifier.weight(1f)) { nav.navigate(Screen.CalmHub.route) }
             }
 
             ClassPlanCard(

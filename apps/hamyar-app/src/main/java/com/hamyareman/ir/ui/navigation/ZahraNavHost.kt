@@ -208,6 +208,8 @@ fun ZahraNavHost() {
             composable(Screen.ScreenTime.route) { ScreenTimeScreen({ nav.popBackStack() }, { nav.navigate(Screen.Focus.route) }) }
             composable(Screen.Focus.route) { FocusModeScreen { nav.popBackStack() } }
             composable(Screen.Calm.route) { CalmMenuScreen(nav) }
+            composable(Screen.CalmHub.route) { com.hamyareman.ir.ui.calmdown.CalmHubScreen(nav) { nav.popBackStack() } }
+            composable(Screen.FreeReading.route) { com.hamyareman.ir.ui.study.FreeReadingScreen(nav) { nav.popBackStack() } }
             composable(Screen.Journal.route) { JournalScreen { nav.popBackStack() } }
             composable(Screen.Breath.route) { BreathingScreen { nav.popBackStack() } }
             composable(Screen.Routine.route) { RoutineScreen { nav.popBackStack() } }
