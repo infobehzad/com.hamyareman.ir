@@ -656,6 +656,13 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                     }) { Text("خاموش کن") }
                 }
             }
+            if (state.suppressed && msg.isNullOrBlank()) {
+                Text(
+                    "پخش به‌خاطر تمرکزِ صوتیِ دستگاه موقتاً متوقف است (برنامهٔ دیگری در حال پخش است)؛ چند لحظه دیگر دوباره بزن.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
             // وضعیتِ واقعیِ صوت به کاربر نشان داده می‌شود (قبلاً خطاها بی‌صدا قورت می‌شدند).
             val shownMsg = msg ?: state.error
             if (availability == false) {

@@ -26,6 +26,8 @@ data class PlaybackState(
     val durationMs: Long = 0L,
     val speed: Float = 1f,
     val error: String? = null,
+    /** پخش به‌خاطرِ تمرکزِ صوتی (یا اپِ دیگر) سرکوب شده — بدون اینکه خطایی بیاید. */
+    val suppressed: Boolean = false,
 )
 
 /**
@@ -174,6 +176,8 @@ class PlaybackController(
                 positionMs = player.currentPosition.coerceAtLeast(0L),
                 durationMs = player.duration.takeIf { d -> d > 0 && d != C.TIME_UNSET } ?: 0L,
                 speed = player.playbackParameters.speed,
+                suppressed = player.playWhenReady &&
+                    player.playbackSuppressionReason != Player.PLAYBACK_SUPPRESSION_REASON_NONE,
             )
         }
     }
