@@ -18,9 +18,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -30,6 +33,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -112,7 +116,7 @@ fun MathLessonScreen(
             return@LaunchedEffect
         }
         if (chromeHidden) return@LaunchedEffect
-        delay(3000)
+        delay(5000)
         chromeHidden = true
     }
 
@@ -125,27 +129,40 @@ fun MathLessonScreen(
     }
 
     Column(Modifier.fillMaxSize()) {
+        val tracksForBar = teachTracksOf(pack)
         if (chromeHidden) {
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 2.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+            // ۷) سربرگ‌ها هرگز جمع نمی‌شوند — همیشه بالای محتوا و بالای فلش، قابلِ انتخاب.
+            MathChromeTabRow(tabs, tab) { tab = it }
+            // ۶) فلشِ بازکننده: وسطِ صفحه، بزرگ‌تر، با «نفس» آرام + سایه و حلقه.
+            val breath = remember { androidx.compose.animation.core.Animatable(1f) }
+            LaunchedEffect(Unit) {
+                while (true) {
+                    breath.animateTo(
+                        1.10f,
+                        animationSpec = androidx.compose.animation.core.tween(900, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+                    )
+                    breath.animateTo(0.96f, animationSpec = androidx.compose.animation.core.tween(900, easing = androidx.compose.animation.core.FastOutSlowInEasing))
+                }
+            }
+            Box(Modifier.fillMaxWidth().padding(vertical = 4.dp), contentAlignment = Alignment.Center) {
                 Surface(
+                    onClick = {
+                        chromeHidden = false
+                        hideGen++
+                    },
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    border = androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)),
+                    shadowElevation = 10.dp,
                     modifier = Modifier
-                        .size(28.dp)
-                        .clickable {
-                            chromeHidden = false
-                            hideGen++
-                        },
+                        .size(46.dp)
+                        .graphicsLayer { scaleX = breath.value; scaleY = breath.value },
                 ) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("▾", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                        Icon(Icons.Filled.ExpandMore, contentDescription = "باز کردن سربرگ‌ها", modifier = Modifier.size(28.dp))
                     }
                 }
-                Spacer(Modifier.weight(1f))
-                Text(pack.title, style = MaterialTheme.typography.labelSmall, maxLines = 1)
             }
         } else {
             AppTopBar(title = pack.title, onBack = onBack)
@@ -158,17 +175,18 @@ fun MathLessonScreen(
                         if (!it) chromeHidden = false else hideGen++
                     },
                 )
-                Text("جمع شود", style = MaterialTheme.typography.labelSmall)
+                Text("جمع شود", style = MaterialTheme.typography.labelMedium)
             }
-            ScrollableTabRow(selectedTabIndex = tab.coerceIn(0, tabs.lastIndex), edgePadding = 8.dp) {
-                tabs.forEachIndexed { i, t ->
-                    Tab(
-                        selected = tab == i,
-                        onClick = { tab = i },
-                        text = { Text(t.label, style = MaterialTheme.typography.labelMedium) },
-                    )
-                }
+            // ۴) کارتِ پلیر «بالای سربرگ‌ها» و برای همه‌ی سربرگ‌ها.
+            if (tracksForBar.isNotEmpty()) {
+                TeachAudioBar(
+                    packId = pack.packId,
+                    screenTitle = pack.title,
+                    bookTitle = bookTitle,
+                    tracks = tracksForBar,
+                )
             }
+            MathChromeTabRow(tabs, tab) { tab = it }
         }
         val currentKey = tabs.getOrNull(tab)?.key ?: "teach"
         val currentLabel = tabs.getOrNull(tab)?.label ?: "تدریس"
@@ -182,14 +200,6 @@ fun MathLessonScreen(
                 }
             }
         }
-        if (currentKey == "teach") {
-            val tracks = teachTracksOf(pack)
-            if (tracks.isNotEmpty()) {
-                Box(Modifier.then(if (chromeHidden) Modifier.height(0.dp) else Modifier)) {
-                    TeachAudioBar(packId = pack.packId, screenTitle = pack.title, bookTitle = bookTitle, tracks = tracks)
-                }
-            }
-        }
         when (currentKey) {
             "teach" -> MathTeachTab(pack, bookTitle, showPlayer = false)
             "book" -> MathBookHtmlTab(pack, html)
@@ -198,6 +208,20 @@ fun MathLessonScreen(
             "exam" -> MathExamHtmlTab(pack, html)
             "pdf" -> TeachPdfPages(modifier = Modifier.fillMaxSize(), fileId = pack.pdfFileName, pack = pack)
             else -> MathTeachTab(pack, bookTitle, showPlayer = false)
+        }
+    }
+}
+
+/** سربرگ‌ها — در هر دو حالتِ جمع/باز یکی؛ هیچ‌وقت جمع نمی‌شوند. */
+@Composable
+private fun MathChromeTabRow(tabs: List<MathTab>, tab: Int, onSelect: (Int) -> Unit) {
+    ScrollableTabRow(selectedTabIndex = tab.coerceIn(0, tabs.lastIndex), edgePadding = 8.dp) {
+        tabs.forEachIndexed { i, t ->
+            Tab(
+                selected = tab == i,
+                onClick = { onSelect(i) },
+                text = { Text(t.label, style = MaterialTheme.typography.labelMedium) },
+            )
         }
     }
 }

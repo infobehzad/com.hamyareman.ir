@@ -130,6 +130,20 @@ fun LessonStudyScreen(packId: String, onBack: () -> Unit, onOpenPdf: (String) ->
             )
         }
 
+        // کارتِ پلیرِ صوتِ تدریس «بالای سربرگ‌ها» — در همه‌ی سربرگ‌ها یکی می‌ماند.
+        val teachTracks = remember(pack.packId, refresh) { teachTracksOf(pack) }
+        if (teachTracks.isNotEmpty()) {
+            val teachBookTitle = remember(pack.packId) {
+                BookModuleRegistry.modules.firstOrNull { m -> m.packs.any { it.packId == pack.packId } }?.title.orEmpty()
+            }
+            TeachAudioBar(
+                packId = pack.packId,
+                screenTitle = pack.title,
+                bookTitle = teachBookTitle,
+                tracks = teachTracks,
+            )
+        }
+
         val selected = TABS.indexOfFirst { it.second == tab }.coerceAtLeast(0)
         TabRow(selectedTabIndex = selected) {
             TABS.forEachIndexed { i, (label, key) ->
@@ -176,17 +190,12 @@ private fun kindColor(kind: String): Color = when (kind) {
 
 @Composable
 private fun ContentTab(pack: StudyPack, onOpenPdf: (String) -> Unit) {
-    // طبق بازخورد مصوب: خلاصه‌ها = «همان متن کتاب» (PDF صفحه‌به‌صفحه) با همان
-    // پلیرِ تدریس بالای صفحه + خلاصه/نکات امتحانی در یک جمع‌شونده.
-    val tracks = teachTracksOf(pack)
+    // طبق بازخورد مصوب: خلاصه‌ها = «همان متن کتاب» (PDF صفحه‌به‌صفحه) +
+    // خلاصه/نکات امتحانی در یک جمع‌شونده. پلیرِ تدریس بالای سربرگ‌هاست (همه‌ی تب‌ها).
     Column(
         Modifier.fillMaxSize().padding(horizontal = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        val bookTitle = remember(pack.packId) {
-            BookModuleRegistry.modules.firstOrNull { m -> m.packs.any { it.packId == pack.packId } }?.title.orEmpty()
-        }
-        if (tracks.isNotEmpty()) TeachAudioBar(packId = pack.packId, screenTitle = pack.title, bookTitle = bookTitle, tracks = tracks)
 
         val examNotes = remember(pack.packId) { pack.sections.filter { it.kind == "exam" || it.kind == "important" } }
         if (examNotes.isNotEmpty()) {
