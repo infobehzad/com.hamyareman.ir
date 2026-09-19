@@ -832,13 +832,13 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                 }
                 if (fallback != null && fbDur > 0) {
                     Text(
-                        "${teachMmss(if (dragMs >= 0) dragMs else fbPos)} / ${teachMmss(fbDur)}",
+                        "${teachMmss(if (dragMs >= 0) dragMs else fbPos)} از ${teachMmss(fbDur)}",
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 1,
                     )
                 } else if (loadedKey == track.cacheKey && state.durationMs > 0) {
                     Text(
-                        "${teachMmss(if (dragMs >= 0) dragMs else posMs)} / ${teachMmss(state.durationMs)}",
+                        "${teachMmss(if (dragMs >= 0) dragMs else posMs)} از ${teachMmss(state.durationMs)}",
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 1,
                     )

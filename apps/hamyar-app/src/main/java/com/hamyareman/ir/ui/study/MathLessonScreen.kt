@@ -241,7 +241,9 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
             runCatching { ctx.assets.open(path).bufferedReader(Charsets.UTF_8).use { it.readText() } }.getOrNull()
         }.orEmpty()
     }
-    val teachHtml = pack.teachHtml.ifBlank { htmlFromAsset }
+    // اگر HTML (نسخه‌ی ریموت یا قدیمی) پل سیک نداشت، شیم را می‌چسبانیم تا
+    // لینک‌های فهرست با data-seek-ms همیشه به پلیر برسند.
+    val teachHtml = ensureSeekShim(pack.teachHtml.ifBlank { htmlFromAsset })
     val body = pack.teachText.ifBlank {
         pack.sections.filter { it.kind != "exam" }.joinToString("\n\n") { "«${it.title}»\n${it.body}" }
             .ifBlank { "متن تدریس این درس به‌زودی از پوشهٔ Books اضافه می‌شود." }
@@ -618,6 +620,37 @@ private fun MathExamTab(pack: StudyPack) {
             enabled = answers.size == mcq.size,
         ) { Text("تصحیح آزمون") }
     }
+}
+
+/**
+ * اسکریپتِ پخشِ لینک‌های فهرست به پلیر: هر `<a data-seek-ms>` (یا `#t=mm:ss`
+ * در href/متن) با لمس، `HamyarPlayer.seek(ms)` را صدا می‌زند و همان بند را
+ * اسکرول می‌کند. اگر خودِ HTML پل را داشته باشد (نسخه‌های جدید Books) دست
+ * نمی‌زنیم؛ اگر نداشت (ریموت/قدیمی) همین شیم اضافه می‌شود.
+ */
+internal fun ensureSeekShim(html: String): String {
+    if (html.isBlank() || html.contains("HamyarPlayer")) return html
+    val shim = "<script>(function(){" +
+        "function digits(s){return String(s).replace(/[\u06F0-\u06F9]/g,function(d){return String(d.charCodeAt(0)-0x06F0);})" +
+            ".replace(/[\u0660-\u0669]/g,function(d){return String(d.charCodeAt(0)-0x0660);});}" +
+        "function msOf(a){" +
+        "var v=a.getAttribute&&a.getAttribute('data-seek-ms');" +
+        "if(v){var x=parseInt(digits(v).replace(/[^0-9]/g,''),10);if(x>=0)return x;}" +
+        "var h=(a.getAttribute&&a.getAttribute('href'))||'';" +
+        "var m=digits(h).match(/(?:t=|#t)([0-9]{1,3}):([0-9]{1,2})(?::([0-9]{1,2}))?/);" +
+        "if(m){var mm=parseInt(m[1],10),ss=parseInt(m[2],10);if(m[3]){mm=mm*60+ss;ss=parseInt(m[3],10);}return (mm*60+ss)*1000;}" +
+        "var t=digits(a.textContent||'').match(/([0-9]{1,3}):([0-9]{2})(?::([0-9]{2}))?/);" +
+        "if(t){var mm2=parseInt(t[1],10),ss2=parseInt(t[2],10);if(t[3]){mm2=mm2*60+ss2;ss2=parseInt(t[3],10);}return (mm2*60+ss2)*1000;}" +
+        "return 0;}" +
+        "document.addEventListener('click',function(e){" +
+        "var a=e.target;while(a&&a.tagName!=='A')a=a.parentElement;if(!a)return;" +
+        "var ms=msOf(a);if(!ms)return;e.preventDefault();" +
+        "try{if(window.HamyarPlayer&&HamyarPlayer.seek)HamyarPlayer.seek(ms);}catch(_){}" +
+        "var id=(a.getAttribute('href')||'');" +
+        "if(id.charAt(0)==='#'){try{var el=document.querySelector(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}catch(_){}}" +
+        "},true);})();</script>"
+    val i = html.lastIndexOf("</body>")
+    return if (i >= 0) html.substring(0, i) + shim + html.substring(i) else html + shim
 }
 
 /** پل JS فهرست HTML → سیک پلیر تدریس. */

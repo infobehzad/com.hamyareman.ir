@@ -210,17 +210,39 @@ object MediaVault {
                 part.copyTo(target, overwrite = true)
                 part.delete()
             }
-            // تأییدِ سلامت: ابتدای فایل باید واقعاً قابلِ رمزگشایی باشد.
-            runCatching { markVerified(ctx, cacheKey) }.also {
-                val head = peek(ctx, cacheKey)
-                if (head == null || head.size < 64) {
-                    target.delete()
-                    error("فایل ناقص دانلود شد؛ دوباره تلاش کن.")
-                }
+            // تأییدِ سلامت: ابتدای فایل باید واقعاً قابلِ رمزگشایی باشد؛ «تأییدشده»
+            // فقط بعد از موفقیتِ بررسی علامت می‌خورد (قبلاً قبل از بررسی علامت می‌خورد).
+            val head = peek(ctx, cacheKey)
+            if (head == null || head.size < 64) {
+                target.delete()
+                error("فایل ناقص دانلود شد؛ دوباره تلاش کن.")
             }
+            markVerified(ctx, cacheKey)
         } finally {
             part.delete()
         }
+    }
+
+    /**
+     * بازکردنِ جریانِ خوانشِ جسته‌گریخته روی فایلِ گاوصندوق (برای پخش).
+     * برخلاف [decryptToMemory] کل فایل را در حافظه نمی‌ریخت و رمزگشایی نمی‌کند؛
+     * هر بلاک درست لحظه‌ی درخواستِ پلیر رمزگشایی می‌شود — بنابراین بازکردن آنی است
+     * و STATE_BUFFERINGِ ساختگیِ «پخش محلی شروع نشد» از بین می‌رود.
+     */
+    fun openPlainStream(ctx: Context, cacheKey: String): com.hamyareman.ir.platform.feature.playback.VaultStream? {
+        val f = vaultFile(ctx, cacheKey)
+        if (!isVerified(ctx, cacheKey) || !f.exists() || f.length() <= 20) return null
+        return runCatching {
+            val raf = java.io.RandomAccessFile(f, "r")
+            val header = ByteArray(20)
+            raf.seek(0)
+            raf.readFully(header)
+            if (String(header, 0, 4, Charsets.US_ASCII) != MAGIC) {
+                raf.close()
+                return null
+            }
+            PlainVaultStream(raf, header.copyOfRange(4, 20), key(ctx), f.length() - 20)
+        }.getOrNull()
     }
 
     /** رمزگشایی کامل به حافظه — فقط داخل اپ و برای پخش (خروجی هرگز ذخیره نمی‌شود). */
@@ -234,6 +256,60 @@ object MediaVault {
         val cipher = Cipher.getInstance("AES/CTR/NoPadding")
         cipher.init(Cipher.DECRYPT_MODE, key(ctx), IvParameterSpec(iv))
         return cipher.doFinal(all, 20, all.size - 20)
+    }
+
+    /**
+     * جریانِ Plainِ روی فایلِ CTR: برای موقعیتِ p، بلاکِ هم‌ترازِ زیرش را پیدا می‌کنیم،
+     * IV را به تعدادِ بلاک جابه‌جا می‌کنیم (CTR شمارنده‌اش در IV است) و فقط مقداری که
+     * لازم است می‌خوانیم. حالتِ NoPadding یعنی طولِ رمزنگاری = طولِ متن.
+     */
+    private class PlainVaultStream(
+        private val raf: java.io.RandomAccessFile,
+        private val iv: ByteArray,
+        private val dataKey: javax.crypto.SecretKey,
+        override val size: Long,
+    ) : com.hamyareman.ir.platform.feature.playback.VaultStream {
+
+        override fun read(pos: Long, dst: ByteArray, off: Int, len: Int): Int {
+            if (len <= 0 || pos >= size) return -1
+            val aligned = (pos / 16) * 16
+            val pre = (pos - aligned).toInt()
+            val encLen = minOf(size - aligned, (len + pre).toLong()).toInt()
+            if (encLen <= 0) return -1
+            val tmp = ByteArray(encLen)
+            synchronized(raf) {
+                raf.seek(20L + aligned)
+                raf.readFully(tmp)
+            }
+            val cipher = javax.crypto.Cipher.getInstance("AES/CTR/NoPadding")
+            cipher.init(
+                javax.crypto.Cipher.DECRYPT_MODE,
+                dataKey,
+                javax.crypto.spec.IvParameterSpec(shiftIv(iv, aligned / 16)),
+            )
+            // doFinal روی کل بافر: در CTR/NoPadding ته‌بایتِ ناکامل هم با update برنمی‌گردد.
+            val dec = cipher.doFinal(tmp)
+            val n = minOf(len.toLong(), (dec.size - pre).coerceAtLeast(0)).toInt()
+            if (n <= 0) return -1
+            System.arraycopy(dec, pre, dst, off, n)
+            return n
+        }
+
+        override fun close() {
+            runCatching { raf.close() }
+        }
+
+        private fun shiftIv(iv: ByteArray, blocks: Long): ByteArray {
+            val out = iv.copyOf()
+            var x = blocks
+            for (i in out.size - 1 downTo out.size - 8) {
+                val sum = (out[i].toInt() and 0xFF) + (x and 0xFF)
+                out[i] = (sum and 0xFF).toByte()
+                x = (x shr 8) + (sum shr 8)
+                if (x == 0L) break
+            }
+            return out
+        }
     }
 
     private fun ByteArray.startsWith(prefix: ByteArray): Boolean {

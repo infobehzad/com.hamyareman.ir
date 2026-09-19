@@ -1,5 +1,6 @@
 package com.hamyareman.ir.platform.feature.playback
 
+import android.content.Context
 import android.net.Uri
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
@@ -8,22 +9,40 @@ import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.TransferListener
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import java.io.IOException
 
 /**
  * پخشِ مستقیم از «گاوصندوق رسانه» با URI ساده‌ی `vault://<cacheKey>`.
  *
- * تا پیش از این، فایلِ دانلودشده از راه یک سرور HTTPِ دست‌ساز روی ۱۲۷.۰.۰.۱
- * پخش می‌شد (سوکت + پورت + توکن + پاسخ‌دستی). هر خطای کوچک در آن مسیر باعث
- * می‌شد پلیر **بی‌صدا** شکست بخورد. این کلاس آن لایه را کلاً حذف می‌کند:
- * فایلِ رمزشده در همان پروسه رمزگشایی و مستقیم به ExoPlayer داده می‌شود.
+ * نسخه‌ی اولِ این مسیر کل فایل را در `open()` رمزگشایی و در حافظه می‌ریخت؛
+ * برای فایلِ ~۲۵ مگابایتیِ تدریس این یعنی چند ثانیه بلوکه‌شدنِ لودرِ ExoPlayer —
+ * پلیر در STATE_BUFFERING می‌ماند و واچ‌داگِ صفحه آن را «پخش محلی شروع نشد»
+ * تلقی می‌کرد و بی‌دلیل به سرور سوییچ می‌کرد (و آفلاین، هیچ). حالا خوانش
+ * **جسته‌گریخته و رمزگشاییِ تنبل (lazy)** است: بازکردن فایل آنی است و هر بلاک
+ * درست لحظه‌ی نیاز رمزگشایی می‌شود — مثلِ یک فایلِ معمولی روی دیسک.
  *
- * لایه‌ی اپ (که `MediaVault` را می‌شناسد) فقط یک تابع به [VaultSourceHooks] می‌دهد؛
- * بنابراین ماژولِ پخش به ماژولِ اپ وابسته نمی‌شود.
+ * لایه‌ی اپ (که `MediaVault` را می‌شناسد) فقط یک کارخانه‌ی جریان به
+ * [VaultSourceHooks] می‌دهد؛ ماژولِ پخش به ماژولِ اپ وابسته نمی‌ماند.
  */
+
+/** جریانِ رمزگشایی‌شده‌ی یک فایلِ گاوصندوق — خوانشِ تصادفی روی داده‌یPlain. */
+interface VaultStream {
+    /** طولِ داده‌یِ رمزگشایی‌شده (بایت). */
+    val size: Long
+
+    /**
+     * حداقلِ [len] بایت از موقعیتِ [pos] را در dst[off] می‌نویسد و تعدادِ
+     * بایت‌هایِ نوشته‌شده را برمی‌گرداند؛ اگر تمام شده ≤۰ برگردان.
+     */
+    fun read(pos: Long, dst: ByteArray, off: Int, len: Int): Int
+
+    fun close()
+}
+
 object VaultSourceHooks {
-    /** cacheKey → بایت‌های رمزگشایی‌شده؛ اگر null برگردد یعنی فایل در دسترس نیست. */
+    /** cacheKey → جریانِ بازِ گاوصندوق؛ null یعنی فایلِ معتبر موجود نیست. */
     @Volatile
-    var decrypt: ((String) -> ByteArray?)? = null
+    var open: ((String) -> VaultStream?)? = null
 }
 
 internal fun vaultKeyOf(uri: Uri): String =
@@ -59,54 +78,62 @@ fun vaultAwareDataSourceFactory(default: DataSource.Factory): DataSource.Factory
         }
     }
 
-/** یک منبعِ ساده روی حافظه — بدون سوکت و بدون HTTP. */
+/** منبعِ خوانشِ جسته‌گریخته روی [VaultStream] — بدونِ HTTP، بدونِ کلِ فایل در حافظه. */
 @UnstableApi
 private class VaultDataSource : DataSource {
 
-    private var data: ByteArray? = null
+    private var stream: VaultStream? = null
     private var uri: Uri? = null
-    private var pos = 0
-    private var end = 0
+    private var pos = 0L
+    private var end = 0L
 
     override fun addTransferListener(transferListener: TransferListener) = Unit
 
     override fun open(dataSpec: DataSpec): Long {
         val key = vaultKeyOf(dataSpec.uri)
-        val bytes = VaultSourceHooks.decrypt?.invoke(key)
-            ?: throw java.io.IOException("فایلِ گاوصندوق در دسترس نیست: $key")
-        data = bytes
+        val s = VaultSourceHooks.open?.invoke(key)
+            ?: throw IOException("فایلِ گاوصندوق در دسترس نیست: $key")
+        if (!s.openReady()) {
+            runCatching { s.close() }
+            throw IOException("فایلِ گاوصندوق خوانده نشد: $key")
+        }
+        stream = s
         uri = dataSpec.uri
-        val start = dataSpec.position.toInt().coerceIn(0, bytes.size)
-        val length = if (dataSpec.length == C.LENGTH_UNSET.toLong()) {
-            bytes.size - start
+        pos = dataSpec.position.coerceIn(0L, maxOf(0L, s.size))
+        val remaining = (s.size - pos).coerceAtLeast(0L)
+        end = pos + if (dataSpec.length == C.LENGTH_UNSET.toLong()) {
+            remaining
         } else {
-            dataSpec.length.toInt().coerceAtMost(bytes.size - start)
-        }.coerceAtLeast(0)
-        pos = start
-        end = start + length
-        return length.toLong()
+            dataSpec.length.coerceAtMost(remaining)
+        }
+        return (end - pos).coerceAtLeast(0L)
     }
 
     override fun read(buffer: ByteArray, offset: Int, readLength: Int): Int {
-        val d = data ?: return C.RESULT_END_OF_INPUT
+        val s = stream ?: return C.RESULT_END_OF_INPUT
         if (pos >= end) return C.RESULT_END_OF_INPUT
-        val n = readLength.coerceAtMost(end - pos)
-        System.arraycopy(d, pos, buffer, offset, n)
-        pos += n
-        return n
+        val want = minOf(readLength.toLong(), end - pos).toInt()
+        val got = runCatching { s.read(pos, buffer, offset, want) }.getOrDefault(-1)
+        if (got <= 0) return C.RESULT_END_OF_INPUT
+        pos += got
+        return got
     }
 
     override fun getUri(): Uri? = uri
 
     override fun close() {
-        data = null
+        runCatching { stream?.close() }
+        stream = null
         uri = null
-        pos = 0
-        end = 0
+        pos = 0L
+        end = 0L
     }
+
+    /** بازگشتِ true یعنی جریان آماده است (کنترلی برای فایل‌های نیمه‌کاره). */
+    private fun VaultStream.openReady(): Boolean = size > 0L
 }
 
 /** سازنده‌ی MediaSourceِ آگاه به گاوصندوق — برای پلیرهایی که خودشان ExoPlayer می‌سازند. */
 @UnstableApi
-fun vaultAwareMediaSourceFactory(context: android.content.Context): DefaultMediaSourceFactory =
+fun vaultAwareMediaSourceFactory(context: Context): DefaultMediaSourceFactory =
     DefaultMediaSourceFactory(vaultAwareDataSourceFactory(DefaultDataSource.Factory(context)))

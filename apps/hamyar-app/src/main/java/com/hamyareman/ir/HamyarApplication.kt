@@ -14,9 +14,10 @@ class HamyarApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
-        // پخشِ فایل‌های گاوصندوق: طرحِ vault:// را به رمزگشاییِ واقعی وصل کن.
-        com.hamyareman.ir.platform.feature.playback.VaultSourceHooks.decrypt = { key ->
-            runCatching { com.hamyareman.ir.ui.study.MediaVault.decryptToMemory(this, key) }.getOrNull()
+        // پخشِ فایل‌های گاوصندوق: طرحِ vault:// به جریانِ رمزگشاییِ تنبل وصل می‌شود
+        // (خوانشِ جسته‌گریخته؛ بدونِ بلوکه‌شدنِ لودرِ پلیر برای رمزگشاییِ کل فایل).
+        com.hamyareman.ir.platform.feature.playback.VaultSourceHooks.open = { key ->
+            runCatching { com.hamyareman.ir.ui.study.MediaVault.openPlainStream(this, key) }.getOrNull()
         }
         NotificationChannels.ensure(this)
         com.hamyareman.ir.ui.profile.StudentProfileState.loadMirror(this)
