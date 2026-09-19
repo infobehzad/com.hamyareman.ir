@@ -28,6 +28,10 @@ data class PlaybackState(
     val error: String? = null,
     /** پخش به‌خاطرِ تمرکزِ صوتی (یا اپِ دیگر) سرکوب شده — بدون اینکه خطایی بیاید. */
     val suppressed: Boolean = false,
+    /** پلیر «می‌خواهد» پخش کند ( playWhenReady ) — برای تشخیصِ توقفِ بی‌صدا. */
+    val playWhenReady: Boolean = false,
+    /** در حال بارگذاری/بافر کردن است (فایل هنوز آماده نیست). */
+    val buffering: Boolean = false,
 )
 
 /**
@@ -178,6 +182,8 @@ class PlaybackController(
                 speed = player.playbackParameters.speed,
                 suppressed = player.playWhenReady &&
                     player.playbackSuppressionReason != Player.PLAYBACK_SUPPRESSION_REASON_NONE,
+                playWhenReady = player.playWhenReady,
+                buffering = player.playbackState == Player.STATE_BUFFERING,
             )
         }
     }

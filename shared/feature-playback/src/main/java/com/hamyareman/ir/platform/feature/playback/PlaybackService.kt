@@ -98,7 +98,11 @@ class PlaybackService : MediaSessionService() {
         val exo = ExoPlayer.Builder(this)
             // پخشِ فایل‌های دانلودشده‌ی گاوصندوق (vault://) دیگر از سرور HTTP محلی نمی‌گذرد.
             .setMediaSourceFactory(vaultAwareMediaSourceFactory(this))
-            .setAudioAttributes(audioAttributes, /* handleAudioFocus = */ true)
+            // تمرکزِ صوتی را خودمان مدیریت نمی‌کنیم: اگر برنامه یا سیستمی تمرکز را در دست
+            // داشته باشد، ExoPlayer پخش را **بی‌هیچ خطایی** متوقف می‌کند و کاربر فقط سکوت
+            // می‌بیند. برای پخشِ درس، «حتماً پخش شود» مهم‌تر از تعارف با دیگر پلیرهاست؛
+            // قطعِ صدا هنگام جدا شدنِ هندزفری (setHandleAudioBecomingNoisy) همچنان هست.
+            .setAudioAttributes(audioAttributes, /* handleAudioFocus = */ false)
             .setHandleAudioBecomingNoisy(true)
             .setWakeMode(C.WAKE_MODE_LOCAL)
             .setSeekBackIncrementMs(SEEK_INCREMENT_MS)

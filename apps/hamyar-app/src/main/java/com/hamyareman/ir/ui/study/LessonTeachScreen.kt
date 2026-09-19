@@ -56,9 +56,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
 import com.hamyareman.ir.platform.core.common.LocalStore
 import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
@@ -252,8 +256,77 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
         com.hamyareman.ir.platform.feature.playback.TeachGate.enter()
         onDispose { com.hamyareman.ir.platform.feature.playback.TeachGate.exit() }
     }
+    // ---- پلیرِ پشتیبانِ داخلیِ صفحه ----
+    // اگر مسیرِ «سرویسِ پخش» روی این دستگاه پاسخ ندهد (اتصال/سشن/اعلان/تمرکزِ صوتی)،
+    // صدا با همان پلیری پخش می‌شود که ویدیوهای تدریس را پخش می‌کند — در خودِ صفحه،
+    // بدون سرویس و بدون binder. پخشِ درس به هر حال نباید به پس‌زمینه برود،
+    // پس نبودِ اعلان در این مسیر ایراد ندارد؛ «صدا داشته باشیم» اولویت دارد.
+    var fallback by remember { mutableStateOf<ExoPlayer?>(null) }
+    var fbPlaying by remember { mutableStateOf(false) }
+    var fbPos by remember { mutableLongStateOf(0L) }
+    var fbDur by remember { mutableLongStateOf(0L) }
+
+    fun stopFallback() {
+        fallback?.let { p ->
+            runCatching { p.stop() }
+            runCatching { p.release() }
+        }
+        fallback = null
+        fbPlaying = false
+        fbPos = 0L
+        fbDur = 0L
+    }
+
+    fun startFallback(t: TeachTrack, startMs: Long? = null) {
+        stopFallback()
+        val useLocal = MediaVault.isVerified(context, t.cacheKey)
+        val uri = if (useLocal) MediaVault.localUrl(context, t.cacheKey)
+        else StudyMedia.viewUrl(StudyMedia.resolveFileId(t.fileId))
+        val start = startMs ?: savedPos(t)
+        val p = ExoPlayer.Builder(context)
+            .setMediaSourceFactory(
+                com.hamyareman.ir.platform.feature.playback.vaultAwareMediaSourceFactory(context),
+            )
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(C.USAGE_MEDIA)
+                    .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
+                    .build(),
+                /* handleAudioFocus = */ false,
+            )
+            .build()
+        p.addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_READY && p.duration > 0) fbDur = p.duration
+                if (playbackState == Player.STATE_ENDED) {
+                    TeachStats.markTrackDone(context, packId, t.cacheKey)
+                    savePos(t, 0L)
+                    fbPlaying = false
+                }
+            }
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) { fbPlaying = isPlaying }
+
+            override fun onPlayerError(error: PlaybackException) {
+                msg = "خطای پخش: ${error.message ?: error.javaClass.simpleName}"
+            }
+        })
+        p.setMediaItem(MediaItem.Builder().setUri(uri).setMediaId(t.cacheKey).build())
+        p.setPlaybackSpeed(speed)
+        if (start > 0) p.seekTo(start)
+        p.prepare()
+        p.playWhenReady = true
+        fbPos = start
+        fallback = p
+    }
+
+    DisposableEffect(Unit) { onDispose { stopFallback() } }
+
     // v1.25 — خروج از صفحه با هوم/پنجره‌ها/قفل صفحه هم = مکث پخش (شرط بازبودن صفحه).
-    PauseOnStopEffect(pause = { playback.pause() }, stop = { playback.stop() })
+    PauseOnStopEffect(
+        pause = { runCatching { playback.pause() }; fallback?.pause() },
+        stop = { runCatching { playback.stop() }; stopFallback() },
+    )
 
     var forceServer by remember { mutableStateOf(false) }
 
@@ -407,6 +480,32 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
         }
     }
 
+    // پلیرِ پشتیبان: نظرسنجیِ موقعیت، ذخیره و آمارِ شنیدن.
+    LaunchedEffect(fallback) {
+        if (fallback == null) return@LaunchedEffect
+        while (true) {
+            val p = fallback ?: break
+            delay(500)
+            fbPos = p.currentPosition.coerceAtLeast(0L)
+            if (p.duration > 0) fbDur = p.duration
+            listenAccumMs += 500
+            if (listenAccumMs >= 5000) {
+                TeachStats.addListen(context, packId, (listenAccumMs / 1000).toInt(), (fbDur / 1000).toInt())
+                listenAccumMs = 0
+            }
+            if (fbPos - lastSaveMs >= 4000 || fbPos < lastSaveMs) {
+                savePos(track, fbPos)
+                lastSaveMs = fbPos
+            }
+        }
+    }
+    LaunchedEffect(fbPos, fbDur, fbPlaying) {
+        if (fallback != null && fbDur > 0 && fbPos >= fbDur - 1500 && fbPos > 0 && !fbPlaying) {
+            TeachStats.markTrackDone(context, packId, track.cacheKey)
+            savePos(track, 0L)
+        }
+    }
+
     // تشخیص پایان ترک: STATE_ENDED، نزدیک انتهای فایل، یا ≥۹۵٪ ثانیه‌ی شنیده‌شده.
     LaunchedEffect(state.ended, state.playing, state.positionMs, state.durationMs, posMs) {
         val dur = state.durationMs
@@ -429,6 +528,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
             loadedKey?.let { key -> tracks.firstOrNull { it.cacheKey == key }?.let { savePos(it, posMs) } }
             runCatching { playback.stop() }
             playback.release()
+            stopFallback()
         }
     }
 
@@ -436,6 +536,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
     // v1.12: بدون شرط loadedKey (پیشتر خطای آفلاین بن‌بست می‌شد و هیچی پخش نمی‌شد).
     LaunchedEffect(state.error) {
         val err = state.error ?: return@LaunchedEffect
+        if (fallback != null) return@LaunchedEffect
         if (!forceServer) {
             forceServer = true
             pendingStartKey = null
@@ -463,12 +564,27 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
             tracks.firstOrNull { it.cacheKey == k }?.let { startTrack(it, autoplay = true, fromServer = true) }
             msg = "پخش محلی شروع نشد؛ از سرور ادامه می‌دهیم…"
         }
-        // گام ۳ (۶ ثانیه‌ی دیگر): باز هم نشد ⇒ خطای واقعی را نشان بده
-        kotlinx.coroutines.delay(6000)
+        // گام ۳ (۸ ثانیه‌ی دیگر): باز هم نشد ⇒ علت را دقیق بگو (دیگر چیزی پنهان نمی‌ماند)
+        kotlinx.coroutines.delay(8000)
         if (pendingStartKey == k && !playback.state.value.playing) {
-            val err = playback.state.value.error
-            msg = if (err.isNullOrBlank()) "پخش شروع نشد؛ خطای پلیر ثبت نشد (اتصال/سرویس)."
-            else "پخش شروع نشد: $err"
+            val st = playback.state.value
+            val err = st.error
+            msg = when {
+                !err.isNullOrBlank() -> "پخش شروع نشد: $err"
+                st.buffering -> "فایل در حال بارگذاری است؛ اینترنت یا حجم فایل (حدود ۲۵ مگابایت) طول می‌کشد. صبر کن…"
+                !st.hasMedia -> "آیتمِ صوت به پلیر نرسید (صف خالی است)."
+                !st.connected -> "اتصال به سرویس پخش برقرار نشد."
+                !st.playWhenReady -> "پلیر آماده بود اما پخش متوقف شد (توقفِ بی‌صدا)؛ دکمهٔ پخش را دوباره بزن."
+                else -> "پخش شروع نشد؛ خطای پلیر ثبت نشد."
+            }
+            // آخرین راه: پخش با پلیرِ داخلیِ خودِ صفحه (همان مسیری که ویدیوها را پخش می‌کند).
+            if (st.error.isNullOrBlank()) {
+                runCatching { playback.stop() }
+                tracks.firstOrNull { it.cacheKey == k }?.let { t ->
+                    startFallback(t)
+                    msg = "سرویسِ پخش پاسخ نداد؛ با پلیرِ داخلیِ صفحه پخش شد."
+                }
+            }
         }
         if (pendingStartKey == k) pendingStartKey = null
     }
@@ -502,6 +618,13 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                 OutlinedButton(onClick = {
                     if (quietOn()) {
                         msg = "\uD83D\uDD07 «زمان درس» روشن است — برای پخشِ صدا آن را خاموش کن."
+                    } else if (fallback != null) {
+                        val p = fallback!!
+                        if (p.isPlaying) p.pause()
+                        else {
+                            com.hamyareman.ir.platform.feature.playback.TeachGate.pulse()
+                            p.play()
+                        }
                     } else if (state.playing) {
                         playback.pause()
                         savePos(track, posMs)
@@ -528,7 +651,12 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                             }
                         }
                     }
-                }) { Text(if (state.playing && loadedKey == track.cacheKey) "⏸ توقف" else "▶ پخش") }
+                }) {
+                    Text(
+                        if (fallback?.isPlaying == true || (state.playing && loadedKey == track.cacheKey)) "⏸ توقف"
+                        else "▶ پخش",
+                    )
+                }
                 // v1.11: منبع (پخش آنلاین/پخش آفلاین) با آیکون + دانلود/حذف آفلاین —
                 // بالا و سمت چپِ دکمه‌ی توقف.
                 val online = !cached(track)
@@ -630,7 +758,13 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                         Text("دانلود", maxLines = 1)
                     }
                 }
-                if (loadedKey == track.cacheKey && state.durationMs > 0) {
+                if (fallback != null && fbDur > 0) {
+                    Text(
+                        "${teachMmss(if (dragMs >= 0) dragMs else fbPos)} / ${teachMmss(fbDur)}",
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                    )
+                } else if (loadedKey == track.cacheKey && state.durationMs > 0) {
                     Text(
                         "${teachMmss(if (dragMs >= 0) dragMs else posMs)} / ${teachMmss(state.durationMs)}",
                         style = MaterialTheme.typography.bodySmall,
@@ -638,6 +772,42 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                     )
                 }
                 Spacer(Modifier.weight(1f))
+            }
+            // ردیفِ تشخیصی: وضعیتِ واقعیِ پلیر همیشه روی صفحه است تا علتِ هر توقف
+            // در یک نگاه معلوم شود (و با یک لمس رونوشت شود).
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "اتصال:${if (state.connected) "✓" else "✗"} · آیتم:${if (state.hasMedia) "✓" else "✗"} · " +
+                        "پخش:${if (state.playing) "✓" else "✗"} · آماده:${if (state.playWhenReady) "✓" else "✗"} · " +
+                        "بارگذاری:${if (state.buffering) "✓" else "✗"} · سرکوب:${if (state.suppressed) "✓" else "✗"} · " +
+                        "منبع:${if (forceServer) "سرور" else if (MediaVault.isVerified(context, track.cacheKey)) "محلی" else "سرور"}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+                TextButton(onClick = {
+                    val st = state
+                    val txt = listOf(
+                        "اندروید: ${android.os.Build.VERSION.SDK_INT}",
+                        "درس: $packId",
+                        "فایل: ${track.fileId}",
+                        "منبع: ${if (forceServer) "سرور" else if (MediaVault.isVerified(context, track.cacheKey)) "محلی(vault)" else "سرور"}",
+                        "در دسترس: $availability",
+                        "زمان درس (سکوت): ${quietOn()}",
+                        "متصل: ${st.connected}",
+                        "آیتم دارد: ${st.hasMedia}",
+                        "در حال پخش: ${st.playing}",
+                        "آماده‌ی پخش: ${st.playWhenReady}",
+                        "در حال بارگذاری: ${st.buffering}",
+                        "سرکوب‌شده: ${st.suppressed}",
+                        "مدت: ${st.durationMs}",
+                        "موقعیت: ${st.positionMs}",
+                        "خطا: ${st.error ?: "—"}",
+                    ).joinToString("\n")
+                    val cm = context.getSystemService(android.content.ClipboardManager::class.java)
+                    cm?.setPrimaryClip(android.content.ClipData.newPlainText("گزارش پخش", txt))
+                    msg = "گزارش رونوشت شد؛ اینجا یا در پیام برایم بفرست."
+                }) { Text("رونوشت", style = MaterialTheme.typography.labelSmall) }
             }
             // «زمان درس» روشن باشد، پخشِ صدا عملاً غیرفعال است — این را واضح نشان می‌دهیم
             // و یک لمس برای خاموش‌کردن می‌گذاریم (قبلاً زدنِ پخش هیچ واکنشی نداشت).
@@ -694,7 +864,22 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                     startTrack(track, autoplay = true, fromServer = true)
                 }) { Text("تلاش دوباره") }
             }
-            if (loadedKey == track.cacheKey && state.durationMs > 0) {
+            if (fallback != null && fbDur > 0) {
+                Slider(
+                    value = ((if (dragMs >= 0) dragMs else fbPos).toFloat() / fbDur).coerceIn(0f, 1f),
+                    onValueChange = { dragMs = (it * fbDur).toLong() },
+                    onValueChangeFinished = {
+                        if (dragMs >= 0) {
+                            if (abs(dragMs - fbPos) > 3000) TeachStats.addJump(context, packId)
+                            fallback?.seekTo(dragMs)
+                            fbPos = dragMs
+                            savePos(track, dragMs)
+                            dragMs = -1
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(26.dp),
+                )
+            } else if (loadedKey == track.cacheKey && state.durationMs > 0) {
                 Slider(
                     value = (((if (dragMs >= 0) dragMs else posMs).toFloat()) / state.durationMs).coerceIn(0f, 1f),
                     onValueChange = { dragMs = (it * state.durationMs).toLong() },
@@ -717,6 +902,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                         onClick = {
                             speed = v
                             runCatching { playback.setSpeed(v) }
+                            fallback?.setPlaybackSpeed(v)
                             store.putString("teach_${packId}_speed", v.toString())
                         },
                         label = { Text(teachSpeedLabel(v), style = MaterialTheme.typography.labelMedium) },
