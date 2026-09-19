@@ -193,7 +193,7 @@ private fun DownloadsScreenInner(onBack: () -> Unit) {
                 if (asPdf) downloadPdfBlocking(ctx, fileId) { busy[key] = it }
                 else {
                     val remoteId = StudyMedia.resolveFileId(fileId)
-                    MediaVault.downloadEncrypted(ctx, StudyMedia.viewUrl(remoteId), cacheKey) { busy[key] = it }
+                    MediaVault.downloadEncrypted(ctx, StudyMedia.viewUrl(remoteId), cacheKey) { p, t -> busy[key] = if (t > 0) ((p * 100) / t).toInt() else 0 }
                 }
             }
             tick++

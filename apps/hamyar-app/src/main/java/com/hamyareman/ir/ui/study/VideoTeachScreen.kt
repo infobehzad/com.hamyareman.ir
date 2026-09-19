@@ -298,7 +298,7 @@ fun VideoTeachScreen(packId: String, onBack: () -> Unit) {
                         scope.launch {
                             try {
                                 withContext(Dispatchers.IO) {
-                                    MediaVault.downloadEncrypted(context, StudyMedia.viewUrl(fileId), fileId) { pct -> progressPct = pct }
+                                    MediaVault.downloadEncrypted(context, StudyMedia.viewUrl(fileId), fileId) { p, t -> progressPct = if (t > 0) ((p * 100) / t).toInt() else -1 }
                                 }
                                 downloading = false; cacheTick++; useLocal = true
                                 msg = "دانلود شد — پخش محلی رمزشده."
