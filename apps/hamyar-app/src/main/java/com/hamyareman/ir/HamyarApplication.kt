@@ -15,6 +15,8 @@ class HamyarApplication : Application() {
         super.onCreate()
         container = AppContainer(this)
         NotificationChannels.ensure(this)
+        com.hamyareman.ir.ui.profile.StudentProfileState.loadMirror(this)
+        com.hamyareman.ir.ui.profile.StudentProfileState.applyLauncherIcon(this, com.hamyareman.ir.ui.profile.StudentProfileState.gender)
         seedDefaultReminders()
     }
 

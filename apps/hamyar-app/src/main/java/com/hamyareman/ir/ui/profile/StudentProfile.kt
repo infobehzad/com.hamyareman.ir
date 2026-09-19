@@ -65,6 +65,7 @@ object StudentProfileState {
         subscription = store.getString(KEY_SUB, "free").ifBlank { "free" }
         gender = store.getString(KEY_GENDER, "").orEmpty()
         avatarPath = store.getString(KEY_AVATAR, "").orEmpty()
+        applyLauncherIcon(ctx, gender)
     }
 
     fun writeMirror(ctx: Context, g: GradeLevel, done: Boolean) {
@@ -89,6 +90,20 @@ object StudentProfileState {
         firstName = keepName
         subscription = sub.ifBlank { "free" }
         gender = genderId
+        applyLauncherIcon(ctx, genderId)
+    }
+
+    fun applyLauncherIcon(ctx: Context, genderId: String) {
+        val pm = ctx.packageManager
+        val boy = android.content.ComponentName(ctx, "com.hamyareman.ir.LauncherBoy")
+        val girl = android.content.ComponentName(ctx, "com.hamyareman.ir.LauncherGirl")
+        val useGirl = genderId.equals("girl", ignoreCase = true)
+        val enabled = android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+        val disabled = android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+        runCatching {
+            pm.setComponentEnabledSetting(boy, if (useGirl) disabled else enabled, android.content.pm.PackageManager.DONT_KILL_APP)
+            pm.setComponentEnabledSetting(girl, if (useGirl) enabled else disabled, android.content.pm.PackageManager.DONT_KILL_APP)
+        }
     }
 
     fun loadAvatarMirror(ctx: Context) {
