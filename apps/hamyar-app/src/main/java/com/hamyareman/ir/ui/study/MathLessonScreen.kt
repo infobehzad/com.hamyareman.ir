@@ -629,7 +629,10 @@ private fun MathExamTab(pack: StudyPack) {
  * نمی‌زنیم؛ اگر نداشت (ریموت/قدیمی) همین شیم اضافه می‌شود.
  */
 internal fun ensureSeekShim(html: String): String {
-    if (html.isBlank() || html.contains("HamyarPlayer")) return html
+    if (html.isBlank()) return html
+    // همیشه تزریق می‌شود (حتی اگر خودِ HTML پل داشته باشد): نسخه‌ی ریموت ممکن است
+    // اسکریپتِ نصفه/استریپ‌شده داشته باشد. شنونده‌ی capture ما پیش از اسکریپتِ خودِ
+    // فایل اجرا می‌شود و سیکِ دوباره روی همان میلی‌ثانیه بی‌ضرر است.
     val shim = "<script>(function(){" +
         "function digits(s){return String(s).replace(/[\u06F0-\u06F9]/g,function(d){return String(d.charCodeAt(0)-0x06F0);})" +
             ".replace(/[\u0660-\u0669]/g,function(d){return String(d.charCodeAt(0)-0x0660);});}" +
