@@ -40,7 +40,7 @@ class CtrPlainReaderTest {
             while (pos < plain.size) {
                 guard++
                 assertTrue("no progress", guard < 100_000)
-                val n = r.read(pos, out, pos.toInt(), minOf(chunk.toLong(), (plain.size - pos).toLong()).toInt())
+                val n = r.read(pos, out, pos.toInt(), minOf(chunk.toLong(), plain.size - pos).toInt())
                 assertTrue("read must return >0, got $n", n > 0)
                 pos += n
                 chunk = (chunk * 3 % 911) + 17
@@ -66,7 +66,8 @@ class CtrPlainReaderTest {
             for (p in longArrayOf(0, 1, 15, 16, 17, 1023, 4096 + 1, 99_999 - 1)) {
                 val dst = ByteArray(64)
                 val n = r.read(p, dst, 0, 64)
-                assertEquals(plain.size - p.toInt(), n)
+                // read حداکثر «تعدادِ درخواستی» را برمی‌گرداند، نه همه‌ی باقی‌مانده.
+                assertEquals(minOf(64L, (plain.size - p).coerceAtLeast(0L)).toInt(), n)
                 assertArrayEquals(plain.copyOfRange(p.toInt(), p.toInt() + n), dst.copyOfRange(0, n))
             }
         }
