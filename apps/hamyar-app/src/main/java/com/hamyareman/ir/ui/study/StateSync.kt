@@ -151,6 +151,21 @@ object ClassPlanSync {
         return any
     }
 
+    /** کشیدنِ یک کلید از سرور (اگر سرور جدیدتر باشد روی دستگاه اعمال می‌شود). */
+    suspend fun pull(
+        ctx: android.content.Context,
+        tables: com.hamyareman.ir.platform.core.appwrite.TablesDbService,
+        uid: String,
+        key: String,
+    ): Boolean {
+        if (uid.isBlank()) return false
+        val remote = StateSync.pull(ctx, tables, uid, key) ?: return false
+        val local = ClassPlanStore.exportState(ctx, key)
+        if (remote.second < StateSync.localAt(ctx, key) || remote.first == local) return false
+        ClassPlanStore.importState(ctx, key, remote.first)
+        return true
+    }
+
     /** فرستادنِ یک کلید به سرور (بعد از هر تغییرِ محلی). */
     suspend fun push(
         ctx: android.content.Context,
