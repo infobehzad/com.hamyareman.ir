@@ -48,6 +48,10 @@ object ClassPlanStore {
         val exitMorning: String = "13:30",
         /** ساعت خروج از مدرسه — شیفت ظهر (HH:MM). */
         val exitNoon: String = "17:30",
+        /** بخش اولِ تنظیمات شیفت: شیفتِ هفته‌ی جاری (لنگر). */
+        val thisWeekShift: Shift = Shift.MORNING,
+        /** هفته‌ی چندمِ چرخه (۱..cycleWeeks) با آن هفته‌ی لنگر هم‌خوانی دارد. */
+        val cycleWeekOffset: Int = 1,
     )
 
     /** ساعت خروجِ شیفتِ داده‌شده به صورت «HH:MM». */
@@ -108,6 +112,16 @@ object ClassPlanStore {
         return books + SPORT
     }
 
+    /** شیفتِ «هفته‌ی لنگر» با منطقِ قدیمی — فقط برای داده‌های نسخه‌های قبل. */
+    private fun legacyAnchorShift(cycleWeeks: Int, anchorIso: String, fixedEvening: Boolean, weekPattern: List<String>, date: LocalDate): Shift {
+        if (weekPattern.size == cycleWeeks && weekPattern.isNotEmpty()) {
+            val pos = Math.floorMod(SchoolShift.weekIndex(anchorIso, date), cycleWeeks.toLong()).toInt()
+            return if (weekPattern.getOrNull(pos) == "evening") Shift.EVENING else Shift.MORNING
+        }
+        if (cycleWeeks == 1) return if (fixedEvening) Shift.EVENING else Shift.MORNING
+        return SchoolShift.shiftOn(anchorIso, date, cycleWeeks)
+    }
+
     fun load(ctx: Context): Snapshot {
         val s = store(ctx)
         val today = LocalDate.now(JalaliDate.TEHRAN)
@@ -117,11 +131,24 @@ object ClassPlanStore {
                 (0 until arr.length()).map { arr.optString(it) }.filter { it.isNotBlank() }
             }.getOrDefault(emptyList())
         }
+        val cycleWeeks0 = s.getInt("cycle_weeks", 2).let { if (it in listOf(1, 2, 4)) it else 2 }
+        val anchorIso0 = s.getString("anchor").ifBlank { SchoolShift.startOfPersianWeek(today).toString() }
+        val weekPattern0 = s.getString("week_pattern").split(",").map { it.trim() }.filter { it == "morning" || it == "evening" }
+        val thisWeekShift0 = when (s.getString("this_week_shift")) {
+            "evening" -> Shift.EVENING
+            "morning" -> Shift.MORNING
+            else -> legacyAnchorShift(cycleWeeks0, anchorIso0, s.getBool("fixed_evening", false), weekPattern0, today)
+        }
+        val offset0 = s.getInt("cycle_week_offset", 0).let {
+            if (it in 1..cycleWeeks0) it
+            else if (cycleWeeks0 == 1) 1
+            else Math.floorMod(SchoolShift.weekIndex(anchorIso0, today), cycleWeeks0.toLong()).toInt() + 1
+        }
         return Snapshot(
             locked = s.getBool("locked", false),
             days = days,
-            cycleWeeks = s.getInt("cycle_weeks", 2).let { if (it in listOf(1, 2, 4)) it else 2 },
-            anchorIso = s.getString("anchor").ifBlank { SchoolShift.startOfPersianWeek(today).toString() },
+            cycleWeeks = cycleWeeks0,
+            anchorIso = anchorIso0,
             fixedEvening = s.getBool("fixed_evening", false),
             lunarOffset = s.getInt("lunar_offset", 0).coerceIn(-2, 2),
             morningHour = s.getInt("m_hour", 7),
@@ -131,13 +158,15 @@ object ClassPlanStore {
             noonMinute = s.getInt("n_min", 0),
             sleepMorning = s.getString("sleep_am", "21:30").ifBlank { "21:30" },
             sleepEvening = s.getString("sleep_pm", "23:00").ifBlank { "23:00" },
-            weekPattern = s.getString("week_pattern").split(",").map { it.trim() }.filter { it == "morning" || it == "evening" },
+            weekPattern = weekPattern0,
             virtualMorningHour = s.getInt("virt_m_h", 8),
             virtualMorningMinute = s.getInt("virt_m_m", 0),
             virtualNoonHour = s.getInt("virt_n_h", 14),
             virtualNoonMinute = s.getInt("virt_n_m", 0),
             exitMorning = s.getString("exit_am").ifBlank { "13:30" },
             exitNoon = s.getString("exit_pm").ifBlank { "17:30" },
+            thisWeekShift = thisWeekShift0,
+            cycleWeekOffset = offset0,
         )
     }
 
@@ -162,12 +191,47 @@ object ClassPlanStore {
         s.putBool("locked", locked)
     }
 
-    fun saveShift(ctx: Context, cycleWeeks: Int, anchorIso: String, fixedEvening: Boolean, pattern: List<String> = emptyList()) {
+    fun saveShift(
+        ctx: Context,
+        cycleWeeks: Int,
+        anchorIso: String,
+        fixedEvening: Boolean,
+        pattern: List<String> = emptyList(),
+        thisWeekShift: Shift? = null,
+        cycleWeekOffset: Int? = null,
+    ) {
         val s = store(ctx)
         s.putInt("cycle_weeks", cycleWeeks)
         s.putString("anchor", anchorIso)
         s.putBool("fixed_evening", fixedEvening)
-        if (pattern.isNotEmpty()) s.putString("week_pattern", pattern.joinToString(","))
+        // الگوی هفتگیِ دستیِ قدیمی را با ذخیره‌ی تازه پاک می‌کنیم — شیفتِ هفته‌ها
+        // از این‌جا به‌بعد «مشتق» از شیفتِ هفته‌ی جاری است.
+        s.putString("week_pattern", if (pattern.isNotEmpty()) pattern.joinToString(",") else "")
+        thisWeekShift?.let { s.putString("this_week_shift", if (it == Shift.EVENING) "evening" else "morning") }
+        cycleWeekOffset?.let { s.putInt("cycle_week_offset", it.coerceIn(1, cycleWeeks)) }
+    }
+
+    /** بخش اول تنظیمات: شیفتِ هفته‌ی جاری. لنگر = شنبه‌ی همین هفته می‌شود. */
+    fun setCurrentWeekShift(ctx: Context, want: Shift) {
+        val snap = load(ctx)
+        val weekStart = SchoolShift.startOfPersianWeek(LocalDate.now(JalaliDate.TEHRAN)).toString()
+        saveShift(ctx, snap.cycleWeeks, weekStart, want == Shift.EVENING, thisWeekShift = want)
+    }
+
+    /** بخش دوم: چرخه‌ی شیفت (ثابت/دوهفته‌ای/چهارهفته‌ای). */
+    fun setCycleWeeks(ctx: Context, weeks: Int) {
+        val snap = load(ctx)
+        if (weeks !in listOf(1, 2, 4)) return
+        saveShift(ctx, weeks, snap.anchorIso, snap.thisWeekShift == Shift.EVENING, thisWeekShift = snap.thisWeekShift, cycleWeekOffset = 1)
+    }
+
+    /** هفته‌ی چندمِ چرخه، هفته‌ی جاری است؟ (فقط برای چرخه‌های ۲/۴ هفته‌ای). */
+    fun setCycleWeekOffset(ctx: Context, weekPos: Int) {
+        val snap = load(ctx)
+        if (snap.cycleWeeks <= 1) return
+        // لنگر = شنبهٔ همین هفته تا «هفته‌ی k = همین هفته» دقیق دربیاید.
+        val weekStart = SchoolShift.startOfPersianWeek(LocalDate.now(JalaliDate.TEHRAN)).toString()
+        saveShift(ctx, snap.cycleWeeks, weekStart, snap.fixedEvening, thisWeekShift = snap.thisWeekShift, cycleWeekOffset = weekPos)
     }
 
     fun saveVirtualHours(ctx: Context, mh: Int, mm: Int, nh: Int, nm: Int) {
@@ -200,35 +264,26 @@ object ClassPlanStore {
     }
 
     fun shiftOf(snap: Snapshot, date: LocalDate): Shift {
+        // الگوی هفتگیِ دستیِ قدیمی (فقط داده‌های نسخه‌های قبل تا اولین ذخیره‌ی تازه)
         if (snap.weekPattern.size == snap.cycleWeeks && snap.weekPattern.isNotEmpty()) {
             val pos = Math.floorMod(SchoolShift.weekIndex(snap.anchorIso, date), snap.cycleWeeks.toLong()).toInt()
             return if (snap.weekPattern.getOrNull(pos) == "evening") Shift.EVENING else Shift.MORNING
         }
-        if (snap.cycleWeeks == 1) return if (snap.fixedEvening) Shift.EVENING else Shift.MORNING
-        return SchoolShift.shiftOn(snap.anchorIso, date, snap.cycleWeeks)
+        if (snap.cycleWeeks == 1) return snap.thisWeekShift
+        // چرخه: شیفتِ هفته‌ها از شیفتِ هفته‌ی جاری (لنگر) به‌صورتِ متناوبِ هفتگی مشتق می‌شود.
+        return derivedShift(snap.thisWeekShift, SchoolShift.weekIndex(snap.anchorIso, date))
+    }
+
+    /** هفته‌ی چندمِ چرخه (۱..cycleWeeks) با [date] هم‌زمان است؟ */
+    fun cycleWeekPos(snap: Snapshot, date: LocalDate): Int {
+        if (snap.cycleWeeks <= 1) return 1
+        return Math.floorMod(snap.cycleWeekOffset - 1L + SchoolShift.weekIndex(snap.anchorIso, date), snap.cycleWeeks.toLong()).toInt() + 1
     }
 
     fun captionOf(snap: Snapshot, date: LocalDate): String {
         val shift = shiftOf(snap, date)
-        val cap = if (snap.cycleWeeks == 1) "هفته جاری" else SchoolShift.cycleCaption(snap.anchorIso, date, snap.cycleWeeks)
-        return "$cap · ${shift.label}"
-    }
-
-    /** شیفت هفتهٔ جاری را عوض کن و لنگر را طوری بگذار که محاسبه درست دربیاید. */
-    fun setCurrentWeekShift(ctx: Context, want: Shift) {
-        val snap = load(ctx)
-        val today = LocalDate.now(JalaliDate.TEHRAN)
-        val weekStart = SchoolShift.startOfPersianWeek(today)
-        if (snap.cycleWeeks == 1) {
-            saveShift(ctx, 1, weekStart.toString(), want == Shift.EVENING)
-            return
-        }
-        // لنگر = شنبه‌ای که هفتهٔ صبحِ چرخه است.
-        val anchor = if (want == Shift.MORNING) weekStart else {
-            val back = if (snap.cycleWeeks == 4) 14L else 7L
-            weekStart.minusDays(back)
-        }
-        saveShift(ctx, snap.cycleWeeks, anchor.toString(), false)
+        return if (snap.cycleWeeks == 1) "همیشه ${shift.label}"
+        else "هفته‌ی ${toPersianDigits(cycleWeekPos(snap, date).toString())} از ${toPersianDigits(snap.cycleWeeks.toString())} هفته · ${shift.label}"
     }
 
     fun lessonsFor(snap: Snapshot, date: LocalDate): List<String> {
@@ -566,6 +621,8 @@ object ClassPlanStore {
                 put("cycleWeeks", snap.cycleWeeks)
                 put("anchorIso", snap.anchorIso)
                 put("fixedEvening", snap.fixedEvening)
+                put("thisWeekShift", if (snap.thisWeekShift == Shift.EVENING) "evening" else "morning")
+                put("cycleWeekOffset", snap.cycleWeekOffset)
                 put("weekPattern", JSONArray().apply { snap.weekPattern.forEach { put(it) } }.toString())
                 put("morningHour", snap.morningHour)
                 put("morningMinute", snap.morningMinute)
@@ -641,7 +698,13 @@ object ClassPlanStore {
                     (0 until arr.length()).map { arr.optString(it) }.filter { it == "morning" || it == "evening" }
                 }.getOrDefault(emptyList())
                 if (anchor.isNotBlank()) {
-                    saveShift(ctx, cycle, anchor, o.optBoolean("fixedEvening", false), pattern)
+                    val tws = if (o.optString("thisWeekShift") == "evening") Shift.EVENING
+                        else if (o.optString("thisWeekShift") == "morning") Shift.MORNING else null
+                    saveShift(
+                        ctx, cycle, anchor, o.optBoolean("fixedEvening", false), pattern,
+                        thisWeekShift = tws,
+                        cycleWeekOffset = o.optInt("cycleWeekOffset", 0).takeIf { it in 1..cycle },
+                    )
                 }
                 saveTimes(
                     ctx,

@@ -6,6 +6,12 @@ import java.time.temporal.ChronoUnit
 
 enum class Shift(val label: String) { MORNING("شیفت صبح"), EVENING("شیفت ظهر") }
 
+fun Shift.opposite(): Shift = if (this == Shift.MORNING) Shift.EVENING else Shift.MORNING
+
+/** شیفتِ مشتقِ هفته‌ی [weekDelta] هفتهٔ فاصله از هفتهٔ لنگر (۰ = خودِ لنگر). */
+fun derivedShift(base: Shift, weekDelta: Long): Shift =
+    if (Math.floorMod(weekDelta, 2L) == 0L) base else base.opposite()
+
 /** ریاضی تقویم مدرسه — شنبه=۱ … جمعه=۷؛ چرخه‌ی شیفت از لنگر. */
 object SchoolShift {
 

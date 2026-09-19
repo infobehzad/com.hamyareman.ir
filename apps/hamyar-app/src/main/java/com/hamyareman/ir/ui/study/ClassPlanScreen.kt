@@ -60,17 +60,6 @@ import com.hamyareman.ir.ui.home.DashboardFonts
 import com.hamyareman.ir.ui.home.IranOfficialHolidays
 import java.time.LocalDate
 
-private fun effectivePattern(
-    snap: ClassPlanStore.Snapshot,
-    weeks: Int,
-    current: Shift,
-): List<String> {
-    if (snap.weekPattern.size == weeks && snap.weekPattern.isNotEmpty()) return snap.weekPattern
-    val first = if (current == Shift.EVENING) "evening" else "morning"
-    val second = if (first == "morning") "evening" else "morning"
-    return (0 until weeks).map { i -> if (i % 2 == 0) first else second }
-}
-
 /** ساعت به صورت «HH:MM» با یک انتخابگرِ ساده. */
 @Composable
 private fun TimePickText(label: String, value: String, onPick: (String) -> Unit) {
@@ -91,24 +80,7 @@ private fun TimePickText(label: String, value: String, onPick: (String) -> Unit)
     }
 }
 
-/** انتخابِ شیفتِ یک هفته از چرخه. */
-@Composable
-private fun ShiftWeekRow(label: String, value: Shift, onPick: (Shift) -> Unit) {
-    var open by remember { mutableStateOf(false) }
-    Box(Modifier.fillMaxWidth()) {
-        OutlinedButton(onClick = { open = true }, modifier = Modifier.fillMaxWidth()) {
-            Text("$label ${value.label}", fontFamily = DashboardFonts.quote)
-        }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            listOf(Shift.MORNING, Shift.EVENING).forEach { sh ->
-                DropdownMenuItem(
-                    text = { Text(sh.label, fontFamily = DashboardFonts.quote) },
-                    onClick = { onPick(sh); open = false },
-                )
-            }
-        }
-    }
-}
+
 
 @Composable
 fun ClassPlanScreen(onBack: () -> Unit, initialTab: Int = 0, onVirtualHours: (() -> Unit)? = null) {
@@ -397,15 +369,11 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
         ?: runCatching { kotlinx.coroutines.runBlocking { container.auth.currentUserId() } }.getOrNull().orEmpty()
     var snap by remember { mutableStateOf(ClassPlanStore.load(ctx)) }
     val today = LocalDate.now(JalaliDate.TEHRAN)
-    var cycle by remember { mutableIntStateOf(snap.cycleWeeks) }
-    var pattern by remember { mutableStateOf(effectivePattern(snap, snap.cycleWeeks, ClassPlanStore.shiftOf(snap, today))) }
     LaunchedEffect(Unit) {
         val uid = runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
         if (uid.isNotBlank()) {
             val changed = ClassPlanSync.pullAll(ctx, container.tables, uid)
             snap = ClassPlanStore.load(ctx)
-            cycle = snap.cycleWeeks
-            pattern = effectivePattern(snap, cycle, ClassPlanStore.shiftOf(snap, today))
             if (changed) syncNotice = "تنظیمات از سرور به‌روز شد."
             ClassPlanSync.pushAll(ctx, container.tables, uid)
         }
@@ -431,7 +399,12 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
         OutlinedButton(onClick = { shiftSettings = true }, modifier = Modifier.fillMaxWidth()) {
             Text("تنظیمات شیفت مدرسه", fontFamily = DashboardFonts.quote)
         }
-        Text("شیفت هفتهٔ جاری: ${current.label}", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+        Text(
+            if (snap.cycleWeeks == 1) "همیشه ${current.label}"
+            else "شیفت این هفته هفته‌ی ${toPersianDigits(ClassPlanStore.cycleWeekPos(snap, today).toString())} از ${toPersianDigits(snap.cycleWeeks.toString())} هفته، ${current.label}",
+            fontFamily = DashboardFonts.quote,
+            fontWeight = FontWeight.Bold,
+        )
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text("آلارم‌های صدادار", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
             IconButton(onClick = { settingsOpen = true }) {
@@ -506,8 +479,6 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                     val pulled = ClassPlanSync.pullAll(ctx, container.tables, uid)
                     val pushed = ClassPlanSync.pushAll(ctx, container.tables, uid)
                     snap = ClassPlanStore.load(ctx)
-                    cycle = snap.cycleWeeks
-                    pattern = effectivePattern(snap, cycle, ClassPlanStore.shiftOf(snap, today))
                     syncNotice = buildString {
                         append(if (pulled) "از سرور گرفته شد" else "داده‌ی تازه‌ای در سرور نبود")
                         append(if (pushed) "؛ ارسال انجام شد." else "؛ چیزی برای ارسال نبود.")
@@ -536,7 +507,8 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
             title = { Text("تنظیمات شیفت مدرسه", fontFamily = DashboardFonts.quote) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("شیفت هفتهٔ جاری", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+                    // ── گام ۱: شیفتِ هفتهٔ جاری
+                    Text("۱) شیفت هفتهٔ جاری", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(Shift.MORNING, Shift.EVENING).forEach { sh ->
                             FilterChip(
@@ -544,58 +516,67 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                                 onClick = {
                                     ClassPlanStore.setCurrentWeekShift(ctx, sh)
                                     snap = ClassPlanStore.load(ctx)
-                                    cycle = snap.cycleWeeks
-                                    pattern = effectivePattern(snap, cycle, ClassPlanStore.shiftOf(snap, today))
                                 },
                                 label = { Text(sh.label, fontFamily = DashboardFonts.quote) },
                             )
                         }
                     }
-                    Text("چرخهٔ شیفت", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+                    // ── گام ۲: چرخهٔ شیفت
+                    Text("۲) چرخهٔ شیفت", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(1 to "ثابت", 2 to "دوهفته‌ای", 4 to "چهارهفته‌ای").forEach { (w, label) ->
                             FilterChip(
                                 selected = snap.cycleWeeks == w,
                                 onClick = {
-                                    val cur = ClassPlanStore.shiftOf(snap, today)
-                                    pattern = effectivePattern(snap, w, cur)
-                                    ClassPlanStore.saveShift(
-                                        ctx, w, SchoolShift.startOfPersianWeek(today).toString(),
-                                        w == 1 && cur == Shift.EVENING, pattern,
-                                    )
-                                    cycle = w
+                                    ClassPlanStore.setCycleWeeks(ctx, w)
                                     snap = ClassPlanStore.load(ctx)
                                 },
                                 label = { Text(label, fontFamily = DashboardFonts.quote) },
                             )
                         }
                     }
-                    if (snap.cycleWeeks > 1) {
-                        Text(
-                            "شیفتِ هر هفته (هفتهٔ اول = هفتهٔ جاری)",
-                            fontFamily = DashboardFonts.quote,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        pattern.forEachIndexed { i, value ->
-                            ShiftWeekRow(
-                                label = "هفتهٔ ${toPersianDigits((i + 1).toString())} شیفت",
-                                value = if (value == "evening") Shift.EVENING else Shift.MORNING,
-                                onPick = { sh ->
-                                    pattern = pattern.toMutableList().also { it[i] = if (sh == Shift.MORNING) "morning" else "evening" }
+                    // ── گام ۳: شیفتِ هر هفته (مشتق از گام ۱)
+                    when (snap.cycleWeeks) {
+                        1 -> {
+                            Text("۳) شیفت ثابت", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+                            OutlinedButton(
+                                onClick = {
+                                    ClassPlanStore.setCurrentWeekShift(ctx, current)
+                                    snap = ClassPlanStore.load(ctx)
                                 },
-                            )
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text("همیشه ${current.label}", fontFamily = DashboardFonts.quote)
+                            }
                         }
-                    } else {
-                        Text("شیفت ثابت", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            listOf(false to "همیشه صبح", true to "همیشه ظهر").forEach { (ev, label) ->
+                        else -> {
+                            val nowPos = ClassPlanStore.cycleWeekPos(snap, today)
+                            Text(
+                                "۳) شیفتِ هر هفته — هفته‌ی ${toPersianDigits(nowPos.toString())}: ${current.label}",
+                                fontFamily = DashboardFonts.quote,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                "هفتهٔ جاری شما، هفتهٔ چندم از چرخهٔ ${toPersianDigits(snap.cycleWeeks.toString())} هفته‌ای است؟",
+                                fontFamily = DashboardFonts.quote,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                            (1..snap.cycleWeeks).forEach { k ->
+                                val kShift =
+                                    if (Math.floorMod((k - nowPos).toLong(), 2L) == 0L) current
+                                    else current.opposite()
                                 FilterChip(
-                                    selected = snap.fixedEvening == ev,
+                                    selected = nowPos == k,
                                     onClick = {
-                                        ClassPlanStore.saveShift(ctx, 1, snap.anchorIso, ev)
+                                        ClassPlanStore.setCycleWeekOffset(ctx, k)
                                         snap = ClassPlanStore.load(ctx)
                                     },
-                                    label = { Text(label, fontFamily = DashboardFonts.quote) },
+                                    label = {
+                                        Text(
+                                            "هفته‌ی ${toPersianDigits(k.toString())} · ${kShift.label}",
+                                            fontFamily = DashboardFonts.quote,
+                                        )
+                                    },
                                 )
                             }
                         }
@@ -648,14 +629,6 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
             },
             confirmButton = {
                 TextButton(onClick = {
-                    if (snap.cycleWeeks > 1 && pattern.isNotEmpty()) {
-                        ClassPlanStore.saveShift(
-                            ctx, snap.cycleWeeks,
-                            SchoolShift.startOfPersianWeek(today).toString(),
-                            false, pattern,
-                        )
-                        snap = ClassPlanStore.load(ctx)
-                    }
                     shiftSettings = false
                     ClassPlanStore.syncAlarms(ctx, reminders, snap, today)
                     syncScope.launch {
