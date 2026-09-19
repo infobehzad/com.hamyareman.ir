@@ -48,7 +48,7 @@ class ClassPlanShiftTest {
         assertEquals(Shift.MORNING, derivedShift(Shift.MORNING, 2))
         assertEquals(Shift.EVENING, derivedShift(Shift.MORNING, 3))
         assertEquals(Shift.EVENING, derivedShift(Shift.MORNING, -1))
-        assertEquals(Shift.MORNING, derivedShift(Shift.EVENING, 0))
+        assertEquals(Shift.EVENING, derivedShift(Shift.EVENING, 0))
         assertEquals(Shift.MORNING, derivedShift(Shift.EVENING, 1))
         assertEquals(Shift.EVENING, derivedShift(Shift.EVENING, 2))
     }
