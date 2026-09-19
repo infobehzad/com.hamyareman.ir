@@ -216,6 +216,8 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
     var msg by remember { mutableStateOf<String?>(null) }
     var cacheTick by remember { mutableIntStateOf(0) }
     var loadedKey by remember { mutableStateOf<String?>(null) }
+    // منبعِ آیتمِ داخلِ صف (true = پخش محلی از گاوصندوق) — برای تصمیم «ادامه» یا «ردوبالازدنِ دوباره».
+    var loadedLocal by remember { mutableStateOf(false) }
     var listenAccumMs by remember { mutableLongStateOf(0L) }
     var lastSaveMs by remember { mutableLongStateOf(0L) }
     var dragMs by remember { mutableLongStateOf(-1L) }
@@ -303,6 +305,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
             // v1.12: فوراً ترکِ جاری را ثبت کن — تا فال‌بکِ خطا (سرور) همیشه زنده باشد
             // و اگر پخش محلی شروع شد، واتچ‌داگ بتواند نتیجه را بسنجد.
             loadedKey = t.cacheKey
+            loadedLocal = !forceServer && MediaVault.isVerified(context, t.cacheKey) && !fromServer
             lastSaveMs = 0L
             posMs = pos
             pendingStartKey = if (autoplay) t.cacheKey else null
@@ -369,6 +372,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                     store.putString("teach_${packId}_track", idx.toString())
                 }
                 loadedKey = curSync
+                loadedLocal = !forceServer && MediaVault.isVerified(context, curSync)
                 lastSaveMs = 0L
                 posMs = 0L
             }
@@ -393,6 +397,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                     store.putString("teach_${packId}_track", idx.toString())
                 }
                 loadedKey = cur
+                loadedLocal = !forceServer && MediaVault.isVerified(context, cur)
                 lastSaveMs = 0L
                 posMs = 0L
             }
@@ -432,6 +437,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
             forceServer = true
             pendingStartKey = null
             startTrack(track, autoplay = true, fromServer = true)
+            msg = "پخش محلی با مشکل مواجه شد؛ از سرور ادامه می‌دهیم…"
         }
     }
 
@@ -442,8 +448,8 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
         kotlinx.coroutines.delay(5000)
         if (pendingStartKey == k && !playback.state.value.playing && !forceServer) {
             forceServer = true
-            pendingStartKey = null
             tracks.firstOrNull { it.cacheKey == k }?.let { startTrack(it, autoplay = true, fromServer = true) }
+            msg = "پخش محلی شروع نشد؛ از سرور ادامه می‌دهیم…"
         }
         if (pendingStartKey == k) pendingStartKey = null
     }
@@ -492,7 +498,10 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                             if (loadedKey == track.cacheKey && state.hasMedia && !state.error.isNullOrBlank()) {
                                 forceServer = true
                             }
-                            if (loadedKey == track.cacheKey && state.hasMedia && !forceServer) {
+                            // فقط وقتی منبعِ آیتمِ داخلِ صف (محلی/آنلاین) با وضعیت فعلی فایل هم‌خوانی
+                            // دارد «ادامه» بده؛ وگرنه دوباره در صف بگذار — مثلاً بعد از دانلود،
+                            // آیتمِ آنلاینِ قدیمی نباید در صف بماند و پخش محلی باید فعال شود.
+                            if (loadedKey == track.cacheKey && state.hasMedia && !forceServer && (loadedLocal == cached(track))) {
                                 playback.play()
                             } else {
                                 startTrack(track, autoplay = true)
@@ -532,12 +541,13 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                                 style = MaterialTheme.typography.bodySmall,
                                 maxLines = 1,
                             )
-                            Text(
-                                if (totalBytes > 0) "${toPersianDigits(((doneBytes * 100L) / totalBytes).toString())}٪"
-                                else "حجم کل نامعلوم",
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 1,
-                            )
+                            if (totalBytes > 0) {
+                                Text(
+                                    "${toPersianDigits(((doneBytes * 100L) / totalBytes).toString())}٪",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = 1,
+                                )
+                            }
                         }
                     }
                     cached(track) -> {

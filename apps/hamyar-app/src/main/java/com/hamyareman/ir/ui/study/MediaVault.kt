@@ -296,8 +296,16 @@ object LocalMediaServer {
     }
 
     private fun handle(ctx: Context, conn: Socket) {
+        /** پاسخِ خطا — به‌جای بسته‌شدنِ بی‌صدا، پلیر خطای واقعی ببیند و فال‌بک کند. */
+        fun fail(code: Int) {
+            runCatching {
+                conn.getOutputStream().apply {
+                    write("HTTP/1.1 $code ERROR\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".toByteArray())
+                    flush()
+                }
+            }
+        }
         runCatching {
-            conn.soTimeout = 15000
             val reader = conn.getInputStream().bufferedReader()
             val requestLine = reader.readLine() ?: return
             var rangeStart: Long = -1
@@ -315,11 +323,11 @@ object LocalMediaServer {
             }
             // GET /v/<key>?t=<token>
             val parts = requestLine.split(" ")
-            if (parts.size < 2) return
+            if (parts.size < 2) { fail(400); return }
             val path = parts[1]
-            val seg = Regex("/v/([^?]+)\\?t=([0-9a-f]+)").find(path) ?: return
+            val seg = Regex("/v/([^?]+)\\?t=([0-9a-f]+)").find(path) ?: run { fail(400); return }
             val (cacheKey, token) = seg.destructured
-            if (token(cacheKey) != token) return
+            if (token(cacheKey) != token) { fail(403); return }
 
             val bytes = synchronized(this) {
                 if (cacheKey == lastKey && lastBytes != null) lastBytes!!
