@@ -91,6 +91,7 @@ import com.hamyareman.ir.ui.study.QuizReviewScreen
 import com.hamyareman.ir.ui.study.QuizScreen
 import com.hamyareman.ir.ui.study.StudyHomeScreen
 import com.hamyareman.ir.ui.study.VideoTeachScreen
+import com.hamyareman.ir.ui.study.VirtualClassScreen
 import com.hamyareman.ir.ui.water.WaterScreen
 import com.hamyareman.ir.ui.wellness.SketchGalleryScreen
 import com.hamyareman.ir.ui.wellness.WellnessScreen
@@ -193,8 +194,21 @@ fun ZahraNavHost() {
             composable(Screen.AwarenessHub.route) { AwarenessHubScreen(nav) }
             composable(Screen.HealthProgress.route) { HealthProgressScreen(onBack = { nav.popBackStack() }) }
             composable(Screen.WeeklySchedule.route) { WeeklyScheduleScreen { nav.popBackStack() } }
-            composable(Screen.ClassPlan.route) { ClassPlanScreen(onBack = { nav.popBackStack() }, initialTab = 0) }
-            composable(Screen.ClassPlanShift.route) { ClassPlanScreen(onBack = { nav.popBackStack() }, initialTab = 2) }
+            composable(Screen.ClassPlan.route) {
+                ClassPlanScreen(
+                    onBack = { nav.popBackStack() },
+                    initialTab = 0,
+                    onVirtualHours = { nav.navigate(Screen.VirtualClass.route) },
+                )
+            }
+            composable(Screen.ClassPlanShift.route) {
+                ClassPlanScreen(
+                    onBack = { nav.popBackStack() },
+                    initialTab = 2,
+                    onVirtualHours = { nav.navigate(Screen.VirtualClass.route) },
+                )
+            }
+            composable(Screen.VirtualClass.route) { VirtualClassScreen { nav.popBackStack() } }
             composable(Screen.Subscription.route) { com.hamyareman.ir.ui.home.SubscriptionScreen { nav.popBackStack() } }
             composable(Screen.TomorrowPrep.route) { TomorrowPrepScreen { nav.popBackStack() } }
             composable(Screen.SleepNight.route) { com.hamyareman.ir.ui.study.SleepNightScreen { nav.popBackStack() } }
@@ -219,7 +233,13 @@ fun ZahraNavHost() {
             composable(Screen.Helplines.route) { HelplinesScreen { nav.popBackStack() } }
             composable(Screen.Library.route) { LibraryScreen { nav.popBackStack() } }
             composable(Screen.Audiobook.route) { AudiobookScreen { nav.popBackStack() } }
-            composable(Screen.School.route) { ClassPlanScreen(onBack = { nav.popBackStack() }, initialTab = 2) }
+            composable(Screen.School.route) {
+                ClassPlanScreen(
+                    onBack = { nav.popBackStack() },
+                    initialTab = 2,
+                    onVirtualHours = { nav.navigate(Screen.VirtualClass.route) },
+                )
+            }
             composable(
                 Screen.Quiz.route,
                 listOf(navArgument("lessonId") { type = NavType.StringType; defaultValue = "" }),

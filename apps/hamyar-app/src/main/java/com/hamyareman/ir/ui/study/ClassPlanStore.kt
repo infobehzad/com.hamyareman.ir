@@ -3,13 +3,16 @@ package com.hamyareman.ir.ui.study
 import android.content.Context
 import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.LocalStore
+import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.notifications.Reminder
 import com.hamyareman.ir.platform.core.notifications.ReminderScheduler
 import com.hamyareman.ir.platform.feature.study.BookModuleRegistry
 import com.hamyareman.ir.ui.home.IranOfficialHolidays
 import com.hamyareman.ir.ui.profile.GradeGate
 import org.json.JSONArray
+import org.json.JSONObject
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 /**
  * برنامهٔ کلاسی مدرسه + آماده‌سازی فردا + شیفت چرخشی.
@@ -275,4 +278,127 @@ object ClassPlanStore {
         val (h, m) = wakeHourMinute(snap, shift)
         return r.enabled && r.hour == h && r.minute == m
     }
+
+    // ------------------------------------------------------------ کلاس مجازی
+
+    /** یک جلسه‌ی کلاس مجازی در یک روز هفته (شنبه=۱ … پنجشنبه=۵). */
+    data class VirtualSession(
+        val dayIndex: Int,
+        val startH: Int,
+        val startM: Int,
+        val endH: Int,
+        val endM: Int,
+        val subject: String = "",
+    ) {
+        val timeFa: String
+            get() = toPersianDigits("%d:%02d".format(startH, startM)) +
+                " تا " + toPersianDigits("%d:%02d".format(endH, endM))
+    }
+
+    fun virtualSessions(ctx: Context): List<VirtualSession> {
+        val arr = runCatching { JSONArray(store(ctx).getString("virtual_sessions", "[]")) }
+            .getOrDefault(JSONArray())
+        return (0 until arr.length()).mapNotNull { i ->
+            val o = arr.optJSONObject(i) ?: return@mapNotNull null
+            VirtualSession(
+                dayIndex = o.optInt("dayIndex", 1).coerceIn(1, 5),
+                startH = o.optInt("startH", 8).coerceIn(0, 23),
+                startM = o.optInt("startM", 0).coerceIn(0, 59),
+                endH = o.optInt("endH", 9).coerceIn(0, 23),
+                endM = o.optInt("endM", 0).coerceIn(0, 59),
+                subject = o.optString("subject"),
+            )
+        }.sortedBy { it.dayIndex }
+    }
+
+    fun saveVirtualSessions(ctx: Context, list: List<VirtualSession>) {
+        val arr = JSONArray()
+        list.forEach { s ->
+            arr.put(
+                JSONObject()
+                    .put("dayIndex", s.dayIndex)
+                    .put("startH", s.startH).put("startM", s.startM)
+                    .put("endH", s.endH).put("endM", s.endM)
+                    .put("subject", s.subject),
+            )
+        }
+        store(ctx).putString("virtual_sessions", arr.toString())
+    }
+
+    /** یک بازه‌ی تاریخ مجازی (برای نمایش در آکاردیون و حذف تکی). */
+    data class VirtualRange(val id: String, val fromIso: String, val toIso: String)
+
+    fun virtualRanges(ctx: Context): List<VirtualRange> {
+        val arr = runCatching { JSONArray(store(ctx).getString("virtual_ranges", "[]")) }
+            .getOrDefault(JSONArray())
+        return (0 until arr.length()).mapNotNull { i ->
+            val o = arr.optJSONObject(i) ?: return@mapNotNull null
+            VirtualRange(
+                id = o.optString("id"),
+                fromIso = o.optString("from"),
+                toIso = o.optString("to"),
+            )
+        }.sortedBy { it.fromIso }
+    }
+
+    /** ثبت بازه + اعمال روی روزها؛ شناسه برمی‌گردد تا در آکاردیون لیست شود. */
+    fun addVirtualRange(ctx: Context, fromIso: String, toIso: String): VirtualRange? {
+        val from = runCatching { LocalDate.parse(fromIso) }.getOrNull() ?: return null
+        val to = runCatching { LocalDate.parse(toIso) }.getOrNull() ?: return null
+        val (a, b) = if (from.isAfter(to)) to to from else from to to
+        val range = VirtualRange(id = "vr_${System.currentTimeMillis()}", a.toString(), b.toString())
+        val list = virtualRanges(ctx).toMutableList()
+        list += range
+        val arr = JSONArray()
+        list.forEach { r ->
+            arr.put(JSONObject().put("id", r.id).put("from", r.fromIso).put("to", r.toIso))
+        }
+        store(ctx).putString("virtual_ranges", arr.toString())
+        setVirtualRange(ctx, a.toString(), b.toString(), true)
+        return range
+    }
+
+    fun removeVirtualRange(ctx: Context, id: String) {
+        val list = virtualRanges(ctx)
+        val gone = list.firstOrNull { it.id == id } ?: return
+        val arr = JSONArray()
+        list.filterNot { it.id == id }.forEach { r ->
+            arr.put(JSONObject().put("id", r.id).put("from", r.fromIso).put("to", r.toIso))
+        }
+        store(ctx).putString("virtual_ranges", arr.toString())
+        setVirtualRange(ctx, gone.fromIso, gone.toIso, false)
+    }
+
+    // ------------------------------------------------- واژه‌ی «امروز/فردا»
+
+    /**
+     * واژه‌ی روز مقصد: اگر همان روزِ جاری باشد «امروز»، اگر فردا باشد «فردا»،
+     * وگرنه نام روز هفته.
+     */
+    fun dayWordFor(date: LocalDate, today: LocalDate): String = when (date) {
+        today -> "امروز"
+        today.plusDays(1) -> "فردا"
+        else -> JalaliDate.weekDayFa(date.toString())
+    }
+
+    /**
+     * روزِ مقصدِ آماده‌سازی با لحاظ‌کردن عبور از نیمه‌شب:
+     * بعد از ساعت ۱۲ شب، «فردا»ی دیشب همان «امروز» است.
+     * (تا ساعت ۴ صبح هنوز همان روزِ پیش‌رو مدنظر است.)
+     */
+    fun prepTargetDate(now: LocalDateTime = LocalDateTime.now(JalaliDate.TEHRAN)): LocalDate {
+        val today = now.toLocalDate()
+        return if (now.hour < 4) today else today.plusDays(1)
+    }
+
+    /** برچسب کاملِ روز مقصد همراه با شیفت: «امروز صبح» / «فردا ظهر». */
+    fun dayLabelFor(date: LocalDate, today: LocalDate, shift: Shift): String =
+        "${dayWordFor(date, today)} ${if (shift == Shift.MORNING) "صبح" else "ظهر"}"
+
+    /** نخستین روزِ غیرتعطیل از [from] به بعد (برای آماده‌سازیِ روز بعد). */
+    fun firstSchoolDay(snap: Snapshot, from: LocalDate): LocalDate =
+        generateSequence(from) { it.plusDays(1) }
+            .take(14)
+            .firstOrNull { !isSchoolHoliday(snap, it) }
+            ?: from
 }

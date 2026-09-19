@@ -37,8 +37,12 @@ fun TomorrowPrepScreen(onBack: () -> Unit) {
     val ctx = LocalContext.current
     val reminders = LocalAppContainer.current.reminders
     val today = LocalDate.now(JalaliDate.TEHRAN)
-    val tomorrow = today.plusDays(1)
+    // بعد از نیمه‌شب، «فردا»ی دیشب همان «امروز» است.
+    val prepDate = ClassPlanStore.prepTargetDate()
     val snap = remember { ClassPlanStore.load(ctx) }
+    val tomorrow = ClassPlanStore.firstSchoolDay(snap, prepDate)
+    val dayWord = ClassPlanStore.dayWordFor(tomorrow, today)
+    val dayLabel = ClassPlanStore.dayLabelFor(tomorrow, today, ClassPlanStore.shiftOf(snap, tomorrow))
     remember {
         ClassPlanStore.syncAlarms(ctx, reminders, snap, today)
         true
@@ -58,16 +62,16 @@ fun TomorrowPrepScreen(onBack: () -> Unit) {
     val tomorrowFa = JalaliDate.formatFaLong(isoN)
 
     Column(Modifier.fillMaxSize()) {
-        AppTopBar("آماده‌سازی فردا", onBack)
+        AppTopBar("آماده‌سازی $dayWord", onBack)
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Text("فردا $tomorrowFa · ${ClassPlanStore.captionOf(snap, tomorrow)}", fontFamily = DashboardFonts.quote)
+            Text("$dayWord $tomorrowFa · ${ClassPlanStore.captionOf(snap, tomorrow)}", fontFamily = DashboardFonts.quote)
             if (lessons.isNotEmpty()) {
-                Text("درس‌های فردا: ${lessons.joinToString("، ")}", fontFamily = DashboardFonts.quote)
+                Text("درس‌های $dayWord: ${lessons.joinToString("، ")}", fontFamily = DashboardFonts.quote)
             } else {
-                Text("برای فردا درسی در برنامهٔ هفتگی نیست.", fontFamily = DashboardFonts.quote, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("برای $dayWord درسی در برنامهٔ هفتگی نیست.", fontFamily = DashboardFonts.quote, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = bag, onCheckedChange = {
@@ -90,7 +94,7 @@ fun TomorrowPrepScreen(onBack: () -> Unit) {
                 Text("ساعت خوابت ${toPersianDigits(sleep)} باشد", fontFamily = DashboardFonts.quote)
             }
 
-            Text("امتحان فردا (اختیاری)", fontFamily = DashboardFonts.greeting, fontSize = 18.sp)
+            Text("امتحان $dayLabel (اختیاری)", fontFamily = DashboardFonts.section, fontSize = 18.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
             Text("اگر امتحان داری، از درس‌های همان روز انتخاب کن.", fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall)
             androidx.compose.foundation.layout.Box {
                 OutlinedButton(onClick = { examOpen = true }, modifier = Modifier.fillMaxWidth()) {

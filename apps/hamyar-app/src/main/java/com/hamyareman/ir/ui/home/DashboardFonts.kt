@@ -11,4 +11,8 @@ object DashboardFonts {
     val quote = FontFamily(Font(R.font.aria_semibold, FontWeight.SemiBold))
     val aria = quote
     val lalezar = FontFamily(Font(R.font.lalezar, FontWeight.Normal))
+    /** فونت هیلدا — متن‌های دست‌نویس‌گونه (گزارش امتحان، دفتر نکات). */
+    val hilda = FontFamily(Font(R.font.hilda, FontWeight.Normal))
+    /** فونت عنوانِ بخش‌ها (مثل «خواب — دعوت به خواب آرام»، تب‌ها، «کلاس مجازی»). */
+    val section = quote
 }

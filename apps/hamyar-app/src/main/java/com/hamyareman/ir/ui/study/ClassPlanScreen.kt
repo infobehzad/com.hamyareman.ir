@@ -15,10 +15,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -50,21 +55,25 @@ import com.hamyareman.ir.ui.home.IranOfficialHolidays
 import java.time.LocalDate
 
 @Composable
-fun ClassPlanScreen(onBack: () -> Unit, initialTab: Int = 0) {
+fun ClassPlanScreen(onBack: () -> Unit, initialTab: Int = 0, onVirtualHours: (() -> Unit)? = null) {
     var tab by remember { mutableIntStateOf(initialTab.coerceIn(0, 2)) }
     Column(Modifier.fillMaxSize()) {
         AppTopBar("برنامه کلاسی مدرسه", onBack)
         ScrollableTabRow(selectedTabIndex = tab, edgePadding = 8.dp) {
             listOf("هفتگی", "تقویم", "شیفت مدرسه").forEachIndexed { i, label ->
                 Tab(selected = tab == i, onClick = { tab = i }, text = {
-                    Text(label, fontFamily = DashboardFonts.quote)
+                    Text(
+                        label,
+                        fontFamily = DashboardFonts.section,
+                        fontWeight = FontWeight.Bold,
+                    )
                 })
             }
         }
         when (tab) {
             0 -> WeeklyTimetableSection()
             1 -> ShamsiCalendarSection()
-            else -> ShiftSection()
+            else -> ShiftSection(onVirtualHours = onVirtualHours)
         }
     }
 }
@@ -296,7 +305,7 @@ private fun ShamsiCalendarSection() {
 }
 
 @Composable
-private fun ShiftSection() {
+private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
     val ctx = LocalContext.current
     val reminders = LocalAppContainer.current.reminders
     var snap by remember { mutableStateOf(ClassPlanStore.load(ctx)) }
@@ -304,10 +313,8 @@ private fun ShiftSection() {
     var cycle by remember { mutableIntStateOf(snap.cycleWeeks) }
     var alarm by remember { mutableStateOf(SchoolAlarmStore.load(ctx)) }
     var settingsOpen by remember { mutableStateOf(false) }
-    var confirmShift by remember { mutableStateOf(false) }
-    var virtGear by remember { mutableStateOf(false) }
-    var virtFrom by remember { mutableStateOf(today.toString()) }
-    var virtTo by remember { mutableStateOf(today.toString()) }
+    var shiftSettings by remember { mutableStateOf(false) }
+    var ranges by remember { mutableStateOf(ClassPlanStore.virtualRanges(ctx)) }
     val current = ClassPlanStore.shiftOf(snap, today)
 
     fun flushAlarm(next: SchoolAlarmStore.Prefs = alarm) {
@@ -321,12 +328,16 @@ private fun ShiftSection() {
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text(ClassPlanStore.captionOf(snap, today), fontFamily = DashboardFonts.greeting, fontSize = 20.sp, modifier = Modifier.clickable { confirmShift = true })
-        Text("برای ویرایش شیفت، روی عنوان بالا بزن.", fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall)
+        Text(ClassPlanStore.captionOf(snap, today), fontFamily = DashboardFonts.section, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        OutlinedButton(onClick = { shiftSettings = true }, modifier = Modifier.fillMaxWidth()) {
+            Text("تنظیمات شیفت مدرسه", fontFamily = DashboardFonts.quote)
+        }
         Text("شیفت هفتهٔ جاری: ${current.label}", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text("آلارم‌های صدادار", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
-            TextButton(onClick = { settingsOpen = true }) { Text("چرخ‌دنده تنظیمات", fontFamily = DashboardFonts.quote) }
+            IconButton(onClick = { settingsOpen = true }) {
+                Icon(Icons.Filled.Settings, contentDescription = "تنظیمات آلارم")
+            }
         }
         Text("شیفت صبح — سه کادر ساعت", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
         TimePick("آلارم بیداری", alarm.wakeMH, alarm.wakeMM) { h, m -> flushAlarm(alarm.copy(wakeMH = h, wakeMM = m)) }
@@ -336,7 +347,7 @@ private fun ShiftSection() {
         TimePick("آماده شدن ظهر", alarm.wakeNH, alarm.wakeNM) { h, m -> flushAlarm(alarm.copy(wakeNH = h, wakeNM = m)) }
         TimePick("حضور در سرویس", alarm.busNH, alarm.busNM) { h, m -> flushAlarm(alarm.copy(busNH = h, busNM = m)) }
         TimePick("حضور در مدرسه", alarm.schoolNH, alarm.schoolNM) { h, m -> flushAlarm(alarm.copy(schoolNH = h, schoolNM = m)) }
-        Text("خواب — دعوت به خواب آرام", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+        Text("خواب — دعوت به خواب آرام", fontFamily = DashboardFonts.section, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         TimePick("خواب شیفت صبح", alarm.sleepMH, alarm.sleepMM) { h, m -> flushAlarm(alarm.copy(sleepMH = h, sleepMM = m)) }
         TimePick("خواب شیفت ظهر", alarm.sleepNH, alarm.sleepNM) { h, m -> flushAlarm(alarm.copy(sleepNH = h, sleepNM = m)) }
         Text(
@@ -344,23 +355,154 @@ private fun ShiftSection() {
             fontFamily = DashboardFonts.quote,
             style = MaterialTheme.typography.bodySmall,
         )
-        Text("کلاس مجازی", fontFamily = DashboardFonts.greeting, fontSize = 18.sp)
-        Text("یک روز یا بازه را مجازی کن. روی داشبورد قرمز می‌شود و تیک کیف غیرفعال.", fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall)
-        OutlinedTextField(value = virtFrom, onValueChange = { virtFrom = it }, label = { Text("از تاریخ (YYYY-MM-DD)") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = virtTo, onValueChange = { virtTo = it }, label = { Text("تا تاریخ") }, modifier = Modifier.fillMaxWidth())
-        OutlinedButton(onClick = {
-            ClassPlanStore.setVirtualRange(ctx, virtFrom, virtTo, true)
-            snap = ClassPlanStore.load(ctx)
-        }, modifier = Modifier.fillMaxWidth()) { Text("تأیید کلاس مجازی", fontFamily = DashboardFonts.quote) }
-        OutlinedButton(onClick = {
-            ClassPlanStore.setVirtualRange(ctx, virtFrom, virtTo, false)
-            snap = ClassPlanStore.load(ctx)
-        }, modifier = Modifier.fillMaxWidth()) { Text("حذف این بازه از مجازی", fontFamily = DashboardFonts.quote) }
-        TextButton(onClick = { virtGear = true }) { Text("چرخ‌دنده ساعت کلاس مجازی", fontFamily = DashboardFonts.quote) }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text("کلاس مجازی", fontFamily = DashboardFonts.section, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = { onVirtualHours?.invoke() }) {
+                Icon(
+                    Icons.Outlined.Settings,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.width(4.dp))
+                Text("تنظیم ساعت کلاس‌های مجازی", fontFamily = DashboardFonts.quote)
+            }
+        }
+        Text(
+            "یک روز یا بازه را مجازی کن. روی داشبورد قرمز می‌شود و تیک کیف غیرفعال.",
+            fontFamily = DashboardFonts.quote,
+            style = MaterialTheme.typography.bodySmall,
+        )
+        VirtualRangeSection(
+            today = today,
+            ranges = ranges,
+            onAdd = { from, to ->
+                ClassPlanStore.addVirtualRange(ctx, from, to)
+                ranges = ClassPlanStore.virtualRanges(ctx)
+                snap = ClassPlanStore.load(ctx)
+            },
+            onDelete = { id ->
+                ClassPlanStore.removeVirtualRange(ctx, id)
+                ranges = ClassPlanStore.virtualRanges(ctx)
+                snap = ClassPlanStore.load(ctx)
+            },
+        )
         val vdays = ClassPlanStore.virtualDays(ctx)
         if (vdays.isNotEmpty()) {
-            Text("روزهای مجازی: ${vdays.sorted().take(12).joinToString("، ")}", fontFamily = DashboardFonts.quote, fontSize = 12.sp)
+            Text(
+                "جمعاً ${toPersianDigits(vdays.size.toString())} روز مجازی",
+                fontFamily = DashboardFonts.quote,
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
+        val sessions = ClassPlanStore.virtualSessions(ctx)
+        if (sessions.isNotEmpty()) {
+            Text("ساعت‌های ثبت‌شده", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+            sessions.forEach { s ->
+                val dayName = ClassPlanStore.WEEKDAYS.getOrElse(s.dayIndex - 1) { "" }
+                Text(
+                    "$dayName: ${s.timeFa}${if (s.subject.isBlank()) "" else " — ${s.subject}"}",
+                    fontFamily = DashboardFonts.quote,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+    }
+
+    if (shiftSettings) {
+        AlertDialog(
+            onDismissRequest = { shiftSettings = false },
+            title = { Text("تنظیمات شیفت مدرسه", fontFamily = DashboardFonts.quote) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("شیفت هفتهٔ جاری", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(Shift.MORNING, Shift.EVENING).forEach { sh ->
+                            FilterChip(
+                                selected = current == sh,
+                                onClick = {
+                                    ClassPlanStore.setCurrentWeekShift(ctx, sh)
+                                    snap = ClassPlanStore.load(ctx)
+                                    cycle = snap.cycleWeeks
+                                },
+                                label = { Text(sh.label, fontFamily = DashboardFonts.quote) },
+                            )
+                        }
+                    }
+                    Text("چرخهٔ شیفت", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(1 to "ثابت", 2 to "دوهفته‌ای", 4 to "چهارهفته‌ای").forEach { (w, label) ->
+                            FilterChip(
+                                selected = snap.cycleWeeks == w,
+                                onClick = {
+                                    ClassPlanStore.saveShift(ctx, w, snap.anchorIso, snap.fixedEvening)
+                                    cycle = w
+                                    snap = ClassPlanStore.load(ctx)
+                                },
+                                label = { Text(label, fontFamily = DashboardFonts.quote) },
+                            )
+                        }
+                    }
+                    if (snap.cycleWeeks == 1) {
+                        Text("شیفت ثابت", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            listOf(false to "همیشه صبح", true to "همیشه ظهر").forEach { (ev, label) ->
+                                FilterChip(
+                                    selected = snap.fixedEvening == ev,
+                                    onClick = {
+                                        ClassPlanStore.saveShift(ctx, 1, snap.anchorIso, ev)
+                                        snap = ClassPlanStore.load(ctx)
+                                    },
+                                    label = { Text(label, fontFamily = DashboardFonts.quote) },
+                                )
+                            }
+                        }
+                    }
+                    TimePick("ساعت ورود شیفت صبح", snap.morningHour, snap.morningMinute) { h, m ->
+                        ClassPlanStore.saveTimes(
+                            ctx, h, m, snap.wakeLeadMin,
+                            snap.noonHour, snap.noonMinute,
+                            snap.sleepMorning, snap.sleepEvening,
+                        )
+                        snap = ClassPlanStore.load(ctx)
+                    }
+                    TimePick("ساعت ورود شیفت ظهر", snap.noonHour, snap.noonMinute) { h, m ->
+                        ClassPlanStore.saveTimes(
+                            ctx, snap.morningHour, snap.morningMinute, snap.wakeLeadMin,
+                            h, m, snap.sleepMorning, snap.sleepEvening,
+                        )
+                        snap = ClassPlanStore.load(ctx)
+                    }
+                    Text(
+                        "آماده‌سازیِ پیش از حرکت: ${toPersianDigits(snap.wakeLeadMin.toString())} دقیقه",
+                        fontFamily = DashboardFonts.quote,
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(30, 45, 60, 90).forEach { lead ->
+                            FilterChip(
+                                selected = snap.wakeLeadMin == lead,
+                                onClick = {
+                                    ClassPlanStore.saveTimes(
+                                        ctx, snap.morningHour, snap.morningMinute, lead,
+                                        snap.noonHour, snap.noonMinute,
+                                        snap.sleepMorning, snap.sleepEvening,
+                                    )
+                                    snap = ClassPlanStore.load(ctx)
+                                },
+                                label = { Text(toPersianDigits(lead.toString()), fontFamily = DashboardFonts.quote) },
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    shiftSettings = false
+                    ClassPlanStore.syncAlarms(ctx, reminders, snap, today)
+                }) { Text("ذخیره", fontFamily = DashboardFonts.quote) }
+            },
+            dismissButton = { TextButton(onClick = { shiftSettings = false }) { Text("بستن", fontFamily = DashboardFonts.quote) } },
+        )
     }
     if (settingsOpen) {
         AlertDialog(
@@ -394,7 +536,7 @@ private fun ShiftSection() {
 }
 
 @Composable
-private fun TimePick(label: String, hour: Int, minute: Int, onChange: (Int, Int) -> Unit) {
+internal fun TimePick(label: String, hour: Int, minute: Int, onChange: (Int, Int) -> Unit) {
     val ctx = LocalContext.current
     OutlinedButton(
         onClick = {

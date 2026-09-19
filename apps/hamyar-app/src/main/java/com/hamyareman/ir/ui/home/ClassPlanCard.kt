@@ -75,7 +75,8 @@ fun ClassPlanCard(
         onDispose { owner.lifecycle.removeObserver(obs) }
     }
     val today = remember(tick) { LocalDate.now(JalaliDate.TEHRAN) }
-    val tomorrow = today.plusDays(1)
+    // «فردا» متغیر است: بعد از نیمه‌شب، همان روزِ پیش‌رو «امروز» است.
+    val prepDate = remember(tick) { ClassPlanStore.prepTargetDate() }
     val snap = remember(tick) { ClassPlanStore.load(ctx) }
     LaunchedEffect(tick, snap.cycleWeeks, snap.anchorIso, snap.fixedEvening, snap.morningHour, snap.noonHour) {
         ClassPlanStore.syncAlarms(ctx, reminders, snap, today)
@@ -85,10 +86,9 @@ fun ClassPlanCard(
     val dateFa = j?.let { toPersianDigits("${it.day} ${JalaliDate.monthName(it.month)}") } ?: ""
     val shift = ClassPlanStore.shiftOf(snap, today)
     val holiday = ClassPlanStore.isSchoolHoliday(snap, today)
-    val showDate = generateSequence(tomorrow) { it.plusDays(1) }
-        .take(8)
-        .firstOrNull { !ClassPlanStore.isSchoolHoliday(snap, it) }
-        ?: tomorrow
+    val showDate = ClassPlanStore.firstSchoolDay(snap, prepDate)
+    val dayWord = ClassPlanStore.dayWordFor(showDate, today)
+    val dayLabel = ClassPlanStore.dayLabelFor(showDate, today, ClassPlanStore.shiftOf(snap, showDate))
     val tomorrowLessons = ClassPlanStore.lessonsFor(snap, showDate).ifEmpty { listOf("—", "—", "—") }
     val boxes = (tomorrowLessons + listOf("—", "—", "—")).take(3)
     val isoN = showDate.toString()
@@ -171,7 +171,7 @@ fun ClassPlanCard(
             }
             if (virtual) {
                 Text(
-                    "فردا کلاس مجازی است — کیف مدرسه لازم نیست.",
+                    "$dayWord مجازی است",
                     color = Color(0xFFB91C1C),
                     fontFamily = DashboardFonts.quote,
                     fontSize = 13.sp,
@@ -219,7 +219,7 @@ fun ClassPlanCard(
             }
             Box(Modifier.fillMaxWidth()) {
                 PrepTick(
-                    label = if (exam.isBlank()) "فردا امتحان داری؟" else "فردا امتحان $exam",
+                    label = if (exam.isBlank()) "$dayLabel امتحان داری؟" else "$dayLabel امتحان $exam",
                     checked = exam.isNotBlank(),
                     enabled = true,
                     modifier = Modifier.fillMaxWidth().clickable { examOpen = true },
@@ -254,8 +254,11 @@ fun ClassPlanCard(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2,
-                    label = { Text("گزارش نتیجه امتحان", fontFamily = DashboardFonts.lalezar) },
-                    textStyle = androidx.compose.ui.text.TextStyle(fontFamily = DashboardFonts.lalezar, fontSize = 16.sp),
+                    label = { Text("گزارش نتیجه امتحان", fontFamily = DashboardFonts.hilda) },
+                    textStyle = androidx.compose.ui.text.TextStyle(
+                        fontFamily = DashboardFonts.hilda,
+                        fontSize = 18.sp,
+                    ),
                 )
             }
             Text(

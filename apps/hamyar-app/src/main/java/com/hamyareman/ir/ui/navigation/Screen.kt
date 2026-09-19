@@ -40,6 +40,8 @@ sealed class Screen(val route: String) {
     data object School : Screen("school")
     data object ClassPlan : Screen("class-plan")
     data object ClassPlanShift : Screen("class-plan-shift")
+    /** ساعت‌های کلاس مجازی + بازه‌های روزهای مجازی. */
+    data object VirtualClass : Screen("virtual-class")
     data object Subscription : Screen("subscription")
     data object TomorrowPrep : Screen("tomorrow-prep")
     data object SleepNight : Screen("sleep-night")
