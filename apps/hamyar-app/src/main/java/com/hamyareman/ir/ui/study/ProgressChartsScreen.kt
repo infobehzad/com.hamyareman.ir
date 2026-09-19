@@ -15,13 +15,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -55,10 +60,42 @@ fun ProgressChartsScreen(bookCode: String?, onBack: () -> Unit, onPickBook: (Str
     val books = remember { com.hamyareman.ir.ui.profile.GradeGate.filter(BookModuleRegistry.modules) { it.bookCode } }
     val module = remember(bookCode) { books.firstOrNull { it.bookCode == bookCode } }
 
+    // ---------- سینکِ نمودار پیشرفت ----------
+    // ورود به صفحه: اول هرچه محلی مانده می‌رود (push)، بعد از سرور گرفته و ادغام می‌شود (pull).
+    var syncTick by remember { mutableIntStateOf(0) }
+    var syncMsg by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(bookCode, syncTick) {
+        val uid = container.auth.cachedUserId()
+            ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+        if (uid.isBlank()) {
+            syncMsg = "برای سینکِ نمودارها وارد حساب شو."
+            return@LaunchedEffect
+        }
+        val merged = withContext(Dispatchers.IO) {
+            val packIds = module?.packs?.map { it.packId }.orEmpty()
+            TeachCloud.enqueueAll(ctx, container.sync, uid, packIds)
+            packIds.forEach { runCatching { container.studyProgress.flush(it) } }
+            runCatching { container.sync.pushAll() }
+            runCatching {
+                SchoolSync.restoreAll(ctx, container.tables, container.sync, uid, force = true)
+            }.getOrDefault(0)
+        }
+        syncMsg = if (merged > 0) "از سرور به‌روز شد (${toPersianDigits(merged.toString())} مورد)." else "نمودارها همگام‌اند."
+    }
+
     if (module == null) {
         // ---------- انتخاب کتاب ----------
         Column(Modifier.fillMaxSize()) {
             AppTopBar("نمودار پیشرفت کدام کتاب؟", onBack)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    (syncMsg ?: "در حال همگام‌سازی…") + " ",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f),
+                )
+                TextButton(onClick = { syncTick++ }) { Text("به‌روزرسانی") }
+            }
             Column(
                 Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -90,6 +127,20 @@ fun ProgressChartsScreen(bookCode: String?, onBack: () -> Unit, onPickBook: (Str
 
     Column(Modifier.fillMaxSize()) {
         AppTopBar("نمودار پیشرفت — ${module.title}", onBack)
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                (syncMsg ?: "در حال همگام‌سازی…") + " ",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(onClick = { syncTick++ }) { Text("به‌روزرسانی") }
+        }
         if (module.bookCode == "C905") {
             MathLessonProgressPage(module, Modifier.weight(1f))
             return

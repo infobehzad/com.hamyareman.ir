@@ -41,6 +41,13 @@ object TeachCloud {
         )
     }
 
+    /** صف‌کردنِ همه‌ی پک‌هایی که آمار محلی دارند (برای نمودار پیشرفت). */
+    fun enqueueAll(ctx: Context, sync: com.hamyareman.ir.platform.core.sync.SyncEngine?, userId: String?, packIds: List<String> = emptyList()) {
+        if (sync == null || userId.isNullOrBlank()) return
+        val ids = packIds.ifEmpty { TeachStats.allPackIds(ctx) }
+        ids.forEach { packId -> enqueue(ctx, sync, userId, packId) }
+    }
+
     /** ارسال صف (اوت‌باکس) — سبک و بی‌دردسر؛ خطا بی‌صدا برای دفعه‌ی بعد می‌ماند. */
     suspend fun push(sync: com.hamyareman.ir.platform.core.sync.SyncEngine?): Int =
         withContext(Dispatchers.IO) {

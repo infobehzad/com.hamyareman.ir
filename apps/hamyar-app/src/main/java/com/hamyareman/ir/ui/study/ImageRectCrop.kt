@@ -26,6 +26,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -227,39 +228,54 @@ fun ImageRectCropDialog(
                     }
                 }
 
-                // لمسِ دستگیره‌ها: کشیدن برای تغییر اندازه‌ی کادر
+                // لمسِ دستگیره‌ها: کشیدن برای تغییر اندازه‌ی کادر.
+                // مقادیر با rememberUpdatedState خوانده می‌شوند تا با هر بار تغییرِ کادر،
+                // اشاره‌گر از نو راه‌اندازی نشود و کشیدن در ابعاد آزاد قطع نشود.
+                val fwNow = rememberUpdatedState(fw)
+                val fhNow = rememberUpdatedState(fh)
+                val presetNow = rememberUpdatedState(preset)
+                val minNow = rememberUpdatedState(minFrame)
+                val maxWNow = rememberUpdatedState(maxW)
+                val maxHNow = rememberUpdatedState(maxH)
+                val handleNow = rememberUpdatedState(handlePx)
+                val viewWNow = rememberUpdatedState(viewW)
+                val viewHNow = rememberUpdatedState(viewH)
                 Box(
                     Modifier
                         .fillMaxSize()
-                        .pointerInput(fw, fh, viewW, viewH, preset) {
+                        .pointerInput(Unit) {
                             awaitEachGesture {
                                 val down = awaitFirstDown(requireUnconsumed = false)
-                                val left = (viewW - fw) / 2f
-                                val top = (viewH - fh) / 2f
+                                val cw = fwNow.value
+                                val ch = fhNow.value
+                                val left = (viewWNow.value - cw) / 2f
+                                val top = (viewHNow.value - ch) / 2f
                                 val hit = cornerOf(
                                     down.position.x, down.position.y,
-                                    left, top, fw, fh, handlePx * 2.2f,
+                                    left, top, cw, ch, handleNow.value * 2.8f,
                                 ) ?: return@awaitEachGesture
                                 down.consume()
                                 drag(down.id) { change ->
                                     change.consume()
+                                    val baseW = fwNow.value
+                                    val baseH = fhNow.value
                                     val dx = change.position.x - change.previousPosition.x
                                     val dy = change.position.y - change.previousPosition.y
-                                    var nw = fw
-                                    var nh = fh
+                                    var nw = baseW
+                                    var nh = baseH
                                     when (hit) {
-                                        0 -> { nw = fw - dx; nh = fh - dy }
-                                        1 -> { nw = fw + dx; nh = fh - dy }
-                                        2 -> { nw = fw - dx; nh = fh + dy }
-                                        else -> { nw = fw + dx; nh = fh + dy }
+                                        0 -> { nw = baseW - dx; nh = baseH - dy }
+                                        1 -> { nw = baseW + dx; nh = baseH - dy }
+                                        2 -> { nw = baseW - dx; nh = baseH + dy }
+                                        else -> { nw = baseW + dx; nh = baseH + dy }
                                     }
-                                    val ratio = preset.ratio
+                                    val ratio = presetNow.value.ratio
                                     if (ratio != null) {
                                         nw = max(nw, nh * ratio)
                                         nh = nw / ratio
                                     }
-                                    frameW = nw.coerceIn(minFrame, maxW)
-                                    frameH = nh.coerceIn(minFrame, maxH)
+                                    frameW = nw.coerceIn(minNow.value, maxWNow.value)
+                                    frameH = nh.coerceIn(minNow.value, maxHNow.value)
                                     preset = FramePreset.FREE
                                 }
                             }
@@ -319,16 +335,9 @@ fun ImageRectCropDialog(
                     )
                     Slider(
                         value = angle,
+                        // زاویه بعد از رها کردن هم همان‌جا که گذاشته‌اید می‌ماند؛
+                        // فقط هنگام برش (دکمهٔ برش) روی تصویر اعمال می‌شود.
                         onValueChange = { angle = it },
-                        onValueChangeFinished = {
-                            if (abs(angle) > 0.4f) {
-                                baked = rotateBitmap(baked, angle)
-                                angle = 0f
-                                scale = 1f; ox = 0f; oy = 0f
-                            } else {
-                                angle = 0f
-                            }
-                        },
                         valueRange = -45f..45f,
                         modifier = Modifier.weight(1f),
                     )
@@ -354,7 +363,12 @@ fun ImageRectCropDialog(
                     Button(
                         onClick = {
                             val src = if (abs(angle) > 0.4f) rotateBitmap(baked, angle) else baked
-                            val cropped = cropRect(src, drawW, drawH, scale, ox, oy, fw, fh)
+                            // بعد از چرخش، اندازه‌ی نقشه عوض می‌شود؛ تناسب را دوباره حساب می‌کنیم.
+                            val fit = min(
+                                fw / src.width.coerceAtLeast(1),
+                                fh / src.height.coerceAtLeast(1),
+                            )
+                            val cropped = cropRect(src, src.width * fit, src.height * fit, scale, ox, oy, fw, fh)
                             if (cropped != null) onCropped(cropped)
                         },
                         modifier = Modifier.weight(1f),

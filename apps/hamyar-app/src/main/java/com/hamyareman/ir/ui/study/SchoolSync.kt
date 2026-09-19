@@ -34,9 +34,16 @@ object SchoolSync {
     /** در هر اجرای پروسه فقط یک‌بار بازیابی کامل انجام شود. */
     @Volatile var restoredThisSession: Boolean = false
 
-    suspend fun restoreAll(context: Context, tables: TablesDbService, sync: SyncEngine?, userId: String?): Int =
+    suspend fun restoreAll(
+        context: Context,
+        tables: TablesDbService,
+        sync: SyncEngine?,
+        userId: String?,
+        /** با true حتی اگر در این نشست قبلاً بازیابی شده باشد دوباره از سرور می‌خواند. */
+        force: Boolean = false,
+    ): Int =
         withContext(Dispatchers.IO) {
-            if (restoredThisSession) return@withContext 0
+            if (restoredThisSession && !force) return@withContext 0
             if (!tables.isConfigured) return@withContext 0
             if (userId.isNullOrBlank()) return@withContext 0
             var merged = 0

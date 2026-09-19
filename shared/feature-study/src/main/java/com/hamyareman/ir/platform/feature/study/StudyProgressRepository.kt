@@ -286,6 +286,9 @@ class StudyProgressRepository(
         afterWrite?.invoke(packId)
     }
 
+    /** وضعیتِ فعلیِ این پک را دوباره در صفِ ارسال می‌گذارد (برای سینکِ نمودار پیشرفت). */
+    fun flush(packId: String) = enqueue(packId)
+
     companion object {
         @Volatile var afterWrite: ((String) -> Unit)? = null
     }
