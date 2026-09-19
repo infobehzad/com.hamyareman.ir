@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -465,7 +466,9 @@ fun PdfUploadScreen(onBack: () -> Unit) {
         notice = "فقط روی همین گوشی ذخیره شد — فایل‌ها هرگز به سرور نمی‌روند."
     }
 
-    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+    // انتخاب‌گر عکسِ سیستمی (Photo Picker): مستقیم روی تصاویرِ گوشی می‌افتد و بدون
+    // گرفتن «دسترسی کامل به تصاویر» کار می‌کند (فقط همان عکسِ انتخابی به دست اپ می‌رسد).
+    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
         if (!canAddMore()) return@rememberLauncherForActivityResult
         cropBmp = loadOrientedBitmap(context, uri, maxSide = 2400)
@@ -724,7 +727,7 @@ fun PdfUploadScreen(onBack: () -> Unit) {
             )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(
-                    onClick = { if (!busy && canAddMore()) imagePicker.launch("image/*") },
+                    onClick = { if (!busy && canAddMore()) imagePicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
                     modifier = Modifier.weight(1f),
                 ) { Text("عکس + برش") }
                 OutlinedButton(

@@ -113,7 +113,9 @@ fun ImageRectCropDialog(
             val defaultH = viewH * 0.52f
             val fw = (if (frameW <= 1f) defaultW else frameW).coerceIn(minFrame, maxW)
             val fh = (if (frameH <= 1f) defaultH else frameH).coerceIn(minFrame, maxH)
-            val baseFit = min(fw / baked.width.coerceAtLeast(1), fh / baked.height.coerceAtLeast(1))
+            // اندازه‌ی پایه‌ی عکس **ثابت** است (فیت روی بیشینه‌ی کادر) — تغییر اندازه‌ی کادر
+            // نباید عکس را دوباره فیت/حرکت کند؛ کادر روی عکسِ ثابت جابه‌جا/تغییر می‌کند.
+            val baseFit = min(maxW / baked.width.coerceAtLeast(1), maxH / baked.height.coerceAtLeast(1))
             val drawW = baked.width * baseFit
             val drawH = baked.height * baseFit
 
@@ -362,13 +364,9 @@ fun ImageRectCropDialog(
                     ) { Text("راست ۹۰°") }
                     Button(
                         onClick = {
-                            val src = if (abs(angle) > 0.4f) rotateBitmap(baked, angle) else baked
-                            // بعد از چرخش، اندازه‌ی نقشه عوض می‌شود؛ تناسب را دوباره حساب می‌کنیم.
-                            val fit = min(
-                                fw / src.width.coerceAtLeast(1),
-                                fh / src.height.coerceAtLeast(1),
-                            )
-                            val cropped = cropRect(src, src.width * fit, src.height * fit, scale, ox, oy, fw, fh)
+                            // برش = معکوسِ دقیقِ تبدیل نمایش (زوم + جابه‌جایی + زاویه) روی
+                            // عکسِ ثابت — خروجی دقیقاً همان چیزی است که در کادر دیده می‌شود.
+                            val cropped = cropRegion(baked, drawW, drawH, scale, ox, oy, angle, fw, fh)
                             if (cropped != null) onCropped(cropped)
                         },
                         modifier = Modifier.weight(1f),
@@ -431,27 +429,39 @@ internal fun rotateBitmap(src: Bitmap, degrees: Float): Bitmap {
     return out ?: src
 }
 
-private fun cropRect(
+/**
+ * برشِ دقیق: گوشه‌های کادر با معکوسِ تبدیل نمایش (مرکز + پن + زوم + زاویه)
+ * روی تصویر اصلی نگاشت می‌شوند — خروجی با آنچه در کادر دیده می‌شود یکسان است،
+ * حتی وقتی زاویه‌ی غیرصفر فعال است.
+ */
+private fun cropRegion(
     src: Bitmap,
     drawW: Float,
     drawH: Float,
     scale: Float,
     ox: Float,
     oy: Float,
+    angleDeg: Float,
     frameW: Float,
     frameH: Float,
 ): Bitmap? {
-    if (drawW <= 0f || drawH <= 0f || scale <= 0f) return null
-    val srcLeft = ((-frameW / 2f - ox) / scale + drawW / 2f) * (src.width / drawW)
-    val srcTop = ((-frameH / 2f - oy) / scale + drawH / 2f) * (src.height / drawH)
-    val srcW = (frameW / scale) * (src.width / drawW)
-    val srcH = (frameH / scale) * (src.height / drawH)
-    val left = srcLeft.toInt().coerceIn(0, (src.width - 1).coerceAtLeast(0))
-    val top = srcTop.toInt().coerceIn(0, (src.height - 1).coerceAtLeast(0))
-    val w = srcW.toInt().coerceAtLeast(1).coerceAtMost(src.width - left)
-    val h = srcH.toInt().coerceAtLeast(1).coerceAtMost(src.height - top)
-    if (w <= 0 || h <= 0) return null
-    return Bitmap.createBitmap(src, left, top, w, h)
+    if (drawW <= 0f || drawH <= 0f || scale <= 0f || frameW <= 0f || frameH <= 0f) return null
+    val outW = frameW.roundToInt().coerceAtLeast(1)
+    val outH = frameH.roundToInt().coerceAtLeast(1)
+    val out = Bitmap.createBitmap(outW, outH, src.config ?: Bitmap.Config.ARGB_8888)
+    val canvas = AndroidCanvas(out)
+    canvas.drawColor(android.graphics.Color.WHITE)
+    val m = Matrix()
+    // برای نقطه‌ی (u,v) خروجی (رئختنِ بالا-چپ کادر):
+    m.setTranslate(-outW / 2f, -outH / 2f)              // → مختصاتِ نسبت به مرکز کادر
+    m.postTranslate(-ox, -oy)                            // → لغوِ جابه‌جایی (پن)
+    m.postScale(1f / scale, 1f / scale)                  // → لغوِ زوم
+    m.postRotate(-angleDeg)                              // → لغوِ زاویه‌ی نمایش
+    m.postTranslate(drawW / 2f, drawH / 2f)              // → پیکسلِ تصویر (رئختنِ بالا-چپ)
+    m.postScale(src.width / drawW, src.height / drawH)   // → پیکسلِ تصویر اصلی
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+    canvas.drawBitmap(src, m, paint)
+    return out
 }
 
 internal fun compressReadableJpeg(src: Bitmap, maxSide: Int = 2048, quality: Int = 82): Pair<Bitmap, Int> {
