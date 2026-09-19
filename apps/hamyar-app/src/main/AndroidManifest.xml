@@ -143,6 +143,9 @@
 
         <!-- کتاب صوتی: پخش در پس‌زمینه با Media3 + اعلان کنترل.
              exported="false" یعنی هیچ اپ دیگری نمی‌تواند به session وصل شود. -->
+        <receiver
+            android:name="com.hamyareman.ir.platform.core.notifications.AlarmStopReceiver"
+            android:exported="false" />
         <service
             android:name="com.hamyareman.ir.platform.feature.playback.PlaybackService"
             android:exported="false"

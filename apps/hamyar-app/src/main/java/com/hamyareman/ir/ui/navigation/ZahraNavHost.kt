@@ -386,6 +386,7 @@ fun ZahraNavHost() {
                                 (ctx as? com.hamyareman.ir.MainActivity)?.onLoggedOut()
                             }
                         },
+                        onOpenSubscription = { nav.navigate(Screen.Subscription.route) },
                         onSave = { p ->
                             val uid = runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
                             val toSave = p.copy(userId = uid, grade = profile?.grade ?: com.hamyareman.ir.ui.profile.StudentProfileState.grade)

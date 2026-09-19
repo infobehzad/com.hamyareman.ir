@@ -131,7 +131,7 @@ fun HomeScreen(nav: NavController) {
                                     Text(holiday, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
                                 }
                                 Spacer(Modifier.height(8.dp))
-                                SubscriptionChip(StudentProfileState.subscription)
+                                SubscriptionChip(StudentProfileState.subscription) { nav.navigate(Screen.Subscription.route) }
                             }
                         }
                         Spacer(Modifier.width(28.dp))
@@ -264,11 +264,19 @@ private fun val12(h24: Int): Int {
 }
 
 @Composable
-internal fun SubscriptionChip(raw: String) {
+/**
+ * برچسب وضعیت اشتراک — قابل لمس است و به صفحه‌ی اشتراک می‌رود
+ * (پیش‌تر فقط متن بود و هیچ‌جا لینک نمی‌شد).
+ */
+internal fun SubscriptionChip(raw: String, onClick: () -> Unit = {}) {
     val paid = StudentProfileState.isPaid(raw)
     val bg = if (paid) Color(0xFFDCFCE7) else Color(0xFFFEE2E2)
     val fg = if (paid) Color(0xFF166534) else Color(0xFFB91C1C)
-    Surface(shape = RoundedCornerShape(50), color = bg) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = bg,
+        onClick = onClick,
+    ) {
         Text(
             if (paid) "اشتراک فعال" else "مهمان همیار من",
             color = fg,

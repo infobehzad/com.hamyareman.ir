@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -53,6 +54,7 @@ fun UserProfileScreen(
     onBack: () -> Unit,
     onSave: suspend (StudentProfile) -> Boolean,
     onLogout: () -> Unit = {},
+    onOpenSubscription: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     var saveError by remember { mutableStateOf<String?>(null) }
@@ -88,6 +90,43 @@ fun UserProfileScreen(
     var showErrors by remember { mutableStateOf(false) }
     var saving by remember { mutableStateOf(false) }
     var confirmLogout by remember { mutableStateOf(false) }
+    val genderChanged = gender.isNotBlank() && gender != profile?.gender.orEmpty()
+    var askRestart by remember { mutableStateOf(false) }
+    var pendingRestart by remember { mutableStateOf(false) }
+    LaunchedEffect(saving) {
+        if (pendingRestart && !saving) {
+            pendingRestart = false
+            if (saveError.isNullOrBlank()) {
+                delay(700)
+                restartHamyar(ctx)
+            }
+        }
+    }
+
+    fun doSave(withRestart: Boolean) {
+        val ageNow = computedAge
+        val birth = birthJalali
+        if (ageNow == null || birth == null) return
+        StudentProfileState.applyLauncherIcon(ctx, gender)
+        if (withRestart) pendingRestart = true
+        saving = true
+        saveError = null
+        val payload = (profile ?: StudentProfile(
+            userId = "", email = email, firstName = "", lastName = "",
+            age = 0, grade = AppEdition.grade, phone = "",
+        )).copy(
+            firstName = firstName.trim(), lastName = lastName.trim(),
+            age = ageNow, birthDate = birth.isoLike, email = email.trim(), phone = phone,
+            schoolName = schoolName.trim(), province = province, county = county, city = city,
+            gender = gender,
+            grade = AppEdition.grade,
+        )
+        scope.launch {
+            val ok = runCatching { onSave(payload) }.getOrDefault(false)
+            saving = false
+            saveError = if (ok) null else "ذخیره نشد؛ اینترنت را چک کن و دوباره بزن."
+        }
+    }
 
     val bad = showErrors && (
         firstName.trim().length < 2 || lastName.trim().length < 2 ||
@@ -212,6 +251,7 @@ fun UserProfileScreen(
                 color = if (paid) androidx.compose.ui.graphics.Color(0xFFDCFCE7) else androidx.compose.ui.graphics.Color(0xFFFEE2E2),
                 border = BorderStroke(1.dp, if (paid) androidx.compose.ui.graphics.Color(0xFF166534) else androidx.compose.ui.graphics.Color(0xFFB91C1C)),
                 modifier = Modifier.fillMaxWidth(),
+                onClick = onOpenSubscription,
             ) {
                 Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -220,7 +260,11 @@ fun UserProfileScreen(
                         color = if (paid) androidx.compose.ui.graphics.Color(0xFF166534) else androidx.compose.ui.graphics.Color(0xFFB91C1C),
                     )
                     Spacer(Modifier.weight(1f))
-                    Text("همگام با سرور — تغییر از پشتیبانی", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        "جزئیات اشتراک ›",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
                 }
             }
             if (!saveError.isNullOrBlank()) {
@@ -235,23 +279,7 @@ fun UserProfileScreen(
                     if (firstName.trim().length >= 2 && lastName.trim().length >= 2 &&
                         age != null && age in 5..60 && birthJalali != null && phoneOk && gender.isNotBlank()
                     ) {
-                        saving = true
-                        saveError = null
-                        val payload = (profile ?: StudentProfile(
-                            userId = "", email = email, firstName = "", lastName = "",
-                            age = 0, grade = AppEdition.grade, phone = "",
-                        )).copy(
-                            firstName = firstName.trim(), lastName = lastName.trim(),
-                            age = age, birthDate = birthJalali.isoLike, email = email.trim(), phone = phone,
-                            schoolName = schoolName.trim(), province = province, county = county, city = city,
-                            gender = gender,
-                            grade = AppEdition.grade,
-                        )
-                        scope.launch {
-                            val ok = runCatching { onSave(payload) }.getOrDefault(false)
-                            saving = false
-                            saveError = if (ok) null else "ذخیره نشد؛ اینترنت را چک کن و دوباره بزن."
-                        }
+                        if (genderChanged) askRestart = true else doSave(false)
                     }
                 },
                 enabled = !saving,
@@ -285,6 +313,24 @@ fun UserProfileScreen(
                     }
                 }
                 cropBitmap = null
+            },
+        )
+    }
+    if (askRestart) {
+        AlertDialog(
+            onDismissRequest = { askRestart = false },
+            title = { Text("راه‌اندازی دوباره‌ی برنامه") },
+            text = {
+                Text(
+                    "جنسیت عوض شده و آیکون برنامه باید تازه شود. برای دیدن آیکون جدید، " +
+                        "برنامه یک‌بار بسته و دوباره باز می‌شود. ادامه می‌دهی؟",
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { askRestart = false; doSave(true) }) { Text("تأیید و ادامه") }
+            },
+            dismissButton = {
+                TextButton(onClick = { askRestart = false; doSave(false) }) { Text("فعلاً نه") }
             },
         )
     }

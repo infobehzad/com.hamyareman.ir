@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -48,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hamyareman.ir.LocalAppContainer
 import com.hamyareman.ir.platform.core.common.JalaliDate
+import com.hamyareman.ir.platform.core.notifications.AlarmRinger
 import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 import com.hamyareman.ir.ui.home.DashboardFonts
@@ -505,12 +508,54 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
         )
     }
     if (settingsOpen) {
+        val sounds = remember(ctx) { AlarmRinger.deviceSounds(ctx) }
+        var soundUri by remember { mutableStateOf(AlarmRinger.savedSound(ctx)) }
         AlertDialog(
             onDismissRequest = { settingsOpen = false },
             title = { Text("تنظیمات آلارم") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("آهنگ: پیش‌فرض سیستم", fontFamily = DashboardFonts.quote)
+                    Text(
+                        "آهنگ: ${AlarmRinger.titleOf(ctx, soundUri)}",
+                        fontFamily = DashboardFonts.quote,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(180.dp)
+                            .verticalScroll(rememberScrollState()),
+                    ) {
+                        AlarmSoundRow(
+                            label = "پیش‌فرض گوشی",
+                            selected = soundUri.isBlank(),
+                            onPick = {
+                                soundUri = ""
+                                AlarmRinger.saveSound(ctx, "")
+                                flushAlarm(alarm.copy(sound = "default"))
+                            },
+                            onPreview = { AlarmRinger.preview(ctx, "", alarm.volume) },
+                        )
+                        sounds.forEach { (name, uri) ->
+                            AlarmSoundRow(
+                                label = name,
+                                selected = soundUri == uri,
+                                onPick = {
+                                    soundUri = uri
+                                    AlarmRinger.saveSound(ctx, uri)
+                                    flushAlarm(alarm.copy(sound = uri))
+                                },
+                                onPreview = { AlarmRinger.preview(ctx, uri, alarm.volume) },
+                            )
+                        }
+                        if (sounds.isEmpty()) {
+                            Text(
+                                "آهنگی روی گوشی پیدا نشد؛ همان پیش‌فرض سیستم زنگ می‌زند.",
+                                fontFamily = DashboardFonts.quote,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                    }
                     Text("بلندی: ${toPersianDigits(alarm.volume.toString())}٪", fontFamily = DashboardFonts.quote)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(40, 60, 80, 100).forEach { v ->
@@ -528,9 +573,16 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                         onClick = { flushAlarm(alarm.copy(crescendo = !alarm.crescendo)) },
                         label = { Text("صدای افزایشی", fontFamily = DashboardFonts.quote) },
                     )
+                    OutlinedButton(
+                        onClick = { AlarmRinger.start(ctx) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text("تست زنگ", fontFamily = DashboardFonts.quote) }
+                    TextButton(onClick = { AlarmRinger.stop() }, modifier = Modifier.fillMaxWidth()) {
+                        Text("توقف زنگ", fontFamily = DashboardFonts.quote)
+                    }
                 }
             },
-            confirmButton = { TextButton(onClick = { settingsOpen = false }) { Text("بستن") } },
+            confirmButton = { TextButton(onClick = { AlarmRinger.stop(); settingsOpen = false }) { Text("بستن") } },
         )
     }
 }
@@ -548,5 +600,32 @@ internal fun TimePick(label: String, hour: Int, minute: Int, onChange: (Int, Int
             "$label  ${toPersianDigits("%d:%02d".format(hour, minute))}",
             fontFamily = DashboardFonts.quote,
         )
+    }
+}
+
+@Composable
+private fun AlarmSoundRow(
+    label: String,
+    selected: Boolean,
+    onPick: () -> Unit,
+    onPreview: () -> Unit,
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onPick)
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        androidx.compose.material3.RadioButton(selected = selected, onClick = onPick)
+        Text(
+            label,
+            fontFamily = DashboardFonts.quote,
+            modifier = Modifier.weight(1f),
+            maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+        )
+        TextButton(onClick = onPreview) { Text("شنیدن", fontFamily = DashboardFonts.quote) }
     }
 }

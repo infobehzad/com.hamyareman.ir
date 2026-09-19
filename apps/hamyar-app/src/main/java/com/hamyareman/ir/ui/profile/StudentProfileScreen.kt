@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,13 +20,16 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -34,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
+import kotlinx.coroutines.delay
 
 /** فقط ارقام لاتین — کیبورد فارسی هم ممکن است ۰-۹ بدهد؛ همه را لاتین می‌کنیم. */
 private fun latinDigits(s: String): String = buildString {
@@ -78,6 +83,19 @@ fun StudentProfileScreen(
     var province by remember { mutableStateOf("") }
     var county by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
+    val ctx = LocalContext.current
+    // آیکون لانچر بر اساس جنسیت عوض می‌شود؛ اعمالِ کاملش یک راه‌اندازیِ دوباره می‌خواهد.
+    var askRestart by remember { mutableStateOf(false) }
+    var pendingRestart by remember { mutableStateOf(false) }
+    LaunchedEffect(saving) {
+        if (pendingRestart && !saving) {
+            pendingRestart = false
+            if (error.isNullOrBlank()) {
+                delay(700)
+                restartHamyar(ctx)
+            }
+        }
+    }
     var showErrors by remember { mutableStateOf(false) }
 
     val firstNameBad = showErrors && firstName.trim().length < 2
@@ -205,10 +223,7 @@ fun StudentProfileScreen(
                     val ok = firstName.trim().length >= 2 && lastName.trim().length >= 2 &&
                         age != null && age in 5..60 && birthJalali != null &&
                         Regex("^9\\d{9}$").matches(phone) && gender.isNotBlank()
-                    if (ok && !saving && age != null && birthJalali != null) onSubmit(
-                        firstName.trim(), lastName.trim(), age, birthJalali.isoLike, grade, phone,
-                        gender, province, county, city,
-                    )
+                    if (ok && !saving && age != null && birthJalali != null) askRestart = true
                 },
                 enabled = !saving,
                 modifier = Modifier.fillMaxWidth().height(52.dp),
@@ -218,5 +233,45 @@ fun StudentProfileScreen(
             }
             Spacer(Modifier.height(12.dp))
         }
+    }
+
+    if (askRestart) {
+        AlertDialog(
+            onDismissRequest = { askRestart = false },
+            title = { Text("راه‌اندازی دوباره‌ی برنامه") },
+            text = {
+                Text(
+                    "آیکون برنامه بر اساس جنسیت تو عوض می‌شود. برای اینکه آیکون تازه روی صفحه‌ی " +
+                        "گوشی دیده شود، برنامه باید یک‌بار بسته و دوباره باز شود. ادامه می‌دهی؟",
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    askRestart = false
+                    StudentProfileState.applyLauncherIcon(ctx, gender)
+                    pendingRestart = true
+                    val age = computedAge
+                    if (age != null && birthJalali != null) {
+                        onSubmit(
+                            firstName.trim(), lastName.trim(), age, birthJalali.isoLike, grade, phone,
+                            gender, province, county, city,
+                        )
+                    }
+                }) { Text("تأیید و ادامه", fontWeight = FontWeight.Bold) }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    askRestart = false
+                    StudentProfileState.applyLauncherIcon(ctx, gender)
+                    val age = computedAge
+                    if (age != null && birthJalali != null) {
+                        onSubmit(
+                            firstName.trim(), lastName.trim(), age, birthJalali.isoLike, grade, phone,
+                            gender, province, county, city,
+                        )
+                    }
+                }) { Text("فعلاً نه") }
+            },
+        )
     }
 }

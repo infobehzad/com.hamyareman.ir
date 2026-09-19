@@ -66,6 +66,19 @@ class ReminderReceiver : BroadcastReceiver() {
             )
         }
         val school = channel == NotificationChannels.SCHOOL_ALARM || id.startsWith("school_")
+        // زنگِ واقعی: آهنگِ انتخابیِ کاربر با صدای خودمان پخش می‌شود (نه فقط صدای اعلان).
+        if (school) {
+            AlarmRinger.start(context)
+        }
+        val stopIntent = Intent(context, AlarmStopReceiver::class.java).apply {
+            action = ACTION_STOP_ALARM
+        }
+        val stopPi = PendingIntent.getBroadcast(
+            context,
+            (id + "_stop").hashCode(),
+            stopIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
         val notification = NotificationCompat.Builder(
             context,
             if (school) NotificationChannels.SCHOOL_ALARM else channel,
@@ -78,7 +91,18 @@ class ReminderReceiver : BroadcastReceiver() {
             .setCategory(if (school) NotificationCompat.CATEGORY_ALARM else NotificationCompat.CATEGORY_REMINDER)
             .setAutoCancel(true)
             .apply {
-                if (school) setDefaults(NotificationCompat.DEFAULT_ALL)
+                if (school) {
+                    // صدا را خودمان (AlarmRinger) می‌زنیم؛ اعلان فقط لرزش و نمایش.
+                    setDefaults(NotificationCompat.DEFAULT_VIBRATE)
+                    setSound(null)
+                    addAction(
+                        android.R.drawable.ic_lock_idle_alarm,
+                        "توقف زنگ",
+                        stopPi,
+                    )
+                } else {
+                    setDefaults(NotificationCompat.DEFAULT_ALL)
+                }
                 contentIntent?.let { setContentIntent(it) }
             }
             .build()
@@ -121,5 +145,6 @@ class ReminderReceiver : BroadcastReceiver() {
         const val EXTRA_BODY = "reminder_body"
         const val EXTRA_CHANNEL = "reminder_channel"
         const val EXTRA_OPEN_SLEEP = "open_sleep"
+        const val ACTION_STOP_ALARM = "com.hamyareman.ir.STOP_ALARM"
     }
 }

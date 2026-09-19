@@ -32,6 +32,18 @@ enum class GradeLevel(val id: String, val fa: String) {
 fun gradeOfBook(bookCode: String): GradeLevel = GradeLevel.G9
 
 /**
+ * راه‌اندازیِ دوباره‌ی اپ — برای وقتی که آیکون لانچر عوض شده و فقط با
+ * بسته‌شدن کاملِ لانچر آیکونِ تازه روی صفحه‌ی گوشی می‌نشیند.
+ */
+fun restartHamyar(ctx: android.content.Context) {
+    val intent = ctx.packageManager.getLaunchIntentForPackage(ctx.packageName)?.apply {
+        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
+    }
+    runCatching { intent?.let { ctx.startActivity(it) } }
+    android.os.Process.killProcess(android.os.Process.myPid())
+}
+
+/**
  * وضعیت زنده‌ی پایه‌ی کاربر — آینه‌ی محلی (فوری) + تأیید ابری (سینک).
  * صفحه‌های فهرست کتاب با [GradeGate] می‌خوانند.
  */
