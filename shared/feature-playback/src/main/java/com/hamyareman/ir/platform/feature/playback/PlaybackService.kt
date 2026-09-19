@@ -82,6 +82,8 @@ class PlaybackService : MediaSessionService() {
             .build()
 
         val exo = ExoPlayer.Builder(this)
+            // پخشِ فایل‌های دانلودشده‌ی گاوصندوق (vault://) دیگر از سرور HTTP محلی نمی‌گذرد.
+            .setMediaSourceFactory(vaultAwareMediaSourceFactory(this))
             .setAudioAttributes(audioAttributes, /* handleAudioFocus = */ true)
             .setHandleAudioBecomingNoisy(true)
             .setWakeMode(C.WAKE_MODE_LOCAL)

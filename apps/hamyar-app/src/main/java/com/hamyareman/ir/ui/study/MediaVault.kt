@@ -242,8 +242,12 @@ object MediaVault {
         return true
     }
 
-    /** آدرس پخش محلیِ رمزگشایی‌شده‌ی [cacheKey] (فقط روی ۱۲۷.۰.۰.۱ داخل اپ). */
-    fun localUrl(ctx: Context, cacheKey: String): String = LocalMediaServer.urlFor(ctx, cacheKey)
+    /**
+     * آدرسِ پخشِ محلیِ رمزگشایی‌شده‌ی [cacheKey].
+     * این آدرس دیگر روی شبکه نمی‌رود: با طرحِ `vault://` مستقیم در همان پروسه و
+     * بدون سوکت/پورت/توکن خوانده می‌شود (نگاه کنید به VaultDataSource).
+     */
+    fun localUrl(ctx: Context, cacheKey: String): String = "vault://$cacheKey"
 }
 
 /**

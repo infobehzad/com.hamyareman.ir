@@ -138,7 +138,11 @@ fun VideoTeachScreen(packId: String, onBack: () -> Unit) {
     PauseOnStopEffect(pause = { player?.pause() })
 
     DisposableEffect(fileId, uri) {
-        val p = ExoPlayer.Builder(context).build().apply {
+        val p = ExoPlayer.Builder(context)
+            .setMediaSourceFactory(
+                com.hamyareman.ir.platform.feature.playback.vaultAwareMediaSourceFactory(context),
+            )
+            .build().apply {
             setMediaItem(
                 MediaItem.Builder().setUri(uri).setMediaMetadata(
                     androidx.media3.common.MediaMetadata.Builder()
