@@ -173,10 +173,10 @@ class MainActivity : FragmentActivity() {
                     // برنامهٔ هفتگی، شیفت/ساعت خروج، کلاس مجازی و تیک‌ها:
                     // با ورود به اپ خودکار از سرور گرفته و بعد به سرور فرستاده می‌شوند.
                     runCatching {
-                        com.hamyareman.ir.ui.study.ClassPlanSync.pullAll(activity, container.tables, uid)
+                        com.hamyareman.ir.ui.study.ClassPlanSync.pullAll(activity, container.tables, uid.orEmpty())
                     }
                     runCatching {
-                        com.hamyareman.ir.ui.study.ClassPlanSync.pushAll(activity, container.tables, uid)
+                        com.hamyareman.ir.ui.study.ClassPlanSync.pushAll(activity, container.tables, uid.orEmpty())
                     }
                 }
             }
