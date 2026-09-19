@@ -74,12 +74,24 @@ private fun WeeklyTimetableSection() {
     val ctx = LocalContext.current
     val options = remember { ClassPlanStore.subjectOptions(ctx) }
     var snap by remember { mutableStateOf(ClassPlanStore.load(ctx)) }
-    var days by remember { mutableStateOf(snap.days.mapValues { (_, v) -> v.ifEmpty { listOf("", "", "") }.toMutableList() }) }
+    var days by remember {
+        mutableStateOf(
+            (1..5).associateWith { d ->
+                val v = snap.days[d].orEmpty()
+                (if (v.isEmpty()) listOf("", "", "") else v).toMutableList()
+            },
+        )
+    }
     var locked by remember { mutableStateOf(snap.locked) }
     var confirmEdit by remember { mutableStateOf(false) }
 
-    fun persist(lock: Boolean) {
-        ClassPlanStore.saveDays(ctx, days.mapValues { it.value.filter { s -> s.isNotBlank() }.ifEmpty { it.value } }, lock)
+    fun persist(lock: Boolean, map: Map<Int, List<String>> = days) {
+        val clean = map.mapValues { e ->
+            val v = e.value.toMutableList()
+            while (v.size < 3) v.add("")
+            v.toList()
+        }
+        ClassPlanStore.saveDays(ctx, clean, lock)
         locked = lock
         snap = ClassPlanStore.load(ctx)
     }
@@ -96,7 +108,9 @@ private fun WeeklyTimetableSection() {
         )
         ClassPlanStore.WEEKDAYS.forEachIndexed { i, name ->
             val di = i + 1
-            val slots = days[di] ?: listOf("", "", "")
+            val slots = (days[di] ?: emptyList()).let { s ->
+                if (s.size >= 3) s else (s + List(3 - s.size) { "" })
+            }
             Column(
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
@@ -111,8 +125,11 @@ private fun WeeklyTimetableSection() {
                         enabled = !locked,
                         onPick = { picked ->
                             val next = slots.toMutableList()
+                            while (next.size <= si) next.add("")
                             next[si] = picked
-                            days = days.toMutableMap().also { it[di] = next }
+                            val map = days.toMutableMap().also { it[di] = next }
+                            days = map
+                            persist(lock = false, map = map)
                         },
                     )
                 }

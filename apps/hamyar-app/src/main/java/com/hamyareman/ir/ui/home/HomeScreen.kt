@@ -232,7 +232,9 @@ private fun WisdomCard() {
     }
     val body = if (line.author.isBlank()) line.text else line.oneLine()
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable {
+            line = WisdomQuotes.next(ctx, all)
+        },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF7ED)),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),

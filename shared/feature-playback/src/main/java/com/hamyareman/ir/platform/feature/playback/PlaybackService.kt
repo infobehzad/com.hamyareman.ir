@@ -110,7 +110,8 @@ class PlaybackService : MediaSessionService() {
                     playerCommand: Int,
                 ): Int {
                     val pack = currentPackOf(mediaSession.player) ?: TeachGate.currentPack
-                    if (playerCommand == Player.COMMAND_PLAY_PAUSE && pack != null && !TeachGate.teachPageOpen) {
+                    val fromApp = controllerInfo.packageName == packageName
+                    if (playerCommand == Player.COMMAND_PLAY_PAUSE && pack != null && !TeachGate.teachPageOpen && !fromApp) {
                         TeachGate.requestedPack = pack
                         mediaSession.setSessionActivity(teachPendingIntent(pack))
                         runCatching { teachPendingIntent(pack).send() }

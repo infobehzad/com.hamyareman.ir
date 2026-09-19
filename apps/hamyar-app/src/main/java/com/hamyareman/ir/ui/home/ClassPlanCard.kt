@@ -76,7 +76,11 @@ fun ClassPlanCard(
     val dateFa = j?.let { toPersianDigits("${it.day} ${JalaliDate.monthName(it.month)}") } ?: ""
     val shift = ClassPlanStore.shiftOf(snap, today)
     val holiday = ClassPlanStore.isSchoolHoliday(snap, today)
-    val tomorrowLessons = ClassPlanStore.lessonsFor(snap, tomorrow).ifEmpty { listOf("—", "—", "—") }
+    val showDate = generateSequence(tomorrow) { it.plusDays(1) }
+        .take(8)
+        .firstOrNull { !ClassPlanStore.isSchoolHoliday(snap, it) }
+        ?: tomorrow
+    val tomorrowLessons = ClassPlanStore.lessonsFor(snap, showDate).ifEmpty { listOf("—", "—", "—") }
     val boxes = (tomorrowLessons + listOf("—", "—", "—")).take(3)
     val isoT = today.toString()
     val isoN = tomorrow.toString()

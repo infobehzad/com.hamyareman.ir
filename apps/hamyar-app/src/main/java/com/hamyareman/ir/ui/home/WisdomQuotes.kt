@@ -44,4 +44,16 @@ object WisdomQuotes {
         val until = LocalStore(context, PREF).getLong(KEY_UNTIL, 0L)
         return (until - System.currentTimeMillis()).coerceAtLeast(1_000L)
     }
+
+    /** لمس کارت داشبورد — سخن بعدی، جدا از تایمر ۳–۴ ساعته. */
+    fun next(context: Context, all: List<WisdomLine>): WisdomLine {
+        if (all.isEmpty()) return WisdomLine("همیار من کنارت است.", "")
+        val store = LocalStore(context, PREF)
+        val cur = store.getInt(KEY_IDX, 0)
+        val idx = if (cur in all.indices) (cur + 1) % all.size else 0
+        val hours = 3.0 + Random.nextDouble()
+        store.putInt(KEY_IDX, idx)
+        store.putLong(KEY_UNTIL, System.currentTimeMillis() + (hours * 3_600_000L).toLong())
+        return all[idx]
+    }
 }

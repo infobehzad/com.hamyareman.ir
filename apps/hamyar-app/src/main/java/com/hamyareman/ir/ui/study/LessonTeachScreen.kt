@@ -278,6 +278,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
             }
             val pos = startMs ?: if (cached(t) && !fromServer) savedPos(t) else 0L
             playback.setMediaItems(items, tracks.indexOf(t).coerceAtLeast(0), pos)
+            com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = true
             com.hamyareman.ir.platform.feature.playback.TeachGate.currentPack = packId
             playback.setSpeed(speed)
             // v1.12: فوراً ترکِ جاری را ثبت کن — تا فال‌بکِ خطا (سرور) همیشه زنده باشد
