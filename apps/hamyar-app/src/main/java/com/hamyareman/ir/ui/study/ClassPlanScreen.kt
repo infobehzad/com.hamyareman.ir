@@ -304,6 +304,10 @@ private fun ShiftSection() {
     var cycle by remember { mutableIntStateOf(snap.cycleWeeks) }
     var alarm by remember { mutableStateOf(SchoolAlarmStore.load(ctx)) }
     var settingsOpen by remember { mutableStateOf(false) }
+    var confirmShift by remember { mutableStateOf(false) }
+    var virtGear by remember { mutableStateOf(false) }
+    var virtFrom by remember { mutableStateOf(today.toString()) }
+    var virtTo by remember { mutableStateOf(today.toString()) }
     val current = ClassPlanStore.shiftOf(snap, today)
 
     fun flushAlarm(next: SchoolAlarmStore.Prefs = alarm) {
@@ -317,35 +321,9 @@ private fun ShiftSection() {
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text(ClassPlanStore.captionOf(snap, today), fontFamily = DashboardFonts.greeting, fontSize = 20.sp)
-        Text("بازهٔ چرخش شیفت", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(1 to "یک هفته", 2 to "دو هفته", 4 to "یک ماه").forEach { (n, lab) ->
-                FilterChip(
-                    selected = cycle == n,
-                    onClick = {
-                        cycle = n
-                        ClassPlanStore.saveShift(ctx, n, snap.anchorIso, snap.fixedEvening)
-                        snap = ClassPlanStore.load(ctx)
-                    },
-                    label = { Text(lab, fontFamily = DashboardFonts.quote) },
-                )
-            }
-        }
-        Text("شیفت هفتهٔ جاری", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Shift.entries.forEach { sh ->
-                FilterChip(
-                    selected = current == sh,
-                    onClick = {
-                        ClassPlanStore.setCurrentWeekShift(ctx, sh)
-                        snap = ClassPlanStore.load(ctx)
-                        ClassPlanStore.syncAlarms(ctx, reminders, snap, today)
-                    },
-                    label = { Text(sh.label, fontFamily = DashboardFonts.quote) },
-                )
-            }
-        }
+        Text(ClassPlanStore.captionOf(snap, today), fontFamily = DashboardFonts.greeting, fontSize = 20.sp, modifier = Modifier.clickable { confirmShift = true })
+        Text("برای ویرایش شیفت، روی عنوان بالا بزن.", fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall)
+        Text("شیفت هفتهٔ جاری: ${current.label}", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text("آلارم‌های صدادار", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
             TextButton(onClick = { settingsOpen = true }) { Text("چرخ‌دنده تنظیمات", fontFamily = DashboardFonts.quote) }
@@ -366,6 +344,23 @@ private fun ShiftSection() {
             fontFamily = DashboardFonts.quote,
             style = MaterialTheme.typography.bodySmall,
         )
+        Text("کلاس مجازی", fontFamily = DashboardFonts.greeting, fontSize = 18.sp)
+        Text("یک روز یا بازه را مجازی کن. روی داشبورد قرمز می‌شود و تیک کیف غیرفعال.", fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall)
+        OutlinedTextField(value = virtFrom, onValueChange = { virtFrom = it }, label = { Text("از تاریخ (YYYY-MM-DD)") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(value = virtTo, onValueChange = { virtTo = it }, label = { Text("تا تاریخ") }, modifier = Modifier.fillMaxWidth())
+        OutlinedButton(onClick = {
+            ClassPlanStore.setVirtualRange(ctx, virtFrom, virtTo, true)
+            snap = ClassPlanStore.load(ctx)
+        }, modifier = Modifier.fillMaxWidth()) { Text("تأیید کلاس مجازی", fontFamily = DashboardFonts.quote) }
+        OutlinedButton(onClick = {
+            ClassPlanStore.setVirtualRange(ctx, virtFrom, virtTo, false)
+            snap = ClassPlanStore.load(ctx)
+        }, modifier = Modifier.fillMaxWidth()) { Text("حذف این بازه از مجازی", fontFamily = DashboardFonts.quote) }
+        TextButton(onClick = { virtGear = true }) { Text("چرخ‌دنده ساعت کلاس مجازی", fontFamily = DashboardFonts.quote) }
+        val vdays = ClassPlanStore.virtualDays(ctx)
+        if (vdays.isNotEmpty()) {
+            Text("روزهای مجازی: ${vdays.sorted().take(12).joinToString("، ")}", fontFamily = DashboardFonts.quote, fontSize = 12.sp)
+        }
     }
     if (settingsOpen) {
         AlertDialog(

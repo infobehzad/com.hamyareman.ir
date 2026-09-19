@@ -36,6 +36,11 @@ object ClassPlanStore {
         val noonMinute: Int,
         val sleepMorning: String,
         val sleepEvening: String,
+        val weekPattern: List<String>,
+        val virtualMorningHour: Int,
+        val virtualMorningMinute: Int,
+        val virtualNoonHour: Int,
+        val virtualNoonMinute: Int,
     )
 
     fun store(ctx: Context) = LocalStore(ctx, PREF)
@@ -72,6 +77,11 @@ object ClassPlanStore {
             noonMinute = s.getInt("n_min", 0),
             sleepMorning = s.getString("sleep_am", "21:30").ifBlank { "21:30" },
             sleepEvening = s.getString("sleep_pm", "23:00").ifBlank { "23:00" },
+            weekPattern = s.getString("week_pattern").split(",").map { it.trim() }.filter { it == "morning" || it == "evening" },
+            virtualMorningHour = s.getInt("virt_m_h", 8),
+            virtualMorningMinute = s.getInt("virt_m_m", 0),
+            virtualNoonHour = s.getInt("virt_n_h", 14),
+            virtualNoonMinute = s.getInt("virt_n_m", 0),
         )
     }
 
@@ -84,11 +94,18 @@ object ClassPlanStore {
         s.putBool("locked", locked)
     }
 
-    fun saveShift(ctx: Context, cycleWeeks: Int, anchorIso: String, fixedEvening: Boolean) {
+    fun saveShift(ctx: Context, cycleWeeks: Int, anchorIso: String, fixedEvening: Boolean, pattern: List<String> = emptyList()) {
         val s = store(ctx)
         s.putInt("cycle_weeks", cycleWeeks)
         s.putString("anchor", anchorIso)
         s.putBool("fixed_evening", fixedEvening)
+        if (pattern.isNotEmpty()) s.putString("week_pattern", pattern.joinToString(","))
+    }
+
+    fun saveVirtualHours(ctx: Context, mh: Int, mm: Int, nh: Int, nm: Int) {
+        val s = store(ctx)
+        s.putInt("virt_m_h", mh); s.putInt("virt_m_m", mm)
+        s.putInt("virt_n_h", nh); s.putInt("virt_n_m", nm)
     }
 
     fun saveTimes(
@@ -109,9 +126,12 @@ object ClassPlanStore {
     }
 
     fun shiftOf(snap: Snapshot, date: LocalDate): Shift {
+        if (snap.weekPattern.size == snap.cycleWeeks && snap.weekPattern.isNotEmpty()) {
+            val pos = Math.floorMod(SchoolShift.weekIndex(snap.anchorIso, date), snap.cycleWeeks.toLong()).toInt()
+            return if (snap.weekPattern.getOrNull(pos) == "evening") Shift.EVENING else Shift.MORNING
+        }
         if (snap.cycleWeeks == 1) return if (snap.fixedEvening) Shift.EVENING else Shift.MORNING
-        val computed = SchoolShift.shiftOn(snap.anchorIso, date, snap.cycleWeeks)
-        return computed
+        return SchoolShift.shiftOn(snap.anchorIso, date, snap.cycleWeeks)
     }
 
     fun captionOf(snap: Snapshot, date: LocalDate): String {
