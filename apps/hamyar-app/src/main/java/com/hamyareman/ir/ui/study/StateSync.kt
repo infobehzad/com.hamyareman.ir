@@ -26,6 +26,7 @@ object StateSync {
     const val KEY_SHIFT = "class_plan_shift"
     const val KEY_VIRTUAL = "virtual_class"
     const val KEY_CHECKS = "daily_checks"
+    const val KEY_LEAVES = "class_plan_leaves"
     const val KEY_NOTE_TITLES = "note_titles"
 
     private const val PREF = "hamyar_state_sync"
@@ -128,6 +129,7 @@ object ClassPlanSync {
         StateSync.KEY_SHIFT,
         StateSync.KEY_VIRTUAL,
         StateSync.KEY_CHECKS,
+        StateSync.KEY_LEAVES,
     )
 
     /** کشیدنِ همهٔ کلیدها از سرور (اگر سرور جدیدتر باشد روی دستگاه اعمال می‌شود). */

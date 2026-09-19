@@ -604,6 +604,118 @@ object ClassPlanStore {
         return out.sortedWith(compareByDescending<CheckEntry> { it.iso }.thenBy { it.group })
     }
 
+    // ------------------------------------------------------------------ مرخصی
+
+    /** وضعیتِ توجیهِ مرخصی برای مدرسه. */
+    const val JUST_FATHER = "father"    // توسط پدر موجه شده
+    const val JUST_MOTHER = "mother"    // توسط مادر موجه شده
+    const val JUST_NONE = "none"        // موجه نشده
+    const val JUST_MEDICAL = "medical"  // با گواهی پزشکی موجه شده (فقط مریضی)
+
+    /** علت‌های پیش‌فرضِ مرخصی؛ کاربر می‌تواند علتِ دلخواه هم اضافه کند. */
+    private val DEFAULT_LEAVE_REASONS = listOf("مریضی", "کار شخصی", "خواب موندم", "حوصله نداشتم")
+    const val SICK = "مریضی"
+    const val ADD_CUSTOM = "＋ اضافه کردن علت خاص"
+
+    data class LeaveRecord(
+        val id: String,
+        val fromIso: String,
+        val toIso: String,
+        val reason: String,
+        val medicalCert: Boolean = false,
+        /** یکی از JUST_*؛ خالی یعنی هنوز انتخاب نشده. */
+        val justification: String = "",
+    )
+
+    fun leaveReasons(ctx: Context): List<String> {
+        val arr = runCatching { JSONArray(store(ctx).getString("leave_reasons", "[]")) }.getOrDefault(JSONArray())
+        val custom = (0 until arr.length()).map { arr.optString(it) }.filter { it.isNotBlank() }
+        return (DEFAULT_LEAVE_REASONS + custom).distinct()
+    }
+
+    fun addLeaveReason(ctx: Context, title: String) {
+        val t = title.trim()
+        if (t.isBlank()) return
+        val next = (leaveReasons(ctx) + t).distinct()
+        store(ctx).putString("leave_reasons", JSONArray().apply { next.forEach { put(it) } }.toString())
+    }
+
+    fun leaves(ctx: Context): List<LeaveRecord> {
+        val arr = runCatching { JSONArray(store(ctx).getString("leave_records", "[]")) }.getOrDefault(JSONArray())
+        return (0 until arr.length()).mapNotNull { i ->
+            val o = arr.optJSONObject(i) ?: return@mapNotNull null
+            LeaveRecord(
+                id = o.optString("id"),
+                fromIso = o.optString("from"),
+                toIso = o.optString("to"),
+                reason = o.optString("reason"),
+                medicalCert = o.optBoolean("med", false),
+                justification = o.optString("just", ""),
+            )
+        }.sortedBy { it.fromIso }
+    }
+
+    private fun saveLeaves(ctx: Context, list: List<LeaveRecord>) {
+        val arr = JSONArray()
+        list.forEach { r ->
+            arr.put(
+                JSONObject()
+                    .put("id", r.id)
+                    .put("from", r.fromIso)
+                    .put("to", r.toIso)
+                    .put("reason", r.reason)
+                    .put("med", r.medicalCert)
+                    .put("just", r.justification),
+            )
+        }
+        store(ctx).putString("leave_records", arr.toString())
+    }
+
+    fun addLeave(ctx: Context, fromIso: String, toIso: String, reason: String, medicalCert: Boolean, justification: String) {
+        val rec = LeaveRecord(
+            id = "lv_${System.currentTimeMillis()}",
+            fromIso = fromIso,
+            toIso = toIso,
+            reason = reason,
+            medicalCert = medicalCert && reason == SICK,
+            justification = justification,
+        )
+        saveLeaves(ctx, leaves(ctx) + rec)
+    }
+
+    fun updateLeaveJustification(ctx: Context, id: String, justification: String) {
+        saveLeaves(ctx, leaves(ctx).map { if (it.id == id) it.copy(justification = justification) else it })
+    }
+
+    fun removeLeave(ctx: Context, id: String) {
+        saveLeaves(ctx, leaves(ctx).filterNot { it.id == id })
+    }
+
+    /** آیا این روز در بازه‌ی یکی از مرخصی‌هاست؟ */
+    fun leaveOn(ctx: Context, iso: String): LeaveRecord? =
+        leaves(ctx).firstOrNull { iso >= it.fromIso && iso <= it.toIso }
+
+    fun isOnLeave(ctx: Context, iso: String): Boolean = leaveOn(ctx, iso) != null
+
+    /** همه‌ی روزهای یک بازه (از تا) به صورت ISO. */
+    fun daysBetween(fromIso: String, toIso: String): List<String> {
+        val from = runCatching { LocalDate.parse(fromIso) }.getOrNull() ?: return listOf(fromIso)
+        val to = runCatching { LocalDate.parse(toIso) }.getOrNull() ?: return listOf(fromIso)
+        if (to.isBefore(from)) return listOf(fromIso)
+        val out = mutableListOf<String>()
+        var d = from
+        while (!d.isAfter(to)) { out += d.toString(); d = d.plusDays(1) }
+        return out
+    }
+
+    fun justificationLabel(code: String): String = when (code) {
+        JUST_FATHER -> "توسط پدر موجه شده"
+        JUST_MOTHER -> "توسط مادر موجه شده"
+        JUST_MEDICAL -> "با گواهی پزشکی موجه شده"
+        JUST_NONE -> "موجه نشده"
+        else -> "تعیین نشده"
+    }
+
     // ------------------------------------------------------- سینک با سرور
 
     /** وضعیتِ یک کلید را به صورت JSON بیرون می‌دهد (برای `app_state`). */
@@ -653,6 +765,23 @@ object ClassPlanStore {
                     }
                 })
                 put("days", JSONArray().apply { virtualDays(ctx).sorted().forEach { put(it) } })
+            }.toString()
+
+            StateSync.KEY_LEAVES -> JSONObject().apply {
+                val arr = JSONArray()
+                leaves(ctx).forEach { r ->
+                    arr.put(
+                        JSONObject()
+                            .put("id", r.id)
+                            .put("from", r.fromIso)
+                            .put("to", r.toIso)
+                            .put("reason", r.reason)
+                            .put("med", r.medicalCert)
+                            .put("just", r.justification),
+                    )
+                }
+                put("items", arr)
+                put("reasons", JSONArray().apply { leaveReasons(ctx).forEach { put(it) } })
             }.toString()
 
             StateSync.KEY_CHECKS -> JSONObject().apply {
@@ -739,6 +868,29 @@ object ClassPlanStore {
                     val set = (0 until days.length()).map { days.optString(it) }.filter { it.isNotBlank() }.toSet()
                     set.forEach { setVirtual(ctx, it, true) }
                 }
+            }
+
+            StateSync.KEY_LEAVES -> {
+                val arr = o.optJSONArray("items") ?: return
+                val remote = (0 until arr.length()).mapNotNull { i ->
+                    val it = arr.optJSONObject(i) ?: return@mapNotNull null
+                    LeaveRecord(
+                        id = it.optString("id"),
+                        fromIso = it.optString("from"),
+                        toIso = it.optString("to"),
+                        reason = it.optString("reason"),
+                        medicalCert = it.optBoolean("med", false),
+                        justification = it.optString("just", ""),
+                    )
+                }.filter { it.fromIso.isNotBlank() }
+                val reasons = o.optJSONArray("reasons")
+                reasons?.let { rr ->
+                    (0 until rr.length()).map { rr.optString(it) }.filter { it.isNotBlank() }.forEach { addLeaveReason(ctx, it) }
+                }
+                // ادغام بر اساسِ id (آخرین نوشته برنده است)
+                val local = leaves(ctx).associateBy { it.id }.toMutableMap()
+                remote.forEach { local[it.id] = it }
+                if (local.isNotEmpty()) saveLeaves(ctx, local.values.sortedBy { it.fromIso })
             }
 
             StateSync.KEY_CHECKS -> {

@@ -188,6 +188,16 @@ fun ClassPlanCard(
                     fontWeight = FontWeight.Bold,
                 )
             }
+            val leave = ClassPlanStore.leaveOn(ctx, isoN)
+            if (leave != null) {
+                Text(
+                    "$dayWord مرخصی است — ${leave.reason} (${ClassPlanStore.justificationLabel(leave.justification)})",
+                    color = Color(0xFFB45309),
+                    fontFamily = DashboardFonts.quote,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
             Column(Modifier.fillMaxWidth()) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     PrepTick(

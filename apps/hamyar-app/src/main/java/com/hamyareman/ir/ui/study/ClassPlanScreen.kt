@@ -21,6 +21,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
@@ -215,6 +217,7 @@ private fun WeeklyTimetableSection() {
                 modifier = Modifier.fillMaxWidth(),
             ) { Text("ذخیره برنامه", fontFamily = DashboardFonts.quote) }
         }
+        LeaveSection()
     }
     if (confirmEdit) {
         AlertDialog(
@@ -762,5 +765,257 @@ private fun AlarmSoundRow(
             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
         )
         TextButton(onClick = onPreview) { Text("شنیدن", fontFamily = DashboardFonts.quote) }
+    }
+}
+
+/**
+ * بخش «مرخصی» در انتهای کادرِ برنامهٔ هفتگی:
+ * بازه با تقویم شمسی، علت (با امکانِ افزودن علتِ خاص)، گواهی پزشکی (فقط مریضی)
+ * و وضعیتِ توجیه (فقط یکی و فقط یک‌بار — مگر «موجّه نشده» که قابلِ تغییر می‌ماند).
+ * مرخصی‌های ثبت‌شده در یک آکاردیونِ **پیش‌فرض بسته** فهرست می‌شوند.
+ */
+@Composable
+private fun LeaveSection() {
+    val ctx = LocalContext.current
+    val container = LocalAppContainer.current
+    val syncScope = rememberCoroutineScope()
+    val today = LocalDate.now(JalaliDate.TEHRAN)
+
+    var records by remember { mutableStateOf(ClassPlanStore.leaves(ctx)) }
+    var fromIso by remember { mutableStateOf(today.toString()) }
+    var toIso by remember { mutableStateOf(today.toString()) }
+    var reason by remember { mutableStateOf("") }
+    var custom by remember { mutableStateOf("") }
+    var showCustom by remember { mutableStateOf(false) }
+    var medCert by remember { mutableStateOf(false) }
+    var just by remember { mutableStateOf("") }
+    var pickFrom by remember { mutableStateOf(false) }
+    var pickTo by remember { mutableStateOf(false) }
+    var reasonsOpen by remember { mutableStateOf(false) }
+    var listOpen by remember { mutableStateOf(false) } // پیش‌فرض بسته
+    var msg by remember { mutableStateOf<String?>(null) }
+    var deleteId by remember { mutableStateOf<String?>(null) }
+
+    val reasons = remember(records, showCustom) { ClassPlanStore.leaveReasons(ctx) }
+    val isSick = reason == ClassPlanStore.SICK
+
+    fun pushLeaves() {
+        syncScope.launch {
+            val uid = container.auth.cachedUserId()
+                ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+            if (uid.isBlank()) return@launch
+            ClassPlanSync.push(ctx, container.tables, uid, StateSync.KEY_LEAVES)
+        }
+    }
+
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
+            .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text("مرخصی", fontFamily = DashboardFonts.section, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = { pickFrom = true }, modifier = Modifier.weight(1f)) {
+                Text("از: ${JalaliDate.formatFaLong(fromIso)}", fontFamily = DashboardFonts.quote)
+            }
+            OutlinedButton(onClick = { pickTo = true }, modifier = Modifier.weight(1f)) {
+                Text("تا: ${JalaliDate.formatFaLong(toIso)}", fontFamily = DashboardFonts.quote)
+            }
+        }
+
+        // علتِ مرخصی
+        Box {
+            OutlinedButton(onClick = { reasonsOpen = true }, modifier = Modifier.fillMaxWidth()) {
+                Text(if (reason.isBlank()) "علت مرخصی" else reason, fontFamily = DashboardFonts.quote)
+            }
+            DropdownMenu(expanded = reasonsOpen, onDismissRequest = { reasonsOpen = false }) {
+                reasons.forEach { r ->
+                    DropdownMenuItem(
+                        text = { Text(r, fontFamily = DashboardFonts.quote) },
+                        onClick = { reason = r; medCert = false; just = ""; reasonsOpen = false },
+                    )
+                }
+                DropdownMenuItem(
+                    text = { Text(ClassPlanStore.ADD_CUSTOM, fontFamily = DashboardFonts.quote) },
+                    onClick = { showCustom = true; reasonsOpen = false },
+                )
+            }
+        }
+        if (showCustom) {
+            OutlinedTextField(
+                value = custom,
+                onValueChange = { custom = it },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                label = { Text("علتِ خاص", fontFamily = DashboardFonts.quote) },
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = {
+                    if (custom.isBlank()) return@TextButton
+                    ClassPlanStore.addLeaveReason(ctx, custom)
+                    reason = custom.trim()
+                    medCert = false
+                    just = ""
+                    custom = ""
+                    showCustom = false
+                    msg = "علت اضافه شد."
+                }) { Text("افزودن", fontFamily = DashboardFonts.quote) }
+                TextButton(onClick = { showCustom = false; custom = "" }) { Text("انصراف", fontFamily = DashboardFonts.quote) }
+            }
+        }
+
+        // گواهی پزشکی — فقط برای مریضی
+        if (isSick) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = medCert, onCheckedChange = { medCert = it })
+                Text("گواهی پزشکی داشتم", fontFamily = DashboardFonts.quote)
+            }
+        }
+
+        // وضعیتِ توجیه — فقط یکی، و فقط یک‌بار (مگر «موجّه نشده»)
+        if (reason.isNotBlank()) {
+            Text("وضعیت توجیه به مدرسه", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+            val options = buildList {
+                add(ClassPlanStore.JUST_FATHER)
+                add(ClassPlanStore.JUST_MOTHER)
+                if (isSick) add(ClassPlanStore.JUST_MEDICAL)
+                add(ClassPlanStore.JUST_NONE)
+            }
+            options.forEach { code ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth().clickable { if (just.isBlank() || just == ClassPlanStore.JUST_NONE) just = code },
+                ) {
+                    Checkbox(
+                        checked = just == code,
+                        enabled = just.isBlank() || just == ClassPlanStore.JUST_NONE,
+                        onCheckedChange = { if (it) just = code },
+                    )
+                    Text(ClassPlanStore.justificationLabel(code), fontFamily = DashboardFonts.quote)
+                }
+            }
+        }
+
+        Button(onClick = {
+            msg = when {
+                reason.isBlank() -> "علت مرخصی را انتخاب کن."
+                toIso < fromIso -> "روزِ پایان نمی‌تواند پیش از روزِ شروع باشد."
+                just.isBlank() -> "وضعیت توجیه به مدرسه را انتخاب کن."
+                else -> {
+                    ClassPlanStore.addLeave(ctx, fromIso, toIso, reason, medCert, just)
+                    records = ClassPlanStore.leaves(ctx)
+                    just = ""
+                    medCert = false
+                    reason = ""
+                    pushLeaves()
+                    "مرخصی ثبت شد."
+                }
+            }
+        }, modifier = Modifier.fillMaxWidth()) { Text("ثبت مرخصی", fontFamily = DashboardFonts.quote) }
+
+        msg?.let {
+            Text(it, fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+        }
+
+        // ---- آکاردیونِ مرخصی‌های ثبت‌شده (پیش‌فرض بسته) ----
+        Row(
+            Modifier.fillMaxWidth().clickable { listOpen = !listOpen }.padding(vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(if (listOpen) "▾" else "◂", fontFamily = DashboardFonts.quote)
+            Text(
+                "مرخصی‌های ثبت‌شده (${toPersianDigits(records.size.toString())})",
+                fontFamily = DashboardFonts.quote,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 6.dp),
+            )
+        }
+        if (listOpen) {
+            if (records.isEmpty()) {
+                Text("هنوز مرخصی‌ای ثبت نشده است.", fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall)
+            } else {
+                records.forEach { rec ->
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        val days = ClassPlanStore.daysBetween(rec.fromIso, rec.toIso)
+                        days.take(10).forEach { iso ->
+                            Text(
+                                "${JalaliDate.weekDayFa(iso)} ${JalaliDate.formatFaLong(iso)} — ${rec.reason} — ${ClassPlanStore.justificationLabel(rec.justification)}",
+                                fontFamily = DashboardFonts.quote,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                        if (days.size > 10) {
+                            Text(
+                                "و ${toPersianDigits((days.size - 10).toString())} روز دیگر",
+                                fontFamily = DashboardFonts.quote,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        // اگر «موجّه نشده» ثبت شده، بعداً هم می‌توان آن را اصلاح کرد.
+                        if (rec.justification == ClassPlanStore.JUST_NONE) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                listOf(ClassPlanStore.JUST_FATHER, ClassPlanStore.JUST_MOTHER)
+                                    .plus(if (rec.reason == ClassPlanStore.SICK) listOf(ClassPlanStore.JUST_MEDICAL) else emptyList())
+                                    .forEach { code ->
+                                        TextButton(onClick = {
+                                            ClassPlanStore.updateLeaveJustification(ctx, rec.id, code)
+                                            records = ClassPlanStore.leaves(ctx)
+                                            pushLeaves()
+                                        }) { Text(ClassPlanStore.justificationLabel(code), fontFamily = DashboardFonts.quote) }
+                                    }
+                            }
+                        }
+                        TextButton(onClick = { deleteId = rec.id }) {
+                            Text("حذف این مرخصی", fontFamily = DashboardFonts.quote, color = MaterialTheme.colorScheme.error)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (pickFrom) {
+        ShamsiDatePickerDialog(
+            initialIso = fromIso,
+            title = "از روز",
+            onDismiss = { pickFrom = false },
+            onPick = { fromIso = it; if (it > toIso) toIso = it; pickFrom = false },
+        )
+    }
+    if (pickTo) {
+        ShamsiDatePickerDialog(
+            initialIso = toIso,
+            title = "تا روز",
+            onDismiss = { pickTo = false },
+            onPick = { toIso = it; pickTo = false },
+        )
+    }
+    if (deleteId != null) {
+        AlertDialog(
+            onDismissRequest = { deleteId = null },
+            title = { Text("حذف مرخصی؟") },
+            text = { Text("این مرخصی از فهرست پاک می‌شود.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    deleteId?.let { ClassPlanStore.removeLeave(ctx, it) }
+                    deleteId = null
+                    records = ClassPlanStore.leaves(ctx)
+                    pushLeaves()
+                }) { Text("حذف") }
+            },
+            dismissButton = { TextButton(onClick = { deleteId = null }) { Text("انصراف") } },
+        )
     }
 }

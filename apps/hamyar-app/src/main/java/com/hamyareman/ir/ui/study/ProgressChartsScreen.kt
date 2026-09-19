@@ -1,5 +1,7 @@
 package com.hamyareman.ir.ui.study
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,6 +39,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import java.time.LocalDate
 import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
@@ -131,6 +134,8 @@ fun ProgressChartsScreen(bookCode: String?, onBack: () -> Unit, onPickBook: (Str
                 Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
+                // پیش از فهرستِ کتاب‌ها: دروسِ روزهای مرخصی/غیبت برای جبران
+                LeaveCatchUpSection(onPickBook)
                 books.forEach { m ->
                     val started = m.packs.count { TeachStats.raw(ctx, it.packId).length() > 0 }
                     val done = m.packs.count { TeachStats.isDone(ctx, it.packId) }
@@ -523,6 +528,88 @@ private fun TeachRow(pack: StudyPack) {
                 log.forEach { row ->
                     Text("• ${row.whenFa} — ${row.label}", style = MaterialTheme.typography.labelSmall)
                 }
+            }
+        }
+    }
+}
+
+/**
+ * «پیگیری دروس و نواقص غیبت و مرخصی‌ها» — درس‌های روزهایی که مرخصی بوده،
+ * پیش از فهرستِ کتاب‌ها می‌آید تا جبران‌شان راحت‌تر پیگیری شود.
+ * لمسِ هر درس، نمودارِ همان کتاب را باز می‌کند.
+ */
+@Composable
+private fun LeaveCatchUpSection(onPickBook: (String) -> Unit) {
+    val ctx = LocalContext.current
+    val snap = remember { ClassPlanStore.load(ctx) }
+    val leaves = remember { ClassPlanStore.leaves(ctx) }
+    var open by remember { mutableStateOf(false) }
+    if (leaves.isEmpty()) return
+
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Row(
+            Modifier.fillMaxWidth().clickable { open = !open },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(if (open) "▾" else "◂")
+            Text(
+                "پیگیری دروس و نواقص غیبت و مرخصی‌ها",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 6.dp),
+            )
+        }
+        if (open) {
+            leaves.forEach { rec ->
+                val days = ClassPlanStore.daysBetween(rec.fromIso, rec.toIso)
+                Text(
+                    "${rec.reason} — ${ClassPlanStore.justificationLabel(rec.justification)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                days.forEach { iso ->
+                    val date = runCatching { LocalDate.parse(iso) }.getOrNull() ?: return@forEach
+                    val lessons = ClassPlanStore.lessonsFor(snap, date)
+                        .filter { it.isNotBlank() && it != "—" }
+                    Row(Modifier.fillMaxWidth().padding(start = 4.dp)) {
+                        Text(
+                            "${JalaliDate.weekDayFa(iso)} ${JalaliDate.formatFaLong(iso)}: ",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        if (lessons.isEmpty()) {
+                            Text(
+                                "درسی در برنامه نبود",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        } else {
+                            Column(Modifier.weight(1f)) {
+                                lessons.forEach { sub ->
+                                    val code = com.hamyareman.ir.platform.feature.study.BookModuleRegistry.modules
+                                        .firstOrNull { ClassPlanStore.shortBookName(it.title) == sub }?.bookCode
+                                    Text(
+                                        "• $sub",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (code == null) MaterialTheme.colorScheme.onSurface
+                                        else MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.clickable(enabled = code != null) {
+                                            code?.let(onPickBook)
+                                        },
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                Spacer(Modifier.height(6.dp))
             }
         }
     }
