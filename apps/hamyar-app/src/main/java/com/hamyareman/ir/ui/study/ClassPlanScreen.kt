@@ -494,6 +494,27 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onClick = {
+                syncScope.launch {
+                    val uid = runCatching { container.auth.currentUserId() }.getOrNull()
+                        ?: container.auth.cachedUserId().orEmpty()
+                    if (uid.isBlank()) {
+                        syncNotice = "برای همگام‌سازی باید وارد حساب شوی."
+                        return@launch
+                    }
+                    val pulled = ClassPlanSync.pullAll(ctx, container.tables, uid)
+                    val pushed = ClassPlanSync.pushAll(ctx, container.tables, uid)
+                    snap = ClassPlanStore.load(ctx)
+                    cycle = snap.cycleWeeks
+                    pattern = effectivePattern(snap, cycle, ClassPlanStore.shiftOf(snap, today))
+                    syncNotice = buildString {
+                        append(if (pulled) "از سرور گرفته شد" else "داده‌ی تازه‌ای در سرور نبود")
+                        append(if (pushed) "؛ ارسال انجام شد." else "؛ چیزی برای ارسال نبود.")
+                    }
+                }
+            }) { Text("همگام‌سازی با سرور", fontFamily = DashboardFonts.quote) }
+        }
         syncNotice?.let { Text(it, fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary) }
         val sessions = ClassPlanStore.virtualSessions(ctx)
         if (sessions.isNotEmpty()) {
