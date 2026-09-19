@@ -4,6 +4,8 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.webkit.MimeTypeMap
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -57,12 +59,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.FileProvider
 import com.hamyareman.ir.LocalAppContainer
 import com.hamyareman.ir.R
-import com.hamyareman.ir.platform.core.appwrite.AppwriteAuthService
 import com.hamyareman.ir.platform.core.appwrite.AppwriteClientProvider
 import com.hamyareman.ir.platform.core.common.AppResult
 import com.hamyareman.ir.platform.core.common.JalaliDate
@@ -154,6 +156,7 @@ private fun guessMime(ext: String): String =
         ?: when (ext.lowercase()) {
             "pdf" -> "application/pdf"
             "txt", "md" -> "text/plain"
+            "html", "htm" -> "text/html"
             "jpg", "jpeg" -> "image/jpeg"
             "png" -> "image/png"
             "webp" -> "image/webp"
@@ -162,10 +165,24 @@ private fun guessMime(ext: String): String =
 
 private fun isImageMime(mime: String) = mime.startsWith("image/")
 
+private fun isHtmlItem(item: NoteFile): Boolean {
+    val ext = item.ext.lowercase()
+    return ext == "html" || ext == "htm" || item.mime.contains("html")
+}
+
+private fun isPlainTextItem(item: NoteFile): Boolean {
+    val ext = item.ext.lowercase()
+    if (isHtmlItem(item)) return false
+    return item.mime.startsWith("text/") || ext in setOf("txt", "md", "rtf")
+}
+
+private fun needsOpenChoice(item: NoteFile): Boolean =
+    isImageMime(item.mime) || isHtmlItem(item) || isPlainTextItem(item)
+
 private fun fileGroup(item: NoteFile): String = when {
     isImageMime(item.mime) -> "عکس"
     item.mime == "application/pdf" || item.ext.equals("pdf", true) -> "PDF"
-    item.mime.startsWith("text/") || item.ext.lowercase() in setOf("txt", "md", "rtf") -> "متن"
+    item.mime.startsWith("text/") || item.ext.lowercase() in setOf("txt", "md", "rtf", "html", "htm") -> "متن"
     else -> "سایر"
 }
 
@@ -187,9 +204,28 @@ fun PdfUploadScreen(onBack: () -> Unit) {
     var needSubMsg by remember { mutableStateOf<String?>(null) }
     var imageAlbum by remember { mutableStateOf<List<NoteFile>?>(null) }
     var imageStart by remember { mutableIntStateOf(0) }
+    var openPick by remember { mutableStateOf<NoteFile?>(null) }
+    var internalView by remember { mutableStateOf<NoteFile?>(null) }
+
+    fun openExternal(item: NoteFile) {
+        runCatching {
+            val file = File(item.localPath)
+            if (!file.exists()) {
+                notice = "فایل روی گوشی پیدا نشد."
+                return
+            }
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+            val mime = item.mime.ifBlank { guessMime(item.ext) }.ifBlank { "*/*" }
+            val view = Intent(Intent.ACTION_VIEW)
+                .setDataAndType(uri, mime)
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(Intent.createChooser(view, "باز کردن با"))
+        }.onFailure { notice = "برنامه‌ای برای بازکردن این فایل پیدا نشد." }
+    }
 
     LaunchedEffect(Unit) {
-        val uid = store.getString(AppwriteAuthService.KEY_USER_ID)
+        val uid = container.auth.cachedUserId()
+            ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
         if (uid.isBlank()) return@LaunchedEffect
         when (val remote = container.tables.get(TableIds.LESSON_NOTES, "notes_$uid")) {
             is AppResult.Ok -> {
@@ -236,14 +272,21 @@ fun PdfUploadScreen(onBack: () -> Unit) {
         if (cropBmp == null) notice = "خواندن عکس ممکن نشد."
     }
 
-    val filePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { picked ->
+    val filePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { picked ->
         if (picked == null) return@rememberLauncherForActivityResult
         if (!canAddMore()) return@rememberLauncherForActivityResult
         busy = true
         notice = null
         scope.launch {
             val name = MediaFiles.displayName(context, picked) ?: "file.bin"
-            val mime = context.contentResolver.getType(picked) ?: guessMime(File(name).extension)
+            val extGuess = File(name).extension
+            val mimeRaw = context.contentResolver.getType(picked) ?: guessMime(extGuess)
+            val mime = when {
+                extGuess.equals("txt", true) -> "text/plain"
+                extGuess.equals("html", true) || extGuess.equals("htm", true) -> "text/html"
+                mimeRaw == "application/octet-stream" && extGuess.isNotBlank() -> guessMime(extGuess)
+                else -> mimeRaw
+            }
             if (isImageMime(mime)) {
                 cropBmp = loadOrientedBitmap(context, picked, maxSide = 2400)
                 busy = false
@@ -251,12 +294,12 @@ fun PdfUploadScreen(onBack: () -> Unit) {
             }
             val copied = withContext(Dispatchers.IO) {
                 runCatching {
-                    val ext = File(name).extension.ifBlank { MimeTypeMap.getSingleton().getExtensionFromMimeType(mime) ?: "bin" }
+                    val ext = extGuess.ifBlank { MimeTypeMap.getSingleton().getExtensionFromMimeType(mime) ?: "bin" }
                     val target = File(galleryDir(context), "f_${System.currentTimeMillis()}.$ext")
                     context.contentResolver.openInputStream(picked)?.use { input ->
                         target.outputStream().use { output -> input.copyTo(output) }
-                    }
-                    target.takeIf { it.exists() && it.length() > 0 }
+                    } ?: return@runCatching null
+                    target.takeIf { it.exists() }
                 }.getOrNull()
             }
             busy = false
@@ -379,24 +422,25 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                 val now = System.currentTimeMillis()
                 store.putString(KEY_NOTES, notes)
                 store.putLong(KEY_NOTES_AT, now)
-                val uid = store.getString(AppwriteAuthService.KEY_USER_ID)
-                if (uid.isBlank()) {
-                    notice = "نکات روی دستگاه ذخیره شد. برای سینک با سرور وارد شو."
-                } else {
+                scope.launch {
+                    val uid = container.auth.cachedUserId()
+                        ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+                    if (uid.isBlank()) {
+                        notice = "نکات روی دستگاه ذخیره شد. برای سینک با سرور وارد شو."
+                        return@launch
+                    }
                     val payload = mapOf(
                         "userId" to uid,
                         "text" to notes,
                         "updatedAt" to now,
                     )
-                    scope.launch {
-                        val perms = AppwriteClientProvider.ownerOnly(uid)
-                        when (val saved = container.tables.upsert(TableIds.LESSON_NOTES, "notes_$uid", payload, perms)) {
-                            is AppResult.Ok -> notice = "نکات ذخیره شد و با سرور همگام شد."
-                            is AppResult.Err -> {
-                                container.sync.enqueue(TableIds.LESSON_NOTES, "notes_$uid", payload)
-                                runCatching { container.sync.pushAll() }
-                                notice = "نکات روی دستگاه ماند؛ سینک بعدی: ${saved.error.userMessage}"
-                            }
+                    val perms = AppwriteClientProvider.ownerOnly(uid)
+                    when (val saved = container.tables.upsert(TableIds.LESSON_NOTES, "notes_$uid", payload, perms)) {
+                        is AppResult.Ok -> notice = "نکات ذخیره شد و با سرور همگام شد."
+                        is AppResult.Err -> {
+                            container.sync.enqueue(TableIds.LESSON_NOTES, "notes_$uid", payload)
+                            runCatching { container.sync.pushAll() }
+                            notice = "نکات روی دستگاه ماند؛ صف سینک: ${saved.error.userMessage}"
                         }
                     }
                 }
@@ -419,7 +463,7 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                     modifier = Modifier.weight(1f),
                 ) { Text("عکس + برش") }
                 OutlinedButton(
-                    onClick = { if (!busy && canAddMore()) filePicker.launch(arrayOf("*/*")) },
+                    onClick = { if (!busy && canAddMore()) filePicker.launch("*/*") },
                     modifier = Modifier.weight(1f),
                 ) { Text("هر فایل") }
             }
@@ -570,6 +614,72 @@ fun PdfUploadScreen(onBack: () -> Unit) {
             text = { Text(msg) },
             confirmButton = { TextButton(onClick = { needSubMsg = null }) { Text("متوجه شدم") } },
         )
+    }
+
+    openPick?.let { item ->
+        AlertDialog(
+            onDismissRequest = { openPick = null },
+            title = { Text("باز کردن «${item.title}»") },
+            text = { Text("داخل اپ ببینی یا با برنامهٔ دیگری روی گوشی؟") },
+            confirmButton = {
+                TextButton(onClick = {
+                    openPick = null
+                    if (isImageMime(item.mime)) {
+                        val album = items.filter { isImageMime(it.mime) }
+                        imageStart = album.indexOfFirst { it.id == item.id }.coerceAtLeast(0)
+                        imageAlbum = album
+                    } else {
+                        internalView = item
+                    }
+                }) { Text("داخل اپ") }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    openPick = null
+                    openExternal(item)
+                }) { Text("با برنامه دیگر") }
+            },
+        )
+    }
+
+    internalView?.let { item ->
+        Dialog(
+            onDismissRequest = { internalView = null },
+            properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true),
+        ) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(16.dp),
+            ) {
+                Text(item.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(8.dp))
+                val body = remember(item.localPath) {
+                    runCatching { File(item.localPath).readText(Charsets.UTF_8) }.getOrDefault("خواندن فایل ممکن نشد.")
+                }
+                if (isHtmlItem(item)) {
+                    AndroidView(
+                        factory = { ctx ->
+                            WebView(ctx).apply {
+                                webViewClient = WebViewClient()
+                                settings.javaScriptEnabled = false
+                                settings.allowFileAccess = true
+                                loadDataWithBaseURL(null, body, "text/html", "utf-8", null)
+                            }
+                        },
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                    )
+                } else {
+                    Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+                        Text(body, style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+                OutlinedButton(onClick = { internalView = null }, modifier = Modifier.fillMaxWidth()) {
+                    Text("بستن")
+                }
+            }
+        }
     }
 }
 

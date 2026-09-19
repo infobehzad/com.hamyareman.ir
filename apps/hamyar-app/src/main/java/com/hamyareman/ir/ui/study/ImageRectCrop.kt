@@ -5,6 +5,7 @@ import android.graphics.Matrix
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,8 +13,10 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -35,14 +38,16 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 /**
- * برش مستطیلی عکس جزوه/کتاب: زوم، جابه‌جایی و چرخش ۹۰درجه — بدون ماسک دایره.
+ * برش مستطیلی عکس جزوه/کتاب: زوم، جابه‌جایی، چرخش، و **کادر با اندازهٔ قابل‌تغییر**.
  */
 @Composable
 fun ImageRectCropDialog(
@@ -54,6 +59,8 @@ fun ImageRectCropDialog(
     var ox by remember { mutableFloatStateOf(0f) }
     var oy by remember { mutableFloatStateOf(0f) }
     var turns by remember { mutableIntStateOf(0) }
+    var frameW by remember { mutableFloatStateOf(0f) }
+    var frameH by remember { mutableFloatStateOf(0f) }
     val oriented = remember(bitmap, turns) { rotateBitmap(bitmap, turns * 90f) }
     val img = remember(oriented) { oriented.asImageBitmap() }
 
@@ -69,23 +76,24 @@ fun ImageRectCropDialog(
             val density = LocalDensity.current
             val viewW = with(density) { maxWidth.toPx() }
             val viewH = with(density) { maxHeight.toPx() }
-            val frameW = viewW * 0.88f
-            val frameH = viewH * 0.52f
-            val baseFit = min(frameW / oriented.width.coerceAtLeast(1), frameH / oriented.height.coerceAtLeast(1))
+            val minFrame = with(density) { 96.dp.toPx() }
+            val fw = (if (frameW <= 1f) viewW * 0.88f else frameW).coerceIn(minFrame, viewW * 0.98f)
+            val fh = (if (frameH <= 1f) viewH * 0.52f else frameH).coerceIn(minFrame, viewH * 0.86f)
+            val baseFit = min(fw / oriented.width.coerceAtLeast(1), fh / oriented.height.coerceAtLeast(1))
             val drawW = oriented.width * baseFit
             val drawH = oriented.height * baseFit
 
             fun clamp(s: Float, x: Float, y: Float): Triple<Float, Float, Float> {
                 val ns = s.coerceIn(1f, 5f)
-                val maxX = ((drawW * ns - frameW) / 2f).coerceAtLeast(0f)
-                val maxY = ((drawH * ns - frameH) / 2f).coerceAtLeast(0f)
+                val maxX = ((drawW * ns - fw) / 2f).coerceAtLeast(0f)
+                val maxY = ((drawH * ns - fh) / 2f).coerceAtLeast(0f)
                 return Triple(ns, x.coerceIn(-maxX, maxX), y.coerceIn(-maxY, maxY))
             }
 
             Box(
                 Modifier
                     .fillMaxSize()
-                    .pointerInput(oriented) {
+                    .pointerInput(oriented, fw, fh) {
                         detectTransformGestures { _, pan, zoom, _ ->
                             val t = clamp(scale * zoom, ox + pan.x, oy + pan.y)
                             scale = t.first
@@ -115,26 +123,65 @@ fun ImageRectCropDialog(
                         .fillMaxSize()
                         .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen },
                 ) {
-                    val left = (size.width - frameW) / 2f
-                    val top = (size.height - frameH) / 2f
+                    val left = (size.width - fw) / 2f
+                    val top = (size.height - fh) / 2f
                     drawRect(Color(0xB3000000))
                     drawRect(
                         Color.Black,
                         topLeft = Offset(left, top),
-                        size = Size(frameW, frameH),
+                        size = Size(fw, fh),
                         blendMode = BlendMode.DstOut,
                     )
                     drawRect(
                         Color.White.copy(alpha = 0.92f),
                         topLeft = Offset(left, top),
-                        size = Size(frameW, frameH),
+                        size = Size(fw, fh),
                         style = Stroke(width = 3.dp.toPx()),
                     )
                 }
+                val handle = 28.dp
+                val leftPx = (viewW - fw) / 2f
+                val topPx = (viewH - fh) / 2f
+                CornerHandle(
+                    x = leftPx,
+                    y = topPx,
+                    sizeDp = handle,
+                    onDrag = { dx, dy ->
+                        frameW = (fw - dx * 2f).coerceIn(minFrame, viewW * 0.98f)
+                        frameH = (fh - dy * 2f).coerceIn(minFrame, viewH * 0.86f)
+                    },
+                )
+                CornerHandle(
+                    x = leftPx + fw,
+                    y = topPx,
+                    sizeDp = handle,
+                    onDrag = { dx, dy ->
+                        frameW = (fw + dx * 2f).coerceIn(minFrame, viewW * 0.98f)
+                        frameH = (fh - dy * 2f).coerceIn(minFrame, viewH * 0.86f)
+                    },
+                )
+                CornerHandle(
+                    x = leftPx,
+                    y = topPx + fh,
+                    sizeDp = handle,
+                    onDrag = { dx, dy ->
+                        frameW = (fw - dx * 2f).coerceIn(minFrame, viewW * 0.98f)
+                        frameH = (fh + dy * 2f).coerceIn(minFrame, viewH * 0.86f)
+                    },
+                )
+                CornerHandle(
+                    x = leftPx + fw,
+                    y = topPx + fh,
+                    sizeDp = handle,
+                    onDrag = { dx, dy ->
+                        frameW = (fw + dx * 2f).coerceIn(minFrame, viewW * 0.98f)
+                        frameH = (fh + dy * 2f).coerceIn(minFrame, viewH * 0.86f)
+                    },
+                )
             }
 
             Text(
-                "زوم کن، جابه‌جا کن، بچرخان — کادر مستطیل است نه دایره",
+                "گوشه‌های سفید را بکش تا اندازهٔ کادر عوض شود. زوم و چرخش هم هست.",
                 color = Color.White,
                 modifier = Modifier.align(Alignment.TopCenter).padding(top = 24.dp, start = 16.dp, end = 16.dp),
             )
@@ -155,7 +202,7 @@ fun ImageRectCropDialog(
                 ) { Text("چرخش") }
                 Button(
                     onClick = {
-                        val cropped = cropRect(oriented, drawW, drawH, scale, ox, oy, frameW, frameH)
+                        val cropped = cropRect(oriented, drawW, drawH, scale, ox, oy, fw, fh)
                         if (cropped != null) onCropped(cropped)
                     },
                     modifier = Modifier.weight(1f),
@@ -163,6 +210,29 @@ fun ImageRectCropDialog(
             }
         }
     }
+}
+
+@Composable
+private fun CornerHandle(
+    x: Float,
+    y: Float,
+    sizeDp: androidx.compose.ui.unit.Dp,
+    onDrag: (Float, Float) -> Unit,
+) {
+    val density = LocalDensity.current
+    val half = with(density) { sizeDp.toPx() / 2f }
+    Box(
+        Modifier
+            .offset { IntOffset((x - half).roundToInt(), (y - half).roundToInt()) }
+            .size(sizeDp)
+            .background(Color.White, CircleShape)
+            .pointerInput(Unit) {
+                detectDragGestures { change, drag ->
+                    change.consume()
+                    onDrag(drag.x, drag.y)
+                }
+            },
+    )
 }
 
 internal fun rotateBitmap(src: Bitmap, degrees: Float): Bitmap {

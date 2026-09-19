@@ -40,29 +40,47 @@ class ReminderReceiver : BroadcastReceiver() {
         if (school) scheduleRepeatIfNeeded(context, id, title, body, channel)
     }
 
-    private fun show(context: Context, id: String, title: String, body: String, channel: String) {
+    private fun show(
+        context: Context,
+        id: String,
+        title: String,
+        body: String,
+        channel: String,
+        openSleep: Boolean = false,
+    ) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
             PackageManager.PERMISSION_GRANTED
         ) {
             return
         }
-        val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
+        val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            if (openSleep) putExtra(EXTRA_OPEN_SLEEP, true)
+        }
         val contentIntent = launch?.let {
             PendingIntent.getActivity(
                 context,
                 id.hashCode(),
-                it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
+                it,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         }
-        val notification = NotificationCompat.Builder(context, channel)
+        val school = channel == NotificationChannels.SCHOOL_ALARM || id.startsWith("school_")
+        val notification = NotificationCompat.Builder(
+            context,
+            if (school) NotificationChannels.SCHOOL_ALARM else channel,
+        )
             .setSmallIcon(R.drawable.ic_stat_notification)
             .setContentTitle(title)
             .setContentText(body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(if (school) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT)
+            .setCategory(if (school) NotificationCompat.CATEGORY_ALARM else NotificationCompat.CATEGORY_REMINDER)
             .setAutoCancel(true)
-            .apply { contentIntent?.let { setContentIntent(it) } }
+            .apply {
+                if (school) setDefaults(NotificationCompat.DEFAULT_ALL)
+                contentIntent?.let { setContentIntent(it) }
+            }
             .build()
 
         runCatching { NotificationManagerCompat.from(context).notify(id.hashCode(), notification) }
