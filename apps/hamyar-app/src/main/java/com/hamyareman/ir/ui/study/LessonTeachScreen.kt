@@ -237,7 +237,8 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
     fun cached(t: TeachTrack) = cacheTick >= 0 && MediaVault.isVerified(context, t.cacheKey)
 
     /** «زمان درس» — سکوتِ اجباری پلیر دروس (کلید سراسری از «بیشتر»). */
-    fun quietOn(): Boolean = store.getString("quiet_mode", "0") == "1"
+    var quietTick by remember { mutableIntStateOf(0) }
+    fun quietOn(): Boolean = quietTick.let { store.getString("quiet_mode", "0") == "1" }
 
     val appContainer = com.hamyareman.ir.LocalAppContainer.current
     LaunchedEffect(packId) {
@@ -299,7 +300,9 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
             }
             val pos = startMs ?: if (cached(t) && !fromServer) savedPos(t) else 0L
             playback.setMediaItems(items, tracks.indexOf(t).coerceAtLeast(0), pos)
-            com.hamyareman.ir.platform.feature.playback.TeachGate.enter()
+            // کاربر روی «پخش» زده ⇒ صفحه‌ی تدریس قطعاً باز است؛ دروازه را باز کن
+            // تا سرویس پخش را بی‌صدا متوقف نکند (ضدِ انحرافِ شمارنده).
+            com.hamyareman.ir.platform.feature.playback.TeachGate.pulse()
             com.hamyareman.ir.platform.feature.playback.TeachGate.currentPack = packId
             playback.setSpeed(speed)
             // v1.12: فوراً ترکِ جاری را ثبت کن — تا فال‌بکِ خطا (سرور) همیشه زنده باشد
@@ -445,11 +448,27 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
     // (مثلاً پخش آفلاین از سرور محلی راه نیفتاد)، بی‌سروصدا از سرور ادامه بده.
     LaunchedEffect(pendingStartKey) {
         val k = pendingStartKey ?: return@LaunchedEffect
-        kotlinx.coroutines.delay(5000)
+        // گام ۱ (۴ ثانیه): اگر پخش شروع نشد، اول دروازه را تپش و دوباره play کن
+        // — خیلی وقت‌ها مشکل فقط انحرافِ شمارنده‌ی «صفحه‌ی تدریس باز است» است.
+        kotlinx.coroutines.delay(4000)
+        if (pendingStartKey == k && !playback.state.value.playing && !forceServer) {
+            com.hamyareman.ir.platform.feature.playback.TeachGate.pulse()
+            playback.play()
+            msg = "در حال تلاشِ دوباره برای پخش…"
+        }
+        // گام ۲ (۴ ثانیه‌ی دیگر): نشد، از سرور ادامه بده
+        kotlinx.coroutines.delay(4000)
         if (pendingStartKey == k && !playback.state.value.playing && !forceServer) {
             forceServer = true
             tracks.firstOrNull { it.cacheKey == k }?.let { startTrack(it, autoplay = true, fromServer = true) }
             msg = "پخش محلی شروع نشد؛ از سرور ادامه می‌دهیم…"
+        }
+        // گام ۳ (۶ ثانیه‌ی دیگر): باز هم نشد ⇒ خطای واقعی را نشان بده
+        kotlinx.coroutines.delay(6000)
+        if (pendingStartKey == k && !playback.state.value.playing) {
+            val err = playback.state.value.error
+            msg = if (err.isNullOrBlank()) "پخش شروع نشد؛ خطای پلیر ثبت نشد (اتصال/سرویس)."
+            else "پخش شروع نشد: $err"
         }
         if (pendingStartKey == k) pendingStartKey = null
     }
@@ -482,7 +501,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 OutlinedButton(onClick = {
                     if (quietOn()) {
-                        // «زمان درس» روشن است — بدون پیامِ اضافه، پخش نمی‌شود.
+                        msg = "\uD83D\uDD07 «زمان درس» روشن است — برای پخشِ صدا آن را خاموش کن."
                     } else if (state.playing) {
                         playback.pause()
                         savePos(track, posMs)
@@ -502,6 +521,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                             // دارد «ادامه» بده؛ وگرنه دوباره در صف بگذار — مثلاً بعد از دانلود،
                             // آیتمِ آنلاینِ قدیمی نباید در صف بماند و پخش محلی باید فعال شود.
                             if (loadedKey == track.cacheKey && state.hasMedia && !forceServer && (loadedLocal == cached(track))) {
+                                com.hamyareman.ir.platform.feature.playback.TeachGate.pulse()
                                 playback.play()
                             } else {
                                 startTrack(track, autoplay = true)
@@ -618,6 +638,23 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                     )
                 }
                 Spacer(Modifier.weight(1f))
+            }
+            // «زمان درس» روشن باشد، پخشِ صدا عملاً غیرفعال است — این را واضح نشان می‌دهیم
+            // و یک لمس برای خاموش‌کردن می‌گذاریم (قبلاً زدنِ پخش هیچ واکنشی نداشت).
+            if (quietOn()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "\uD83D\uDD07 «زمان درس» روشن است — تا خاموش نشود، صدای تدریس پخش نمی‌شود.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.weight(1f),
+                    )
+                    TextButton(onClick = {
+                        store.putString("quiet_mode", "0")
+                        quietTick++
+                        msg = null
+                    }) { Text("خاموش کن") }
+                }
             }
             // وضعیتِ واقعیِ صوت به کاربر نشان داده می‌شود (قبلاً خطاها بی‌صدا قورت می‌شدند).
             val shownMsg = msg ?: state.error
