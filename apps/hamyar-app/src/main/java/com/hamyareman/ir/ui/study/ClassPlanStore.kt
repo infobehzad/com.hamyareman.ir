@@ -245,31 +245,7 @@ object ClassPlanStore {
     const val ALARM_NOON = "school_wake_noon"
 
     fun syncAlarms(ctx: Context, reminders: ReminderScheduler, snap: Snapshot, date: LocalDate) {
-        val shift = shiftOf(snap, date)
-        val (h, m) = wakeHourMinute(snap, shift)
-        if (shift == Shift.MORNING) {
-            reminders.remove(ALARM_NOON)
-            reminders.upsert(
-                Reminder(
-                    id = ALARM_MORNING,
-                    title = "بیدار شو — شیفت صبح",
-                    body = "شیفت صبح است؛ برای مدرسه آماده شو.",
-                    hour = h,
-                    minute = m,
-                ),
-            )
-        } else {
-            reminders.remove(ALARM_MORNING)
-            reminders.upsert(
-                Reminder(
-                    id = ALARM_NOON,
-                    title = "شیفت بعدازظهر",
-                    body = "حوالی ظهر است؛ برای شیفت بعدازظهر آماده شو.",
-                    hour = h,
-                    minute = m,
-                ),
-            )
-        }
+        SchoolAlarmStore.sync(ctx, reminders, snap, date)
     }
 
     fun alarmIsSet(reminders: ReminderScheduler, snap: Snapshot, date: LocalDate): Boolean {

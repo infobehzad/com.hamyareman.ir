@@ -28,14 +28,16 @@ class ReminderReceiver : BroadcastReceiver() {
         val channel = intent.getStringExtra(EXTRA_CHANNEL) ?: NotificationChannels.REMINDERS
 
         val scheduler = ReminderScheduler(context)
-        if (scheduler.quietHours.isQuietNow()) {
+        val school = id.startsWith("school_")
+        if (!school && scheduler.quietHours.isQuietNow()) {
             // سکوت یعنی سکوت: فقط فردا دوباره زمان‌بندی می‌کنیم.
             scheduler.find(id)?.let { scheduler.schedule(it) }
             return
         }
 
-        show(context, id, title, body, channel)
+        show(context, id, title, body, channel, openSleep = id == "school_sleep")
         scheduler.find(id)?.let { scheduler.schedule(it) }
+        if (school) scheduleRepeatIfNeeded(context, id, title, body, channel)
     }
 
     private fun show(context: Context, id: String, title: String, body: String, channel: String) {
@@ -68,10 +70,38 @@ class ReminderReceiver : BroadcastReceiver() {
         LocalStore(context, ReminderScheduler.REMINDER_STORE).putLong("last_shown_${id}", System.currentTimeMillis())
     }
 
+    private fun scheduleRepeatIfNeeded(
+        context: Context,
+        id: String,
+        title: String,
+        body: String,
+        channel: String,
+    ) {
+        if (id.endsWith("_r")) return
+        val store = LocalStore(context, "hamyar_class_plan")
+        val times = store.getInt("alarm_repeat", 2).coerceIn(1, 5)
+        if (times < 2) return
+        val alarm = context.getSystemService(android.app.AlarmManager::class.java) ?: return
+        val intent = Intent(context, ReminderReceiver::class.java).apply {
+            putExtra(EXTRA_ID, "${id}_r")
+            putExtra(EXTRA_TITLE, title)
+            putExtra(EXTRA_BODY, body)
+            putExtra(EXTRA_CHANNEL, channel)
+        }
+        val pi = PendingIntent.getBroadcast(
+            context,
+            "${id}_r".hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        alarm.setAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5 * 60_000L, pi)
+    }
+
     companion object {
         const val EXTRA_ID = "reminder_id"
         const val EXTRA_TITLE = "reminder_title"
         const val EXTRA_BODY = "reminder_body"
         const val EXTRA_CHANNEL = "reminder_channel"
+        const val EXTRA_OPEN_SLEEP = "open_sleep"
     }
 }

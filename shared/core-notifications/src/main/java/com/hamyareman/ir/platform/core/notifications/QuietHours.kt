@@ -55,8 +55,9 @@ object NotificationChannels {
     const val REMINDERS = "reminders"
     const val WEEKLY = "weekly"
     const val SYNC = "sync"
+    const val SCHOOL_ALARM = "school_alarm"
 
-    val all: List<String> = listOf(MESSAGES, CALLS, REMINDERS, WEEKLY, SYNC)
+    val all: List<String> = listOf(MESSAGES, CALLS, REMINDERS, WEEKLY, SYNC, SCHOOL_ALARM)
 
     private data class ChannelSpec(val id: String, val name: String, val importance: Int)
 
@@ -66,6 +67,7 @@ object NotificationChannels {
         ChannelSpec(REMINDERS, "یادآورهای ملایم", NotificationManager.IMPORTANCE_DEFAULT),
         ChannelSpec(WEEKLY, "خلاصه‌ی هفتگی", NotificationManager.IMPORTANCE_LOW),
         ChannelSpec(SYNC, "همگام‌سازی", NotificationManager.IMPORTANCE_MIN),
+        ChannelSpec(SCHOOL_ALARM, "آلارم مدرسه و خواب", NotificationManager.IMPORTANCE_HIGH),
     )
 
     /** ساخت کانال‌ها — باید یک‌بار در Application.onCreate صدا زده شود. */

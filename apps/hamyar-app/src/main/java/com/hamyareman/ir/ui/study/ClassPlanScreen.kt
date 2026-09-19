@@ -302,17 +302,13 @@ private fun ShiftSection() {
     var snap by remember { mutableStateOf(ClassPlanStore.load(ctx)) }
     val today = LocalDate.now(JalaliDate.TEHRAN)
     var cycle by remember { mutableIntStateOf(snap.cycleWeeks) }
-    var mH by remember { mutableIntStateOf(snap.morningHour) }
-    var mM by remember { mutableIntStateOf(snap.morningMinute) }
-    var lead by remember { mutableIntStateOf(snap.wakeLeadMin) }
-    var nH by remember { mutableIntStateOf(snap.noonHour) }
-    var nM by remember { mutableIntStateOf(snap.noonMinute) }
-    var sleepAm by remember { mutableStateOf(snap.sleepMorning) }
-    var sleepPm by remember { mutableStateOf(snap.sleepEvening) }
+    var alarm by remember { mutableStateOf(SchoolAlarmStore.load(ctx)) }
+    var settingsOpen by remember { mutableStateOf(false) }
     val current = ClassPlanStore.shiftOf(snap, today)
 
-    fun flushTimes() {
-        ClassPlanStore.saveTimes(ctx, mH, mM, lead, nH, nM, sleepAm, sleepPm)
+    fun flushAlarm(next: SchoolAlarmStore.Prefs = alarm) {
+        SchoolAlarmStore.save(ctx, next)
+        alarm = SchoolAlarmStore.load(ctx)
         snap = ClassPlanStore.load(ctx)
         ClassPlanStore.syncAlarms(ctx, reminders, snap, today)
     }
@@ -350,34 +346,70 @@ private fun ShiftSection() {
                 )
             }
         }
-        Text("زنگ صبح (ساعت:دقیقه) و فاصلهٔ بیداری قبل از زنگ", fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TinyIntField("ساعت صبح", mH, 0, 23) { mH = it; flushTimes() }
-            TinyIntField("دقیقه", mM, 0, 59) { mM = it; flushTimes() }
-            TinyIntField("دقیقه قبل", lead, 15, 180) { lead = it; flushTimes() }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text("آلارم‌های صدادار", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+            TextButton(onClick = { settingsOpen = true }) { Text("چرخ‌دنده تنظیمات", fontFamily = DashboardFonts.quote) }
         }
-        Text("آلارم شیفت بعدازظهر (حوالی ۱۲)", fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TinyIntField("ساعت ظهر", nH, 10, 15) { nH = it; flushTimes() }
-            TinyIntField("دقیقه", nM, 0, 59) { nM = it; flushTimes() }
-        }
-        OutlinedTextField(value = sleepAm, onValueChange = { sleepAm = it; flushTimes() }, label = { Text("ساعت خواب شیفت صبح") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = sleepPm, onValueChange = { sleepPm = it; flushTimes() }, label = { Text("ساعت خواب شیفت بعدازظهر") }, modifier = Modifier.fillMaxWidth())
-        val (ah, am) = ClassPlanStore.wakeHourMinute(snap, ClassPlanStore.shiftOf(snap, today))
+        Text("شیفت صبح — سه کادر ساعت", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+        TimePick("آلارم بیداری", alarm.wakeMH, alarm.wakeMM) { h, m -> flushAlarm(alarm.copy(wakeMH = h, wakeMM = m)) }
+        TimePick("حضور در سرویس", alarm.busMH, alarm.busMM) { h, m -> flushAlarm(alarm.copy(busMH = h, busMM = m)) }
+        TimePick("حضور در مدرسه", alarm.schoolMH, alarm.schoolMM) { h, m -> flushAlarm(alarm.copy(schoolMH = h, schoolMM = m)) }
+        Text("شیفت ظهر — سه کادر ساعت", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+        TimePick("آماده شدن ظهر", alarm.wakeNH, alarm.wakeNM) { h, m -> flushAlarm(alarm.copy(wakeNH = h, wakeNM = m)) }
+        TimePick("حضور در سرویس", alarm.busNH, alarm.busNM) { h, m -> flushAlarm(alarm.copy(busNH = h, busNM = m)) }
+        TimePick("حضور در مدرسه", alarm.schoolNH, alarm.schoolNM) { h, m -> flushAlarm(alarm.copy(schoolNH = h, schoolNM = m)) }
+        Text("خواب — دعوت به خواب آرام", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+        TimePick("خواب شیفت صبح", alarm.sleepMH, alarm.sleepMM) { h, m -> flushAlarm(alarm.copy(sleepMH = h, sleepMM = m)) }
+        TimePick("خواب شیفت ظهر", alarm.sleepNH, alarm.sleepNM) { h, m -> flushAlarm(alarm.copy(sleepNH = h, sleepNM = m)) }
         Text(
-            "آلارم فعال: ${toPersianDigits("%d:%02d".format(ah, am))} — شیفت مخالف حذف می‌شود.",
+            "آلارم شیفت مخالف خاموش می‌شود. اگر دعوت خواب لمس نشود، یک‌بار دیگر بعد از ۵ دقیقه تکرار می‌شود.",
             fontFamily = DashboardFonts.quote,
             style = MaterialTheme.typography.bodySmall,
+        )
+    }
+    if (settingsOpen) {
+        AlertDialog(
+            onDismissRequest = { settingsOpen = false },
+            title = { Text("تنظیمات آلارم") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("آهنگ: پیش‌فرض سیستم", fontFamily = DashboardFonts.quote)
+                    Text("بلندی: ${toPersianDigits(alarm.volume.toString())}٪", fontFamily = DashboardFonts.quote)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(40, 60, 80, 100).forEach { v ->
+                            FilterChip(selected = alarm.volume == v, onClick = { flushAlarm(alarm.copy(volume = v)) }, label = { Text(toPersianDigits(v.toString())) })
+                        }
+                    }
+                    Text("تعداد تکرار", fontFamily = DashboardFonts.quote)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        (1..3).forEach { n ->
+                            FilterChip(selected = alarm.repeat == n, onClick = { flushAlarm(alarm.copy(repeat = n)) }, label = { Text(toPersianDigits(n.toString())) })
+                        }
+                    }
+                    FilterChip(
+                        selected = alarm.crescendo,
+                        onClick = { flushAlarm(alarm.copy(crescendo = !alarm.crescendo)) },
+                        label = { Text("صدای افزایشی", fontFamily = DashboardFonts.quote) },
+                    )
+                }
+            },
+            confirmButton = { TextButton(onClick = { settingsOpen = false }) { Text("بستن") } },
         )
     }
 }
 
 @Composable
-private fun TinyIntField(label: String, value: Int, min: Int, max: Int, onChange: (Int) -> Unit) {
-    OutlinedTextField(
-        value = value.toString(),
-        onValueChange = { t -> t.toIntOrNull()?.let { onChange(it.coerceIn(min, max)) } },
-        label = { Text(label, fontSize = 11.sp) },
-        modifier = Modifier.width(110.dp),
-    )
+private fun TimePick(label: String, hour: Int, minute: Int, onChange: (Int, Int) -> Unit) {
+    val ctx = LocalContext.current
+    OutlinedButton(
+        onClick = {
+            android.app.TimePickerDialog(ctx, { _, h, m -> onChange(h, m) }, hour, minute, true).show()
+        },
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text(
+            "$label  ${toPersianDigits("%d:%02d".format(hour, minute))}",
+            fontFamily = DashboardFonts.quote,
+        )
+    }
 }

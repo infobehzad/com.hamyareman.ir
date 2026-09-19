@@ -96,9 +96,13 @@ fun ClassPlanCard(
     var bag by remember(tick, isoN) { mutableStateOf(ClassPlanStore.prepBag(ctx, isoN)) }
     var hw by remember(tick, isoN) { mutableStateOf(ClassPlanStore.prepHw(ctx, isoN)) }
     val alarmOn = ClassPlanStore.alarmIsSet(reminders, snap, today)
-    val (ah, am) = ClassPlanStore.wakeHourMinute(snap, shift)
+    val alarmPrefs = remember(tick) { com.hamyareman.ir.ui.study.SchoolAlarmStore.load(ctx) }
+    val (ah, am) = if (shift == com.hamyareman.ir.ui.study.Shift.MORNING) alarmPrefs.wakeMH to alarmPrefs.wakeMM else alarmPrefs.wakeNH to alarmPrefs.wakeNM
     val alarmLabel = toPersianDigits("%d:%02d".format(ah, am))
-    val sleep = toPersianDigits(ClassPlanStore.sleepText(snap, shift))
+    val sleep = toPersianDigits(
+        if (shift == com.hamyareman.ir.ui.study.Shift.MORNING) "%d:%02d".format(alarmPrefs.sleepMH, alarmPrefs.sleepMM)
+        else "%d:%02d".format(alarmPrefs.sleepNH, alarmPrefs.sleepNM),
+    )
     val virtual = ClassPlanStore.isVirtual(ctx, isoN)
     var exam by remember(tick, isoN) { mutableStateOf(ClassPlanStore.examOf(ctx, isoN)) }
     var examOpen by remember { mutableStateOf(false) }

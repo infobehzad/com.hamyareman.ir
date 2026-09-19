@@ -70,6 +70,7 @@ class MainActivity : FragmentActivity() {
         // لمس اعلان پخش (حتی با اپ کاملاً بسته) → بعد از لاگین/باز شدن قفل،
         // صفحه‌ی تدریس همان درس باز و پخش همان‌جا شروع می‌شود.
         captureTeachIntent(intent)
+        captureSleepIntent(intent)
 
         setContent {
             val container = app.container
@@ -314,6 +315,16 @@ class MainActivity : FragmentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         captureTeachIntent(intent)
+        captureSleepIntent(intent)
+    }
+
+    private fun captureSleepIntent(intent: android.content.Intent?) {
+        val sleepAction = com.hamyareman.ir.platform.feature.playback.SleepPlaybackService.OPEN_ACTION
+        val extra = intent?.getBooleanExtra(com.hamyareman.ir.platform.feature.playback.SleepPlaybackService.OPEN_EXTRA, false) == true ||
+            intent?.getBooleanExtra(com.hamyareman.ir.platform.core.notifications.ReminderReceiver.EXTRA_OPEN_SLEEP, false) == true
+        if (intent?.action == sleepAction || extra) {
+            com.hamyareman.ir.ui.study.SleepLaunch.pending = true
+        }
     }
 
     /** extra درسِ اعلان پخش → [TeachLaunch] (nav به صفحه‌ی تدریس می‌پرد). */

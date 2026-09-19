@@ -34,7 +34,10 @@ data class PlaybackState(
  * نکته‌ی مهم درباره‌ی چرخه‌ی عمر: `release()` فقط **اتصال این صفحه** را قطع می‌کند،
  * نه پخش را. برای قطع صدا قبل از release باید [stop] صدا زده شود.
  */
-class PlaybackController(context: Context) {
+class PlaybackController(
+    context: Context,
+    private val serviceClass: Class<out androidx.media3.session.MediaSessionService> = PlaybackService::class.java,
+) {
 
     private val appContext = context.applicationContext
 
@@ -65,7 +68,7 @@ class PlaybackController(context: Context) {
     /** اتصال به سرویس. اگر سرویس بالا نباشد، اندروید خودش آن را start می‌کند. */
     suspend fun connect(): Boolean {
         if (isConnected) return true
-        val token = SessionToken(appContext, ComponentName(appContext, PlaybackService::class.java))
+        val token = SessionToken(appContext, ComponentName(appContext, serviceClass))
         val future = MediaController.Builder(appContext, token).buildAsync()
         return suspendCancellableCoroutine { continuation ->
             future.addListener(

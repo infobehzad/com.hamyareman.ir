@@ -104,6 +104,12 @@ fun ZahraNavHost() {
     val c = LocalAppContainer.current
     // لمس اعلان پخش → صفحه‌ی تدریس همان درس (قانون: صوت فقط در صفحه‌ی تدریس پخش می‌شود؛
     // پس بعد از لود شدن همان صفحه، پخش خودکار از TeachAudioBar شروع می‌شود).
+    LaunchedEffect(com.hamyareman.ir.ui.study.SleepLaunch.pending) {
+        if (com.hamyareman.ir.ui.study.SleepLaunch.pending) {
+            com.hamyareman.ir.ui.study.SleepLaunch.pending = false
+            nav.navigate(Screen.SleepNight.route) { launchSingleTop = true }
+        }
+    }
     LaunchedEffect(com.hamyareman.ir.ui.study.TeachLaunch.pendingTeachPack) {
         val p = com.hamyareman.ir.ui.study.TeachLaunch.pendingTeachPack ?: return@LaunchedEffect
         if (com.hamyareman.ir.platform.feature.study.BookModuleRegistry.pack(p) != null) {
@@ -191,6 +197,7 @@ fun ZahraNavHost() {
             composable(Screen.ClassPlanShift.route) { ClassPlanScreen(onBack = { nav.popBackStack() }, initialTab = 2) }
             composable(Screen.Subscription.route) { com.hamyareman.ir.ui.home.SubscriptionScreen { nav.popBackStack() } }
             composable(Screen.TomorrowPrep.route) { TomorrowPrepScreen { nav.popBackStack() } }
+            composable(Screen.SleepNight.route) { com.hamyareman.ir.ui.study.SleepNightScreen { nav.popBackStack() } }
             composable(Screen.Meds.route) { MedsScreen { nav.popBackStack() } }
             composable(Screen.SleepLog.route) { SleepLogScreen { nav.popBackStack() } }
             composable(Screen.ReadingCorner.route) { ReadingCornerScreen { nav.popBackStack() } }
