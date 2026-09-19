@@ -227,6 +227,8 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
     var dragMs by remember { mutableLongStateOf(-1L) }
     var quiet by remember { mutableStateOf(false) }
     var pendingStartKey by remember { mutableStateOf<String?>(null) }
+    // اگر بعد از فرمانِ پخش، موقعیت به انتهای فایل چسبیده باشد → یک‌بار از سرِ فایل (تله‌ی انتها).
+    var healArmKey by remember { mutableStateOf<String?>(null) }
     var pendingSeekMs by remember { mutableLongStateOf(-1L) }
 
     val track = tracks[activeIdx]
@@ -236,7 +238,18 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
     }
 
     fun posKey(t: TeachTrack) = "teach_${packId}_${t.cacheKey}_pos"
-    fun savedPos(t: TeachTrack) = store.getString(posKey(t), "0").toLongOrNull() ?: 0L
+    fun durKey(t: TeachTrack) = "teach_${packId}_${t.cacheKey}_dur"
+    /**
+     * «تله‌ی انتها»: اگر موقعیتِ ذخیره‌شده به انتهای فایلِ واقعی برسد یا از آن رد شده باشد
+     * (مثلاً فایلِ درس کوتاه/جایگزین شده باشد ولی موقعیتِ نسخهٔ بزرگِ قبلی مانده باشد)،
+     * پلیر از انتها شروع می‌کند: بی‌صدا، بدونِ هیچ خطایی. چنین موقعیتی را صفر می‌کنیم.
+     */
+    fun savedPos(t: TeachTrack): Long {
+        val p = store.getString(posKey(t), "0").toLongOrNull() ?: 0L
+        if (p <= 0) return 0L
+        val d = store.getString(durKey(t), "0").toLongOrNull() ?: 0L
+        return if (d > 3000 && p >= d - 1500) 0L else p
+    }
     fun savePos(t: TeachTrack, p: Long) { if (p > 0) store.putString(posKey(t), p.toString()) else store.remove(posKey(t)) }
     fun cached(t: TeachTrack) = cacheTick >= 0 && MediaVault.isVerified(context, t.cacheKey)
 
@@ -297,7 +310,17 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
             .build()
         p.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
-                if (playbackState == Player.STATE_READY && p.duration > 0) fbDur = p.duration
+                if (playbackState == Player.STATE_READY && p.duration > 0) {
+                    fbDur = p.duration
+                    store.putString("teach_${packId}_${t.cacheKey}_dur", p.duration.toString())
+                    // «تله‌ی انتها» — همان محافظتِ مسیرِ سرویس، اینجا هم لازم است.
+                    if (p.currentPosition >= p.duration - 1500) {
+                        p.seekTo(0L)
+                        fbPos = 0L
+                        savePos(t, 0L)
+                        msg = "موقعیتِ ذخیره‌شده بیرون از انتهای فایل بود؛ از ابتدا پخش می‌شود."
+                    }
+                }
                 if (playbackState == Player.STATE_ENDED) {
                     TeachStats.markTrackDone(context, packId, t.cacheKey)
                     savePos(t, 0L)
@@ -394,6 +417,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
             // و اگر پخش محلی شروع شد، واتچ‌داگ بتواند نتیجه را بسنجد.
             loadedKey = t.cacheKey
             loadedLocal = !forceServer && MediaVault.isVerified(context, t.cacheKey) && !fromServer
+            healArmKey = t.cacheKey
             lastSaveMs = 0L
             posMs = pos
             pendingStartKey = if (autoplay) t.cacheKey else null
@@ -528,9 +552,30 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
     }
 
     // تشخیص پایان ترک: STATE_ENDED، نزدیک انتهای فایل، یا ≥۹۵٪ ثانیه‌ی شنیده‌شده.
+    // «ترمیمِ انتها» برای مسیرِ سرویس: بعد از فرمانِ پخش، اگر فایل آماده شد اما
+    // موقعیت به انتهایش چسبیده بود و پخشی شروع نشد، از سرِ فایل ادامه می‌دهیم.
+    LaunchedEffect(healArmKey, state.durationMs, state.playing) {
+        val key = healArmKey ?: return@LaunchedEffect
+        val dur = state.durationMs
+        if (fallback != null || dur <= 0L) return@LaunchedEffect
+        if (state.playing) { healArmKey = null; return@LaunchedEffect }
+        val pos = playback.positionMs
+        if (pos > 0L && pos < dur - 1500L) { healArmKey = null; return@LaunchedEffect }
+        if (pos >= dur - 1500L) {
+            healArmKey = null
+            runCatching { playback.seekTo(0L) }
+            tracks.firstOrNull { it.cacheKey == key }?.let { savePos(it, 0L) }
+            posMs = 0L
+            com.hamyareman.ir.platform.feature.playback.TeachGate.pulse()
+            runCatching { playback.play() }
+            msg = "موقعیتِ ذخیره‌شده بیرون از انتهای فایل بود؛ از ابتدا پخش می‌شود."
+        }
+    }
+
     LaunchedEffect(state.ended, state.playing, state.positionMs, state.durationMs, posMs) {
         if (fallback != null) return@LaunchedEffect
         val dur = state.durationMs
+        if (dur > 0) loadedKey?.let { k -> store.putString("teach_${packId}_${k}_dur", dur.toString()) }
         val pos = maxOf(posMs, state.positionMs)
         val nearEnd = dur > 0 && pos >= dur - 1500
         val listenSnap = TeachStats.snap(context, packId)
