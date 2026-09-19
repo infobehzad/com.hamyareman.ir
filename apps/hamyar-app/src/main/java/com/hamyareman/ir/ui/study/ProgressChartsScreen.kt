@@ -145,6 +145,19 @@ fun ProgressChartsScreen(bookCode: String?, onBack: () -> Unit, onPickBook: (Str
                 }
 
                 teachActive.forEach { pack -> TeachRow(pack) }
+                packs.forEach { pack ->
+                    val exams = TeachStats.schoolExams(ctx, pack.packId)
+                    if (exams.isNotEmpty()) {
+                        Card(Modifier.fillMaxWidth()) {
+                            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text("امتحان مدرسه — ${pack.title}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                exams.takeLast(8).forEach { (iso, t) ->
+                                    Text("• $iso — $t", style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                        }
+                    }
+                }
 
                 cardRows.forEach { (pack, states) ->
                     val total = pack.flashcards.size
@@ -273,6 +286,13 @@ private fun MathLessonProgressPage(
                                     "• $k — تلاش ${toPersianDigits(tries.toString())} · درست ${toPersianDigits(ok.toString())} · نادرست ${toPersianDigits(bad.toString())}",
                                     style = MaterialTheme.typography.bodySmall,
                                 )
+                            }
+                        }
+                        val schoolEx = TeachStats.schoolExams(ctx, pack.packId)
+                        if (schoolEx.isNotEmpty()) {
+                            Text("امتحان مدرسه", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                            schoolEx.takeLast(8).forEach { (iso, t) ->
+                                Text("• $iso — $t", style = MaterialTheme.typography.bodySmall)
                             }
                         }
                         val log = StudyActivity.rows(ctx, pack.packId).asReversed().take(80)

@@ -117,7 +117,7 @@ object ClassPlanStore {
     fun captionOf(snap: Snapshot, date: LocalDate): String {
         val shift = shiftOf(snap, date)
         val cap = if (snap.cycleWeeks == 1) "هفته جاری" else SchoolShift.cycleCaption(snap.anchorIso, date, snap.cycleWeeks)
-        return "$cap شیفت ${shift.label}"
+        return "$cap · ${shift.label}"
     }
 
     /** شیفت هفتهٔ جاری را عوض کن و لنگر را طوری بگذار که محاسبه درست دربیاید. */
@@ -189,6 +189,44 @@ object ClassPlanStore {
     fun setExam(ctx: Context, iso: String, subject: String) { store(ctx).putString("exam_$iso", subject) }
     fun reportOf(ctx: Context, iso: String) = store(ctx).getString("rep_$iso")
     fun setReport(ctx: Context, iso: String, text: String) { store(ctx).putString("rep_$iso", text) }
+
+    fun virtualDays(ctx: Context): Set<String> {
+        val arr = runCatching { JSONArray(store(ctx).getString("virtual_days", "[]")) }.getOrDefault(JSONArray())
+        return (0 until arr.length()).map { arr.optString(it) }.filter { it.isNotBlank() }.toSet()
+    }
+
+    fun isVirtual(ctx: Context, iso: String): Boolean = iso in virtualDays(ctx)
+
+    fun setVirtual(ctx: Context, iso: String, on: Boolean) {
+        val set = virtualDays(ctx).toMutableSet()
+        if (on) set += iso else set -= iso
+        val arr = JSONArray(); set.sorted().forEach { arr.put(it) }
+        store(ctx).putString("virtual_days", arr.toString())
+    }
+
+    fun setVirtualRange(ctx: Context, fromIso: String, toIso: String, on: Boolean) {
+        val from = runCatching { LocalDate.parse(fromIso) }.getOrNull() ?: return
+        val to = runCatching { LocalDate.parse(toIso) }.getOrNull() ?: return
+        var d = from
+        while (!d.isAfter(to)) {
+            setVirtual(ctx, d.toString(), on)
+            d = d.plusDays(1)
+        }
+    }
+
+    fun packIdForSubject(subject: String): String? {
+        if (subject.isBlank() || subject == SPORT) return null
+        return BookModuleRegistry.modules.firstOrNull { shortBookName(it.title) == subject }
+            ?.packs?.firstOrNull()?.packId
+    }
+
+    fun saveExamReport(ctx: Context, iso: String, subject: String, text: String) {
+        setReport(ctx, iso, text)
+        val packId = packIdForSubject(subject) ?: return
+        if (text.isBlank()) return
+        TeachStats.noteSchoolExam(ctx, packId, iso, text)
+        StudyActivity.add(ctx, packId, "school_exam", "گزارش امتحان مدرسه ($iso): $text")
+    }
 
     fun wakeHourMinute(snap: Snapshot, shift: Shift): Pair<Int, Int> {
         return if (shift == Shift.MORNING) {

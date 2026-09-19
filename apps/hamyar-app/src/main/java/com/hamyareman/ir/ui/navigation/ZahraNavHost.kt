@@ -188,6 +188,8 @@ fun ZahraNavHost() {
             composable(Screen.HealthProgress.route) { HealthProgressScreen(onBack = { nav.popBackStack() }) }
             composable(Screen.WeeklySchedule.route) { WeeklyScheduleScreen { nav.popBackStack() } }
             composable(Screen.ClassPlan.route) { ClassPlanScreen(onBack = { nav.popBackStack() }, initialTab = 0) }
+            composable(Screen.ClassPlanShift.route) { ClassPlanScreen(onBack = { nav.popBackStack() }, initialTab = 2) }
+            composable(Screen.Subscription.route) { com.hamyareman.ir.ui.home.SubscriptionScreen { nav.popBackStack() } }
             composable(Screen.TomorrowPrep.route) { TomorrowPrepScreen { nav.popBackStack() } }
             composable(Screen.Meds.route) { MedsScreen { nav.popBackStack() } }
             composable(Screen.SleepLog.route) { SleepLogScreen { nav.popBackStack() } }

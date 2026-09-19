@@ -4,7 +4,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
-enum class Shift(val label: String) { MORNING("صبح"), EVENING("بعدازظهر") }
+enum class Shift(val label: String) { MORNING("شیفت صبح"), EVENING("شیفت ظهر") }
 
 /** ریاضی تقویم مدرسه — شنبه=۱ … جمعه=۷؛ چرخه‌ی شیفت از لنگر. */
 object SchoolShift {

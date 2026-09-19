@@ -181,6 +181,31 @@ object TeachStats {
     }
 
     /** همه‌ی پک‌هایی که آمار دارند (برای صفحه‌ی پیشرفت). */
+    /** گزارش امتحان مدرسه — روی همان پک درس، برای نمودار پیشرفت و سینک. */
+    fun noteSchoolExam(ctx: Context, packId: String, iso: String, text: String) {
+        if (packId.isBlank() || text.isBlank()) return
+        val o = read(ctx, packId)
+        val arr = o.optJSONArray("sx") ?: org.json.JSONArray()
+        arr.put(
+            JSONObject()
+                .put("iso", iso)
+                .put("t", text)
+                .put("at", System.currentTimeMillis()),
+        )
+        o.put("sx", arr)
+        write(ctx, packId, o)
+    }
+
+    fun schoolExams(ctx: Context, packId: String): List<Pair<String, String>> {
+        val arr = read(ctx, packId).optJSONArray("sx") ?: return emptyList()
+        return (0 until arr.length()).mapNotNull { i ->
+            val o = arr.optJSONObject(i) ?: return@mapNotNull null
+            val iso = o.optString("iso")
+            val t = o.optString("t")
+            if (t.isBlank()) null else iso to t
+        }
+    }
+
     fun allPackIds(ctx: Context): List<String> {
         val s = store(ctx)
         // LocalStore همه‌ی کلیدها را ندارد؛ پس کلیدهای شناخته‌شده‌ی رجیستری را می‌پیماییم.

@@ -165,6 +165,7 @@ fun HomeScreen(nav: NavController) {
             ClassPlanCard(
                 onOpenPlan = { nav.navigate(Screen.ClassPlan.route) },
                 onOpenPrep = { nav.navigate(Screen.TomorrowPrep.route) },
+                onOpenAlarm = { nav.navigate(Screen.ClassPlanShift.route) },
             )
 
             SectionCard("حالت امروز چطوره؟", "با یک ایموجی ثبتش کن — اختیاریه.") { nav.navigate(Screen.Mood.route) }
@@ -196,7 +197,7 @@ private fun GreetingBanner(title: String, subtitle: String) {
                         listOf(Color(0xFF0F766E), Color(0xFF115E59), Color(0xFF1E3A8A)),
                     ),
                 )
-                .padding(horizontal = 22.dp, vertical = 20.dp),
+                .padding(horizontal = 16.dp, vertical = 10.dp),
             contentAlignment = Alignment.Center,
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -204,7 +205,7 @@ private fun GreetingBanner(title: String, subtitle: String) {
                     title,
                     color = Color.White,
                     fontFamily = DashboardFonts.greeting,
-                    fontSize = 26.sp,
+                    fontSize = 22.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )

@@ -9,4 +9,6 @@ import com.hamyareman.ir.R
 object DashboardFonts {
     val greeting = FontFamily(Font(R.font.delbar, FontWeight.Normal))
     val quote = FontFamily(Font(R.font.aria_semibold, FontWeight.SemiBold))
+    val aria = quote
+    val lalezar = FontFamily(Font(R.font.lalezar, FontWeight.Normal))
 }
