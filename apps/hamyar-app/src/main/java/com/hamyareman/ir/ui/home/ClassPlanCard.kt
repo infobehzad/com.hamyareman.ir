@@ -12,15 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -31,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,6 +44,9 @@ import com.hamyareman.ir.LocalAppContainer
 import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.ui.study.ClassPlanStore
+import com.hamyareman.ir.ui.study.ClassPlanSync
+import com.hamyareman.ir.ui.study.StateSync
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 private val LessonColors = listOf(
@@ -79,6 +77,8 @@ fun ClassPlanCard(
     val prepDate = remember(tick) { ClassPlanStore.prepTargetDate() }
     val snap = remember(tick) { ClassPlanStore.load(ctx) }
     LaunchedEffect(tick, snap.cycleWeeks, snap.anchorIso, snap.fixedEvening, snap.morningHour, snap.noonHour) {
+        // رفرشِ تیک‌ها و اطلاع‌رسانی‌های فردا در ساعت خروج / پایان کلاس مجازی
+        ClassPlanStore.maybeRefreshAtExit(ctx, reminders = reminders)
         ClassPlanStore.syncAlarms(ctx, reminders, snap, today)
     }
     val j = JalaliDate.toJalali(today.toString())
@@ -95,6 +95,8 @@ fun ClassPlanCard(
     val isoT = today.toString()
     var bag by remember(tick, isoN) { mutableStateOf(ClassPlanStore.prepBag(ctx, isoN)) }
     var hw by remember(tick, isoN) { mutableStateOf(ClassPlanStore.prepHw(ctx, isoN)) }
+    val bagLock = remember(tick, isoN, bag) { ClassPlanStore.bagLocked(ctx, isoN) }
+    val hwLock = remember(tick, isoN, hw) { ClassPlanStore.hwLocked(ctx, isoN) }
     val alarmOn = ClassPlanStore.alarmIsSet(reminders, snap, today)
     val alarmPrefs = remember(tick) { com.hamyareman.ir.ui.study.SchoolAlarmStore.load(ctx) }
     val (ah, am) = if (shift == com.hamyareman.ir.ui.study.Shift.MORNING) alarmPrefs.wakeMH to alarmPrefs.wakeMM else alarmPrefs.wakeNH to alarmPrefs.wakeNM
@@ -105,9 +107,16 @@ fun ClassPlanCard(
     )
     val virtual = ClassPlanStore.isVirtual(ctx, isoN)
     var exam by remember(tick, isoN) { mutableStateOf(ClassPlanStore.examOf(ctx, isoN)) }
-    var examOpen by remember { mutableStateOf(false) }
     var report by remember(tick, isoN, exam) { mutableStateOf(ClassPlanStore.reportOf(ctx, isoN)) }
-    val examOptions = ClassPlanStore.lessonsFor(snap, showDate).filter { it.isNotBlank() && it != "—" }
+    val pushScope = rememberCoroutineScope()
+    fun pushChecks() {
+        pushScope.launch {
+            val uid = LocalAppContainer.current.auth.cachedUserId()
+                ?: runCatching { LocalAppContainer.current.auth.currentUserId() }.getOrNull().orEmpty()
+            if (uid.isBlank()) return@launch
+            ClassPlanSync.push(ctx, LocalAppContainer.current.tables, uid, StateSync.KEY_CHECKS)
+        }
+    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -183,68 +192,51 @@ fun ClassPlanCard(
                     PrepTick(
                         label = "کیف مدرسه آماده است",
                         checked = bag && !virtual,
-                        enabled = !virtual,
+                        enabled = !virtual && !bagLock,
                         modifier = Modifier.weight(1f),
                     ) {
                         bag = it
                         ClassPlanStore.setPrepBag(ctx, isoN, it)
+                        pushChecks()
                     }
                     PrepTick(
                         label = "تکالیف انجام شده",
                         checked = hw,
-                        enabled = true,
-                        modifier = Modifier.weight(1f),
+                        enabled = !hwLock,
+                        modifier = Modifier.weight(1f).padding(start = 8.dp),
                     ) {
                         hw = it
                         ClassPlanStore.setPrepHw(ctx, isoN, it)
+                        pushChecks()
                     }
                 }
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
                     PrepTick(
                         label = "آلارم برای ساعت $alarmLabel تنظیم شده",
                         checked = alarmOn,
                         enabled = false,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).clickable(onClick = onOpenAlarm),
                     )
-                    IconButton(onClick = onOpenAlarm, modifier = Modifier.size(36.dp)) {
-                        Icon(Icons.Filled.Settings, contentDescription = "تنظیم آلارم")
-                    }
                     PrepTick(
                         label = "ساعت خوابت $sleep باشد",
                         checked = true,
                         enabled = false,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).padding(start = 8.dp),
                     )
                 }
             }
-            Box(Modifier.fillMaxWidth()) {
-                PrepTick(
-                    label = if (exam.isBlank()) "$dayLabel امتحان داری؟" else "$dayLabel امتحان $exam",
-                    checked = exam.isNotBlank(),
-                    enabled = true,
-                    modifier = Modifier.fillMaxWidth().clickable { examOpen = true },
-                ) { examOpen = true }
-                DropdownMenu(expanded = examOpen, onDismissRequest = { examOpen = false }) {
-                    DropdownMenuItem(
-                        text = { Text("بدون امتحان", fontFamily = DashboardFonts.quote) },
-                        onClick = {
-                            exam = ""
-                            ClassPlanStore.setExam(ctx, isoN, "")
-                            examOpen = false
-                        },
-                    )
-                    examOptions.forEach { sub ->
-                        DropdownMenuItem(
-                            text = { Text(sub, fontFamily = DashboardFonts.lalezar) },
-                            onClick = {
-                                exam = sub
-                                ClassPlanStore.setExam(ctx, isoN, sub)
-                                examOpen = false
-                            },
-                        )
-                    }
-                }
-            }
+            // در داشبورد فقط نمایش است؛ خودِ متن به صفحهٔ آماده‌سازی فردا می‌رود.
+            Text(
+                if (exam.isBlank()) "$dayLabel امتحان داری؟" else "$dayLabel امتحان $exam",
+                fontFamily = DashboardFonts.quote,
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.fillMaxWidth().clickable(onClick = onOpenPrep),
+            )
             if (exam.isNotBlank()) {
                 OutlinedTextField(
                     value = report,

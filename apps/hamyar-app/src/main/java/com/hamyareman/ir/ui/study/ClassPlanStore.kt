@@ -72,7 +72,11 @@ object ClassPlanStore {
      * رفرشِ اطلاع‌رسانی‌های فردا در ساعتِ خروج (یا پایانِ کلاس مجازی):
      * تیک‌های قفل‌شده آزاد می‌شوند تا برای روز بعد آماده شوند.
      */
-    fun maybeRefreshAtExit(ctx: Context, now: LocalDateTime = LocalDateTime.now(JalaliDate.TEHRAN)) {
+    fun maybeRefreshAtExit(
+        ctx: Context,
+        now: LocalDateTime = LocalDateTime.now(JalaliDate.TEHRAN),
+        reminders: ReminderScheduler? = null,
+    ) {
         val today = now.toLocalDate()
         val s = store(ctx)
         if (s.getBool("refreshed_$today", false)) return
@@ -86,6 +90,11 @@ object ClassPlanStore {
         if (now.hour * 60 + now.minute < gate) return
         s.keysWithPrefix("lock_").forEach { s.remove(it) }
         s.putBool("refreshed_$today", true)
+        // همهٔ اطلاع‌رسانی‌های مربوط به فردا دوباره زمان‌بندی می‌شوند.
+        if (reminders != null) {
+            val next = firstSchoolDay(snap, today.plusDays(1))
+            syncAlarms(ctx, reminders, snap, next)
+        }
     }
 
     fun store(ctx: Context) = LocalStore(ctx, PREF)
@@ -491,6 +500,54 @@ object ClassPlanStore {
             .firstOrNull { !isSchoolHoliday(snap, it) }
             ?: from
 
+
+    // --------------------------------------------- صورتِ تیک‌ها (برای گزارش ماهانه)
+
+    data class CheckEntry(
+        val iso: String,
+        /** `روزمره` یا `امتحان`. */
+        val group: String,
+        val title: String,
+        val detail: String,
+    )
+
+    /**
+     * همهٔ تیک‌های ثبت‌شده (روزمره و مربوط به امتحان) برای دسته‌بندیِ ماهانه
+     * در صفحهٔ آماده‌سازی فردا.
+     */
+    fun checkEntries(ctx: Context): List<CheckEntry> {
+        val s = store(ctx)
+        val out = mutableListOf<CheckEntry>()
+        s.keysWithPrefix("bag_").forEach { k ->
+            val iso = k.removePrefix("bag_")
+            if (iso.length == 10 && s.getBool(k)) out += CheckEntry(iso, "daily", "کیف مدرسه آماده است", "")
+        }
+        s.keysWithPrefix("hw_").forEach { k ->
+            val iso = k.removePrefix("hw_")
+            if (iso.length == 10 && s.getBool(k)) out += CheckEntry(iso, "daily", "تکالیف انجام شده", "")
+        }
+        s.keysWithPrefix("examprep_").forEach { k ->
+            val rest = k.removePrefix("examprep_")
+            val iso = rest.take(10)
+            val option = rest.drop(11)
+            if (iso.length == 10 && s.getBool(k)) out += CheckEntry(iso, "exam", option, "آمادگی امتحان")
+        }
+        s.keysWithPrefix("exam_").forEach { k ->
+            val iso = k.removePrefix("exam_")
+            if (iso.length == 10) {
+                val sub = s.getString(k)
+                if (sub.isNotBlank()) out += CheckEntry(iso, "exam", "امتحان $sub", "")
+            }
+        }
+        s.keysWithPrefix("rep_").forEach { k ->
+            val iso = k.removePrefix("rep_")
+            if (iso.length == 10) {
+                val text = s.getString(k)
+                if (text.isNotBlank()) out += CheckEntry(iso, "report", "گزارش روز", text)
+            }
+        }
+        return out.sortedWith(compareByDescending<CheckEntry> { it.iso }.thenBy { it.group })
+    }
 
     // ------------------------------------------------------- سینک با سرور
 
