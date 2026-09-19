@@ -34,6 +34,8 @@ jobs:
         with:
           packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-cleanup: never
       - name: wellness unit tests
         run: |
           ./gradlew :hamyar-app:testDebugUnitTest \
@@ -50,17 +52,22 @@ jobs:
 
   android:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-          cache: gradle
       - uses: android-actions/setup-android@v3
         with:
           packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
+      # cache-cleanup: never — قدمِ «پاک‌سازیِ کش» در انتهای کار یک بیلدِ جدا اجرا می‌کند
+      # و طبق باگِ شناخته‌شده‌ی Gradle گاهی بیش از نیم‌ساعت تا یک ساعت فریز می‌کند؛
+      # در حالی که خودِ بیلد و آپلودِ APK مدت‌ها قبل تمام شده است.
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-cleanup: never
       - run: ./gradlew test :hamyar-app:assembleDebug :hamyar-app:lintDebug --stacktrace
       - name: Upload debug APK
         if: always()
