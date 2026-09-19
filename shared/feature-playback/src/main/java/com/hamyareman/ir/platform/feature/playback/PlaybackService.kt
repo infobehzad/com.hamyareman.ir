@@ -25,8 +25,34 @@ import com.google.common.util.concurrent.ListenableFuture
  * نشده، دکمه‌ی پلی اعلان به‌جای پخش، همان صفحه را باز می‌کند.
  */
 object TeachGate {
-    @Volatile var teachPageOpen: Boolean = false
+    /**
+     * شمارندهٔ بازبودنِ صفحه‌های پخش: چند صفحه می‌توانند هم‌زمان ادعای «باز» بودن
+     * کنند (مثلاً هنگام جابه‌جایی بین صفحه‌ها) و فقط با بسته‌شدنِ آخری،
+     * پخشِ پس‌زمینه ممنوع می‌شود. (قبلاً با یک boolean، بسته‌شدنِ صفحهٔ قبلی
+     * پخشِ صفحهٔ جدید را بلافاصله متوقف می‌کرد.)
+     */
+    private var openCount = 0
 
+    @Volatile var teachPageOpen: Boolean = false
+        private set
+
+    @Synchronized
+    fun enter() {
+        openCount++
+        teachPageOpen = true
+    }
+
+    @Synchronized
+    fun exit() {
+        openCount = (openCount - 1).coerceAtLeast(0)
+        teachPageOpen = openCount > 0
+    }
+
+    @Synchronized
+    fun closeAll() {
+        openCount = 0
+        teachPageOpen = false
+    }
     /** درسی که باید در باز شدن بعدی اپ، صفحه‌ی تدریسش باز شود. */
     @Volatile var requestedPack: String? = null
 

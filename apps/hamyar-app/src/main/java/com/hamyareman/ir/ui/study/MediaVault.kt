@@ -53,9 +53,42 @@ object MediaVault {
     fun isCached(ctx: Context, cacheKey: String): Boolean =
         vaultFile(ctx, cacheKey).let { it.exists() && it.length() > 32 }
 
+    /**
+     * آیا این فایلِ دانلودشده **تأیید شده** است؟ (دانلود کامل و قابلِ رمزگشایی)
+     * فقط فایل‌های تأییدشده برای پخشِ آفلاین استفاده می‌شوند تا یک فایلِ نیمه‌کاره
+     * پخش را نشکند.
+     */
+    fun isVerified(ctx: Context, cacheKey: String): Boolean =
+        isCached(ctx, cacheKey) && ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getStringSet("verified", emptySet()).orEmpty().contains(cacheKey)
+
+    fun markVerified(ctx: Context, cacheKey: String) {
+        val prefs = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val set = prefs.getStringSet("verified", emptySet()).orEmpty().toMutableSet()
+        set += cacheKey
+        prefs.edit().putStringSet("verified", set).apply()
+    }
+
+    /** نگاهِ کوتاه به ابتدای فایلِ رمزگشایی‌شده — برای اطمینان از سالم‌بودنِ دانلود. */
+    fun peek(ctx: Context, cacheKey: String, bytes: Int = 4096): ByteArray? {
+        val all = vaultFile(ctx, cacheKey)
+        if (!all.exists() || all.length() <= 20) return null
+        return runCatching {
+            val raw = all.inputStream().use { it.readBytes().copyOf((20 + bytes).coerceAtMost(all.length().toInt())) }
+            if (!raw.startsWith(MAGIC.toByteArray(Charsets.US_ASCII))) return@runCatching null
+            val iv = raw.copyOfRange(4, 20)
+            val cipher = Cipher.getInstance("AES/CTR/NoPadding")
+            cipher.init(Cipher.DECRYPT_MODE, key(ctx), IvParameterSpec(iv))
+            cipher.doFinal(raw, 20, raw.size - 20)
+        }.getOrNull()
+    }
+
     fun delete(ctx: Context, cacheKey: String) {
         vaultFile(ctx, cacheKey).delete()
         File(vaultDir(ctx), "$cacheKey.enc.part").delete()
+        val prefs = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val set = prefs.getStringSet("verified", emptySet()).orEmpty().toMutableSet()
+        if (set.remove(cacheKey)) prefs.edit().putStringSet("verified", set).apply()
     }
 
     fun cachedBytes(ctx: Context): Long =
@@ -124,7 +157,7 @@ object MediaVault {
      * دانلود از [url] و نوشتنِ رمزشده (AES/CTR با IV تازه) در گاوصندوق.
      * روی دیسک حتی یک بایتِ خام از رسانه نوشته نمی‌شود.
      */
-    fun downloadEncrypted(ctx: Context, url: String, cacheKey: String, onProgress: (Int) -> Unit) {
+    fun downloadEncrypted(ctx: Context, url: String, cacheKey: String, onProgress: (Long, Long) -> Unit) {
         val conn = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
             connectTimeout = 15000
             readTimeout = 30000
@@ -132,7 +165,24 @@ object MediaVault {
         }
         conn.connect()
         if (conn.responseCode !in 200..299) error("HTTP ${conn.responseCode}")
-        val total = conn.contentLength
+        // سرور معمولاً Content-Length نمی‌فرستد (پاسخ chunked)؛ در این صورت
+        // فقط حجمِ دریافت‌شده گزارش می‌شود و درصد نمایش داده نمی‌شود.
+        var total = conn.contentLengthLong
+        if (total <= 0) {
+            val head = runCatching {
+                val c = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
+                    connectTimeout = 8000
+                    readTimeout = 8000
+                    requestMethod = "HEAD"
+                    instanceFollowRedirects = true
+                }
+                c.connect()
+                val len = c.getHeaderFieldLong("Content-Length", -1L)
+                c.disconnect()
+                len
+            }.getOrDefault(-1L)
+            if (head > 0) total = head
+        }
         val cipher = Cipher.getInstance("AES/CTR/NoPadding")
         val iv = ByteArray(16).also { SecureRandom().nextBytes(it) }
         cipher.init(Cipher.ENCRYPT_MODE, key(ctx), IvParameterSpec(iv))
@@ -145,12 +195,12 @@ object MediaVault {
                 conn.inputStream.use { input ->
                     val buf = ByteArray(32 * 1024)
                     var read: Int
-                    var done = 0
+                    var done = 0L
                     while (input.read(buf).also { read = it } > 0) {
                         val enc = cipher.update(buf, 0, read)
                         if (enc != null) out.write(enc)
                         done += read
-                        if (total > 0) onProgress(done * 100 / total)
+                        onProgress(done, total)
                     }
                     val tail = cipher.doFinal()
                     if (tail != null) out.write(tail)
@@ -159,6 +209,14 @@ object MediaVault {
             if (!part.renameTo(target)) {
                 part.copyTo(target, overwrite = true)
                 part.delete()
+            }
+            // تأییدِ سلامت: ابتدای فایل باید واقعاً قابلِ رمزگشایی باشد.
+            runCatching { markVerified(ctx, cacheKey) }.also {
+                val head = peek(ctx, cacheKey)
+                if (head == null || head.size < 64) {
+                    target.delete()
+                    error("فایل ناقص دانلود شد؛ دوباره تلاش کن.")
+                }
             }
         } finally {
             part.delete()

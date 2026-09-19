@@ -46,6 +46,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -182,6 +184,33 @@ internal data class LessonNote(
     val updatedAt: Long,
 )
 
+private val DEFAULT_NOTE_TITLES = listOf(
+    "نکته مهم",
+    "فرمول‌ها",
+    "اشتباه‌های من",
+    "تمرین‌ها",
+    "خلاصهٔ درس",
+    "سؤال از معلم",
+)
+
+internal fun readNoteTitles(store: LocalStore): List<String> =
+    (DEFAULT_NOTE_TITLES + parseNoteTitles(store.getString("note_titles", "[]"))).distinct()
+
+internal fun writeNoteTitles(store: LocalStore, titles: List<String>) {
+    store.putString("note_titles", noteTitlesJson(titles))
+}
+
+internal fun noteTitlesJson(titles: List<String>): String {
+    val arr = JSONArray()
+    titles.forEach { arr.put(it) }
+    return arr.toString()
+}
+
+internal fun parseNoteTitles(raw: String): List<String> = runCatching {
+    val arr = JSONArray(raw)
+    (0 until arr.length()).map { arr.optString(it) }.filter { it.isNotBlank() }
+}.getOrDefault(emptyList())
+
 internal fun readNotes(store: LocalStore): List<LessonNote> = runCatching {
     val arr = JSONArray(store.getString(KEY_NOTES_ITEMS, "[]"))
     buildList {
@@ -265,21 +294,41 @@ private fun guessMime(ext: String): String =
 
 private fun isImageMime(mime: String) = mime.startsWith("image/")
 
+/** پسوندِ واقعی — از مسیرِ فایل هم اگر در فهرست خالی مانده باشد. */
+private fun extOf(item: NoteFile): String =
+    item.ext.ifBlank { File(item.localPath).extension }.lowercase()
+
+private fun readHead(path: String, n: Int): ByteArray? = runCatching {
+    val f = File(path)
+    if (!f.exists()) return@runCatching null
+    val buf = ByteArray(n)
+    val read = f.inputStream().use { it.read(buf, 0, n) }
+    if (read <= 0) null else buf.copyOf(read)
+}.getOrNull()
+
 private fun isHtmlItem(item: NoteFile): Boolean {
-    val ext = item.ext.lowercase()
+    val ext = extOf(item)
     return ext == "html" || ext == "htm" || item.mime.contains("html")
 }
 
-private fun isPlainTextItem(item: NoteFile): Boolean {
-    val ext = item.ext.lowercase()
-    if (isHtmlItem(item)) return false
-    return item.mime.startsWith("text/") || ext in setOf("txt", "md", "rtf")
+private fun isPdfItem(item: NoteFile): Boolean {
+    if (extOf(item) == "pdf" || item.mime == "application/pdf") return true
+    val head = readHead(item.localPath, 5) ?: return false
+    return String(head, Charsets.US_ASCII).startsWith("%PDF-")
 }
 
-private fun isPdfItem(item: NoteFile): Boolean =
-    item.mime == "application/pdf" || item.ext.equals("pdf", ignoreCase = true)
+private fun isPlainTextItem(item: NoteFile): Boolean {
+    if (isHtmlItem(item) || isPdfItem(item)) return false
+    val ext = extOf(item)
+    if (item.mime.startsWith("text/") || ext in setOf("txt", "md", "rtf")) return true
+    // بو کردنِ محتوا: اگر بایتِ کنترلی نداشت، متن است.
+    val head = readHead(item.localPath, 512) ?: return false
+    if (head.isEmpty()) return false
+    return head.all { b -> b >= 9.toByte() }
+}
 
-private fun needsOpenChoice(item: NoteFile): Boolean =
+/** هر چه بشود داخل اپ نشان داد. */
+private fun canOpenInternal(item: NoteFile): Boolean =
     isImageMime(item.mime) || isHtmlItem(item) || isPlainTextItem(item) || isPdfItem(item)
 
 private fun fileGroup(item: NoteFile): String = when {
@@ -307,9 +356,9 @@ fun PdfUploadScreen(onBack: () -> Unit) {
     var needSubMsg by remember { mutableStateOf<String?>(null) }
     var imageAlbum by remember { mutableStateOf<List<NoteFile>?>(null) }
     var imageStart by remember { mutableIntStateOf(0) }
-    var openPick by remember { mutableStateOf<NoteFile?>(null) }
     var internalView by remember { mutableStateOf<NoteFile?>(null) }
     var noteItems by remember { mutableStateOf(readNotes(store)) }
+    var noteTitles by remember { mutableStateOf(readNoteTitles(store)) }
     var noteTitle by remember { mutableStateOf("") }
     var editingNoteId by remember { mutableStateOf<String?>(null) }
     var notesOpen by remember { mutableStateOf(false) }
@@ -333,6 +382,42 @@ fun PdfUploadScreen(onBack: () -> Unit) {
         }.onFailure { notice = "برنامه‌ای برای بازکردن این فایل پیدا نشد." }
     }
 
+    fun openInternal(item: NoteFile) {
+        when {
+            isImageMime(item.mime) -> {
+                val album = items.filter { isImageMime(it.mime) }
+                imageStart = album.indexOfFirst { it.id == item.id }.coerceAtLeast(0)
+                imageAlbum = album
+            }
+            isPdfItem(item) -> pdfView = item
+            isHtmlItem(item) || isPlainTextItem(item) -> internalView = item
+            else -> openExternal(item)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        val uid0 = container.auth.cachedUserId()
+            ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+        if (uid0.isNotBlank()) {
+            val remote = StateSync.pull(context, container.tables, uid0, StateSync.KEY_NOTE_TITLES)
+            if (remote != null) {
+                val merged = (readNoteTitles(store) + parseNoteTitles(remote.first)).distinct()
+                if (merged != noteTitles) {
+                    noteTitles = merged
+                    writeNoteTitles(store, merged)
+                }
+            } else {
+                StateSync.push(
+                    ctx = context,
+                    tables = container.tables,
+                    uid = uid0,
+                    key = StateSync.KEY_NOTE_TITLES,
+                    payload = noteTitlesJson(noteTitles),
+                )
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         val uid = container.auth.cachedUserId()
             ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
@@ -340,7 +425,7 @@ fun PdfUploadScreen(onBack: () -> Unit) {
         when (val remote = container.tables.get(TableIds.LESSON_NOTES, "notes_$uid")) {
             is AppResult.Ok -> {
                 val row = remote.value ?: return@LaunchedEffect
-                val remoteText = row.string("text")
+                val remoteText = row.string("payload").ifBlank { row.string("text") }
                 val remoteAt = row.long("updatedAt")
                 val localAt = store.getLong(KEY_NOTES_AT, 0L)
                 if (remoteText.isNotBlank() && remoteAt >= localAt) {
@@ -535,13 +620,24 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Right,
             )
-            OutlinedTextField(
-                value = noteTitle,
-                onValueChange = { noteTitle = it },
-                label = { Text("عنوان نکته") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                textStyle = androidx.compose.ui.text.TextStyle(textAlign = TextAlign.Right),
+            NoteTitlePicker(
+                titles = noteTitles,
+                selected = noteTitle,
+                onSelect = { noteTitle = it },
+                onAdd = { title ->
+                    if (title.isNotBlank() && title !in noteTitles) {
+                        noteTitles = noteTitles + title
+                        writeNoteTitles(store, noteTitles)
+                        scope.launch {
+                            val uid = container.auth.cachedUserId()
+                                ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+                            if (uid.isNotBlank()) {
+                                StateSync.push(ctx = context, tables = container.tables, uid = uid, key = StateSync.KEY_NOTE_TITLES, payload = noteTitlesJson(noteTitles))
+                            }
+                        }
+                    }
+                    noteTitle = title
+                },
             )
             LinedNotesPaper(
                 value = notes,
@@ -556,6 +652,9 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                 noteItems = next.sortedByDescending { it.updatedAt }
                 writeNotes(store, noteItems)
                 editingNoteId = null
+                // پس از ذخیره، دفترچه و عنوان خالی می‌شوند.
+                noteTitle = ""
+                notes = ""
                 scope.launch {
                     val uid = container.auth.cachedUserId()
                         ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
@@ -563,9 +662,11 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                         notice = "نکات روی دستگاه ذخیره شد. برای سینک با سرور وارد شو."
                         return@launch
                     }
+                    val encoded = encodeNotesForServer(noteItems)
                     val payload = mapOf(
                         "userId" to uid,
-                        "text" to encodeNotesForServer(noteItems),
+                        "payload" to encoded,
+                        "text" to encoded.take(7000),
                         "updatedAt" to now,
                     )
                     val perms = AppwriteClientProvider.ownerOnly(uid)
@@ -670,21 +771,9 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                                 item = item,
                                 modifier = Modifier.weight(1f),
                                 onOpen = {
-                                    if (isImageMime(item.mime)) {
-                                        val album = groupItems.filter { isImageMime(it.mime) }
-                                        imageStart = album.indexOfFirst { it.id == item.id }.coerceAtLeast(0)
-                                        imageAlbum = album
-                                    } else {
-                                        runCatching {
-                                            val file = File(item.localPath)
-                                            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-                                            context.startActivity(
-                                                Intent(Intent.ACTION_VIEW).setDataAndType(uri, item.mime)
-                                                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION),
-                                            )
-                                        }.onFailure { notice = "برنامه‌ای برای بازکردن این فایل پیدا نشد." }
-                                    }
+                                    if (canOpenInternal(item)) openInternal(item) else openExternal(item)
                                 },
+                                onExternal = { openExternal(item) },
                                 onDelete = {
                                     scope.launch {
                                         withContext(Dispatchers.IO) { runCatching { File(item.localPath).delete() } }
@@ -869,34 +958,6 @@ fun PdfUploadScreen(onBack: () -> Unit) {
             title = { Text("نیاز به اشتراک فعال") },
             text = { Text(msg) },
             confirmButton = { TextButton(onClick = { needSubMsg = null }) { Text("متوجه شدم") } },
-        )
-    }
-
-    openPick?.let { item ->
-        AlertDialog(
-            onDismissRequest = { openPick = null },
-            title = { Text("باز کردن «${item.title}»") },
-            text = { Text("داخل اپ ببینی یا با برنامهٔ دیگری روی گوشی؟") },
-            confirmButton = {
-                TextButton(onClick = {
-                    openPick = null
-                    when {
-                        isImageMime(item.mime) -> {
-                            val album = items.filter { isImageMime(it.mime) }
-                            imageStart = album.indexOfFirst { it.id == item.id }.coerceAtLeast(0)
-                            imageAlbum = album
-                        }
-                        isPdfItem(item) -> pdfView = item
-                        else -> internalView = item
-                    }
-                }) { Text("داخل اپ") }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    openPick = null
-                    openExternal(item)
-                }) { Text("با برنامه دیگر") }
-            },
         )
     }
 
@@ -1190,6 +1251,7 @@ private fun GalleryTile(
     modifier: Modifier,
     onOpen: () -> Unit,
     onDelete: () -> Unit,
+    onExternal: () -> Unit = {},
 ) {
     Column(modifier.clickable(onClick = onOpen)) {
         Box(
@@ -1217,6 +1279,9 @@ private fun GalleryTile(
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Right,
         )
+        if (canOpenInternal(item)) {
+            TextButton(onClick = onExternal, modifier = Modifier.fillMaxWidth()) { Text("با برنامهٔ دیگر") }
+        }
         TextButton(onClick = onDelete, modifier = Modifier.fillMaxWidth()) { Text("حذف") }
     }
 }
@@ -1325,8 +1390,8 @@ private fun GalleryThumb(item: NoteFile) {
         }
     }
     val previewText = remember(item.localPath) {
-        if (bmp == null && !isImageMime(item.mime)) {
-            runCatching { File(item.localPath).readText(Charsets.UTF_8).take(160) }.getOrDefault("")
+        if (bmp == null && !isImageMime(item.mime) && !isPdfItem(item)) {
+            runCatching { File(item.localPath).readText(Charsets.UTF_8).take(200) }.getOrDefault("")
         } else ""
     }
     when {
@@ -1347,5 +1412,76 @@ private fun GalleryThumb(item: NoteFile) {
             modifier = Modifier.fillMaxSize().padding(6.dp),
         )
         else -> Text(item.ext.uppercase().ifBlank { "FILE" }, fontWeight = FontWeight.Bold)
+    }
+}
+
+/**
+ * انتخاب عنوانِ نکته: چند عنوانِ آماده + گزینهٔ آخر برای ساختِ عنوانِ جدید.
+ */
+@Composable
+private fun NoteTitlePicker(
+    titles: List<String>,
+    selected: String,
+    onSelect: (String) -> Unit,
+    onAdd: (String) -> Unit,
+) {
+    var menu by remember { mutableStateOf(false) }
+    var adding by remember { mutableStateOf(false) }
+    var draft by remember { mutableStateOf("") }
+
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Box(Modifier.fillMaxWidth()) {
+            OutlinedButton(onClick = { menu = true }, modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    selected.ifBlank { "انتخاب عنوان نکته" },
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Right,
+                )
+            }
+            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                titles.forEach { t ->
+                    DropdownMenuItem(
+                        text = { Text(t, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Right) },
+                        onClick = { onSelect(t); menu = false },
+                    )
+                }
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            "＋ افزودن عنوان جدید…",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Right,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    },
+                    onClick = { menu = false; adding = true },
+                )
+            }
+        }
+        if (adding) {
+            OutlinedTextField(
+                value = draft,
+                onValueChange = { draft = it },
+                label = { Text("عنوان جدید") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = androidx.compose.ui.text.TextStyle(textAlign = TextAlign.Right),
+            )
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = { adding = false; draft = "" },
+                    modifier = Modifier.weight(1f),
+                ) { Text("انصراف") }
+                OutlinedButton(
+                    onClick = {
+                        val t = draft.trim()
+                        if (t.isNotBlank()) onAdd(t)
+                        adding = false
+                        draft = ""
+                    },
+                    modifier = Modifier.weight(1f),
+                ) { Text("افزودن") }
+            }
+        }
     }
 }

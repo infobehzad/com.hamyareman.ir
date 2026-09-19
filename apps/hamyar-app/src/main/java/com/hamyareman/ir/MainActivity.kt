@@ -361,6 +361,6 @@ class MainActivity : FragmentActivity() {
     fun onLoggedOut() {
         loggedIn.value = false
         profileNeeded.value = null
-        com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = false
+        com.hamyareman.ir.platform.feature.playback.TeachGate.exit()
     }
 }

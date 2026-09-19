@@ -211,6 +211,8 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
     var posMs by remember { mutableLongStateOf(0L) }
     var downloading by remember { mutableStateOf(false) }
     var progressPct by remember { mutableIntStateOf(-1) }
+    var doneBytes by remember { mutableLongStateOf(0L) }
+    var totalBytes by remember { mutableLongStateOf(0L) }
     var msg by remember { mutableStateOf<String?>(null) }
     var cacheTick by remember { mutableIntStateOf(0) }
     var loadedKey by remember { mutableStateOf<String?>(null) }
@@ -230,7 +232,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
     fun posKey(t: TeachTrack) = "teach_${packId}_${t.cacheKey}_pos"
     fun savedPos(t: TeachTrack) = store.getString(posKey(t), "0").toLongOrNull() ?: 0L
     fun savePos(t: TeachTrack, p: Long) { if (p > 0) store.putString(posKey(t), p.toString()) else store.remove(posKey(t)) }
-    fun cached(t: TeachTrack) = cacheTick >= 0 && MediaVault.isCached(context, t.cacheKey)
+    fun cached(t: TeachTrack) = cacheTick >= 0 && MediaVault.isVerified(context, t.cacheKey)
 
     /** «زمان درس» — سکوتِ اجباری پلیر دروس (کلید سراسری از «بیشتر»). */
     fun quietOn(): Boolean = store.getString("quiet_mode", "0") == "1"
@@ -244,8 +246,8 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
     // قانون v1.10: صوت تدریس فقط وقتی صفحه‌ی پلیر (تدریس/جزوه/نکات) باز است از اعلان
     // هم پخش می‌شود — سرویس با این پرچم پلیِ اعلان را می‌سنجد.
     DisposableEffect(packId) {
-        com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = true
-        onDispose { com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = false }
+        com.hamyareman.ir.platform.feature.playback.TeachGate.enter()
+        onDispose { com.hamyareman.ir.platform.feature.playback.TeachGate.exit() }
     }
     // v1.25 — خروج از صفحه با هوم/پنجره‌ها/قفل صفحه هم = مکث پخش (شرط بازبودن صفحه).
     PauseOnStopEffect(pause = { playback.pause() }, stop = { playback.stop() })
@@ -260,7 +262,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
     LaunchedEffect(packId, tracks.size) {
         availability = withContext(Dispatchers.IO) {
             tracks.any { t ->
-                MediaVault.isCached(context, t.cacheKey) || StudyMedia.audioExists(t.fileId)
+                MediaVault.isVerified(context, t.cacheKey) || StudyMedia.audioExists(t.fileId)
             }
         }
     }
@@ -284,7 +286,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
             // صف همه‌ی ترک‌های درس — اعلان سیستمی دکمه‌ی قبلی/بعدی می‌دهد.
             val items = withContext(Dispatchers.IO) {
                 tracks.map { tr ->
-                    val useLocal = !forceServer && MediaVault.isCached(context, tr.cacheKey) && !(fromServer && tr.cacheKey == t.cacheKey)
+                    val useLocal = !forceServer && MediaVault.isVerified(context, tr.cacheKey) && !(fromServer && tr.cacheKey == t.cacheKey)
                     val remoteId = if (useLocal) tr.fileId else StudyMedia.resolveFileId(tr.fileId)
                     MediaItem.Builder()
                         .setMediaId(tr.cacheKey)
@@ -295,7 +297,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
             }
             val pos = startMs ?: if (cached(t) && !fromServer) savedPos(t) else 0L
             playback.setMediaItems(items, tracks.indexOf(t).coerceAtLeast(0), pos)
-            com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = true
+            com.hamyareman.ir.platform.feature.playback.TeachGate.enter()
             com.hamyareman.ir.platform.feature.playback.TeachGate.currentPack = packId
             playback.setSpeed(speed)
             // v1.12: فوراً ترکِ جاری را ثبت کن — تا فال‌بکِ خطا (سرور) همیشه زنده باشد
@@ -516,13 +518,23 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                 )
                 when {
                     downloading -> {
-                        LinearProgressIndicator(
-                            progress = { (if (progressPct < 0) 0 else progressPct) / 100f },
-                            modifier = Modifier.width(72.dp).height(6.dp),
-                        )
-                        if (progressPct >= 0) {
+                        if (totalBytes > 0) {
+                            LinearProgressIndicator(
+                                progress = { (doneBytes.toFloat() / totalBytes.toFloat()).coerceIn(0f, 1f) },
+                                modifier = Modifier.width(72.dp).height(6.dp),
+                            )
+                        } else {
+                            LinearProgressIndicator(modifier = Modifier.width(72.dp).height(6.dp))
+                        }
+                        Column {
                             Text(
-                                "${toPersianDigits(progressPct.toString())}٪",
+                                humanSize(doneBytes) + if (totalBytes > 0) " از ${humanSize(totalBytes)}" else "",
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1,
+                            )
+                            Text(
+                                if (totalBytes > 0) "${toPersianDigits(((doneBytes * 100L) / totalBytes).toString())}٪"
+                                else "حجم کل نامعلوم",
                                 style = MaterialTheme.typography.bodySmall,
                                 maxLines = 1,
                             )
@@ -559,8 +571,9 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                         }
                     }
                     else -> TextButton(onClick = {
-                        downloading = true; progressPct = -1
+                        downloading = true; progressPct = -1; doneBytes = 0L; totalBytes = 0L
                         scope.launch {
+                            var ok = false
                             try {
                                 withContext(Dispatchers.IO) {
                                     val remoteId = StudyMedia.resolveFileId(track.fileId)
@@ -568,12 +581,18 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                                         context,
                                         StudyMedia.viewUrl(remoteId),
                                         track.cacheKey,
-                                    ) { pct -> progressPct = pct }
+                                    ) { done, total ->
+                                        doneBytes = done
+                                        totalBytes = total
+                                        progressPct = if (total > 0) ((done * 100L) / total).toInt() else -1
+                                    }
                                 }
+                                ok = true
                                 downloading = false; cacheTick++
                             } catch (e: Exception) {
                                 downloading = false
                             }
+                            msg = if (ok) "دانلود کامل شد؛ پخشِ بعدی آفلاین است." else "دانلود کامل نشد؛ دوباره تلاش کن."
                         }
                     }) {
                         Icon(Icons.Outlined.Download, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -872,4 +891,11 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
             Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         }
     }
+}
+
+/** حجمِ خوانا برای نوارِ دانلود (مگابایت/کیلوبایت با ارقام فارسی). */
+internal fun humanSize(bytes: Long): String {
+    val mb = bytes / 1_048_576.0
+    return if (mb >= 1) toPersianDigits("%.1f".format(mb)) + " مگابایت"
+    else toPersianDigits((bytes / 1024).coerceAtLeast(0).toString()) + " کیلوبایت"
 }

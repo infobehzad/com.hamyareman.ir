@@ -204,11 +204,11 @@ fun AudiobookScreen(onBack: () -> Unit) {
 
     DisposableEffect(Unit) {
         // قاعده‌ی سراسری صوت: صفحه‌ی پخش باز = پخش مجاز؛ بسته = مکث فوری.
-        com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = true
+        com.hamyareman.ir.platform.feature.playback.TeachGate.enter()
         onDispose {
             store.putInt(KEY_POSITION, playback.positionMs.toInt())
             runCatching { playback.stop() }
-            com.hamyareman.ir.platform.feature.playback.TeachGate.teachPageOpen = false
+            com.hamyareman.ir.platform.feature.playback.TeachGate.exit()
             playback.release()
         }
     }

@@ -51,8 +51,10 @@ object TableIds {
     // --- پرامپت ۰۱: حافظه‌ی پیشرفت پلیر ویدیو/صوت ---
     const val LESSON_MEDIA_PROGRESS = "lesson_media_progress"
     const val STUDY_PROGRESS = "study_progress"
-    /** نکات درسی دفتر ۵خط — متن؛ فایل جزوه سینک نمی‌شود. */
+    /** نکات درسی — متن/عنوان‌ها؛ فایل جزوه سینک نمی‌شود. */
     const val LESSON_NOTES = "lesson_notes"
+    /** وضعیتِ عمومیِ برنامه (برنامه هفتگی، شیفت، کلاس مجازی، تیک‌ها) — کلید → JSON. */
+    const val APP_STATE = "app_state"
 
     // --- پرامپت ۰۲: ماژول ورزش/یوگا/تنفس/یادگیری ---
     const val WELLNESS_MOVES = "wellness_moves"
@@ -69,7 +71,7 @@ object TableIds {
         WEEKLY_SUMMARIES, ROUTINE_BLOCKS, WATER_LOGS, EXERCISE_LOGS, BADGES,
         LESSONS, QUIZZES, RECIPES, EXERCISES, LEARNING_NODES, ART_PROMPTS,
         LESSON_MEDIA_PROGRESS, WELLNESS_MOVES, SKETCH_REFERENCES, WELLNESS_LOGS,
-        STUDY_PROGRESS, LESSON_NOTES,
+        STUDY_PROGRESS, LESSON_NOTES, APP_STATE,
     )
 
     /** جدول‌های «فقط روی دستگاه» — در سرور هیچ سطری ندارند و ساخته هم نمی‌شوند. */
