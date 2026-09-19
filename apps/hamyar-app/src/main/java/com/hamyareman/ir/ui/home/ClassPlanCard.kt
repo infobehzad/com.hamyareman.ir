@@ -109,12 +109,13 @@ fun ClassPlanCard(
     var exam by remember(tick, isoN) { mutableStateOf(ClassPlanStore.examOf(ctx, isoN)) }
     var report by remember(tick, isoN, exam) { mutableStateOf(ClassPlanStore.reportOf(ctx, isoN)) }
     val pushScope = rememberCoroutineScope()
+    val container = LocalAppContainer.current
     fun pushChecks() {
         pushScope.launch {
-            val uid = LocalAppContainer.current.auth.cachedUserId()
-                ?: runCatching { LocalAppContainer.current.auth.currentUserId() }.getOrNull().orEmpty()
+            val uid = container.auth.cachedUserId()
+                ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
             if (uid.isBlank()) return@launch
-            ClassPlanSync.push(ctx, LocalAppContainer.current.tables, uid, StateSync.KEY_CHECKS)
+            ClassPlanSync.push(ctx, container.tables, uid, StateSync.KEY_CHECKS)
         }
     }
 
