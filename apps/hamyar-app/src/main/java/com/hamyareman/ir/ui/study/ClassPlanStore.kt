@@ -600,12 +600,16 @@ object ClassPlanStore {
 
             StateSync.KEY_CHECKS -> JSONObject().apply {
                 val s = store(ctx)
-                val bag = JSONObject(); val hw = JSONObject(); val exam = JSONObject(); val rep = JSONObject()
+                val bag = JSONObject(); val hw = JSONObject(); val exam = JSONObject()
+                val rep = JSONObject(); val prep = JSONObject()
                 s.keysWithPrefix("bag_").forEach { k -> bag.put(k.removePrefix("bag_"), s.getBool(k)) }
                 s.keysWithPrefix("hw_").forEach { k -> hw.put(k.removePrefix("hw_"), s.getBool(k)) }
                 s.keysWithPrefix("exam_").forEach { k -> exam.put(k.removePrefix("exam_"), s.getString(k)) }
                 s.keysWithPrefix("rep_").forEach { k -> rep.put(k.removePrefix("rep_"), s.getString(k)) }
-                put("bag", bag); put("hw", hw); put("exam", exam); put("report", rep)
+                // تیک‌های آمادگیِ امتحان: کلیدِ محلی examprep_<تاریخ>_<گزینه>
+                s.keysWithPrefix("examprep_").forEach { k -> prep.put(k.removePrefix("examprep_"), s.getBool(k)) }
+                put("bag", bag); put("hw", hw); put("exam", exam)
+                put("report", rep); put("examprep", prep)
             }.toString()
 
             else -> "{}"
@@ -681,6 +685,7 @@ object ClassPlanStore {
                 obj("hw")?.keys()?.forEach { k -> s.putBool("hw_$k", obj("hw")!!.optBoolean(k)) }
                 obj("exam")?.keys()?.forEach { k -> s.putString("exam_$k", obj("exam")!!.optString(k)) }
                 obj("report")?.keys()?.forEach { k -> s.putString("rep_$k", obj("report")!!.optString(k)) }
+                obj("examprep")?.keys()?.forEach { k -> s.putBool("examprep_$k", obj("examprep")!!.optBoolean(k)) }
             }
         }
     }
