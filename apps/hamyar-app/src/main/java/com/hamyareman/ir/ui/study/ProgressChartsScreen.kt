@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
@@ -25,8 +26,11 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -53,6 +57,9 @@ import com.hamyareman.ir.LocalAppContainer
  * v1.18 — نمودار پیشرفت «اختصاصی هر کتاب»: فقط گزارش‌های همان کتاب لیست می‌شود.
  * بدون bookCode: فهرست کتاب‌ها برای انتخاب (با شمار شروع‌شده/کامل‌شده‌ی هر کتاب).
  */
+/** سقفِ کلِ یک همگام‌سازی — بعد از آن، پیام نمایش داده می‌شود و صفحه رها می‌گردد. */
+private const val SYNC_TIMEOUT_MS = 25_000L
+
 @Composable
 fun ProgressChartsScreen(bookCode: String?, onBack: () -> Unit, onPickBook: (String) -> Unit) {
     val container = LocalAppContainer.current
@@ -62,8 +69,11 @@ fun ProgressChartsScreen(bookCode: String?, onBack: () -> Unit, onPickBook: (Str
 
     // ---------- سینکِ نمودار پیشرفت ----------
     // ورود به صفحه: اول هرچه محلی مانده می‌رود (push)، بعد از سرور گرفته و ادغام می‌شود (pull).
+    // سقف زمانی دارد تا صفحه هرگز روی «در حال همگام‌سازی…» گیر نکند؛ آمارِ محلی
+    // مستقل از سینک ثبت می‌شود و در سینکِ بعدی ارسال خواهد شد.
     var syncTick by remember { mutableIntStateOf(0) }
     var syncMsg by remember { mutableStateOf<String?>(null) }
+    var syncing by remember { mutableStateOf(false) }
     LaunchedEffect(bookCode, syncTick) {
         val uid = container.auth.cachedUserId()
             ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
@@ -71,30 +81,51 @@ fun ProgressChartsScreen(bookCode: String?, onBack: () -> Unit, onPickBook: (Str
             syncMsg = "برای سینکِ نمودارها وارد حساب شو."
             return@LaunchedEffect
         }
+        syncing = true
         val merged = withContext(Dispatchers.IO) {
-            val packIds = module?.packs?.map { it.packId }.orEmpty()
-            TeachCloud.enqueueAll(ctx, container.sync, uid, packIds)
-            packIds.forEach { runCatching { container.studyProgress.flush(it) } }
-            runCatching { container.sync.pushAll() }
-            runCatching {
-                SchoolSync.restoreAll(ctx, container.tables, container.sync, uid, force = true)
-            }.getOrDefault(0)
+            try {
+                withTimeout(SYNC_TIMEOUT_MS) {
+                    val packIds = module?.packs?.map { it.packId }.orEmpty()
+                    TeachCloud.enqueueAll(ctx, container.sync, uid, packIds)
+                    packIds.forEach { runCatching { container.studyProgress.flush(it) } }
+                    runCatching { container.sync.pushAll() }
+                    runCatching {
+                        SchoolSync.restoreAll(ctx, container.tables, container.sync, uid, force = true)
+                    }.getOrDefault(0)
+                }
+            } catch (e: TimeoutCancellationException) {
+                null
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                -1
+            }
         }
-        syncMsg = if (merged > 0) "از سرور به‌روز شد (${toPersianDigits(merged.toString())} مورد)." else "نمودارها همگام‌اند."
+        syncing = false
+        syncMsg = when {
+            merged == null -> "همگام‌سازی به درازا کشید؛ «به‌روزرسانی» را دوباره بزن."
+            merged < 0 -> "همگام‌سازی ممکن نشد (شبکه)؛ آمارِ محلی سالم است."
+            merged > 0 -> "از سرور به‌روز شد (${toPersianDigits(merged.toString())} مورد)."
+            else -> "نمودارها همگام‌اند."
+        }
     }
 
     if (module == null) {
         // ---------- انتخاب کتاب ----------
         Column(Modifier.fillMaxSize()) {
-            AppTopBar("نمودار پیشرفت کدام کتاب؟", onBack)
+            AppTopBar("نمودار پیشرفت — انتخاب کتاب", onBack)
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                if (syncing) {
+                    CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
+                    Spacer(Modifier.width(6.dp))
+                }
                 Text(
-                    (syncMsg ?: "در حال همگام‌سازی…") + " ",
+                    syncMsg ?: "در حال همگام‌سازی…",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = { syncTick++ }) { Text("به‌روزرسانی") }
+                TextButton(onClick = { syncTick++ }, enabled = !syncing) { Text("به‌روزرسانی") }
             }
             Column(
                 Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
@@ -133,13 +164,17 @@ fun ProgressChartsScreen(bookCode: String?, onBack: () -> Unit, onPickBook: (Str
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            if (syncing) {
+                CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
+                Spacer(Modifier.width(6.dp))
+            }
             Text(
-                (syncMsg ?: "در حال همگام‌سازی…") + " ",
+                syncMsg ?: "در حال همگام‌سازی…",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.weight(1f),
             )
-            TextButton(onClick = { syncTick++ }) { Text("به‌روزرسانی") }
+            TextButton(onClick = { syncTick++ }, enabled = !syncing) { Text("به‌روزرسانی") }
         }
         if (module.bookCode == "C905") {
             MathLessonProgressPage(module, Modifier.weight(1f))
