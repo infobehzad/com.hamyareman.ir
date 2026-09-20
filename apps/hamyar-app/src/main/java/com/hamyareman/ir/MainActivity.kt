@@ -348,6 +348,12 @@ class MainActivity : FragmentActivity() {
                                 remoteLabel = "بابا",
                                 remoteUserId = container.partnerId,
                             )
+
+                            // کانالِ آپدیت (v1.66): تنظیماتش روی سرور است (ردیفِ
+                            // `app_release` در `app_state`) و فایل در ریپوی عمومیِ
+                            // انتشار میماند. اگر نسخهٔ تازه‌تری باشد، همین‌جا پیام
+                            // داده می‌شود و دانلود/نصب از خودِ اپ انجام می‌گیرد.
+                            com.hamyareman.ir.ui.update.UpdateGateHost()
                             }
                             // ۳) وارد شده ولی قفل فعال: صفحه‌ی PIN.
                             else -> {
