@@ -117,6 +117,20 @@ object StateSync {
     }
 
     fun localAt(ctx: Context, key: String): Long = store(ctx).getLong("at_$key", 0L)
+
+    /**
+     * «تغییرِ محلی» بدونِ push: زمانِ محلیِ کلید جلو می‌رود تا pullِ بعدی نسخهٔ
+     * کهنه‌ی سرور را جای دادهٔ تازهٔ دستگاه نگذارد (باگِ قبلی: تیک‌ها و برنامهٔ
+     * هفتگی با اولین pull پاک می‌شدند).
+     */
+    fun markLocal(ctx: Context, key: String) {
+        store(ctx).putLong("at_$key", System.currentTimeMillis())
+    }
+
+    /** بعد از اِعمالِ نسخهٔ سرور، زمانِ محلی روی زمانِ همان نسخه می‌نشیند. */
+    fun markSyncedAt(ctx: Context, key: String, at: Long) {
+        if (at > 0) store(ctx).putLong("at_$key", at)
+    }
 }
 
 /**
@@ -146,6 +160,8 @@ object ClassPlanSync {
                 val local = ClassPlanStore.exportState(ctx, key)
                 if (remote.second >= StateSync.localAt(ctx, key) && remote.first != local) {
                     ClassPlanStore.importState(ctx, key, remote.first)
+                    // زمانِ محلی = زمانِ سرور؛ وگرنه pushِ بعدی بی‌دلیل تکرار می‌شود.
+                    StateSync.markSyncedAt(ctx, key, remote.second)
                     any = true
                 }
             }
@@ -165,6 +181,7 @@ object ClassPlanSync {
         val local = ClassPlanStore.exportState(ctx, key)
         if (remote.second < StateSync.localAt(ctx, key) || remote.first == local) return false
         ClassPlanStore.importState(ctx, key, remote.first)
+        StateSync.markSyncedAt(ctx, key, remote.second)
         return true
     }
 
@@ -177,6 +194,34 @@ object ClassPlanSync {
     ): Boolean {
         if (uid.isBlank()) return false
         return StateSync.push(ctx, tables, uid, key, ClassPlanStore.exportState(ctx, key))
+    }
+
+    /**
+     * push فقط وقتی نسخهٔ محلی از سرور تازه‌تر باشد. اگر سرور تازه‌تر است، همان
+     * نسخه روی دستگاه اعمال می‌شود (آخرین نوشته برنده) — این همان چیزی است که
+     * «سینک درست» یعنی: نه دادهٔ سرور پاک می‌شود، نه تغییرِ محلی از دست می‌رود.
+     */
+    suspend fun pushIfNewer(
+        ctx: android.content.Context,
+        tables: com.hamyareman.ir.platform.core.appwrite.TablesDbService,
+        uid: String,
+        key: String,
+    ): Boolean {
+        if (uid.isBlank()) return false
+        val local = ClassPlanStore.exportState(ctx, key)
+        val remote = StateSync.pull(ctx, tables, uid, key)
+        if (remote == null) return StateSync.push(ctx, tables, uid, key, local)
+        if (remote.first == local) {
+            StateSync.markSyncedAt(ctx, key, remote.second)
+            return false
+        }
+        return if (StateSync.localAt(ctx, key) > remote.second) {
+            StateSync.push(ctx, tables, uid, key, local)
+        } else {
+            ClassPlanStore.importState(ctx, key, remote.first)
+            StateSync.markSyncedAt(ctx, key, remote.second)
+            false
+        }
     }
 
     suspend fun pushAll(

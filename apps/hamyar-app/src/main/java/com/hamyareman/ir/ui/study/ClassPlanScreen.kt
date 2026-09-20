@@ -116,14 +116,6 @@ private fun WeeklyTimetableSection() {
     var syncNotice by remember { mutableStateOf<String?>(null) }
     fun uidNow(): String = container.auth.cachedUserId()
         ?: runCatching { kotlinx.coroutines.runBlocking { container.auth.currentUserId() } }.getOrNull().orEmpty()
-    LaunchedEffect(Unit) {
-        val uid = runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
-        if (uid.isNotBlank()) {
-            val changed = ClassPlanSync.pullAll(ctx, container.tables, uid)
-            if (changed) syncNotice = "برنامه از سرور به‌روز شد."
-            ClassPlanSync.push(ctx, container.tables, uid, StateSync.KEY_WEEK)
-        }
-    }
     val options = remember { ClassPlanStore.subjectOptions(ctx) }
     var snap by remember { mutableStateOf(ClassPlanStore.load(ctx)) }
     var days by remember {
@@ -134,34 +126,97 @@ private fun WeeklyTimetableSection() {
             },
         )
     }
+    // هر خانه می‌تواند «دو درس» داشته باشد: درسِ دوم هم‌اندازهٔ درسِ اول.
+    var seconds by remember {
+        mutableStateOf(
+            (1..5).associateWith { d ->
+                val n = days[d]?.size ?: 3
+                val v = snap.second[d].orEmpty()
+                (v + List((n - v.size).coerceAtLeast(0)) { "" }).take(n).toMutableList()
+            },
+        )
+    }
+    var bells by remember { mutableStateOf(snap.bells) }
     var locked by remember { mutableStateOf(snap.locked) }
     var confirmEdit by remember { mutableStateOf(false) }
+    // بعد از pull، stateهای صفحه از روی دادهٔ تازهٔ سرور ساخته می‌شوند — وگرنه
+    // برنامهٔ کشیده‌شده تا خروج از صفحه دیده نمی‌شد (همان «سینک درست نمی‌شود»).
+    fun reloadFromStore() {
+        snap = ClassPlanStore.load(ctx)
+        days = (1..5).associateWith { d ->
+            val v = snap.days[d].orEmpty()
+            (if (v.isEmpty()) listOf("", "", "") else v).toMutableList()
+        }
+        seconds = (1..5).associateWith { d ->
+            val n = days[d]?.size ?: 3
+            val v = snap.second[d].orEmpty()
+            (v + List((n - v.size).coerceAtLeast(0)) { "" }).take(n).toMutableList()
+        }
+        bells = snap.bells
+        locked = snap.locked
+    }
+    LaunchedEffect(Unit) {
+        val uid = runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+        if (uid.isNotBlank()) {
+            val changed = ClassPlanSync.pullAll(ctx, container.tables, uid)
+            if (changed) {
+                reloadFromStore()
+                syncNotice = "برنامه از سرور به‌روز شد."
+            }
+            // فقط اگر نسخهٔ دستگاه تازه‌تر باشد؛ وگرنه دادهٔ سرور پاک می‌شد.
+            if (ClassPlanSync.pushIfNewer(ctx, container.tables, uid, StateSync.KEY_WEEK)) {
+                syncNotice = "برنامه با سرور همگام شد."
+            }
+        }
+    }
 
-    fun persist(lock: Boolean, map: Map<Int, List<String>> = days) {
+    fun persist(lock: Boolean, map: Map<Int, List<String>> = days, sec: Map<Int, List<String>> = seconds, bell: List<String> = bells) {
         val clean = map.mapValues { e ->
             val v = e.value.toMutableList()
             while (v.size < 3) v.add("")
             v.toList()
         }
-        ClassPlanStore.saveDays(ctx, clean, lock)
+        val cleanSec = sec.mapValues { e ->
+            val n = clean[e.key]?.size ?: 0
+            val v = e.value.toMutableList()
+            while (v.size < n) v.add("")
+            v.take(n).toList()
+        }
+        ClassPlanStore.saveDays(ctx, clean, lock, seconds = cleanSec, bells = bell)
         locked = lock
         snap = ClassPlanStore.load(ctx)
     }
+    fun persistAndSync(lock: Boolean, map: Map<Int, List<String>> = days, sec: Map<Int, List<String>> = seconds, bell: List<String> = bells) {
+        persist(lock, map, sec, bell)
+        syncScope.launch {
+            if (ClassPlanSync.pushIfNewer(ctx, container.tables, uidNow(), StateSync.KEY_WEEK)) {
+                syncNotice = "برنامه با سرور همگام شد."
+            }
+        }
+    }
+
+    val maxCells = (days.values.maxOfOrNull { it.size } ?: 3).coerceAtLeast(1)
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(
-            "شنبه تا چهارشنبه، سه درس در روز. از فهرست کتاب‌ها یا ورزش انتخاب کن. پس از تکمیل، فهرست‌ها غیرفعال می‌شوند.",
+            "شنبه تا چهارشنبه. هر خانه می‌تواند دو درس داشته باشد و ساعتِ شروع و پایانِ هر زنگ («تایم زنگ ۱…» در پایین) برای همهٔ روزها یکی است. پس از تکمیل، فهرست‌ها غیرفعال می‌شوند.",
             fontFamily = DashboardFonts.quote,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        syncNotice?.let {
+            Text(it, fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+        }
         ClassPlanStore.WEEKDAYS.forEachIndexed { i, name ->
             val di = i + 1
             val slots = (days[di] ?: emptyList()).let { s ->
                 if (s.size >= 3) s else (s + List(3 - s.size) { "" })
+            }
+            val slots2 = (seconds[di] ?: emptyList()).let { s ->
+                if (s.size >= slots.size) s else (s + List(slots.size - s.size) { "" })
             }
             Column(
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
@@ -171,24 +226,53 @@ private fun WeeklyTimetableSection() {
             ) {
                 Text(name, fontFamily = DashboardFonts.greeting, fontSize = 18.sp)
                 slots.forEachIndexed { si, value ->
-                    SubjectDropdown(
-                        value = value,
-                        options = options,
-                        enabled = !locked,
-                        onPick = { picked ->
-                            val next = slots.toMutableList()
-                            while (next.size <= si) next.add("")
-                            next[si] = picked
-                            val map = days.toMutableMap().also { it[di] = next }
-                            days = map
-                            persist(lock = false, map = map)
-                        },
-                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            SubjectDropdown(
+                                value = value,
+                                options = options,
+                                enabled = !locked,
+                                modifier = Modifier.weight(1f),
+                                onPick = { picked ->
+                                    val next = slots.toMutableList()
+                                    while (next.size <= si) next.add("")
+                                    next[si] = picked
+                                    val map = days.toMutableMap().also { it[di] = next }
+                                    days = map
+                                    persistAndSync(lock = false, map = map)
+                                },
+                            )
+                            SubjectDropdown(
+                                value = slots2.getOrElse(si) { "" },
+                                options = options,
+                                enabled = !locked,
+                                placeholder = "درس دوم (اختیاری)",
+                                modifier = Modifier.weight(1f),
+                                onPick = { picked ->
+                                    val next = slots2.toMutableList()
+                                    while (next.size <= si) next.add("")
+                                    next[si] = picked
+                                    val sec = seconds.toMutableMap().also { it[di] = next }
+                                    seconds = sec
+                                    persistAndSync(lock = false, sec = sec)
+                                },
+                            )
+                        }
+                        val bellText = ClassPlanStore.bellLabel(snap, si)
+                        Text(
+                            if (bellText.isBlank()) "تایم زنگ ${toPersianDigits((si + 1).toString())}: تنظیم نشده"
+                            else "تایم زنگ ${toPersianDigits((si + 1).toString())}: $bellText",
+                            fontFamily = DashboardFonts.quote,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (bellText.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
                 if (!locked) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         TextButton(onClick = {
                             days = days.toMutableMap().also { it[di] = (slots + "").toMutableList() }
+                            seconds = seconds.toMutableMap().also { it[di] = (slots2 + "").toMutableList() }
                         }) { Text("افزودن خانه", fontFamily = DashboardFonts.quote) }
                         if (slots.size > 1) {
                             TextButton(onClick = {
@@ -197,14 +281,64 @@ private fun WeeklyTimetableSection() {
                                 days = days.toMutableMap().also {
                                     it[di] = (ClassPlanStore.load(ctx).days[di].orEmpty()).toMutableList()
                                 }
-                                persist(lock = false, map = days)
-                                syncScope.launch { ClassPlanSync.push(ctx, container.tables, uidNow(), StateSync.KEY_WEEK) }
+                                seconds = seconds.toMutableMap().also {
+                                    it[di] = (ClassPlanStore.load(ctx).second[di].orEmpty()).toMutableList()
+                                }
+                                persistAndSync(lock = false, map = days, sec = seconds)
                             }) { Text("حذف آخرین خانه", fontFamily = DashboardFonts.quote) }
                         }
                     }
                 }
             }
         }
+
+        // ---- «تایم زنگ ۱..n» — بر حسبِ تعدادِ خانه‌ها، برای همهٔ روزها ----
+        Column(
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
+                .padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text("تایم زنگ‌ها", fontFamily = DashboardFonts.section, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(
+                "ساعتِ شروع و پایانِ هر زنگ یک‌بار این‌جا تنظیم می‌شود و خودکار برای همهٔ روزها اعمال و با سرور همگام می‌شود.",
+                fontFamily = DashboardFonts.quote,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            (0 until maxCells).forEach { si ->
+                val raw = bells.getOrElse(si) { "" }
+                val parts = raw.split("-")
+                val from = parts.getOrNull(0)?.takeIf { it.isNotBlank() } ?: "07:30"
+                val to = parts.getOrNull(1)?.takeIf { it.isNotBlank() } ?: "08:15"
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        "تایم زنگ ${toPersianDigits((si + 1).toString())}  ·  ${toPersianDigits(from)} تا ${toPersianDigits(to)}",
+                        fontFamily = DashboardFonts.quote,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Box(Modifier.weight(1f)) {
+                            TimePickText("شروع", from) { hh ->
+                                val next = (bells + List((si + 1 - bells.size).coerceAtLeast(0)) { "" }).toMutableList()
+                                next[si] = "$hh-$to"
+                                bells = next
+                                persistAndSync(lock = locked, bell = next)
+                            }
+                        }
+                        Box(Modifier.weight(1f)) {
+                            TimePickText("پایان", to) { hh ->
+                                val next = (bells + List((si + 1 - bells.size).coerceAtLeast(0)) { "" }).toMutableList()
+                                next[si] = "$from-$hh"
+                                bells = next
+                                persistAndSync(lock = locked, bell = next)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         if (locked) {
             OutlinedButton(onClick = { confirmEdit = true }, modifier = Modifier.fillMaxWidth()) {
                 Text("ویرایش برنامه هفتگی", fontFamily = DashboardFonts.quote)
@@ -212,12 +346,13 @@ private fun WeeklyTimetableSection() {
         } else {
             OutlinedButton(
                 onClick = {
-                    persist(lock = (1..5).all { d -> (days[d]?.count { it.isNotBlank() } ?: 0) >= 3 })
+                    persistAndSync(lock = (1..5).all { d -> (days[d]?.count { it.isNotBlank() } ?: 0) >= 3 })
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) { Text("ذخیره برنامه", fontFamily = DashboardFonts.quote) }
         }
-        LeaveSection()
+        // کارتِ کاملِ مرخصی به صفحهٔ جداگانهٔ «مرخصی» منتقل شد
+        // (از منوی «برنامه هفتگی و مرخصی» در صفحهٔ اصلی مدرسه باز می‌شود).
     }
     if (confirmEdit) {
         AlertDialog(
@@ -237,16 +372,18 @@ private fun SubjectDropdown(
     value: String,
     options: List<String>,
     enabled: Boolean,
+    modifier: Modifier = Modifier,
+    placeholder: String = "انتخاب درس",
     onPick: (String) -> Unit,
 ) {
     var open by remember { mutableStateOf(false) }
-    Box {
+    Box(modifier) {
         OutlinedButton(
             onClick = { if (enabled) open = true },
             enabled = enabled,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text(value.ifBlank { "انتخاب درس" }, fontFamily = DashboardFonts.quote)
+            Text(value.ifBlank { placeholder }, fontFamily = DashboardFonts.quote, maxLines = 1)
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             options.forEach { opt ->
@@ -775,7 +912,7 @@ private fun AlarmSoundRow(
  * مرخصی‌های ثبت‌شده در یک آکاردیونِ **پیش‌فرض بسته** فهرست می‌شوند.
  */
 @Composable
-private fun LeaveSection() {
+internal fun LeaveSection() {
     val ctx = LocalContext.current
     val container = LocalAppContainer.current
     val syncScope = rememberCoroutineScope()

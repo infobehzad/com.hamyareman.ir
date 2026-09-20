@@ -164,11 +164,191 @@ object MediaVault {
 
     // ------------------------------------------------------ دانلود رمزشده
 
+    /** تعدادِ رشته‌های موازیِ دانلودِ صوت (هر رشته یک بازه‌ی Range). */
+    private const val PARALLEL_STREAMS = 3
+
+    /** اندازهٔ هر بازه — مضربی از ۱۶ بایت (بلاکِ AES) تا CTR مستقل درست دربیاید. */
+    private const val RANGE_CHUNK = 4L * 1024 * 1024
+
     /**
      * دانلود از [url] و نوشتنِ رمزشده (AES/CTR با IV تازه) در گاوصندوق.
      * روی دیسک حتی یک بایتِ خام از رسانه نوشته نمی‌شود.
+     *
+     * سرعت: اول اندازهٔ کل با یک درخواستِ سبک خوانده می‌شود و بعد دانلود
+     * «چندرشته‌ای» انجام می‌گیرد (سه بازه‌ی هم‌زمان). چون رمزنگاری CTR است،
+     * هر بازه با شمارندهٔ همان بلاک رمز می‌شود و نتیجه دقیقاً با رمزنگاریِ
+     * تک‌رشته یکی است (آزمونِ MediaVaultParallelCryptoTest همین را می‌سنجد).
+     * اگر سرور به Range پاسخِ ۲۰۶ نداد یا هر خطایی رخ داد، بی‌صدا به مسیرِ
+     * تک‌رشته برمی‌گردیم.
      */
     fun downloadEncrypted(ctx: Context, url: String, cacheKey: String, onProgress: (Long, Long) -> Unit) {
+        val probed = probeSize(url)
+        if (probed > 0) {
+            val ok = runCatching { downloadParallel(ctx, url, cacheKey, probed, onProgress) }.isSuccess
+            if (ok) return
+        }
+        downloadSingle(ctx, url, cacheKey, probed, onProgress)
+    }
+
+    /**
+     * گزارشِ تُنُکِ پیشرفت: دستِ‌کم هر ۵۱۲KB یا هر ۲۰۰ms (نه هر تکهٔ شبکه) تا
+     * بازترکیبِ صفحه گلوگاهِ دانلود نشود. [lastBytes] و [lastTime] گزارشِ قبلی‌اند.
+     */
+    private fun reportProgress(
+        onProgress: (Long, Long) -> Unit,
+        done: Long,
+        total: Long,
+        lastBytes: java.util.concurrent.atomic.AtomicLong,
+        lastTime: java.util.concurrent.atomic.AtomicLong,
+    ) {
+        val now = System.currentTimeMillis()
+        val prevBytes = lastBytes.get()
+        if (done - prevBytes >= 512 * 1024 || now - lastTime.get() >= 200 || done >= total) {
+            if (lastBytes.compareAndSet(prevBytes, done)) {
+                lastTime.set(now)
+                onProgress(done, total)
+            }
+        }
+    }
+
+    /** دانلودِ چندرشته‌ای با Range + رمزنگاریِ مستقلِ هر بازه (CTR). */
+    private fun downloadParallel(
+        ctx: Context,
+        url: String,
+        cacheKey: String,
+        total: Long,
+        onProgress: (Long, Long) -> Unit,
+    ) {
+        val secret = key(ctx)
+        val iv = ByteArray(16).also { SecureRandom().nextBytes(it) }
+        val target = vaultFile(ctx, cacheKey)
+        val part = File(vaultDir(ctx), "$cacheKey.enc.part")
+        val magic = MAGIC.toByteArray(Charsets.US_ASCII)
+        val headerLen = (magic.size + 16).toLong()
+        try {
+            val ranges = mutableListOf<LongArray>()
+            var off = 0L
+            while (off < total) {
+                val end = minOf(off + RANGE_CHUNK, total) - 1
+                ranges += longArrayOf(off, end, headerLen + off)
+                off = end + 1
+            }
+            java.io.RandomAccessFile(part, "rw").use { head ->
+                head.setLength(headerLen + total)
+                head.seek(0)
+                head.write(magic)
+                head.write(iv)
+            }
+            val done = java.util.concurrent.atomic.AtomicLong(0)
+            val lastBytes = java.util.concurrent.atomic.AtomicLong(0)
+            val lastTime = java.util.concurrent.atomic.AtomicLong(System.currentTimeMillis())
+            val errors = java.util.concurrent.CopyOnWriteArrayList<Throwable>()
+            val pool = java.util.concurrent.Executors.newFixedThreadPool(minOf(PARALLEL_STREAMS, ranges.size))
+            try {
+                val latch = java.util.concurrent.CountDownLatch(ranges.size)
+                ranges.forEach { r ->
+                    pool.execute {
+                        try {
+                            fetchRange(url, r[0], r[1], secret, iv, part, r[2]) { n ->
+                                reportProgress(onProgress, done.addAndGet(n), total, lastBytes, lastTime)
+                            }
+                        } catch (t: Throwable) {
+                            errors += t
+                        } finally {
+                            latch.countDown()
+                        }
+                    }
+                }
+                latch.await()
+                if (errors.isNotEmpty()) throw errors.first()
+            } finally {
+                pool.shutdownNow()
+            }
+            if (done.get() != total) error("دانلودِ چندرشته‌ای کامل نشد (${done.get()} از $total بایت).")
+            onProgress(total, total)
+            finishDownload(ctx, url, cacheKey, part, target, total)
+        } catch (t: Throwable) {
+            part.delete()
+            throw t
+        }
+    }
+
+    /**
+     * یک بازهٔ [start]..[end] را می‌گیرد و رمزِ همان بازه را در [fileOff]ِ فایل
+     * می‌نویسد. هر رشته `RandomAccessFile` خودش را دارد (بدونِ قفلِ مشترک).
+     * فقط پاسخِ **۲۰۶** پذیرفته می‌شود: اگر سرور Range را نادیده بگیرد و کلِ فایل
+     * را بفرستد (۲۰۰)، نوشتنش فایل را خراب می‌کرد.
+     */
+    private fun fetchRange(
+        url: String,
+        start: Long,
+        end: Long,
+        secret: javax.crypto.SecretKey,
+        iv: ByteArray,
+        part: File,
+        fileOff: Long,
+        onBytes: (Long) -> Unit,
+    ) {
+        val conn = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
+            connectTimeout = 15000
+            readTimeout = 30000
+            instanceFollowRedirects = true
+            setRequestProperty("Range", "bytes=$start-$end")
+        }
+        try {
+            conn.connect()
+            if (conn.responseCode != 206) error("سرور به بازه پاسخِ ۲۰۶ نداد (کد ${conn.responseCode}).")
+            val want = end - start + 1
+            val cipher = Cipher.getInstance("AES/CTR/NoPadding")
+            cipher.init(Cipher.ENCRYPT_MODE, secret, IvParameterSpec(counterIv(iv, start / 16)))
+            var got = 0L
+            java.io.RandomAccessFile(part, "rw").use { raf ->
+                raf.seek(fileOff)
+                conn.inputStream.use { input ->
+                    val buf = ByteArray(64 * 1024)
+                    var read: Int
+                    while (input.read(buf).also { read = it } > 0) {
+                        val enc = cipher.update(buf, 0, read)
+                        if (enc != null) raf.write(enc)
+                        got += read
+                        onBytes(read.toLong())
+                    }
+                    val tail = cipher.doFinal()
+                    if (tail != null) raf.write(tail)
+                }
+            }
+            if (got != want) error("بازهٔ $start-$end ناقص رسید ($got از $want بایت).")
+        } finally {
+            conn.disconnect()
+        }
+    }
+
+    /**
+     * IV شمارندهٔ CTR برای بلاکِ شمارهٔ [blockIndex]: همان IV با اضافه‌شدنِ
+     * شمارهٔ بلاک به‌صورتِ عددِ ۱۲۸بیتیِ big-endian (دقیقاً کاری که حالتِ CTR
+     * در JCE می‌کند) — پس رمزِ هر بازه جداگانه با رمزِ تک‌رشته یکی است.
+     */
+    internal fun counterIv(iv: ByteArray, blockIndex: Long): ByteArray {
+        val out = iv.copyOf()
+        var carry = blockIndex
+        var i = 15
+        while (carry != 0L && i >= 0) {
+            val v = (out[i].toInt() and 0xFF) + (carry and 0xFF).toInt()
+            out[i] = (v and 0xFF).toByte()
+            carry = (carry ushr 8) + (v shr 8).toLong()
+            i--
+        }
+        return out
+    }
+
+    /** مسیرِ تک‌رشته (همان رفتارِ قدیمی) — وقتی Range در دسترس نباشد. */
+    private fun downloadSingle(
+        ctx: Context,
+        url: String,
+        cacheKey: String,
+        probed: Long,
+        onProgress: (Long, Long) -> Unit,
+    ) {
         val conn = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
             connectTimeout = 15000
             readTimeout = 30000
@@ -176,51 +356,100 @@ object MediaVault {
         }
         conn.connect()
         if (conn.responseCode !in 200..299) error("HTTP ${conn.responseCode}")
-        // باکت پاسخِ chunked می‌دهد: نه GET و نه HEAD هدرِ Content-Length ندارند،
-        // پس اندازه‌ی کل از «Content-Range» یک درخواستِ ۱بایتی خوانده می‌شود تا
-        // درصدِ دانلود واقعاً نمایش داده شود.
         var total = conn.contentLengthLong
-        if (total <= 0) total = probeSize(url)
+        if (total <= 0) total = probed
         val cipher = Cipher.getInstance("AES/CTR/NoPadding")
         val iv = ByteArray(16).also { SecureRandom().nextBytes(it) }
         cipher.init(Cipher.ENCRYPT_MODE, key(ctx), IvParameterSpec(iv))
         val target = vaultFile(ctx, cacheKey)
         val part = File(vaultDir(ctx), "$cacheKey.enc.part")
         var done = 0L
+        // گلوگاهِ سرعت فقط شبکه نبود: هر ۳۲KB یک تماسِ «onProgress» یعنی برای یک
+        // درسِ ۲۴MB نزدیکِ ۷۵۰ بازنویسیِ state و صدها بازترکیبِ صفحه. اکنون
+        // پیشرفت تُنُک گزارش می‌شود و نوشتنِ دیسک بافرِ بزرگ دارد.
+        val lastBytes = java.util.concurrent.atomic.AtomicLong(0)
+        val lastTime = java.util.concurrent.atomic.AtomicLong(System.currentTimeMillis())
         try {
-            java.io.FileOutputStream(part).use { out ->
+            java.io.BufferedOutputStream(java.io.FileOutputStream(part), 256 * 1024).use { out ->
                 out.write(MAGIC.toByteArray(Charsets.US_ASCII))
                 out.write(iv)
                 conn.inputStream.use { input ->
-                    val buf = ByteArray(32 * 1024)
+                    val buf = ByteArray(64 * 1024)
                     var read: Int
                     while (input.read(buf).also { read = it } > 0) {
                         val enc = cipher.update(buf, 0, read)
                         if (enc != null) out.write(enc)
                         done += read
-                        onProgress(done, total)
+                        reportProgress(onProgress, done, total, lastBytes, lastTime)
                     }
                     val tail = cipher.doFinal()
                     if (tail != null) out.write(tail)
                 }
             }
+            onProgress(done, total)
             if (total > 0 && done < total) error("دانلود کامل نشد ($done از $total بایت).")
-            if (!part.renameTo(target)) {
-                part.copyTo(target, overwrite = true)
-                part.delete()
-            }
-            // تأییدِ سلامت: ابتدای فایل باید واقعاً قابلِ رمزگشایی باشد؛ «تأییدشده»
-            // فقط بعد از موفقیتِ بررسی علامت می‌خورد (قبلاً قبل از بررسی علامت می‌خورد).
-            val head = peek(ctx, cacheKey)
-            if (head == null || head.size < 64) {
-                target.delete()
-                error("فایل ناقص دانلود شد؛ دوباره تلاش کن.")
-            }
-            markVerified(ctx, cacheKey)
+            finishDownload(ctx, url, cacheKey, part, target, total)
         } finally {
             part.delete()
         }
     }
+
+    /**
+     * انتقالِ فایلِ موقت به گاوصندوق + تأییدِ سلامت.
+     * تأیید دو سرِ فایل است: ابتدا (که باید قابلِ رمزگشایی باشد) و انتها (که با
+     * همان بایت‌های سرور مقایسه می‌شود) — این‌طور اگر شمارندهٔ CTR در بازه‌های
+     * میانی اشتباه بسته شده باشد، فایل «تأییدشده» علامت نمی‌خورد.
+     */
+    private fun finishDownload(ctx: Context, url: String, cacheKey: String, part: File, target: File, total: Long) {
+        if (!part.renameTo(target)) {
+            part.copyTo(target, overwrite = true)
+            part.delete()
+        }
+        val head = peek(ctx, cacheKey)
+        if (head == null || head.size < 64) {
+            target.delete()
+            error("فایل ناقص دانلود شد؛ دوباره تلاش کن.")
+        }
+        if (total >= 4096 && !tailMatchesServer(ctx, url, cacheKey, total)) {
+            target.delete()
+            error("انتهای فایل با سرور یکی نبود؛ دوباره تلاش کن.")
+        }
+        markVerified(ctx, cacheKey)
+    }
+
+    /** مقایسهٔ ~۶۴ بایتِ آخرِ رمزگشاشده با همان بازه از سرور. */
+    private fun tailMatchesServer(ctx: Context, url: String, cacheKey: String, total: Long): Boolean = runCatching {
+        val alignStart = ((total - 64) / 16) * 16
+        val len = (total - alignStart).toInt()
+        if (len <= 0) return@runCatching true
+        val conn = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
+            connectTimeout = 10000
+            readTimeout = 20000
+            setRequestProperty("Range", "bytes=$alignStart-${total - 1}")
+        }
+        val remote = try {
+            conn.connect()
+            if (conn.responseCode != 206) return@runCatching true // سرور Range نمی‌دهد ⇒ سخت نگیر
+            conn.inputStream.readBytes()
+        } finally {
+            conn.disconnect()
+        }
+        if (remote.size != len) return@runCatching true
+        val f = vaultFile(ctx, cacheKey)
+        val headerLen = (MAGIC.toByteArray(Charsets.US_ASCII).size + 16).toLong()
+        val iv = ByteArray(16)
+        java.io.RandomAccessFile(f, "r").use { raf ->
+            raf.seek(MAGIC.toByteArray(Charsets.US_ASCII).size.toLong())
+            raf.readFully(iv)
+            val cipher = Cipher.getInstance("AES/CTR/NoPadding")
+            cipher.init(Cipher.DECRYPT_MODE, key(ctx), IvParameterSpec(counterIv(iv, alignStart / 16)))
+            raf.seek(headerLen + alignStart)
+            val enc = ByteArray(len)
+            raf.readFully(enc)
+            val plain = cipher.doFinal(enc)
+            plain.contentEquals(remote)
+        }
+    }.getOrDefault(false)
 
     /**
      * اندازه‌ی کلِ فایل از هدرِ `Content-Range`.
@@ -232,20 +461,36 @@ object MediaVault {
      * همان خوانده می‌شود).
      */
     private fun probeSize(url: String): Long = runCatching {
+        // ۱) «bytes=0-1023» → ۲۰۶ با «Content-Range: bytes 0-1023/کل»
+        probeTotal(url, "bytes=0-1023").takeIf { it > 0 }
+            // ۲) بعضی لبه‌های CDN رنج را نادیده می‌گیرند (۲۰۰ بدونِ Content-Length):
+            //    آن‌گاه «bytes=0-0» → ۴۱۶ با «Content-Range: bytes ستاره/کل»
+            ?: probeTotal(url, "bytes=0-0").takeIf { it > 0 }
+            ?: -1L
+    }.getOrDefault(-1L)
+
+    /** یک درخواستِ رنجِ کوچک فقط برای خواندنِ اندازه‌ی کل از «Content-Range». */
+    private fun probeTotal(url: String, range: String): Long? = runCatching {
         val c = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
             connectTimeout = 8000
             readTimeout = 8000
             instanceFollowRedirects = true
-            setRequestProperty("Range", "bytes=0-1023")
+            setRequestProperty("Range", range)
         }
         c.connect()
-        val range = c.getHeaderField("Content-Range")
+        val code = c.responseCode
+        val header = c.getHeaderField("Content-Range")
         val len = c.contentLengthLong
         runCatching { c.inputStream.close() }
+        runCatching { c.errorStream?.close() }
         c.disconnect()
-        val total = totalFromContentRange(range)
-        if (total > 0) total else if (c.responseCode == 200) len else -1L
-    }.getOrDefault(-1L)
+        val total = totalFromContentRange(header)
+        when {
+            total > 0 -> total
+            code == 200 && len > 0 -> len
+            else -> null
+        }
+    }.getOrNull()
 
     /**
      * بازکردنِ جریانِ خوانشِ جسته‌گریخته روی فایلِ گاوصندوق (برای پخش).

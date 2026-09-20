@@ -81,6 +81,15 @@ fun ClassPlanCard(
         ClassPlanStore.maybeRefreshAtExit(ctx, reminders = reminders)
         ClassPlanStore.syncAlarms(ctx, reminders, snap, today)
     }
+    // تیک‌ها از سرور هم «کشیده» می‌شوند تا گزارشِ آمادگی روی هر دو دستگاه یکی باشد.
+    val syncBox = LocalAppContainer.current
+    LaunchedEffect(tick) {
+        val uid = runCatching { syncBox.auth.currentUserId() }.getOrNull().orEmpty()
+        if (uid.isBlank()) return@LaunchedEffect
+        val got = ClassPlanSync.pull(ctx, syncBox.tables, uid, StateSync.KEY_CHECKS)
+        val pushed = ClassPlanSync.pushIfNewer(ctx, syncBox.tables, uid, StateSync.KEY_CHECKS)
+        if (got || pushed) tick++
+    }
     val j = JalaliDate.toJalali(today.toString())
     val dayName = JalaliDate.weekDayFa(today.toString())
     val dateFa = j?.let { toPersianDigits("${it.day} ${JalaliDate.monthName(it.month)}") } ?: ""
@@ -89,8 +98,13 @@ fun ClassPlanCard(
     val showDate = ClassPlanStore.firstSchoolDay(snap, prepDate)
     val dayWord = ClassPlanStore.dayWordFor(showDate, today)
     val dayLabel = ClassPlanStore.dayLabelFor(showDate, today, ClassPlanStore.shiftOf(snap, showDate))
-    val tomorrowLessons = ClassPlanStore.lessonsFor(snap, showDate).ifEmpty { listOf("—", "—", "—") }
-    val boxes = (tomorrowLessons + listOf("—", "—", "—")).take(3)
+    // هر خانه می‌تواند دو درس داشته باشد: «درسِ اول / درسِ دوم» در یک کادر.
+    val tomorrowLessons = ClassPlanStore.lessonsFor(snap, showDate)
+    val tomorrowSecond = snap.second[com.hamyareman.ir.ui.study.SchoolShift.dayIndex(showDate)].orEmpty()
+    val boxes = tomorrowLessons.mapIndexed { i, name ->
+        val b = tomorrowSecond.getOrElse(i) { "" }
+        if (b.isNotBlank()) "$name / $b" else name
+    }.ifEmpty { listOf("—", "—", "—") }.take(5)
     val isoN = showDate.toString()
     val isoT = today.toString()
     var bag by remember(tick, isoN) { mutableStateOf(ClassPlanStore.prepBag(ctx, isoN)) }

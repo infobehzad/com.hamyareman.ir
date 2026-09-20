@@ -104,12 +104,13 @@ fun SchoolHubScreen(nav: NavController) {
         }
 
         HubMenuGroup(
-            "🗓 برنامه‌ی هفتگی",
-            "برنامهٔ شخصی تو و شیفت مدرسه",
+            "🗓 برنامه هفتگی و مرخصی",
+            "برنامهٔ شخصی تو، شیفت مدرسه و مرخصی‌ها",
             open = openGroup == "schedule",
             onToggle = { toggleGroup("schedule") },
         ) {
             HubCard("⏰", "برنامه‌ی هفتگی من", "جدول زمانی شخصی شنبه تا جمعه — درس، تکلیف، مرور، ورزش") { nav.hubTo(Screen.WeeklySchedule.route) }
+            HubCard("📄", "مرخصی", "ثبت بازهٔ مرخصی با علت، گواهی پزشکی و وضعیتِ توجیه") { nav.hubTo(Screen.Leave.route) }
             HubCard("🏫", "برنامه‌ی مدرسه", "شیفت چرخشی و زنگ‌های کلاسی") { nav.hubTo(Screen.School.route) }
         }
 

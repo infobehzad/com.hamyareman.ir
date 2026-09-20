@@ -32,8 +32,8 @@ android {
         applicationId = "com.hamyareman.ir"   // Platform ثبت‌شده در کنسول Appwrite
         minSdk = 26
         targetSdk = 36
-        versionCode = 64
-        versionName = "1.63"
+        versionCode = 65
+        versionName = "1.64"
         buildConfigField("String", "APPWRITE_ENDPOINT", "\"$appwriteEndpoint\"")
         buildConfigField("String", "APPWRITE_PROJECT_ID", "\"$appwriteProjectId\"")
         // برای مانیفستِ ادغام‌شده (اگر نسخه‌ای از SDK اسکیم را با ${appwriteProjectId} بخواهد)

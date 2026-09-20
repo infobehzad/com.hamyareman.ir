@@ -38,6 +38,8 @@ sealed class Screen(val route: String) {
     data object Library : Screen("library")
     data object Audiobook : Screen("audiobook")
     data object School : Screen("school")
+    /** صفحهٔ جداگانهٔ «مرخصی» (از منوی برنامه هفتگی و مرخصی). */
+    data object Leave : Screen("leave")
     data object ClassPlan : Screen("class-plan")
     data object ClassPlanShift : Screen("class-plan-shift")
     /** ساعت‌های کلاس مجازی + بازه‌های روزهای مجازی. */

@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -59,6 +60,8 @@ fun TomorrowPrepScreen(onBack: () -> Unit) {
         }
     }
 
+    // با هر تغییرِ تیک، گزارشِ ماهانه دوباره ساخته می‌شود.
+    var reportTick by remember { mutableIntStateOf(0) }
     // بعد از نیمه‌شب، «فردا»ی دیشب همان «امروز» است.
     val prepDate = ClassPlanStore.prepTargetDate()
     var snap by remember { mutableStateOf(ClassPlanStore.load(ctx)) }
@@ -73,8 +76,12 @@ fun TomorrowPrepScreen(onBack: () -> Unit) {
         if (changed) {
             snap = ClassPlanStore.load(ctx)
             syncNotice = "اطلاعات از سرور به‌روز شد."
+            reportTick++
         }
-        ClassPlanSync.push(ctx, container.tables, uid, StateSync.KEY_CHECKS)
+        // فقط وقتی نسخهٔ دستگاه تازه‌تر است push می‌شود؛ وگرنه تیک‌های سرور پاک می‌شد.
+        if (ClassPlanSync.pushIfNewer(ctx, container.tables, uid, StateSync.KEY_CHECKS)) {
+            syncNotice = "تیک‌ها با سرور همگام شد."
+        }
     }
 
     val tomorrow = ClassPlanStore.firstSchoolDay(snap, prepDate)
@@ -134,6 +141,7 @@ fun TomorrowPrepScreen(onBack: () -> Unit) {
                         bag = it
                         bagLock = it
                         ClassPlanStore.setPrepBag(ctx, isoN, it)
+                        reportTick++
                         pushChecks()
                     },
                 )
@@ -147,6 +155,7 @@ fun TomorrowPrepScreen(onBack: () -> Unit) {
                         hw = it
                         hwLock = it
                         ClassPlanStore.setPrepHw(ctx, isoN, it)
+                        reportTick++
                         pushChecks()
                     },
                 )
@@ -292,23 +301,22 @@ fun TomorrowPrepScreen(onBack: () -> Unit) {
             }
 
             // --- آکاردیونِ گزارشِ ماهانه (پیش‌فرض بسته) ---
-            MonthlyChecksAccordion()
+            MonthlyChecksAccordion(reportTick)
         }
     }
 }
 
-/** آکاردیونی که پیش‌فرض بسته است و تیک‌ها را بر اساس ماه و سال دسته‌بندی می‌کند. */
+/**
+ * آکاردیونِ «گزارش ماهانه آمادگی حضور در مدرسه» — پیش‌فرض بسته.
+ * فقط مواردی که تیک نخورده‌اند فهرست می‌شوند؛ روزی که تیک‌هایش کامل است
+ * در گزارش نمی‌آید (و «کیف مدرسه» در روزهای مجازی ناقص حساب نمی‌شود).
+ */
 @Composable
-private fun MonthlyChecksAccordion() {
+private fun MonthlyChecksAccordion(tick: Int = 0) {
     val ctx = LocalContext.current
     var open by remember { mutableStateOf(false) }
-    val entries = remember { ClassPlanStore.checkEntries(ctx) }
-    val groups = remember(entries) {
-        entries.groupBy { e ->
-            val j = JalaliDate.toJalali(e.iso)
-            if (j == null) "نامشخص" else "${JalaliDate.monthName(j.month)} ${toPersianDigits(j.year.toString())}"
-        }
-    }
+    val groups = remember(tick, open) { ClassPlanStore.readinessReport(ctx) }
+    val entries = remember(groups) { groups.flatMap { it.second } }
     Column(Modifier.fillMaxWidth()) {
         Row(
             Modifier.fillMaxWidth().clickable { open = !open }.padding(vertical = 8.dp),
@@ -316,7 +324,7 @@ private fun MonthlyChecksAccordion() {
         ) {
             Text(if (open) "▾" else "◂", fontFamily = DashboardFonts.quote)
             Text(
-                "گزارش ماهانهٔ تیک‌ها",
+                "گزارش ماهانه آمادگی حضور در مدرسه",
                 fontFamily = DashboardFonts.section,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
@@ -325,17 +333,21 @@ private fun MonthlyChecksAccordion() {
         }
         if (open) {
             if (entries.isEmpty()) {
-                Text("هنوز تیکی ثبت نشده است.", fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    "همهٔ روزها کامل تیک خورده‌اند — مورد جامانده‌ای نیست.",
+                    fontFamily = DashboardFonts.quote,
+                    style = MaterialTheme.typography.bodySmall,
+                )
             } else {
                 groups.forEach { (month, list) ->
                     Text(month, fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
                     list.forEach { e ->
                         val fa = JalaliDate.formatFaLong(e.iso)
-                        val extra = if (e.detail.isBlank()) "" else " — ${e.detail}"
                         Text(
-                            "• $fa ${e.title}$extra",
+                            "• $fa — ${e.title} تیک نخورده",
                             fontFamily = DashboardFonts.quote,
                             style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.padding(start = 8.dp),
                         )
                     }

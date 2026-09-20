@@ -8,13 +8,33 @@ const { JSDOM } = require('jsdom');
 
 const shimRaw = fs.readFileSync('/tmp/shim.js', 'utf8');
 const base = path.join(__dirname, '..', '..', 'apps/hamyar-app/src/main/assets/math/c905/');
-const expect = {
-  ryazif01d01: [57000, 221000, 340000, 443000, 525000, 674000, 749000, 891000, 1047000, 1495000],
-  ryazif01d02: [68000, 134000, 296000, 479000, 670000, 808000, 946000, 1194000, 1632000],
-  ryazif01d03: [79000, 139000, 243000, 491000, 615000, 730000, 910000, 980000, 1073000, 1350000, 1786000],
-  ryazif01d04: [82000, 166000, 272000, 383000, 456000, 567000, 702000, 826000, 910000, 1114000, 1664000],
-  ryazif01review: [76000, 178000, 247000, 389000, 477000, 552000, 660000, 1146000, 1267000],
-};
+const AUD = path.join(__dirname, '..', '..', 'Books/Base-09/ریاضی/04- صوت تدریس/');
+
+// پارسرِ بردبار: ارقامِ فارسی/عربی، فاصلهٔ اختیاری کنارِ دونقطه، ثانیهٔ ۱ یا ۲ رقمی
+// («۲:۸» یعنی ۲ دقیقه و ۸ ثانیه؛ «۱۴ :۴۵» هم قبول است).
+const FA = { '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9',
+             '٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9' };
+function parseTimingList(text) {
+  const out = [];
+  for (const line of String(text).split('\n')) {
+    const s = line.replace(/[۰-۹٠-٩]/g, (d) => FA[d]);
+    const m = s.match(/(\d{1,3})\s*:\s*(\d{1,2})(?!\d)/);
+    if (m && Number(m[2]) < 60) out.push(Number(m[1]) * 60000 + Number(m[2]) * 1000);
+  }
+  return out;
+}
+
+// انتظارات مستقیم از فهرست‌های زمان‌بندیِ Books خوانده می‌شوند تا هرگز کهنه نشوند.
+const expect = {};
+if (fs.existsSync(AUD)) {
+  for (const f of fs.readdirSync(AUD)) {
+    if (!/^ryazif.+\.txt$/.test(f)) continue;
+    const name = f.replace(/\.txt$/, '');
+    if (fs.existsSync(base + name + '.html')) {
+      expect[name] = parseTimingList(fs.readFileSync(path.join(AUD, f), 'utf8'));
+    }
+  }
+}
 
 function run(html, times) {
   const calls = [];
@@ -32,11 +52,17 @@ function run(html, times) {
 }
 
 let fail = 0;
-for (const [name, exp] of Object.entries(expect)) {
+const names = Object.keys(expect);
+if (names.length === 0) {
+  console.log('⚠️  هیچ فهرستِ زمان‌بندی‌ای در Books پیدا نشد — تست رد شد (نه شکست).');
+  process.exit(0);
+}
+for (const name of names) {
+  const exp = expect[name];
   const html = fs.readFileSync(base + name + '.html', 'utf8');
   for (const [mode, doc, times] of [['html', html, []], ['map', html.replace(/ data-seek-ms="\d+"/g, ''), exp]]) {
     const r = run(doc, times);
-    const tocOk = exp.every((ms, i) => !r.toc[i] || r.toc[i].ms === ms);
+    const tocOk = exp.length > 0 && exp.every((ms, i) => r.toc[i] && r.toc[i].ms === ms);
     const titleOk = r.titles.length > 0 && r.titles.every((t) => t.ms != null);
     const ok = tocOk && titleOk;
     if (!ok) fail++;
@@ -44,6 +70,19 @@ for (const [name, exp] of Object.entries(expect)) {
       `tocTimes=${tocOk} titleSeek=${titleOk} sampleLabel=${r.toc[0]?.label}`);
     if (!ok) console.log('   ', JSON.stringify(r.toc.slice(0, 3)), JSON.stringify(r.titles.slice(0, 3)), 'expected:', exp.join(','));
   }
+}
+// درس‌هایی که HTMLشان هست ولی هنوز فهرستِ زمان ندارند: فقط «دود نکردن» بررسی می‌شود.
+for (const f of fs.readdirSync(base)) {
+  if (!/^ryazif.+\.html$/.test(f)) continue;
+  const name = f.replace(/\.html$/, '');
+  if (expect[name]) continue;
+  const html = fs.readFileSync(base + f, 'utf8');
+  const r = run(html, []);
+  // این درس‌ها هنوز فهرستِ زمان ندارند؛ فقط «ساختار سالم» بررسی می‌شود.
+  // (سه درسِ فصلِ ۳ اساساً «.toc» ندارند؛ وقتی فهرستشان آمد اینجا هم سبز می‌شود.)
+  const ok = r.titles.length > 0;
+  if (!ok) fail++;
+  console.log(`${ok ? '🕓' : '❌'} ${name} [بدون زمان] toc=${r.toc.length} titles=${r.titles.length} — منتظرِ فهرستِ زمان`);
 }
 console.log(fail === 0 ? '\n✅ همه‌ی بررسی‌ها پاس شد' : `\n❌ ${fail} مورد ناموفق`);
 process.exit(fail === 0 ? 0 : 1);

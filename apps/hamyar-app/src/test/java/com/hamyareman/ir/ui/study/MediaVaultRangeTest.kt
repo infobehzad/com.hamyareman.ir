@@ -41,44 +41,61 @@ class MediaVaultRangeTest {
         if (!asset.exists()) return
         val times = TeachSeekMap.times("C905_E01-L01")
         assertEquals(10, times.size)
-        val inHtml = Regex("data-seek-ms=\"(\\d+)\"")
+        val inHtml = Regex("""data-seek-ms="(\d+)""")
             .findAll(asset.readText())
             .map { it.groupValues[1].toLong() }
             .toList()
-        // ۱۰ لینکِ فهرست؛ دو «data-seek-ms» باقی‌مانده داخلِ اسکریپتِ خودِ فایل است.
-        assertTrue("HTML times: $inHtml vs map: $times", inHtml.containsAll(times))
+        assertEquals("HTML times vs map", times, inHtml)
         assertEquals(57_000L, times.first())
         assertEquals(1_495_000L, times.last())
     }
+
     /**
      * نگهبانِ همگامی: `data-seek-ms`های HTML تدریس باید دقیقاً همان فهرست‌های
-     * زمان‌بندیِ پوشهٔ «Books/Base-09/ریاضی/04- صوت تدریس» (فایل‌های
-     * `ryazif01….txt`) باشند — وگرنه لمسِ فهرست، پلیر را به دقیقه‌ثانیه‌ی غلط
-     * می‌برد. (اگر پوشه‌ی Books در دسترس نبود، تست سکوت می‌کند.)
+     * زمان‌بندیِ پوشهٔ صوتِ تدریس در Books باشند. این بررسی «داده‌محور» است: هر
+     * فایلِ `ryazif….txt` که HTML هم‌نامش در assets باشد مقایسه می‌شود، پس با
+     * افزودنِ درس‌های تازه (فصلِ ۲ و ۳) خودبه‌خود پوشش داده می‌شوند.
+     * HTMLهایی که هنوز `data-seek-ms` ندارند (فهرستِ زمانشان نرسیده) رد می‌شوند
+     * تا بیلدِ کاربر بی‌دلیل قرمز نشود.
      */
     @Test
     fun `html seek times match the Books timing lists`() {
-        val names = listOf("ryazif01d01", "ryazif01d02", "ryazif01d03", "ryazif01d04", "ryazif01review")
+        val dir = File("../../Books/Base-09/ریاضی/04- صوت تدریس")
+        if (!dir.isDirectory) return
         var checked = 0
-        for (n in names) {
-            val txt = File("../../Books/Base-09/ریاضی/04- صوت تدریس/$n.txt")
-            val html = File("src/main/assets/math/c905/$n.html")
-            if (!txt.exists() || !html.exists()) continue
-            val want = parseTimingList(txt.readText())
-            val got = Regex("data-seek-ms=\"(\\d+)\"")
+        var pending = 0
+        for (txt in dir.listFiles().orEmpty().sortedBy { it.name }) {
+            val name = txt.nameWithoutExtension
+            if (!txt.name.endsWith(".txt") || !name.startsWith("ryazif")) continue
+            val html = File("src/main/assets/math/c905/$name.html")
+            if (!html.exists()) continue
+            val got = Regex("""data-seek-ms="(\d+)""")
                 .findAll(html.readText())
                 .map { it.groupValues[1].toLong() }
                 .toList()
-            assertEquals("$n — فهرستِ زمان‌بندیِ Books با HTML یکی نیست", want, got)
+            if (got.isEmpty()) { pending++; continue }
+            val want = parseTimingList(txt.readText())
+            assertEquals("$name — فهرستِ زمان‌بندیِ Books با HTML یکی نیست", want, got)
             checked++
         }
-        assertTrue("هیچ فهرستِ زمان‌بندی پیدا نشد", checked >= 1)
+        assertTrue("هیچ HTML همگام‌شده‌ای پیدا نشد", checked >= 5)
     }
 
-    /** «۱. 0:57 — عنوان» ⇒ 57000 (میلی‌ثانیه) — با ارقامِ فارسی یا لاتین. */
+    /**
+     * «۱. ۰:۵۷ — عنوان» ⇒ 57000 میلی‌ثانیه. بردبار: ارقامِ فارسی/عربی، فاصلهٔ
+     * اختیاری کنارِ دونقطه («۱۴ :۴۵») و ثانیهٔ تک‌رقمی («۲:۸» = ۲ دقیقه و ۸ ثانیه).
+     */
     private fun parseTimingList(text: String): List<Long> = text.lineSequence().mapNotNull { line ->
-        val s = line.map { c -> if (c in '\u06F0'..'\u06F9') '0' + (c - '\u06F0') else c }.joinToString("")
-        Regex("""(\d{1,3}):(\d{2})""").find(s)
-            ?.let { m -> m.groupValues[1].toLong() * 60_000 + m.groupValues[2].toLong() * 1000 }
+        val s = line.map { c ->
+            when (c) {
+                in '\u06F0'..'\u06F9' -> '0' + (c - '\u06F0')
+                in '\u0660'..'\u0669' -> '0' + (c - '\u0660')
+                else -> c
+            }
+        }.joinToString("")
+        Regex("""(\d{1,3})\s*:\s*(\d{1,2})(?!\d)""").find(s)?.let { m ->
+            val sec = m.groupValues[2].toLong()
+            if (sec < 60) m.groupValues[1].toLong() * 60_000 + sec * 1000 else null
+        }
     }.toList()
 }

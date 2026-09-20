@@ -52,7 +52,27 @@ object ClassPlanStore {
         val thisWeekShift: Shift = Shift.MORNING,
         /** هفته‌ی چندمِ چرخه (۱..cycleWeeks) با آن هفته‌ی لنگر هم‌خوانی دارد. */
         val cycleWeekOffset: Int = 1,
+        /** درسِ دومِ هر خانه — هم‌اندازهٔ `days`؛ رشتهٔ خالی یعنی خانه تک‌درسی است. */
+        val second: Map<Int, List<String>> = emptyMap(),
+        /**
+         * ساعتِ هر زنگ به صورت «HH:MM-HH:MM» (خانهٔ i = «تایم زنگ i+1»).
+         * یک فهرست برای همهٔ روزها؛ از صفحهٔ برنامهٔ مدرسه تنظیم و سینک می‌شود.
+         */
+        val bells: List<String> = emptyList(),
     )
+
+    /** «HH:MM-HH:MM» زنگِ شمارهٔ [slot] (صفر‌پایه) — اگر تنظیم نشده باشد رشتهٔ خالی. */
+    fun bellOf(snap: Snapshot, slot: Int): String = snap.bells.getOrNull(slot).orEmpty()
+
+    /** نمایشِ فارسیِ بازهٔ زنگ: «۰۷:۳۰ تا ۰۸:۱۵»؛ خالی اگر تنظیم نشده باشد. */
+    fun bellLabel(snap: Snapshot, slot: Int): String {
+        val raw = bellOf(snap, slot)
+        val parts = raw.split("-")
+        val a = parts.getOrNull(0)?.trim().orEmpty()
+        val b = parts.getOrNull(1)?.trim().orEmpty()
+        if (a.isBlank() || b.isBlank()) return ""
+        return "${toPersianDigits(a)} تا ${toPersianDigits(b)}"
+    }
 
     /** ساعت خروجِ شیفتِ داده‌شده به صورت «HH:MM». */
     fun exitOf(snap: Snapshot, shift: Shift): String =
@@ -131,6 +151,16 @@ object ClassPlanStore {
                 (0 until arr.length()).map { arr.optString(it) }.filter { it.isNotBlank() }
             }.getOrDefault(emptyList())
         }
+        val second = (1..5).associateWith { d ->
+            runCatching {
+                val arr = JSONArray(s.getString("dayb_$d", "[]"))
+                (0 until arr.length()).map { arr.optString(it) }
+            }.getOrDefault(emptyList())
+        }
+        val bells0 = runCatching {
+            val arr = JSONArray(s.getString("bell_times", "[]"))
+            (0 until arr.length()).map { arr.optString(it) }
+        }.getOrDefault(emptyList())
         val cycleWeeks0 = s.getInt("cycle_weeks", 2).let { if (it in listOf(1, 2, 4)) it else 2 }
         val anchorIso0 = s.getString("anchor").ifBlank { SchoolShift.startOfPersianWeek(today).toString() }
         val weekPattern0 = s.getString("week_pattern").split(",").map { it.trim() }.filter { it == "morning" || it == "evening" }
@@ -167,6 +197,8 @@ object ClassPlanStore {
             exitNoon = s.getString("exit_pm").ifBlank { "17:30" },
             thisWeekShift = thisWeekShift0,
             cycleWeekOffset = offset0,
+            second = second,
+            bells = bells0,
         )
     }
 
@@ -180,15 +212,49 @@ object ClassPlanStore {
             out.put(arr.optString(i))
         }
         s.putString("day_$dayIndex", out.toString())
+        val arrB = runCatching { JSONArray(s.getString("dayb_$dayIndex", "[]")) }.getOrDefault(JSONArray())
+        val outB = JSONArray()
+        for (i in 0 until arrB.length()) {
+            if (i == slotIndex) continue
+            outB.put(arrB.optString(i))
+        }
+        s.putString("dayb_$dayIndex", outB.toString())
+        StateSync.markLocal(ctx, StateSync.KEY_WEEK)
     }
 
-    fun saveDays(ctx: Context, days: Map<Int, List<String>>, locked: Boolean) {
+    /**
+     * ذخیرهٔ خانه‌های برنامهٔ هفتگی. [seconds] درسِ دومِ هر خانه است (اختیاری) و
+     * [bells] ساعتِ زنگ‌ها برای همهٔ روزها (اختیاری). `null` یعنی «دست نزن».
+     */
+    fun saveDays(
+        ctx: Context,
+        days: Map<Int, List<String>>,
+        locked: Boolean,
+        seconds: Map<Int, List<String>>? = null,
+        bells: List<String>? = null,
+    ) {
         val s = store(ctx)
         days.forEach { (d, list) ->
             val arr = JSONArray(); list.forEach { arr.put(it) }
             s.putString("day_$d", arr.toString())
         }
+        seconds?.forEach { (d, list) ->
+            val arr = JSONArray(); list.forEach { arr.put(it) }
+            s.putString("dayb_$d", arr.toString())
+        }
+        bells?.let { saveBellTimes(ctx, it, markChanged = false) }
         s.putBool("locked", locked)
+        StateSync.markLocal(ctx, StateSync.KEY_WEEK)
+    }
+
+    /**
+     * «تایم زنگ ۱..n» — یک فهرستِ مشترک برای همهٔ روزها به صورت «HH:MM-HH:MM».
+     */
+    fun saveBellTimes(ctx: Context, bells: List<String>, markChanged: Boolean = true) {
+        val arr = JSONArray()
+        bells.forEach { arr.put(it) }
+        store(ctx).putString("bell_times", arr.toString())
+        if (markChanged) StateSync.markLocal(ctx, StateSync.KEY_WEEK)
     }
 
     fun saveShift(
@@ -209,6 +275,7 @@ object ClassPlanStore {
         s.putString("week_pattern", if (pattern.isNotEmpty()) pattern.joinToString(",") else "")
         thisWeekShift?.let { s.putString("this_week_shift", if (it == Shift.EVENING) "evening" else "morning") }
         cycleWeekOffset?.let { s.putInt("cycle_week_offset", it.coerceIn(1, cycleWeeks)) }
+        StateSync.markLocal(ctx, StateSync.KEY_SHIFT)
     }
 
     /** بخش اول تنظیمات: شیفتِ هفته‌ی جاری. لنگر = شنبه‌ی همین هفته می‌شود. */
@@ -238,6 +305,7 @@ object ClassPlanStore {
         val s = store(ctx)
         s.putInt("virt_m_h", mh); s.putInt("virt_m_m", mm)
         s.putInt("virt_n_h", nh); s.putInt("virt_n_m", nm)
+        StateSync.markLocal(ctx, StateSync.KEY_SHIFT)
     }
 
     fun saveTimes(
@@ -251,16 +319,19 @@ object ClassPlanStore {
         s.putInt("wake_lead", wakeLeadMin)
         s.putInt("n_hour", noonHour); s.putInt("n_min", noonMinute)
         s.putString("sleep_am", sleepMorning); s.putString("sleep_pm", sleepEvening)
+        StateSync.markLocal(ctx, StateSync.KEY_SHIFT)
     }
 
     fun saveExitTimes(ctx: Context, morning: String, noon: String) {
         val s = store(ctx)
         s.putString("exit_am", morning)
         s.putString("exit_pm", noon)
+        StateSync.markLocal(ctx, StateSync.KEY_SHIFT)
     }
 
     fun saveLunarOffset(ctx: Context, offset: Int) {
         store(ctx).putInt("lunar_offset", offset.coerceIn(-2, 2))
+        StateSync.markLocal(ctx, StateSync.KEY_SHIFT)
     }
 
     fun shiftOf(snap: Snapshot, date: LocalDate): Shift {
@@ -343,11 +414,13 @@ object ClassPlanStore {
     fun setPrepBag(ctx: Context, iso: String, v: Boolean) {
         store(ctx).putBool("bag_$iso", v)
         if (v) store(ctx).putBool("lock_bag_$iso", true) else store(ctx).remove("lock_bag_$iso")
+        StateSync.markLocal(ctx, StateSync.KEY_CHECKS)
     }
 
     fun setPrepHw(ctx: Context, iso: String, v: Boolean) {
         store(ctx).putBool("hw_$iso", v)
         if (v) store(ctx).putBool("lock_hw_$iso", true) else store(ctx).remove("lock_hw_$iso")
+        StateSync.markLocal(ctx, StateSync.KEY_CHECKS)
     }
 
     // --- آمادگیِ امتحان (فقط وقتی امتحان وجود دارد) ---
@@ -360,11 +433,18 @@ object ClassPlanStore {
 
     fun setExamPrepDone(ctx: Context, iso: String, option: String, v: Boolean) {
         store(ctx).putBool("examprep_${iso}_$option", v)
+        StateSync.markLocal(ctx, StateSync.KEY_CHECKS)
     }
     fun examOf(ctx: Context, iso: String) = store(ctx).getString("exam_$iso")
-    fun setExam(ctx: Context, iso: String, subject: String) { store(ctx).putString("exam_$iso", subject) }
+    fun setExam(ctx: Context, iso: String, subject: String) {
+        store(ctx).putString("exam_$iso", subject)
+        StateSync.markLocal(ctx, StateSync.KEY_CHECKS)
+    }
     fun reportOf(ctx: Context, iso: String) = store(ctx).getString("rep_$iso")
-    fun setReport(ctx: Context, iso: String, text: String) { store(ctx).putString("rep_$iso", text) }
+    fun setReport(ctx: Context, iso: String, text: String) {
+        store(ctx).putString("rep_$iso", text)
+        StateSync.markLocal(ctx, StateSync.KEY_CHECKS)
+    }
 
     fun virtualDays(ctx: Context): Set<String> {
         val arr = runCatching { JSONArray(store(ctx).getString("virtual_days", "[]")) }.getOrDefault(JSONArray())
@@ -378,6 +458,7 @@ object ClassPlanStore {
         if (on) set += iso else set -= iso
         val arr = JSONArray(); set.sorted().forEach { arr.put(it) }
         store(ctx).putString("virtual_days", arr.toString())
+        StateSync.markLocal(ctx, StateSync.KEY_VIRTUAL)
     }
 
     fun setVirtualRange(ctx: Context, fromIso: String, toIso: String, on: Boolean) {
@@ -476,6 +557,7 @@ object ClassPlanStore {
             )
         }
         store(ctx).putString("virtual_sessions", arr.toString())
+        StateSync.markLocal(ctx, StateSync.KEY_VIRTUAL)
     }
 
     /** یک بازه‌ی تاریخ مجازی (برای نمایش در آکاردیون و حذف تکی). */
@@ -604,6 +686,58 @@ object ClassPlanStore {
         return out.sortedWith(compareByDescending<CheckEntry> { it.iso }.thenBy { it.group })
     }
 
+    // --------------------------------- گزارشِ ماهانهٔ آمادگی حضور در مدرسه
+
+    /** یک موردِ تیک‌نخورده در یک روز. */
+    data class MissingItem(val iso: String, val title: String)
+
+    /**
+     * گزارشِ «آمادگی حضور در مدرسه»: برای هر روزِ مدرسه فقط مواردی که تیک
+     * نخورده‌اند برگردانده می‌شود؛ روزی که تیک‌هایش کامل است در گزارش نمی‌آید.
+     *  - روزهای تعطیل/پنجشنبه/جمعه و روزهای مرخصی حساب نمی‌شوند؛
+     *  - «کیف مدرسه» در روزهای مجازی ناقص شمرده نمی‌شود.
+     * خروجی: فهرستِ (نامِ ماهِ شمسی، مواردِ جامانده) — تازه‌ترین ماه اول.
+     */
+    fun readinessReport(
+        ctx: Context,
+        today: LocalDate = LocalDate.now(JalaliDate.TEHRAN),
+    ): List<Pair<String, List<MissingItem>>> {
+        val snap = load(ctx)
+        val s = store(ctx)
+        val leaveList = leaves(ctx)
+        val virtualSet = virtualDays(ctx)
+        // از اولین روزی که برایش چیزی ثبت شده (یا از اولِ ماهِ شمسیِ جاری) تا امروز.
+        val recorded = listOf("bag_", "hw_", "exam_", "rep_").flatMap { p ->
+            s.keysWithPrefix(p).map { it.removePrefix(p).take(10) }
+        }.filter { it.length == 10 }.mapNotNull { runCatching { LocalDate.parse(it) }.getOrNull() }
+        val j0 = JalaliDate.toJalali(today.toString())
+        val monthStart = j0?.let { JalaliDate.toGregorianIso(JalaliDate.Jalali(it.year, it.month, 1)) }
+            ?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+            ?: today.withDayOfMonth(1)
+        val floor = today.minusDays(366)
+        val from = (listOfNotNull(recorded.minOrNull(), monthStart).minOrNull() ?: today).let {
+            if (it.isBefore(floor)) floor else it
+        }
+        val out = mutableListOf<MissingItem>()
+        var d = from
+        while (!d.isAfter(today)) {
+            val iso = d.toString()
+            val onLeave = leaveList.any { iso >= it.fromIso && iso <= it.toIso }
+            if (!isSchoolHoliday(snap, d) && !onLeave) {
+                val virtual = iso in virtualSet
+                if (!virtual && !prepBag(ctx, iso)) out += MissingItem(iso, "کیف مدرسه آماده است")
+                if (!prepHw(ctx, iso)) out += MissingItem(iso, "تکالیف انجام شده")
+            }
+            d = d.plusDays(1)
+        }
+        return out.groupBy { item ->
+            val j = JalaliDate.toJalali(item.iso)
+            if (j == null) "نامشخص" else "${JalaliDate.monthName(j.month)} ${toPersianDigits(j.year.toString())}"
+        }.entries
+            .sortedByDescending { e -> e.value.maxOf { it.iso } }
+            .map { e -> e.key to e.value.sortedByDescending { it.iso } }
+    }
+
     // ------------------------------------------------------------------ مرخصی
 
     /** وضعیتِ توجیهِ مرخصی برای مدرسه. */
@@ -638,6 +772,7 @@ object ClassPlanStore {
         if (t.isBlank()) return
         val next = (leaveReasons(ctx) + t).distinct()
         store(ctx).putString("leave_reasons", JSONArray().apply { next.forEach { put(it) } }.toString())
+        StateSync.markLocal(ctx, StateSync.KEY_LEAVES)
     }
 
     fun leaves(ctx: Context): List<LeaveRecord> {
@@ -669,6 +804,7 @@ object ClassPlanStore {
             )
         }
         store(ctx).putString("leave_records", arr.toString())
+        StateSync.markLocal(ctx, StateSync.KEY_LEAVES)
     }
 
     fun addLeave(ctx: Context, fromIso: String, toIso: String, reason: String, medicalCert: Boolean, justification: String) {
@@ -727,6 +863,11 @@ object ClassPlanStore {
                 val days = JSONObject()
                 snap.days.forEach { (d, list) -> days.put(d.toString(), JSONArray().apply { list.forEach { put(it) } }) }
                 put("days", days)
+                // درسِ دومِ هر خانه + «تایم زنگ ۱..n» (برای همهٔ روزها یکی است)
+                val sec = JSONObject()
+                snap.second.forEach { (d, list) -> sec.put(d.toString(), JSONArray().apply { list.forEach { put(it) } }) }
+                put("seconds", sec)
+                put("bells", JSONArray().apply { snap.bells.forEach { put(it) } })
             }.toString()
 
             StateSync.KEY_SHIFT -> JSONObject().apply {
@@ -745,6 +886,11 @@ object ClassPlanStore {
                 put("sleepEvening", snap.sleepEvening)
                 put("exitMorning", snap.exitMorning)
                 put("exitNoon", snap.exitNoon)
+                put("lunarOffset", snap.lunarOffset)
+                put("virtualMorningHour", snap.virtualMorningHour)
+                put("virtualMorningMinute", snap.virtualMorningMinute)
+                put("virtualNoonHour", snap.virtualNoonHour)
+                put("virtualNoonMinute", snap.virtualNoonMinute)
             }.toString()
 
             StateSync.KEY_VIRTUAL -> JSONObject().apply {
@@ -808,14 +954,18 @@ object ClassPlanStore {
         when (key) {
             StateSync.KEY_WEEK -> {
                 val daysObj = o.optJSONObject("days") ?: return
-                val days = (1..5).associate { d ->
-                    d to runCatching {
-                        val arr = daysObj.optJSONArray(d.toString()) ?: JSONArray()
-                        (0 until arr.length()).map { arr.optString(it) }.filter { it.isNotBlank() }
-                    }.getOrDefault(emptyList())
+                fun dayList(parent: JSONObject?, d: Int, keepBlank: Boolean): List<String> = runCatching {
+                    val arr = parent?.optJSONArray(d.toString()) ?: JSONArray()
+                    (0 until arr.length()).map { arr.optString(it) }
+                        .let { if (keepBlank) it else it.filter(String::isNotBlank) }
+                }.getOrDefault(emptyList())
+                val days = (1..5).associateWith { d -> dayList(daysObj, d, keepBlank = false) }
+                val seconds = (1..5).associateWith { d -> dayList(o.optJSONObject("seconds"), d, keepBlank = true) }
+                val bells = o.optJSONArray("bells")?.let { arr ->
+                    (0 until arr.length()).map { arr.optString(it) }
                 }
-                if (days.values.any { it.isNotEmpty() }) {
-                    saveDays(ctx, days, o.optBoolean("locked", false))
+                if (days.values.any { it.isNotEmpty() } || !bells.isNullOrEmpty()) {
+                    saveDays(ctx, days, o.optBoolean("locked", false), seconds = seconds, bells = bells)
                 }
             }
 
@@ -826,6 +976,14 @@ object ClassPlanStore {
                     val arr = JSONArray(o.optString("weekPattern", "[]"))
                     (0 until arr.length()).map { arr.optString(it) }.filter { it == "morning" || it == "evening" }
                 }.getOrDefault(emptyList())
+                if (o.has("lunarOffset")) saveLunarOffset(ctx, o.optInt("lunarOffset", 0))
+                if (o.has("virtualMorningHour")) {
+                    saveVirtualHours(
+                        ctx,
+                        o.optInt("virtualMorningHour", 8), o.optInt("virtualMorningMinute", 0),
+                        o.optInt("virtualNoonHour", 14), o.optInt("virtualNoonMinute", 0),
+                    )
+                }
                 if (anchor.isNotBlank()) {
                     val tws = if (o.optString("thisWeekShift") == "evening") Shift.EVENING
                         else if (o.optString("thisWeekShift") == "morning") Shift.MORNING else null

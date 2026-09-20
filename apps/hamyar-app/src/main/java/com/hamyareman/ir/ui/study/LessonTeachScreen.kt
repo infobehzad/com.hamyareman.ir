@@ -22,7 +22,10 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.VolumeOff
@@ -459,7 +462,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
         if (sysVol > 0) lastUnmuted = sysVol
         runCatching { am?.setStreamVolume(android.media.AudioManager.STREAM_MUSIC, sysVol, 0) }
     }
-    LaunchedEffect(volOpen, volTick) { if (volOpen) { delay(2600); volOpen = false } }
+    LaunchedEffect(volOpen, volTick) { if (volOpen) { delay(4600); volOpen = false } }
     // پیامِ کوتاه (نتیجه‌ی دانلود) خودش بعدِ چند ثانیه پاک می‌شود.
     LaunchedEffect(note) { if (note != null) { delay(6000); note = null } }
     // کلیدهایِ فیزیکیِ ولوم → همگام‌سازیِ آیکون/اسلایدر.
@@ -528,22 +531,7 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                 )
                 when {
                     downloading -> {
-                        LinearProgressIndicator(
-                            progress = {
-                                if (totalBytes > 0) (doneBytes.toFloat() / totalBytes.toFloat()).coerceIn(0f, 1f) else 0f
-                            },
-                            modifier = Modifier.width(64.dp).height(6.dp),
-                        )
-                        Text(
-                            if (totalBytes > 0) {
-                                toPersianDigits(((doneBytes * 100L) / totalBytes).toString()) + "٪ — " +
-                                    humanSize(doneBytes) + " از " + humanSize(totalBytes)
-                            } else {
-                                humanSize(doneBytes)
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 1,
-                        )
+                        // جزئیاتِ حجم/درصد به «بالای» نوارِ وضعیت منتقل شد (بلوکِ زیرِ ردیف).
                     }
                     cached(track) -> {
                         var confirmDelete by remember { mutableStateOf(false) }
@@ -606,13 +594,6 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                         Text("دانلود", maxLines = 1)
                     }
                 }
-                if (durMs > 0) {
-                    Text(
-                        "${teachMmss(if (dragMs >= 0) dragMs else posMs)} از ${teachMmss(durMs)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1,
-                    )
-                }
                 Spacer(Modifier.weight(1f))
                 // ولوم به سبکِ یوتیوب: وقتی نوار بسته است، لمسِ آیکون فقط نوار را باز
                 // می‌کند (بی‌صدا نمی‌کند)؛ میوت/لغوِ میوت فقط وقتی نوار باز است.
@@ -650,10 +631,35 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                             onValueChange = { applyVol(it.roundToInt()) },
                             valueRange = 0f..sysMax.toFloat(),
                             steps = sysMax - 1,
-                            modifier = Modifier.width(96.dp).height(26.dp),
+                            modifier = Modifier.width(125.dp).height(26.dp),
                         )
                     }
                 }
+            }
+            if (downloading) {
+                // «حجم و درصدِ دانلود» بالای نوارِ وضعیت، با فونتِ ۱٫۵ برابر
+                Text(
+                    if (totalBytes > 0) {
+                        toPersianDigits(((doneBytes * 100L) / totalBytes).toString()) + "٪ — " +
+                            humanSize(doneBytes) + " از " + humanSize(totalBytes)
+                    } else {
+                        humanSize(doneBytes)
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    fontSize = MaterialTheme.typography.bodySmall.fontSize * 1.5f,
+                    maxLines = 1,
+                )
+                Spacer(Modifier.height(4.dp))
+                LinearProgressIndicator(
+                    progress = {
+                        if (totalBytes > 0) (doneBytes.toFloat() / totalBytes.toFloat()).coerceIn(0f, 1f) else 0f
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                )
+                Spacer(Modifier.height(6.dp))
             }
             if (quietOn()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -699,7 +705,22 @@ internal fun TeachAudioBar(packId: String, screenTitle: String, bookTitle: Strin
                     modifier = Modifier.fillMaxWidth().height(26.dp),
                 )
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+            // زمان‌ها + چیپ‌های سرعت در یک ردیف؛ اگر جا نشد، ردیف لغزنده است
+            // (زمان‌ها همیشه سمتِ راست و چیپ‌ها بعد از آن‌ها).
+            Row(
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (durMs > 0) {
+                    Text(
+                        "${teachMmss(if (dragMs >= 0) dragMs else posMs)} از ${teachMmss(durMs)}",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontSize = MaterialTheme.typography.bodySmall.fontSize * 1.5f,
+                        maxLines = 1,
+                    )
+                    Spacer(Modifier.width(10.dp))
+                }
                 TEACH_SPEEDS.forEach { v ->
                     FilterChip(
                         selected = speed == v,

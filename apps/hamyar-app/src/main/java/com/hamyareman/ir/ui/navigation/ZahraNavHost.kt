@@ -81,6 +81,7 @@ import com.hamyareman.ir.ui.study.AudiobookScreen
 import com.hamyareman.ir.ui.study.BookDetailScreen
 import com.hamyareman.ir.ui.study.DownloadsScreen
 import com.hamyareman.ir.ui.study.HealthProgressScreen
+import com.hamyareman.ir.ui.study.LeaveScreen
 import com.hamyareman.ir.ui.study.LessonPdfScreen
 import com.hamyareman.ir.ui.study.LessonStudyScreen
 import com.hamyareman.ir.ui.study.LessonTeachScreen
@@ -233,6 +234,7 @@ fun ZahraNavHost() {
             composable(Screen.Helplines.route) { HelplinesScreen { nav.popBackStack() } }
             composable(Screen.Library.route) { LibraryScreen { nav.popBackStack() } }
             composable(Screen.Audiobook.route) { AudiobookScreen { nav.popBackStack() } }
+            composable(Screen.Leave.route) { LeaveScreen { nav.popBackStack() } }
             composable(Screen.School.route) {
                 ClassPlanScreen(
                     onBack = { nav.popBackStack() },

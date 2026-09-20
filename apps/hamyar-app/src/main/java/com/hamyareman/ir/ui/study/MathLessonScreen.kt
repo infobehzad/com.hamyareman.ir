@@ -15,6 +15,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.spring
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
+import kotlinx.coroutines.launch
+import kotlin.math.abs
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -229,7 +246,93 @@ fun MathLessonScreen(
                 }
             }
         }
-        HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
+        // ۵) سوایپِ سربرگ‌ها: آستانه‌ی شروع «سه برابر» (سه برابر کمتر حساس) +
+        //    افکتِ جهت‌دار. کمتر از آستانه هیچ اثری ندارد (نه جابه‌جایی، نه انیمیشن).
+        val swipeScope = rememberCoroutineScope()
+        val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+        val tug = remember { Animatable(0f) }
+        var tugProgress by remember { mutableFloatStateOf(0f) }
+        var tugDestLeft by remember { mutableStateOf(true) }
+        var tugLabel by remember { mutableStateOf<String?>(null) }
+        var tugJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+        Box(
+            Modifier
+                .weight(1f)
+                .pointerInput(tabs.size, rtl) {
+                    val slop = viewConfiguration.touchSlop
+                    val startAt = slop * 3f
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                        val pid = down.id
+                        val width = size.width.toFloat().coerceAtLeast(1f)
+                        val commitAt = width * 0.34f
+                        var dx = 0f
+                        var dy = 0f
+                        var dir = 0f
+                        var target = -1
+                        while (true) {
+                            val event = awaitPointerEvent(PointerEventPass.Initial)
+                            val change = event.changes.firstOrNull { it.id == pid } ?: break
+                            if (!change.pressed) break
+                            dx += change.position.x - change.previousPosition.x
+                            dy += change.position.y - change.previousPosition.y
+                            if (dir == 0f) {
+                                if (abs(dx) >= startAt && abs(dx) > abs(dy) * 1.2f) {
+                                    dir = if (dx > 0) 1f else -1f
+                                    // در RTL سربرگِ بعدی سمتِ چپ است، در LTR سمتِ راست.
+                                    val next = if (rtl) dx > 0 else dx < 0
+                                    val cand = pagerState.currentPage + if (next) 1 else -1
+                                    if (cand !in tabs.indices) {
+                                        dir = 0f; dx = 0f; dy = 0f
+                                    } else {
+                                        target = cand
+                                        tugDestLeft = dx > 0
+                                        tugLabel = tabs[cand].label
+                                        tugProgress = 0f
+                                        tugJob?.cancel()
+                                        change.consume()
+                                    }
+                                }
+                            } else {
+                                change.consume()
+                                val extra = (dx - dir * startAt) * dir
+                                tugProgress = (extra / commitAt).coerceIn(0f, 1f)
+                                tug.snapTo(dir * (extra * 0.35f).coerceIn(-width * 0.25f, width * 0.25f))
+                            }
+                        }
+                        if (dir != 0f) {
+                            val commit = tugProgress >= 1f && target >= 0
+                            val to = target
+                            tugJob = swipeScope.launch {
+                                if (commit) {
+                                    // انیمیشنِ خودِ پیجر، جابه‌جایی را نرم نشان می‌دهد.
+                                    tug.snapTo(0f)
+                                    tugProgress = 0f
+                                    tugLabel = null
+                                    pagerState.animateScrollToPage(to)
+                                } else {
+                                    tug.animateTo(0f, spring(dampingRatio = 0.6f, stiffness = 620f))
+                                    tugProgress = 0f
+                                    tugLabel = null
+                                }
+                            }
+                        }
+                    }
+                },
+        ) {
+            HorizontalPager(
+                state = pagerState,
+                userScrollEnabled = false,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        translationX = tug.value
+                        val pr = tugProgress
+                        scaleX = 1f - 0.03f * pr
+                        scaleY = 1f - 0.03f * pr
+                        alpha = 1f - 0.28f * pr
+                    },
+            ) { page ->
             when (tabs.getOrNull(page)?.key) {
                 "teach" -> MathTeachTab(pack, bookTitle, showPlayer = false)
                 "book" -> MathBookHtmlTab(pack, html)
@@ -239,9 +342,75 @@ fun MathLessonScreen(
                 "pdf" -> TeachPdfPages(modifier = Modifier.fillMaxSize(), fileId = pack.pdfFileName, pack = pack)
                 else -> MathTeachTab(pack, bookTitle, showPlayer = false)
             }
+            }
+            TabSwipeHint(
+                destLeft = tugDestLeft,
+                label = tugLabel,
+                progress = { tugProgress },
+            )
         }
     }
 }
+
+/**
+ * افکتِ جهت‌دارِ سوایپِ سربرگ‌ها: نورِ لبه‌ی مقصد + فلش و برچسبِ سربرگِ مقصد که
+ * با پیشرفتِ درگ روشن/بزرگ می‌شود. خواندنِ «progress» داخلِ لایه‌ی گرافیکی است تا
+ * درگ باعثِ بازترکیب نشود.
+ */
+@Composable
+private fun TabSwipeHint(destLeft: Boolean, label: String?, progress: () -> Float) {
+    val tint = MaterialTheme.colorScheme.primary
+    Box(Modifier.fillMaxSize()) {
+        Box(
+            Modifier
+                .align(if (destLeft) Alignment.CenterLeft else Alignment.CenterRight)
+                .fillMaxHeight()
+                .width(110.dp)
+                .graphicsLayer { alpha = progress() * 0.85f }
+                .background(
+                    Brush.horizontalGradient(
+                        if (destLeft) {
+                            listOf(tint.copy(alpha = 0.55f), tint.copy(alpha = 0f))
+                        } else {
+                            listOf(tint.copy(alpha = 0f), tint.copy(alpha = 0.55f))
+                        },
+                    ),
+                ),
+        )
+        if (label != null) {
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                shadowElevation = 8.dp,
+                modifier = Modifier
+                    .align(if (destLeft) Alignment.CenterLeft else Alignment.CenterRight)
+                    .padding(horizontal = 12.dp)
+                    .graphicsLayer {
+                        val p = progress()
+                        alpha = p
+                        translationX = (if (destLeft) -1f else 1f) * (1f - p) * 30.dp.toPx()
+                        scaleX = 0.8f + 0.2f * p
+                        scaleY = 0.8f + 0.2f * p
+                    },
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                ) {
+                    Icon(
+                        if (destLeft) Icons.Filled.ChevronLeft else Icons.Filled.ChevronRight,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
 
 /** سربرگ‌ها — در هر دو حالتِ جمع/باز یکی؛ هیچ‌وقت جمع نمی‌شوند. */
 @Composable
@@ -683,32 +852,34 @@ private fun MathExamTab(pack: StudyPack) {
  * همه‌ی پنج صوتِ فصلِ ۱ (درس ۱ تا ۴ + جمع‌بندی) زمان‌هایشان کامل است.
  */
 internal object TeachSeekMap {
-    // منبع: فهرست‌های زمان‌بندیِ `Books/Base-09/ریاضی/04- صوت تدریس/ryazif01d0X.txt`
-    // (و `ryazif01review.txt`) — همان زمان‌هایی که در HTML درس‌های ۲/۳/۴/جمع‌بندی
-    // به‌صورت `data-seek-ms` هست. درسِ ۱ هم با همین زمان‌ها در HTML نوشته شد.
+    // منبعِ حقیقت: فهرست‌های زمان‌بندیِ پوشهٔ صوتِ تدریس در Books
+    // (ryazif01d01.txt … ryazif01review.txt). این جدول با همان فایل‌ها و با
+    // «data-seek-ms»های داخلِ HTMLهای assets همگام است؛ آزمونِ
+    // MediaVaultRangeTest هر سه را با هم مقایسه می‌کند تا از هم دور نیفتند.
     private val table: Map<String, List<Long>> = mapOf(
         "C905_E01-L01" to listOf(
             57_000, 221_000, 340_000, 443_000, 525_000,
             674_000, 749_000, 891_000, 1_047_000, 1_495_000,
         ),
         "C905_E01-L02" to listOf(
-            68_000, 134_000, 296_000, 479_000, 670_000,
-            808_000, 946_000, 1_194_000, 1_632_000,
+            60_000, 131_000, 286_000, 457_000, 624_000,
+            786_000, 928_000, 1_164_000, 1_636_000,
         ),
         "C905_E01-L03" to listOf(
-            79_000, 139_000, 243_000, 491_000, 615_000, 730_000,
-            910_000, 980_000, 1_073_000, 1_350_000, 1_786_000,
+            70_000, 128_000, 233_000, 462_000, 595_000,
+            779_000, 903_000, 972_000, 1_070_000, 1_325_000,
+            1_796_000,
         ),
         "C905_E01-L04" to listOf(
-            82_000, 166_000, 272_000, 383_000, 456_000, 567_000,
-            702_000, 826_000, 910_000, 1_114_000, 1_664_000,
+            70_000, 137_000, 245_000, 341_000, 405_000,
+            525_000, 664_000, 805_000, 885_000, 1_085_000,
+            1_681_000,
         ),
         "C905_E01-SUM" to listOf(
-            76_000, 178_000, 247_000, 389_000, 477_000,
-            552_000, 660_000, 1_146_000, 1_267_000,
+            76_000, 172_000, 244_000, 366_000, 454_000,
+            552_000, 648_000, 1_184_000, 1_283_000,
         ),
     )
-
     fun times(packId: String): List<Long> = table[packId].orEmpty()
 }
 
