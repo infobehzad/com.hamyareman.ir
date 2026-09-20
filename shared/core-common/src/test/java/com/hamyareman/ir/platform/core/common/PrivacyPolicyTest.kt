@@ -40,9 +40,19 @@ class PrivacyPolicyTest {
     fun `server tables never include a private table`() {
         // جدول‌های خصوصی هیچ‌وقت در appwrite.json ساخته نمی‌شوند.
         assertEquals(5, PrivacyPolicy.neverSyncTables.size)
-        assertEquals(26, TableIds.serverTables.size)
+        // v1.65: جدولِ `users` (نگاشتِ نام کاربری → حساب) اضافه شد ⇒ ۲۷ جدول.
+        assertEquals(27, TableIds.serverTables.size)
         assertTrue(TableIds.serverTables.none { PrivacyPolicy.isNeverSynced(it) })
         assertEquals(PrivacyPolicy.neverSyncTables, TableIds.deviceOnlyTables)
+    }
+
+    @Test
+    fun `username mapping table is a server table and never a private one`() {
+        // لاگین با نام کاربری و بازیابیِ رمز به این جدول نیاز دارد؛ پس باید سمتِ سرور
+        // ساخته شود — ولی هرگز جزوِ جدول‌های «هرگز سینک نمی‌شود» نیست.
+        assertTrue(TableIds.USERS in TableIds.serverTables)
+        assertFalse(PrivacyPolicy.isNeverSynced(TableIds.USERS))
+        assertFalse(TableIds.USERS in PrivacyPolicy.weeklyShareableTables)
     }
 
     @Test

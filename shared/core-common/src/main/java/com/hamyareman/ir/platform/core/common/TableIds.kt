@@ -70,7 +70,8 @@ object TableIds {
 
     /**
      * همه‌ی جداولی که واقعاً در Appwrite ساخته می‌شوند
-     * (مطابق `backend/appwrite.json` — ۲۴ جدول).
+     * (مطابق `backend/appwrite.json` — ۲۷ جدول؛ با افزودنِ `app_state` و `users`
+     * در v1.64 و v1.65). شمارِ دقیق را `PrivacyPolicyTest` نگهبانی می‌کند.
      */
     val serverTables: Set<String> = setOf(
         PROFILES, USER_SETTINGS, FATHER_LINKS, PAIRING_CODES,
