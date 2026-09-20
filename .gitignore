@@ -34,3 +34,9 @@ node_modules/
 # کلید خصوصی GitHub App — فقط لوکال، هرگز کامیت نشود
 github-app-private-key.pem
 .git-setup.sh
+
+# ابزارهای محلیِ توسعه (نه بخشی از بیلد اپ)
+node_modules/
+/package.json
+/package-lock.json
+__pycache__/

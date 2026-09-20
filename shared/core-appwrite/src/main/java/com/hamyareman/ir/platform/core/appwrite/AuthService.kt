@@ -105,8 +105,10 @@ interface AuthService {
  * پیاده‌سازی Appwrite.
  *
  * نکات مهم:
- *  - نقش کاربر فقط با Label سمت سرور تعیین می‌شود (`zahra` / `father` / `guest`).
- *    تابع `user-bootstrap` برچسب را می‌گذارد و `pairing` پدر را ارتقا می‌دهد.
+ *  - نقش کاربر با Label سمت سرور تعیین می‌شود (`zahra` / `father` / `guest`) و هرگز
+ *    یک فیلدِ نوشتنیِ کلاینتی نیست. تابع `user-bootstrap` برچسب را می‌گذارد و
+ *    `pairing` پدر را ارتقا می‌دهد؛ چون `user-bootstrap` هنوز مستقر نیست، نبودِ
+ *    Label با [roleOf] به نقشِ پیش‌فرضِ اپ برمی‌گردد (نه «مهمان»).
  *  - در حالت محلی (بدون projectId) یک کاربر محلی با [fallbackRole] برگردانده می‌شود
  *    تا UI و جریان‌ها قابل تست باشند.
  *  - **v1.65 — ورودِ آفلاین:** فقط «بارِ اول» اینترنت لازم است. بعد از هر ورودِ
@@ -151,10 +153,23 @@ class AppwriteAuthService(
             name = user.name,
             email = user.email,
             labels = labels,
-            role = UserRole.fromLabels(labels),
+            role = roleOf(labels),
             username = cachedUsername().orEmpty(),
         ).also { remember(it) }
     }.getOrNull()
+
+    /**
+     * نقش از Labelهای سرور؛ ولی **نبودِ Label** یعنی «هنوز کسی نقش نداده»، نه «مهمان».
+     *
+     * چرا: تابعِ `user-bootstrap` که Label را سمتِ سرور می‌گذارد، در حال حاضر روی پروژه
+     * مستقر نیست (در کنسول فقط `google-auth` و `ai-companion` هستند) و هر سه کاربرِ
+     * واقعی `labels: []` دارند. با `fromLabels` همه‌شان `GUEST` می‌شدند و همان نقش در
+     * کشِ محلی هم می‌نشست. پس در این حالت نقشِ پیش‌فرضِ خودِ اپ ([fallbackRole])
+     * برمی‌گردد — همان کاری که [cachedRole] از قبل می‌کرد. Labelِ صریحِ سرور
+     * (مثلاً `father` بعد از پیوند) همیشه بر این پیش‌فرض اولویت دارد.
+     */
+    private fun roleOf(labels: List<String>): UserRole =
+        if (labels.isEmpty()) fallbackRole else UserRole.fromLabels(labels)
 
     override suspend fun currentUser(): AuthUser? {
         if (!provider.isConfigured) return localUser
