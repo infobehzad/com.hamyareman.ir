@@ -114,6 +114,7 @@ private fun WeeklyTimetableSection() {
     val container = LocalAppContainer.current
     val syncScope = rememberCoroutineScope()
     var syncNotice by remember { mutableStateOf<String?>(null) }
+    var syncError by remember { mutableStateOf<String?>(null) }
     fun uidNow(): String = container.auth.cachedUserId()
         ?: runCatching { kotlinx.coroutines.runBlocking { container.auth.currentUserId() } }.getOrNull().orEmpty()
     val options = remember { ClassPlanStore.subjectOptions(ctx) }
@@ -156,7 +157,10 @@ private fun WeeklyTimetableSection() {
         locked = snap.locked
     }
     LaunchedEffect(Unit) {
-        val uid = runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+        // شناسه را اول از کشِ محلی می‌گیریم: اگر لحظهٔ باز شدنِ صفحه اینترنت نباشد،
+        // `account.get()` شکست می‌خورد و سینک کلاً متوقف می‌شد (همان «سینک نمی‌شود»).
+        val uid = container.auth.cachedUserId()
+            ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
         if (uid.isNotBlank()) {
             val changed = ClassPlanSync.pullAll(ctx, container.tables, uid)
             if (changed) {
@@ -167,6 +171,9 @@ private fun WeeklyTimetableSection() {
             if (ClassPlanSync.pushIfNewer(ctx, container.tables, uid, StateSync.KEY_WEEK)) {
                 syncNotice = "برنامه با سرور همگام شد."
             }
+            syncError = StateSync.lastError(ctx, StateSync.KEY_WEEK)
+        } else {
+            syncError = "برای همگام‌سازی اول وارد حساب شو."
         }
     }
 
@@ -189,9 +196,10 @@ private fun WeeklyTimetableSection() {
     fun persistAndSync(lock: Boolean, map: Map<Int, List<String>> = days, sec: Map<Int, List<String>> = seconds, bell: List<String> = bells) {
         persist(lock, map, sec, bell)
         syncScope.launch {
-            if (ClassPlanSync.pushIfNewer(ctx, container.tables, uidNow(), StateSync.KEY_WEEK)) {
-                syncNotice = "برنامه با سرور همگام شد."
-            }
+            val uid = container.auth.cachedUserId() ?: uidNow()
+            val pushed = ClassPlanSync.pushIfNewer(ctx, container.tables, uid, StateSync.KEY_WEEK)
+            syncNotice = if (pushed) "برنامه با سرور همگام شد." else syncNotice
+            syncError = StateSync.lastError(ctx, StateSync.KEY_WEEK)
         }
     }
 
@@ -209,6 +217,14 @@ private fun WeeklyTimetableSection() {
         )
         syncNotice?.let {
             Text(it, fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+        }
+        syncError?.let {
+            Text(
+                "⚠ $it",
+                fontFamily = DashboardFonts.quote,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
         }
         ClassPlanStore.WEEKDAYS.forEachIndexed { i, name ->
             val di = i + 1
@@ -292,21 +308,43 @@ private fun WeeklyTimetableSection() {
             }
         }
 
-        // ---- «تایم زنگ ۱..n» — بر حسبِ تعدادِ خانه‌ها، برای همهٔ روزها ----
+        // ---- «تایم زنگ ۱..n» — یک‌بار برای هر دو شیفت و همهٔ روزها، جمع‌شونده ----
+        // اگر هیچ زنگی تنظیم نشده باشد باز می‌آید؛ وگرنه جمع است و با یک لمس باز می‌شود.
+        var bellsOpen by remember { mutableStateOf(snap.bells.none { it.isNotBlank() }) }
+        val bellsSet = bells.count { it.isNotBlank() }
         Column(
             Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
                 .padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Text("تایم زنگ‌ها", fontFamily = DashboardFonts.section, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Row(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+                    .clickable { bellsOpen = !bellsOpen }
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    "تایم زنگ‌ها",
+                    fontFamily = DashboardFonts.section,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    toPersianDigits("$bellsSet/$maxCells") + if (bellsOpen) "  ▲ بستن" else "  ▼ باز کردن",
+                    fontFamily = DashboardFonts.quote,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
             Text(
-                "ساعتِ شروع و پایانِ هر زنگ یک‌بار این‌جا تنظیم می‌شود و خودکار برای همهٔ روزها اعمال و با سرور همگام می‌شود.",
+                "ساعتِ شروع و پایانِ هر زنگ فقط یک‌بار این‌جا وارد می‌شود و برای هر دو شیفتِ صبح و عصر و همهٔ روزها ذخیره و با سرور همگام می‌شود.",
                 fontFamily = DashboardFonts.quote,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            (0 until maxCells).forEach { si ->
+            if (bellsOpen) (0 until maxCells).forEach { si ->
                 val raw = bells.getOrElse(si) { "" }
                 val parts = raw.split("-")
                 val from = parts.getOrNull(0)?.takeIf { it.isNotBlank() } ?: "07:30"
@@ -389,7 +427,11 @@ private fun SubjectDropdown(
             options.forEach { opt ->
                 DropdownMenuItem(
                     text = { Text(opt, fontFamily = DashboardFonts.quote) },
-                    onClick = { onPick(opt); open = false },
+                    // گزینهٔ «— خالی —» خانه را خالی می‌کند (مقدارِ ذخیره‌شده = "").
+                    onClick = {
+                        onPick(if (opt == ClassPlanStore.EMPTY_SUBJECT) "" else opt)
+                        open = false
+                    },
                 )
             }
         }

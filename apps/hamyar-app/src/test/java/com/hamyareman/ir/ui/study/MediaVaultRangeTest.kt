@@ -51,34 +51,90 @@ class MediaVaultRangeTest {
     }
 
     /**
-     * نگهبانِ همگامی: `data-seek-ms`های HTML تدریس باید دقیقاً همان فهرست‌های
-     * زمان‌بندیِ پوشهٔ صوتِ تدریس در Books باشند. این بررسی «داده‌محور» است: هر
-     * فایلِ `ryazif….txt` که HTML هم‌نامش در assets باشد مقایسه می‌شود، پس با
-     * افزودنِ درس‌های تازه (فصلِ ۲ و ۳) خودبه‌خود پوشش داده می‌شوند.
-     * HTMLهایی که هنوز `data-seek-ms` ندارند (فهرستِ زمانشان نرسیده) رد می‌شوند
-     * تا بیلدِ کاربر بی‌دلیل قرمز نشود.
+     * نگهبانِ همگامیِ سه‌طرفه: `data-seek-ms`های HTML تدریس ↔ `TeachSeekMap` ↔
+     * فهرست‌های زمان‌بندیِ پوشهٔ صوتِ تدریس در Books.
+     *
+     * چرا نه مقایسهٔ جایگاهی با .txt: تعدادِ آیتم‌های .txt با تعدادِ آیتم‌های فهرستِ
+     * HTML یکی نیست («بخش صفر: مقدمه»، «استراحت» و گاهی «جمع‌بندی» در HTML جایی
+     * ندارند). پس همترازیِ عنوان‌ها یک‌بار با
+     * `tools/seek-shim/sync_seek_html.py` انجام و نتیجه در
+     * `tools/seek-shim/expected-seek.json` ثبت می‌شود؛ این آزمون هم همان انتظار را
+     * با HTML و با `TeachSeekMap` مقایسه می‌کند و هم بررسی می‌کند که انتظار،
+     * **زیردنبالهٔ فزایندهٔ** خودِ .txt باشد (تا با به‌روزرسانیِ .txt، انتظارِ کهنه
+     * سبز نماند).
      */
     @Test
     fun `html seek times match the Books timing lists`() {
         val dir = File("../../Books/Base-09/ریاضی/04- صوت تدریس")
-        if (!dir.isDirectory) return
+        val expectedFile = File("../../tools/seek-shim/expected-seek.json")
+        if (!dir.isDirectory || !expectedFile.exists()) return
+        val expected = parseExpected(expectedFile.readText())
         var checked = 0
-        var pending = 0
-        for (txt in dir.listFiles().orEmpty().sortedBy { it.name }) {
-            val name = txt.nameWithoutExtension
-            if (!txt.name.endsWith(".txt") || !name.startsWith("ryazif")) continue
+        for ((name, want) in expected) {
+            if (want.isEmpty()) continue
             val html = File("src/main/assets/math/c905/$name.html")
-            if (!html.exists()) continue
-            val got = Regex("""data-seek-ms="(\d+)""")
-                .findAll(html.readText())
-                .map { it.groupValues[1].toLong() }
-                .toList()
-            if (got.isEmpty()) { pending++; continue }
-            val want = parseTimingList(txt.readText())
-            assertEquals("$name — فهرستِ زمان‌بندیِ Books با HTML یکی نیست", want, got)
+            val txt = File(dir, "$name.txt")
+            if (!html.exists() || !txt.exists()) continue
+            val got = seekTimes(html.readText())
+            assertEquals(
+                "$name — HTML با انتظارِ همگام‌شده یکی نیست؛ " +
+                    "`python3 tools/seek-shim/sync_seek_html.py` را اجرا کن",
+                want,
+                got,
+            )
+            assertTrue(
+                "$name — زمان‌های انتظار، زیردنبولهٔ فهرستِ Books نیستند (.txt عوض شده؟)",
+                isSubsequence(want, parseTimingList(txt.readText())),
+            )
+            val pack = packOf(name)
+            if (pack != null) {
+                val mapped = TeachSeekMap.times(pack)
+                if (mapped.isNotEmpty()) {
+                    assertEquals("$name — TeachSeekMap با HTML یکی نیست ($pack)", want, mapped)
+                }
+            }
             checked++
         }
         assertTrue("هیچ HTML همگام‌شده‌ای پیدا نشد", checked >= 5)
+    }
+
+    private fun seekTimes(html: String): List<Long> =
+        Regex("data-seek-ms=\"(\\d+)\"")
+            .findAll(html)
+            .map { it.groupValues[1].toLong() }
+            .toList()
+
+    /**
+     * تجزیهٔ سبکِ `expected-seek.json` بدونِ org.json (که در تستِ JVM ماک نیست):
+     * هر درس با کلیدِ `ryazif…` و نخستین آرایهٔ عددیِ بعد از آن (`ms`، چون
+     * `json.dumps(sort_keys=true)` آن را پیش از `pack` و `titles` می‌آورد).
+     */
+    private fun parseExpected(json: String): Map<String, List<Long>> {
+        val out = LinkedHashMap<String, List<Long>>()
+        val entry = Regex("(ryazif[a-z0-9]+)[^0-9\\[]*\\[([0-9,\\s]+)]")
+        entry.findAll(json).forEach { m ->
+            out[m.groupValues[1]] =
+                m.groupValues[2].split(",").mapNotNull { it.trim().toLongOrNull() }
+        }
+        return out
+    }
+
+    private fun isSubsequence(sub: List<Long>, all: List<Long>): Boolean {
+        var i = 0
+        for (v in all) {
+            if (i < sub.size && sub[i] == v) i++
+        }
+        return i == sub.size
+    }
+
+    private fun packOf(stem: String): String? {
+        Regex("""ryazif(\d{2})d(\d{2})""").matchEntire(stem)?.let {
+            return "C905_E${it.groupValues[1]}-L${it.groupValues[2]}"
+        }
+        Regex("""ryazif(\d{2})review""").matchEntire(stem)?.let {
+            return "C905_E${it.groupValues[1]}-SUM"
+        }
+        return null
     }
 
     /**

@@ -32,7 +32,23 @@ object StateSync {
     private const val PREF = "hamyar_state_sync"
     private const val KEY_LAST = "last_sync_at"
 
-    fun rowId(uid: String, key: String) = "state_${uid}_$key"
+    /**
+     * شناسهٔ قطعیِ سطر.
+     *
+     * Appwrite برای `documentId` حداکثر **۳۶ کاراکتر** قبول می‌کند و باید با حرف یا
+     * رقم شروع شود؛ الگوی قبلی (`state_<uid>_<key>`) برای uidهای ۲۰ کاراکتری هم
+     * ۴۱ کاراکتر می‌شد ⇒ سرور هر push/pull را با `general_argument_invalid` رد
+     * می‌کرد و سینکِ برنامهٔ هفتگی/تیک‌ها/مرخصی بی‌صدا شکست می‌خورد.
+     * حالا شناسه از هشِ SHA-256ِ «uid|key» ساخته می‌شود: قطعی، یکتا و همیشه
+     * ۳۴ کاراکتر (`st` + ۳۲ رقمِ شانزده‌دهی).
+     */
+    fun rowId(uid: String, key: String): String {
+        val digest = java.security.MessageDigest.getInstance("SHA-256")
+            .digest("$uid|$key".toByteArray(Charsets.UTF_8))
+        val hex = StringBuilder(34).append("st")
+        digest.forEach { hex.append("%02x".format(it.toInt() and 0xFF)) }
+        return hex.substring(0, 34)
+    }
 
     private fun store(ctx: Context) = LocalStore(ctx, PREF)
 
@@ -49,7 +65,7 @@ object StateSync {
     ): Boolean = withContext(Dispatchers.IO) {
         if (uid.isBlank()) return@withContext false
         val now = System.currentTimeMillis()
-        val ok = tables.upsert(
+        val res = tables.upsert(
             TABLE,
             rowId(uid, key),
             mapOf(
@@ -59,14 +75,30 @@ object StateSync {
                 "updatedAt" to now,
             ),
             AppwriteClientProvider.ownerOnly(uid),
-        ) is AppResult.Ok
+        )
+        val ok = res is AppResult.Ok
         if (ok) {
             store(ctx).putString("local_$key", payload)
             store(ctx).putLong("at_$key", now)
             store(ctx).putLong(KEY_LAST, now)
+            store(ctx).remove("err_$key")
+        } else {
+            // تا پیش از این، شکستِ سینک کاملاً بی‌صدا بود («سینک درست نمی‌شود»).
+            noteError(ctx, key, res)
         }
         ok
     }
+
+    /** ثبتِ دلیلِ آخرین شکستِ سینکِ یک کلید تا در UI دیده و گزارش شود. */
+    private fun noteError(ctx: Context, key: String, res: AppResult<*>?) {
+        val msg = (res as? AppResult.Err)?.error?.userMessage ?: "سرور پاسخ نداد"
+        store(ctx).putString("err_$key", msg)
+        store(ctx).putLong("err_at_$key", System.currentTimeMillis())
+    }
+
+    /** آخرین خطای سینکِ [key]؛ `null` یعنی آخرین تلاش موفق بوده. */
+    fun lastError(ctx: Context, key: String): String? =
+        store(ctx).getString("err_$key").takeIf { it.isNotBlank() }
 
     /**
      * خواندن از سرور؛ اگر سطر نبود → null. مقدارِ برگشتی = payload و updatedAt.
@@ -80,12 +112,16 @@ object StateSync {
         if (uid.isBlank()) return@withContext null
         when (val r = tables.get(TABLE, rowId(uid, key))) {
             is AppResult.Ok -> {
+                store(ctx).remove("err_$key")
                 val row = r.value ?: return@withContext null
                 val payload = row.string("payload")
                 if (payload.isBlank()) return@withContext null
                 payload to row.long("updatedAt")
             }
-            is AppResult.Err -> null
+            is AppResult.Err -> {
+                noteError(ctx, key, r)
+                null
+            }
         }
     }
 

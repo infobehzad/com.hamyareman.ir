@@ -56,6 +56,13 @@ object TableIds {
     /** وضعیتِ عمومیِ برنامه (برنامه هفتگی، شیفت، کلاس مجازی، تیک‌ها) — کلید → JSON. */
     const val APP_STATE = "app_state"
 
+    /**
+     * نگاشتِ «نام کاربری → حساب» (v1.65): ورود با نامِ کاربری و بازیابیِ رمز.
+     * دو جور سطر دارد: `u_<هشِ نام کاربری>` (خواندنِ عمومی برای لاگین) و
+     * `p_<هشِ userId>` (خصوصی: «نام کاربریِ من» روی هر دستگاه/نصبِ تازه).
+     */
+    const val USERS = "users"
+
     // --- پرامپت ۰۲: ماژول ورزش/یوگا/تنفس/یادگیری ---
     const val WELLNESS_MOVES = "wellness_moves"
     const val SKETCH_REFERENCES = "sketch_references"
@@ -71,7 +78,7 @@ object TableIds {
         WEEKLY_SUMMARIES, ROUTINE_BLOCKS, WATER_LOGS, EXERCISE_LOGS, BADGES,
         LESSONS, QUIZZES, RECIPES, EXERCISES, LEARNING_NODES, ART_PROMPTS,
         LESSON_MEDIA_PROGRESS, WELLNESS_MOVES, SKETCH_REFERENCES, WELLNESS_LOGS,
-        STUDY_PROGRESS, LESSON_NOTES, APP_STATE,
+        STUDY_PROGRESS, LESSON_NOTES, APP_STATE, USERS,
     )
 
     /** جدول‌های «فقط روی دستگاه» — در سرور هیچ سطری ندارند و ساخته هم نمی‌شوند. */

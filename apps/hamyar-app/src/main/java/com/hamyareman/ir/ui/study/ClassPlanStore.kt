@@ -24,6 +24,29 @@ object ClassPlanStore {
     val WEEKDAYS = listOf("شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه") // ۱..۵
     const val SPORT = "ورزش"
 
+    /** درسِ پایهٔ نهم که کتابش در رجیستریِ ماژول‌ها نیست ولی در مدرسه زنگ دارد. */
+    const val DEFENSE = "آمادگی دفاعی"
+
+    /** گزینهٔ انتهای فهرست: زنگ را خالی می‌کند (مقدارِ ذخیره‌شده = رشتهٔ خالی). */
+    const val EMPTY_SUBJECT = "— خالی —"
+
+    /**
+     * نامِ ثبت‌شدهٔ درس در برنامهٔ هفتگی — قانونِ مدرسه: چند کتاب، یک زنگ هستند.
+     *  - «تعلیمات اسلامی» (همان پیام‌های آسمان) ⇒ **معارف**
+     *  - «نگارش» و «فارسی» ⇒ **فارسی**
+     *  - «زبان انگلیسی» و «کتاب کار زبان انگلیسی» ⇒ **زبان انگلیسی**
+     * بقیهٔ درس‌ها با نامِ کوتاهِ خودِ کتاب ثبت می‌شوند. تابع idempotent است، پس
+     * دادهٔ ذخیره‌شدهٔ نسخه‌های قدیمی هم موقعِ خواندن به نامِ درست می‌نشیند.
+     */
+    fun canonicalSubject(raw: String): String {
+        val t = raw.trim()
+        if (t.isEmpty() || t == EMPTY_SUBJECT) return ""
+        if (t.contains("تعلیمات اسلامی") || t.contains("پیام")) return "معارف"
+        if (t.contains("نگارش") || t.contains("فارسی")) return "فارسی"
+        if (t.contains("زبان انگلیسی") || t.contains("کتاب کار")) return "زبان انگلیسی"
+        return t
+    }
+
     data class SlotDay(val subjects: List<String>)
     data class Snapshot(
         val locked: Boolean,
@@ -126,10 +149,21 @@ object ClassPlanStore {
     fun shortBookName(title: String): String =
         title.replace(" پایه نهم", "").substringBefore(" — ").trim()
 
+    /**
+     * فهرستِ درس‌های قابلِ انتخاب در زنگ‌ها: کتاب‌های همان پایه (با نامِ
+     * [canonicalSubject] و بدونِ تکرار) + «آمادگی دفاعی» و «ورزش» + در انتها
+     * گزینهٔ [EMPTY_SUBJECT] برای خالی‌کردنِ خانه.
+     */
     fun subjectOptions(ctx: Context): List<String> {
         val books = GradeGate.filter(BookModuleRegistry.modules) { it.bookCode }
-            .map { shortBookName(it.title) }
-        return books + SPORT
+            .map { canonicalSubject(shortBookName(it.title)) }
+            .filter { it.isNotBlank() }
+        val extras = mutableListOf<String>()
+        if (com.hamyareman.ir.ui.profile.StudentProfileState.grade ==
+            com.hamyareman.ir.ui.profile.GradeLevel.G9
+        ) extras += DEFENSE
+        extras += SPORT
+        return (books + extras).distinct() + EMPTY_SUBJECT
     }
 
     /** شیفتِ «هفته‌ی لنگر» با منطقِ قدیمی — فقط برای داده‌های نسخه‌های قبل. */
@@ -148,13 +182,14 @@ object ClassPlanStore {
         val days = (1..5).associateWith { d ->
             runCatching {
                 val arr = JSONArray(s.getString("day_$d", "[]"))
-                (0 until arr.length()).map { arr.optString(it) }.filter { it.isNotBlank() }
+                (0 until arr.length()).map { canonicalSubject(arr.optString(it)) }
+                    .filter { it.isNotBlank() }
             }.getOrDefault(emptyList())
         }
         val second = (1..5).associateWith { d ->
             runCatching {
                 val arr = JSONArray(s.getString("dayb_$d", "[]"))
-                (0 until arr.length()).map { arr.optString(it) }
+                (0 until arr.length()).map { canonicalSubject(arr.optString(it)) }
             }.getOrDefault(emptyList())
         }
         val bells0 = runCatching {

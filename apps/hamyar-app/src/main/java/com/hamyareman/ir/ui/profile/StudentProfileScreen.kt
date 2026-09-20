@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.hamyareman.ir.platform.core.common.JalaliDate
@@ -62,9 +63,12 @@ fun StudentProfileScreen(
     email: String,
     saving: Boolean,
     error: String?,
+    /** نام کاربریِ فعلیِ حساب (خالی = هنوز تعیین نشده و در این فرم گرفته می‌شود). */
+    currentUsername: String = "",
     onSubmit: (
         firstName: String, lastName: String, age: Int, birthDate: String, grade: GradeLevel, phone: String,
         gender: String, province: String, county: String, city: String,
+        username: String, password: String,
     ) -> Unit,
 ) {
     var firstName by remember { mutableStateOf("") }
@@ -79,6 +83,11 @@ fun StudentProfileScreen(
     val computedAge = remember(birthJalali) { birthJalali?.let { JalaliDate.ageYears(it) } }
     val grade = AppEdition.grade
     var phone by remember { mutableStateOf("") }
+    // v1.65 — نام کاربری + رمز: برای حسابِ گوگلی این‌جا ساخته می‌شود تا دفعهٔ بعد
+    // بدونِ گوگل (و حتی بدونِ اینترنت) وارد اپ شود.
+    var username by remember { mutableStateOf(currentUsername) }
+    var accountPassword by remember { mutableStateOf("") }
+    val needCredentials = currentUsername.isBlank()
     var gender by remember { mutableStateOf("") }
     var province by remember { mutableStateOf("") }
     var county by remember { mutableStateOf("") }
@@ -102,6 +111,9 @@ fun StudentProfileScreen(
     val lastNameBad = showErrors && lastName.trim().length < 2
     val ageBad = showErrors && (computedAge == null || computedAge !in 5..60)
     val phoneBad = showErrors && !Regex("^9\\d{9}$").matches(phone)
+    val usernameOk = username.trim().lowercase().matches(Regex("^[a-z0-9_]{3,24}$"))
+    val usernameBad = showErrors && needCredentials && !usernameOk
+    val passwordBad = showErrors && needCredentials && accountPassword.length < 8
 
     Column(Modifier.fillMaxSize()) {
         AppTopBar("ثبت‌نام دانش‌آموز", onBack = {})
@@ -126,6 +138,43 @@ fun StudentProfileScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
+
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it.trim().lowercase().replace(' ', '_') },
+                    label = { Text(if (needCredentials) "نام کاربری یکتا *" else "نام کاربری") },
+                    isError = usernameBad,
+                    singleLine = true,
+                    supportingText = {
+                        Text(
+                            when {
+                                usernameBad -> "۳ تا ۲۴ کاراکتر؛ فقط a-z، ۰-۹ و _"
+                                else -> "با همین نام (یا ایمیل) و رمز، دوباره وارد می‌شوی"
+                            },
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                OutlinedTextField(
+                    value = accountPassword,
+                    onValueChange = { accountPassword = it },
+                    label = { Text(if (needCredentials) "رمز عبور *" else "رمز تازه (اختیاری)") },
+                    isError = passwordBad,
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    supportingText = {
+                        Text(
+                            if (passwordBad) "حداقل ۸ کاراکتر"
+                            else "برای ورودِ بدونِ گوگل لازم است؛ هیچ‌جا نمایش داده نمی‌شود",
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
 
             OutlinedTextField(
                 value = firstName,
@@ -222,7 +271,8 @@ fun StudentProfileScreen(
                     val age = computedAge
                     val ok = firstName.trim().length >= 2 && lastName.trim().length >= 2 &&
                         age != null && age in 5..60 && birthJalali != null &&
-                        Regex("^9\\d{9}$").matches(phone) && gender.isNotBlank()
+                        Regex("^9\\d{9}$").matches(phone) && gender.isNotBlank() &&
+                        (!needCredentials || (usernameOk && accountPassword.length >= 8))
                     if (ok && !saving && age != null && birthJalali != null) askRestart = true
                 },
                 enabled = !saving,
@@ -255,6 +305,7 @@ fun StudentProfileScreen(
                         onSubmit(
                             firstName.trim(), lastName.trim(), age, birthJalali.isoLike, grade, phone,
                             gender, province, county, city,
+                            username.trim().lowercase(), accountPassword,
                         )
                     }
                 }) { Text("تأیید و ادامه", fontWeight = FontWeight.Bold) }
@@ -268,6 +319,7 @@ fun StudentProfileScreen(
                         onSubmit(
                             firstName.trim(), lastName.trim(), age, birthJalali.isoLike, grade, phone,
                             gender, province, county, city,
+                            username.trim().lowercase(), accountPassword,
                         )
                     }
                 }) { Text("فعلاً نه") }

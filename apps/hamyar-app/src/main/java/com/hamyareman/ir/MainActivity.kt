@@ -125,6 +125,7 @@ class MainActivity : FragmentActivity() {
             val scope = androidx.compose.runtime.rememberCoroutineScope()
             var loginLoading by remember { mutableStateOf(false) }
             var loginError by remember { mutableStateOf<String?>(null) }
+            var loginNotice by remember { mutableStateOf<String?>(null) }
 
             // v1.25 — «مرا به خاطر بسپار»: سشنِ معتبر = ورود مستقیم به اپ؛
             // صفحه‌ی لاگین فقط وقتی سشنی نیست. (قانون قدیمیِ «لاگین هر اجرا» حذف شد.)
@@ -199,26 +200,74 @@ class MainActivity : FragmentActivity() {
                             loggedIn.value == false -> LoginScreen(
                                 loading = loginLoading,
                                 error = loginError,
-                                onEmailSignIn = { em, pw ->
-                                    loginLoading = true; loginError = null
+                                notice = loginNotice,
+                                onSignIn = { id, pw, rem ->
+                                    loginLoading = true; loginError = null; loginNotice = null
                                     scope.launch {
-                                        when (val r = container.auth.signIn(em, pw)) {
+                                        when (val r = container.auth.signInWithIdentifier(id, pw, rem)) {
                                             is AppResult.Ok -> loggedIn.value = true
                                             is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
                                         }
                                     }
                                 },
-                                onEmailSignUp = { nm, em, pw ->
-                                    loginLoading = true; loginError = null
+                                onSignUp = { nm, em, un, pw, rem ->
+                                    loginLoading = true; loginError = null; loginNotice = null
                                     scope.launch {
-                                        when (val r = container.auth.signUp(nm, em, pw)) {
+                                        when (val r = container.auth.signUpWithUsername(nm, em, un, pw, rem)) {
+                                            is AppResult.Ok -> loggedIn.value = true
+                                            is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
+                                        }
+                                    }
+                                },
+                                onRecover = { id ->
+                                    loginLoading = true; loginError = null; loginNotice = null
+                                    scope.launch {
+                                        when (val r = container.auth.requestRecovery(id)) {
+                                            is AppResult.Ok -> {
+                                                loginNotice = "ایمیلِ بازیابی فرستاده شد. لینکِ داخلش را کپی کن و در اپ بچسبان."
+                                                loginLoading = false
+                                            }
+                                            is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
+                                        }
+                                    }
+                                },
+                                onRecoverComplete = { link, pw ->
+                                    loginLoading = true; loginError = null; loginNotice = null
+                                    scope.launch {
+                                        when (val r = container.auth.completeRecovery(link, pw)) {
+                                            is AppResult.Ok -> {
+                                                // لینکِ بازیابی فقط رمز را عوض می‌کند (سشن نمی‌سازد)؛
+                                                // کاربر با همان رمزِ تازه از فرمِ ورود وارد می‌شود.
+                                                loginNotice = "رمز عوض شد ✅ حالا با نام کاربری و رمز تازه وارد شو."
+                                                loginLoading = false
+                                            }
+                                            is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
+                                        }
+                                    }
+                                },
+                                onSendOtp = { id ->
+                                    loginLoading = true; loginError = null; loginNotice = null
+                                    scope.launch {
+                                        when (val r = container.auth.sendOtp(id)) {
+                                            is AppResult.Ok -> {
+                                                loginNotice = "کد ۶ رقمی به ایمیلت فرستاده شد (۱۵ دقیقه اعتبار دارد)."
+                                                loginLoading = false
+                                            }
+                                            is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
+                                        }
+                                    }
+                                },
+                                onSignInOtp = { code, rem ->
+                                    loginLoading = true; loginError = null; loginNotice = null
+                                    scope.launch {
+                                        when (val r = container.auth.signInWithOtp(code, rem)) {
                                             is AppResult.Ok -> loggedIn.value = true
                                             is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
                                         }
                                     }
                                 },
                                 onGoogle = {
-                                    loginLoading = true; loginError = null
+                                    loginLoading = true; loginError = null; loginNotice = null
                                     scope.launch {
                                         when (val r = container.auth.signInWithGoogle(activity)) {
                                             is AppResult.Ok -> loggedIn.value = true
@@ -233,16 +282,32 @@ class MainActivity : FragmentActivity() {
                                 var saving by remember { mutableStateOf(false) }
                                 var formError by remember { mutableStateOf<String?>(null) }
                                 var email by remember { mutableStateOf("") }
+                                var currentUsername by remember { mutableStateOf("") }
                                 LaunchedEffect(Unit) {
-                                    email = runCatching { container.auth.currentUser() }.getOrNull()?.email.orEmpty()
+                                    val me = runCatching { container.auth.currentUser() }.getOrNull()
+                                    email = me?.email.orEmpty()
+                                    currentUsername = me?.username?.ifBlank { null }
+                                        ?: runCatching { container.auth.currentUsername() }.getOrNull().orEmpty()
                                 }
                                 com.hamyareman.ir.ui.profile.StudentProfileScreen(
                                     email = email,
                                     saving = saving,
                                     error = formError,
-                                    onSubmit = { fn, ln, age, birthDate, grade, phone, gender, province, county, city ->
+                                    currentUsername = currentUsername,
+                                    onSubmit = { fn, ln, age, birthDate, grade, phone, gender, province, county, city, un, pw ->
                                         saving = true; formError = null
                                         scope.launch {
+                                            // v1.65 — نام کاربریِ یکتا (+ رمز برای حسابِ گوگلی) پیش از
+                                            // ثبتِ پروفایل ذخیره می‌شود تا ورودِ بعدی بدونِ گوگل/اینترنت ممکن شود.
+                                            if (un.isNotBlank() && un != currentUsername) {
+                                                val r = container.auth.saveUsername(un, pw.ifBlank { null }, null)
+                                                if (r is AppResult.Err) {
+                                                    formError = r.error.userMessage
+                                                    saving = false
+                                                    return@launch
+                                                }
+                                                currentUsername = un
+                                            }
                                             val uid = container.auth.currentUserId().orEmpty()
                                             val ok = com.hamyareman.ir.ui.profile.StudentProfileRepo.save(
                                                 container.tables,

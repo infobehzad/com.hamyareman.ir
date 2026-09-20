@@ -23,6 +23,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.toPersianDigits
@@ -199,6 +200,7 @@ fun UserProfileScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth(),
             )
+            CredentialsSection()
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
             OutlinedTextField(
                 value = phone,
@@ -338,7 +340,7 @@ fun UserProfileScreen(
         AlertDialog(
             onDismissRequest = { confirmLogout = false },
             title = { Text("خروج از حساب؟") },
-            text = { Text("نشست بسته می‌شود و برای ورود دوباره باید ایمیل یا گوگل را بزنی.") },
+            text = { Text("نشست بسته می‌شود و «مرا به خاطر بسپار» هم پاک می‌شود؛ برای ورود دوباره نام کاربری یا ایمیل و رمز (یا گوگل) لازم است.") },
             confirmButton = {
                 TextButton(onClick = { confirmLogout = false; onLogout() }) { Text("خروج") }
             },
@@ -346,5 +348,94 @@ fun UserProfileScreen(
                 TextButton(onClick = { confirmLogout = false }) { Text("انصراف") }
             },
         )
+    }
+}
+
+/**
+ * «نام کاربری و رمزِ ورود» (v1.65) — همان چیزی که در فرم ثبت‌نام گرفته می‌شود و
+ * این‌جا بدونِ تأییدِ رمزِ قبلی قابلِ ویرایش است:
+ *  - نام کاربری یکتا ⇒ نگاشتِ `نام کاربری → ایمیل` در جدولِ `users` سرور.
+ *  - رمزِ تازه: برای حسابِ گوگلی بدونِ رمزِ قبلی؛ اگر سرور رمزِ فعلی خواست، همان‌جا
+ *    فیلدِ «رمز فعلی» باز می‌شود.
+ */
+@Composable
+private fun CredentialsSection() {
+    val auth = com.hamyareman.ir.LocalAppContainer.current.auth
+    val scope = rememberCoroutineScope()
+    var username by remember { mutableStateOf(auth.cachedUsername().orEmpty()) }
+    var password by remember { mutableStateOf("") }
+    var currentPassword by remember { mutableStateOf("") }
+    var askCurrent by remember { mutableStateOf(false) }
+    var busy by remember { mutableStateOf(false) }
+    var notice by remember { mutableStateOf<String?>(null) }
+    var err by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        username = runCatching { auth.currentUsername() }.getOrNull().orEmpty()
+    }
+
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("نام کاربری و رمزِ ورود", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Text(
+                "با همین نام کاربری (یا ایمیل) و رمز می‌توانی دوباره وارد شوی؛ اگر «مرا به خاطر بسپار» روشن باشد، دفعهٔ بعد بدونِ اینترنت هم اپ باز می‌شود.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it.trim().lowercase().replace(' ', '_') },
+                    label = { Text("نام کاربری یکتا") },
+                    singleLine = true,
+                    supportingText = { Text("a-z، ۰-۹ و _ — بین ۳ تا ۲۴ کاراکتر") },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("رمز تازه (اختیاری)") },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                if (askCurrent) {
+                    OutlinedTextField(
+                        value = currentPassword,
+                        onValueChange = { currentPassword = it },
+                        label = { Text("رمز فعلی (برای تغییرِ رمز لازم است)") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+            Button(
+                enabled = !busy,
+                onClick = {
+                    busy = true; err = null; notice = null
+                    scope.launch {
+                        val r = auth.saveUsername(username, password.ifBlank { null }, currentPassword.ifBlank { null })
+                        when (r) {
+                            is com.hamyareman.ir.platform.core.common.AppResult.Ok -> {
+                                notice = "ذخیره شد ✅ نام کاربری: ${r.value}"
+                                password = ""; currentPassword = ""; askCurrent = false
+                            }
+                            is com.hamyareman.ir.platform.core.common.AppResult.Err -> {
+                                err = r.error.userMessage
+                                askCurrent = err?.contains("رمز فعلی") == true ||
+                                    err?.contains("فراموشی رمز") == true
+                            }
+                        }
+                        busy = false
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text(if (busy) "در حال ذخیره…" else "ذخیرهٔ نام کاربری و رمز") }
+            notice?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary) }
+            err?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
+        }
     }
 }
