@@ -143,7 +143,7 @@ class AppwriteAuthService(
     // ---------------------------------------------------------------- هویتِ جاری
 
     /** نسخهٔ سرورِ کاربر؛ اگر موفق باشد کشِ محلی هم به‌روز می‌شود. */
-    private fun fetchRemote(): AuthUser? = runCatching {
+    private suspend fun fetchRemote(): AuthUser? = runCatching {
         val user = account.get()
         val labels = user.labels
         AuthUser(
