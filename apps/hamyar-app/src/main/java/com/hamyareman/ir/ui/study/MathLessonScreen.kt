@@ -21,7 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
@@ -253,6 +253,9 @@ fun MathLessonScreen(
         val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
         var tugPx by remember { mutableFloatStateOf(0f) }
         var tugProgress by remember { mutableFloatStateOf(0f) }
+        // فنرِ بازگشت در کریدینِ آزاد اجرا می‌شود (نه داخلِ AwaitPointerEventScope
+        // که توابعِ suspendِ محدود دارد) و مقدارش را در همان state می‌نویسد.
+        val tugSpring = remember { Animatable(1f) }
         var tugDestLeft by remember { mutableStateOf(true) }
         var tugLabel by remember { mutableStateOf<String?>(null) }
         var tugJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
@@ -315,9 +318,13 @@ fun MathLessonScreen(
                                     pagerState.animateScrollToPage(to)
                                 } else {
                                     // فنر: کشش و افکتِ لبه با هم به صفر برمی‌گردند.
-                                    animate(1f, 0f, spring(dampingRatio = 0.6f, stiffness = 620f)) { f, _ ->
-                                        tugPx = fromPx * f
-                                        tugProgress = fromP * f
+                                    tugSpring.snapTo(1f)
+                                    tugSpring.animateTo(
+                                        0f,
+                                        spring(dampingRatio = 0.6f, stiffness = 620f),
+                                    ) {
+                                        tugPx = fromPx * value
+                                        tugProgress = fromP * value
                                     }
                                     tugPx = 0f
                                     tugProgress = 0f
