@@ -233,7 +233,11 @@ fun HelplinesScreen(onBack: () -> Unit) {
                                         "\n" + result.value.helplines
                                             .joinToString(" · ") { "${it.name}: ${it.number}" }
                             }
-                            is AppResult.Err -> result.error.userMessage
+                            // صادقانه: نرفت. به‌جای رهاکردنِ کاربر، راهِ جایگزینِ عملی
+                            // هم نشان داده می‌شود (شماره‌های کمکی پایینِ همین صفحه هست).
+                            is AppResult.Err -> result.error.userMessage +
+                                "\n\nاگر الان حالت خوب نیست، مستقیم به بابا زنگ بزن؛ " +
+                                "شماره‌های کمکی هم پایینِ همین صفحه هست."
                         }
                         sending = false
                     }
