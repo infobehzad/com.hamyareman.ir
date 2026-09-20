@@ -460,14 +460,16 @@ object MediaVault {
      * با ۱ کیلوبایت انجام می‌شود (و اگر پاسخِ ۴۱۶ هم «ستاره/اندازه» برگرداند،
      * همان خوانده می‌شود).
      */
-    private fun probeSize(url: String): Long = runCatching {
+    private fun probeSize(url: String): Long {
         // ۱) «bytes=0-1023» → ۲۰۶ با «Content-Range: bytes 0-1023/کل»
-        probeTotal(url, "bytes=0-1023").takeIf { it > 0 }
-            // ۲) بعضی لبه‌های CDN رنج را نادیده می‌گیرند (۲۰۰ بدونِ Content-Length):
-            //    آن‌گاه «bytes=0-0» → ۴۱۶ با «Content-Range: bytes ستاره/کل»
-            ?: probeTotal(url, "bytes=0-0").takeIf { it > 0 }
-            ?: -1L
-    }.getOrDefault(-1L)
+        val a = probeTotal(url, "bytes=0-1023")
+        if (a != null && a > 0) return a
+        // ۲) بعضی لبه‌های CDN رنج را نادیده می‌گیرند (۲۰۰ بدونِ Content-Length):
+        //    آن‌گاه «bytes=0-0» → ۴۱۶ با «Content-Range: bytes ستاره/کل»
+        val b = probeTotal(url, "bytes=0-0")
+        if (b != null && b > 0) return b
+        return -1L
+    }
 
     /** یک درخواستِ رنجِ کوچک فقط برای خواندنِ اندازه‌ی کل از «Content-Range». */
     private fun probeTotal(url: String, range: String): Long? = runCatching {

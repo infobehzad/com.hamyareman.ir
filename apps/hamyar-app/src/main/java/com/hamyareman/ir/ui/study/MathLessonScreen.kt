@@ -17,10 +17,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.spring
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
@@ -250,7 +251,7 @@ fun MathLessonScreen(
         //    افکتِ جهت‌دار. کمتر از آستانه هیچ اثری ندارد (نه جابه‌جایی، نه انیمیشن).
         val swipeScope = rememberCoroutineScope()
         val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
-        val tug = remember { Animatable(0f) }
+        var tugPx by remember { mutableFloatStateOf(0f) }
         var tugProgress by remember { mutableFloatStateOf(0f) }
         var tugDestLeft by remember { mutableStateOf(true) }
         var tugLabel by remember { mutableStateOf<String?>(null) }
@@ -297,21 +298,28 @@ fun MathLessonScreen(
                                 change.consume()
                                 val extra = (dx - dir * startAt) * dir
                                 tugProgress = (extra / commitAt).coerceIn(0f, 1f)
-                                tug.snapTo(dir * (extra * 0.35f).coerceIn(-width * 0.25f, width * 0.25f))
+                                tugPx = dir * (extra * 0.35f).coerceIn(-width * 0.25f, width * 0.25f)
                             }
                         }
                         if (dir != 0f) {
                             val commit = tugProgress >= 1f && target >= 0
                             val to = target
+                            val fromPx = tugPx
+                            val fromP = tugProgress
                             tugJob = swipeScope.launch {
                                 if (commit) {
                                     // انیمیشنِ خودِ پیجر، جابه‌جایی را نرم نشان می‌دهد.
-                                    tug.snapTo(0f)
+                                    tugPx = 0f
                                     tugProgress = 0f
                                     tugLabel = null
                                     pagerState.animateScrollToPage(to)
                                 } else {
-                                    tug.animateTo(0f, spring(dampingRatio = 0.6f, stiffness = 620f))
+                                    // فنر: کشش و افکتِ لبه با هم به صفر برمی‌گردند.
+                                    animate(1f, 0f, spring(dampingRatio = 0.6f, stiffness = 620f)) { f, _ ->
+                                        tugPx = fromPx * f
+                                        tugProgress = fromP * f
+                                    }
+                                    tugPx = 0f
                                     tugProgress = 0f
                                     tugLabel = null
                                 }
@@ -326,7 +334,7 @@ fun MathLessonScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
-                        translationX = tug.value
+                        translationX = tugPx
                         val pr = tugProgress
                         scaleX = 1f - 0.03f * pr
                         scaleY = 1f - 0.03f * pr
@@ -360,10 +368,13 @@ fun MathLessonScreen(
 @Composable
 private fun TabSwipeHint(destLeft: Boolean, label: String?, progress: () -> Float) {
     val tint = MaterialTheme.colorScheme.primary
+    // «چپ/راستِ مطلق» با Start/End ساخته می‌شود: در RTL جایِ این دو عوض می‌شود.
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val side = if (destLeft == rtl) Alignment.CenterEnd else Alignment.CenterStart
     Box(Modifier.fillMaxSize()) {
         Box(
             Modifier
-                .align(if (destLeft) Alignment.CenterLeft else Alignment.CenterRight)
+                .align(side)
                 .fillMaxHeight()
                 .width(110.dp)
                 .graphicsLayer { alpha = progress() * 0.85f }
@@ -384,7 +395,7 @@ private fun TabSwipeHint(destLeft: Boolean, label: String?, progress: () -> Floa
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 shadowElevation = 8.dp,
                 modifier = Modifier
-                    .align(if (destLeft) Alignment.CenterLeft else Alignment.CenterRight)
+                    .align(side)
                     .padding(horizontal = 12.dp)
                     .graphicsLayer {
                         val p = progress()
