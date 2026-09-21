@@ -35,10 +35,15 @@ fun HealthHubScreen(nav: NavController) {
         HubCard("🧘", "حرکات ورزشی و یوگا", "۴۳ حرکت با راهنمای صوتی آزرا و تایمر") { nav.hubTo(Screen.Wellness.route) }
         HubCard("💧", "آب بنوش", "لیوان‌های امروز را ثبت کن") { nav.hubTo(Screen.Water.route) }
         HubCard("😴", "خواب من", "خوابیدن و بیدار شدن را ثبت کن؛ رشته‌ات را نگه دار") { nav.hubTo(Screen.SleepLog.route) }
-        HubCard("🌸", "چرخه و حال‌ها", "تقویم چرخه، ثبت حال و ذهن‌آگاهی") { nav.hubTo(Screen.Cycle.route) }
+        // «چرخه ی ماهانه» فقط برای دخترها دیده می‌شود (کارت کامل برای پسرها پنهان است).
+        if (com.hamyareman.ir.ui.profile.StudentProfileState.gender != "boy") {
+            HubCard("🌸", "چرخه ی ماهانه", "تقویم پریود، راهنمای روزبه‌روز و کم‌کردن درد") { nav.hubTo(Screen.Cycle.route) }
+        }
         HubCard("💊", "یادآور دارو و مراقبت", "دارو یا مراقبت روزانه با هشدار سرِ وقت") { nav.hubTo(Screen.Meds.route) }
         HubCard("🌤", "روتین روز", "بلوک‌های روزت را ببین یا روز سبک انتخاب کن") { nav.hubTo(Screen.Routine.route) }
 
+        // کارتِ «آگاهی» (هابِ جدا) طبقِ درخواست از «سلامتی» برداشته شد؛
+        // تمرین‌های حال‌خوب همین‌جا زیرِ همین گروه می‌مانند.
         HubMenuGroup("🪷 آگاهی", "حال‌خوب و ذهن‌آگاهی — همین‌جا کنار سلامتی") {
             HubCard("📓", "دفترچه‌ی من", "حرف‌های بلندتر؛ روزنوشت آزاد") { nav.hubTo(Screen.Journal.route) }
             HubCard("🌬", "تمرین نفس", "با شمارش صوتی و انیمیشن") { nav.hubTo(Screen.Breath.route) }

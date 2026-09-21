@@ -165,10 +165,21 @@ object MediaVault {
     // ------------------------------------------------------ دانلود رمزشده
 
     /** تعدادِ رشته‌های موازیِ دانلودِ صوت (هر رشته یک بازه‌ی Range). */
-    private const val PARALLEL_STREAMS = 3
+    /**
+     * شمارِ رشته‌های موازیِ دانلود. سرور برای هر اتصال سقفِ سرعت دارد و با
+     * یک رشته، یک درسِ ۲۴ مگابایتی دقیقه‌ها طول می‌کشید؛ با ۶ رشته (وقتی
+     * سرور Content-Range می‌دهد) مجموعِ سرعت چند برابر می‌شود. اگر سرور
+     * رنج ندهد، خودکار به دانلودِ تک‌رشته‌ای برمی‌گردیم.
+     */
+    private const val PARALLEL_STREAMS = 6
 
     /** اندازهٔ هر بازه — مضربی از ۱۶ بایت (بلاکِ AES) تا CTR مستقل درست دربیاید. */
-    private const val RANGE_CHUNK = 4L * 1024 * 1024
+    /** اندازهٔ هر بازه: با تُکه‌های کوچک‌تر، رشته‌ها زودتر تمام نمی‌شوند و
+     * موازی‌سازی روی کلِ فایل حفظ می‌شود (۴MB → ۲MB). */
+    private const val RANGE_CHUNK = 2L * 1024 * 1024
+
+    /** چند بار یک بازهٔ نیمه‌کاره دوباره تلاش شود (از همان‌جا که مانده). */
+    private const val MAX_RANGE_ATTEMPTS = 5
 
     /**
      * دانلود از [url] و نوشتنِ رمزشده (AES/CTR با IV تازه) در گاوصندوق.
@@ -203,7 +214,9 @@ object MediaVault {
     ) {
         val now = System.currentTimeMillis()
         val prevBytes = lastBytes.get()
-        if (done - prevBytes >= 512 * 1024 || now - lastTime.get() >= 200 || done >= total) {
+        // ۱MB/۴۰۰ms: هر به‌روزرسانیِ پیشرفت یک بازترکیبِ صفحهٔ تدریس است؛ با
+        // ۵۱۲KB/۲۰۰ms این بازترکیب‌ها روی گوشیِ ضعیف، خودِ نخِ دانلود را هم می‌خواباند.
+        if (done - prevBytes >= 1024 * 1024 || now - lastTime.get() >= 400 || done >= total) {
             if (lastBytes.compareAndSet(prevBytes, done)) {
                 lastTime.set(now)
                 onProgress(done, total)
@@ -278,6 +291,12 @@ object MediaVault {
      * می‌نویسد. هر رشته `RandomAccessFile` خودش را دارد (بدونِ قفلِ مشترک).
      * فقط پاسخِ **۲۰۶** پذیرفته می‌شود: اگر سرور Range را نادیده بگیرد و کلِ فایل
      * را بفرستد (۲۰۰)، نوشتنش فایل را خراب می‌کرد.
+     *
+     * **تلاشِ مجددِ درون‌بازه‌ای:** روی موبایل یک بازهٔ ۲ مگابایتی خیلی وقت‌ها
+     * وسطِ راه قطع می‌شود. قبلاً یک قطعیِ کوچک کلِ دانلودِ چندرشته‌ای را می‌انداخت
+     * و برنامه از **صفر** با یک رشته دانلود می‌کرد — همان «کندیِ عجیبِ» کاربر.
+     * حالا همان بازه از همان‌جایی که مانده ادامه می‌یابد (چند بار، با فاصلهٔ
+     * پرشونده) و بقیهٔ رشته‌ها هم دست‌نخورده به کارشان ادامه می‌دهند.
      */
     private fun fetchRange(
         url: String,
@@ -289,38 +308,52 @@ object MediaVault {
         fileOff: Long,
         onBytes: (Long) -> Unit,
     ) {
-        val conn = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
-            connectTimeout = 15000
-            readTimeout = 30000
-            instanceFollowRedirects = true
-            setRequestProperty("Range", "bytes=$start-$end")
-        }
-        try {
-            conn.connect()
-            if (conn.responseCode != 206) error("سرور به بازه پاسخِ ۲۰۶ نداد (کد ${conn.responseCode}).")
-            val want = end - start + 1
-            val cipher = Cipher.getInstance("AES/CTR/NoPadding")
-            cipher.init(Cipher.ENCRYPT_MODE, secret, IvParameterSpec(counterIv(iv, start / 16)))
-            var got = 0L
-            java.io.RandomAccessFile(part, "rw").use { raf ->
-                raf.seek(fileOff)
-                conn.inputStream.use { input ->
-                    val buf = ByteArray(64 * 1024)
-                    var read: Int
-                    while (input.read(buf).also { read = it } > 0) {
-                        val enc = cipher.update(buf, 0, read)
-                        if (enc != null) raf.write(enc)
-                        got += read
-                        onBytes(read.toLong())
+        var from = start
+        var attempt = 0
+        java.io.RandomAccessFile(part, "rw").use { raf ->
+            while (from <= end) {
+                val cipher = Cipher.getInstance("AES/CTR/NoPadding")
+                cipher.init(Cipher.ENCRYPT_MODE, secret, IvParameterSpec(counterIv(iv, from / 16)))
+                var conn: java.net.HttpURLConnection? = null
+                try {
+                    raf.seek(fileOff + (from - start))
+                    conn = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
+                        connectTimeout = 15000
+                        readTimeout = 30000
+                        instanceFollowRedirects = true
+                        useCaches = false
+                        setRequestProperty("Range", "bytes=$from-$end")
+                        setRequestProperty("Accept-Encoding", "identity")
                     }
-                    val tail = cipher.doFinal()
-                    if (tail != null) raf.write(tail)
+                    conn.connect()
+                    if (conn.responseCode != 206) error("سرور به بازه پاسخِ ۲۰۶ نداد (کد ${conn.responseCode}).")
+                    conn.inputStream.use { input ->
+                        val buf = ByteArray(64 * 1024)
+                        var read: Int
+                        while (input.read(buf).also { read = it } > 0) {
+                            val enc = cipher.update(buf, 0, read)
+                            if (enc != null) raf.write(enc)
+                            from += read
+                            onBytes(read.toLong())
+                        }
+                        val tail = cipher.doFinal()
+                        if (tail != null) raf.write(tail)
+                    }
+                } catch (t: Throwable) {
+                    attempt++
+                    if (attempt > MAX_RANGE_ATTEMPTS) throw t
+                    // عقب‌نشینیِ پرشونده: ۰٫۴s، ۰٫۸s، ۱٫۶s …
+                    runCatching { Thread.sleep(400L shl (attempt - 1)) }
+                    // بازگشت به مرزِ ۱۶ بایتی تا جریان‌کلیدِ CTR همان‌جا ادامه یابد
+                    // (بایت‌های نوشته‌شده بعد از این مرز دوباره و یکسان نوشته می‌شوند).
+                    val done = from - start
+                    from = start + (done / 16) * 16
+                } finally {
+                    runCatching { conn?.disconnect() }
                 }
             }
-            if (got != want) error("بازهٔ $start-$end ناقص رسید ($got از $want بایت).")
-        } finally {
-            conn.disconnect()
         }
+        if (from != end + 1) error("بازهٔ $start-$end ناقص رسید.")
     }
 
     /**
@@ -353,6 +386,8 @@ object MediaVault {
             connectTimeout = 15000
             readTimeout = 30000
             instanceFollowRedirects = true
+            useCaches = false
+            setRequestProperty("Accept-Encoding", "identity")
         }
         conn.connect()
         if (conn.responseCode !in 200..299) error("HTTP ${conn.responseCode}")

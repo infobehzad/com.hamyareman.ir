@@ -4,13 +4,13 @@ import com.hamyareman.ir.platform.feature.study.BookModule
 import com.hamyareman.ir.platform.feature.study.StudyPack
 
 /**
- * ماژول کتاب «تفکر و سبک زندگی پایه نهم» (C941) — معماری مصوب: کل محتوای درس داخل کد.
+ * ماژول کتاب «از من تا خدا (تربیت دینی) پایه نهم» (C941) — معماری مصوب: کل محتوای درس داخل کد.
  * منبع تألیف: PDF کتاب درسی ریپو.
  */
 object TafakkorC941 {
     private fun l01(): StudyPack = StudyPack(
         packId = "C941_L01", bookCode = "C941", lessonId = "L01",
-        title = "درس ۱ — شروع یک ماجرا", bookTitle = "تفکر و سبک زندگی پایه نهم", pdfFileName = "C941_L01_BOOK.pdf",
+        title = "درس ۱ — شروع یک ماجرا", bookTitle = "از من تا خدا (تربیت دینی) پایه نهم", pdfFileName = "C941_L01_BOOK.pdf",
         audioFileId = "C941_L01_AUDIO.mp3",
         sections = listOf(
             StudyPack.Section(id = "s1", title = "معرفی کتاب: داستان یوسف (ع)", kind = "concept", body = "داستان حضرت یوسف از معروف‌ترین و زیباترین داستان‌های تاریخ است؛ خداوند آن را در سوره‌ی یوسف «نیکوترین قصه‌ها» شمرده است (آیه‌ی ۳).\nدر این کتاب چهار راوی بخش‌هایی از داستان را تعریف می‌کنند: یعقوب (برادر بزرگ یوسف)، زلیخا (همسر عزیز مصر)، هم‌بند یوسف در زندان، و خود یوسف (ع).\n«بهراستی در داستان یوسف و برادرانش برای پرسشگران نشانه‌هایی است» (آیه‌ی ۷)."),
@@ -50,6 +50,6 @@ object TafakkorC941 {
     val packs: List<StudyPack> = listOf(l01())
 
     val module = BookModule(
-        bookCode = "C941", title = "تفکر و سبک زندگی پایه نهم", subject = "", packs = packs,
+        bookCode = "C941", title = "از من تا خدا (تربیت دینی) پایه نهم", subject = "", packs = packs,
     )
 }

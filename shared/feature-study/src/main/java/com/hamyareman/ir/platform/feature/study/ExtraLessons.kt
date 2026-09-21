@@ -75,6 +75,11 @@ object ExtraLessons {
         "C910" to (2..9).map { "L%02d".format(it) },
         "C911" to (2..6).map { "L%02d".format(it) },
         "C917" to listOf("E01-L02", "E01-L03", "E01-L04", "E01-L05", "E02-L01", "E02-L02", "E02-L03", "E02-L04", "E02-L05", "E02-L06"),
+        "C915" to listOf(
+            "E01-L01", "E01-L02",
+            "E02-L01", "E02-L02", "E02-L03", "E02-L04", "E02-L05",
+            "E03-L01", "E03-L02", "E03-L03", "E03-L04",
+        ),
         "C941" to (2..12).map { "L%02d".format(it) },
     )
 

@@ -36,6 +36,7 @@ object BookModuleRegistry {
         com.hamyareman.ir.platform.feature.study.books.EnglishWbC911.module,
         com.hamyareman.ir.platform.feature.study.books.KarC917.module,
         com.hamyareman.ir.platform.feature.study.books.TafakkorC941.module,
+        com.hamyareman.ir.platform.feature.study.books.EdafaiC915.module,
     )
 
     val modules: List<BookModule> =

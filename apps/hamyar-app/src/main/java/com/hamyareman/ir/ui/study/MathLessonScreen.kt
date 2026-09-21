@@ -252,6 +252,9 @@ fun MathLessonScreen(
         val swipeScope = rememberCoroutineScope()
         val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
         var tugPx by remember { mutableFloatStateOf(0f) }
+        // زوم داخلِ محتوا (مثلاً صفحهٔ PDF): سوایپِ سربرگ‌ها را قفل می‌کند تا
+        // کاربر وسطِ خواندنِ شکلِ زوم‌شده، ناخواسته به سربرگِ دیگری نپرد.
+        var contentZoomed by remember { mutableStateOf(false) }
         var tugProgress by remember { mutableFloatStateOf(0f) }
         // فنرِ بازگشت در کریدینِ آزاد اجرا می‌شود (نه داخلِ AwaitPointerEventScope
         // که توابعِ suspendِ محدود دارد) و مقدارش را در همان state می‌نویسد.
@@ -262,10 +265,12 @@ fun MathLessonScreen(
         Box(
             Modifier
                 .weight(1f)
-                .pointerInput(tabs.size, rtl) {
+                .pointerInput(tabs.size, rtl, contentZoomed) {
                     val slop = viewConfiguration.touchSlop
                     val startAt = slop * 3f
                     awaitEachGesture {
+                        // تا وقتی محتوا زوم است، هیچ سوایپی برای عوض‌کردنِ سربرگ نمی‌گیریم.
+                        if (contentZoomed) return@awaitEachGesture
                         val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
                         val pid = down.id
                         val width = size.width.toFloat().coerceAtLeast(1f)
@@ -354,7 +359,12 @@ fun MathLessonScreen(
                 "flash" -> MathFlashHtmlTab(pack, html)
                 "summary" -> MathSummaryTab(pack, isSum = isSum, chapter = chapter)
                 "exam" -> MathExamHtmlTab(pack, html)
-                "pdf" -> TeachPdfPages(modifier = Modifier.fillMaxSize(), fileId = pack.pdfFileName, pack = pack)
+                "pdf" -> TeachPdfPages(
+                    modifier = Modifier.fillMaxSize(),
+                    fileId = pack.pdfFileName,
+                    pack = pack,
+                    onZoomChange = { contentZoomed = it },
+                )
                 else -> MathTeachTab(pack, bookTitle, showPlayer = false)
             }
             }

@@ -18,29 +18,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 import com.hamyareman.ir.platform.core.designsystem.PrimaryButton
-import com.hamyareman.ir.platform.core.designsystem.SectionCard
 import com.hamyareman.ir.LocalAppContainer
 
 private val faces = listOf("😔", "😕", "😐", "🙂", "😄")
-
-@Composable
-fun CycleCalendarScreen(onBack: () -> Unit, onMood: () -> Unit, onMind: () -> Unit) {
-    val store = LocalAppContainer.current.store
-    val start = store.getString("cycle_start", JalaliDate.todayIso())
-    Column(Modifier.fillMaxSize()) {
-        AppTopBar("چرخه و ذهن‌آگاهی", onBack)
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("این تقویم فقط یک پیش‌بینی آماری از ثبت‌های خودته، نه ادعای پزشکی.", style = MaterialTheme.typography.bodyMedium)
-            Text("شروع آخرین دوره: ${JalaliDate.formatFa(start)}")
-            PrimaryButton("ثبت شروع دوره") { store.putString("cycle_start", JalaliDate.todayIso()) }
-            SectionCard("حال امروز", "با ایموجی، بدون برچسب.") { onMood() }
-            SectionCard("تمرین ۳ دقیقه‌ای", "صداشو داری؟ اگه نه، هروقت خواستی هست.") { onMind() }
-        }
-    }
-}
 
 @Composable
 fun MoodCheckInScreen(onBack: () -> Unit) {

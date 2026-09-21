@@ -81,7 +81,7 @@ fun SchoolHubScreen(nav: NavController) {
                                 Column(Modifier.padding(10.dp)) {
                                     Text(book.title, style = MaterialTheme.typography.titleSmall, maxLines = 2)
                                     Text(
-                                        "${book.packs.size} درس",
+                                        "${lessonCount(book)} درس",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
@@ -124,4 +124,20 @@ fun SchoolHubScreen(nav: NavController) {
             HubCard("📈", "نمودار پیشرفت دروس", "رشدت در هر درس — طبق آزمون‌ها و فلش‌کارت‌ها") { nav.hubTo(Screen.Charts.of(null)) }
         }
     }
+}
+
+/**
+ * شمارِ درس‌های کتاب برای کارتِ مدرسه.
+ *
+ * چرا: کتابِ تازه‌اضافه‌شده (مثل «آمادگی دفاعی» و «از من تا خدا») اول فقط فهرست و
+ * جلد دارد و پکِ محتوایش بعداً می‌آید؛ اگر فقط `packs.size` را نشان دهیم کارت
+ * می‌گوید «۰ درس» در حالی که فهرستِ رسمی پُر است. پس تا وقتی پکی ثبت نشده،
+ * از فهرستِ رسمی ([com.hamyareman.ir.platform.feature.study.BookToc]) می‌شماریم.
+ */
+private fun lessonCount(book: com.hamyareman.ir.platform.feature.study.BookModule): Int {
+    fun walk(nodes: List<com.hamyareman.ir.platform.feature.study.BookToc.TocNode>): Int =
+        nodes.sumOf { (if (it.packId != null) 1 else 0) + walk(it.children) }
+    val fromToc = walk(com.hamyareman.ir.platform.feature.study.BookToc.forBook(book.bookCode))
+    // بیشینه: کتاب ممکن است پکی داشته باشد که در فهرست نیست (مرور/جمع‌بندی).
+    return maxOf(book.packs.size, fromToc)
 }

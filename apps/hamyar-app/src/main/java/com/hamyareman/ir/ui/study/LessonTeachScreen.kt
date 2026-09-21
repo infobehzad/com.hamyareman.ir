@@ -809,7 +809,13 @@ private class TeachPageCache(private val maxPages: Int = 4) {
  * اگر PDF هنوز روی سرور نبود، متن سکشن‌های غیرامتحانی جایگزین می‌شود.
  */
 @Composable
-internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: StudyPack) {
+internal fun TeachPdfPages(
+    modifier: Modifier = Modifier,
+    fileId: String,
+    pack: StudyPack,
+    /** زوم داخلِ صفحهٔ PDF: سوایپِ سربرگ/صفحه باید تا وقتی زوم است قفل شود. */
+    onZoomChange: (Boolean) -> Unit = {},
+) {
     val ctx = LocalContext.current
     var state by remember(fileId) { mutableStateOf<TeachPdfState>(TeachPdfState.Idle) }
     val pageCache = remember(fileId) { TeachPageCache() }
@@ -876,6 +882,9 @@ internal fun TeachPdfPages(modifier: Modifier = Modifier, fileId: String, pack: 
         }
         is TeachPdfState.Ready -> Column(modifier = modifier) {
             var zoomed by remember { mutableStateOf(false) }
+            // وضعیتِ زوم را هم به بیرون خبر می‌دهیم (قفلِ سوایپ) و هم به داخلِ نماها.
+            LaunchedEffect(zoomed) { onZoomChange(zoomed) }
+            DisposableEffect(Unit) { onDispose { onZoomChange(false) } }
             val pager = rememberPagerState(pageCount = { st.pageCount })
             val seenPages = remember(fileId) { mutableSetOf<Int>() }
             val screenW = remember {

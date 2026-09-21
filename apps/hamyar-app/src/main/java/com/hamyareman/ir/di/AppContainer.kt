@@ -16,7 +16,6 @@ import com.hamyareman.ir.platform.core.appwrite.ServerActions
 import com.hamyareman.ir.platform.feature.study.StudyPackRepository
 import com.hamyareman.ir.platform.feature.study.StudyProgressRepository
 import com.hamyareman.ir.platform.core.common.LocalStore
-import com.hamyareman.ir.platform.core.common.ScreenTimeTracker
 import com.hamyareman.ir.platform.core.common.UserRole
 import com.hamyareman.ir.platform.core.notifications.QuietHoursManager
 import com.hamyareman.ir.platform.core.notifications.ReminderScheduler
@@ -176,12 +175,6 @@ class AppContainer(context: Context) {
         selfUserId = { auth.currentUserId() },
         realtime = realtime,
     )
-
-    /**
-     * زمان صفحه با UsageStatsManager. داده‌اش در `neverSyncTables` است و هرگز به
-     * سرور نمی‌رود؛ اگر مجوز ویژه داده نشده باشد، عدد جعلی نشان نمی‌دهیم.
-     */
-    val screenTime = ScreenTimeTracker(context, store)
 
     /**
      * کاتالوگ محتوای خواندنی (آشپزی، درس، آزمون، نقشه‌ی راه، ایده‌ی نقاشی).

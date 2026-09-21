@@ -18,8 +18,9 @@ fun AcademyHubScreen(nav: NavController) {
     HubBody {
         HubHeader("آموزشگاه ✨", "مطالعات آزاد، پلیرها، کتاب‌ها و آموزش هوش")
 
-        HubMenuGroup("🧠 مطالعات آزاد", "تمرکز و روتین شخصی، جدا از درس مدرسه") {
-            HubCard("✏️", "مطالعه", "تمرکز، روتین مطالعه و ابزارهای درس") { nav.hubTo(Screen.StudyHome.route) }
+        // «مطالعه» به داشبورد منتقل شد (کارتِ «مطالعه آزاد — هر کتاب یک زندگی»).
+        HubMenuGroup("🧠 مطالعه آزاد", "هر کتاب یک زندگی") {
+            HubCard("📖", "کتاب متنی و صوتی", "قفسه‌ی کتاب‌ها و کتاب صوتی") { nav.hubTo(Screen.FreeReading.route) }
         }
 
         HubMenuGroup("🎧 پلیرها و کتاب", "گوش دادن و خواندن") {

@@ -155,7 +155,7 @@ fun HomeScreen(nav: NavController) {
 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 QuickTile("🎒", "مدرسه", Modifier.weight(1f)) { nav.hubTo(Screen.Study.route) }
-                QuickTile("📖", "مطالعه آزاد", Modifier.weight(1f)) { nav.navigate(Screen.FreeReading.route) }
+                QuickTile("📖", "کتاب متنی و صوتی", Modifier.weight(1f)) { nav.navigate(Screen.FreeReading.route) }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 QuickTile("🪷", "آگاهی", Modifier.weight(1f)) { nav.hubTo(Screen.AwarenessHub.route) }
@@ -168,12 +168,12 @@ fun HomeScreen(nav: NavController) {
                 onOpenAlarm = { nav.navigate(Screen.ClassPlanShift.route) },
             )
 
-            SectionCard("حالت امروز چطوره؟", "با یک ایموجی ثبتش کن — اختیاریه.") { nav.navigate(Screen.Mood.route) }
+            // «مطالعه» از کارتِ «مطالعات آزاد» به داشبورد منتقل شد (جای کارتِ «حالت امروز چطوره؟»).
+            SectionCard("مطالعه آزاد", "هر کتاب یک زندگی") { nav.navigate(Screen.StudyHome.route) }
 
             Text("امروز", style = MaterialTheme.typography.titleMedium)
             HubCard("🌤", "روتین امروز", "بلوک‌های روزت را ببین") { nav.navigate(Screen.Routine.route) }
             HubCard("💧", "آب بنوش", "لیوان‌های امروزت را ثبت کن") { nav.navigate(Screen.Water.route) }
-            HubCard("💛", "آرامش سریع", "سه دقیقه تا حال بهتر") { nav.navigate(Screen.Calm.route) }
             Spacer(Modifier.height(8.dp))
         }
     }

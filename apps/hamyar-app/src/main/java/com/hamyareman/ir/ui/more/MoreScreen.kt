@@ -41,8 +41,6 @@ fun MoreScreen(nav: NavController) {
     HubBody {
         HubHeader("بیشتر", "هر چیز دیگر که به کارت می‌آید")
 
-        HubCard("💞", "قلب‌به‌قلب با بابا", "پیام، ویس، عکس و تماس — جای امنِ دوتایی") { nav.hubTo(Screen.Heart.route) }
-        HubCard("🔗", "پیوند با بابا", "کد ۶ رقمی اتصال") { nav.hubTo(Screen.Pairing.route) }
 
         HubCard("🛟", "فضای امن من", "نوشتن، آلبوم، شماره‌های کمک") { nav.hubTo(Screen.SafeSpace.route) }
         HubCard("🚨", "شماره‌های کمک", "همیشه در دسترس") { nav.hubTo(Screen.Helplines.route) }
@@ -50,7 +48,6 @@ fun MoreScreen(nav: NavController) {
         HubCard("🎨", "نقاشی سیاه‌قلم", "ایده‌ی امروز و گالری") { nav.hubTo(Screen.Art.route) }
         HubCard("🍲", "آشپزی", "دستور پخت درخواستی") { nav.hubTo(Screen.Recipes.route) }
         HubCard("🏅", "امتیاز و بج", "فقط جنبه‌ی مثبت") { nav.hubTo(Screen.Badges.route) }
-        HubCard("⏳", "زمان صفحه", "سقف خودانتخابی و حالت تمرکز") { nav.hubTo(Screen.ScreenTime.route) }
 
         QuietModeCard()
 

@@ -27,9 +27,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.hamyareman.ir.LocalAppContainer
 import com.hamyareman.ir.platform.feature.calls.CallScreen
-import com.hamyareman.ir.platform.feature.hearttoheart.HeartToHeartScreen
 import com.hamyareman.ir.platform.feature.hearttoheart.MessageDirection
-import com.hamyareman.ir.platform.feature.pairing.ZahraPairingScreen
 import com.hamyareman.ir.platform.feature.study.BookModuleRegistry
 import com.hamyareman.ir.ui.ailearning.AiAssessmentScreen
 import com.hamyareman.ir.ui.ailearning.AiLearningHomeScreen
@@ -41,7 +39,6 @@ import com.hamyareman.ir.ui.calmdown.CalmMenuScreen
 import com.hamyareman.ir.ui.calmdown.JournalScreen
 import com.hamyareman.ir.ui.chatbot.ChatScreen
 import com.hamyareman.ir.ui.chatbot.ChatSettingsScreen
-import com.hamyareman.ir.ui.cycle.CycleCalendarScreen
 import com.hamyareman.ir.ui.cycle.MindfulnessScreen
 import com.hamyareman.ir.ui.cycle.MoodCheckInScreen
 import com.hamyareman.ir.ui.exercise.ExerciseDetailScreen
@@ -69,8 +66,6 @@ import com.hamyareman.ir.ui.safespace.AlbumScreen
 import com.hamyareman.ir.ui.safespace.HelplinesScreen
 import com.hamyareman.ir.ui.safespace.SafeSpaceScreen
 import com.hamyareman.ir.ui.safespace.WritingPromptScreen
-import com.hamyareman.ir.ui.screentime.FocusModeScreen
-import com.hamyareman.ir.ui.screentime.ScreenTimeScreen
 import com.hamyareman.ir.ui.settings.AppLockScreen
 import com.hamyareman.ir.ui.settings.PrivacySettingsScreen
 import com.hamyareman.ir.ui.settings.RemindersScreen
@@ -162,9 +157,6 @@ fun ZahraNavHost() {
                     onHelplines = { nav.navigate(Screen.Helplines.route) },
                 )
             }
-            composable(Screen.Heart.route) {
-                HeartToHeartScreen(c.heart, MessageDirection.TO_FATHER, onStartCall = { nav.navigate(Screen.Call.route) }, onDialTel = { c.calls.dialTel(c.fatherTel) })
-            }
             composable(Screen.More.route) { MoreScreen(nav) }
             composable(Screen.HealthHub.route) { HealthHubScreen(nav) }
             composable(Screen.Academy.route) { AcademyHubScreen(nav) }
@@ -217,11 +209,16 @@ fun ZahraNavHost() {
             composable(Screen.SleepLog.route) { SleepLogScreen { nav.popBackStack() } }
             composable(Screen.ReadingCorner.route) { ReadingCornerScreen { nav.popBackStack() } }
             composable(Screen.Appearance.route) { AppearanceScreen { nav.popBackStack() } }
-            composable(Screen.Cycle.route) { CycleCalendarScreen({ nav.popBackStack() }, { nav.navigate(Screen.Mood.route) }, { nav.navigate(Screen.Mindfulness.route) }) }
+            composable(Screen.Cycle.route) {
+                com.hamyareman.ir.ui.cycle.MonthlyCycleScreen(
+                    onBack = { nav.popBackStack() },
+                    onMood = { nav.navigate(Screen.Mood.route) },
+                    onMind = { nav.navigate(Screen.Mindfulness.route) },
+                    onMoves = { nav.navigate(Screen.Wellness.route) },
+                )
+            }
             composable(Screen.Mood.route) { MoodCheckInScreen { nav.popBackStack() } }
             composable(Screen.Mindfulness.route) { MindfulnessScreen { nav.popBackStack() } }
-            composable(Screen.ScreenTime.route) { ScreenTimeScreen({ nav.popBackStack() }, { nav.navigate(Screen.Focus.route) }) }
-            composable(Screen.Focus.route) { FocusModeScreen { nav.popBackStack() } }
             composable(Screen.Calm.route) { CalmMenuScreen(nav) }
             composable(Screen.CalmHub.route) { com.hamyareman.ir.ui.calmdown.CalmHubScreen(nav) { nav.popBackStack() } }
             composable(Screen.FreeReading.route) { com.hamyareman.ir.ui.study.FreeReadingScreen(nav) { nav.popBackStack() } }
@@ -344,7 +341,6 @@ fun ZahraNavHost() {
                 )
             }
             composable(Screen.Water.route) { WaterScreen() }
-            composable(Screen.Pairing.route) { ZahraPairingScreen(c.pairing) { nav.popBackStack() } }
             composable(Screen.Call.route) {
                 CallScreen(
                     engine = c.calls,
