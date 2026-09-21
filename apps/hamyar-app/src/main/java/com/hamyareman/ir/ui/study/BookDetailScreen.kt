@@ -253,6 +253,18 @@ private fun LessonCard(
                     Text("🔔 ${toPersianDigits(due.toString())} کارت امروز باید مرور شود", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                 }
             }
+            if (pack == null) {
+                // کتابی که تازه اضافه شده (فهرست/جلد آماده، محتوا هنوز نه) و درس‌های
+                // اوّلِ کتاب‌های نیمه‌کامل: پیش‌تر دکمهٔ «ورود به درس» به صفحه‌ی
+                // «این درس پیدا نشد.» می‌رفت. حالا همان‌جا شفاف می‌گوییم که متنِ درس
+                // هنوز آماده نشده، تا دکمه‌ای که به بن‌بست می‌رسد نشان داده نشود.
+                Text(
+                    "📖 متنِ این درس هنوز آماده نشده — فهرست و عنوانش سرِ جایش است و به‌زودی اضافه می‌شود.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                return@Column
+            }
             Text(
                 if (teachDone) "✅ دوره‌ی اول تدریس کامل شده"
                 else "ورود به درس و سربرگ‌ها باز است",
@@ -260,7 +272,7 @@ private fun LessonCard(
                 color = if (teachDone) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(8.dp))
-            val bookCode = pack?.bookCode ?: packId.substringBefore('_')
+            val bookCode = pack.bookCode
             val gate = LessonAccess.gate(ctx, bookCode, packId)
             var gateDialog by remember(packId) { mutableStateOf(false) }
             if (gateDialog) {
