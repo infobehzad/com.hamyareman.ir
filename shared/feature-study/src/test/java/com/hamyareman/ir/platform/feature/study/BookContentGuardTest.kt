@@ -2,6 +2,7 @@ package com.hamyareman.ir.platform.feature.study
 
 import com.hamyareman.ir.platform.feature.study.books.EdafaiC915
 import com.hamyareman.ir.platform.feature.study.books.EnglishC910
+import com.hamyareman.ir.platform.feature.study.books.EnglishWbC911
 import com.hamyareman.ir.platform.feature.study.books.TafakkorC941
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -87,6 +88,12 @@ class BookContentGuardTest {
         // فهرستِ C910 نُه ردیفِ اصلی دارد و همه‌شان پک‌اند (۶ Lesson و ۳ Review)؛
         // ردیف‌های «Talking about ...» فرزندِ همان درس‌ها و راهنمای موضوع‌اند.
         assertBook("C910", EnglishC910.packs, chapterCount = 0, lessonCount = 9)
+    }
+
+    @Test
+    fun `C911 کتاب کار زبان — ۶ درس`() {
+        // شش ردیفِ فهرست، همه پک‌دار و بدونِ ردیفِ فصل.
+        assertBook("C911", EnglishWbC911.packs, chapterCount = 0, lessonCount = 6)
     }
 
     @Test

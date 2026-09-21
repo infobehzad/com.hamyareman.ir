@@ -46,7 +46,8 @@ object EnglishWbC911 {
         ),
     )
 
-    val packs: List<StudyPack> = listOf(l01())
+    /** درس ۱ + درس‌های ۲ تا ۶ (از `EnglishWbC911Lessons`) — کلِ کتاب کار. */
+    val packs: List<StudyPack> = listOf(l01()) + EnglishWbC911Lessons.packs
 
     val module = BookModule(
         bookCode = "C911", title = "کتاب کار زبان انگلیسی پایه نهم", subject = "", packs = packs,
