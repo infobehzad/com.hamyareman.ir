@@ -47,7 +47,8 @@ object TafakkorC941 {
         ),
     )
 
-    val packs: List<StudyPack> = listOf(l01())
+    /** درس ۱ + درس‌های ۲ تا ۱۲ (از `TafakkorC941Lessons`) — کلِ کتاب. */
+    val packs: List<StudyPack> = listOf(l01()) + TafakkorC941Lessons.packs
 
     val module = BookModule(
         bookCode = "C941", title = "از من تا خدا (تربیت دینی) پایه نهم", subject = "", packs = packs,
