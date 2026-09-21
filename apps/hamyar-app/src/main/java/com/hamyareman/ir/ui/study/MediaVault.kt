@@ -1,6 +1,10 @@
 package com.hamyareman.ir.ui.study
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import com.hamyareman.ir.ui.net.NetState
+import com.hamyareman.ir.ui.net.ResilientHttp
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
@@ -102,6 +106,21 @@ object MediaVault {
         if (set.remove(cacheKey)) prefs.edit().putStringSet("verified", set).apply()
     }
 
+    /**
+     * تا برگشتنِ اینترنت صبر می‌کند (نسخهٔ بلوکه‌ایِ [NetState.awaitOnline] — برای
+     * نخ‌های دانلود که سواسپند نیستند). وقتی شبکه عوض می‌شود یا پروکسی می‌پرد،
+     * به‌جای سوزاندنِ تلاش‌ها این‌جا صبر می‌کنیم و بعد از همان‌جا ادامه می‌دهیم.
+     */
+    internal fun awaitNetwork(ctx: Context, timeoutMs: Long = 120_000L): Boolean {
+        if (NetState.isOnline(ctx)) return true
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            if (NetState.isOnline(ctx)) return true
+            runCatching { Thread.sleep(700) }
+        }
+        return NetState.isOnline(ctx)
+    }
+
     fun cachedBytes(ctx: Context): Long =
         vaultDir(ctx).listFiles()?.sumOf { it.length() } ?: 0L
 
@@ -179,7 +198,7 @@ object MediaVault {
     private const val RANGE_CHUNK = 2L * 1024 * 1024
 
     /** چند بار یک بازهٔ نیمه‌کاره دوباره تلاش شود (از همان‌جا که مانده). */
-    private const val MAX_RANGE_ATTEMPTS = 5
+    private const val MAX_RANGE_ATTEMPTS = 8
 
     /**
      * دانلود از [url] و نوشتنِ رمزشده (AES/CTR با IV تازه) در گاوصندوق.
@@ -262,7 +281,7 @@ object MediaVault {
                 ranges.forEach { r ->
                     pool.execute {
                         try {
-                            fetchRange(url, r[0], r[1], secret, iv, part, r[2]) { n ->
+                            fetchRange(ctx, url, r[0], r[1], secret, iv, part, r[2]) { n ->
                                 reportProgress(onProgress, done.addAndGet(n), total, lastBytes, lastTime)
                             }
                         } catch (t: Throwable) {
@@ -299,6 +318,7 @@ object MediaVault {
      * پرشونده) و بقیهٔ رشته‌ها هم دست‌نخورده به کارشان ادامه می‌دهند.
      */
     private fun fetchRange(
+        ctx: Context,
         url: String,
         start: Long,
         end: Long,
@@ -317,15 +337,9 @@ object MediaVault {
                 var conn: java.net.HttpURLConnection? = null
                 try {
                     raf.seek(fileOff + (from - start))
-                    conn = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
-                        connectTimeout = 15000
-                        readTimeout = 30000
-                        instanceFollowRedirects = true
-                        useCaches = false
-                        setRequestProperty("Range", "bytes=$from-$end")
-                        setRequestProperty("Accept-Encoding", "identity")
-                    }
-                    conn.connect()
+                    // اتصالِ تازه برای هر تلاش: اگر شبکه/پروکسی عوض شده باشد، مسیرِ
+                    // تازه خوانده می‌شود (تنظیمِ دستیِ پروکسی نداریم؛ همه از سیستم می‌آید).
+                    conn = ResilientHttp.open(url, range = "bytes=$from-$end", connectMs = 15000, readMs = 30000, attempts = 3)
                     if (conn.responseCode != 206) error("سرور به بازه پاسخِ ۲۰۶ نداد (کد ${conn.responseCode}).")
                     conn.inputStream.use { input ->
                         val buf = ByteArray(64 * 1024)
@@ -342,6 +356,9 @@ object MediaVault {
                 } catch (t: Throwable) {
                     attempt++
                     if (attempt > MAX_RANGE_ATTEMPTS) throw t
+                    // اگر اینترنت نیست، اول تا برگشتنش صبر می‌کنیم (تغییرِ شبکه/پروکسی
+                    // نباید دانلود را بکُشد) و بعد از همان‌جا ادامه می‌دهیم.
+                    if (!NetState.isOnline(ctx)) awaitNetwork(ctx)
                     // عقب‌نشینیِ پرشونده: ۰٫۴s، ۰٫۸s، ۱٫۶s …
                     runCatching { Thread.sleep(400L shl (attempt - 1)) }
                     // بازگشت به مرزِ ۱۶ بایتی تا جریان‌کلیدِ CTR همان‌جا ادامه یابد
@@ -374,7 +391,14 @@ object MediaVault {
         return out
     }
 
-    /** مسیرِ تک‌رشته (همان رفتارِ قدیمی) — وقتی Range در دسترس نباشد. */
+    /**
+     * مسیرِ تک‌رشته — حالا **قابلِ ادامه** است.
+     *
+     * اگر وسطِ دانلود شبکه عوض شود (وای‌فای → دیتا) یا پروکسی بپرد، اتصال می‌شکند؛
+     * به‌جای از‌صفر‌شروع‌کردن، تا برگشتنِ اینترنت صبر می‌کنیم و با
+     * `Range: bytes=<مانده>-` از همان‌جا ادامه می‌دهیم. بازگشت به مرزِ ۱۶ بایتی
+     * انجام می‌شود تا جریان‌کلیدِ CTR بی‌دردسر ادامه پیدا کند.
+     */
     private fun downloadSingle(
         ctx: Context,
         url: String,
@@ -382,47 +406,81 @@ object MediaVault {
         probed: Long,
         onProgress: (Long, Long) -> Unit,
     ) {
-        val conn = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
-            connectTimeout = 15000
-            readTimeout = 30000
-            instanceFollowRedirects = true
-            useCaches = false
-            setRequestProperty("Accept-Encoding", "identity")
-        }
-        conn.connect()
-        if (conn.responseCode !in 200..299) error("HTTP ${conn.responseCode}")
-        var total = conn.contentLengthLong
-        if (total <= 0) total = probed
-        val cipher = Cipher.getInstance("AES/CTR/NoPadding")
-        val iv = ByteArray(16).also { SecureRandom().nextBytes(it) }
-        cipher.init(Cipher.ENCRYPT_MODE, key(ctx), IvParameterSpec(iv))
         val target = vaultFile(ctx, cacheKey)
         val part = File(vaultDir(ctx), "$cacheKey.enc.part")
+        val headerLen = (MAGIC.length + 16).toLong()
+        val iv = ByteArray(16).also { SecureRandom().nextBytes(it) }
+        var total = probed
         var done = 0L
-        // گلوگاهِ سرعت فقط شبکه نبود: هر ۳۲KB یک تماسِ «onProgress» یعنی برای یک
-        // درسِ ۲۴MB نزدیکِ ۷۵۰ بازنویسیِ state و صدها بازترکیبِ صفحه. اکنون
-        // پیشرفت تُنُک گزارش می‌شود و نوشتنِ دیسک بافرِ بزرگ دارد.
+        var attempt = 0
         val lastBytes = java.util.concurrent.atomic.AtomicLong(0)
         val lastTime = java.util.concurrent.atomic.AtomicLong(System.currentTimeMillis())
-        try {
-            java.io.BufferedOutputStream(java.io.FileOutputStream(part), 256 * 1024).use { out ->
-                out.write(MAGIC.toByteArray(Charsets.US_ASCII))
-                out.write(iv)
-                conn.inputStream.use { input ->
-                    val buf = ByteArray(64 * 1024)
-                    var read: Int
-                    while (input.read(buf).also { read = it } > 0) {
-                        val enc = cipher.update(buf, 0, read)
-                        if (enc != null) out.write(enc)
-                        done += read
-                        reportProgress(onProgress, done, total, lastBytes, lastTime)
+
+        java.io.RandomAccessFile(part, "rw").use { raf ->
+            raf.setLength(headerLen)
+            raf.seek(0)
+            raf.write(MAGIC.toByteArray(Charsets.US_ASCII))
+            raf.write(iv)
+
+            while (attempt <= MAX_RANGE_ATTEMPTS) {
+                val aligned = done - (done % 16)
+                try {
+                    val conn = ResilientHttp.open(
+                        url,
+                        range = if (aligned > 0) "bytes=$aligned-" else null,
+                        connectMs = 15000,
+                        readMs = 30000,
+                        attempts = 3,
+                    )
+                    if (conn.responseCode !in 200..299) error("HTTP ${conn.responseCode}")
+                    if (aligned > 0 && conn.responseCode == 200) {
+                        // سرور رنج را نادیده گرفت: از صفر شروع کن.
+                        done = 0
+                        raf.setLength(headerLen)
                     }
-                    val tail = cipher.doFinal()
-                    if (tail != null) out.write(tail)
+                    val cl = conn.contentLengthLong
+                    if (total <= 0 && cl > 0) total = if (aligned > 0) aligned + cl else cl
+
+                    val cipher = Cipher.getInstance("AES/CTR/NoPadding")
+                    cipher.init(Cipher.ENCRYPT_MODE, key(ctx), IvParameterSpec(counterIv(iv, aligned / 16)))
+                    raf.seek(headerLen + aligned)
+                    done = aligned
+
+                    conn.inputStream.use { input ->
+                        val buf = ByteArray(64 * 1024)
+                        var read: Int
+                        while (input.read(buf).also { read = it } > 0) {
+                            val enc = cipher.update(buf, 0, read)
+                            if (enc != null) raf.write(enc)
+                            done += read
+                            reportProgress(onProgress, done, total, lastBytes, lastTime)
+                        }
+                        val tail = cipher.doFinal()
+                        if (tail != null) raf.write(tail)
+                    }
+                    runCatching { conn.disconnect() }
+                    if (total <= 0 || done >= total) break
+                    attempt++  // اتصال تمام شد ولی فایل کامل نیست ⇒ ادامه بده
+                } catch (t: Throwable) {
+                    attempt++
+                    if (attempt > MAX_RANGE_ATTEMPTS) {
+                        part.delete()
+                        throw t
+                    }
+                    // تغییرِ شبکه/پروکسی: صبر تا برگشتنِ اینترنت، بعد ادامه از همان‌جا.
+                    if (!NetState.isOnline(ctx)) awaitNetwork(ctx)
+                    runCatching { Thread.sleep(400L shl (attempt - 1).coerceAtMost(4)) }
                 }
             }
-            onProgress(done, total)
-            if (total > 0 && done < total) error("دانلود کامل نشد ($done از $total بایت).")
+            raf.setLength(headerLen + done)
+        }
+
+        onProgress(done, total)
+        if (total > 0 && done < total) {
+            part.delete()
+            error("دانلود کامل نشد ($done از $total بایت).")
+        }
+        try {
             finishDownload(ctx, url, cacheKey, part, target, total)
         } finally {
             part.delete()
@@ -457,13 +515,14 @@ object MediaVault {
         val alignStart = ((total - 64) / 16) * 16
         val len = (total - alignStart).toInt()
         if (len <= 0) return@runCatching true
-        val conn = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
-            connectTimeout = 10000
-            readTimeout = 20000
-            setRequestProperty("Range", "bytes=$alignStart-${total - 1}")
-        }
+        val conn = ResilientHttp.open(
+            url,
+            range = "bytes=$alignStart-${total - 1}",
+            connectMs = 10000,
+            readMs = 20000,
+            attempts = 3,
+        )
         val remote = try {
-            conn.connect()
             if (conn.responseCode != 206) return@runCatching true // سرور Range نمی‌دهد ⇒ سخت نگیر
             conn.inputStream.readBytes()
         } finally {
@@ -508,13 +567,7 @@ object MediaVault {
 
     /** یک درخواستِ رنجِ کوچک فقط برای خواندنِ اندازه‌ی کل از «Content-Range». */
     private fun probeTotal(url: String, range: String): Long? = runCatching {
-        val c = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
-            connectTimeout = 8000
-            readTimeout = 8000
-            instanceFollowRedirects = true
-            setRequestProperty("Range", range)
-        }
-        c.connect()
+        val c = ResilientHttp.open(url, range = range, connectMs = 8000, readMs = 8000, attempts = 3)
         val code = c.responseCode
         val header = c.getHeaderField("Content-Range")
         val len = c.contentLengthLong

@@ -23,6 +23,7 @@ internal fun MathInteractiveHtml(
     kind: String,
     assetPath: String,
     modifier: Modifier = Modifier,
+    onZoomChanged: (Boolean) -> Unit = {},
 ) {
     val ctx = LocalContext.current
     val progress = LocalAppContainer.current.studyProgress
@@ -35,6 +36,12 @@ internal fun MathInteractiveHtml(
             WebView(c).apply {
                 webViewClient = object : WebViewClient() {
                     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest) = false
+
+                    /** زومِ کاربر (دو انگشتی) گزارش می‌شود تا سوایپِ سربرگ‌ها قفل شود. */
+                    override fun onScaleChanged(view: WebView, oldScale: Float, newScale: Float) {
+                        onZoomChanged(newScale > 1.02f)
+                    }
+
                     override fun onPageFinished(view: WebView, url: String) {
                         view.evaluateJavascript(
                             "(function(){var s=document.createElement('script');s.src='file:///android_asset/math/c905/hamyar-persist.js';document.documentElement.appendChild(s);})();",

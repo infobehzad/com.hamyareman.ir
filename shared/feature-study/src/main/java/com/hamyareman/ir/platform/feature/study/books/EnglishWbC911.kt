@@ -44,14 +44,9 @@ object EnglishWbC911 {
             StudyPack.Solution("sol2", "پاسخ تمرین ۲ — متن کامل با چرا", "I **am** Ali Rasooli. I **am** 14 years old. (I → am)\nMy school **is** beautiful. (school مفرد → is)\nThere **are** 30 students in my class. (students جمع → are)\nMy classmates **are** clever and friendly. (جمع → are)\nMr. Ahmadi ... He **is** hard-working but he **isn't** nervous at all. (he → is/isn't؛ at all فقط با منفی)\nHe's **very** kind and patient. (کوتاه‌نویسی He is → He's)\nچرا «at all» با isn't می‌آید؟ چون تقویت‌کننده‌ی منفی است: «اصلاً»."),
             StudyPack.Solution("sol3", "پاسخ تمرین ۳ — چرای مرتب‌سازی", "1. I am not nervous. — فاعل + to be + not + صفت.\n2. You and your friend are not selfish. — فاعل دوتایی → are.\n3. Is Mina careless? — سوال: to be اول.\n4. There are two rooms in our house. — rooms جمع → are؛ ترتیب: There + be + تعداد + اسم + مکان.\n5. Is there an orange on the table? — سوالِ There: Is there + a/an + اسم + مکان؟\nچرا ترتیب مهم است؟ چون انگلیسی زبانِ «ترتیبی» است؛ برخلاف فارسی، جابه‌جایی کلمات معنی را می‌شکند (Mina is careless ≠ Is Mina careless)."),
         ),
-        summary = "کتاب کار درس ۱ تمرین‌های درسِ شخصیت است: جای‌خالیِ فعل to be، مرتب‌کردنِ جمله‌ها، وصل‌کردنِ جمله به تصویر، " +
-            "جدولِ واژه‌های شخصیت و سؤال‌های پایان درس — همه با پاسخِ چرایی‌دار.",
-        examTips = "۱) to be: I am · he/she/it is · you/we/they are؛ منفی: isn't/aren't.\n" +
-            "۲) There is + مفرد / There are + جمع — فقط اسمِ بعد از فعل مهم است.\n" +
-            "۳) سؤال: to be را اول جمله ببر (Is Mina careless?).\n" +
-            "۴) ستون‌های واژگان: brave/neat/clever در برابر rude/selfish/careless.\n" +
-            "۵) «at all» فقط در جملهٔ منفی می‌آید (he isn't nervous at all).",
     )
+
+    /** درس ۱ + درس‌های ۲ تا ۶ (از `EnglishWbC911Lessons`) — کلِ کتاب کار. */
     val packs: List<StudyPack> = listOf(l01()) + EnglishWbC911Lessons.packs
 
     val module = BookModule(

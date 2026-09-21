@@ -68,6 +68,8 @@ import java.io.File
 import kotlin.math.roundToInt
 import java.net.HttpURLConnection
 import java.net.URL
+import com.hamyareman.ir.ui.net.NetState
+import com.hamyareman.ir.ui.net.ResilientHttp
 
 /**
  * «مدیریت دانلود کتاب‌ها» (v1.16) — با همان ساختار فهرست رسمی هر کتاب:
@@ -108,13 +110,11 @@ private val remoteSizeCache = mutableMapOf<String, Long>()
 private fun headSizeBlocking(fileId: String): Long {
     remoteSizeCache[fileId]?.let { return it }
     val remoteId = StudyMedia.resolveFileId(fileId)
-    val conn = (URL(StudyMedia.viewUrl(remoteId)).openConnection() as HttpURLConnection).apply {
-        connectTimeout = 10000; readTimeout = 10000; instanceFollowRedirects = true
-        requestMethod = "HEAD"
-    }
     return try {
-        conn.connect()
+        // اتصالِ مقاوم: HEAD گاهی به خطای گذرا می‌خورد؛ این‌جا تا سه بار تلاش می‌شود.
+        val conn = ResilientHttp.open(StudyMedia.viewUrl(remoteId), connectMs = 10000, readMs = 10000, attempts = 3)
         val len = if (conn.responseCode in 200..299) conn.contentLengthLong else -1L
+        conn.disconnect()
         // -2 یعنی «سرور ندارد/ناموفق» — همیشه کش می‌شود تا پروب بی‌نهایت نشود
         val cached = if (len > 0) len else -2L
         remoteSizeCache[fileId] = cached
@@ -122,8 +122,6 @@ private fun headSizeBlocking(fileId: String): Long {
     } catch (e: Exception) {
         remoteSizeCache[fileId] = -2L
         -2L
-    } finally {
-        conn.disconnect()
     }
 }
 
@@ -131,23 +129,46 @@ private fun headSizeBlocking(fileId: String): Long {
 private fun downloadPdfBlocking(ctx: android.content.Context, fileId: String, onProgress: (Int) -> Unit) {
     val target = pdfCacheFile(ctx, fileId)
     val tmp = File(target.parentFile, "$fileId.part")
-    val remoteId = StudyMedia.resolveFileId(fileId)
-    val conn = (URL(StudyMedia.viewUrl(remoteId)).openConnection() as HttpURLConnection).apply {
-        connectTimeout = 15000; readTimeout = 30000; instanceFollowRedirects = true
-    }
-    conn.connect()
-    if (conn.responseCode == 404) throw NotFoundOnServer()
-    if (conn.responseCode !in 200..299) throw java.io.IOException("HTTP ${conn.responseCode}")
-    val total = conn.contentLengthLong
-    conn.inputStream.use { input ->
-        java.io.FileOutputStream(tmp).use { out ->
-            val buf = ByteArray(64 * 1024)
-            var read: Int
-            var done = 0L
-            while (input.read(buf).also { read = it } > 0) {
-                out.write(buf, 0, read); done += read
-                if (total > 0) onProgress(((done * 100) / total).toInt())
+    val url = StudyMedia.viewUrl(StudyMedia.resolveFileId(fileId))
+    var attempt = 0
+    // تغییرِ شبکه/پروکسی وسطِ دانلود، این فایل را نیمه‌کاره رها نمی‌کند: تا چند بار
+    // با «Range: bytes=<مانده>-» از همان‌جا ادامه می‌دهیم و اگر اینترنت نبود صبر می‌کنیم.
+    while (attempt <= 6) {
+        val done = if (tmp.exists()) tmp.length() else 0L
+        try {
+            val conn = ResilientHttp.open(
+                url,
+                range = if (done > 0) "bytes=$done-" else null,
+                connectMs = 15000,
+                readMs = 30000,
+                attempts = 3,
+            )
+            if (conn.responseCode == 404) throw NotFoundOnServer()
+            if (conn.responseCode !in 200..299) throw java.io.IOException("HTTP ${conn.responseCode}")
+            if (done > 0 && conn.responseCode == 200) tmp.delete()
+            val total = conn.contentLengthLong.let { if (it > 0 && done > 0) it + done else it }
+            java.io.FileOutputStream(tmp, done > 0 && conn.responseCode == 206).use { out ->
+                conn.inputStream.use { input ->
+                    val buf = ByteArray(64 * 1024)
+                    var read: Int
+                    var written = done
+                    while (input.read(buf).also { read = it } > 0) {
+                        out.write(buf, 0, read)
+                        written += read
+                        if (total > 0) onProgress(((written * 100) / total).toInt())
+                    }
+                }
             }
+            runCatching { conn.disconnect() }
+            if (total > 0 && tmp.length() < total) { attempt++; continue }
+            break
+        } catch (e: NotFoundOnServer) {
+            throw e
+        } catch (e: Exception) {
+            attempt++
+            if (attempt > 6) throw e
+            if (!NetState.isOnline(ctx)) NetState.awaitOnline(ctx)
+            runCatching { Thread.sleep((400L * attempt).coerceAtMost(3000L)) }
         }
     }
     val ok = tmp.length() > 1024 && runCatching {

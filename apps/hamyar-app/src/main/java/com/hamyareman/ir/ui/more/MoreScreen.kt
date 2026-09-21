@@ -34,7 +34,8 @@ import com.hamyareman.ir.ui.update.UpdateCheckCard
 
 /**
  * «بیشتر» — همه‌چیز غیر از ۵ تب اصلی:
- * ارتباط با بابا، فضای امن، سرگرمی‌های خلاق، شخصی‌سازی (ظاهر و فونت) و تنظیمات.
+ * فضای امن و شماره‌های کمک، پروفایل، ظاهر و فونت، و تنظیمات.
+ * (کارت‌های «امتیاز و بج»، «نقاشی سیاه‌قلم» و «آشپزی» طبقِ درخواست برداشته شدند.)
  */
 @Composable
 fun MoreScreen(nav: NavController) {
@@ -45,15 +46,11 @@ fun MoreScreen(nav: NavController) {
         HubCard("🛟", "فضای امن من", "نوشتن، آلبوم، شماره‌های کمک") { nav.hubTo(Screen.SafeSpace.route) }
         HubCard("🚨", "شماره‌های کمک", "همیشه در دسترس") { nav.hubTo(Screen.Helplines.route) }
 
-        HubCard("🎨", "نقاشی سیاه‌قلم", "ایده‌ی امروز و گالری") { nav.hubTo(Screen.Art.route) }
-        HubCard("🍲", "آشپزی", "دستور پخت درخواستی") { nav.hubTo(Screen.Recipes.route) }
-        HubCard("🏅", "امتیاز و بج", "فقط جنبه‌ی مثبت") { nav.hubTo(Screen.Badges.route) }
-
         QuietModeCard()
 
         HubCard("👤", "پروفایل من", "مشخصات من، مدرسه، عکس و وضعیت اشتراک") { nav.hubTo(Screen.UserProfile.route) }
         HubCard("🎨", "ظاهر و فونت", "تم رنگی، حالت تاریک/روشن، فونت دانلودی") { nav.hubTo(Screen.Appearance.route) }
-        HubCard("⚙️", "تنظیمات", "حریم، قفل، همگام‌سازی") { nav.hubTo(Screen.Settings.route) }
+        HubCard("⚙️", "تنظیمات", "حریم، قفل، کش و همگام‌سازی خودکار") { nav.hubTo(Screen.Settings.route) }
 
         // بررسیِ دستیِ آپدیت (کانالِ آپدیت: تنظیمات روی سرور، فایل در مخزنِ عمومی).
         UpdateCheckCard()

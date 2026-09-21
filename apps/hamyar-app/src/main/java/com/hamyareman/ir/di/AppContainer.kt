@@ -74,6 +74,9 @@ class AppContainer(context: Context) {
         StudyProgressRepository.afterWrite = { _ ->
             CoroutineScope(Dispatchers.IO).launch { runCatching { sync.pushAll() } }
         }
+        // همگام‌سازیِ خودکارِ پس‌زمینه: به‌محضِ برگشتنِ اینترنت + تلاشِ دوره‌ای.
+        // (قبلاً دکمهٔ دستی در تنظیمات بود؛ حالا هیچ کاری از کاربر لازم نیست.)
+        com.hamyareman.ir.ui.sync.SyncCenter.installAutoSync(context, this)
         // «Ping» Appwrite: یک درخواست واقعی در شروع اپ تا اتصال در کنسول دیده شود.
         // (SDK اندروید متد ping() ندارد؛ Account.get() سبک‌ترین درخواست احرازشده است.)
         if (appwrite.isConfigured) {

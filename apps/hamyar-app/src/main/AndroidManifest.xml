@@ -126,6 +126,15 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <!-- نتیجهٔ نصبِ آپدیت (نشستِ PackageInstaller) -->
+        <receiver
+            android:name="com.hamyareman.ir.ui.update.UpdateInstallReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.hamyareman.ir.INSTALL_RESULT" />
+            </intent-filter>
+        </receiver>
+
         <!-- یادآورهای محلی (آب، روتین، مرور) -->
         <receiver
             android:name="com.hamyareman.ir.platform.core.notifications.ReminderReceiver"

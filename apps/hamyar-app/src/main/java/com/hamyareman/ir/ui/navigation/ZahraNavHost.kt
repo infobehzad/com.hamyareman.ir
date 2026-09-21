@@ -213,8 +213,7 @@ fun ZahraNavHost() {
                 com.hamyareman.ir.ui.cycle.MonthlyCycleScreen(
                     onBack = { nav.popBackStack() },
                     onMood = { nav.navigate(Screen.Mood.route) },
-                    onMind = { nav.navigate(Screen.Mindfulness.route) },
-                    onMoves = { nav.navigate(Screen.Wellness.route) },
+                    onMoves = { nav.navigate(Screen.PeriodTraining.route) },
                 )
             }
             composable(Screen.Mood.route) { MoodCheckInScreen { nav.popBackStack() } }
@@ -222,6 +221,7 @@ fun ZahraNavHost() {
             composable(Screen.Calm.route) { CalmMenuScreen(nav) }
             composable(Screen.CalmHub.route) { com.hamyareman.ir.ui.calmdown.CalmHubScreen(nav) { nav.popBackStack() } }
             composable(Screen.FreeReading.route) { com.hamyareman.ir.ui.study.FreeReadingScreen(nav) { nav.popBackStack() } }
+            composable(Screen.PeriodTraining.route) { com.hamyareman.ir.ui.cycle.PeriodTrainingScreen { nav.popBackStack() } }
             composable(Screen.GeneralToolkit.route) { com.hamyareman.ir.ui.tools.GeneralToolkitScreen { nav.popBackStack() } }
             composable(Screen.ChemistryLab.route) { com.hamyareman.ir.ui.tools.ChemistryLabScreen { nav.popBackStack() } }
             composable(Screen.PhysicsLab.route) { com.hamyareman.ir.ui.tools.PhysicsLabScreen { nav.popBackStack() } }

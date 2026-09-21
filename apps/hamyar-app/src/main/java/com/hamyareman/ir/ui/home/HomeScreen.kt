@@ -83,7 +83,7 @@ private val HomeSide = 16.dp
 private val WISDOM_FONT = DashboardFonts.hilda
 
 /** مارجینِ کناریِ کارتِ «سخن بزرگان» — یک‌پنجمِ حالتِ معمول. */
-private val WisdomSide = 3.dp
+private val WisdomSide = 1.dp
 
 private fun greeting(): String {
     val h = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
@@ -273,80 +273,121 @@ private fun WisdomCard(modifier: Modifier = Modifier) {
         line = WisdomQuotes.current(ctx, all)
     }
     val body = if (line.author.isBlank()) line.text else line.oneLine()
-    // افکتِ دورِ کارت — بدونِ تصویر: حاشیهٔ رنگین‌کمانیِ چرخان + هالهٔ نبض‌دارِ نرم.
+
+    // ---- انیمیشن‌های کارتِ «تم فلسفی» ----
     val anim = rememberInfiniteTransition(label = "wisdom-glow")
     val spin by anim.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
-        animationSpec = infiniteRepeatable(tween(durationMillis = 7000, easing = LinearEasing)),
+        animationSpec = infiniteRepeatable(tween(durationMillis = 9000, easing = LinearEasing)),
         label = "spin",
     )
     val pulse by anim.animateFloat(
-        initialValue = 0.25f,
+        initialValue = 0.2f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            tween(durationMillis = 1700, easing = FastOutSlowInEasing),
+            tween(durationMillis = 2600, easing = FastOutSlowInEasing),
             RepeatMode.Reverse,
         ),
         label = "pulse",
     )
+    val drift by anim.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(durationMillis = 12000, easing = LinearEasing)),
+        label = "drift",
+    )
+
     Box(modifier.fillMaxWidth()) {
+        // لایهٔ افکت: ستاره‌های چشمک‌زن + هالهٔ نفس‌کش + قوسِ طلاییِ چرخان
         Box(
             Modifier.matchParentSize().drawBehind {
-                // ۱) هالهٔ بیرونی که با نبض نفس می‌کشد
-                val halo = Color(0xFFFB923C)
                 drawRoundRect(
-                    color = halo.copy(alpha = 0.05f + 0.11f * pulse),
-                    topLeft = Offset(-2.dp.toPx(), -2.dp.toPx()),
-                    size = Size(size.width + 4.dp.toPx(), size.height + 4.dp.toPx()),
-                    cornerRadius = CornerRadius(22.dp.toPx()),
-                    style = Stroke(width = 5.dp.toPx()),
+                    color = Color(0xFFFBBF24).copy(alpha = 0.05f + 0.16f * pulse),
+                    topLeft = Offset(-1.dp.toPx(), -1.dp.toPx()),
+                    size = Size(size.width + 2.dp.toPx(), size.height + 2.dp.toPx()),
+                    cornerRadius = CornerRadius(24.dp.toPx()),
+                    style = Stroke(width = 6.dp.toPx()),
                 )
-                // ۲) حاشیهٔ رنگین‌کمانیِ چرخان، دقیقاً روی لبهٔ کارت
+                // ستاره‌ها: جای ثابت (از روی شمارهٔ ستاره) و چشمکِ آرام
+                for (i in 0 until 30) {
+                    val fx = ((i * 37) % 97) / 97f
+                    val fy = ((i * 61) % 89) / 89f
+                    val tw = 0.45f + 0.55f * kotlin.math.abs(kotlin.math.sin((drift * 6.283f) + i))
+                    drawCircle(
+                        color = Color(0xFFFFF7DB).copy(alpha = 0.06f + 0.16f * tw),
+                        radius = (0.7f + (i % 3) * 0.45f).dp.toPx(),
+                        center = Offset(fx * size.width, fy * size.height),
+                    )
+                }
+                // قوسِ طلاییِ چرخان روی لبه
                 val c = Offset(size.width / 2f, size.height / 2f)
                 val shader = android.graphics.SweepGradient(
                     c.x,
                     c.y,
                     intArrayOf(
+                        Color(0xFFFDE68A).toArgb(),
                         Color(0xFFF59E0B).toArgb(),
-                        Color(0xFFFB7185).toArgb(),
                         Color(0xFF8B5CF6).toArgb(),
-                        Color(0xFF22D3EE).toArgb(),
-                        Color(0xFF34D399).toArgb(),
-                        Color(0xFFF59E0B).toArgb(),
+                        Color(0xFF1E1B4B).toArgb(),
+                        Color(0xFFFDE68A).toArgb(),
                     ),
                     null,
                 )
                 shader.setLocalMatrix(android.graphics.Matrix().apply { setRotate(spin, c.x, c.y) })
                 drawRoundRect(
                     brush = ShaderBrush(shader),
-                    topLeft = Offset(1.25.dp.toPx(), 1.25.dp.toPx()),
-                    size = Size(size.width - 2.5.dp.toPx(), size.height - 2.5.dp.toPx()),
-                    cornerRadius = CornerRadius(19.dp.toPx()),
-                    style = Stroke(width = 2.5.dp.toPx()),
+                    topLeft = Offset(1.dp.toPx(), 1.dp.toPx()),
+                    size = Size(size.width - 2.dp.toPx(), size.height - 2.dp.toPx()),
+                    cornerRadius = CornerRadius(21.dp.toPx()),
+                    style = Stroke(width = 2.dp.toPx()),
                 )
             },
         )
-        Card(
-            modifier = Modifier.fillMaxWidth().clickable {
-                line = WisdomQuotes.next(ctx, all)
-            },
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF7ED)),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+
+        // خودِ کارت: آسمانِ شب با گرادیانِ بنفش/نیلی و متنِ طلایی
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFF111633), Color(0xFF1E1B4B), Color(0xFF3B0764)),
+                    ),
+                )
+                .clickable { line = WisdomQuotes.next(ctx, all) }
+                .padding(horizontal = 10.dp, vertical = 10.dp),
         ) {
-            BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp)) {
-                val n = body.length.coerceAtLeast(1)
-                val sp = (maxWidth.value / (n * 0.62f)).coerceIn(11f, 18f)
+            // نشانِ نقل‌قولِ تزئینی، پشتِ متن
+            Text(
+                "❝",
+                fontSize = 46.sp,
+                color = Color(0xFFFBBF24).copy(alpha = 0.16f + 0.10f * pulse),
+                modifier = Modifier.align(Alignment.TopStart),
+            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    val n = body.length.coerceAtLeast(1)
+                    val sp = (maxWidth.value / (n * 0.56f)).coerceIn(12f, 22f)
+                    Text(
+                        body,
+                        fontFamily = WISDOM_FONT,
+                        fontSize = sp.sp,
+                        color = Color(0xFFFDE68A),
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
                 Text(
-                    body,
-                    fontFamily = WISDOM_FONT,
-                    fontSize = sp.sp,
-                    color = Color(0xFF9A3412),
+                    if (line.author.isBlank()) "برای جملهٔ بعدی بزن" else "— ${line.author} · برای جملهٔ بعدی بزن",
+                    fontSize = 10.sp,
+                    color = Color(0xFFE9D5FF).copy(alpha = 0.75f),
                     textAlign = TextAlign.Center,
                     maxLines = 1,
-                    overflow = TextOverflow.Clip,
-                    softWrap = false,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

@@ -33,8 +33,8 @@ import androidx.compose.ui.platform.LocalContext
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 import com.hamyareman.ir.LocalAppContainer
 import java.io.File
-import java.net.HttpURLConnection
-import java.net.URL
+import com.hamyareman.ir.ui.net.NetState
+import com.hamyareman.ir.ui.net.ResilientHttp
 import java.util.LinkedHashMap
 
 /**
@@ -89,32 +89,55 @@ fun LessonPdfScreen(packId: String, onBack: () -> Unit) {
             val target = File(cacheDir, fileId)
             if (!target.exists() || target.length() < 1024) {
                 state = PdfState.Downloading(0)
-                val url = URL("$PDF_ENDPOINT/storage/buckets/$PDF_BUCKET/files/$fileId/view?project=$PDF_PROJECT")
-                val conn = (url.openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 15000
-                    readTimeout = 30000
-                    instanceFollowRedirects = true
-                }
-                if (conn.responseCode !in 200..299) {
-                    state = PdfState.Error("دانلود ناموفق بود (کد ${conn.responseCode}). اینترنت یا باکت را بررسی کنید.")
-                    return@LaunchedEffect
-                }
-                val total = conn.contentLengthLong
-                conn.inputStream.use { input ->
-                    java.io.FileOutputStream(target).use { out ->
-                        val buf = ByteArray(64 * 1024)
-                        var read: Int
-                        var done = 0L
-                        while (input.read(buf).also { read = it } > 0) {
-                            out.write(buf, 0, read)
-                            done += read
-                            if (total > 0) {
-                                val pct = ((done * 100) / total).toInt()
-                                if (state is PdfState.Downloading && (state as PdfState.Downloading).progressPct != pct) {
-                                    state = PdfState.Downloading(pct)
+                val url = "$PDF_ENDPOINT/storage/buckets/$PDF_BUCKET/files/$fileId/view?project=$PDF_PROJECT"
+                // دانلودِ مقاوم: اگر شبکه/پروکسی وسطِ راه عوض شود، به‌جای شکستن، از
+                // همان‌جا ادامه می‌دهد (تا ۶ تلاش، با صبر برای برگشتنِ اینترنت).
+                var attempt = 0
+                var finished = false
+                while (attempt <= 6 && !finished) {
+                    val done0 = if (target.exists()) target.length() else 0L
+                    val resume = done0 > 1024
+                    try {
+                        val conn = ResilientHttp.open(
+                            url,
+                            range = if (resume) "bytes=$done0-" else null,
+                            connectMs = 15000,
+                            readMs = 30000,
+                            attempts = 3,
+                        )
+                        if (conn.responseCode !in 200..299) {
+                            state = PdfState.Error("دانلود ناموفق بود (کد ${conn.responseCode}). اینترنت یا باکت را بررسی کنید.")
+                            return@LaunchedEffect
+                        }
+                        if (resume && conn.responseCode == 200) target.delete()
+                        val partial = resume && conn.responseCode == 206
+                        val total = conn.contentLengthLong.let {
+                            if (it > 0 && partial) it + target.length() else it
+                        }
+                        java.io.FileOutputStream(target, partial).use { out ->
+                            conn.inputStream.use { input ->
+                                val buf = ByteArray(64 * 1024)
+                                var read: Int
+                                var done = if (partial) target.length() else 0L
+                                while (input.read(buf).also { read = it } > 0) {
+                                    out.write(buf, 0, read)
+                                    done += read
+                                    if (total > 0) {
+                                        val pct = ((done * 100) / total).toInt()
+                                        if (state is PdfState.Downloading && (state as PdfState.Downloading).progressPct != pct) {
+                                            state = PdfState.Downloading(pct)
+                                        }
+                                    }
                                 }
                             }
                         }
+                        runCatching { conn.disconnect() }
+                        finished = total <= 0 || target.length() >= total
+                    } catch (t: Throwable) {
+                        attempt++
+                        if (attempt > 6) throw t
+                        if (!NetState.isOnline(ctx)) NetState.awaitOnline(ctx)
+                        runCatching { Thread.sleep((400L * attempt).coerceAtMost(3000L)) }
                     }
                 }
             }

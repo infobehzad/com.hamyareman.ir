@@ -1168,12 +1168,19 @@ private fun ImageGalleryPager(
         initialPage = start.coerceIn(0, (album.size - 1).coerceAtLeast(0)),
         pageCount = { album.size.coerceAtLeast(1) },
     )
+    // صفحه‌ای که کاربر در آن زوم کرده است؛ تا وقتی زوم است، سوایپِ گالری کار نمی‌کند
+    // تا وسطِ دیدنِ جزئیاتِ عکس، ناخواسته به عکسِ بعدی نپرد.
+    var zoomedPage by remember { mutableIntStateOf(-1) }
     Dialog(
         onDismissRequest = onClose,
         properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true),
     ) {
         Box(Modifier.fillMaxSize().background(Color(0xFF0F172A))) {
-            HorizontalPager(state = pager, modifier = Modifier.fillMaxSize()) { page ->
+            HorizontalPager(
+                state = pager,
+                userScrollEnabled = zoomedPage != pager.currentPage,
+                modifier = Modifier.fillMaxSize(),
+            ) { page ->
                 val item = album.getOrNull(page)
                 val bmp = remember(item?.localPath) {
                     item?.localPath?.let { runCatching { BitmapFactory.decodeFile(it) }.getOrNull() }
@@ -1189,11 +1196,13 @@ private fun ImageGalleryPager(
                                 scale = (scale * zoom).coerceIn(1f, 6f)
                                 ox += pan.x
                                 oy += pan.y
+                                zoomedPage = if (scale > 1.01f) page else -1
                             }
                         }
                         .clickable {
                             // لمسِ ساده: برگشت به اندازه‌ی اولیه
                             scale = 1f; ox = 0f; oy = 0f
+                            zoomedPage = -1
                         },
                     contentAlignment = Alignment.Center,
                 ) {

@@ -123,6 +123,9 @@ sealed class Screen(val route: String) {
     data object Wellness : Screen("wellness")
     /** پرامپت ۰۲: گالری مرجع‌های نقاشی سیاه‌قلم. */
     data object SketchGallery : Screen("sketch-gallery")
+    /** «تمرینات مخصوص این دوره» — چهار سربرگِ یوگا/تنفس/کنترل درد/آرامش برای روزهای چرخه. */
+    data object PeriodTraining : Screen("cycle-training")
+
     /** کارت‌های تازهٔ داشبورد: جعبه‌ابزار عمومی / آزمایشگاه شیمی / آزمایشگاه فیزیک / جعبه‌ابزار ریاضی. */
     data object GeneralToolkit : Screen("toolkit-general")
     data object ChemistryLab : Screen("lab-chemistry")

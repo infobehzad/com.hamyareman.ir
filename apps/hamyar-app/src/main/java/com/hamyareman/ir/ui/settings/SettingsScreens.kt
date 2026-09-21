@@ -49,6 +49,12 @@ import com.hamyareman.ir.platform.core.appwrite.AppwriteClientProvider
 import com.hamyareman.ir.platform.core.common.AppResult
 import com.hamyareman.ir.platform.core.common.TableIds
 import com.hamyareman.ir.di.AppContainer
+import androidx.compose.material3.Slider
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import com.hamyareman.ir.ui.net.NetState
+import com.hamyareman.ir.ui.sync.SyncCenter
+import java.util.Locale
 
 @Composable
 fun SettingsScreen(nav: NavController) {
@@ -73,8 +79,9 @@ fun SettingsScreen(nav: NavController) {
                 "یادآورهای ملایم + بازه‌ی بی‌اعلان شبانه.",
             ) { nav.navigate(Screen.Reminders.route) }
             SectionCard(
-                "همگام‌سازی و بک‌اند",
-                if (container.isBackendConfigured) "متصل به Appwrite." else "حالت محلی (Appwrite پیکربندی نشده).",
+                "کش و همگام‌سازی خودکار",
+                "حجمِ کش، تعدادِ داده‌های کش‌شده، صفِ ارسال، وضعیتِ اتصال و زمانِ آخرین " +
+                    "همگام‌سازی — همگام‌سازی خودکار در پس‌زمینه انجام می‌شود، بدونِ دکمه.",
             ) { nav.navigate(Screen.Sync.route) }
             SectionCard(
                 "تم",
@@ -171,10 +178,6 @@ fun PrivacySettingsScreen(onBack: () -> Unit) {
             PrimaryButton("پاک‌کردن کش گفت‌وگو از این دستگاه") {
                 container.heart.clearLocal()
                 notice = "کش حرف دل از این دستگاه پاک شد (نسخه‌ی سرور دست‌نخورده است)."
-            }
-            PrimaryButton("خالی‌کردن صف همگام‌سازی") {
-                container.sync.clear()
-                notice = "صف ارسال خالی شد."
             }
             PrimaryButton("پاک‌کردن همه‌ی داده‌های محلی (شامل PIN)") {
                 container.heart.clearLocal()
@@ -499,34 +502,120 @@ fun RemindersScreen(onBack: () -> Unit) {
 
 @Composable
 fun SyncScreen(onBack: () -> Unit) {
+    val ctx = LocalContext.current
     val container = LocalAppContainer.current
-    val scope = rememberCoroutineScope()
-    var status by remember { mutableStateOf(buildStatus(container)) }
-    var busy by remember { mutableStateOf(false) }
+    var status by remember { mutableStateOf(SyncCenter.status(ctx, container)) }
+    var limit by remember { mutableStateOf(SyncCenter.cacheLimitMb(ctx)) }
+    var notice by remember { mutableStateOf<String?>(null) }
+    var askClear by remember { mutableStateOf(false) }
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-    ) {
-        AppTopBar("همگام‌سازی", onBack)
+    fun mb(bytes: Long): String =
+        toPersianDigits(String.format(Locale.US, "%.1f", bytes / 1048576.0))
+
+    fun refresh() {
+        status = SyncCenter.status(ctx, container)
+    }
+
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        AppTopBar("کش و همگام‌سازی", onBack)
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+
             Card(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(12.dp)) {
-                    Text("وضعیت بک‌اند", style = MaterialTheme.typography.titleSmall)
-                    Spacer(Modifier.height(4.dp))
-                    Text(status, style = MaterialTheme.typography.bodySmall)
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("همگام‌سازی خودکار روشن است ✅", style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        "هر داده‌ای که باید سینک شود، اول روی همین گوشی ذخیره می‌شود (کش) و بعد " +
+                            "به صفِ ارسال می‌رود؛ اگر اینترنت نباشد هیچ‌چیز گم نمی‌شود و به‌محضِ " +
+                            "برگشتنِ اینترنت خودش فرستاده می‌شود. کارِ دستی لازم نیست.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
-            PrimaryButton(if (busy) "در حال همگام‌سازی…" else "همگام‌سازی حالا") {
-                busy = true
-                scope.launch {
-                    container.sync.pushAll()
-                    container.heart.pushPending()
-                    status = buildStatus(container)
-                    busy = false
+
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("وضعیت", style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        "اتصال به سرور: " + when {
+                            !container.isBackendConfigured -> "پیکربندی نشده (حالت محلی)"
+                            status.online -> "آنلاین و آماده"
+                            else -> "آفلاین — داده‌ها در صف می‌مانند"
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        "در صفِ ارسال: " + toPersianDigits(status.outbox.toString()) + " قلم" +
+                            "  •  پیام‌های «حرف دل» در انتظار: " + toPersianDigits(status.heartPending.toString()),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        if (status.lastSyncAt > 0) {
+                            "آخرین همگام‌سازی: " + JalaliDate.stampFa(status.lastSyncAt)
+                        } else {
+                            "هنوز همگام‌سازی انجام نشده."
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    status.lastError?.let {
+                        Text(
+                            "آخرین خطای سینک: $it",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
                 }
             }
+
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("کشِ گوشی", style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        "حجمِ کش: " + mb(status.cacheBytes) + " مگابایت از " +
+                            toPersianDigits(status.limitMb.toString()) + " مگابایت",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        "تعدادِ مواردِ کش‌شده: " + toPersianDigits(status.cacheItems.toString()) + " قلم" +
+                            "  •  صوت/ویدیوی دانلودشده: " + toPersianDigits(status.mediaFiles.toString()) +
+                            " فایل، " + mb(status.mediaBytes) + " مگابایت",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        "داده‌های سینک‌شده (برنامه، تیک‌ها، نکته‌ها): " +
+                            toPersianDigits(status.stateRows.toString()) + " قلم — این‌ها همیشه محلی می‌مانند.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        "سقفِ کش: " + toPersianDigits(limit.toString()) + " مگابایت",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Slider(
+                        value = limit.toFloat(),
+                        onValueChange = { limit = it.toInt() },
+                        valueRange = SyncCenter.MIN_LIMIT_MB.toFloat()..SyncCenter.MAX_LIMIT_MB.toFloat(),
+                    )
+                    Text(
+                        "وقتی کش از سقف بگذرد، قدیمی‌ترین فایل‌های صوتی/تصویری خودکار پاک می‌شوند؛ " +
+                            "داده‌های سینک‌شده پاک نمی‌شوند و فایلِ پاک‌شده اگر لازم شود دوباره دانلود می‌شود.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        PrimaryButton("اعمالِ سقف") {
+                            SyncCenter.setCacheLimitMb(ctx, limit)
+                            refresh()
+                            notice = "سقفِ کش روی " + toPersianDigits(limit.toString()) + " مگابایت تنظیم شد."
+                        }
+                        TextButton(onClick = { askClear = true }) { Text("پاک‌کردنِ کشِ رسانه") }
+                    }
+                    notice?.let {
+                        Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            }
+
             Text(
                 "چیزی که هرگز همگام نمی‌شود: ${PrivacyPolicy.neverSyncTables.joinToString("، ")}",
                 style = MaterialTheme.typography.labelSmall,
@@ -544,6 +633,28 @@ fun SyncScreen(onBack: () -> Unit) {
                 }
             }
         }
+    }
+
+    if (askClear) {
+        AlertDialog(
+            onDismissRequest = { askClear = false },
+            title = { Text("پاک‌کردنِ کشِ رسانه؟") },
+            text = {
+                Text(
+                    "فایل‌های صوتی/ویدیویی که دانلود کرده‌ای پاک می‌شوند (برنامه، تیک‌ها و " +
+                        "نکته‌ها دست‌نخورده می‌مانند). هر فایلی لازم شود، دوباره از سرور می‌آید.",
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    SyncCenter.clearMediaCache(ctx)
+                    askClear = false
+                    refresh()
+                    notice = "کشِ رسانه پاک شد."
+                }) { Text("پاک کن") }
+            },
+            dismissButton = { TextButton(onClick = { askClear = false }) { Text("بی‌خیال") } },
+        )
     }
 }
 

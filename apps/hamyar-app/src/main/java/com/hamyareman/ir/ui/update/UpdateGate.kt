@@ -1,36 +1,36 @@
 package com.hamyareman.ir.ui.update
 
-import android.app.DownloadManager
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.content.ContextCompat
 import com.hamyareman.ir.BuildConfig
 import com.hamyareman.ir.LocalAppContainer
+import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.PrimaryButton
 import kotlinx.coroutines.launch
 
@@ -38,12 +38,12 @@ import kotlinx.coroutines.launch
  * کانالِ آپدیت — سه تکه:
  *
  * 1. [UpdateGateHost] — خودکار، یک بار پس از ورود و بازشدنِ قفل.
- * 2. [UpdateDialog] — دیالوگِ مشترک (توصیه‌ای/اجباری) با دانلود و نصبِ درون‌برنامه‌ای.
- * 3. [UpdateCheckCard] — بررسیِ **دستی** در صفحهٔ «بیشتر» (برای وقتی کاربر خودش
- *    می‌خواهد مطمئن شود؛ از «بعداً» و از کشِ ۶ساعته هم عبور می‌کند).
+ * 2. [UpdateDialog] — دیالوگِ مشترک (توصیه‌ای/اجباری) با دانلودِ **درون‌برنامه‌ای**
+ *    (نوار پیشرفت + درصد + سرعت + «x از y مگابایت») و نصبِ داخلِ اپ.
+ * 3. [UpdateCheckCard] — بررسیِ **دستی** در صفحهٔ «بیشتر».
  *
- * تصمیم از ردیفِ `app_release` در جدولِ `app_state` می‌آید و فایل در مخزنِ
- * عمومیِ انتشار میزبانی می‌شود؛ پس اعلامِ نسخهٔ تازه هیچ APKی لازم ندارد.
+ * متنِ «تغییراتِ نسخه» از فایلِ `update-notes.json` در مخزنِ عمومیِ انتشار خوانده
+ * می‌شود (نه از کد) تا هر وقت خواستی همان‌جا ویرایشش کنی.
  */
 @Composable
 fun UpdateGateHost() {
@@ -69,47 +69,92 @@ fun UpdateGateHost() {
     )
 }
 
+/** نوارِ پیشرفتِ ساده (بدونِ وابستگی به نسخهٔ کتابخانه) — درصد را هم می‌گیرد. */
+@Composable
+private fun DownloadBar(fraction: Float) {
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .height(8.dp)
+            .clip(RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.surfaceVariant),
+    ) {
+        Box(
+            Modifier
+                .fillMaxWidth(fraction.coerceIn(0f, 1f))
+                .height(8.dp)
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.primary),
+        )
+    }
+}
+
 /**
- * دیالوگِ آپدیت. تنهای جایی که «دانلود و نصب» واقعاً اجرا می‌شود:
- * دانلودِ درون‌برنامه‌ای → بررسیِ `sha256` → نصب‌کنندهٔ سیستم؛ و اگر هر مرحله
- * شکست بخورد، کاربر با «دانلود در مرورگر» راهِ جایگزین دارد.
+ * دیالوگِ آپدیت — تنها جایی که «دانلود و نصب» واقعاً اجرا می‌شود:
+ * دانلودِ درون‌برنامه‌ای با پیشرفتِ زنده → بررسیِ `sha256` → نصب‌کنندهٔ سیستم.
+ * اگر مجوزِ نصب داده نشده باشد، صفحهٔ تنظیماتِ همان مجوز باز می‌شود.
  */
 @Composable
 fun UpdateDialog(info: UpdateInfo, forced: Boolean, onClose: () -> Unit) {
     val ctx = LocalContext.current
-    var downloading by remember { mutableStateOf(false) }
-    var note by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
-    // پایانِ دانلود → بررسیِ هش → نصب. گیرندهٔ زمانِ اجرا، فقط تا وقتی دانلودی در جریان است.
-    DisposableEffect(downloading) {
-        if (!downloading) return@DisposableEffect onDispose { }
-        val receiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                downloading = false
-                when {
-                    !ApkUpdate.isReady(ctx) ->
-                        note = "دانلود کامل نشد؛ با «دانلود در مرورگر» دوباره امتحان کن."
-                    !ApkUpdate.verify(ctx, info.sha256) -> {
-                        // فایلِ نیمه‌کاره/دست‌کاری‌شده هرگز به نصب‌کننده نمی‌رسد.
-                        ApkUpdate.clear(ctx)
-                        note = "فایلِ دانلودشده سالم نبود و پاک شد؛ یک‌بار دیگر بزن."
-                    }
-                    !ApkUpdate.install(ctx) -> {
-                        ApkUpdate.explain(ctx)
-                        note = "نصب‌کننده باز نشد؛ فایلِ دانلودشده را دستی نصب کن."
-                    }
+    var downloading by remember { mutableStateOf(false) }
+    var progress by remember { mutableStateOf<ApkProgress?>(null) }
+    var note by remember { mutableStateOf<String?>(null) }
+    var ready by remember { mutableStateOf(ApkUpdate.isReady(ctx)) }
+    var repoNotes by remember {
+        mutableStateOf(UpdateNotes.notes(ctx, UpdatePlan.versionLabel(info)))
+    }
+
+    // متنِ تغییرات از ریپو (اگر اینترنت نبود، همان کشِ قبلی می‌ماند).
+    LaunchedEffect(info.latest) {
+        if (UpdateNotes.refresh(ctx)) {
+            repoNotes = UpdateNotes.notes(ctx, UpdatePlan.versionLabel(info))
+        }
+    }
+    val shownNotes = repoNotes.ifEmpty { info.notes }
+    val versionFa = toPersianDigits(UpdatePlan.versionLabel(info))
+
+    fun installNow() {
+        note = null
+        when {
+            !ApkUpdate.isReady(ctx) -> note = "فایلِ نصبی آماده نیست؛ اول دانلودش کن."
+            !ApkUpdate.verify(ctx, info.sha256) -> {
+                ApkUpdate.clear(ctx)
+                ready = false
+                note = "فایلِ دانلودشده سالم نبود و پاک شد؛ یک‌بار دیگر دانلود کن."
+            }
+            !ApkUpdate.canInstall(ctx) -> {
+                ApkUpdate.openInstallPermission(ctx)
+                note = "اجازهٔ «نصب برنامه‌های ناشناس» را برای همیار من روشن کن و بعد «نصب» را بزن."
+            }
+            !ApkUpdate.install(ctx) -> {
+                ApkUpdate.explain(ctx)
+                note = "نصب‌کننده باز نشد؛ فایل را دستی نصب کن یا از «دانلود در مرورگر» استفاده کن."
+            }
+        }
+    }
+
+    fun startDownload() {
+        note = null
+        downloading = true
+        progress = ApkProgress(0, info.size, 0)
+        scope.launch {
+            val f = ApkUpdate.download(ctx, info.url) { p -> progress = p }
+            downloading = false
+            when {
+                f == null -> note = "دانلود کامل نشد؛ اینترنت را چک کن و دوباره بزن (از همان‌جا ادامه می‌دهد)."
+                !ApkUpdate.verify(ctx, info.sha256) -> {
+                    ApkUpdate.clear(ctx)
+                    note = "فایلِ دانلودشده سالم نبود و پاک شد؛ یک‌بار دیگر بزن."
+                }
+                else -> {
+                    ready = true
+                    installNow()
                 }
             }
         }
-        runCatching {
-            ContextCompat.registerReceiver(
-                ctx,
-                receiver,
-                IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-                ContextCompat.RECEIVER_NOT_EXPORTED,
-            )
-        }
-        onDispose { runCatching { ctx.unregisterReceiver(receiver) } }
     }
 
     /** «بعداً»: تا نسخهٔ بعدی دیگر پرسیده نشود (فقط در حالتِ توصیه‌ای). */
@@ -134,7 +179,7 @@ fun UpdateDialog(info: UpdateInfo, forced: Boolean, onClose: () -> Unit) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     "نسخه‌ی تو: ${BuildConfig.VERSION_NAME}" +
-                        "  •  نسخه‌ی تازه: ${UpdatePlan.versionLabel(info)}" +
+                        "  •  نسخه‌ی تازه: $versionFa" +
                         if (info.size > 0) "  •  حجم: ${UpdatePlan.sizeLabel(info.size)}" else "",
                     style = MaterialTheme.typography.bodyMedium,
                 )
@@ -144,33 +189,50 @@ fun UpdateDialog(info: UpdateInfo, forced: Boolean, onClose: () -> Unit) {
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
-                info.notes.take(6).forEach { line ->
+                shownNotes.take(8).forEach { line ->
                     Text("• $line", style = MaterialTheme.typography.bodyMedium)
                 }
+
+                // ---- دانلود درون‌برنامه‌ای با نوار پیشرفت ----
                 if (downloading) {
-                    Text("در حال دانلود… وقتی تمام شد، نصب‌کننده خودش باز می‌شود.")
+                    val p = progress ?: ApkProgress(0, info.size, 0)
+                    DownloadBar(p.percent / 100f)
+                    Text(
+                        "نسخهٔ $versionFa — " + toPersianDigits("${p.percent}") + "٪",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Text(
+                        p.sizeText + "  •  " + p.speedText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else if (ready) {
+                    Text(
+                        "دانلود کامل شد ✅ — برای نصب، دکمه‌ی «نصب نسخه‌ی تازه» را بزن.",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
                 }
                 note?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
             }
         },
         confirmButton = {
-            if (downloading) {
-                PrimaryButton("در حال دانلود…") { }
-            } else {
-                PrimaryButton("دانلود و نصب") {
-                    note = null
-                    if (ApkUpdate.download(ctx, info.url)) {
-                        downloading = true
-                    } else {
-                        UpdateChecker.openInBrowser(ctx, info.url)
-                    }
-                }
+            when {
+                downloading -> PrimaryButton("در حال دانلود…") { }
+                ready -> PrimaryButton("نصب نسخه‌ی تازه") { installNow() }
+                else -> PrimaryButton("دانلود و نصب") { startDownload() }
             }
         },
         // در حالتِ اجباری، دکمهٔ انصراف عمداً خالی است (فقط «دانلود و نصب» می‌ماند).
         dismissButton = {
             if (!forced) {
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    if (ready) {
+                        TextButton(onClick = {
+                            ApkUpdate.clear(ctx)
+                            ready = false
+                            startDownload()
+                        }) { Text("دانلود مجدد") }
+                    }
                     TextButton(onClick = { UpdateChecker.openInBrowser(ctx, info.url) }) {
                         Text("دانلود در مرورگر")
                     }
@@ -183,7 +245,7 @@ fun UpdateDialog(info: UpdateInfo, forced: Boolean, onClose: () -> Unit) {
 
 /**
  * کارتِ «آپدیت اپ» برای صفحهٔ «بیشتر»: نسخهٔ فعلی را نشان می‌دهد و با لمس،
- * **همین حالا** از سرور می‌پرسد (بدونِ توجه به کشِ ۶ساعته و «بعداً»‌های قبلی).
+ * **همین حالا** از سرور می‌پرسد (بدونِ توجه به کشِ ۶ساعته و «بعداً»های قبلی).
  * اگر نسخهٔ تازه بود، همان دیالوگِ بالا باز می‌شود.
  */
 @Composable

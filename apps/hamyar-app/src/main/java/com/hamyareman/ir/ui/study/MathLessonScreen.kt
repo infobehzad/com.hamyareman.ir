@@ -354,18 +354,18 @@ fun MathLessonScreen(
                     },
             ) { page ->
             when (tabs.getOrNull(page)?.key) {
-                "teach" -> MathTeachTab(pack, bookTitle, showPlayer = false)
-                "book" -> MathBookHtmlTab(pack, html)
-                "flash" -> MathFlashHtmlTab(pack, html)
-                "summary" -> MathSummaryTab(pack, isSum = isSum, chapter = chapter)
-                "exam" -> MathExamHtmlTab(pack, html)
+                "teach" -> MathTeachTab(pack, bookTitle, showPlayer = false, onZoomChanged = { contentZoomed = it })
+                "book" -> MathBookHtmlTab(pack, html, onZoomChanged = { contentZoomed = it })
+                "flash" -> MathFlashHtmlTab(pack, html, onZoomChanged = { contentZoomed = it })
+                "summary" -> MathSummaryTab(pack, isSum = isSum, chapter = chapter, onZoomChanged = { contentZoomed = it })
+                "exam" -> MathExamHtmlTab(pack, html, onZoomChanged = { contentZoomed = it })
                 "pdf" -> TeachPdfPages(
                     modifier = Modifier.fillMaxSize(),
                     fileId = pack.pdfFileName,
                     pack = pack,
                     onZoomChange = { contentZoomed = it },
                 )
-                else -> MathTeachTab(pack, bookTitle, showPlayer = false)
+                else -> MathTeachTab(pack, bookTitle, showPlayer = false, onZoomChanged = { contentZoomed = it })
             }
             }
             TabSwipeHint(
@@ -455,37 +455,55 @@ private fun MathChromeTabRow(tabs: List<MathTab>, tab: Int, onSelect: (Int) -> U
 }
 
 @Composable
-private fun MathBookHtmlTab(pack: StudyPack, html: MathHtmlAssets.Spec?) {
+private fun MathBookHtmlTab(pack: StudyPack, html: MathHtmlAssets.Spec?, onZoomChanged: (Boolean) -> Unit = {}) {
     val asset = html?.bookAsset
     if (!asset.isNullOrBlank()) {
-        MathInteractiveHtml(packId = pack.packId, kind = "book", assetPath = asset, modifier = Modifier.fillMaxSize())
+        MathInteractiveHtml(
+            packId = pack.packId,
+            kind = "book",
+            assetPath = asset,
+            modifier = Modifier.fillMaxSize(),
+            onZoomChanged = onZoomChanged,
+        )
     } else {
         MathStudyTab(pack)
     }
 }
 
 @Composable
-private fun MathFlashHtmlTab(pack: StudyPack, html: MathHtmlAssets.Spec?) {
+private fun MathFlashHtmlTab(pack: StudyPack, html: MathHtmlAssets.Spec?, onZoomChanged: (Boolean) -> Unit = {}) {
     val asset = html?.flashAsset
     if (!asset.isNullOrBlank()) {
-        MathInteractiveHtml(packId = pack.packId, kind = "flash", assetPath = asset, modifier = Modifier.fillMaxSize())
+        MathInteractiveHtml(
+            packId = pack.packId,
+            kind = "flash",
+            assetPath = asset,
+            modifier = Modifier.fillMaxSize(),
+            onZoomChanged = onZoomChanged,
+        )
     } else {
         MathFlashTab(pack)
     }
 }
 
 @Composable
-private fun MathExamHtmlTab(pack: StudyPack, html: MathHtmlAssets.Spec?) {
+private fun MathExamHtmlTab(pack: StudyPack, html: MathHtmlAssets.Spec?, onZoomChanged: (Boolean) -> Unit = {}) {
     val asset = html?.examAsset
     if (!asset.isNullOrBlank()) {
-        MathInteractiveHtml(packId = pack.packId, kind = "exam", assetPath = asset, modifier = Modifier.fillMaxSize())
+        MathInteractiveHtml(
+            packId = pack.packId,
+            kind = "exam",
+            assetPath = asset,
+            modifier = Modifier.fillMaxSize(),
+            onZoomChanged = onZoomChanged,
+        )
     } else {
         MathExamTab(pack)
     }
 }
 
 @Composable
-private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean = true) {
+private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean = true, onZoomChanged: (Boolean) -> Unit = {}) {
     val tracks = teachTracksOf(pack)
     val ctx = androidx.compose.ui.platform.LocalContext.current
     val htmlFromAsset = remember(pack.packId) {
@@ -512,7 +530,11 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
                 AndroidView(
                     factory = { c ->
                         WebView(c).apply {
-                            webViewClient = WebViewClient()
+                            webViewClient = object : WebViewClient() {
+                                override fun onScaleChanged(view: WebView, oldScale: Float, newScale: Float) {
+                                    onZoomChanged(newScale > 1.02f)
+                                }
+                            }
                             settings.javaScriptEnabled = true
                             settings.domStorageEnabled = true
                             settings.loadWithOverviewMode = true
@@ -725,7 +747,7 @@ private fun MathFlashTab(pack: StudyPack) {
 }
 
 @Composable
-private fun MathSummaryTab(pack: StudyPack, isSum: Boolean, chapter: Int) {
+private fun MathSummaryTab(pack: StudyPack, isSum: Boolean, chapter: Int, onZoomChanged: (Boolean) -> Unit = {}) {
     val summary = pack.summary.ifBlank {
         pack.sections.filter { it.kind == "exam" }.lastOrNull()?.body
             ?: "خلاصه‌ی چندسطری این درس به‌زودی از پوشهٔ Books نوشته می‌شود."
@@ -745,7 +767,11 @@ private fun MathSummaryTab(pack: StudyPack, isSum: Boolean, chapter: Int) {
         AndroidView(
             factory = { ctx ->
                 WebView(ctx).apply {
-                    webViewClient = WebViewClient()
+                    webViewClient = object : WebViewClient() {
+                        override fun onScaleChanged(view: WebView, oldScale: Float, newScale: Float) {
+                            onZoomChanged(newScale > 1.02f)
+                        }
+                    }
                     settings.javaScriptEnabled = false
                     settings.loadWithOverviewMode = true
                     settings.useWideViewPort = true

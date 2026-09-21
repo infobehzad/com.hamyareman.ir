@@ -58,7 +58,6 @@ import java.time.LocalDate
 fun MonthlyCycleScreen(
     onBack: () -> Unit,
     onMood: () -> Unit,
-    onMind: () -> Unit,
     onMoves: () -> Unit,
 ) {
     if (StudentProfileState.gender == "boy") {
@@ -80,6 +79,8 @@ fun MonthlyCycleScreen(
 
     var state by remember { mutableStateOf(MonthlyCycle.load(ctx)) }
     var syncNote by remember { mutableStateOf<String?>(null) }
+    // روزی که کاربر خواسته علامتش برداشته شود — تا تأیید نکند، چیزی عوض نمی‌شود.
+    var askRemove by remember { mutableStateOf<String?>(null) }
     var syncing by remember { mutableStateOf(false) }
     // شناسهٔ کاربر suspend است؛ پس در افکت خوانده می‌شود و سینکِ بی‌صدای ورود هم
     // همین‌جا انجام می‌گیرد (تا در اولین فرصت، داده‌ی سرور بیاید).
@@ -141,7 +142,10 @@ fun MonthlyCycleScreen(
                     Text("امروز — $phaseTitle", style = MaterialTheme.typography.titleMedium)
                     Text(phaseBody, style = MaterialTheme.typography.bodyMedium)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = { update(MonthlyCycle.toggleDay(state, today)) }) {
+                        Button(onClick = {
+                            if (today in state.periodDays) askRemove = today
+                            else update(MonthlyCycle.toggleDay(state, today))
+                        }) {
                             Text(if (today in state.periodDays) "امروز پریودم — برداشته شود" else "امروز پریودم")
                         }
                     }
@@ -220,7 +224,10 @@ fun MonthlyCycleScreen(
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(onClick = { update(MonthlyCycle.toggleDay(state, picked)) }) {
+                        OutlinedButton(onClick = {
+                            if (picked in state.periodDays) askRemove = picked
+                            else update(MonthlyCycle.toggleDay(state, picked))
+                        }) {
                             Text(if (picked in state.periodDays) "برداشتنِ علامت" else "این روز پریود بود")
                         }
                         OutlinedButton(onClick = { update(MonthlyCycle.markStart(state, picked)) }) {
@@ -293,10 +300,7 @@ fun MonthlyCycleScreen(
                             }
                         }
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(onClick = onMoves) { Text("حرکاتِ ملایم و یوگا") }
-                        OutlinedButton(onClick = onMind) { Text("ذهن‌آگاهی") }
-                    }
+                    Button(onClick = onMoves) { Text("تمرینات مخصوص این دوره") }
                     Text(
                         "اگر درد طوری است که نمی‌توانی مدرسه بروی یا با مسکنِ معمولی بهتر نمی‌شود، " +
                             "به مامان/بابا بگو و با پزشک مشورت کن.",
@@ -308,15 +312,15 @@ fun MonthlyCycleScreen(
 
             // ---- حال و ذهن ----
             SectionCard("حالِ امروزم چطوره؟", "با یک ایموجی ثبتش کن — اختیاریه.") { onMood() }
-            SectionCard("ذهن‌آگاهی", "تمرین‌های کوتاه حضور") { onMind() }
 
-            // ---- سینک ----
+            // ---- ذخیره و سینک (خودکار؛ دکمه‌ای لازم نیست) ----
             Card(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text("ذخیره و سینک", style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "این تقویم روی گوشیِ خودت ذخیره می‌شود و با حسابِ خودت در سرور هم همگام می‌شود " +
-                            "(سطرِ خصوصیِ خودت؛ هیچ‌کس دیگری نمی‌بیند).",
+                        "این تقویم روی گوشیِ خودت ذخیره می‌شود و خودکار با حسابِ خودت همگام می‌شود " +
+                            "(سطرِ خصوصیِ خودت؛ هیچ‌کس دیگری نمی‌بیند). اگر اینترنت نباشد، تغییرها " +
+                            "همین‌جا می‌مانند و به‌محضِ وصل‌شدن فرستاده می‌شوند.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -327,26 +331,34 @@ fun MonthlyCycleScreen(
                         style = MaterialTheme.typography.bodySmall,
                     )
                     syncNote?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(enabled = !syncing, onClick = { syncNow() }) {
-                            Text(if (syncing) "در حال سینک…" else "همگام‌سازی")
-                        }
-                        OutlinedButton(
-                            enabled = !syncing,
-                            onClick = {
-                                scope.launch {
-                                    val r = MonthlyCycle.pushNow(ctx, container.tables, uid)
-                                    syncNote = if (r is AppResult.Err) r.error.userMessage
-                                    else "روی سرور ذخیره شد."
-                                }
-                            },
-                        ) { Text("ذخیره در سرور") }
-                    }
                 }
             }
 
             Spacer(Modifier.height(10.dp))
         }
+    }
+
+    // ---- تأییدِ برداشتنِ علامت ----
+    askRemove?.let { day ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { askRemove = null },
+            title = { Text("برداشتنِ علامتِ پریود؟") },
+            text = {
+                Text(
+                    "علامتِ " + (JalaliDate.toJalali(day)?.faLong ?: "این روز") +
+                        " برداشته شود؟ بعداً می‌توانی دوباره ثبتش کنی.",
+                )
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    update(MonthlyCycle.toggleDay(state, day))
+                    askRemove = null
+                }) { Text("بله، بردار") }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { askRemove = null }) { Text("نه، بماند") }
+            },
+        )
     }
 }
 
