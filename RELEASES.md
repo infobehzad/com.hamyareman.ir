@@ -1,0 +1,92 @@
+# RELEASES.md — قراردادِ انتشارِ همیار من
+
+> این فایل، «قراردادِ کاری» است: هر آپدیتی که ساخته می‌شود باید از این مسیر بگذرد.
+> آخرین به‌روزرسانی: ۲۰۲۶-۰۹-۲۱ (نسخهٔ ۱٫۶۶ / کد ۶۷)
+
+خلاصهٔ قرارداد:
+
+1. **قابلِ نصب روی نسخهٔ قبلی باشد.**
+2. **در مخزنِ عمومیِ [`Aydinnza/hamyar-releases`](https://github.com/Aydinnza/hamyar-releases) منتشر شود.**
+3. **از سرور اعلام شود** (ردیفِ `app_release` در `app_state`) تا اپ خودش پیام بدهد.
+4. **زنده تأیید شود**: لینکِ عمومی `HTTP 200` بدهد و `sha256` یکی باشد.
+
+---
+
+## ۱) «قابلِ نصب روی نسخهٔ قبلی» یعنی چه؟
+
+اندروید نصبِ نسخهٔ تازه روی نسخهٔ نصب‌شده را فقط وقتی می‌پذیرد که:
+
+| شرط | مقدارِ پروژه | کجا تضمین شده |
+|---|---|---|
+| نامِ بسته یکی باشد | `com.hamyareman.ir` | `apps/hamyar-app/build.gradle.kts` → `defaultConfig.applicationId` |
+| کلیدِ امضا یکی باشد | گواهی با اثرِ انگشتِ `5f091b6bf47d7294b37f8994099a6c88ac2e25182dd6cbe6a36da6b3bf804959` | `debug.keystore` در ریشهٔ ریپو؛ `buildTypes.release.signingConfig = signingConfigs.getByName("debug")` |
+| `versionCode` بزرگ‌تر باشد | ۶۶ → **۶۷** | `defaultConfig.versionCode` (هر انتشار +۱) |
+
+اگر کلیدِ امضا عوض شود، کاربر باید اپ را **حذف** و دوباره نصب کند
+(`INSTALL_FAILED_UPDATE_INCOMPATIBLE`) — پس **هرگز** کلیدِ امضا را عوض نکنید.
+
+**تأییدِ عملیِ هر انتشار** (بدونِ گوشی و بدونِ Android SDK):
+
+```bash
+python3 - <<'PY'
+from pyaxmlparser import APK
+a = APK('hamyar-1.67.apk'); print(a.package, a.version_code, a.version_name)
+PY
+# اثرِ انگشتِ گواهیِ امضای v2 (بلاکِ APK Sig Block) باید با debug.keystore یکی باشد.
+```
+
+نسخهٔ سبکِ R8 هم با همین کلید امضا می‌شود، پس بینِ دو داراییِ یک انتشار هم
+جابه‌جاییِ نصب بی‌دردسر است.
+
+---
+
+## ۲) مخزنِ عمومیِ انتشار
+
+- مخزنِ **اصلیِ پروژه خصوصی می‌ماند** (سورس + کلیدِ امضا). هیچ توکنی داخلِ اپ
+  نمی‌رود؛ اگر فایل در مخزنِ خصوصی بود، برای دانلود باید توکنِ دسترسی در اپ
+  گذاشته می‌شد که با `strings` قابلِ استخراج است.
+- در `hamyar-releases` فقط فایلِ نصبی می‌نشیند: Release با تگِ `v<نسخه>` و
+  داراییِ `hamyar-<نسخه>.apk` (به‌علاوهٔ `hamyar-<نسخه>-r8.apk` در صورت وجود).
+- لینکِ دانلودِ انتشارها بی‌احراز هویت کار می‌کند؛ همین چیزی است که اپ لازم دارد.
+
+نمونهٔ لینک: `https://github.com/Aydinnza/hamyar-releases/releases/download/v1.66/hamyar-1.66.apk`
+
+---
+
+## ۳) اعلام از سرور (بدونِ APKِ جدید)
+
+ردیفِ `app_release` در جدولِ `app_state` (شناسهٔ `app_release`، `userId = "global"`،
+`$permissions: ["read(\"users\")"]`) تنها منبعِ تصمیمِ اپ است:
+
+```json
+{"latest":67,"name":"1.66","min":0,
+ "url":"https://github.com/Aydinnza/hamyar-releases/releases/download/v1.66/hamyar-1.66.apk",
+ "size":52963212,"sha256":"9b9b…","chan":"stable","rollout":100,
+ "notes":["…","…"]}
+```
+
+- `latest` / `name`: آخرین نسخه (کد و نام).
+- `min`: کمتر از این کد → آپدیتِ **اجباری** (۰ = هیچ‌وقت اجباری نکن).
+- `rollout`: چند درصدِ کاربران پیام را ببینند (۱..۱۰۰).
+- `chan`: کانال (`stable`؛ بیلدهای stable فقط همین را می‌خوانند).
+- `url` خالی = **پیام خاموش** (برای خاموش‌کردنِ سریع بدونِ حذفِ ردیف).
+
+ابزار: `python3 /home/user/publish-update.py …` با گزینه‌های
+`--version --name --min --rollout --url --size --sha --notes --off --show`.
+
+**سه راه** برای به‌روزرسانیِ این ردیف:
+1. اسکریپتِ محلی (`publish-update.py`).
+2. ورک‌فلوی دستیِ `.github/workflows/publish-update.yml` (نیازمند secretهای
+   `RELEASES_TOKEN` و `APPWRITE_API_KEY`؛ متغیرِ `RELEASES_REPO` از قبل روی
+   `Aydinnza/hamyar-releases` تنظیم شده است). پیش‌فرضِ آن `publish=false` است
+   (فقط می‌سازد و payload را چاپ می‌کند).
+3. کنسولِ Appwrite (دستی).
+
+---
+
+## ۴) نسخه‌ها
+
+| نسخه | کد | دارایی | تاریخ | یادداشت |
+|---|---|---|---|---|
+| ۱٫۶۵ | ۶۶ | — (دستی) | ۲۰۲۶-۰۹-۲۰ | پیش از راه‌افتادنِ کانالِ آپدیت؛ چکر نداشت |
+| ۱٫۶۶ | ۶۷ | `hamyar-1.66.apk` (+ `-r8`) | ۲۰۲۶-۰۹-۲۱ | کانالِ آپدیت + پیامِ صادقانهٔ توابع + اندازهٔ کمتر |
