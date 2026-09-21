@@ -34,6 +34,13 @@ android {
         targetSdk = 36
         versionCode = 67
         versionName = "1.66"
+        ndk {
+            // فقط معماری‌های واقعیِ گوشی. x86/x86_64 (شبیه‌ساز) عمداً حذف‌اند:
+            // کتابخانه‌ی بومیِ WebRTC برای هر معماری ~۶ تا ۱۲ مگابایت است و هر دو
+            // معماریِ شبیه‌ساز روی هیچ گوشیِ واقعی لازم نیستند
+            // (اندازه‌گیریِ APKِ دیباگ: ۷۴٫۶ مگابایت؛ با این فیلتر ~۵۰ مگابایت).
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+        }
         buildConfigField("String", "APPWRITE_ENDPOINT", "\"$appwriteEndpoint\"")
         buildConfigField("String", "APPWRITE_PROJECT_ID", "\"$appwriteProjectId\"")
         // برای مانیفستِ ادغام‌شده (اگر نسخه‌ای از SDK اسکیم را با ${appwriteProjectId} بخواهد)
@@ -48,8 +55,16 @@ android {
             versionNameSuffix = "-debug"
         }
         release {
-            // تا زمانی که R8 با کتابخانه‌های WebRTC/Appwrite تست نشده، minify خاموش است.
-            isMinifyEnabled = false
+            // امضا با همان کلیدِ دیباگِ داخلِ ریپو (قراردادِ پروژه): بدونِ امضای
+            // یکسان، نصبِ نسخه‌ی تازه روی نصبِ قبلی رد می‌شود
+            // (INSTALL_FAILED_UPDATE_INCOMPATIBLE) و کلِ کانالِ آپدیت می‌خوابد.
+            signingConfig = signingConfigs.getByName("debug")
+            // R8 روشن شد تا dexِ ~۲۵ مگابایتی جمع شود. نگهبان‌های لازم (Gson/Appwrite،
+            // WebRTC، OkHttp) در proguard-rules.pro هستند. منبع‌ها دست‌نخورده
+            // می‌مانند (shrinkResources خاموش) تا چیزی که با نام خوانده می‌شود از
+            // دست نرود. این بیلد تا وقتی روی گوشی تست نشده، مسیرِ **انتشارِ** پیش‌فرض
+            // نیست؛ پیش‌فرضِ کانالِ آپدیت همان بیلدِ دیباگ است.
+            isMinifyEnabled = true
             isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

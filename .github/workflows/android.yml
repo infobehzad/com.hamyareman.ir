@@ -111,3 +111,21 @@ jobs:
           name: hamyar-app-debug-apk
           path: apps/hamyar-app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+
+      # بیلدِ ریلیزِ R8 — عمداً **غیرِمسدودکننده**: مسیرِ اصلیِ انتشار همان بیلدِ
+      # دیباگ است. اگر R8 روی کدِ تازه بشکند، این قدم قرمز میشود ولی کارِ بقیه
+      # متوقف نمیشود؛ اگر سبز شد، حجمِ نسخهٔ کوچکشده در لاگ/آرتیفکت دیده میشود.
+      - name: release APK (R8) — غیرِمسدودکننده
+        continue-on-error: true
+        run: |
+          ./gradlew :hamyar-app:assembleRelease --stacktrace
+          for f in apps/hamyar-app/build/outputs/apk/*/*.apk; do
+            printf '%-70s %s مگابایت\n' "$f" "$(( $(stat -c%s "$f") / 1048576 ))"
+          done
+      - name: upload release APK
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hamyar-app-release-apk
+          path: apps/hamyar-app/build/outputs/apk/release/*.apk
+          if-no-files-found: ignore
