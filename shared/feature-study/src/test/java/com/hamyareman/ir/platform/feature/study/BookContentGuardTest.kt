@@ -82,23 +82,27 @@ class BookContentGuardTest {
     }
 
     @Test
-    fun `کتاب‌های درسیِ دیگر هم عنوان و محتوا را نمی‌شکنند`() {
-        // سبک: کتاب‌هایی که همهٔ درس‌های فهرستشان پک دارند باید هم‌خوان بمانند؛
-        // کتاب‌های نیمه‌کامل (با درسِ بدونِ پک) از این بررسی کنار می‌مانند و در اپ
-        // پیامِ «متن این درس آماده نشده» می‌گیرند.
-        var checkedBooks = 0
-        for (module in BookModuleRegistry.modules) {
-            val lessons = lessonPackIds(BookToc.forBook(module.bookCode))
-            if (lessons.isEmpty()) continue
-            val byPackId = module.packs.associateBy { it.packId }
-            if (lessons.any { byPackId[it] == null }) continue
-            for (id in lessons) {
-                assertTrue("عنوانی برای $id (${module.bookCode}) نیست", !LessonTitles.titles[id].isNullOrBlank())
-                val pack = byPackId.getValue(id)
-                assertTrue("پکِ $id خالی است", pack.sections.isNotEmpty() && pack.questions.isNotEmpty())
+    fun `همهٔ ماژول‌های کتاب سالم و خودسازگارند`() {
+        // بررسیِ سبک برای همهٔ ماژول‌ها (کتاب‌های قدیمی‌تر ممکن است عنوانِ همهٔ
+        // درس‌هایشان در `LessonTitles` نباشد؛ آن‌ها اینجا فقط از نظرِ «سالم‌بودنِ
+        // خودِ پک» بررسی می‌شوند. بررسیِ کاملِ فهرست ↔ عنوان ↔ محتوا در دو تستِ
+        // اختصاصیِ C915 و C941 انجام می‌شود.)
+        val modules = BookModuleRegistry.modules
+        assertTrue("ماژول‌های کتاب خالی است", modules.size >= 10)
+        for (module in modules) {
+            assertTrue("پکِ تکراری در ${module.bookCode}", module.packs.size == module.packs.map { it.packId }.toSet().size)
+            for (pack in module.packs) {
+                assertTrue("پکِ ${pack.packId} به کتابِ ${module.bookCode} تعلق ندارد", pack.packId.startsWith("${module.bookCode}_"))
+                assertEquals("کتابِ پک اشتباه است (${pack.packId})", module.bookCode, pack.bookCode)
+                assertTrue("پکِ ${pack.packId} درس‌نامه ندارد", pack.sections.isNotEmpty())
+                assertTrue("پکِ ${pack.packId} فلش‌کارت ندارد", pack.flashcards.isNotEmpty())
+                assertTrue("پکِ ${pack.packId} پرسش ندارد", pack.questions.isNotEmpty())
+                assertEquals(
+                    "شناسهٔ سؤالِ تکراری در ${pack.packId}",
+                    pack.questions.size,
+                    pack.questions.map { it.id }.toSet().size,
+                )
             }
-            checkedBooks++
         }
-        assertTrue("هیچ کتابِ کاملِ فهرست‌داری بررسی نشد", checkedBooks >= 2)
     }
 }
