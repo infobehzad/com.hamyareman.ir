@@ -23,6 +23,8 @@ object LessonAccess {
 
     fun isAlwaysOpen(packId: String): Boolean {
         if (isToc(packId)) return true
+        val pack = BookModuleRegistry.pack(packId)
+        if (pack?.pdfOnly == true) return true
         // کل فصل ۱ ریاضی نهم (درس‌ها + جمع‌بندی)
         if (packId.startsWith("C905_E01")) return true
         val lesson = packId.substringAfter('_', packId)

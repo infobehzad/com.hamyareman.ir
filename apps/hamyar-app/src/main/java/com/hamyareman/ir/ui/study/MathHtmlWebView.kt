@@ -54,7 +54,7 @@ internal fun MathInteractiveHtml(
                 settings.domStorageEnabled = true
                 settings.loadWithOverviewMode = true
                 settings.useWideViewPort = true
-                settings.builtInZoomControls = true
+                settings.builtInZoomControls = false
                 settings.displayZoomControls = false
                 settings.allowFileAccess = true
                 addJavascriptInterface(bridge, "Hamyar")

@@ -235,7 +235,7 @@ private fun LessonCard(
                     )
                 }
             }
-            if (pack != null) {
+            if (pack != null && !pack.pdfOnly) {
                 Text(
                     "${pack.sections.size} سکشن · ${pack.flashcards.size} کارت · ${pack.questions.size} سؤال",
                     style = MaterialTheme.typography.bodySmall,
@@ -266,12 +266,14 @@ private fun LessonCard(
                 )
                 return@Column
             }
-            Text(
-                if (teachDone) "✅ دوره‌ی اول تدریس کامل شده"
-                else "ورود به درس و سربرگ‌ها باز است",
-                style = MaterialTheme.typography.labelSmall,
-                color = if (teachDone) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            if (!pack.pdfOnly) {
+                Text(
+                    if (teachDone) "✅ دوره‌ی اول تدریس کامل شده"
+                    else "ورود به درس و سربرگ‌ها باز است",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (teachDone) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             Spacer(Modifier.height(8.dp))
             val bookCode = pack.bookCode
             val gate = LessonAccess.gate(ctx, bookCode, packId)
@@ -290,7 +292,14 @@ private fun LessonCard(
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(if (gate == LessonAccess.Gate.Open) "ورود به درس" else "نیاز به تهیه اشتراک", maxLines = 1)
+                Text(
+                    when {
+                        gate != LessonAccess.Gate.Open -> "نیاز به تهیه اشتراک"
+                        pack.pdfOnly -> "باز کردن"
+                        else -> "ورود به درس"
+                    },
+                    maxLines = 1,
+                )
             }
         }
     }

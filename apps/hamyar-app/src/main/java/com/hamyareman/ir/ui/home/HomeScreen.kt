@@ -283,111 +283,31 @@ private fun WisdomCard(modifier: Modifier = Modifier) {
         delay(WisdomQuotes.remainingMs(ctx))
         line = WisdomQuotes.current(ctx, all)
     }
-    val body = line.oneLine()
+    val body = line.oneLine().replace('\n', ' ').replace("  ", " ").trim()
 
-    // ---- انیمیشن‌های کارتِ «تم فلسفی» ----
-    val anim = rememberInfiniteTransition(label = "wisdom-glow")
-    val spin by anim.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(tween(durationMillis = 9000, easing = LinearEasing)),
-        label = "spin",
-    )
-    val pulse by anim.animateFloat(
-        initialValue = 0.2f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            tween(durationMillis = 2600, easing = FastOutSlowInEasing),
-            RepeatMode.Reverse,
-        ),
-        label = "pulse",
-    )
-    val drift by anim.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(durationMillis = 12000, easing = LinearEasing)),
-        label = "drift",
-    )
-
-    Box(modifier.fillMaxWidth()) {
-        // لایهٔ افکت: ستاره‌های چشمک‌زن + هالهٔ نفس‌کش + قوسِ طلاییِ چرخان
-        Box(
-            Modifier.matchParentSize().drawBehind {
-                drawRoundRect(
-                    color = Color(0xFFFBBF24).copy(alpha = 0.05f + 0.16f * pulse),
-                    topLeft = Offset(-1.dp.toPx(), -1.dp.toPx()),
-                    size = Size(size.width + 2.dp.toPx(), size.height + 2.dp.toPx()),
-                    cornerRadius = CornerRadius(24.dp.toPx()),
-                    style = Stroke(width = 6.dp.toPx()),
-                )
-                // ستاره‌ها: جای ثابت (از روی شمارهٔ ستاره) و چشمکِ آرام
-                for (i in 0 until 30) {
-                    val fx = ((i * 37) % 97) / 97f
-                    val fy = ((i * 61) % 89) / 89f
-                    val tw = 0.45f + 0.55f * kotlin.math.abs(kotlin.math.sin((drift * 6.283f) + i))
-                    drawCircle(
-                        color = Color(0xFFFFF7DB).copy(alpha = 0.06f + 0.16f * tw),
-                        radius = (0.7f + (i % 3) * 0.45f).dp.toPx(),
-                        center = Offset(fx * size.width, fy * size.height),
-                    )
-                }
-                // قوسِ طلاییِ چرخان روی لبه
-                val c = Offset(size.width / 2f, size.height / 2f)
-                val shader = android.graphics.SweepGradient(
-                    c.x,
-                    c.y,
-                    intArrayOf(
-                        Color(0xFFFDE68A).toArgb(),
-                        Color(0xFFF59E0B).toArgb(),
-                        Color(0xFF8B5CF6).toArgb(),
-                        Color(0xFF1E1B4B).toArgb(),
-                        Color(0xFFFDE68A).toArgb(),
-                    ),
-                    null,
-                )
-                shader.setLocalMatrix(android.graphics.Matrix().apply { setRotate(spin, c.x, c.y) })
-                drawRoundRect(
-                    brush = ShaderBrush(shader),
-                    topLeft = Offset(1.dp.toPx(), 1.dp.toPx()),
-                    size = Size(size.width - 2.dp.toPx(), size.height - 2.dp.toPx()),
-                    cornerRadius = CornerRadius(21.dp.toPx()),
-                    style = Stroke(width = 2.dp.toPx()),
-                )
-            },
+    Box(
+        modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color(0xFF111633), Color(0xFF1E1B4B), Color(0xFF3B0764)),
+                ),
+            )
+            .clickable { line = WisdomQuotes.next(ctx, all) }
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+    ) {
+        AutoFitQuote(
+            text = body,
+            fontFamily = WISDOM_FONT,
+            color = Color(0xFFFDE68A),
+            modifier = Modifier.fillMaxWidth().height(36.dp),
         )
-
-        // خودِ کارت: آسمانِ شب با گرادیانِ بنفش/نیلی و متنِ طلایی
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFF111633), Color(0xFF1E1B4B), Color(0xFF3B0764)),
-                    ),
-                )
-                .clickable { line = WisdomQuotes.next(ctx, all) }
-                .padding(horizontal = 10.dp, vertical = 10.dp),
-        ) {
-            // نشانِ نقل‌قولِ تزئینی، پشتِ متن
-            Text(
-                "❝",
-                fontSize = 46.sp,
-                color = Color(0xFFFBBF24).copy(alpha = 0.16f + 0.10f * pulse),
-                modifier = Modifier.align(Alignment.TopStart),
-            )
-            AutoFitQuote(
-                text = body,
-                fontFamily = WISDOM_FONT,
-                color = Color(0xFFFDE68A),
-                modifier = Modifier.fillMaxWidth().height(132.dp),
-            )
-        }
     }
 }
 
 /**
- * جمله با هر طولی کادر ثابت را پر می‌کند: اندازهٔ فونت خودکار کوچک/بزرگ می‌شود.
+ * یک سطر، اندازهٔ فونت خودکار تا کل کادر را پر کند.
  */
 @Composable
 private fun AutoFitQuote(
@@ -399,14 +319,13 @@ private fun AutoFitQuote(
     val measurer = rememberTextMeasurer()
     BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
         val maxW = constraints.maxWidth
-        val maxH = constraints.maxHeight
-        val sizeSp = remember(text, maxW, maxH, fontFamily) {
-            if (maxW <= 0 || maxH <= 0) 16f
+        val sizeSp = remember(text, maxW, fontFamily) {
+            if (maxW <= 0) 14f
             else {
-                var lo = 10f
-                var hi = 34f
+                var lo = 9f
+                var hi = 28f
                 var best = 12f
-                repeat(14) {
+                repeat(12) {
                     val mid = (lo + hi) / 2f
                     val layout = measurer.measure(
                         text = AnnotatedString(text),
@@ -414,11 +333,13 @@ private fun AutoFitQuote(
                             fontSize = mid.sp,
                             fontFamily = fontFamily,
                             textAlign = TextAlign.Center,
-                            lineHeight = (mid * 1.28f).sp,
                         ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Clip,
+                        softWrap = false,
                         constraints = Constraints(maxWidth = maxW),
                     )
-                    val fits = layout.size.height <= maxH && !layout.didOverflowHeight
+                    val fits = !layout.didOverflowWidth && layout.size.width <= maxW
                     if (fits) {
                         best = mid
                         lo = mid
@@ -433,9 +354,10 @@ private fun AutoFitQuote(
             text,
             fontFamily = fontFamily,
             fontSize = sizeSp.sp,
-            lineHeight = (sizeSp * 1.28f).sp,
             color = color,
             textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
             overflow = TextOverflow.Clip,
             modifier = Modifier.fillMaxWidth(),
         )

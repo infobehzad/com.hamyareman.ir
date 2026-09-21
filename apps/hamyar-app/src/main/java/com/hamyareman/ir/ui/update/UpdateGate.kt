@@ -49,8 +49,8 @@ object UpdateUi {
 
 /**
  * کانالِ آپدیت:
- * 1. هر اجرای کامل اپ از سرور می‌پرسد، اعلان می‌فرستد، و صفحهٔ دانلود را باز می‌کند.
- * 2. صفحهٔ دانلود: نوار پیشرفت + حجم + سرعت؛ پس از اتمام یک‌بار مجوز نصب و نصب داخل اپ.
+ * اگر نسخه‌ی تازه‌ای باشد، فقط همان‌وقت اعلام می‌شود — اختیاری با «بعداً»، اجباری بدون آن.
+ * اعلان جدا و overlay همیشگی نیست.
  */
 @Composable
 fun UpdateGateHost() {
@@ -65,7 +65,6 @@ fun UpdateGateHost() {
             else -> return@LaunchedEffect
         }
         UpdateNotes.refresh(ctx)
-        UpdateNotifier.notify(ctx, info)
         if (UpdateUi.session == null) {
             UpdateUi.session = info to (d is UpdateDecision.Forced)
         }

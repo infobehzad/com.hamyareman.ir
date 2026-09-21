@@ -110,6 +110,38 @@ object ExtraLessons {
         return "$unit ${com.hamyareman.ir.platform.core.common.toPersianDigits(fallbackNumber.toString())}"
     }
 
+    /** کارتِ فقط-PDF بدون سربرگ (فهرست کتاب / ستایش / پیوست‌ها). */
+    private fun pdfOnlyPack(module: BookModule, lessonId: String, title: String, pdfFileName: String): StudyPack =
+        StudyPack(
+            packId = "${module.bookCode}_$lessonId",
+            bookCode = module.bookCode,
+            lessonId = lessonId,
+            title = title,
+            bookTitle = module.title,
+            pdfFileName = pdfFileName,
+            sections = emptyList(),
+            flashcards = emptyList(),
+            questions = emptyList(),
+            solutions = emptyList(),
+            pdfOnly = true,
+        )
+
+    /** فهرست + پیوست‌های فارسی — همه مثل «فهرست» ریاضی فقط PDF می‌گیرند. */
+    private fun frontMatter(module: BookModule): List<StudyPack> {
+        val out = mutableListOf<StudyPack>()
+        if (module.bookCode != "C905") {
+            out += pdfOnlyPack(module, "TOC", "فهرست", "${module.bookCode}-fehrest.pdf")
+        }
+        if (module.bookCode == "C903") {
+            out += pdfOnlyPack(module, "SETAYESH", "ستایش", "C903-setayesh.pdf")
+            out += pdfOnlyPack(module, "NIYAYESH", "نیایش", "C903-niyayesh.pdf")
+            out += pdfOnlyPack(module, "VAJEH", "واژه‌نامه", "C903-vajeh.pdf")
+            out += pdfOnlyPack(module, "AALAM", "اعلام", "C903-aalam.pdf")
+            out += pdfOnlyPack(module, "KETABNAMEH", "کتاب‌نامه", "C903-ketabnameh.pdf")
+        }
+        return out
+    }
+
     /** درس‌هایِ هنوز ثبت‌نشده‌ی یک ماژول (PDF واقعی، بدون محتوای تعاملی تا بازسازی). */
     private fun mathSkeletonSections(): List<StudyPack.Section> = listOf(
         StudyPack.Section("teach", "متن تدریس", "concept", "ساختار تدریس این درس آماده است؛ متن کامل به‌زودی اضافه می‌شود."),
@@ -118,7 +150,8 @@ object ExtraLessons {
     )
 
     fun extrasFor(module: BookModule): List<StudyPack> {
-        val ids = lessonIds[module.bookCode] ?: return emptyList()
+        val front = frontMatter(module)
+        val ids = lessonIds[module.bookCode] ?: return front
         val packs = ids.mapIndexed { i, lessonId ->
             val packId = "${module.bookCode}_$lessonId"
             val n = i + if (ids.any { it == "E01-L01" || it == "L01" }) 1 else 2
@@ -142,7 +175,7 @@ object ExtraLessons {
                 exercises = emptyList(),
             )
         }
-        if (module.bookCode != "C905") return packs
+        if (module.bookCode != "C905") return front + packs
         val toc = StudyPack(
             packId = "C905_TOC",
             bookCode = "C905",

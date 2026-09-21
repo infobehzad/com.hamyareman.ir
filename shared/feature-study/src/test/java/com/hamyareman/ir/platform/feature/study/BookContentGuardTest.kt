@@ -33,7 +33,7 @@ class BookContentGuardTest {
         assertTrue("فهرستِ $bookCode در BookToc نیست", toc.isNotEmpty())
         assertEquals("شمارِ فصل‌های $bookCode", chapterCount, toc.count { it.packId == null })
 
-        val lessons = lessonPackIds(toc)
+        val lessons = lessonPackIds(toc).filter { !it.endsWith("_TOC") }
         assertEquals("شمارِ درس‌های $bookCode", lessonCount, lessons.size)
 
         val byPackId = packs.associateBy { it.packId }

@@ -173,6 +173,13 @@ fun LessonTeachScreen(
         NeedSubScreen(onBack = onBack)
         return
     }
+    if (pack.pdfOnly) {
+        Column(Modifier.fillMaxSize()) {
+            AppTopBar(title = pack.title, onBack = onBack)
+            TeachPdfPages(modifier = Modifier.weight(1f), fileId = pack.pdfFileName, pack = pack)
+        }
+        return
+    }
     if (pack.bookCode == "C905") {
         MathLessonScreen(packId = packId, initialTab = 0, onBack = onBack)
         return
@@ -944,23 +951,10 @@ internal fun TeachPdfPages(
                         CircularProgressIndicator()
                     }
                 } else {
-                    val pageBmp = bmp
-                    AndroidView(
-                        factory = { c ->
-                            PdfPageZoomView(c).apply {
-                                onZoomed = { z -> zoomed = z }
-                                bind(pageBmp)
-                                tag = pageBmp
-                            }
-                        },
-                        update = { v ->
-                            v.onZoomed = { z -> zoomed = z }
-                            if (v.tag !== pageBmp) {
-                                v.tag = pageBmp
-                                v.bind(pageBmp)
-                            }
-                        },
+                    ZoomableBitmap(
+                        bitmap = bmp!!,
                         modifier = Modifier.fillMaxSize(),
+                        onZoomed = { z -> zoomed = z },
                     )
                 }
             }

@@ -12,8 +12,8 @@ import android.content.Context
  */
 internal object PdfSafe {
 
-    const val MAX_W = 1080
-    const val MAX_H = 1920
+    const val MAX_W = 900
+    const val MAX_H = 1400
 
     fun renderPage(page: PdfRenderer.Page, maxW: Int = MAX_W, maxH: Int = MAX_H): Bitmap? {
         return try {

@@ -148,7 +148,7 @@ fun MathLessonScreen(
 
     // فقط «فهرست» کتاب، صفحه‌ی ساده‌ی PDF می‌ماند؛ همه‌ی درس‌ها و جمع‌بندیِ فصل‌ها
     // پلیرِ صوت + سربرگ‌ها را دارند (حتی اگر صوتشان هنوز روی سرور نباشد).
-    if (pack.lessonId == "TOC" || pack.packId == "C905_TOC") {
+    if (pack.pdfOnly || pack.lessonId == "TOC" || pack.packId == "C905_TOC") {
         Column(Modifier.fillMaxSize()) {
             AppTopBar(title = pack.title, onBack = onBack)
             TeachPdfPages(modifier = Modifier.weight(1f), fileId = pack.pdfFileName, pack = pack)
@@ -539,7 +539,7 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
                             settings.domStorageEnabled = true
                             settings.loadWithOverviewMode = true
                             settings.useWideViewPort = true
-                            settings.builtInZoomControls = true
+                            settings.builtInZoomControls = false
                             settings.displayZoomControls = false
                             addJavascriptInterface(TeachHtmlBridge(), "HamyarPlayer")
                             setBackgroundColor(android.graphics.Color.WHITE)
@@ -775,7 +775,7 @@ private fun MathSummaryTab(pack: StudyPack, isSum: Boolean, chapter: Int, onZoom
                     settings.javaScriptEnabled = false
                     settings.loadWithOverviewMode = true
                     settings.useWideViewPort = true
-                    settings.builtInZoomControls = true
+                    settings.builtInZoomControls = false
                     settings.displayZoomControls = false
                     settings.defaultTextEncodingName = "utf-8"
                     setBackgroundColor(android.graphics.Color.WHITE)

@@ -1354,11 +1354,9 @@ private fun InternalPdfViewer(file: File, modifier: Modifier = Modifier) {
                 val pager = rememberPagerState(pageCount = { pages.size })
                 VerticalPager(state = pager, modifier = Modifier.fillMaxSize()) { idx ->
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Image(
-                            bitmap = pages[idx].asImageBitmap(),
-                            contentDescription = "صفحه ${toPersianDigits((idx + 1).toString())}",
-                            modifier = Modifier.fillMaxWidth().padding(4.dp),
-                            contentScale = ContentScale.Fit,
+                        ZoomableBitmap(
+                            bitmap = pages[idx],
+                            modifier = Modifier.fillMaxSize().padding(4.dp),
                         )
                     }
                 }

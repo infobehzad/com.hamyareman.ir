@@ -39,7 +39,7 @@ object BookToc {
         TocNode("C902_013", "فصل پنجم: جامعه اسلامی", children = listOf(TocNode("C902_014", "درس ۹ - انقلاب اسلامی ایران", packId = "C902_E05-L01"), TocNode("C902_015", "درس ۱۰ - مسئولیت همگانی", packId = "C902_E05-L02"), TocNode("C902_016", "درس ۱۱ - انفاق", packId = "C902_E05-L03"), TocNode("C902_017", "درس ۱۲ - جهاد", packId = "C902_E05-L04"))),
         ),
         "C903" to listOf(
-        TocNode("C903_001", "ستایش: به نام خداوند جان و خرد (۹)"),
+        TocNode("C903_001", "ستایش: به نام خداوند جان و خرد (۹)", packId = "C903_SETAYESH"),
         TocNode("C903_002", "فصل اول: زیبایی آفرینش (۱۱)", children = listOf(TocNode("C903_003", "درس ۱ - آفرینش همه تنبیه خداوند دل است (۱۲)", packId = "C903_E01-L01"), TocNode("C903_004", "حکایت: سفر (۱۶)", packId = "C903_E01-L02"), TocNode("C903_005", "درس ۲ - عجایب صنعِ حق تعالی (۱۷)", packId = "C903_E01-L03"), TocNode("C903_006", "شعرخوانی: پرواز (۲۲)", packId = "C903_E01-L04"))),
         TocNode("C903_007", "فصل دوم: شکفتن (۲۳)", children = listOf(TocNode("C903_008", "درس ۳ - مثل آیینه، کار و شایستگی (۲۴)", packId = "C903_E02-L01"), TocNode("C903_009", "حکایت: باغبان نیک‌اندیش (۲۹)", packId = "C903_E02-L02"), TocNode("C903_010", "درس ۴ - هم‌نشین (۳۰)", packId = "C903_E02-L03"), TocNode("C903_011", "روان‌خوانی: دریچه‌های شکوفایی (۳۶)", packId = "C903_E02-L04"))),
         TocNode("C903_012", "فصل آزاد ۱: ادبیات بومی (۴۱)", children = listOf(TocNode("C903_013", "درس ۵ - درس آزاد (۴۲)", packId = "C903_E03-L01"), TocNode("C903_014", "حکایت (۴۵)", packId = "C903_E03-L02"), TocNode("C903_015", "شعرخوانی (۴۶)", packId = "C903_E03-L03"))),
@@ -48,10 +48,10 @@ object BookToc {
         TocNode("C903_028", "فصل پنجم: اسلام و انقلاب اسلامی", children = listOf(TocNode("C903_029", "درس ۱۲ - پیام‌آور رحمت", packId = "C903_E06-L01"), TocNode("C903_030", "حکایت: سیرت سلمان", packId = "C903_E06-L02"), TocNode("C903_031", "درس ۱۳ - آشنای غریبان", packId = "C903_E06-L03"), TocNode("C903_032", "درس ۱۴ - پیدای پنهان", packId = "C903_E06-L04"), TocNode("C903_033", "شعرخوانی: بُوَد قدر تو افزون از مالیک", packId = "C903_E06-L05"))),
         TocNode("C903_034", "فصل آزاد ۲: ادبیات بومی", children = listOf(TocNode("C903_035", "درس ۱۵ - درس آزاد", packId = "C903_E07-L01"), TocNode("C903_036", "روان‌خوانی", packId = "C903_E07-L02"))),
         TocNode("C903_037", "فصل ششم: ادبیات جهان", children = listOf(TocNode("C903_038", "درس ۱۶ - آرزو", packId = "C903_E08-L01"), TocNode("C903_039", "درس ۱۷ - شازده کوچولو", packId = "C903_E08-L02"), TocNode("C903_040", "روان‌خوانی: دو نقاش", packId = "C903_E08-L03"))),
-        TocNode("C903_041", "نیایش: بیا تا برآریم دستی ز دل"),
-        TocNode("C903_042", "واژه‌نامه"),
-        TocNode("C903_043", "اعلام؛ اشخاص و آثار"),
-        TocNode("C903_044", "کتاب‌نامه"),
+        TocNode("C903_041", "نیایش: بیا تا برآریم دستی ز دل", packId = "C903_NIYAYESH"),
+        TocNode("C903_042", "واژه‌نامه", packId = "C903_VAJEH"),
+        TocNode("C903_043", "اعلام؛ اشخاص و آثار", packId = "C903_AALAM"),
+        TocNode("C903_044", "کتاب‌نامه", packId = "C903_KETABNAMEH"),
         ),
         "C904" to listOf(
         TocNode("C904_001", "درس اول - نظام ذهنی «پرورده» و «بند» بنویسیم", packId = "C904_L01"),
@@ -193,20 +193,23 @@ object BookToc {
         TocNode("C917_007", "بخش دوم: پودمان‌های نیمه‌تجویزی (انتخاب ۲ پودمان از ۶ پودمان این بخش)", children = listOf(TocNode("C917_008", "پودمان ۶: برق (۷۳)", packId = "C917_E02-L01"), TocNode("C917_009", "پودمان ۷: تأسیسات مکانیکی (۸۷)", packId = "C917_E02-L02"), TocNode("C917_010", "پودمان ۸: عمران (۱۰۱)", packId = "C917_E02-L03"), TocNode("C917_011", "پودمان ۹: خودرو (۱۱۵)", packId = "C917_E02-L04"), TocNode("C917_012", "پودمان ۱۰: پایش رشد و تکامل کودک (۱۲۹)", packId = "C917_E02-L05"), TocNode("C917_013", "پودمان ۱۱: صنایع دستی (برجسته‌کاری روی فلز مس) (۱۴۱)", packId = "C917_E02-L06"))),
         ),
         "C915" to listOf(
-        TocNode("C915_000", "فصل ۱ — مفاهیم و ضرورت آمادهگی دفاعی"),
-        TocNode("C915_001", "درس ۱ — امنیت", packId = "C915_E01-L01"),
-        TocNode("C915_002", "درس ۲ — دفاع و تهاجم", packId = "C915_E01-L02"),
-        TocNode("C915_003", "فصل ۲ — فرهنگ دفاع"),
-        TocNode("C915_004", "درس ۳ — انقلاب اسلامی", packId = "C915_E02-L01"),
-        TocNode("C915_005", "درس ۴ — بسیج، مدرسه‌ی عشق", packId = "C915_E02-L02"),
-        TocNode("C915_006", "درس ۵ — آشنایی با حماسه‌ی دفاع مقدس", packId = "C915_E02-L03"),
-        TocNode("C915_007", "درس ۶ — مردان مبارز و زنان قهرمان", packId = "C915_E02-L04"),
-        TocNode("C915_008", "درس ۷ — سرباز اسلام، سردار دل‌ها", packId = "C915_E02-L05"),
-        TocNode("C915_009", "فصل ۳ — دفاع نظامی و غیرنظامی"),
-        TocNode("C915_010", "درس ۸ — نظام جمع و شیوه‌های رزم انفرادی", packId = "C915_E03-L01"),
-        TocNode("C915_011", "درس ۹ — شناخت و مقابله با جنگ نرم", packId = "C915_E03-L02"),
-        TocNode("C915_012", "درس ۱۰ — پدافند غیرعامل", packId = "C915_E03-L03"),
-        TocNode("C915_013", "درس ۱۱ — آمادگی و ایمنی در برابر زمین‌لرزه", packId = "C915_E03-L04"),
+        TocNode("C915_000", "فصل ۱ — مفاهیم و ضرورت آمادهگی دفاعی", children = listOf(
+            TocNode("C915_001", "درس ۱ — امنیت", packId = "C915_E01-L01"),
+            TocNode("C915_002", "درس ۲ — دفاع و تهاجم", packId = "C915_E01-L02"),
+        )),
+        TocNode("C915_003", "فصل ۲ — فرهنگ دفاع", children = listOf(
+            TocNode("C915_004", "درس ۳ — انقلاب اسلامی", packId = "C915_E02-L01"),
+            TocNode("C915_005", "درس ۴ — بسیج، مدرسه‌ی عشق", packId = "C915_E02-L02"),
+            TocNode("C915_006", "درس ۵ — آشنایی با حماسه‌ی دفاع مقدس", packId = "C915_E02-L03"),
+            TocNode("C915_007", "درس ۶ — مردان مبارز و زنان قهرمان", packId = "C915_E02-L04"),
+            TocNode("C915_008", "درس ۷ — سرباز اسلام، سردار دل‌ها", packId = "C915_E02-L05"),
+        )),
+        TocNode("C915_009", "فصل ۳ — دفاع نظامی و غیرنظامی", children = listOf(
+            TocNode("C915_010", "درس ۸ — نظام جمع و شیوه‌های رزم انفرادی", packId = "C915_E03-L01"),
+            TocNode("C915_011", "درس ۹ — شناخت و مقابله با جنگ نرم", packId = "C915_E03-L02"),
+            TocNode("C915_012", "درس ۱۰ — پدافند غیرعامل", packId = "C915_E03-L03"),
+            TocNode("C915_013", "درس ۱۱ — آمادگی و ایمنی در برابر زمین‌لرزه", packId = "C915_E03-L04"),
+        )),
         ),
         "C941" to listOf(
         TocNode("C941_001", "درس ۱ - شروع یک ماجرا (۱۵)", packId = "C941_L01"),
@@ -224,7 +227,14 @@ object BookToc {
         ),
     )
 
-    fun forBook(bookCode: String): List<TocNode> = trees[bookCode] ?: emptyList()
+    fun forBook(bookCode: String): List<TocNode> {
+        val raw = trees[bookCode] ?: return emptyList()
+        if (raw.any { it.packId != null && (it.packId.endsWith("_TOC") || it.packId.substringAfter('_', "") == "TOC") }) {
+            return raw
+        }
+        val toc = TocNode("${bookCode}_TOC_ROW", "فهرست", packId = "${bookCode}_TOC")
+        return listOf(toc) + raw
+    }
 
     /** عنوان هر packId از فهرست — بدون شماره‌ی صفحه؛ حکایت/شعرخوانی/روان‌خوانی با «-». */
     private val titlesByPack: Map<String, String> by lazy {
