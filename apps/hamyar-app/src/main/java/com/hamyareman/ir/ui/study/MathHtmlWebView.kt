@@ -39,7 +39,8 @@ internal fun MathInteractiveHtml(
 
                     /** زومِ کاربر (دو انگشتی) گزارش می‌شود تا سوایپِ سربرگ‌ها قفل شود. */
                     override fun onScaleChanged(view: WebView, oldScale: Float, newScale: Float) {
-                        onZoomChanged(newScale > 1.02f)
+                        val zoomed = newScale.isFinite() && newScale > 1.02f
+                        view.post { runCatching { onZoomChanged(zoomed) } }
                     }
 
                     override fun onPageFinished(view: WebView, url: String) {

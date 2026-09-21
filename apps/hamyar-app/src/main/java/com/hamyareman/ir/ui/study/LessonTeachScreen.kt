@@ -822,6 +822,15 @@ internal fun TeachPdfPages(
     var renderer by remember(fileId) { mutableStateOf<PdfRenderer?>(null) }
     val renderLock = remember(fileId) { Any() }
 
+    DisposableEffect(fileId) {
+        onDispose {
+            synchronized(renderLock) {
+                runCatching { renderer?.close() }
+                renderer = null
+            }
+        }
+    }
+
     LaunchedEffect(fileId) {
         if (fileId.isBlank()) {
             state = TeachPdfState.Error("برای این بخش، کتابِ PDF جداگانه‌ای نیست.")
@@ -839,6 +848,8 @@ internal fun TeachPdfPages(
             state = TeachPdfState.Ready(r.pageCount)
         } catch (e: PdfUnavailable) {
             state = TeachPdfState.Error(e.message ?: "PDF در دسترس نیست.")
+        } catch (oom: OutOfMemoryError) {
+            state = TeachPdfState.Error("حافظه برای بازکردن کتاب کافی نبود؛ یک‌بار دیگر تلاش کن.")
         } catch (e: Exception) {
             // کش دانلودشده را پاک نکن — شاید رندر مشکل داشت نه فایل.
             state = TeachPdfState.Error("بازکردن PDF ناموفق بود؛ دوباره تلاش کن.")
@@ -909,20 +920,14 @@ internal fun TeachPdfPages(
                                 synchronized(renderLock) {
                                     val r = renderer ?: return@synchronized null
                                     r.openPage(index).use { page ->
-                                        val targetW = screenW
-                                        val scale = targetW.toFloat() / page.width.toFloat()
-                                        val w = targetW
-                                        val h = (page.height * scale).toInt().coerceAtLeast(1)
-                                        val b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-                                        b.eraseColor(Color.WHITE)
-                                        page.render(b, null, android.graphics.Matrix().apply { setScale(scale, scale) }, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                                        val b = PdfSafe.renderPage(page, maxW = screenW) ?: return@use null
                                         val deg = com.hamyareman.ir.platform.feature.study.PdfRotations.degrees[fileId] ?: 0
-                                        if (deg % 360 != 0) {
-                                            val m = android.graphics.Matrix().apply { postRotate(deg.toFloat()) }
-                                            Bitmap.createBitmap(b, 0, 0, b.width, b.height, m, true)
-                                        } else b
+                                        PdfSafe.rotate(b, deg)
                                     }
                                 }
+                            } catch (oom: OutOfMemoryError) {
+                                runCatching { System.gc() }
+                                null
                             } catch (e: Exception) { null }
                         }
                         if (rendered != null) {

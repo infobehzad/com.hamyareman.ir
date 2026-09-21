@@ -53,8 +53,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -266,13 +271,19 @@ private fun GreetingBanner(title: String, subtitle: String, modifier: Modifier =
 @Composable
 private fun WisdomCard(modifier: Modifier = Modifier) {
     val ctx = LocalContext.current
-    val all = remember { WisdomQuotes.load(ctx) }
+    var all by remember { mutableStateOf(WisdomQuotes.load(ctx)) }
     var line by remember { mutableStateOf(WisdomQuotes.current(ctx, all)) }
-    LaunchedEffect(line) {
+    LaunchedEffect(Unit) {
+        if (WisdomQuotes.refresh(ctx)) {
+            all = WisdomQuotes.load(ctx)
+            line = WisdomQuotes.current(ctx, all)
+        }
+    }
+    LaunchedEffect(line, all) {
         delay(WisdomQuotes.remainingMs(ctx))
         line = WisdomQuotes.current(ctx, all)
     }
-    val body = if (line.author.isBlank()) line.text else line.oneLine()
+    val body = line.oneLine()
 
     // ---- انیمیشن‌های کارتِ «تم فلسفی» ----
     val anim = rememberInfiniteTransition(label = "wisdom-glow")
@@ -365,33 +376,69 @@ private fun WisdomCard(modifier: Modifier = Modifier) {
                 color = Color(0xFFFBBF24).copy(alpha = 0.16f + 0.10f * pulse),
                 modifier = Modifier.align(Alignment.TopStart),
             )
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                BoxWithConstraints(Modifier.fillMaxWidth()) {
-                    val n = body.length.coerceAtLeast(1)
-                    val sp = (maxWidth.value / (n * 0.56f)).coerceIn(12f, 22f)
-                    Text(
-                        body,
-                        fontFamily = WISDOM_FONT,
-                        fontSize = sp.sp,
-                        color = Color(0xFFFDE68A),
-                        textAlign = TextAlign.Center,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.fillMaxWidth(),
+            AutoFitQuote(
+                text = body,
+                fontFamily = WISDOM_FONT,
+                color = Color(0xFFFDE68A),
+                modifier = Modifier.fillMaxWidth().height(132.dp),
+            )
+        }
+    }
+}
+
+/**
+ * جمله با هر طولی کادر ثابت را پر می‌کند: اندازهٔ فونت خودکار کوچک/بزرگ می‌شود.
+ */
+@Composable
+private fun AutoFitQuote(
+    text: String,
+    fontFamily: FontFamily,
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
+    val measurer = rememberTextMeasurer()
+    BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
+        val maxW = constraints.maxWidth
+        val maxH = constraints.maxHeight
+        val sizeSp = remember(text, maxW, maxH, fontFamily) {
+            if (maxW <= 0 || maxH <= 0) 16f
+            else {
+                var lo = 10f
+                var hi = 34f
+                var best = 12f
+                repeat(14) {
+                    val mid = (lo + hi) / 2f
+                    val layout = measurer.measure(
+                        text = AnnotatedString(text),
+                        style = TextStyle(
+                            fontSize = mid.sp,
+                            fontFamily = fontFamily,
+                            textAlign = TextAlign.Center,
+                            lineHeight = (mid * 1.28f).sp,
+                        ),
+                        constraints = Constraints(maxWidth = maxW),
                     )
+                    val fits = layout.size.height <= maxH && !layout.didOverflowHeight
+                    if (fits) {
+                        best = mid
+                        lo = mid
+                    } else {
+                        hi = mid
+                    }
                 }
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    if (line.author.isBlank()) "برای جملهٔ بعدی بزن" else "— ${line.author} · برای جملهٔ بعدی بزن",
-                    fontSize = 10.sp,
-                    color = Color(0xFFE9D5FF).copy(alpha = 0.75f),
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                best
             }
         }
+        Text(
+            text,
+            fontFamily = fontFamily,
+            fontSize = sizeSp.sp,
+            lineHeight = (sizeSp * 1.28f).sp,
+            color = color,
+            textAlign = TextAlign.Center,
+            overflow = TextOverflow.Clip,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 

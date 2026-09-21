@@ -9,52 +9,80 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 /**
- * «متنِ تغییراتِ نسخه» از یک فایلِ متنیِ ریپوی انتشار خوانده می‌شود، نه از کدِ اپ.
+ * متنِ تغییراتِ نسخه از فایلِ متنیِ ریپو خوانده می‌شود تا بدون ساختن APK تازه
+ * قابل ویرایش باشد.
  *
- * فایل: `update-notes.json` در مخزنِ عمومیِ انتشار
- * (`Aydinnza/hamyar-releases`). شکلش یک آبجکتِ ساده است: کلید = شمارهٔ نسخه،
- * مقدار = لیستِ خطوطِ تغییرات:
+ * فایل: `content/update-notes.txt` در `Aydinnza/com.hamyareman.ir`
+ * (آینهٔ عمومی در `Aydinnza/hamyar-releases`). شکل:
  *
- * ```json
- * { "1.74": ["دانلودِ درون‌برنامه‌ای با نوار پیشرفت", "…"] }
+ * ```
+ * # 1.75
+ * خط اول
+ * خط دوم
  * ```
  *
- * پس بدونِ ساختنِ نسخهٔ تازه می‌شود متنِ صفحهٔ آپدیت را ویرایش کرد؛ اپ هر بار
- * نسخهٔ تازه را می‌بیند، همین فایل را می‌خواند (و آخرین نسخهٔ خوانده‌شده را برای
- * حالتِ آفلاین کش می‌کند تا اگر اینترنت نبود، متنِ قبلی نمایش داده شود).
+ * اگر txt در دسترس نبود، `update-notes.json` قدیمی به‌عنوان پشتیبان خوانده می‌شود.
  */
 object UpdateNotes {
 
-    /** نشانیِ خامِ فایلِ متنِ تغییرات در مخزنِ عمومیِ انتشار. */
-    const val RAW_URL =
+    val TXT_URLS = listOf(
+        "https://raw.githubusercontent.com/Aydinnza/com.hamyareman.ir/main/content/update-notes.txt",
+        "https://raw.githubusercontent.com/Aydinnza/hamyar-releases/main/content/update-notes.txt",
+        "https://raw.githubusercontent.com/Aydinnza/hamyar-releases/main/update-notes.txt",
+    )
+
+    const val JSON_URL =
         "https://raw.githubusercontent.com/Aydinnza/hamyar-releases/main/update-notes.json"
 
     private const val PREF = "hamyar_update_notes"
+    private const val KEY_TXT = "txt"
     private const val KEY_JSON = "json"
     private const val KEY_AT = "fetched_at"
 
     private fun store(ctx: Context) = LocalStore(ctx, PREF)
 
-    /** کلِ جدولِ تغییراتِ کش‌شده (نسخه → خطوط). */
-    fun table(ctx: Context): Map<String, List<String>> = runCatching {
-        val root = JSONObject(store(ctx).getString(KEY_JSON, "{}"))
-        buildMap {
-            root.keys().forEach { version ->
-                val arr = root.optJSONArray(version) ?: return@forEach
-                put(version, buildList {
-                    for (i in 0 until arr.length()) {
-                        val line = arr.optString(i).trim()
-                        if (line.isNotEmpty()) add(line)
-                    }
-                })
+    fun parseTxt(body: String): Map<String, List<String>> {
+        val map = linkedMapOf<String, MutableList<String>>()
+        var cur = "latest"
+        body.lineSequence().forEach { raw ->
+            val line = raw.trim()
+            if (line.isEmpty()) return@forEach
+            if (line.startsWith("#")) {
+                cur = line.trimStart('#').trim().removePrefix("v")
+                map.getOrPut(cur) { mutableListOf() }
+            } else {
+                val clean = line.removePrefix("- ").removePrefix("• ").trim()
+                if (clean.isNotEmpty()) map.getOrPut(cur) { mutableListOf() }.add(clean)
             }
         }
-    }.getOrDefault(emptyMap())
+        return map
+    }
 
-    /**
-     * خطوطِ تغییراتِ یک نسخه. اول با برچسبِ همان نسخه، بعد با کلیدهای عمومی
-     * (`"all"` برای همه و `"latest"` برای آخرین نسخه) جایگزین می‌شود.
-     */
+    fun table(ctx: Context): Map<String, List<String>> {
+        val txt = store(ctx).getString(KEY_TXT, "")
+        if (txt.length > 8) {
+            val parsed = runCatching { parseTxt(txt) }.getOrDefault(emptyMap())
+            if (parsed.isNotEmpty()) return parsed
+        }
+        return runCatching {
+            val root = JSONObject(store(ctx).getString(KEY_JSON, "{}"))
+            buildMap {
+                root.keys().forEach { version ->
+                    val arr = root.optJSONArray(version) ?: return@forEach
+                    put(
+                        version,
+                        buildList {
+                            for (i in 0 until arr.length()) {
+                                val line = arr.optString(i).trim()
+                                if (line.isNotEmpty()) add(line)
+                            }
+                        },
+                    )
+                }
+            }
+        }.getOrDefault(emptyMap())
+    }
+
     fun notes(ctx: Context, version: String): List<String> {
         val table = table(ctx)
         val keys = listOf(version.trim(), version.trim().removePrefix("v"), "latest", "all")
@@ -64,14 +92,24 @@ object UpdateNotes {
 
     fun fetchedAt(ctx: Context): Long = store(ctx).getLong(KEY_AT, 0L)
 
-    /** خواندنِ تازه از مخزن؛ خطای شبکه بی‌صدا نادیده گرفته می‌شود (کش می‌ماند). */
     suspend fun refresh(ctx: Context): Boolean = withContext(Dispatchers.IO) {
         if (!NetState.isOnline(ctx)) return@withContext false
+        for (url in TXT_URLS) {
+            val ok = runCatching {
+                val conn = ResilientHttp.open(url, attempts = 2)
+                val body = conn.inputStream.bufferedReader().use { it.readText() }
+                runCatching { conn.disconnect() }
+                if (body.startsWith("<") || parseTxt(body).isEmpty()) return@runCatching false
+                store(ctx).putString(KEY_TXT, body)
+                store(ctx).putLong(KEY_AT, System.currentTimeMillis())
+                true
+            }.getOrDefault(false)
+            if (ok) return@withContext true
+        }
         runCatching {
-            val conn = ResilientHttp.open(RAW_URL, attempts = 3)
+            val conn = ResilientHttp.open(JSON_URL, attempts = 2)
             val body = conn.inputStream.bufferedReader().use { it.readText() }
             conn.disconnect()
-            // فقط اگر JSONِ معتبر بود کش می‌شود (فایلِ نیمه‌کاره جای متنِ درست را نگیرد).
             JSONObject(body)
             store(ctx).putString(KEY_JSON, body)
             store(ctx).putLong(KEY_AT, System.currentTimeMillis())

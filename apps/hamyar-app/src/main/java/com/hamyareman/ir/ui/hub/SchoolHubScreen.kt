@@ -1,6 +1,5 @@
 package com.hamyareman.ir.ui.hub
 
-import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -52,7 +51,11 @@ fun SchoolHubScreen(nav: NavController) {
     HubBody {
         HubHeader("مدرسه 🎒", "کلاسِ درس همیشه باز است — هر روز یک قدم با برنامه و درس‌هایت جلو برو")
 
-        val books = remember { com.hamyareman.ir.ui.profile.GradeGate.filter(BookModuleRegistry.modules) { it.bookCode } }
+        val books = remember {
+            runCatching {
+                com.hamyareman.ir.ui.profile.GradeGate.filter(BookModuleRegistry.modules) { it.bookCode }
+            }.getOrDefault(emptyList())
+        }
         HubMenuGroup(
             "📚 کتاب‌ها",
             "${books.size} کتاب درسی — هر کتاب با درس‌ها، صوت، ویدیو و آزمونش",
@@ -64,7 +67,7 @@ fun SchoolHubScreen(nav: NavController) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                     pair.forEach { book ->
                         val cover = remember(book.bookCode) {
-                            runCatching { BitmapFactory.decodeStream(ctx.assets.open("book-covers/${book.bookCode}.jpg")) }.getOrNull()
+                            com.hamyareman.ir.ui.study.PdfSafe.decodeCover(ctx, book.bookCode)
                         }
                         Card(
                             Modifier.weight(1f).clickable { nav.hubTo(Screen.Book.of(book.bookCode)) },

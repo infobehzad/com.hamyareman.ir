@@ -78,9 +78,21 @@ object UpdateChecker {
         }
     }
 
-    /** تصمیمِ نهایی برای این نصب (با رعایتِ «بعداً» و رول‌آوت). */
-    suspend fun decide(ctx: Context, tables: TablesDbService, current: Int): UpdateDecision {
-        val info = if (isFresh(ctx)) cached(ctx) ?: refresh(ctx, tables) else refresh(ctx, tables)
+    /**
+     * تصمیمِ نهایی برای این نصب (با رعایتِ «بعداً» و رول‌آوت).
+     * [forceNetwork] = هر اجرای کامل اپ باید از سرور بپرسد (نه از کشِ ۶ساعته).
+     */
+    suspend fun decide(
+        ctx: Context,
+        tables: TablesDbService,
+        current: Int,
+        forceNetwork: Boolean = false,
+    ): UpdateDecision {
+        val info = if (!forceNetwork && isFresh(ctx)) {
+            cached(ctx) ?: refresh(ctx, tables)
+        } else {
+            refresh(ctx, tables) ?: cached(ctx)
+        }
         val ready = info ?: return UpdateDecision.None
         val bucket = UpdatePlan.rolloutBucket(installId(ctx))
         return when (val d = UpdatePlan.decisionFor(current, ready, bucket)) {

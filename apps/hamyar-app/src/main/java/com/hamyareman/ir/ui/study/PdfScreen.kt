@@ -1183,7 +1183,7 @@ private fun ImageGalleryPager(
             ) { page ->
                 val item = album.getOrNull(page)
                 val bmp = remember(item?.localPath) {
-                    item?.localPath?.let { runCatching { BitmapFactory.decodeFile(it) }.getOrNull() }
+                    item?.localPath?.let { PdfSafe.decodeFileCapped(it, maxSide = 1600) }
                 }
                 var scale by remember(page) { mutableFloatStateOf(1f) }
                 var ox by remember(page) { mutableFloatStateOf(0f) }
@@ -1193,7 +1193,8 @@ private fun ImageGalleryPager(
                         .fillMaxSize()
                         .pointerInput(page) {
                             detectTransformGestures { _, pan, zoom, _ ->
-                                scale = (scale * zoom).coerceIn(1f, 6f)
+                                val z = if (zoom.isFinite() && zoom > 0f) zoom else 1f
+                                scale = (scale * z).coerceIn(1f, 4f)
                                 ox += pan.x
                                 oy += pan.y
                                 zoomedPage = if (scale > 1.01f) page else -1

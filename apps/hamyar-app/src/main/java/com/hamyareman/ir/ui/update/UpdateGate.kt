@@ -6,16 +6,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,63 +30,69 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.hamyareman.ir.BuildConfig
 import com.hamyareman.ir.LocalAppContainer
 import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.PrimaryButton
 import kotlinx.coroutines.launch
 
+/** درخواست دستی از کارت «آپدیت برنامه» — همان صفحهٔ دانلود را باز می‌کند. */
+object UpdateUi {
+    var session by mutableStateOf<Pair<UpdateInfo, Boolean>?>(null)
+}
+
 /**
- * کانالِ آپدیت — سه تکه:
- *
- * 1. [UpdateGateHost] — خودکار، یک بار پس از ورود و بازشدنِ قفل.
- * 2. [UpdateDialog] — دیالوگِ مشترک (توصیه‌ای/اجباری) با دانلودِ **درون‌برنامه‌ای**
- *    (نوار پیشرفت + درصد + سرعت + «x از y مگابایت») و نصبِ داخلِ اپ.
- * 3. [UpdateCheckCard] — بررسیِ **دستی** در صفحهٔ «بیشتر».
- *
- * متنِ «تغییراتِ نسخه» از فایلِ `update-notes.json` در مخزنِ عمومیِ انتشار خوانده
- * می‌شود (نه از کد) تا هر وقت خواستی همان‌جا ویرایشش کنی.
+ * کانالِ آپدیت:
+ * 1. هر اجرای کامل اپ از سرور می‌پرسد، اعلان می‌فرستد، و صفحهٔ دانلود را باز می‌کند.
+ * 2. صفحهٔ دانلود: نوار پیشرفت + حجم + سرعت؛ پس از اتمام یک‌بار مجوز نصب و نصب داخل اپ.
  */
 @Composable
 fun UpdateGateHost() {
     val ctx = LocalContext.current
     val container = LocalAppContainer.current
 
-    var decision by remember { mutableStateOf<UpdateDecision?>(null) }
-
     LaunchedEffect(Unit) {
-        decision = UpdateChecker.decide(ctx, container.tables, BuildConfig.VERSION_CODE)
+        val d = UpdateChecker.decide(ctx, container.tables, BuildConfig.VERSION_CODE, forceNetwork = true)
+        val info: UpdateInfo = when (d) {
+            is UpdateDecision.Forced -> d.info
+            is UpdateDecision.Optional -> d.info
+            else -> return@LaunchedEffect
+        }
+        UpdateNotes.refresh(ctx)
+        UpdateNotifier.notify(ctx, info)
+        if (UpdateUi.session == null) {
+            UpdateUi.session = info to (d is UpdateDecision.Forced)
+        }
     }
 
-    val d = decision
-    val info: UpdateInfo = when (d) {
-        is UpdateDecision.Forced -> d.info
-        is UpdateDecision.Optional -> d.info
-        else -> return
+    UpdateUi.session?.let { (info, forced) ->
+        UpdateDownloadScreen(
+            info = info,
+            forced = forced,
+            onClose = { UpdateUi.session = null },
+        )
     }
-    UpdateDialog(
-        info = info,
-        forced = d is UpdateDecision.Forced,
-        onClose = { decision = UpdateDecision.None },
-    )
 }
 
-/** نوارِ پیشرفتِ ساده (بدونِ وابستگی به نسخهٔ کتابخانه) — درصد را هم می‌گیرد. */
 @Composable
 private fun DownloadBar(fraction: Float) {
     Box(
         Modifier
             .fillMaxWidth()
-            .height(8.dp)
+            .height(10.dp)
             .clip(RoundedCornerShape(50))
             .background(MaterialTheme.colorScheme.surfaceVariant),
     ) {
         Box(
             Modifier
                 .fillMaxWidth(fraction.coerceIn(0f, 1f))
-                .height(8.dp)
+                .height(10.dp)
                 .clip(RoundedCornerShape(50))
                 .background(MaterialTheme.colorScheme.primary),
         )
@@ -90,24 +100,24 @@ private fun DownloadBar(fraction: Float) {
 }
 
 /**
- * دیالوگِ آپدیت — تنها جایی که «دانلود و نصب» واقعاً اجرا می‌شود:
- * دانلودِ درون‌برنامه‌ای با پیشرفتِ زنده → بررسیِ `sha256` → نصب‌کنندهٔ سیستم.
- * اگر مجوزِ نصب داده نشده باشد، صفحهٔ تنظیماتِ همان مجوز باز می‌شود.
+ * صفحهٔ تمام‌صفحه‌ی دانلود و نصب آپدیت.
+ * در حالت اجباری دکمهٔ بازگشت و بستن کار نمی‌کند.
  */
 @Composable
-fun UpdateDialog(info: UpdateInfo, forced: Boolean, onClose: () -> Unit) {
+fun UpdateDownloadScreen(info: UpdateInfo, forced: Boolean, onClose: () -> Unit) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     var downloading by remember { mutableStateOf(false) }
     var progress by remember { mutableStateOf<ApkProgress?>(null) }
     var note by remember { mutableStateOf<String?>(null) }
     var ready by remember { mutableStateOf(ApkUpdate.isReady(ctx)) }
+    var askedPermission by remember { mutableStateOf(false) }
     var repoNotes by remember {
         mutableStateOf(UpdateNotes.notes(ctx, UpdatePlan.versionLabel(info)))
     }
 
-    // متنِ تغییرات از ریپو (اگر اینترنت نبود، همان کشِ قبلی می‌ماند).
     LaunchedEffect(info.latest) {
         if (UpdateNotes.refresh(ctx)) {
             repoNotes = UpdateNotes.notes(ctx, UpdatePlan.versionLabel(info))
@@ -126,13 +136,30 @@ fun UpdateDialog(info: UpdateInfo, forced: Boolean, onClose: () -> Unit) {
                 note = "فایلِ دانلودشده سالم نبود و پاک شد؛ یک‌بار دیگر دانلود کن."
             }
             !ApkUpdate.canInstall(ctx) -> {
-                ApkUpdate.openInstallPermission(ctx)
-                note = "اجازهٔ «نصب برنامه‌های ناشناس» را برای همیار من روشن کن و بعد «نصب» را بزن."
+                if (!askedPermission) {
+                    askedPermission = true
+                    ApkUpdate.openInstallPermission(ctx)
+                    note = "اجازهٔ «نصب برنامه‌های ناشناس» را برای همیار من روشن کن؛ بعد خودش نصب می‌شود."
+                } else {
+                    ApkUpdate.openInstallPermission(ctx)
+                    note = "هنوز مجوز نصب داده نشده. بعد از روشن‌کردنش به برنامه برگرد."
+                }
             }
             !ApkUpdate.install(ctx) -> {
                 ApkUpdate.explain(ctx)
-                note = "نصب‌کننده باز نشد؛ فایل را دستی نصب کن یا از «دانلود در مرورگر» استفاده کن."
+                note = "نصب‌کننده باز نشد؛ یک‌بار دیگر بزن."
             }
+        }
+    }
+
+    fun afterDownloadOk() {
+        ready = true
+        if (!ApkUpdate.canInstall(ctx) && !askedPermission) {
+            askedPermission = true
+            ApkUpdate.openInstallPermission(ctx)
+            note = "دانلود کامل شد. اجازهٔ نصب از منبع ناشناس را یک‌بار تأیید کن."
+        } else {
+            installNow()
         }
     }
 
@@ -149,83 +176,114 @@ fun UpdateDialog(info: UpdateInfo, forced: Boolean, onClose: () -> Unit) {
                     ApkUpdate.clear(ctx)
                     note = "فایلِ دانلودشده سالم نبود و پاک شد؛ یک‌بار دیگر بزن."
                 }
-                else -> {
-                    ready = true
-                    installNow()
-                }
+                else -> afterDownloadOk()
             }
         }
     }
 
-    /** «بعداً»: تا نسخهٔ بعدی دیگر پرسیده نشود (فقط در حالتِ توصیه‌ای). */
+    DisposableEffect(ready, askedPermission) {
+        val obs = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && ready && !downloading) {
+                if (ApkUpdate.canInstall(ctx)) installNow()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(obs)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
+    }
+
     fun later() {
+        if (forced) return
         UpdateChecker.skip(ctx, info.latest)
         onClose()
     }
 
-    // در حالتِ اجباری، دکمهٔ back هم بی‌اثر است.
     BackHandler(enabled = forced) { }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = { if (!forced) later() },
         properties = DialogProperties(
             dismissOnBackPress = !forced,
-            dismissOnClickOutside = !forced,
+            dismissOnClickOutside = false,
+            usePlatformDefaultWidth = false,
         ),
-        title = {
-            Text(if (forced) "به‌روزرسانیِ همیار من لازم است" else "نسخه‌ی تازه‌ی همیار من آماده است")
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    ) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 20.dp, vertical = 24.dp),
+        ) {
+            Text("آپدیت برنامه", style = MaterialTheme.typography.headlineMedium)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "نسخه‌ی تو: ${BuildConfig.VERSION_NAME}" +
+                    "  •  نسخه‌ی تازه: $versionFa" +
+                    if (info.size > 0) "  •  حجم: ${UpdatePlan.sizeLabel(info.size)}" else "",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            if (forced) {
+                Spacer(Modifier.height(6.dp))
                 Text(
-                    "نسخه‌ی تو: ${BuildConfig.VERSION_NAME}" +
-                        "  •  نسخه‌ی تازه: $versionFa" +
-                        if (info.size > 0) "  •  حجم: ${UpdatePlan.sizeLabel(info.size)}" else "",
+                    "این به‌روزرسانی اجباری است. برای ادامه باید نسخه‌ی تازه نصب شود.",
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
                 )
-                if (forced) {
-                    Text(
-                        "برای ادامه‌ی کار باید نسخه‌ی تازه نصب شود. دانلودش اینترنت لازم دارد.",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-                shownNotes.take(8).forEach { line ->
+            }
+            Spacer(Modifier.height(12.dp))
+            Text("تغییرات این نسخه", style = MaterialTheme.typography.titleMedium)
+            Column(
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                shownNotes.forEach { line ->
                     Text("• $line", style = MaterialTheme.typography.bodyMedium)
                 }
-
-                // ---- دانلود درون‌برنامه‌ای با نوار پیشرفت ----
-                if (downloading) {
-                    val p = progress ?: ApkProgress(0, info.size, 0)
-                    DownloadBar(p.percent / 100f)
-                    Text(
-                        "نسخهٔ $versionFa — " + toPersianDigits("${p.percent}") + "٪",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    Text(
-                        p.sizeText + "  •  " + p.speedText,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                } else if (ready) {
-                    Text(
-                        "دانلود کامل شد ✅ — برای نصب، دکمه‌ی «نصب نسخه‌ی تازه» را بزن.",
-                        style = MaterialTheme.typography.bodySmall,
-                    )
+                if (shownNotes.isEmpty()) {
+                    Text("متن تغییرات هنوز نرسیده.", style = MaterialTheme.typography.bodySmall)
                 }
-                note?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
             }
-        },
-        confirmButton = {
+
+            if (downloading) {
+                val p = progress ?: ApkProgress(0, info.size, 0)
+                DownloadBar(p.percent / 100f)
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "نسخهٔ $versionFa — " + toPersianDigits("${p.percent}") + "٪",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    p.sizeText + "  •  " + p.speedText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(8.dp))
+            } else if (ready) {
+                Text(
+                    "دانلود کامل شد ✅ — نصب از داخل برنامه انجام می‌شود.",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+            note?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.height(8.dp))
+            }
+
             when {
                 downloading -> PrimaryButton("در حال دانلود…") { }
                 ready -> PrimaryButton("نصب نسخه‌ی تازه") { installNow() }
                 else -> PrimaryButton("دانلود و نصب") { startDownload() }
             }
-        },
-        // در حالتِ اجباری، دکمهٔ انصراف عمداً خالی است (فقط «دانلود و نصب» می‌ماند).
-        dismissButton = {
             if (!forced) {
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(
+                    Modifier.fillMaxWidth().padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     if (ready) {
                         TextButton(onClick = {
                             ApkUpdate.clear(ctx)
@@ -233,21 +291,14 @@ fun UpdateDialog(info: UpdateInfo, forced: Boolean, onClose: () -> Unit) {
                             startDownload()
                         }) { Text("دانلود مجدد") }
                     }
-                    TextButton(onClick = { UpdateChecker.openInBrowser(ctx, info.url) }) {
-                        Text("دانلود در مرورگر")
-                    }
                     TextButton(onClick = { later() }) { Text("بعداً") }
                 }
             }
-        },
-    )
+        }
+    }
 }
 
-/**
- * کارتِ «آپدیت اپ» برای صفحهٔ «بیشتر»: نسخهٔ فعلی را نشان می‌دهد و با لمس،
- * **همین حالا** از سرور می‌پرسد (بدونِ توجه به کشِ ۶ساعته و «بعداً»های قبلی).
- * اگر نسخهٔ تازه بود، همان دیالوگِ بالا باز می‌شود.
- */
+/** کارتِ «آپدیت برنامه» برای صفحهٔ «بیشتر». */
 @Composable
 fun UpdateCheckCard() {
     val ctx = LocalContext.current
@@ -256,12 +307,10 @@ fun UpdateCheckCard() {
 
     var busy by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf<String?>(null) }
-    var prompt by remember { mutableStateOf<UpdateInfo?>(null) }
-    var forcedPrompt by remember { mutableStateOf(false) }
 
     Card(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("🔄 آپدیت اپ", style = MaterialTheme.typography.titleMedium)
+            Text("🔄 آپدیت برنامه", style = MaterialTheme.typography.titleMedium)
             Text(
                 "نسخه‌ی نصب‌شده: ${BuildConfig.VERSION_NAME}" +
                     if (UpdateChecker.cached(ctx) != null) {
@@ -272,9 +321,7 @@ fun UpdateCheckCard() {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            status?.let {
-                Text(it, style = MaterialTheme.typography.bodySmall)
-            }
+            status?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
             TextButton(
                 enabled = !busy,
                 onClick = {
@@ -288,10 +335,10 @@ fun UpdateCheckCard() {
                             status = "همین نسخه را داری؛ «" + UpdatePlan.versionLabel(info) +
                                 "» آخرین نسخه است ✅"
                         } else {
-                            // بررسیِ دستی، از رول‌آوت و «بعداً» عبور می‌کند: کاربر خودش خواسته.
                             val d = UpdatePlan.decisionFor(BuildConfig.VERSION_CODE, info, bucket = 0)
-                            forcedPrompt = d is UpdateDecision.Forced
-                            prompt = info
+                            UpdateNotes.refresh(ctx)
+                            // بررسی دستی هم اگر سرور min گذاشته باشد اجباری است.
+                            UpdateUi.session = info to (d is UpdateDecision.Forced)
                         }
                         busy = false
                     }
@@ -300,9 +347,5 @@ fun UpdateCheckCard() {
                 Text(if (busy) "در حال بررسی…" else "بررسیِ نسخه‌ی تازه")
             }
         }
-    }
-
-    prompt?.let {
-        UpdateDialog(info = it, forced = forcedPrompt, onClose = { prompt = null })
     }
 }

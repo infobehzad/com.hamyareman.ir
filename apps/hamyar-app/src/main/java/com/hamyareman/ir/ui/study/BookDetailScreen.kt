@@ -1,6 +1,5 @@
 package com.hamyareman.ir.ui.study
 
-import android.graphics.BitmapFactory
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -63,10 +62,13 @@ fun BookDetailScreen(
     onVideoTeach: (String) -> Unit,
     onCharts: () -> Unit,
 ) {
-    val module = remember(bookCode) { BookModuleRegistry.modules.firstOrNull { it.bookCode == bookCode } }
+    val module = remember(bookCode) {
+        runCatching { BookModuleRegistry.modules.firstOrNull { it.bookCode == bookCode } }.getOrNull()
+    }
     val container = LocalAppContainer.current
     val today = remember { com.hamyareman.ir.platform.core.common.JalaliDate.todayIso() }
 
+    Column(Modifier.fillMaxSize()) {
     AppTopBar(title = module?.title ?: "کتاب", onBack = onBack)
     HubBody {
         if (module == null) {
@@ -75,9 +77,7 @@ fun BookDetailScreen(
         }
 
         val ctx = LocalContext.current
-        val cover = remember(bookCode) {
-            runCatching { BitmapFactory.decodeStream(ctx.assets.open("book-covers/$bookCode.jpg")) }.getOrNull()
-        }
+        val cover = remember(bookCode) { PdfSafe.decodeCover(ctx, bookCode) }
         Card(Modifier.fillMaxWidth()) {
             Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (cover != null) {
@@ -115,10 +115,11 @@ fun BookDetailScreen(
             tocStore.putString("acc_$bookCode", next)
         }
         Column(Modifier.fillMaxWidth()) {
-            BookToc.forBook(bookCode).forEach { node ->
+            runCatching { BookToc.forBook(bookCode) }.getOrDefault(emptyList()).forEach { node ->
                 TocRow(bookCode, node, 0, tocStore, onTeach, onStudy, onVideoTeach, openId = openSection, onToggle = toggle)
             }
         }
+    }
     }
 }
 
@@ -193,7 +194,7 @@ private fun LessonCard(
     onSubToggle: () -> Unit,
 ) {
     val packId = node.packId ?: return
-    val pack = remember(packId) { BookModuleRegistry.pack(packId) }
+    val pack = remember(packId) { runCatching { BookModuleRegistry.pack(packId) }.getOrNull() }
     val container = LocalAppContainer.current
     val ctx = LocalContext.current
     val today = remember { com.hamyareman.ir.platform.core.common.JalaliDate.todayIso() }

@@ -56,8 +56,9 @@ object NotificationChannels {
     const val WEEKLY = "weekly"
     const val SYNC = "sync"
     const val SCHOOL_ALARM = "school_alarm"
+    const val UPDATES = "updates"
 
-    val all: List<String> = listOf(MESSAGES, CALLS, REMINDERS, WEEKLY, SYNC, SCHOOL_ALARM)
+    val all: List<String> = listOf(MESSAGES, CALLS, REMINDERS, WEEKLY, SYNC, SCHOOL_ALARM, UPDATES)
 
     private data class ChannelSpec(val id: String, val name: String, val importance: Int)
 

@@ -41,16 +41,7 @@ fun HealthHubScreen(nav: NavController) {
         }
         HubCard("💊", "یادآور دارو و مراقبت", "دارو یا مراقبت روزانه با هشدار سرِ وقت") { nav.hubTo(Screen.Meds.route) }
         HubCard("🌤", "روتین روز", "بلوک‌های روزت را ببین یا روز سبک انتخاب کن") { nav.hubTo(Screen.Routine.route) }
-
-        // کارتِ «آگاهی» (هابِ جدا) طبقِ درخواست از «سلامتی» برداشته شد؛
-        // تمرین‌های حال‌خوب همین‌جا زیرِ همین گروه می‌مانند.
-        HubMenuGroup("🪷 آگاهی", "حال‌خوب و ذهن‌آگاهی — همین‌جا کنار سلامتی") {
-            HubCard("📓", "دفترچه‌ی من", "حرف‌های بلندتر؛ روزنوشت آزاد") { nav.hubTo(Screen.Journal.route) }
-            HubCard("🌬", "تمرین نفس", "با شمارش صوتی و انیمیشن") { nav.hubTo(Screen.Breath.route) }
-            HubCard("🧠", "ذهن‌آگاهی", "تمرین‌های کوتاه حضور") { nav.hubTo(Screen.Mindfulness.route) }
-            HubCard("💛", "آرامش سریع", "امواج، جنگل بارانی و ریست طلایی") { nav.hubTo(Screen.Calm.route) }
-            HubCard("🧘", "حرکات آرامش", "جلسه‌های صوتی کامل آرامش") { nav.hubTo(Screen.Wellness.route) }
-        }
+        // کارت/گروه «آگاهی» فقط در داشبورد می‌ماند.
     }
 }
 

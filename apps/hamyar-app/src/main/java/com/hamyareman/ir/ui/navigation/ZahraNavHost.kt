@@ -130,13 +130,18 @@ fun ZahraNavHost() {
                         selected = route == tab.route ||
                             (tab.route == Screen.Study.route && (route?.startsWith("study-book") == true || route == Screen.StudyHome.route)),
                         onClick = {
-                            if (tab.route == Screen.Home.route) {
-                                nav.popBackStack(Screen.Home.route, inclusive = false)
-                            } else {
+                            // هرجا باشیم، لمس عنوان منوی پایین به صفحهٔ اصلی همان عنوان می‌رود
+                            // (نه به زیرصفحه‌ی قبلیِ همان تب).
+                            if (route == tab.route) return@NavigationBarItem
+                            val landed = nav.popBackStack(tab.route, inclusive = false)
+                            if (!landed) {
                                 nav.navigate(tab.route) {
-                                    popUpTo(Screen.Home.route) { saveState = true }
+                                    popUpTo(Screen.Home.route) {
+                                        inclusive = false
+                                        saveState = false
+                                    }
                                     launchSingleTop = true
-                                    restoreState = true
+                                    restoreState = false
                                 }
                             }
                         },

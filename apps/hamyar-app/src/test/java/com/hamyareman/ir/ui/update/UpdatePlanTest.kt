@@ -95,4 +95,19 @@ class UpdatePlanTest {
         assertEquals("1 مگابایت", UpdatePlan.sizeLabel(1024L * 1024L))
         assertEquals("26 مگابایت", UpdatePlan.sizeLabel(28_000_000L))
     }
+
+    @Test
+    fun `update notes txt is grouped by version heading`() {
+        val table = UpdateNotes.parseTxt(
+            """
+            # 1.75
+            خط اول
+            - خط دوم
+            # 1.74
+            قدیمی
+            """.trimIndent(),
+        )
+        assertEquals(listOf("خط اول", "خط دوم"), table["1.75"])
+        assertEquals(listOf("قدیمی"), table["1.74"])
+    }
 }
