@@ -6,6 +6,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+# برای گذاشتنِ فایلِ نصبی روی Release (جایگزینِ آرتیفکت وقتی سهمیهٔ آرتیفکت پر است)
+permissions:
+  contents: write
+
 jobs:
   functions-tests:
     runs-on: ubuntu-latest
@@ -43,6 +47,7 @@ jobs:
             --info --stacktrace
       - name: upload wellness reports
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: wellness-test-results
@@ -78,6 +83,7 @@ jobs:
             --info --stacktrace
       - name: upload study reports
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: study-test-results
@@ -106,6 +112,7 @@ jobs:
       - run: ./gradlew test :hamyar-app:assembleDebug :hamyar-app:lintDebug --stacktrace
       - name: Upload debug APK
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: hamyar-app-debug-apk
@@ -124,8 +131,27 @@ jobs:
           done
       - name: upload release APK
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: hamyar-app-release-apk
           path: apps/hamyar-app/build/outputs/apk/release/*.apk
           if-no-files-found: ignore
+
+      # ---- مسیرِ دومِ تحویلِ فایلِ نصبی: داراییِ Release در همین مخزن ----
+      # چرا: سهمیهٔ «آرتیفکت» گیت‌هاب پر می‌شود و آن‌وقت هیچ APKی بالا نمی‌آید.
+      # Release سهمیهٔ جدا دارد و همیشه کار می‌کند.
+      - name: انتشارِ APK روی Release (ci-apk)
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          gh release view ci-apk >/dev/null 2>&1 || \
+            gh release create ci-apk --title "CI APK" --notes "آخرین فایل‌های نصبیِ ساختهٔ CI (نسخهٔ debug و R8)." || true
+          shopt -s nullglob
+          shopt -s globstar
+          for f in apps/hamyar-app/build/outputs/apk/**/*.apk; do
+            echo "↑ $f"
+            gh release upload ci-apk "$f" --clobber
+          done
