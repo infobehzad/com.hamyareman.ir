@@ -69,6 +69,7 @@ import kotlin.math.roundToInt
 import java.net.HttpURLConnection
 import java.net.URL
 import com.hamyareman.ir.ui.net.NetState
+import com.hamyareman.ir.ui.net.awaitOnlineBlocking
 import com.hamyareman.ir.ui.net.ResilientHttp
 
 /**
@@ -167,7 +168,7 @@ private fun downloadPdfBlocking(ctx: android.content.Context, fileId: String, on
         } catch (e: Exception) {
             attempt++
             if (attempt > 6) throw e
-            if (!NetState.isOnline(ctx)) NetState.awaitOnline(ctx)
+            if (!NetState.isOnline(ctx)) NetState.awaitOnlineBlocking(ctx)
             runCatching { Thread.sleep((400L * attempt).coerceAtMost(3000L)) }
         }
     }

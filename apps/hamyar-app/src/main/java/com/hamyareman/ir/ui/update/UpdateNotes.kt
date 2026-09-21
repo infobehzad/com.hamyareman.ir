@@ -68,7 +68,7 @@ object UpdateNotes {
     suspend fun refresh(ctx: Context): Boolean = withContext(Dispatchers.IO) {
         if (!NetState.isOnline(ctx)) return@withContext false
         runCatching {
-            val conn = ResilientHttp.open(ctx, RAW_URL, attempts = 3)
+            val conn = ResilientHttp.open(RAW_URL, attempts = 3)
             val body = conn.inputStream.bufferedReader().use { it.readText() }
             conn.disconnect()
             // فقط اگر JSONِ معتبر بود کش می‌شود (فایلِ نیمه‌کاره جای متنِ درست را نگیرد).

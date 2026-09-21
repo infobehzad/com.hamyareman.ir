@@ -66,6 +66,20 @@ object NetState {
 }
 
 /**
+ * نسخهٔ بلوکه‌ایِ [NetState.awaitOnline] — برای کدهای دانلودِ ساده که سواسپند نیستند
+ * (روی نخِ پس‌زمینه اجرا می‌شوند).
+ */
+fun NetState.awaitOnlineBlocking(ctx: Context, timeoutMs: Long = 120_000L): Boolean {
+    if (isOnline(ctx)) return true
+    val deadline = System.currentTimeMillis() + timeoutMs
+    while (System.currentTimeMillis() < deadline) {
+        if (isOnline(ctx)) return true
+        runCatching { Thread.sleep(700) }
+    }
+    return isOnline(ctx)
+}
+
+/**
  * اتصالِ «مقاوم» — همان چیزی که دانلود را وقتی شبکه/پروکسی عوض می‌شود زنده نگه می‌دارد.
  *
  * هر تلاش یک اتصالِ تازه می‌سازد (بدونِ کش، با `Connection: close`) تا پروکسی و

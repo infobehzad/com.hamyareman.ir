@@ -138,16 +138,19 @@ object SyncCenter {
         started = true
         val app = ctx.applicationContext
 
-        runCatching {
-            val cm = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            cm.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
-                override fun onAvailable(network: Network) {
-                    scope.launch { pushNow(app, container) }
-                }
-            })
-        }
-
         scope.launch {
+            // کمی صبر تا گرافِ وابستگی (AppContainer) کامل ساخته شود؛ وگرنه ممکن است
+            // همین لحظه که شبکه هست، کالبک بیاید و به وابستگیِ نیمه‌ساخته برسد.
+            delay(1500)
+            runCatching {
+                val cm = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                cm.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
+                    override fun onAvailable(network: Network) {
+                        scope.launch { pushNow(app, container) }
+                    }
+                })
+            }
+            // تلاشِ دوره‌ای: هر ۵ دقیقه (سبک؛ فقط اگر چیزی در صف باشد معنی دارد).
             while (true) {
                 delay(5 * 60 * 1000L)
                 if (NetState.isOnline(app)) pushNow(app, container)
