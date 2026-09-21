@@ -141,14 +141,23 @@ object MonthlyCycle {
         }.getOrNull()
     }
 
-    /** روزِ چندمِ دوره‌ی جاری است (۱..) اگر امروز در روزهای ثبت‌شده باشد. */
+    /**
+     * «روزِ چندمِ این دوره» برای روزِ [iso] — اگر آن روز در روزهای ثبت‌شده باشد.
+     *
+     * از **ابتدای همان رشتهٔ پیوسته** می‌شماریم (نه از آخرین روزِ ثبت‌شده):
+     * نسخهٔ اول از نزدیک‌ترین روزِ کوچک‌تر می‌شمرد و برای ۳ شهریور در دوره‌ای که
+     * ۱ تا ۵ شهریور ثبت شده بود، «روزِ ۱» می‌داد.
+     */
     fun periodDayNumber(state: State, iso: String): Int? {
         if (iso !in state.periodDays) return null
-        // از آخرین شروعِ پیش از این روز می‌شماریم.
-        val start = state.periodDays.filter { it <= iso }.maxOrNull() ?: return null
-        val n = runCatching {
-            (LocalDate.parse(iso).toEpochDay() - LocalDate.parse(start).toEpochDay()).toInt() + 1
-        }.getOrNull() ?: return null
+        var day = runCatching { LocalDate.parse(iso) }.getOrNull() ?: return null
+        var n = 1
+        while (n < 12) {
+            val prev = day.minusDays(1)
+            if (prev.toString() !in state.periodDays) break
+            day = prev
+            n++
+        }
         return if (n in 1..10) n else null
     }
 

@@ -55,11 +55,16 @@ class MonthlyCycleTest {
     }
 
     @Test
-    fun `period day number counts from the latest registered start`() {
+    fun `period day number counts from the start of the same run of days`() {
         val s = MonthlyCycle.markStart(empty, "2026-09-01")
         assertEquals(1, MonthlyCycle.periodDayNumber(s, "2026-09-01"))
         assertEquals(3, MonthlyCycle.periodDayNumber(s, "2026-09-03"))
+        assertEquals(5, MonthlyCycle.periodDayNumber(s, "2026-09-05"))
         assertNull(MonthlyCycle.periodDayNumber(s, "2026-09-20"))
+        // پس از یک دورهٔ تازه، شمارش از سرِ همان دوره شروع می‌شود.
+        val two = MonthlyCycle.markStart(s, "2026-09-29")
+        assertEquals(1, MonthlyCycle.periodDayNumber(two, "2026-09-29"))
+        assertEquals(2, MonthlyCycle.periodDayNumber(two, "2026-09-30"))
     }
 
     @Test
