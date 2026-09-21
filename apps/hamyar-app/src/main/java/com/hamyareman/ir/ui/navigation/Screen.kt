@@ -123,6 +123,11 @@ sealed class Screen(val route: String) {
     data object Wellness : Screen("wellness")
     /** پرامپت ۰۲: گالری مرجع‌های نقاشی سیاه‌قلم. */
     data object SketchGallery : Screen("sketch-gallery")
+    /** کارت‌های تازهٔ داشبورد: جعبه‌ابزار عمومی / آزمایشگاه شیمی / آزمایشگاه فیزیک / جعبه‌ابزار ریاضی. */
+    data object GeneralToolkit : Screen("toolkit-general")
+    data object ChemistryLab : Screen("lab-chemistry")
+    data object PhysicsLab : Screen("lab-physics")
+    data object MathToolkit : Screen("toolkit-math")
 }
 
 data class Tab(val route: String, val icon: ImageVector, val label: String)

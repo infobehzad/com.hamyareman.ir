@@ -222,6 +222,10 @@ fun ZahraNavHost() {
             composable(Screen.Calm.route) { CalmMenuScreen(nav) }
             composable(Screen.CalmHub.route) { com.hamyareman.ir.ui.calmdown.CalmHubScreen(nav) { nav.popBackStack() } }
             composable(Screen.FreeReading.route) { com.hamyareman.ir.ui.study.FreeReadingScreen(nav) { nav.popBackStack() } }
+            composable(Screen.GeneralToolkit.route) { com.hamyareman.ir.ui.tools.GeneralToolkitScreen { nav.popBackStack() } }
+            composable(Screen.ChemistryLab.route) { com.hamyareman.ir.ui.tools.ChemistryLabScreen { nav.popBackStack() } }
+            composable(Screen.PhysicsLab.route) { com.hamyareman.ir.ui.tools.PhysicsLabScreen { nav.popBackStack() } }
+            composable(Screen.MathToolkit.route) { com.hamyareman.ir.ui.tools.MathToolkitScreen { nav.popBackStack() } }
             composable(Screen.Journal.route) { JournalScreen { nav.popBackStack() } }
             composable(Screen.Breath.route) { BreathingScreen { nav.popBackStack() } }
             composable(Screen.Routine.route) { RoutineScreen { nav.popBackStack() } }

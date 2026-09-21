@@ -49,9 +49,15 @@ fun HubHeader(title: String, subtitle: String, onBack: (() -> Unit)? = null) {
 
 /** آیتم منوی هاب — کارت قابل‌کلیک با ایموجی و توضیح. */
 @Composable
-fun HubCard(emoji: String, title: String, subtitle: String, onClick: () -> Unit) {
+fun HubCard(
+    emoji: String,
+    title: String,
+    subtitle: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
     Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        modifier = modifier.fillMaxWidth().clickable(onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
     ) {
         Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {

@@ -59,6 +59,7 @@ private val LessonColors = listOf(
 
 @Composable
 fun ClassPlanCard(
+    modifier: Modifier = Modifier,
     onOpenPlan: () -> Unit,
     onOpenPrep: () -> Unit,
     onOpenAlarm: () -> Unit,
@@ -134,7 +135,7 @@ fun ClassPlanCard(
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),

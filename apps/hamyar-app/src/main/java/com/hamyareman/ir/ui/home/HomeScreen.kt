@@ -1,5 +1,12 @@
 package com.hamyareman.ir.ui.home
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +41,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -47,7 +61,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.toPersianDigits
-import com.hamyareman.ir.platform.core.designsystem.SectionCard
 import com.hamyareman.ir.ui.hub.HubCard
 import com.hamyareman.ir.ui.hub.hubTo
 import com.hamyareman.ir.ui.navigation.Screen
@@ -56,6 +69,21 @@ import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.LocalDateTime
 import java.util.Calendar
+
+/** مارجینِ کناریِ بلوک‌های داشبورد (کارتِ سخن بزرگان عمداً پهن‌تر و بی‌مارجین‌تر است). */
+private val HomeSide = 16.dp
+
+/**
+ * فونتِ متنِ «سخن بزرگان».
+ *
+ * فونتِ درخواستی («بدخط») در مخزن و در پوشهٔ `res/font` اپ نیست؛ تا فایلش برسد،
+ * نزدیک‌ترین فونتِ دست‌نویسِ خودِ اپ (هیلدا) استفاده می‌شود. برای سوئیچ، فقط
+ * همین یک خط را به فونتِ تازه عوض کن (یا `DashboardFonts.badkhat` را بساز).
+ */
+private val WISDOM_FONT = DashboardFonts.hilda
+
+/** مارجینِ کناریِ کارتِ «سخن بزرگان» — یک‌پنجمِ حالتِ معمول. */
+private val WisdomSide = 3.dp
 
 private fun greeting(): String {
     val h = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
@@ -97,13 +125,17 @@ fun HomeScreen(nav: NavController) {
         FloatingActionButton(onClick = { nav.navigate(Screen.Calm.route) }) { Text("💛") }
     }) { pad ->
         Column(
-            Modifier.fillMaxSize().padding(pad).padding(16.dp).verticalScroll(rememberScrollState()),
+            Modifier.fillMaxSize().padding(pad).padding(vertical = 16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            GreetingBanner(title = "${greeting()} $who جان", subtitle = "همیار من کنارت است؛ از مدرسه تا آرامش")
+            GreetingBanner(
+                title = "${greeting()} $who جان",
+                subtitle = "همیار من کنارت است؛ از مدرسه تا آرامش",
+                modifier = Modifier.padding(horizontal = HomeSide),
+            )
 
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = HomeSide),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             ) {
@@ -151,39 +183,48 @@ fun HomeScreen(nav: NavController) {
                 }
             }
 
-            WisdomCard()
+            WisdomCard(Modifier.padding(horizontal = WisdomSide))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = HomeSide), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 QuickTile("🎒", "مدرسه", Modifier.weight(1f)) { nav.hubTo(Screen.Study.route) }
                 QuickTile("📖", "کتاب متنی و صوتی", Modifier.weight(1f)) { nav.navigate(Screen.FreeReading.route) }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = HomeSide), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 QuickTile("🪷", "آگاهی", Modifier.weight(1f)) { nav.hubTo(Screen.AwarenessHub.route) }
                 QuickTile("💛", "آرامش", Modifier.weight(1f)) { nav.navigate(Screen.CalmHub.route) }
             }
 
             ClassPlanCard(
+                modifier = Modifier.padding(horizontal = HomeSide),
                 onOpenPlan = { nav.navigate(Screen.ClassPlan.route) },
                 onOpenPrep = { nav.navigate(Screen.TomorrowPrep.route) },
                 onOpenAlarm = { nav.navigate(Screen.ClassPlanShift.route) },
             )
 
-            // «مطالعه» از کارتِ «مطالعات آزاد» به داشبورد منتقل شد (جای کارتِ «حالت امروز چطوره؟»).
-            SectionCard("مطالعه آزاد", "هر کتاب یک زندگی") { nav.navigate(Screen.StudyHome.route) }
+            // چهار کارتِ کم‌عرض در یک ردیف — جای کارتِ «مطالعه آزاد» (مطالعه از تب «مدرسه» در دسترس است).
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = HomeSide),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                ToolTile("🧰", "جعبه‌ابزار عمومی", Modifier.weight(1f)) { nav.navigate(Screen.GeneralToolkit.route) }
+                ToolTile("⚗️", "آزمایشگاه شیمی", Modifier.weight(1f)) { nav.navigate(Screen.ChemistryLab.route) }
+                ToolTile("🔬", "آزمایشگاه فیزیک", Modifier.weight(1f)) { nav.navigate(Screen.PhysicsLab.route) }
+                ToolTile("🧮", "جعبه‌ابزار ریاضی", Modifier.weight(1f)) { nav.navigate(Screen.MathToolkit.route) }
+            }
 
-            Text("امروز", style = MaterialTheme.typography.titleMedium)
-            HubCard("🌤", "روتین امروز", "بلوک‌های روزت را ببین") { nav.navigate(Screen.Routine.route) }
-            HubCard("💧", "آب بنوش", "لیوان‌های امروزت را ثبت کن") { nav.navigate(Screen.Water.route) }
+            Text("امروز", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = HomeSide))
+            HubCard("🌤", "روتین امروز", "بلوک‌های روزت را ببین", Modifier.padding(horizontal = HomeSide)) { nav.navigate(Screen.Routine.route) }
+            HubCard("💧", "آب بنوش", "لیوان‌های امروزت را ثبت کن", Modifier.padding(horizontal = HomeSide)) { nav.navigate(Screen.Water.route) }
             Spacer(Modifier.height(8.dp))
         }
     }
 }
 
 @Composable
-private fun GreetingBanner(title: String, subtitle: String) {
+private fun GreetingBanner(title: String, subtitle: String, modifier: Modifier = Modifier) {
     val shape = RoundedCornerShape(28.dp)
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = shape,
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
@@ -223,7 +264,7 @@ private fun GreetingBanner(title: String, subtitle: String) {
 }
 
 @Composable
-private fun WisdomCard() {
+private fun WisdomCard(modifier: Modifier = Modifier) {
     val ctx = LocalContext.current
     val all = remember { WisdomQuotes.load(ctx) }
     var line by remember { mutableStateOf(WisdomQuotes.current(ctx, all)) }
@@ -232,28 +273,83 @@ private fun WisdomCard() {
         line = WisdomQuotes.current(ctx, all)
     }
     val body = if (line.author.isBlank()) line.text else line.oneLine()
-    Card(
-        modifier = Modifier.fillMaxWidth().clickable {
-            line = WisdomQuotes.next(ctx, all)
-        },
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF7ED)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-    ) {
-        BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp)) {
-            val n = body.length.coerceAtLeast(1)
-            val sp = (maxWidth.value / (n * 0.62f)).coerceIn(11f, 18f)
-            Text(
-                body,
-                fontFamily = DashboardFonts.quote,
-                fontSize = sp.sp,
-                color = Color(0xFF9A3412),
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                overflow = TextOverflow.Clip,
-                softWrap = false,
-                modifier = Modifier.fillMaxWidth(),
-            )
+    // افکتِ دورِ کارت — بدونِ تصویر: حاشیهٔ رنگین‌کمانیِ چرخان + هالهٔ نبض‌دارِ نرم.
+    val anim = rememberInfiniteTransition(label = "wisdom-glow")
+    val spin by anim.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween(durationMillis = 7000, easing = LinearEasing)),
+        label = "spin",
+    )
+    val pulse by anim.animateFloat(
+        initialValue = 0.25f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            tween(durationMillis = 1700, easing = FastOutSlowInEasing),
+            RepeatMode.Reverse,
+        ),
+        label = "pulse",
+    )
+    Box(modifier.fillMaxWidth()) {
+        Box(
+            Modifier.matchParentSize().drawBehind {
+                // ۱) هالهٔ بیرونی که با نبض نفس می‌کشد
+                val halo = Color(0xFFFB923C)
+                drawRoundRect(
+                    color = halo.copy(alpha = 0.05f + 0.11f * pulse),
+                    topLeft = Offset(-2.dp.toPx(), -2.dp.toPx()),
+                    size = Size(size.width + 4.dp.toPx(), size.height + 4.dp.toPx()),
+                    cornerRadius = CornerRadius(22.dp.toPx()),
+                    style = Stroke(width = 5.dp.toPx()),
+                )
+                // ۲) حاشیهٔ رنگین‌کمانیِ چرخان، دقیقاً روی لبهٔ کارت
+                val c = Offset(size.width / 2f, size.height / 2f)
+                val shader = android.graphics.SweepGradient(
+                    c.x,
+                    c.y,
+                    intArrayOf(
+                        Color(0xFFF59E0B).toArgb(),
+                        Color(0xFFFB7185).toArgb(),
+                        Color(0xFF8B5CF6).toArgb(),
+                        Color(0xFF22D3EE).toArgb(),
+                        Color(0xFF34D399).toArgb(),
+                        Color(0xFFF59E0B).toArgb(),
+                    ),
+                    null,
+                )
+                shader.setLocalMatrix(android.graphics.Matrix().apply { setRotate(spin, c.x, c.y) })
+                drawRoundRect(
+                    brush = ShaderBrush(shader),
+                    topLeft = Offset(1.25.dp.toPx(), 1.25.dp.toPx()),
+                    size = Size(size.width - 2.5.dp.toPx(), size.height - 2.5.dp.toPx()),
+                    cornerRadius = CornerRadius(19.dp.toPx()),
+                    style = Stroke(width = 2.5.dp.toPx()),
+                )
+            },
+        )
+        Card(
+            modifier = Modifier.fillMaxWidth().clickable {
+                line = WisdomQuotes.next(ctx, all)
+            },
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF7ED)),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        ) {
+            BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp)) {
+                val n = body.length.coerceAtLeast(1)
+                val sp = (maxWidth.value / (n * 0.62f)).coerceIn(11f, 18f)
+                Text(
+                    body,
+                    fontFamily = WISDOM_FONT,
+                    fontSize = sp.sp,
+                    color = Color(0xFF9A3412),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Clip,
+                    softWrap = false,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
     }
 }
@@ -284,6 +380,43 @@ internal fun SubscriptionChip(raw: String, onClick: () -> Unit = {}) {
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
         )
+    }
+}
+
+/**
+ * کارتِ کم‌عرضِ داشبورد برای جعبه‌ابزارها — چهار عدد در یک ردیف؛
+ * متن دو خط می‌شکند و در ارتفاعِ ثابت وسط‌چین می‌ماند.
+ */
+@Composable
+private fun ToolTile(emoji: String, label: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    androidx.compose.material3.Card(
+        onClick = onClick,
+        modifier = modifier.height(104.dp),
+        shape = RoundedCornerShape(18.dp),
+        colors = androidx.compose.material3.CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+        elevation = androidx.compose.material3.CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Column(
+            Modifier.fillMaxSize().padding(horizontal = 4.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(emoji, fontSize = 26.sp)
+            Spacer(Modifier.height(4.dp))
+            Text(
+                label,
+                fontFamily = DashboardFonts.aria,
+                fontSize = 12.sp,
+                lineHeight = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
     }
 }
 
