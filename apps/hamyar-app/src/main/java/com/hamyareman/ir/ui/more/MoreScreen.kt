@@ -30,6 +30,7 @@ import com.hamyareman.ir.ui.hub.HubHeader
 import com.hamyareman.ir.ui.hub.HubBody
 import com.hamyareman.ir.ui.navigation.Screen
 import com.hamyareman.ir.platform.core.common.LocalStore
+import com.hamyareman.ir.ui.update.UpdateCheckCard
 
 /**
  * «بیشتر» — همه‌چیز غیر از ۵ تب اصلی:
@@ -56,6 +57,9 @@ fun MoreScreen(nav: NavController) {
         HubCard("👤", "پروفایل من", "مشخصات من، مدرسه، عکس و وضعیت اشتراک") { nav.hubTo(Screen.UserProfile.route) }
         HubCard("🎨", "ظاهر و فونت", "تم رنگی، حالت تاریک/روشن، فونت دانلودی") { nav.hubTo(Screen.Appearance.route) }
         HubCard("⚙️", "تنظیمات", "حریم، قفل، همگام‌سازی") { nav.hubTo(Screen.Settings.route) }
+
+        // بررسیِ دستیِ آپدیت (کانالِ آپدیت: تنظیمات روی سرور، فایل در مخزنِ عمومی).
+        UpdateCheckCard()
 
         Text(
             "همیار من — نسخه‌ی " + com.hamyareman.ir.BuildConfig.VERSION_NAME,

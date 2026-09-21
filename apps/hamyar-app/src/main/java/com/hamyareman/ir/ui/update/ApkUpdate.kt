@@ -7,6 +7,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import java.io.File
+import java.security.MessageDigest
 
 /**
  * دانلود و نصبِ درون‌برنامه‌ایِ APK.
@@ -49,6 +50,34 @@ object ApkUpdate {
         val f = file(ctx)
         f.exists() && f.length() > 1024L * 100L
     }.getOrDefault(false)
+
+    /** پاک‌کردنِ فایلِ نیمه‌کاره/خراب (تا دانلودِ بعدی تازه شروع شود). */
+    fun clear(ctx: Context) {
+        runCatching { file(ctx).delete() }
+    }
+
+    /**
+     * بررسیِ اصالتِ فایلِ دانلودشده با `sha256`ِ اعلام‌شدهٔ سرور.
+     *
+     * اگر سرور هش نداده باشد `true` برمی‌گردد: در آن حالت تنها نگهبان،
+     * امضای APK است که خودِ اندروید پیش از نصب بررسی می‌کند.
+     */
+    fun verify(ctx: Context, expected: String): Boolean {
+        if (expected.isBlank()) return true
+        val actual = runCatching {
+            val md = MessageDigest.getInstance("SHA-256")
+            file(ctx).inputStream().use { ins ->
+                val buf = ByteArray(1 shl 16)
+                while (true) {
+                    val n = ins.read(buf)
+                    if (n <= 0) break
+                    md.update(buf, 0, n)
+                }
+            }
+            md.digest().joinToString("") { "%02x".format(it) }
+        }.getOrNull() ?: return false
+        return actual.equals(expected.trim(), ignoreCase = true)
+    }
 
     /** اجرای نصب‌کنندهٔ سیستم روی فایلِ دانلودشده. */
     fun install(ctx: Context): Boolean {

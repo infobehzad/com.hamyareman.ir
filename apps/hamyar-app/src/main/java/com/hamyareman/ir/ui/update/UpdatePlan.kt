@@ -26,6 +26,8 @@ data class UpdateInfo(
     val url: String = "",
     /** حجمِ تقریبیِ فایل (بایت) برای نمایش؛ `0` = نامعلوم. */
     val size: Long = 0L,
+    /** هشِ فایلِ APK؛ خالی = سرور هش نداده (بررسی به نصب‌کنندهٔ سیستم واگذار می‌شود). */
+    val sha256: String = "",
     val notes: List<String> = emptyList(),
     val chan: String = "stable",
     /** درصدِ کاربرانی که این پیام را می‌بینند (۱..۱۰۰). */
@@ -57,6 +59,7 @@ object UpdatePlan {
         min = num(json, "min").toInt(),
         url = str(json, "url"),
         size = num(json, "size"),
+        sha256 = str(json, "sha256"),
         notes = arr(json, "notes"),
         chan = str(json, "chan").ifBlank { CHANNEL },
         rollout = num(json, "rollout").toInt().let { if (it <= 0) 100 else it.coerceAtMost(100) },

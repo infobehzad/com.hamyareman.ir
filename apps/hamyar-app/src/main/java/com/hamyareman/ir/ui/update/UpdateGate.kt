@@ -9,7 +9,10 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -19,7 +22,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -27,18 +32,18 @@ import androidx.core.content.ContextCompat
 import com.hamyareman.ir.BuildConfig
 import com.hamyareman.ir.LocalAppContainer
 import com.hamyareman.ir.platform.core.designsystem.PrimaryButton
+import kotlinx.coroutines.launch
 
 /**
- * میزبانِ «کانالِ آپدیت» — یک بار پس از ورود و بازشدنِ قفل اجرا می‌شود:
+ * کانالِ آپدیت — سه تکه:
  *
- * ۱. تنظیماتِ انتشار را از ردیفِ `app_release` در `app_state` می‌خواند (با کشِ ۶ساعته).
- * ۲. اگر نسخهٔ سرور تازه‌تر بود، دیالوگ نشان می‌دهد: توصیه‌ای (با «بعداً») یا
- *    اجباری (بدونِ بستن).
- * ۳. «دانلود و نصب» = دانلودِ درون‌برنامه‌ای + نصب‌کنندهٔ سیستم؛ اگر نشد، همان
- *    نشانی در مرورگر باز می‌شود.
+ * 1. [UpdateGateHost] — خودکار، یک بار پس از ورود و بازشدنِ قفل.
+ * 2. [UpdateDialog] — دیالوگِ مشترک (توصیه‌ای/اجباری) با دانلود و نصبِ درون‌برنامه‌ای.
+ * 3. [UpdateCheckCard] — بررسیِ **دستی** در صفحهٔ «بیشتر» (برای وقتی کاربر خودش
+ *    می‌خواهد مطمئن شود؛ از «بعداً» و از کشِ ۶ساعته هم عبور می‌کند).
  *
- * عمداً **پس از ورود و بازشدنِ قفل** اجرا می‌شود: پیامِ آپدیت نباید مسیرِ ورود،
- * بازیابیِ رمز یا کارِ کاربرِ آفلاین را ببندد.
+ * تصمیم از ردیفِ `app_release` در جدولِ `app_state` می‌آید و فایل در مخزنِ
+ * عمومیِ انتشار میزبانی می‌شود؛ پس اعلامِ نسخهٔ تازه هیچ APKی لازم ندارد.
  */
 @Composable
 fun UpdateGateHost() {
@@ -46,26 +51,53 @@ fun UpdateGateHost() {
     val container = LocalAppContainer.current
 
     var decision by remember { mutableStateOf<UpdateDecision?>(null) }
-    var downloading by remember { mutableStateOf(false) }
-    var note by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         decision = UpdateChecker.decide(ctx, container.tables, BuildConfig.VERSION_CODE)
     }
 
-    // پایانِ دانلود → نصب‌کننده. گیرندهٔ زمانِ اجرا، فقط تا وقتی دانلودی در جریان است.
+    val d = decision
+    val info: UpdateInfo = when (d) {
+        is UpdateDecision.Forced -> d.info
+        is UpdateDecision.Optional -> d.info
+        else -> return
+    }
+    UpdateDialog(
+        info = info,
+        forced = d is UpdateDecision.Forced,
+        onClose = { decision = UpdateDecision.None },
+    )
+}
+
+/**
+ * دیالوگِ آپدیت. تنهای جایی که «دانلود و نصب» واقعاً اجرا می‌شود:
+ * دانلودِ درون‌برنامه‌ای → بررسیِ `sha256` → نصب‌کنندهٔ سیستم؛ و اگر هر مرحله
+ * شکست بخورد، کاربر با «دانلود در مرورگر» راهِ جایگزین دارد.
+ */
+@Composable
+fun UpdateDialog(info: UpdateInfo, forced: Boolean, onClose: () -> Unit) {
+    val ctx = LocalContext.current
+    var downloading by remember { mutableStateOf(false) }
+    var note by remember { mutableStateOf<String?>(null) }
+
+    // پایانِ دانلود → بررسیِ هش → نصب. گیرندهٔ زمانِ اجرا، فقط تا وقتی دانلودی در جریان است.
     DisposableEffect(downloading) {
         if (!downloading) return@DisposableEffect onDispose { }
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 downloading = false
-                if (ApkUpdate.isReady(ctx)) {
-                    if (!ApkUpdate.install(ctx)) {
+                when {
+                    !ApkUpdate.isReady(ctx) ->
+                        note = "دانلود کامل نشد؛ با «دانلود در مرورگر» دوباره امتحان کن."
+                    !ApkUpdate.verify(ctx, info.sha256) -> {
+                        // فایلِ نیمه‌کاره/دست‌کاری‌شده هرگز به نصب‌کننده نمی‌رسد.
+                        ApkUpdate.clear(ctx)
+                        note = "فایلِ دانلودشده سالم نبود و پاک شد؛ یک‌بار دیگر بزن."
+                    }
+                    !ApkUpdate.install(ctx) -> {
                         ApkUpdate.explain(ctx)
                         note = "نصب‌کننده باز نشد؛ فایلِ دانلودشده را دستی نصب کن."
                     }
-                } else {
-                    note = "دانلود کامل نشد؛ با «دانلود در مرورگر» دوباره امتحان کن."
                 }
             }
         }
@@ -80,19 +112,17 @@ fun UpdateGateHost() {
         onDispose { runCatching { ctx.unregisterReceiver(receiver) } }
     }
 
-    val d = decision
-    val info: UpdateInfo = when (d) {
-        is UpdateDecision.Forced -> d.info
-        is UpdateDecision.Optional -> d.info
-        else -> return
+    /** «بعداً»: تا نسخهٔ بعدی دیگر پرسیده نشود (فقط در حالتِ توصیه‌ای). */
+    fun later() {
+        UpdateChecker.skip(ctx, info.latest)
+        onClose()
     }
-    val forced = d is UpdateDecision.Forced
 
     // در حالتِ اجباری، دکمهٔ back هم بی‌اثر است.
     BackHandler(enabled = forced) { }
 
     AlertDialog(
-        onDismissRequest = { if (!forced) dismiss(ctx, info) { decision = UpdateDecision.None } },
+        onDismissRequest = { if (!forced) later() },
         properties = DialogProperties(
             dismissOnBackPress = !forced,
             dismissOnClickOutside = !forced,
@@ -144,17 +174,73 @@ fun UpdateGateHost() {
                     TextButton(onClick = { UpdateChecker.openInBrowser(ctx, info.url) }) {
                         Text("دانلود در مرورگر")
                     }
-                    TextButton(onClick = { dismiss(ctx, info) { decision = UpdateDecision.None } }) {
-                        Text("بعداً")
-                    }
+                    TextButton(onClick = { later() }) { Text("بعداً") }
                 }
             }
         },
     )
 }
 
-/** «بعداً»: تا نسخهٔ بعدی دیگر پرسیده نشود (فقط برای حالتِ توصیه‌ای). */
-private fun dismiss(ctx: Context, info: UpdateInfo, onDone: () -> Unit) {
-    UpdateChecker.skip(ctx, info.latest)
-    onDone()
+/**
+ * کارتِ «آپدیت اپ» برای صفحهٔ «بیشتر»: نسخهٔ فعلی را نشان می‌دهد و با لمس،
+ * **همین حالا** از سرور می‌پرسد (بدونِ توجه به کشِ ۶ساعته و «بعداً»‌های قبلی).
+ * اگر نسخهٔ تازه بود، همان دیالوگِ بالا باز می‌شود.
+ */
+@Composable
+fun UpdateCheckCard() {
+    val ctx = LocalContext.current
+    val container = LocalAppContainer.current
+    val scope = rememberCoroutineScope()
+
+    var busy by remember { mutableStateOf(false) }
+    var status by remember { mutableStateOf<String?>(null) }
+    var prompt by remember { mutableStateOf<UpdateInfo?>(null) }
+    var forcedPrompt by remember { mutableStateOf(false) }
+
+    Card(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text("🔄 آپدیت اپ", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "نسخه‌ی نصب‌شده: ${BuildConfig.VERSION_NAME}" +
+                    if (UpdateChecker.cached(ctx) != null) {
+                        "  •  آخرین اعلام‌شده: " + UpdatePlan.versionLabel(UpdateChecker.cached(ctx)!!)
+                    } else {
+                        ""
+                    },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            status?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall)
+            }
+            TextButton(
+                enabled = !busy,
+                onClick = {
+                    busy = true
+                    status = null
+                    scope.launch {
+                        val info = UpdateChecker.refresh(ctx, container.tables)
+                        if (info == null || info.url.isBlank() || info.latest <= 0) {
+                            status = "الان نتوانستم از سرور بپرسم؛ بعداً دوباره امتحان کن."
+                        } else if (info.latest <= BuildConfig.VERSION_CODE) {
+                            status = "همین نسخه را داری؛ «" + UpdatePlan.versionLabel(info) +
+                                "» آخرین نسخه است ✅"
+                        } else {
+                            // بررسیِ دستی، از رول‌آوت و «بعداً» عبور می‌کند: کاربر خودش خواسته.
+                            val d = UpdatePlan.decisionFor(BuildConfig.VERSION_CODE, info, bucket = 0)
+                            forcedPrompt = d is UpdateDecision.Forced
+                            prompt = info
+                        }
+                        busy = false
+                    }
+                },
+            ) {
+                Text(if (busy) "در حال بررسی…" else "بررسیِ نسخه‌ی تازه")
+            }
+        }
+    }
+
+    prompt?.let {
+        UpdateDialog(info = it, forced = forcedPrompt, onClose = { prompt = null })
+    }
 }

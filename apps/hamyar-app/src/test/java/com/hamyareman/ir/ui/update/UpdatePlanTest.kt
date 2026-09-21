@@ -26,6 +26,7 @@ class UpdatePlanTest {
         assertTrue(info.url.endsWith("hamyar-1.66.apk"))
         assertEquals(28000000L, info.size)
         assertEquals("1.66", UpdatePlan.versionLabel(info))
+        assertEquals("abc", info.sha256)
         assertEquals(listOf("پلیر صوت", "ورود آفلاین"), info.notes)
         assertEquals("stable", info.chan)
         assertEquals(100, info.rollout)
@@ -39,6 +40,7 @@ class UpdatePlanTest {
         assertEquals(100, info.rollout)
         assertTrue(info.notes.isEmpty())
         assertEquals("", UpdatePlan.versionLabel(info))
+        assertEquals("", info.sha256)
     }
 
     @Test
