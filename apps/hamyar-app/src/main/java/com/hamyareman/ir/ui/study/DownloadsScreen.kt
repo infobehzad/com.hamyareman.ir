@@ -35,6 +35,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -57,6 +58,7 @@ import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 import com.hamyareman.ir.platform.feature.study.BookModuleRegistry
 import com.hamyareman.ir.platform.feature.study.BookToc
 import com.hamyareman.ir.platform.feature.study.BookToc.TocNode
+import androidx.compose.material3.OutlinedButton
 import com.hamyareman.ir.platform.feature.study.StudyPack
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
@@ -197,6 +199,12 @@ private fun DownloadsScreenInner(onBack: () -> Unit) {
                 }
             }
             tick++
+            // محتوای دانلودشده «امضا» می‌شود تا اگر بعداً روی سرور عوض شد،
+            // همین صفحه بفهمد و فقط همان فایل را دوباره بگیرد (کانالِ محتواییِ
+            // آپدیت، بدونِ APK).
+            runCatching {
+                MediaFreshness.rememberDownload(ctx, key, fileId, cacheKey, asPdf)
+            }
         } catch (e: NotFoundOnServer) {
             store.putString("dl404_$fileId", "1")
         } catch (e: Exception) {
@@ -204,6 +212,40 @@ private fun DownloadsScreenInner(onBack: () -> Unit) {
         } finally {
             busy.remove(key)
         }
+    }
+
+    // --- به‌روزرسانیِ محتوا: فقط فایل‌هایی که روی سرور عوض شده‌اند ---
+    var mediaCheck by remember { mutableStateOf<MediaFreshness.Check?>(null) }
+    var mediaBusy by remember { mutableStateOf(false) }
+
+    fun runMediaCheck() {
+        if (mediaBusy) return
+        mediaBusy = true
+        scope.launch {
+            mediaCheck = MediaFreshness.findStale(ctx)
+            mediaBusy = false
+        }
+    }
+
+    /** پاک‌کردنِ نسخهٔ کهنه و گرفتنِ نسخهٔ تازه — فقط برای فایل‌های تغییریافته. */
+    fun refreshStale(items: List<MediaFreshness.Item>) {
+        scope.launch {
+            for (item in items) {
+                if (!isActive) break
+                withContext(Dispatchers.IO) {
+                    if (item.isPdf) pdfCacheFile(ctx, item.fileId).delete()
+                    else MediaVault.delete(ctx, item.cacheKey)
+                }
+                dl(item.fileId, item.cacheKey, item.key, item.isPdf)
+            }
+            tick++
+            mediaCheck = MediaFreshness.findStale(ctx)
+        }
+    }
+
+    // بررسیِ خودکار در پس‌زمینه، اگر نتیجهٔ قبلی کهنه است (شش ساعت).
+    LaunchedEffect(Unit) {
+        if (!MediaFreshness.isFresh(ctx)) runMediaCheck()
     }
 
     fun download(moduleFiles: List<Quadruple>) {
@@ -217,6 +259,15 @@ private fun DownloadsScreenInner(onBack: () -> Unit) {
 
     AppTopBar("مدیریت دانلود کتاب‌ها", onBack)
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(12.dp)) {
+        item {
+            MediaUpdateCard(
+                check = mediaCheck,
+                busy = mediaBusy,
+                lastCheckAt = MediaFreshness.lastCheckAt(ctx),
+                onCheck = { runMediaCheck() },
+                onUpdate = { items -> refreshStale(items) },
+            )
+        }
         items(books.size) { i ->
             BookDlCard(
                 module = books[i],
@@ -681,5 +732,78 @@ private fun DlLessonRow(
                 ChipView(chipOf(false, t)) { clickChip(it) }
             }
         }
+    }
+}
+
+/**
+ * کارتِ «به‌روزرسانی محتوا» — کانالِ محتواییِ آپدیت:
+ *
+ * فایل‌های صوتی/PDFِ تدریس روی سرور می‌توانند عوض شوند، در حالی که نسخه‌ی
+ * دانلودشده روی گوشی همان قدیمی می‌ماند. این کارت اثرِ انگشتِ محتوای سرور را با
+ * اثرِ انگشتی که هنگامِ دانلود ثبت شده مقایسه می‌کند و **فقط فایل‌های
+ * تغییریافته** را با دکمه‌ی «به‌روزرسانی» دوباره می‌گیرد.
+ */
+@Composable
+private fun MediaUpdateCard(
+    check: MediaFreshness.Check?,
+    busy: Boolean,
+    lastCheckAt: Long,
+    onCheck: () -> Unit,
+    onUpdate: (List<MediaFreshness.Item>) -> Unit,
+) {
+    val stale = check?.stale.orEmpty()
+    Card(Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text("🔄 به‌روزرسانی محتوا", style = MaterialTheme.typography.titleMedium)
+
+            val body = when {
+                busy -> "در حال بررسی…"
+                check == null && lastCheckAt <= 0L ->
+                    "ببین کدام فایلِ دانلودشده روی سرور تازه‌تر شده؛ فقط همان‌ها دوباره گرفته می‌شوند."
+                check == null ->
+                    "آخرین بررسی: ${agoLabel(lastCheckAt)}"
+                stale.isEmpty() && check.failed == 0 ->
+                    "همه‌چیز به‌روز است ✅  (${toPersianDigits(check.checked.toString())} فایل بررسی شد)"
+                else -> buildString {
+                    if (stale.isNotEmpty()) {
+                        append(toPersianDigits(stale.size.toString()))
+                        append(" فایل روی سرور تازه‌تر شده: ")
+                        append(stale.take(4).joinToString("، ") { it.fileId })
+                        if (stale.size > 4) append(" و …")
+                    }
+                    if (check.failed > 0) {
+                        if (isNotEmpty()) append("\n")
+                        append(toPersianDigits(check.failed.toString()))
+                        append(" فایل بررسی نشد (اینترنت را چک کن).")
+                    }
+                    if (check.checked == 0) append("هنوز چیزی دانلود نکرده‌ای.")
+                }
+            }
+            Text(body, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(enabled = !busy, onClick = onCheck) {
+                    Text(if (busy) "در حال بررسی…" else "بررسی")
+                }
+                if (stale.isNotEmpty()) {
+                    Button(enabled = !busy, onClick = { onUpdate(stale) }) {
+                        Text("به‌روزرسانی ${toPersianDigits(stale.size.toString())} فایل")
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** «۲ دقیقه پیش» / «۳ ساعت پیش» / «۵ روز پیش» — برای خطِ آخرین بررسی. */
+private fun agoLabel(at: Long): String {
+    if (at <= 0L) return "—"
+    val d = System.currentTimeMillis() - at
+    val min = d / 60_000
+    return when {
+        min < 1 -> "همین حالا"
+        min < 60 -> toPersianDigits(min.toString()) + " دقیقه پیش"
+        min < 24 * 60 -> toPersianDigits((min / 60).toString()) + " ساعت پیش"
+        else -> toPersianDigits((min / (24 * 60)).toString()) + " روز پیش"
     }
 }
