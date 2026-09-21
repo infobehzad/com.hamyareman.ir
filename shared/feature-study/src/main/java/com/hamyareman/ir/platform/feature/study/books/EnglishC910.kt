@@ -53,7 +53,7 @@ object EnglishC910 {
             StudyPack.Question(id = "qq4", type = "short", text = "جمله را مرتب کن: and/you/your friend/selfish/not/are/.", options = emptyList(), answer = "You and your friend are not selfish.", explanation = "فاعل دوتایی → are.", topic = "Grammar", difficulty = 2, refSectionId = "s1"),
             StudyPack.Question(id = "qq5", type = "short", text = "سوال بساز: Mina/is/careless/؟", options = emptyList(), answer = "Is Mina careless?", explanation = "Is + فاعل + صفت + ? — جواب: Yes, she is.", topic = "Grammar", difficulty = 1, refSectionId = "s1"),
             StudyPack.Question(id = "qq6", type = "short", text = "جمله را مرتب کن: there/an/orange/table/is/on the/؟", options = emptyList(), answer = "Is there an orange on the table?", explanation = "سوال There: Is there + ... ?", topic = "Grammar", difficulty = 2, refSectionId = "s1"),
-            StudyPack.Question(id = "qq7", type = "mcq", text = "در مکالمه، Parham درباره‌ی شخصیت رضا چه می‌گوید؟", options = listOf("He's quiet and shy", "He's clever and kind", "He's rude", "He's careless"), answer = "He's clever and kind (and very helpful)", explanation = "کلمه‌به‌کلمه از متن مکالمه.", topic = "Conversation", difficulty = 2, refSectionId = "s1"),
+            StudyPack.Question(id = "qq7", type = "mcq", text = "در مکالمه، Parham درباره‌ی شخصیت رضا چه می‌گوید؟", options = listOf("He's quiet and shy", "He's clever and kind", "He's rude", "He's careless"), answer = "He's clever and kind", explanation = "کلمه‌به‌کلمه از متن مکالمه.", topic = "Conversation", difficulty = 2, refSectionId = "s1"),
             StudyPack.Question(id = "qq8", type = "mcq", text = "پرسیدن «شخصیت مادرت چه‌طور است؟» به انگلیسی:", options = listOf("Who is your mother?", "What's your mother like?", "How is your mother do?", "What does your mother like?"), answer = "What's your mother like?", explanation = "الگوی What + be + فاعل + like؟", topic = "Practice 2", difficulty = 2, refSectionId = "s1"),
             StudyPack.Question(id = "qq9", type = "short", text = "با کلمه‌ی «patient» یک جمله بنویس.", options = emptyList(), answer = "نمونه: My teacher is very patient.", explanation = "هر جمله‌ی درست با patient پذیرفته است.", topic = "واژگان", difficulty = 1, refSectionId = "s1"),
             StudyPack.Question(id = "qq10", type = "mcq", text = "کدام واژه شخصیت منفی است؟", options = listOf("brave", "neat", "selfish", "polite"), answer = "selfish", explanation = "brave/neat/polite مثبت‌اند؛ selfish یعنی خودخواه.", topic = "واژگان", difficulty = 1, refSectionId = "s1"),
@@ -67,9 +67,18 @@ object EnglishC910 {
             StudyPack.Solution("sol5", "Role Play (ص۲۶) — پاسخ کارت B با چرایی", "1. Yes, I am (سؤال با are، جواب با am چون فاعل I). 2. No, he isn't (brother مفرد). 3. Yes, they are (family members جمع). 4. Ali is brave (سوم‌شخص مفرد → is). 5. My teacher is friendly (مفرد). 6. He is kind and serious (What...like → جواب با صفت)."),
             StudyPack.Solution("sol6", "Listening B (ص۲۴) — پاسخ ایران با چرایی", "1. Iran is a beautiful/great country (Iran مفرد → is + a + صفت). 2. Iranian people are brave, kind, hard-working and friendly (people جمع → are)."),
         ),
+        summary = "درس ۱ زبان نهم دربارهٔ شخصیت آدم‌هاست: با فعل to be (am/is/are) و صفت‌ها توصیف می‌کنیم، " +
+            "با «What's he like?» شخصیت می‌پرسیم و با There is/are از وجودِ چیزها حرف می‌زنیم. " +
+            "جوابِ کوتاه (Yes, he is / No, she isn't)، صفت‌های مثبت و منفی و کلمات پرسشیِ همین درس در تمرین‌های کتاب به‌کار می‌آیند.",
+        examTips = "۱) جدولِ to be: I am · he/she/it is · you/we/they are (+ کوتاه‌نویسی‌ها).\n" +
+            "۲) پرسشی و منفی: Is he...? / isn't — Are they...? / aren't.\n" +
+            "۳) There is + مفرد ↔ There are + جمع و پاسخِ کوتاهِ Yes, there is/are.\n" +
+            "۴) تفاوتِ What's he like? (شخصیت) با What does he like? (علاقه).\n" +
+            "۵) صفت‌ها: kind، helpful، hard-working، neat، selfish، careless، nervous.",
     )
 
-    val packs: List<StudyPack> = listOf(l01())
+    /** درس ۱ + درس‌های ۲ تا ۹ (از `EnglishC910Lessons`؛ شاملِ Review 1/2/3) — کلِ کتاب. */
+    val packs: List<StudyPack> = listOf(l01()) + EnglishC910Lessons.packs
 
     val module = BookModule(
         bookCode = "C910", title = "زبان انگلیسی پایه نهم", subject = "", packs = packs,

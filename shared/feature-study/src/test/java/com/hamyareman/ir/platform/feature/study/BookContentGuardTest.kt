@@ -1,6 +1,7 @@
 package com.hamyareman.ir.platform.feature.study
 
 import com.hamyareman.ir.platform.feature.study.books.EdafaiC915
+import com.hamyareman.ir.platform.feature.study.books.EnglishC910
 import com.hamyareman.ir.platform.feature.study.books.TafakkorC941
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -79,6 +80,13 @@ class BookContentGuardTest {
     fun `C941 از من تا خدا — ۱۲ درس`() {
         // این کتاب فصل‌بندیِ ردیف‌دار ندارد؛ کلِ فهرست درس‌های پشت‌سرهم است.
         assertBook("C941", TafakkorC941.packs, chapterCount = 0, lessonCount = 12)
+    }
+
+    @Test
+    fun `C910 زبان انگلیسی — ۶ ردیفِ راهنما، ۹ پکِ درسی`() {
+        // ردیف‌های «Talking about ...» در فهرست، راهنمای موضوع‌اند و پک ندارند؛
+        // ۹ پکِ این کتاب: شش Lesson و سه Review.
+        assertBook("C910", EnglishC910.packs, chapterCount = 6, lessonCount = 9)
     }
 
     @Test
