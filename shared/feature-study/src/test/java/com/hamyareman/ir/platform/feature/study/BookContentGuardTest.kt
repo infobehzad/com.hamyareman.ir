@@ -84,9 +84,9 @@ class BookContentGuardTest {
 
     @Test
     fun `C910 زبان انگلیسی — ۶ ردیفِ راهنما، ۹ پکِ درسی`() {
-        // ردیف‌های «Talking about ...» در فهرست، راهنمای موضوع‌اند و پک ندارند؛
-        // ۹ پکِ این کتاب: شش Lesson و سه Review.
-        assertBook("C910", EnglishC910.packs, chapterCount = 6, lessonCount = 9)
+        // فهرستِ C910 نُه ردیفِ اصلی دارد و همه‌شان پک‌اند (۶ Lesson و ۳ Review)؛
+        // ردیف‌های «Talking about ...» فرزندِ همان درس‌ها و راهنمای موضوع‌اند.
+        assertBook("C910", EnglishC910.packs, chapterCount = 0, lessonCount = 9)
     }
 
     @Test
