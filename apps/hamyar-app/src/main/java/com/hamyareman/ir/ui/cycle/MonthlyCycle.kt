@@ -161,11 +161,12 @@ object MonthlyCycle {
         val n = daysToNext(state, iso)
         val cyc = state.cycleLength.coerceIn(21, 35)
         if (n != null && n in 0..cyc) {
+            // n = چند روز تا شروعِ بعدی؛ روزِ چرخه = cyc - n.
             val dayInCycle = cyc - n
             return when {
-                dayInCycle in 0..2 -> Phase.PMS
-                dayInCycle in 11..16 -> Phase.OVULATION
-                dayInCycle < 11 -> Phase.FOLLICULAR
+                n in 0..2 -> Phase.PMS              // ۲ روزِ آخرِ چرخه
+                dayInCycle in 12..16 -> Phase.OVULATION
+                dayInCycle < 12 -> Phase.FOLLICULAR
                 else -> Phase.LUTEAL
             }
         }

@@ -45,8 +45,13 @@ class MonthlyCycleTest {
         val s = MonthlyCycle.markStart(empty, "2026-09-01")
         assertEquals(MonthlyCycle.Phase.PERIOD, MonthlyCycle.phase(s, "2026-09-01"))
         assertEquals(MonthlyCycle.Phase.PERIOD, MonthlyCycle.phase(s, "2026-09-04"))
-        // روزِ پیش از شروعِ بعدی = PMS
+        // ۲ روزِ آخرِ چرخه = PMS (روزِ ۲۶ و ۲۷ چرخه‌ی ۲۸روزه)
+        assertEquals(MonthlyCycle.Phase.PMS, MonthlyCycle.phase(s, "2026-09-27"))
         assertEquals(MonthlyCycle.Phase.PMS, MonthlyCycle.phase(s, "2026-09-28"))
+        // میانه‌ی چرخه ≈ تخمک‌گذاری
+        assertEquals(MonthlyCycle.Phase.OVULATION, MonthlyCycle.phase(s, "2026-09-15"))
+        // فردای تمام‌شدنِ پریود = فولیکولار
+        assertEquals(MonthlyCycle.Phase.FOLLICULAR, MonthlyCycle.phase(s, "2026-09-07"))
     }
 
     @Test

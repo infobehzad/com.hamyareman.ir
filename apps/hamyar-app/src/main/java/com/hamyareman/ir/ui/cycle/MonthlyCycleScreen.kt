@@ -93,7 +93,8 @@ fun MonthlyCycleScreen(
     }
 
     val today = remember { LocalDate.now(JalaliDate.TEHRAN).toString() }
-    val todayJalali = remember { JalaliDate.toJalali(today) }
+    // تبدیلِ شمسیِ «امروز» قطعی است؛ نگهبانِ null فقط برای امنیتِ نوع است.
+    val todayJalali = remember { JalaliDate.toJalali(today) ?: JalaliDate.Jalali(1400, 1, 1) }
     var viewYear by remember { mutableStateOf(todayJalali.year) }
     var viewMonth by remember { mutableStateOf(todayJalali.month) }
     var picked by remember { mutableStateOf(today) }
@@ -200,6 +201,7 @@ fun MonthlyCycleScreen(
                                         state = state,
                                         today = today,
                                         selected = iso == picked,
+                                        modifier = Modifier.weight(1f),
                                         onClick = { picked = iso.orEmpty() },
                                     )
                                 }
@@ -356,6 +358,7 @@ private fun DayCell(
     state: MonthlyCycle.State,
     today: String,
     selected: Boolean,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     val isPeriod = iso.isNotBlank() && iso in state.periodDays
@@ -373,8 +376,7 @@ private fun DayCell(
     val fg = if (isPeriod) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
 
     Box(
-        modifier = Modifier
-            .weight(1f)
+        modifier = modifier
             .aspectRatio(1f)
             .padding(2.dp)
             .background(bg, RoundedCornerShape(10.dp))
