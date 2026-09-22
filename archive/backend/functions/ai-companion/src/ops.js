@@ -14,6 +14,10 @@
  */
 const sdk = require('node-appwrite');
 
+function serverKey() {
+  return process.env.HAMYAR_SERVER_KEY || process.env.APPWRITE_FUNCTION_API_KEY || process.env.APPWRITE_API_KEY || '';
+}
+
 const DATABASE_ID = process.env.APPWRITE_DATABASE_ID || 'ZahraDB';
 const PROFILES = 'profiles';
 const SETTINGS = 'user_settings';
@@ -39,10 +43,14 @@ const FAREWELL =
   'موفقیتت را از همین‌جا می‌بینیم — به امید دیدار.';
 
 function adminClient() {
+  const project = process.env.APPWRITE_FUNCTION_PROJECT_ID ||
+    process.env.APPWRITE_PROJECT_ID ||
+    '6a9d59e3002751cc3ea8';
+  const key = process.env.APPWRITE_FUNCTION_API_KEY || process.env.APPWRITE_API_KEY || '';
   const client = new sdk.Client()
-    .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
-    .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID);
-  client.setKey(process.env.APPWRITE_FUNCTION_API_KEY);
+    .setEndpoint('https://fra.cloud.appwrite.io/v1')
+    .setProject(project);
+  if (key) client.setKey(key);
   return client;
 }
 
@@ -304,13 +312,37 @@ async function handleBootstrap(req, res, userId, body) {
   }
 }
 
+async function fetchUser(userId) {
+  const project = process.env.APPWRITE_FUNCTION_PROJECT_ID ||
+    process.env.APPWRITE_PROJECT_ID ||
+    '6a9d59e3002751cc3ea8';
+  const key = serverKey();
+  const urls = [];
+  const envEp = String(process.env.APPWRITE_FUNCTION_API_ENDPOINT || '').replace(/\/$/, '');
+  if (envEp) urls.push(envEp);
+  urls.push('https://fra.cloud.appwrite.io/v1');
+  let last = 'no-url';
+  for (const base of urls) {
+    try {
+      const r = await fetch(base + '/users/' + encodeURIComponent(userId), {
+        headers: { 'X-Appwrite-Project': project, 'X-Appwrite-Key': key },
+      });
+      if (r.ok) return r.json();
+      last = 'http ' + r.status + ' ' + base.replace('https://', '');
+    } catch (e) {
+      last = (e && e.message ? e.message : 'fetch') + ' ' + base.replace('https://', '');
+    }
+  }
+  throw new Error('users.get ' + last);
+}
+
 async function handleOps(req, res, userId, body, action) {
   const client = adminClient();
   const users = new sdk.Users(client);
   const tables = tablesService(client);
 
   try {
-    const user = await users.get(userId);
+    const user = await fetchUser(userId);
     switch (action) {
       case 'billing_my':
         return res.json(await opMy(tables, userId, user), 200);
@@ -367,7 +399,8 @@ async function handleOps(req, res, userId, body, action) {
     }
   } catch (err) {
     const msg = err && err.message ? String(err.message) : String(err);
-    console.error('ops failed', action, msg);
+    const cause = err && err.cause ? String(err.cause.message || err.cause) : '';
+    console.error('ops failed', action, msg, cause);
     const missing = /not found|could not be found|404/i.test(msg);
     return res.json({
       ok: false,
