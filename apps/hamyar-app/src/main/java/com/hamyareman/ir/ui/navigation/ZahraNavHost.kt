@@ -26,8 +26,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.hamyareman.ir.LocalAppContainer
-import com.hamyareman.ir.platform.feature.calls.CallScreen
-import com.hamyareman.ir.platform.feature.hearttoheart.MessageDirection
 import com.hamyareman.ir.platform.feature.study.BookModuleRegistry
 import com.hamyareman.ir.ui.ailearning.AiAssessmentScreen
 import com.hamyareman.ir.ui.ailearning.AiLearningHomeScreen
@@ -62,7 +60,6 @@ import com.hamyareman.ir.ui.more.MoreScreen
 import com.hamyareman.ir.ui.recipes.RecipeDetailScreen
 import com.hamyareman.ir.ui.recipes.RecipesScreen
 import com.hamyareman.ir.ui.routine.RoutineScreen
-import com.hamyareman.ir.ui.safespace.AlbumScreen
 import com.hamyareman.ir.ui.safespace.HelplinesScreen
 import com.hamyareman.ir.ui.safespace.SafeSpaceScreen
 import com.hamyareman.ir.ui.safespace.WritingPromptScreen
@@ -98,7 +95,6 @@ fun ZahraNavHost() {
     val nav = rememberNavController()
     val entry by nav.currentBackStackEntryAsState()
     val route = entry?.destination?.route
-    val c = LocalAppContainer.current
     // لمس اعلان پخش → صفحه‌ی تدریس همان درس (قانون: صوت فقط در صفحه‌ی تدریس پخش می‌شود؛
     // پس بعد از لود شدن همان صفحه، پخش خودکار از TeachAudioBar شروع می‌شود).
     LaunchedEffect(com.hamyareman.ir.ui.study.SleepLaunch.pending) {
@@ -120,8 +116,7 @@ fun ZahraNavHost() {
         }
     }
     val hideBar = route?.startsWith("study-teach") == true ||
-        route?.startsWith("video-teach") == true ||
-        route == Screen.Call.route
+        route?.startsWith("video-teach") == true
     Scaffold(bottomBar = {
         if (!hideBar) {
             NavigationBar {
@@ -235,7 +230,6 @@ fun ZahraNavHost() {
             composable(Screen.Breath.route) { BreathingScreen { nav.popBackStack() } }
             composable(Screen.Routine.route) { RoutineScreen { nav.popBackStack() } }
             composable(Screen.SafeSpace.route) { SafeSpaceScreen(nav) }
-            composable(Screen.Album.route) { AlbumScreen { nav.popBackStack() } }
             composable(Screen.Writing.route) { WritingPromptScreen { nav.popBackStack() } }
             composable(Screen.Helplines.route) { HelplinesScreen { nav.popBackStack() } }
             composable(Screen.Library.route) { LibraryScreen { nav.popBackStack() } }
@@ -350,15 +344,6 @@ fun ZahraNavHost() {
                 )
             }
             composable(Screen.Water.route) { WaterScreen() }
-            composable(Screen.Call.route) {
-                CallScreen(
-                    engine = c.calls,
-                    onClose = { nav.popBackStack() },
-                    fatherTel = c.fatherTel,
-                    remoteUserId = c.partnerId,
-                    remoteLabel = "بابا",
-                )
-            }
             composable(Screen.Settings.route) { SettingsScreen(nav) }
             composable(Screen.UserProfile.route) {
                 val container = LocalAppContainer.current

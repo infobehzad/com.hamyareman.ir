@@ -26,6 +26,7 @@ rootProject.name = "HamyarPlatform"
 
 include(
     ":hamyar-app",
+    ":hamyar-admin",
     ":core-common",
     ":core-designsystem",
     ":core-appwrite",
@@ -40,6 +41,7 @@ include(
 )
 
 project(":hamyar-app").projectDir = file("apps/hamyar-app")
+project(":hamyar-admin").projectDir = file("apps/hamyar-admin")
 project(":core-common").projectDir = file("shared/core-common")
 project(":core-designsystem").projectDir = file("shared/core-designsystem")
 project(":core-appwrite").projectDir = file("shared/core-appwrite")

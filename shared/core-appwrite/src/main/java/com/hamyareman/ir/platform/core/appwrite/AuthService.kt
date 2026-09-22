@@ -22,6 +22,13 @@ import java.net.URLDecoder
 import java.security.MessageDigest
 import java.util.concurrent.atomic.AtomicLong
 
+/** زمینهٔ قفل پایه + سقف دو دستگاه — از اپ (flavor) تزریق می‌شود. */
+data class AuthGateContext(
+    val gradeId: String,
+    val deviceId: String,
+    val deviceLabel: String,
+)
+
 /** کاربر جاری از دید اپ — نقش همیشه از Labels سرور می‌آید، نه از یک فیلد کلاینتی. */
 data class AuthUser(
     val id: String,
@@ -105,10 +112,9 @@ interface AuthService {
  * پیاده‌سازی Appwrite.
  *
  * نکات مهم:
- *  - نقش کاربر با Label سمت سرور تعیین می‌شود (`zahra` / `father` / `guest`) و هرگز
- *    یک فیلدِ نوشتنیِ کلاینتی نیست. تابع `user-bootstrap` برچسب را می‌گذارد و
- *    `pairing` پدر را ارتقا می‌دهد؛ چون `user-bootstrap` هنوز مستقر نیست، نبودِ
- *    Label با [roleOf] به نقشِ پیش‌فرضِ اپ برمی‌گردد (نه «مهمان»).
+ *  - نقش کاربر با Label سمت سرور تعیین می‌شود (`zahra`) و هرگز یک فیلدِ نوشتنیِ
+ *    کلاینتی نیست. تابع `user-bootstrap` برچسب پایه را می‌گذارد و ورود را به
+ *    همان پایه + حداکثر دو دستگاه قفل می‌کند. اگر تابع مستقر نباشد ورود قطع نمی‌شود.
  *  - در حالت محلی (بدون projectId) یک کاربر محلی با [fallbackRole] برگردانده می‌شود
  *    تا UI و جریان‌ها قابل تست باشند.
  *  - **v1.65 — ورودِ آفلاین:** فقط «بارِ اول» اینترنت لازم است. بعد از هر ورودِ
@@ -125,6 +131,7 @@ class AppwriteAuthService(
     private val fallbackRole: UserRole,
     private val store: LocalStore? = null,
     private val functions: FunctionsService? = null,
+    private val gateContext: () -> AuthGateContext? = { null },
 ) : AuthService {
 
     override val isConfigured: Boolean get() = provider.isConfigured
@@ -208,8 +215,7 @@ class AppwriteAuthService(
             runCatching { account.deleteSession("current") }
             account.create(userId = ID.unique(), email = email, password = password, name = name)
             account.createEmailPasswordSession(email = email, password = password)
-            bootstrap()
-            requireUser()
+            afterSession()
         }.getOrElse { AppResult.Err(mapAuth(it, "رمز یا ایمیل نامعتبر است.", "این ایمیل قبلاً ثبت شده.")) }
     }
 
@@ -233,8 +239,7 @@ class AppwriteAuthService(
         return runCatching {
             runCatching { account.deleteSession("current") }
             account.createEmailPasswordSession(email = email, password = password)
-            bootstrap()
-            requireUser().also { if (it is AppResult.Ok) adoptUsername(it.value.id, email) }
+            afterSession().also { if (it is AppResult.Ok) adoptUsername(it.value.id, email) }
         }.getOrElse { AppResult.Err(mapAuth(it, "نام کاربری/ایمیل یا رمز عبور درست نیست.")) }
     }
 
@@ -258,8 +263,7 @@ class AppwriteAuthService(
             runCatching { account.deleteSession("current") }
             account.create(userId = ID.unique(), email = email, password = password, name = name)
             account.createEmailPasswordSession(email = email, password = password)
-            bootstrap()
-            val res = requireUser()
+            val res = afterSession()
             if (res is AppResult.Ok) {
                 publishUsername(res.value.id, u, email)
                 store?.putString(KEY_USERNAME, u)
@@ -289,8 +293,7 @@ class AppwriteAuthService(
             // تمام می‌کنیم تا OAuth همیشه از صفر شروع کند و هر اکانت گوگل، کاربر خودش را بسازد.
             runCatching { account.deleteSession("current") }
             account.createOAuth2Session(activity = activity, provider = OAuthProvider.GOOGLE)
-            bootstrap()
-            requireUser().also { if (it is AppResult.Ok) adoptUsername(it.value.id, it.value.email) }
+            afterSession().also { if (it is AppResult.Ok) adoptUsername(it.value.id, it.value.email) }
         }.getOrElse { AppResult.Err(mapAuth(it, "ورود با گوگل ناموفق بود.")) }
     }
 
@@ -413,8 +416,7 @@ class AppwriteAuthService(
         return runCatching {
             runCatching { account.deleteSession("current") }
             account.createSession(userId = uid, secret = otp.trim())
-            bootstrap()
-            requireUser().also { if (it is AppResult.Ok) adoptUsername(it.value.id, it.value.email) }
+            afterSession().also { if (it is AppResult.Ok) adoptUsername(it.value.id, it.value.email) }
         }.getOrElse { AppResult.Err(mapAuth(it, "کد یک‌بارمصرف درست نیست یا منقضی شده.")) }
     }
 
@@ -521,17 +523,59 @@ class AppwriteAuthService(
 
     // ------------------------------------------------------------------- کشِ محلی
 
+    /** بعد از ساخت سشن: قفل پایه + سقف دو دستگاه، بعد هویت. */
+    private suspend fun afterSession(): AppResult<AuthUser> {
+        when (val g = bootstrap()) {
+            is AppResult.Err -> return g
+            is AppResult.Ok -> Unit
+        }
+        return requireUser()
+    }
+
     /**
-     * صدا زدن `user-bootstrap`: ساخت سطر profiles و گذاشتن Label مناسب.
-     * اگر تابع سرور موجود نبود، خطا را قورت می‌دهیم تا ورود کاربر شکست نخورد
-     * (در این حالت نقش `guest` می‌ماند و باید در کنسول بررسی شود).
+     * صدا زدن `user-bootstrap`: قفل ایمیل به یک پایه و حداکثر دو دستگاه.
+     * اگر تابع مستقر نباشد ورود قطع نمی‌شود؛ رد صریح (پایه/دستگاه) نشست را می‌بندد.
      */
-    private suspend fun bootstrap() {
-        val svc = functions ?: return
-        runCatching {
-            svc.call(FunctionIds.USER_BOOTSTRAP, """{"app":"${fallbackRole.label}"}""")
+    private suspend fun bootstrap(): AppResult<Unit> {
+        val svc = functions ?: return AppResult.Ok(Unit)
+        val ctx = gateContext() ?: return AppResult.Ok(Unit)
+        val body = JSONObject()
+            .put("app", "zahra")
+            .put("grade", ctx.gradeId)
+            .put("deviceId", ctx.deviceId)
+            .put("deviceLabel", ctx.deviceLabel)
+            .toString()
+        return when (val r = svc.call(FunctionIds.USER_BOOTSTRAP, body)) {
+            is AppResult.Ok -> {
+                val parsed = runCatching { JSONObject(r.value.body.ifBlank { "{}" }) }.getOrNull()
+                val ok = parsed?.optBoolean("ok", true) ?: true
+                if (ok) return AppResult.Ok(Unit)
+                val code = parsed?.optString("code").orEmpty()
+                if (code == "GRADE_MISMATCH" || code == "DEVICE_LIMIT") {
+                    runCatching { account.deleteSession("current") }
+                    forgetRole()
+                    AppResult.Err(AppError.Permission(gateMessage(parsed)))
+                } else {
+                    AppResult.Ok(Unit)
+                }
+            }
+            is AppResult.Err -> AppResult.Ok(Unit)
         }
     }
+
+    private fun gateMessage(o: JSONObject?): String {
+        val msg = o?.optString("messageFa").orEmpty().ifBlank { o?.optString("error").orEmpty() }
+        return when (o?.optString("code")) {
+            "GRADE_MISMATCH" ->
+                msg.ifBlank { "این ایمیل برای پایهٔ دیگری ثبت شده و نمی‌تواند وارد این اپ شود." }
+            "DEVICE_LIMIT" ->
+                msg.ifBlank { "این حساب روی دو دستگاه دیگر فعال است." }
+            else -> msg.ifBlank { "ورود در این دستگاه مجاز نیست." }
+        }
+    }
+
+    /** بررسی دوبارهٔ قفل پایه/دستگاه برای سشنِ از قبل باز. */
+    suspend fun enforceAccountGate(): AppResult<Unit> = bootstrap()
 
     private suspend fun requireUser(): AppResult<AuthUser> =
         fetchRemote()?.let { AppResult.Ok(it) }

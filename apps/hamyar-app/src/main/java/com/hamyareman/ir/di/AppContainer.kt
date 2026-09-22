@@ -23,23 +23,22 @@ import com.hamyareman.ir.platform.core.security.AppLock
 import com.hamyareman.ir.platform.core.security.BiometricUnlock
 import com.hamyareman.ir.platform.core.security.Encryptor
 import com.hamyareman.ir.platform.core.sync.SyncEngine
-import com.hamyareman.ir.platform.feature.calls.CallEngine
-import com.hamyareman.ir.platform.feature.calls.CallSignaling
+import com.hamyareman.ir.platform.core.appwrite.AuthGateContext
 import com.hamyareman.ir.platform.feature.hearttoheart.AlbumAuthor
 import com.hamyareman.ir.platform.feature.hearttoheart.AlbumRepository
 import com.hamyareman.ir.platform.feature.hearttoheart.HeartRepository
-import com.hamyareman.ir.platform.feature.pairing.AppwritePairingRepository
 import com.hamyareman.ir.platform.feature.playback.LessonMediaProgressRepository
 import com.hamyareman.ir.ui.wellness.WellnessLogRepository
 import com.hamyareman.ir.ui.wellness.WellnessMoveRepository
 import com.hamyareman.ir.ui.wellness.WellnessTimingProvider
 import com.hamyareman.ir.BuildConfig
+import com.hamyareman.ir.ui.auth.DeviceIdentity
 import com.hamyareman.ir.ui.chatbot.AiCompanion
 import com.hamyareman.ir.ui.content.CatalogRepository
-import com.hamyareman.ir.platform.feature.calls.IncomingCallWatcher
+import com.hamyareman.ir.ui.profile.AppEdition
 
 /**
- * گراف وابستگی دستی اپ زهرا (بدون Hilt/Koin تا بیلد ساده و قابل‌اشکال‌زدایی بماند).
+ * گراف وابستگی دستی اپ دانش‌آموز (بدون Hilt/Koin تا بیلد ساده و قابل‌اشکال‌زدایی بماند).
  *
  * هر سرویس طوری ساخته شده که اگر Appwrite پیکربندی نشده باشد، اپ در «حالت محلی»
  * کار کند و کاربر پیام صادقانه بگیرد.
@@ -54,9 +53,6 @@ class AppContainer(context: Context) {
 
     /** ظاهر اپ (تم/حالت رنگ/فونت) — سراسری و پایدار. */
     val uiPrefs = com.hamyareman.ir.ui.appearance.UiPrefs(context)
-
-    /** استور مشترک پیوند — اپ پدر روی همان دستگاه هم آن را می‌خواند. */
-    private val pairingStore = LocalStore(context, AppwritePairingRepository.PAIRING_STORE)
 
     val appwrite = AppwriteClientProvider(
         context = context,
@@ -94,8 +90,8 @@ class AppContainer(context: Context) {
      * کلاینتِ تایپ‌شده‌ی توابع سرور (`ServerActions`).
      *
      * منطق‌هایی که باید **سمت سرور** باشند تا یک اپ دستکاری‌شده نتواند دورشان بزند:
-     * خبردادن به پدر، تأیید خاطره‌ی آلبوم، انتخاب درس امروز، اثر انگشت کاتالوگ
-     * و خلاصه‌ی روزانه. اگر تابعی deploy نشده باشد، همه‌ی فراخوانی‌ها `Err` می‌دهند
+     * قفل پایه/دستگاه، انتخاب درس امروز، اثر انگشت کاتالوگ.
+     * اگر تابعی deploy نشده باشد، همه‌ی فراخوانی‌ها `Err` می‌دهند
      * و اپ روی مسیر محلی خودش می‌ماند.
      */
     val serverActions = ServerActions(functions)
@@ -116,14 +112,13 @@ class AppContainer(context: Context) {
         fallbackRole = UserRole.ZAHRA,
         store = store,
         functions = functions,
-    )
-
-    val pairing = AppwritePairingRepository(
-        functions = functions,
-        tables = tables,
-        auth = auth,
-        pairingStore = pairingStore,
-        role = UserRole.ZAHRA,
+        gateContext = {
+            AuthGateContext(
+                gradeId = AppEdition.grade.id,
+                deviceId = DeviceIdentity.id(appContext),
+                deviceLabel = DeviceIdentity.label(),
+            )
+        },
     )
 
     val heart = HeartRepository(
@@ -131,16 +126,10 @@ class AppContainer(context: Context) {
         tables = tables,
         storage = storage,
         provider = appwrite,
-        partnerUserId = { pairing.cachedLink().partnerId },
+        partnerUserId = { null },
         realtime = realtime,
     )
 
-    /**
-     * آلبوم خاطرات مشترک با پدر.
-     *
-     * مالک آلبوم همیشه زهراست؛ خاطره‌ی پدر با `approved=false` ساخته می‌شود
-     * و تا زهرا تأیید نکند در آلبوم او نمی‌نشیند.
-     */
     val album = AlbumRepository(
         store = store,
         tables = tables,
@@ -150,33 +139,7 @@ class AppContainer(context: Context) {
         zahraId = { store.getString(AppwriteAuthService.KEY_USER_ID) },
         realtime = realtime,
         serverActions = serverActions,
-        fatherId = { pairing.cachedLink().partnerId },
-    )
-
-    val signaling = CallSignaling(tables, appwrite, realtime)
-
-    val calls = CallEngine(
-        context = context,
-        signaling = signaling,
-        selfUserId = { auth.currentUserId() },
-    )
-
-    /**
-     * نگهبانِ زنگِ تماس ورودی.
-     *
-     * تا پیش از این `acceptIncoming` وجود داشت ولی هیچ‌وقت صدا زده نمی‌شد، یعنی یک طرف
-     * زنگ می‌زد و طرف دیگر هیچ‌وقت نمی‌دید. این کلاس سطرهای `call_sessions` با
-     * `status="ringing"` را از دو مسیر می‌خواند (Realtime + polling به‌عنوان تور ایمنی)
-     * و زنگ/لرزش و صفحه‌ی «پاسخ/رد» را بالا می‌آورد.
-     *
-     * فقط وقتی اپ باز است کار می‌کند؛ برای زنگ در حالت بسته‌بودن اپ به سرویس
-     * پیش‌زمینه‌ی دائمی + FCM نیاز است (عمداً اضافه نشد: باتری و حریم خصوصی).
-     */
-    val incomingCalls = IncomingCallWatcher(
-        context = context,
-        signaling = signaling,
-        selfUserId = { auth.currentUserId() },
-        realtime = realtime,
+        fatherId = { null },
     )
 
     /**
@@ -257,7 +220,5 @@ class AppContainer(context: Context) {
     )
 
     val role: UserRole get() = auth.cachedRole()
-    val partnerId: String? get() = pairing.cachedLink().partnerId
-    val fatherTel: String get() = store.getString("father_tel", "")
     val isBackendConfigured: Boolean get() = appwrite.isConfigured
 }

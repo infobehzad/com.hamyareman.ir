@@ -8,28 +8,33 @@ import com.hamyareman.ir.platform.core.appwrite.TablesDbService
 import com.hamyareman.ir.platform.core.common.LocalStore
 import com.hamyareman.ir.platform.core.common.TableIds
 
-/** پایه‌های تحصیلی — دراپ‌داون ثبت‌نام و کلید فیلتر محتوا. */
-enum class GradeLevel(val id: String, val fa: String) {
-    G5("grade5", "پایه پنجم"),
-    G6("grade6", "پایه ششم"),
-    G7("grade7", "پایه هفتم"),
-    G8("grade8", "پایه هشتم"),
-    G9("grade9", "پایه نهم"),
-    G10("grade10", "پایه دهم"),
-    G11("grade11", "پایه یازدهم"),
-    G12("grade12", "پایه دوازدهم");
+/** پایه‌های تحصیلی — هر APK یکی از این‌هاست (چهارم تا دوازدهم). */
+enum class GradeLevel(val id: String, val fa: String, val num: Int) {
+    G4("grade4", "پایه چهارم", 4),
+    G5("grade5", "پایه پنجم", 5),
+    G6("grade6", "پایه ششم", 6),
+    G7("grade7", "پایه هفتم", 7),
+    G8("grade8", "پایه هشتم", 8),
+    G9("grade9", "پایه نهم", 9),
+    G10("grade10", "پایه دهم", 10),
+    G11("grade11", "پایه یازدهم", 11),
+    G12("grade12", "پایه دوازدهم", 12);
 
     companion object {
         fun byId(id: String?): GradeLevel = entries.firstOrNull { it.id == id } ?: G9
+        fun byNum(n: Int?): GradeLevel? = entries.firstOrNull { it.num == n }
     }
 }
 
 /**
- * نگاشت کتاب → پایه. **نگارش فعلی:** همه‌ی کتاب‌ها و دروس موجودِ جدول به پایه‌ی
- * نهم لینک شده‌اند (به محض ارائه‌ی فهرست پایه‌های دیگر، همین یک تابع گسترش می‌یابد
- * و هیچ‌جای دیگری از کد نباید تغییر کند).
+ * نگاشت کتاب → پایه از روی کد کتاب (`C905` → نهم، `C10xx` → دهم).
+ * اگر کد شناخته نشود، کتاب در هیچ پایه‌ی دیگری دیده نمی‌شود مگر همین اپ.
  */
-fun gradeOfBook(bookCode: String): GradeLevel = GradeLevel.G9
+fun gradeOfBook(bookCode: String): GradeLevel {
+    val m = Regex("^C(1[0-2]|[1-9])").find(bookCode.trim())
+    val n = m?.groupValues?.get(1)?.toIntOrNull()
+    return GradeLevel.byNum(n) ?: AppEdition.grade
+}
 
 /**
  * راه‌اندازیِ دوباره‌ی اپ — برای وقتی که آیکون لانچر عوض شده و فقط با
@@ -64,10 +69,8 @@ object StudentProfileState {
     var avatarPath: String by androidx.compose.runtime.mutableStateOf("")
         private set
 
-    fun isPaid(raw: String = subscription): Boolean {
-        val s = raw.trim().lowercase()
-        return s.isNotBlank() && s != "free"
-    }
+    fun isPaid(raw: String = subscription): Boolean =
+        com.hamyareman.ir.platform.core.common.BillingStatus.isPaid(raw)
 
     fun loadMirror(ctx: Context) {
         val store = LocalStore(ctx, STORE)
@@ -205,6 +208,8 @@ object StudentProfileRepo {
 
     /** ذخیره (ساخت/بازنویسی) + پرمیشن فقط-خودِ-کاربر؛ true = در سرور ثبت شد. */
     suspend fun save(tables: TablesDbService, email: String, p: StudentProfile): Boolean {
+        val keepSub = fetch(tables, p.userId)?.subscription?.ifBlank { null }
+            ?: p.subscription.ifBlank { "free" }
         val data = mapOf(
             "userId" to p.userId,
             "email" to email,
@@ -219,7 +224,8 @@ object StudentProfileRepo {
             "city" to p.city,
             "county" to p.county,
             "gender" to p.gender,
-            "subscription" to p.subscription.ifBlank { "free" },
+            // مقدار قبلی حفظ می‌شود؛ تغییر اشتراک فقط از تابع سرور است.
+            "subscription" to keepSub,
             "updatedAtMs" to System.currentTimeMillis(),
         )
         return when (tables.upsert(TABLE, p.userId, data, RowPermissions.forUser(p.userId))) {

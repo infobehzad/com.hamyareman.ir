@@ -27,7 +27,6 @@ import com.hamyareman.ir.platform.core.security.BiometricPromptRunner
 import com.hamyareman.ir.di.AppContainer
 import com.hamyareman.ir.ui.appearance.FontLibrary
 import com.hamyareman.ir.ui.appearance.LocalUiPrefs
-import com.hamyareman.ir.platform.feature.calls.IncomingCallsHost
 import com.hamyareman.ir.ui.auth.LoginScreen
 import com.hamyareman.ir.ui.navigation.ZahraNavHost
 import kotlinx.coroutines.launch
@@ -132,7 +131,17 @@ class MainActivity : FragmentActivity() {
             LaunchedEffect(Unit) {
                 if (loggedIn.value == null) {
                     val u = runCatching { container.auth.currentUser() }.getOrNull()
-                    loggedIn.value = u != null
+                    if (u == null) {
+                        loggedIn.value = false
+                    } else {
+                        when (val g = container.auth.enforceAccountGate()) {
+                            is AppResult.Err -> {
+                                loginError = g.error.userMessage
+                                loggedIn.value = false
+                            }
+                            is AppResult.Ok -> loggedIn.value = true
+                        }
+                    }
                 }
             }
 
@@ -148,9 +157,17 @@ class MainActivity : FragmentActivity() {
                     if (fetched != null) {
                         // v1.31 — نام و اشتراک بازیابی‌شده هم در آینه نوشته شود؛
                         // وگرنه سلام داشبورد «دوست من» می‌ماند (باگ گزارش‌شده).
+                        var sub = fetched.subscription
+                        runCatching {
+                            val gate = com.hamyareman.ir.platform.core.appwrite.BillingGateway(container.functions)
+                            when (val b = gate.myOrder()) {
+                                is AppResult.Ok -> sub = b.value.first.ifBlank { sub }
+                                else -> Unit
+                            }
+                        }
                         com.hamyareman.ir.ui.profile.StudentProfileState.writeMirror(
                             activity, fetched.grade, /* done = */ true,
-                            name = fetched.firstName, sub = fetched.subscription,
+                            name = fetched.firstName, sub = sub,
                             genderId = fetched.gender,
                         )
                         container.uiPrefs.applyDefaultForGender(fetched.gender)
@@ -338,16 +355,6 @@ class MainActivity : FragmentActivity() {
                             // ۲) وارد شده و قفل باز: اپ.
                             isUnlocked -> {
                             ZahraNavHost()
-
-                            // زنگِ تماس ورودی روی هر صفحه‌ای بالا می‌آید — ولی فقط بعد از
-                            // بازشدن قفل: تا اپ قفل است حتی نام تماس‌گیرنده نشان داده نمی‌شود.
-                            IncomingCallsHost(
-                                watcher = container.incomingCalls,
-                                engine = container.calls,
-                                phoneFallback = container.fatherTel,
-                                remoteLabel = "بابا",
-                                remoteUserId = container.partnerId,
-                            )
 
                             // کانالِ آپدیت (v1.66): تنظیماتش روی سرور است (ردیفِ
                             // `app_release` در `app_state`) و فایل در ریپوی عمومیِ

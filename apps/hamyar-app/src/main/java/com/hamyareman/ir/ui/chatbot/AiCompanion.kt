@@ -9,7 +9,6 @@ import com.hamyareman.ir.util.CrisisKeywordDetector
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
-import com.hamyareman.ir.platform.core.appwrite.GuardianAlert
 import com.hamyareman.ir.platform.core.appwrite.ServerActions
 
 /** یک خط گفت‌وگو. فقط روی دستگاه می‌ماند (`chat_history` در فهرست never-sync است). */
@@ -146,13 +145,9 @@ class AiCompanion(
         val text = message.trim()
         if (text.isBlank()) return CompanionReply("چیزی ننوشتی؛ هر وقت خواستی بنویس.", false, ReplySource.RULES_LOCAL)
 
-        // ۱) ایمنی اول: این متن به هیچ مدلی نمی‌رود. اما **خبردادن به پدر** یک کار
-        //    متفاوت است و با اختیار سرور انجام می‌شود (تابع notify-guardian).
+        // ۱) ایمنی اول: این متن به هیچ مدلی نمی‌رود.
         if (CrisisKeywordDetector.detect(text)) {
-            return withGuardian(
-                CompanionReply(CRISIS_REPLY, crisis = true, source = ReplySource.SAFETY),
-                text,
-            )
+            return CompanionReply(CRISIS_REPLY, crisis = true, source = ReplySource.SAFETY)
         }
 
         // ۲) قواعد محلی وقتی AI خاموش است یا بک‌اند تنظیم نشده.
@@ -184,40 +179,6 @@ class AiCompanion(
             )
         }
     }
-
-    /**
-     * اگر پاسخ «بحرانی» بود، به پدر هم خبر می‌دهیم و نتیجه را **صادقانه** به همان
-     * پاسخ اضافه می‌کنیم: رفت ⇒ می‌گوییم رفت؛ نرفت ⇒ دلیلش را می‌گوییم و شماره‌های
-     * کمکی که سرور فرستاده نشان می‌دهیم. هرگز وانمود نمی‌کنیم خبر رفته است.
-     */
-    private suspend fun withGuardian(reply: CompanionReply, userText: String): CompanionReply =
-        if (!reply.crisis) reply else reply.copy(text = reply.text + guardianNote(userText))
-
-    private suspend fun guardianNote(userText: String): String {
-        val actions = serverActions ?: return ""
-        if (!actions.isConfigured) return ""
-        // یادداشت کوتاه می‌شود؛ سرور هم به ۲۰۰ حرف محدود می‌کند.
-        return when (val result = actions.notifyGuardian("crisis", userText.take(120))) {
-            is AppResult.Ok -> {
-                val alert = result.value
-                when {
-                    alert.sent && alert.deduped ->
-                        "\n\nچند دقیقه پیش به بابا خبر داده بودم؛ پیام تکراری نفرستادم."
-                    alert.sent -> "\n\nبه بابا هم خبر دادم."
-                    else -> "\n\nنتونستم به بابا خبر بدم: ${alert.reasonFa}${helplinesSuffix(alert)}"
-                }
-            }
-            // اگر سرور نرسید، پاسخ ایمنی محلی سر جایش می‌ماند و چیزی اضافه نمی‌کنیم.
-            is AppResult.Err -> ""
-        }
-    }
-
-    private fun helplinesSuffix(alert: GuardianAlert): String =
-        if (alert.helplines.isEmpty()) {
-            ""
-        } else {
-            "\n" + alert.helplines.joinToString(" · ") { "${it.name}: ${it.number}" }
-        }
 
     private fun parseReply(rawBody: String, userMessage: String): CompanionReply = runCatching {
         val o = JSONObject(rawBody)

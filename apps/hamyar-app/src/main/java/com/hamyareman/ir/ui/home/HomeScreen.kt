@@ -375,16 +375,29 @@ private fun val12(h24: Int): Int {
  * (پیش‌تر فقط متن بود و هیچ‌جا لینک نمی‌شد).
  */
 internal fun SubscriptionChip(raw: String, onClick: () -> Unit = {}) {
-    val paid = StudentProfileState.isPaid(raw)
-    val bg = if (paid) Color(0xFFDCFCE7) else Color(0xFFFEE2E2)
-    val fg = if (paid) Color(0xFF166534) else Color(0xFFB91C1C)
+    val s = com.hamyareman.ir.platform.core.common.BillingStatus.norm(raw)
+    val paid = com.hamyareman.ir.platform.core.common.BillingStatus.isPaid(s)
+    val pending = s == com.hamyareman.ir.platform.core.common.BillingStatus.PENDING
+    val refunding = s == com.hamyareman.ir.platform.core.common.BillingStatus.REFUND_PENDING
+    val bg = when {
+        pending -> Color(0xFFFEF3C7)
+        refunding -> Color(0xFFE0E7FF)
+        paid -> Color(0xFFDCFCE7)
+        else -> Color(0xFFFEE2E2)
+    }
+    val fg = when {
+        pending -> Color(0xFF92400E)
+        refunding -> Color(0xFF3730A3)
+        paid -> Color(0xFF166534)
+        else -> Color(0xFFB91C1C)
+    }
     Surface(
         shape = RoundedCornerShape(50),
         color = bg,
         onClick = onClick,
     ) {
         Text(
-            if (paid) "اشتراک فعال" else "مهمان همیار من",
+            com.hamyareman.ir.platform.core.common.BillingStatus.chipFa(s),
             color = fg,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.labelMedium,

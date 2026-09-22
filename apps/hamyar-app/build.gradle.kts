@@ -32,8 +32,8 @@ android {
         applicationId = "com.hamyareman.ir"   // Platform ثبت‌شده در کنسول Appwrite
         minSdk = 26
         targetSdk = 36
-        versionCode = 77
-        versionName = "1.76"
+        versionCode = 78
+        versionName = "1.77"
         ndk {
             // فقط معماری‌های واقعیِ گوشی. x86/x86_64 (شبیه‌ساز) عمداً حذف‌اند:
             // کتابخانه‌ی بومیِ WebRTC برای هر معماری ~۶ تا ۱۲ مگابایت است و هر دو
@@ -47,6 +47,43 @@ android {
         manifestPlaceholders["appwriteProjectId"] = appwriteProjectId
         buildConfigField("String", "APPWRITE_PROJECT_NAME", "\"همیار من\"")
         buildConfigField("String", "APPWRITE_DATABASE_ID", "\"$appwriteDatabaseId\"")
+    }
+
+    // نه اپ جدا (چهارم تا دوازدهم) روی یک موتور. نهم همان applicationId فعلی است
+    // تا نصب روی نسخه‌های قبلی بماند. بقیه‌ی پایه‌ها پکیج تازه‌اند و باید در
+    // کنسول Appwrite به‌عنوان Platform اندروید ثبت شوند.
+    flavorDimensions += listOf("grade")
+    productFlavors {
+        fun gradeApp(
+            flavorName: String,
+            num: Int,
+            id: String,
+            faShort: String,
+            faNumeral: String,
+            applicationId: String,
+            folder: String,
+            defaultFlavor: Boolean = false,
+        ) {
+            create(flavorName) {
+                dimension = "grade"
+                this.applicationId = applicationId
+                isDefault = defaultFlavor
+                buildConfigField("int", "GRADE_NUM", "$num")
+                buildConfigField("String", "GRADE_ID", "\"$id\"")
+                buildConfigField("String", "GRADE_FA_SHORT", "\"$faShort\"")
+                buildConfigField("String", "GRADE_FA_NUMERAL", "\"$faNumeral\"")
+                buildConfigField("String", "BOOKS_FOLDER", "\"$folder\"")
+            }
+        }
+        gradeApp("p04", 4, "grade4", "چهارم", "۴", "com.hamyareman.p04", "Base-04")
+        gradeApp("p05", 5, "grade5", "پنجم", "۵", "com.hamyareman.p05", "Base-05")
+        gradeApp("p06", 6, "grade6", "ششم", "۶", "com.hamyareman.p06", "Base-06")
+        gradeApp("p07", 7, "grade7", "هفتم", "۷", "com.hamyareman.p07", "Base-07")
+        gradeApp("p08", 8, "grade8", "هشتم", "۸", "com.hamyareman.p08", "Base-08")
+        gradeApp("p09", 9, "grade9", "نهم", "۹", "com.hamyareman.ir", "Base-09", defaultFlavor = true)
+        gradeApp("p10", 10, "grade10", "دهم", "۱۰", "com.hamyareman.p10", "Base-10")
+        gradeApp("p11", 11, "grade11", "یازدهم", "۱۱", "com.hamyareman.p11", "Base-11")
+        gradeApp("p12", 12, "grade12", "دوازدهم", "۱۲", "com.hamyareman.p12", "Base-12")
     }
 
     buildTypes {

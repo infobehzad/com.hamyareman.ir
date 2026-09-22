@@ -32,15 +32,11 @@ import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 import com.hamyareman.ir.platform.core.designsystem.PrimaryButton
 import com.hamyareman.ir.platform.core.designsystem.SectionCard
 import com.hamyareman.ir.LocalAppContainer
-import com.hamyareman.ir.platform.feature.hearttoheart.SharedAlbumScreen
 import com.hamyareman.ir.ui.navigation.Screen
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDate
 import java.util.UUID
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
-import com.hamyareman.ir.platform.core.common.AppResult
 
 @Composable
 fun SafeSpaceScreen(nav: NavController) {
@@ -49,8 +45,7 @@ fun SafeSpaceScreen(nav: NavController) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text("خیلی از نوجوان‌ها وقتی زندگی خانوادگی‌شون تغییر می‌کنه، قاطی احساسات مختلف می‌شن. همه‌ی این‌ها طبیعیه.")
             SectionCard("نامه به خونه‌ی قبلی", "یه تمرین نوشتاری، کاملاً اختیاری.") { nav.navigate(Screen.Writing.route) }
-            SectionCard("آلبوم خاطرات با بابا", "فقط با تأیید تو اضافه می‌شود.") { nav.navigate(Screen.Album.route) }
-            SectionCard("شماره‌های مشاوره", "جایگزین بابا یا دوستات نیست؛ یه گزینه‌ی اضافیه.") { nav.navigate(Screen.Helplines.route) }
+            SectionCard("شماره‌های مشاوره", "همیشه در دسترس، بدون فشار.") { nav.navigate(Screen.Helplines.route) }
         }
     }
 }
@@ -122,7 +117,7 @@ fun WritingPromptScreen(onBack: () -> Unit) {
             }
             Text(
                 "این نامه با AES-GCM رمز می‌شود و کلیدش در Keystore خود گوشی است؛ " +
-                    "هیچ‌وقت به سرور نمی‌رود و پدر هم آن را نمی‌بیند.",
+                    "هیچ‌وقت به سرور نمی‌رود.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -186,66 +181,12 @@ fun WritingPromptScreen(onBack: () -> Unit) {
 }
 
 @Composable
-fun AlbumScreen(onBack: () -> Unit) {
-    // آلبوم مشترک در ماژول `feature-hearttoheart` است تا اپ پدر دقیقاً همان صفحه را داشته باشد.
-    SharedAlbumScreen(
-        repo = LocalAppContainer.current.album,
-        onBack = onBack,
-        title = "آلبوم خاطرات با بابا",
-    )
-}
-
-@Composable
 fun HelplinesScreen(onBack: () -> Unit) {
     val ctx = LocalContext.current
-    val c = LocalAppContainer.current
-    val scope = rememberCoroutineScope()
-    var guardianNote by remember { mutableStateOf<String?>(null) }
-    var sending by remember { mutableStateOf(false) }
-
     Column(Modifier.fillMaxSize()) {
         AppTopBar("شماره‌های کمک", onBack)
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("بدون فشار. هر وقت خواستی.")
-
-            /**
-             * «به بابا خبر بده» — متن و مقصد را **سرور** می‌سازد (تابع notify-guardian)،
-             * پس اگر حال کاربر طوری است که نتواند توضیح بدهد، یک لمس کافی است.
-             * نتیجه صادقانه نشان داده می‌شود: اگر پیوند فعال نباشد، به‌جای وانمود
-             * کردن، دلیل و شماره‌های کمکی که سرور فرستاده نشان داده می‌شود.
-             */
-            SectionCard(
-                title = if (sending) "در حال فرستادن…" else "به بابا خبر بده",
-                body = "یه پیام کوتاه از طرف سرور برای بابا می‌رود؛ لازم نیست توضیح بدی.",
-            ) {
-                if (!sending) {
-                    sending = true
-                    guardianNote = null
-                    scope.launch {
-                        guardianNote = when (val result = c.serverActions.notifyGuardian("help")) {
-                            is AppResult.Ok -> when {
-                                result.value.sent && result.value.deduped ->
-                                    "چند دقیقه پیش خبر داده بودم؛ دوباره نفرستادم."
-                                result.value.sent ->
-                                    "فرستادم. بابا در «حرف دل» می‌بیند."
-                                else -> result.value.reasonFa +
-                                    if (result.value.helplines.isEmpty()) "" else
-                                        "\n" + result.value.helplines
-                                            .joinToString(" · ") { "${it.name}: ${it.number}" }
-                            }
-                            // صادقانه: نرفت. به‌جای رهاکردنِ کاربر، راهِ جایگزینِ عملی
-                            // هم نشان داده می‌شود (شماره‌های کمکی پایینِ همین صفحه هست).
-                            is AppResult.Err -> result.error.userMessage +
-                                "\n\nاگر الان حالت خوب نیست، مستقیم به بابا زنگ بزن؛ " +
-                                "شماره‌های کمکی هم پایینِ همین صفحه هست."
-                        }
-                        sending = false
-                    }
-                }
-            }
-            guardianNote?.let {
-                Text(it, style = MaterialTheme.typography.bodyMedium)
-            }
             Helplines.iran.forEach { h ->
                 SectionCard("${h.name} — ${h.number}", h.hours) {
                     ctx.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:${h.number}")))

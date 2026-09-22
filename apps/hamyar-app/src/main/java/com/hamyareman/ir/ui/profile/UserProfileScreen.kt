@@ -248,18 +248,30 @@ fun UserProfileScreen(
             // ─── وضعیت اشتراک (فقط نمایش — تغییر از سمت پشتیبانی) ───
             val sub = StudentProfileState.subscription.ifBlank { "free" }
             val paid = StudentProfileState.isPaid(sub)
+            val pending = com.hamyareman.ir.platform.core.common.BillingStatus.norm(sub) ==
+                com.hamyareman.ir.platform.core.common.BillingStatus.PENDING
+            val chipColor = when {
+                pending -> androidx.compose.ui.graphics.Color(0xFFFEF3C7)
+                paid -> androidx.compose.ui.graphics.Color(0xFFDCFCE7)
+                else -> androidx.compose.ui.graphics.Color(0xFFFEE2E2)
+            }
+            val chipFg = when {
+                pending -> androidx.compose.ui.graphics.Color(0xFF92400E)
+                paid -> androidx.compose.ui.graphics.Color(0xFF166534)
+                else -> androidx.compose.ui.graphics.Color(0xFFB91C1C)
+            }
             Surface(
                 shape = MaterialTheme.shapes.medium,
-                color = if (paid) androidx.compose.ui.graphics.Color(0xFFDCFCE7) else androidx.compose.ui.graphics.Color(0xFFFEE2E2),
-                border = BorderStroke(1.dp, if (paid) androidx.compose.ui.graphics.Color(0xFF166534) else androidx.compose.ui.graphics.Color(0xFFB91C1C)),
+                color = chipColor,
+                border = BorderStroke(1.dp, chipFg),
                 modifier = Modifier.fillMaxWidth(),
                 onClick = onOpenSubscription,
             ) {
                 Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        if (paid) "اشتراک فعال" else "مهمان همیار من",
+                        com.hamyareman.ir.platform.core.common.BillingStatus.chipFa(sub),
                         fontWeight = FontWeight.Bold,
-                        color = if (paid) androidx.compose.ui.graphics.Color(0xFF166534) else androidx.compose.ui.graphics.Color(0xFFB91C1C),
+                        color = chipFg,
                     )
                     Spacer(Modifier.weight(1f))
                     Text(

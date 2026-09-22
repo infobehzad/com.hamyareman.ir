@@ -133,7 +133,7 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Text("همیار من 💜", style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
+        Text(com.hamyareman.ir.ui.profile.AppEdition.appTitle + " 💜", style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
         Spacer(Modifier.height(8.dp))
         Text(
             when (mode) {

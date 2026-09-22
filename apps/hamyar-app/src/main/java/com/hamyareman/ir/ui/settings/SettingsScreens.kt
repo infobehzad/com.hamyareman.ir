@@ -68,7 +68,7 @@ fun SettingsScreen(nav: NavController) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SectionCard(
                 "حریم خصوصی",
-                "چه چیزی با بابا به اشتراک گذاشته می‌شود و چه چیزی هرگز نمی‌شود.",
+                "چه چیزی هرگز از این دستگاه بیرون نمی‌رود.",
             ) { nav.navigate(Screen.Privacy.route) }
             SectionCard(
                 "قفل اپ",
@@ -99,10 +99,7 @@ fun SettingsScreen(nav: NavController) {
 fun PrivacySettingsScreen(onBack: () -> Unit) {
     val container = LocalAppContainer.current
     val store = container.store
-    var tel by remember { mutableStateOf(store.getString("father_tel")) }
-    var weekly by remember { mutableStateOf(store.getBool("weekly_optin")) }
     var notice by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
 
     Column(
         Modifier
@@ -112,39 +109,9 @@ fun PrivacySettingsScreen(onBack: () -> Unit) {
         AppTopBar("حریم خصوصی", onBack)
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
-                "خلاصه‌ی هفتگی فقط اگر خودت روشنش کنی برای بابا می‌رود. هیچ‌وقت خودکار روشن نمی‌شود.",
+                "چرخه، ژورنال و چت خام هرگز به سرور نمی‌روند. بقیه‌ی پیشرفت درسی با حساب خودت همگام می‌شود.",
                 style = MaterialTheme.typography.bodyMedium,
             )
-            Row(
-                Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text("اشتراک خلاصه‌ی هفتگی", Modifier.weight(1f))
-                Switch(
-                    checked = weekly,
-                    onCheckedChange = {
-                        weekly = it
-                        store.putBool("weekly_optin", it)
-                        // پرچم opt-in باید در سرور هم بنشیند، وگرنه توابع
-                        // weekly-summary و daily-checkin هیچ‌وقت چیزی برای پدر نمی‌سازند.
-                        notice = null
-                        scope.launch { notice = pushWeeklyOptIn(container, it) }
-                    },
-                )
-            }
-
-            OutlinedTextField(
-                value = tel,
-                onValueChange = { tel = it },
-                label = { Text("شماره‌ی بابا برای زنگ معمولی") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            PrimaryButton("ذخیره‌ی شماره") {
-                store.putString("father_tel", tel.trim())
-                notice = "شماره ذخیره شد."
-            }
 
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(12.dp)) {
@@ -162,22 +129,11 @@ fun PrivacySettingsScreen(onBack: () -> Unit) {
                 }
             }
 
-            Card(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(12.dp)) {
-                    Text("می‌تواند به اشتراک گذاشته شود", style = MaterialTheme.typography.titleSmall)
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        PrivacyPolicy.weeklyShareableTables.joinToString("، "),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            }
-
             Spacer(Modifier.height(8.dp))
             Text("پاک‌کردن داده", style = MaterialTheme.typography.titleMedium)
             PrimaryButton("پاک‌کردن کش گفت‌وگو از این دستگاه") {
                 container.heart.clearLocal()
-                notice = "کش حرف دل از این دستگاه پاک شد (نسخه‌ی سرور دست‌نخورده است)."
+                notice = "کش گفت‌وگو از این دستگاه پاک شد."
             }
             PrimaryButton("پاک‌کردن همه‌ی داده‌های محلی (شامل PIN)") {
                 container.heart.clearLocal()
@@ -676,45 +632,5 @@ private fun buildStatus(container: com.hamyareman.ir.di.AppContainer): String {
                 "هنوز همگام‌سازی انجام نشده."
             },
         )
-    }
-}
-
-/**
- * فرستادن پرچم «اشتراک خلاصه» به سرور و ساختن خلاصه‌ی امروز.
- *
- * چرا سمت سرور؟ چون توابع `weekly-summary` و `daily-checkin` **فقط** وقتی چیزی
- * می‌سازند که `user_settings.weeklyOptIn` در TablesDB روشن باشد؛ پرچم محلیِ
- * روی دستگاه پدر را از خلاصه بی‌خبر می‌گذاشت.
- *
- * اگر بک‌اند در دسترس نبود، انتخاب کاربر روی همان دستگاه ذخیره می‌ماند و پیام
- * صادقانه برمی‌گردد (وانمود نمی‌کنیم در سرور ثبت شده).
- */
-private suspend fun pushWeeklyOptIn(container: AppContainer, enabled: Boolean): String? {
-    val userId = container.store.getString(AppwriteAuthService.KEY_USER_ID)
-    if (userId.isBlank()) return "برای ثبت این انتخاب، اول وارد شو (یا مهمان شو)."
-
-    val saved = container.tables.upsert(
-        TableIds.USER_SETTINGS,
-        "settings-$userId",
-        mapOf("userId" to userId, "weeklyOptIn" to enabled),
-        AppwriteClientProvider.ownerOnly(userId),
-    )
-    if (saved is AppResult.Err) {
-        return "${saved.error.userMessage} (انتخابت روی همین دستگاه ذخیره شد.)"
-    }
-    if (!enabled) return "خاموش شد؛ هیچ خلاصه‌ای برای بابا نمی‌رود."
-
-    // با روشن‌شدن، خلاصه‌ی امروز هم همان لحظه ساخته می‌شود تا پدر صفحه‌ی خالی نبیند.
-    return when (val checkin = container.serverActions.dailyCheckin()) {
-        is AppResult.Ok ->
-            if (checkin.value.ok) {
-                "روشن شد. خلاصه‌ی امروز هم ساخته شد: ${checkin.value.note}"
-            } else {
-                when (checkin.value.reason) {
-                    "no_link" -> "روشن شد، ولی هنوز پیوند فعال با بابا نیست؛ اول کد پیوند بده."
-                    else -> "روشن شد. امروز هنوز داده‌ای برای خلاصه نیست."
-                }
-            }
-        is AppResult.Err -> "روشن شد (در سرور ثبت شد)، ولی خلاصه‌ی امروز ساخته نشد."
     }
 }

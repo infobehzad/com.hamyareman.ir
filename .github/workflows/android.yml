@@ -42,7 +42,7 @@ jobs:
           cache-cleanup: never
       - name: wellness unit tests
         run: |
-          ./gradlew :hamyar-app:testDebugUnitTest \
+          ./gradlew :hamyar-app:testP09DebugUnitTest \
             --tests "com.hamyareman.ir.ui.wellness.*" \
             --info --stacktrace
       - name: upload wellness reports
@@ -77,7 +77,7 @@ jobs:
           cache-cleanup: never
       - name: study/art unit tests
         run: |
-          ./gradlew :hamyar-app:testDebugUnitTest \
+          ./gradlew :hamyar-app:testP09DebugUnitTest \
             --tests "com.hamyareman.ir.ui.study.*" \
             --tests "com.hamyareman.ir.ui.art.*" \
             --info --stacktrace
@@ -109,15 +109,23 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           cache-cleanup: never
-      - run: ./gradlew test :hamyar-app:assembleDebug :hamyar-app:lintDebug --stacktrace
+      - run: ./gradlew :core-common:testDebugUnitTest :hamyar-app:testP09DebugUnitTest :hamyar-app:assembleP09Debug :hamyar-app:lintP09Debug :hamyar-admin:assembleDebug --stacktrace
       - name: Upload debug APK
         if: always()
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: hamyar-app-debug-apk
-          path: apps/hamyar-app/build/outputs/apk/debug/*.apk
+          path: apps/hamyar-app/build/outputs/apk/**/*.apk
           if-no-files-found: error
+      - name: Upload admin APK
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: hamyar-admin-debug-apk
+          path: apps/hamyar-admin/build/outputs/apk/**/*.apk
+          if-no-files-found: ignore
 
       # بیلدِ ریلیزِ R8 — عمداً **غیرِمسدودکننده**: مسیرِ اصلیِ انتشار همان بیلدِ
       # دیباگ است. اگر R8 روی کدِ تازه بشکند، این قدم قرمز میشود ولی کارِ بقیه
@@ -125,8 +133,8 @@ jobs:
       - name: release APK (R8) — غیرِمسدودکننده
         continue-on-error: true
         run: |
-          ./gradlew :hamyar-app:assembleRelease --stacktrace
-          for f in apps/hamyar-app/build/outputs/apk/*/*.apk; do
+          ./gradlew :hamyar-app:assembleP09Release --stacktrace
+          for f in apps/hamyar-app/build/outputs/apk/**/*.apk; do
             printf '%-70s %s مگابایت\n' "$f" "$(( $(stat -c%s "$f") / 1048576 ))"
           done
       - name: upload release APK

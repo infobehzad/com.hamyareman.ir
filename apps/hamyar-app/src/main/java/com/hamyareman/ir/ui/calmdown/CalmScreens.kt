@@ -44,7 +44,6 @@ fun CalmMenuScreen(nav: NavController) {
             SectionCard("تنفس ۲ دقیقه‌ای", "یه الگوی نرم.") { nav.navigate(Screen.Breath.route) }
             SectionCard("دفترچه‌ی خصوصی", "هرچی دلت خواست بنویس؛ رمز می‌شود.") { nav.navigate(Screen.Journal.route) }
             SectionCard("پیاده‌روی کوتاه", "فقط چند قدم دور خونه.") { }
-            SectionCard("تماس با بابا", "تماس داخل اپ یا تلفن معمولی.") { nav.navigate(Screen.Call.route) }
             SectionCard("شماره‌های کمک", "همیشه در دسترس، بدون فشار.") { nav.navigate(Screen.Helplines.route) }
         }
     }

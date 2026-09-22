@@ -63,6 +63,12 @@ object TableIds {
      */
     const val USERS = "users"
 
+    /**
+     * سفارش‌های اشتراک کارت‌به‌کارت و درخواست استرداد.
+     * نوشتن فقط از تابع سرور (کلید API داخل APK نیست).
+     */
+    const val SUBSCRIPTION_ORDERS = "subscription_orders"
+
     // --- پرامپت ۰۲: ماژول ورزش/یوگا/تنفس/یادگیری ---
     const val WELLNESS_MOVES = "wellness_moves"
     const val SKETCH_REFERENCES = "sketch_references"
@@ -70,8 +76,8 @@ object TableIds {
 
     /**
      * همه‌ی جداولی که واقعاً در Appwrite ساخته می‌شوند
-     * (مطابق `backend/appwrite.json` — ۲۷ جدول؛ با افزودنِ `app_state` و `users`
-     * در v1.64 و v1.65). شمارِ دقیق را `PrivacyPolicyTest` نگهبانی می‌کند.
+     * (مطابق `backend/appwrite.json` — ۲۸ جدول؛ `subscription_orders` برای
+     * صف پرداخت/استرداد). شمارِ دقیق را `PrivacyPolicyTest` نگهبانی می‌کند.
      */
     val serverTables: Set<String> = setOf(
         PROFILES, USER_SETTINGS, FATHER_LINKS, PAIRING_CODES,
@@ -79,7 +85,7 @@ object TableIds {
         WEEKLY_SUMMARIES, ROUTINE_BLOCKS, WATER_LOGS, EXERCISE_LOGS, BADGES,
         LESSONS, QUIZZES, RECIPES, EXERCISES, LEARNING_NODES, ART_PROMPTS,
         LESSON_MEDIA_PROGRESS, WELLNESS_MOVES, SKETCH_REFERENCES, WELLNESS_LOGS,
-        STUDY_PROGRESS, LESSON_NOTES, APP_STATE, USERS,
+        STUDY_PROGRESS, LESSON_NOTES, APP_STATE, USERS, SUBSCRIPTION_ORDERS,
     )
 
     /** جدول‌های «فقط روی دستگاه» — در سرور هیچ سطری ندارند و ساخته هم نمی‌شوند. */
@@ -104,6 +110,12 @@ object BucketIds {
 /** شناسه‌ی توابع سرور (Function ID در کنسول Appwrite). */
 object FunctionIds {
     const val USER_BOOTSTRAP = "user-bootstrap"
+    /**
+     * عملیات ادمین و صف پرداخت/استرداد. روی پلن رایگان سقف توابع پر است،
+     * پس روی همان `user-bootstrap` سوار است (فیلد `action` در JSON).
+     * کلید سرور فقط داخل تابع است، نه در هیچ APK.
+     */
+    const val ADMIN_OPS = USER_BOOTSTRAP
     const val PAIRING = "pairing"
     const val WEEKLY_SUMMARY = "weekly-summary"
     /** لایه‌ی AI «همراه زهرا» — proxy سمت سرور؛ کلید مدل هرگز در اپ نیست. */

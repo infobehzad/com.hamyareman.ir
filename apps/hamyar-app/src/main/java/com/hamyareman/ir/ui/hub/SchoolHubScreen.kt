@@ -97,34 +97,18 @@ fun SchoolHubScreen(nav: NavController) {
             }
         }
 
-        HubMenuGroup(
-            "⬇️ دانلودها",
-            "صوت و PDF هر کتاب — دانلود یکجا با نمایش حجم",
-            open = openGroup == "downloads",
-            onToggle = { toggleGroup("downloads") },
-        ) {
-            HubCard("📶", "مدیریت دانلود کتاب‌ها", "وضعیت دانلود صوت‌ها و PDFها به تفکیک کتاب") { nav.hubTo(Screen.Downloads.route) }
-        }
-
-        HubMenuGroup(
-            "🗓 برنامه هفتگی و مرخصی",
-            "برنامهٔ شخصی تو، شیفت مدرسه و مرخصی‌ها",
-            open = openGroup == "schedule",
-            onToggle = { toggleGroup("schedule") },
-        ) {
-            HubCard("⏰", "برنامه‌ی هفتگی من", "جدول زمانی شخصی شنبه تا جمعه — درس، تکلیف، مرور، ورزش") { nav.hubTo(Screen.WeeklySchedule.route) }
-            HubCard("📄", "مرخصی", "ثبت بازهٔ مرخصی با علت، گواهی پزشکی و وضعیتِ توجیه") { nav.hubTo(Screen.Leave.route) }
-            HubCard("🏫", "برنامه‌ی مدرسه", "شیفت چرخشی و زنگ‌های کلاسی") { nav.hubTo(Screen.School.route) }
-        }
-
-        HubMenuGroup(
-            "📝 آزمون و بازخورد",
-            "سنجش دروس مدرسه",
-            open = openGroup == "quiz",
-            onToggle = { toggleGroup("quiz") },
-        ) {
-            HubCard("🧪", "جزوه‌های شخصی و آزمونی", "دفتر نکات + گالری فایل روی گوشی") { nav.hubTo(Screen.Pdf.route) }
-            HubCard("📈", "نمودار پیشرفت دروس", "رشدت در هر درس — طبق آزمون‌ها و فلش‌کارت‌ها") { nav.hubTo(Screen.Charts.of(null)) }
+        val gender = HubCatalog.gender()
+        HubCatalog.schoolExtra().forEach { group ->
+            HubMenuGroup(
+                group.title,
+                group.subtitle,
+                open = openGroup == group.id,
+                onToggle = { toggleGroup(group.id) },
+            ) {
+                group.items.forEach { item ->
+                    HubCard(item.emojiFor(gender), item.title, item.subtitle) { nav.hubTo(item.route) }
+                }
+            }
         }
     }
 }
