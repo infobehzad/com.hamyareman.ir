@@ -19,10 +19,12 @@ import androidx.compose.ui.Modifier
 import com.hamyareman.admin.ui.AdminHomeScreen
 import com.hamyareman.admin.ui.AdminLoginScreen
 import com.hamyareman.admin.ui.AdminSettingsScreen
+import com.hamyareman.ir.platform.core.appwrite.AuthUser
 import com.hamyareman.ir.platform.core.common.AppResult
 import com.hamyareman.ir.platform.core.designsystem.BrandTheme
 import com.hamyareman.ir.platform.core.designsystem.PlatformTheme
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 val LocalAdmin = staticCompositionLocalOf<AdminContainer> { error("AdminContainer missing") }
 
@@ -39,7 +41,7 @@ class AdminMainActivity : AppCompatActivity() {
             var showSettings by remember { mutableStateOf(false) }
             val container = remember(tick) { app.container }
             val scope = rememberCoroutineScope()
-            var loading by remember { mutableStateOf(false) }
+            var signingIn by remember { mutableStateOf(false) }
             var error by remember { mutableStateOf<String?>(null) }
 
             LaunchedEffect(tick) {
@@ -47,34 +49,21 @@ class AdminMainActivity : AppCompatActivity() {
                 if (lastCrash != null) {
                     error = "اپ دفعهٔ قبل بسته شد. اگر تکرار شد این متن را بفرست:\n$lastCrash"
                 }
-                loading = true
                 val outcome = runCatching {
-                    if (!container.api.configured) {
-                        false to "کلید سرور را از «تنظیمات اتصال سرور» بگذار."
-                    } else {
-                        val u = runCatching { container.auth.currentUser() }.getOrNull()
-                        if (u == null) {
-                            false to null
-                        } else when (val p = adminIo { container.api.requireAdmin(u.id) }) {
-                            is AppResult.Ok -> true to null
-                            is AppResult.Err -> {
-                                runCatching { container.auth.logout() }
-                                false to p.error.userMessage
-                            }
-                        }
-                    }
+                    val u = withTimeoutOrNull(8_000) {
+                        runCatching { container.auth.currentUser() }.getOrNull()
+                    } ?: return@runCatching false to null
+                    verifyAdmin(container, u)
                 }
                 outcome.fold(
                     onSuccess = { (ok, msg) ->
                         loggedIn.value = ok
                         if (msg != null) error = msg
                     },
-                    onFailure = { t ->
+                    onFailure = {
                         loggedIn.value = false
-                        error = t.message?.ifBlank { null } ?: "بررسی نشست ناموفق بود."
                     },
                 )
-                loading = false
             }
 
             PlatformTheme(brand = BrandTheme.Mint, darkTheme = isSystemInDarkTheme()) {
@@ -99,25 +88,17 @@ class AdminMainActivity : AppCompatActivity() {
                                 onSettings = { showSettings = true },
                             )
                             else -> AdminLoginScreen(
-                                loading = loading,
+                                loading = signingIn,
                                 error = error,
                                 onSettings = { showSettings = true },
                                 onSignIn = { email, password ->
-                                    loading = true
+                                    signingIn = true
                                     error = null
                                     scope.launch {
                                         val outcome = runCatching {
-                                            if (!container.api.configured) {
-                                                false to "کلید سرور را از «تنظیمات اتصال سرور» بگذار."
-                                            } else when (val r = adminIo { container.auth.signIn(email, password) }) {
+                                            when (val r = adminIo { container.auth.signIn(email, password) }) {
                                                 is AppResult.Err -> false to r.error.userMessage
-                                                is AppResult.Ok -> when (val p = adminIo { container.api.requireAdmin(r.value.id) }) {
-                                                    is AppResult.Ok -> true to null
-                                                    is AppResult.Err -> {
-                                                        runCatching { container.auth.logout() }
-                                                        false to p.error.userMessage
-                                                    }
-                                                }
+                                                is AppResult.Ok -> verifyAdmin(container, r.value)
                                             }
                                         }
                                         outcome.fold(
@@ -130,7 +111,7 @@ class AdminMainActivity : AppCompatActivity() {
                                                 error = "ورود ناموفق: " + (t.message?.ifBlank { null } ?: t.javaClass.simpleName)
                                             },
                                         )
-                                        loading = false
+                                        signingIn = false
                                     }
                                 },
                             )
@@ -140,4 +121,25 @@ class AdminMainActivity : AppCompatActivity() {
             }
         }
     }
+}
+
+private suspend fun verifyAdmin(container: AdminContainer, user: AuthUser): Pair<Boolean, String?> {
+    val emailOk = user.email.equals("behzadinfo@gmail.com", true) ||
+        user.email.equals("aydinnz.designer@gmail.com", true)
+    val labelOk = user.labels.any { it.equals("admin", true) }
+    if (container.api.configured) {
+        return when (val p = adminIo { container.api.requireAdmin(user.id) }) {
+            is AppResult.Ok -> true to null
+            is AppResult.Err -> {
+                if (emailOk || labelOk) true to null
+                else {
+                    runCatching { container.auth.logout() }
+                    false to p.error.userMessage
+                }
+            }
+        }
+    }
+    if (emailOk || labelOk) return true to null
+    runCatching { container.auth.logout() }
+    return false to "این حساب ادمین نیست."
 }
