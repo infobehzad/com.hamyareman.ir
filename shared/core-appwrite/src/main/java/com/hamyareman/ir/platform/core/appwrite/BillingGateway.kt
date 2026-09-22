@@ -55,6 +55,39 @@ data class BillingProfile(
     val subscription: String = "",
     val name: String = "",
     val labels: List<String> = emptyList(),
+    val blocked: Boolean = false,
+    val hamyarGrade: String = "",
+    val deviceCount: Int = 0,
+)
+
+data class AdminDevice(
+    val id: String = "",
+    val label: String = "",
+    val lastAt: Long = 0L,
+)
+
+data class AdminUser(
+    val userId: String = "",
+    val email: String = "",
+    val name: String = "",
+    val labels: List<String> = emptyList(),
+    val status: Boolean = true,
+    val blocked: Boolean = false,
+    val hamyarGrade: String = "",
+    val devices: List<AdminDevice> = emptyList(),
+    val sessionCount: Int = 0,
+    val subscription: String = "",
+    val profile: BillingProfile = BillingProfile(),
+    val tempPassword: String = "",
+)
+
+data class AdminStats(
+    val usersTotal: Int = 0,
+    val pendingPay: Int = 0,
+    val pendingRefund: Int = 0,
+    val approved: Int = 0,
+    val refunded: Int = 0,
+    val paidProfiles: Int = 0,
 )
 
 class BillingGateway(private val functions: FunctionsService) {
@@ -169,11 +202,74 @@ class BillingGateway(private val functions: FunctionsService) {
                         userId = o.optString("userId").ifBlank { p.userId },
                         email = o.optString("email").ifBlank { p.email },
                         name = o.optString("name").ifBlank { p.name },
+                        labels = parseLabels(o.optJSONArray("labels")).ifEmpty { p.labels },
+                        blocked = o.optBoolean("blocked", p.blocked),
+                        hamyarGrade = o.optString("hamyarGrade").ifBlank { p.hamyarGrade.ifBlank { p.grade } },
+                        deviceCount = o.optInt("deviceCount", p.deviceCount),
+                        subscription = o.optString("subscription").ifBlank { p.subscription },
                     )
                 }
                 AppResult.Ok(out)
             }
         }
+
+    suspend fun adminUser(userId: String): AppResult<AdminUser> =
+        userOf(call(BillingActions.ADMIN_USER, JSONObject().put("targetUserId", userId)))
+
+    suspend fun adminSetGrade(userId: String, grade: String): AppResult<AdminUser> =
+        userOf(call(BillingActions.ADMIN_SET_GRADE, JSONObject().put("targetUserId", userId).put("grade", grade)))
+
+    suspend fun adminSetPremium(userId: String, paid: Boolean): AppResult<AdminUser> =
+        userOf(call(BillingActions.ADMIN_SET_PREMIUM, JSONObject().put("targetUserId", userId).put("paid", paid)))
+
+    suspend fun adminRevokeDevice(userId: String, deviceId: String): AppResult<AdminUser> =
+        userOf(call(BillingActions.ADMIN_REVOKE_DEVICE, JSONObject().put("targetUserId", userId).put("deviceId", deviceId)))
+
+    suspend fun adminClearDevices(userId: String): AppResult<AdminUser> =
+        userOf(call(BillingActions.ADMIN_CLEAR_DEVICES, JSONObject().put("targetUserId", userId)))
+
+    suspend fun adminForceLogout(userId: String): AppResult<AdminUser> =
+        userOf(call(BillingActions.ADMIN_LOGOUT, JSONObject().put("targetUserId", userId)))
+
+    suspend fun adminBlock(userId: String, block: Boolean): AppResult<AdminUser> =
+        userOf(
+            call(
+                if (block) BillingActions.ADMIN_BLOCK else BillingActions.ADMIN_UNBLOCK,
+                JSONObject().put("targetUserId", userId),
+            ),
+        )
+
+    suspend fun adminResetPassword(userId: String): AppResult<AdminUser> =
+        userOf(call(BillingActions.ADMIN_RESET_PASSWORD, JSONObject().put("targetUserId", userId)))
+
+    suspend fun adminStats(): AppResult<AdminStats> =
+        when (val r = call(BillingActions.ADMIN_STATS)) {
+            is AppResult.Err -> r
+            is AppResult.Ok -> {
+                val s = r.value.optJSONObject("stats") ?: JSONObject()
+                AppResult.Ok(
+                    AdminStats(
+                        usersTotal = s.optInt("usersTotal"),
+                        pendingPay = s.optInt("pendingPay"),
+                        pendingRefund = s.optInt("pendingRefund"),
+                        approved = s.optInt("approved"),
+                        refunded = s.optInt("refunded"),
+                        paidProfiles = s.optInt("paidProfiles"),
+                    ),
+                )
+            }
+        }
+
+    private fun userOf(r: AppResult<JSONObject>): AppResult<AdminUser> = when (r) {
+        is AppResult.Err -> r
+        is AppResult.Ok -> {
+            val u = r.value.optJSONObject("user")
+                ?: return AppResult.Err(AppError.Local("کاربر برنگشت."))
+            val parsed = parseAdminUser(u)
+            val temp = r.value.optString("tempPassword").ifBlank { parsed.tempPassword }
+            AppResult.Ok(parsed.copy(tempPassword = temp))
+        }
+    }
 
     private fun unit(r: AppResult<JSONObject>): AppResult<Unit> = when (r) {
         is AppResult.Err -> r
@@ -219,11 +315,13 @@ class BillingGateway(private val functions: FunctionsService) {
             }
         }
 
+        fun parseLabels(arr: JSONArray?): List<String> {
+            if (arr == null) return emptyList()
+            return (0 until arr.length()).map { arr.optString(it) }.filter { it.isNotBlank() }
+        }
+
         fun parseProfile(o: JSONObject?): BillingProfile {
             if (o == null) return BillingProfile()
-            val labelsArr = o.optJSONArray("labels")
-            val labels = if (labelsArr == null) emptyList() else
-                (0 until labelsArr.length()).map { labelsArr.optString(it) }
             return BillingProfile(
                 userId = o.optString("userId"),
                 email = o.optString("email"),
@@ -240,7 +338,37 @@ class BillingGateway(private val functions: FunctionsService) {
                 birthDate = o.optString("birthDate"),
                 subscription = o.optString("subscription"),
                 name = o.optString("name"),
-                labels = labels,
+                labels = parseLabels(o.optJSONArray("labels")),
+                blocked = o.optBoolean("blocked", false),
+                hamyarGrade = o.optString("hamyarGrade"),
+                deviceCount = o.optInt("deviceCount"),
+            )
+        }
+
+        fun parseAdminUser(o: JSONObject): AdminUser {
+            val devicesArr = o.optJSONArray("devices")
+            val devices = if (devicesArr == null) emptyList() else
+                (0 until devicesArr.length()).mapNotNull { i ->
+                    val d = devicesArr.optJSONObject(i) ?: return@mapNotNull null
+                    AdminDevice(
+                        id = d.optString("id"),
+                        label = d.optString("label").ifBlank { "دستگاه" },
+                        lastAt = d.optLong("lastAt"),
+                    )
+                }
+            return AdminUser(
+                userId = o.optString("userId"),
+                email = o.optString("email"),
+                name = o.optString("name"),
+                labels = parseLabels(o.optJSONArray("labels")),
+                status = o.optBoolean("status", true),
+                blocked = o.optBoolean("blocked", false),
+                hamyarGrade = o.optString("hamyarGrade"),
+                devices = devices,
+                sessionCount = o.optInt("sessionCount"),
+                subscription = o.optString("subscription"),
+                profile = parseProfile(o.optJSONObject("profile")),
+                tempPassword = o.optString("tempPassword"),
             )
         }
     }

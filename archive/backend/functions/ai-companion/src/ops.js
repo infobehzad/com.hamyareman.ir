@@ -325,6 +325,16 @@ async function handleOps(req, res, userId, body, action) {
       case 'admin_reject':
       case 'admin_refund_ok':
       case 'admin_search':
+      case 'admin_user':
+      case 'admin_set_grade':
+      case 'admin_set_premium':
+      case 'admin_revoke_device':
+      case 'admin_clear_devices':
+      case 'admin_logout':
+      case 'admin_block':
+      case 'admin_unblock':
+      case 'admin_reset_password':
+      case 'admin_stats':
         if (!isAdminUser(user)) {
           return res.json({
             ok: false,
@@ -341,6 +351,16 @@ async function handleOps(req, res, userId, body, action) {
         if (action === 'admin_reject') return res.json(await opAdminReject(tables, body), 200);
         if (action === 'admin_refund_ok') return res.json(await opAdminRefund(tables, body), 200);
         if (action === 'admin_search') return res.json(await opAdminSearch(tables, users, body), 200);
+        if (action === 'admin_user') return res.json(await opAdminUser(tables, users, body), 200);
+        if (action === 'admin_set_grade') return res.json(await opAdminSetGrade(tables, users, userId, body), 200);
+        if (action === 'admin_set_premium') return res.json(await opAdminSetPremium(tables, users, body), 200);
+        if (action === 'admin_revoke_device') return res.json(await opAdminRevokeDevice(tables, users, userId, body), 200);
+        if (action === 'admin_clear_devices') return res.json(await opAdminClearDevices(tables, users, userId, body), 200);
+        if (action === 'admin_logout') return res.json(await opAdminLogout(tables, users, userId, body), 200);
+        if (action === 'admin_block') return res.json(await opAdminBlock(tables, users, userId, body, true), 200);
+        if (action === 'admin_unblock') return res.json(await opAdminBlock(tables, users, userId, body, false), 200);
+        if (action === 'admin_reset_password') return res.json(await opAdminResetPassword(tables, users, userId, body), 200);
+        if (action === 'admin_stats') return res.json(await opAdminStats(tables, users), 200);
         break;
       default:
         return res.json({ ok: false, code: 'BAD_ACTION', messageFa: 'عملیات ناشناخته است.' }, 200);
@@ -593,14 +613,7 @@ async function opAdminSearch(tables, users, body) {
     );
     const list = (ures && ures.users) || [];
     for (const u of list) {
-      const profile = await getProfile(tables, u.$id);
-      hits.push({
-        userId: u.$id,
-        email: u.email || '',
-        name: u.name || '',
-        labels: u.labels || [],
-        profile,
-      });
+      hits.push(await hitOf(tables, u));
     }
   } catch (e) {
     try {
@@ -612,8 +625,314 @@ async function opAdminSearch(tables, users, body) {
   try {
     const profile = await getProfile(tables, q);
     if (profile && (profile.email || profile.firstName) && !hits.some((h) => h.userId === q)) {
-      hits.push({ userId: q, email: profile.email || '', name: (profile.firstName || '') + ' ' + (profile.lastName || ''), labels: [], profile });
+      hits.push({
+        userId: q,
+        email: profile.email || '',
+        name: ((profile.firstName || '') + ' ' + (profile.lastName || '')).trim(),
+        labels: [],
+        blocked: false,
+        hamyarGrade: profile.grade || '',
+        deviceCount: 0,
+        subscription: profile.subscription || 'free',
+        profile,
+      });
     }
   } catch (e) { /* ignore */ }
   return { ok: true, hits };
+}
+
+async function hitOf(tables, u) {
+  const profile = await getProfile(tables, u.$id);
+  const prefs = prefsOf(u);
+  const devices = parseDevices(prefs.hamyarDevices);
+  const labels = Array.isArray(u.labels) ? u.labels : [];
+  const blocked = u.status === false || labels.some((l) => String(l).toLowerCase() === 'blocked');
+  return {
+    userId: u.$id,
+    email: u.email || '',
+    name: u.name || '',
+    labels,
+    blocked,
+    hamyarGrade: String(prefs.hamyarGrade || profile.grade || ''),
+    deviceCount: devices.length,
+    subscription: profile.subscription || 'free',
+    profile,
+  };
+}
+
+function targetId(body) {
+  return String(body.targetUserId || body.userId || '').trim();
+}
+
+function selfGuard(adminId, uid, verb) {
+  if (uid && uid === adminId) {
+    return {
+      ok: false,
+      code: 'SELF',
+      messageFa: 'این کار را روی حساب ادمین خودت انجام نده (' + verb + ').',
+    };
+  }
+  return null;
+}
+
+async function sessionCountOf(users, uid) {
+  try {
+    const s = await users.listSessions(uid);
+    if (s && typeof s.total === 'number') return s.total;
+    return ((s && (s.sessions || s.rows)) || []).length;
+  } catch (e) {
+    try {
+      const s = await users.listSessions({ userId: uid });
+      if (s && typeof s.total === 'number') return s.total;
+      return ((s && (s.sessions || s.rows)) || []).length;
+    } catch (e2) {
+      return 0;
+    }
+  }
+}
+
+async function packUser(tables, users, u, extra) {
+  const profile = await getProfile(tables, u.$id);
+  const prefs = prefsOf(u);
+  const devices = parseDevices(prefs.hamyarDevices);
+  const labels = Array.isArray(u.labels) ? u.labels : [];
+  const blocked = u.status === false || labels.some((l) => String(l).toLowerCase() === 'blocked');
+  const sessionCount = await sessionCountOf(users, u.$id);
+  return {
+    userId: u.$id,
+    email: u.email || '',
+    name: u.name || '',
+    labels,
+    status: u.status !== false,
+    blocked,
+    hamyarGrade: String(prefs.hamyarGrade || profile.grade || ''),
+    devices: devices.map((d) => ({
+      id: d.id,
+      label: d.label || 'دستگاه',
+      lastAt: Number(d.lastAt || 0),
+    })),
+    sessionCount,
+    subscription: profile.subscription || 'free',
+    profile: {
+      userId: u.$id,
+      email: u.email || profile.email || '',
+      firstName: profile.firstName || '',
+      lastName: profile.lastName || '',
+      grade: profile.grade || prefs.hamyarGrade || '',
+      gender: profile.gender || '',
+      phone: profile.phone || '',
+      schoolName: profile.schoolName || '',
+      province: profile.province || '',
+      city: profile.city || '',
+      county: profile.county || '',
+      age: profile.age || 0,
+      birthDate: profile.birthDate || '',
+      subscription: profile.subscription || 'free',
+      name: u.name || '',
+      labels,
+    },
+    ...(extra || {}),
+  };
+}
+
+async function loadTarget(users, uid) {
+  if (!uid) return { error: { ok: false, code: 'BAD_INPUT', messageFa: 'شناسه کاربر خالی است.' } };
+  try {
+    const u = await users.get(uid);
+    return { u };
+  } catch (e) {
+    return { error: { ok: false, code: 'NOT_FOUND', messageFa: 'کاربر پیدا نشد.' } };
+  }
+}
+
+async function savePrefs(users, uid, prefs) {
+  try {
+    await users.updatePrefs(uid, prefs);
+  } catch (e) {
+    await users.updatePrefs({ userId: uid, prefs });
+  }
+}
+
+async function saveLabels(users, uid, labels) {
+  const unique = Array.from(new Set(labels.filter(Boolean)));
+  try {
+    await users.updateLabels(uid, unique);
+  } catch (e) {
+    await users.updateLabels({ userId: uid, labels: unique });
+  }
+}
+
+async function saveStatus(users, uid, active) {
+  try {
+    await users.updateStatus(uid, active);
+  } catch (e) {
+    await users.updateStatus({ userId: uid, status: active });
+  }
+}
+
+async function dropSessions(users, uid) {
+  try {
+    await users.deleteSessions(uid);
+  } catch (e) {
+    try { await users.deleteSessions({ userId: uid }); } catch (e2) { /* ignore */ }
+  }
+}
+
+async function savePassword(users, uid, password) {
+  try {
+    await users.updatePassword(uid, password);
+  } catch (e) {
+    await users.updatePassword({ userId: uid, password });
+  }
+}
+
+async function countTable(tables, table, attr, val) {
+  const Query = sdk.Query;
+  const queries = [];
+  if (attr && Query && Query.equal) queries.push(Query.equal(attr, val));
+  if (Query && Query.limit) queries.push(Query.limit(1));
+  const res = await tables.list(DATABASE_ID, table, queries);
+  if (res && typeof res.total === 'number') return res.total;
+  return ((res && (res.rows || res.documents)) || []).length;
+}
+
+async function opAdminUser(tables, users, body) {
+  const uid = targetId(body);
+  const loaded = await loadTarget(users, uid);
+  if (loaded.error) return loaded.error;
+  return { ok: true, user: await packUser(tables, users, loaded.u) };
+}
+
+async function opAdminSetGrade(tables, users, adminId, body) {
+  const uid = targetId(body);
+  const grade = String(body.grade || '').trim().toLowerCase();
+  if (!GRADE_FA[grade]) {
+    return { ok: false, code: 'BAD_GRADE', messageFa: 'پایه نامعتبر است.' };
+  }
+  const loaded = await loadTarget(users, uid);
+  if (loaded.error) return loaded.error;
+  const u = loaded.u;
+  const prefs = prefsOf(u);
+  prefs.hamyarGrade = grade;
+  await savePrefs(users, uid, prefs);
+  const prev = Array.isArray(u.labels) ? u.labels : [];
+  const labels = prev
+    .filter((l) => l && !String(l).startsWith('grade'))
+    .concat(['zahra', grade]);
+  await saveLabels(users, uid, labels);
+  try { await tables.update(DATABASE_ID, STUDENT_PROFILES, uid, { grade }); } catch (e) { /* ignore */ }
+  try { await tables.update(DATABASE_ID, PROFILES, 'profile_' + uid, { grade }); } catch (e) { /* ignore */ }
+  const fresh = await users.get(uid);
+  return { ok: true, user: await packUser(tables, users, fresh) };
+}
+
+async function opAdminSetPremium(tables, users, body) {
+  const uid = targetId(body);
+  const paid = !!body.paid;
+  const loaded = await loadTarget(users, uid);
+  if (loaded.error) return loaded.error;
+  await setSubscription(tables, uid, paid ? 'yearly' : 'free');
+  const fresh = await users.get(uid);
+  return { ok: true, user: await packUser(tables, users, fresh) };
+}
+
+async function opAdminRevokeDevice(tables, users, adminId, body) {
+  const uid = targetId(body);
+  const deviceId = String(body.deviceId || '').trim();
+  const guard = selfGuard(adminId, uid, 'حذف دستگاه');
+  if (guard) return guard;
+  if (!deviceId) return { ok: false, code: 'BAD_INPUT', messageFa: 'شناسه دستگاه خالی است.' };
+  const loaded = await loadTarget(users, uid);
+  if (loaded.error) return loaded.error;
+  const prefs = prefsOf(loaded.u);
+  const devices = parseDevices(prefs.hamyarDevices).filter((d) => d.id !== deviceId);
+  prefs.hamyarDevices = JSON.stringify(devices);
+  await savePrefs(users, uid, prefs);
+  const fresh = await users.get(uid);
+  return { ok: true, user: await packUser(tables, users, fresh) };
+}
+
+async function opAdminClearDevices(tables, users, adminId, body) {
+  const uid = targetId(body);
+  const guard = selfGuard(adminId, uid, 'پاک‌کردن دستگاه‌ها');
+  if (guard) return guard;
+  const loaded = await loadTarget(users, uid);
+  if (loaded.error) return loaded.error;
+  const prefs = prefsOf(loaded.u);
+  prefs.hamyarDevices = '[]';
+  await savePrefs(users, uid, prefs);
+  const fresh = await users.get(uid);
+  return { ok: true, user: await packUser(tables, users, fresh) };
+}
+
+async function opAdminLogout(tables, users, adminId, body) {
+  const uid = targetId(body);
+  const guard = selfGuard(adminId, uid, 'خروج اجباری');
+  if (guard) return guard;
+  const loaded = await loadTarget(users, uid);
+  if (loaded.error) return loaded.error;
+  await dropSessions(users, uid);
+  const fresh = await users.get(uid);
+  return { ok: true, user: await packUser(tables, users, fresh) };
+}
+
+async function opAdminBlock(tables, users, adminId, body, block) {
+  const uid = targetId(body);
+  const guard = selfGuard(adminId, uid, block ? 'مسدود کردن' : 'رفع مسدودی');
+  if (guard) return guard;
+  const loaded = await loadTarget(users, uid);
+  if (loaded.error) return loaded.error;
+  const u = loaded.u;
+  await saveStatus(users, uid, !block);
+  const prev = Array.isArray(u.labels) ? u.labels : [];
+  const labels = block
+    ? prev.filter((l) => String(l).toLowerCase() !== 'blocked').concat(['blocked'])
+    : prev.filter((l) => String(l).toLowerCase() !== 'blocked');
+  await saveLabels(users, uid, labels);
+  if (block) await dropSessions(users, uid);
+  const fresh = await users.get(uid);
+  return { ok: true, user: await packUser(tables, users, fresh) };
+}
+
+async function opAdminResetPassword(tables, users, adminId, body) {
+  const uid = targetId(body);
+  const guard = selfGuard(adminId, uid, 'بازیابی رمز');
+  if (guard) return guard;
+  const loaded = await loadTarget(users, uid);
+  if (loaded.error) return loaded.error;
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+  const buf = require('crypto').randomBytes(10);
+  let pass = '';
+  for (let i = 0; i < 10; i++) pass += alphabet[buf[i] % alphabet.length];
+  await savePassword(users, uid, pass);
+  await dropSessions(users, uid);
+  const fresh = await users.get(uid);
+  return { ok: true, tempPassword: pass, user: await packUser(tables, users, fresh, { tempPassword: pass }) };
+}
+
+async function opAdminStats(tables, users) {
+  let usersTotal = 0;
+  try {
+    const Query = sdk.Query;
+    const ures = await users.list(Query && Query.limit ? [Query.limit(1)] : []);
+    usersTotal = (ures && typeof ures.total === 'number') ? ures.total : ((ures && ures.users) || []).length;
+  } catch (e) {
+    usersTotal = 0;
+  }
+  async function safeCount(attr, val) {
+    try { return await countTable(tables, ORDERS, attr, val); } catch (e) { return -1; }
+  }
+  let paidProfiles = -1;
+  try { paidProfiles = await countTable(tables, STUDENT_PROFILES, 'subscription', 'yearly'); } catch (e) { paidProfiles = -1; }
+  return {
+    ok: true,
+    stats: {
+      usersTotal,
+      pendingPay: await safeCount('status', 'pending'),
+      pendingRefund: await safeCount('status', 'refund_pending'),
+      approved: await safeCount('status', 'approved'),
+      refunded: await safeCount('status', 'refunded'),
+      paidProfiles,
+    },
+  };
 }

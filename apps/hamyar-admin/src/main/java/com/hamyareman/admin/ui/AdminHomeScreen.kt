@@ -40,6 +40,7 @@ import com.hamyareman.admin.LocalAdmin
 import com.hamyareman.ir.platform.core.appwrite.BillingOrder
 import com.hamyareman.ir.platform.core.appwrite.BillingProfile
 import com.hamyareman.ir.platform.core.common.AppResult
+import com.hamyareman.ir.platform.core.common.BillingStatus
 import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 import kotlinx.coroutines.launch
@@ -51,7 +52,7 @@ private const val PROJECT = "6a9d59e3002751cc3ea8"
 private fun fileView(id: String): String =
     if (id.isBlank()) "" else "$MEDIA/$id/view?project=$PROJECT"
 
-private enum class AdminTab { PAY, REFUND, SEARCH }
+private enum class AdminTab { PAY, REFUND, SEARCH, STATS }
 
 @Composable
 fun AdminHomeScreen(onLogout: () -> Unit) {
@@ -62,6 +63,7 @@ fun AdminHomeScreen(onLogout: () -> Unit) {
     var error by remember { mutableStateOf<String?>(null) }
     var orders by remember { mutableStateOf<List<BillingOrder>>(emptyList()) }
     var selected by remember { mutableStateOf<String?>(null) }
+    var selectedUser by remember { mutableStateOf<String?>(null) }
     var query by remember { mutableStateOf("") }
     var hits by remember { mutableStateOf<List<BillingProfile>>(emptyList()) }
 
@@ -79,15 +81,21 @@ fun AdminHomeScreen(onLogout: () -> Unit) {
     }
 
     LaunchedEffect(tab) {
-        if (tab != AdminTab.SEARCH) load()
+        if (tab == AdminTab.PAY || tab == AdminTab.REFUND) load()
     }
 
+    val userId = selectedUser
+    if (userId != null) {
+        AdminUserScreen(userId = userId, onBack = { selectedUser = null })
+        return
+    }
     val detailId = selected
     if (detailId != null) {
         OrderDetailScreen(
             orderId = detailId,
             refundQueue = tab == AdminTab.REFUND,
             onBack = { selected = null; load() },
+            onOpenUser = { uid -> selected = null; selectedUser = uid },
         )
         return
     }
@@ -98,6 +106,7 @@ fun AdminHomeScreen(onLogout: () -> Unit) {
             FilterChip(selected = tab == AdminTab.PAY, onClick = { tab = AdminTab.PAY }, label = { Text("پرداخت‌ها") })
             FilterChip(selected = tab == AdminTab.REFUND, onClick = { tab = AdminTab.REFUND }, label = { Text("بازگشت وجه") })
             FilterChip(selected = tab == AdminTab.SEARCH, onClick = { tab = AdminTab.SEARCH }, label = { Text("جستجو") })
+            FilterChip(selected = tab == AdminTab.STATS, onClick = { tab = AdminTab.STATS }, label = { Text("آمار") })
             Spacer(Modifier.weight(1f))
             OutlinedButton(onClick = onLogout) { Text("خروج") }
         }
@@ -106,6 +115,7 @@ fun AdminHomeScreen(onLogout: () -> Unit) {
             CircularProgressIndicator(Modifier.padding(24.dp).align(Alignment.CenterHorizontally))
         }
         when (tab) {
+            AdminTab.STATS -> AdminStatsScreen()
             AdminTab.SEARCH -> Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = query,
@@ -127,12 +137,17 @@ fun AdminHomeScreen(onLogout: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text("جستجو") }
                 hits.forEach { p ->
-                    Card(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-                        Column(Modifier.padding(12.dp)) {
+                    Card(
+                        onClick = { selectedUser = p.userId },
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    ) {
+                        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text((p.firstName + " " + p.lastName).ifBlank { p.name }.ifBlank { "بدون نام" }, fontWeight = FontWeight.Bold)
                             Text(p.email.ifBlank { p.userId })
-                            Text("پایه: ${p.grade} · جنسیت: ${p.gender} · اشتراک: ${p.subscription.ifBlank { "—" }}")
-                            Text("موبایل: ${p.phone.ifBlank { "—" }}")
+                            val g = gradeFa(p.hamyarGrade.ifBlank { p.grade })
+                            Text("پایه: $g · ${genderFa(p.gender)} · ${BillingStatus.chipFa(p.subscription)}")
+                            Text("موبایل: ${p.phone.ifBlank { "—" }} · دستگاه: ${toPersianDigits(p.deviceCount.toString())}")
+                            if (p.blocked) Text("مسدود", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -157,7 +172,12 @@ fun AdminHomeScreen(onLogout: () -> Unit) {
 }
 
 @Composable
-private fun OrderDetailScreen(orderId: String, refundQueue: Boolean, onBack: () -> Unit) {
+private fun OrderDetailScreen(
+    orderId: String,
+    refundQueue: Boolean,
+    onBack: () -> Unit,
+    onOpenUser: (String) -> Unit,
+) {
     val container = LocalAdmin.current
     val scope = rememberCoroutineScope()
     var loading by remember { mutableStateOf(true) }
