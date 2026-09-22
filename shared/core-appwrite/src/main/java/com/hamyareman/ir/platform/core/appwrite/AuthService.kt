@@ -175,8 +175,13 @@ class AppwriteAuthService(
      * برمی‌گردد — همان کاری که [cachedRole] از قبل می‌کرد. Labelِ صریحِ سرور
      * (مثلاً `father` بعد از پیوند) همیشه بر این پیش‌فرض اولویت دارد.
      */
-    private fun roleOf(labels: List<String>): UserRole =
-        if (labels.isEmpty()) fallbackRole else UserRole.fromLabels(labels)
+    private fun roleOf(labels: List<String>): UserRole {
+        if (labels.any { it.equals(UserRole.FATHER.label, true) }) return UserRole.FATHER
+        if (labels.any { it.equals(UserRole.ZAHRA.label, true) }) return UserRole.ZAHRA
+        if (labels.any { it.equals(UserRole.GUEST.label, true) }) return UserRole.GUEST
+        // لیبل پایه/ادمین بدون zahra را مهمان نکن — اپ دانش‌آموز همان نقش پیش‌فرض می‌ماند.
+        return fallbackRole
+    }
 
     override suspend fun currentUser(): AuthUser? {
         if (!provider.isConfigured) return localUser

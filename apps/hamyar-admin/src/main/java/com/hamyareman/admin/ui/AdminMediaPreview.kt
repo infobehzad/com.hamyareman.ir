@@ -1,7 +1,10 @@
 package com.hamyareman.admin.ui
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.pdf.PdfRenderer
 import android.media.MediaPlayer
+import android.os.ParcelFileDescriptor
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.Image
@@ -23,6 +26,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,16 +44,17 @@ import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 import kotlinx.coroutines.delay
 import java.io.File
 
-internal enum class PreviewKind { IMAGE, TEXT, HTML, AUDIO, OTHER }
+internal enum class PreviewKind { IMAGE, TEXT, HTML, AUDIO, PDF, OTHER }
 
 internal fun previewKind(name: String, mime: String): PreviewKind {
     val n = name.lowercase()
     val m = mime.lowercase()
     return when {
-        m.startsWith("image/") || n.endsWith(".jpg") || n.endsWith(".jpeg") || n.endsWith(".png") || n.endsWith(".webp") || n.endsWith(".gif") -> PreviewKind.IMAGE
+        m.contains("pdf") || n.endsWith(".pdf") -> PreviewKind.PDF
+        m.startsWith("image/") || n.endsWith(".jpg") || n.endsWith(".jpeg") || n.endsWith(".png") || n.endsWith(".webp") || n.endsWith(".gif") || n.endsWith(".bmp") -> PreviewKind.IMAGE
         m.contains("html") || n.endsWith(".html") || n.endsWith(".htm") -> PreviewKind.HTML
-        m.startsWith("audio/") || n.endsWith(".mp3") || n.endsWith(".m4a") || n.endsWith(".wav") || n.endsWith(".ogg") -> PreviewKind.AUDIO
-        m.startsWith("text/") || n.endsWith(".txt") || n.endsWith(".json") || n.endsWith(".csv") || n.endsWith(".md") -> PreviewKind.TEXT
+        m.startsWith("audio/") || n.endsWith(".mp3") || n.endsWith(".m4a") || n.endsWith(".wav") || n.endsWith(".ogg") || n.endsWith(".aac") -> PreviewKind.AUDIO
+        m.startsWith("text/") || n.endsWith(".txt") || n.endsWith(".json") || n.endsWith(".csv") || n.endsWith(".md") || n.endsWith(".xml") -> PreviewKind.TEXT
         else -> PreviewKind.OTHER
     }
 }
@@ -100,11 +105,7 @@ fun AdminFilePreview(
                     }
                     PreviewKind.TEXT -> {
                         val text = remember(data) { data.toString(Charsets.UTF_8).take(200_000) }
-                        Text(
-                            text,
-                            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
+                        Text(text, modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), style = MaterialTheme.typography.bodySmall)
                     }
                     PreviewKind.HTML -> {
                         val html = remember(data) { data.toString(Charsets.UTF_8) }
@@ -120,15 +121,70 @@ fun AdminFilePreview(
                             update = { it.loadDataWithBaseURL(null, html, "text/html", "utf-8", null) },
                         )
                     }
-                    PreviewKind.AUDIO -> {
-                        AudioPlayer(bytes = data, fileId = fileId, cacheDir = context.cacheDir)
-                    }
+                    PreviewKind.AUDIO -> AudioPlayer(bytes = data, fileId = fileId, cacheDir = context.cacheDir)
+                    PreviewKind.PDF -> PdfPager(bytes = data, fileId = fileId, cacheDir = context.cacheDir)
                     PreviewKind.OTHER -> Text(
-                        "برای این نوع فایل پیش‌نمایش داخلی نیست (${mime.ifBlank { name }}).",
+                        "این نوع ($mime) پیش‌نمایش اختصاصی ندارد. اگر عکس/صدا/پی‌دی‌اف است نام فایل را با پسوند درست ذخیره کن.",
                         modifier = Modifier.padding(16.dp),
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun PdfPager(bytes: ByteArray, fileId: String, cacheDir: File) {
+    var page by remember { mutableIntStateOf(0) }
+    var count by remember { mutableIntStateOf(0) }
+    var bmp by remember { mutableStateOf<Bitmap?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
+    DisposableEffect(fileId, bytes) {
+        val f = File(cacheDir, "admin-pdf-$fileId.pdf")
+        var pfd: ParcelFileDescriptor? = null
+        var renderer: PdfRenderer? = null
+        try {
+            f.writeBytes(bytes)
+            pfd = ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY)
+            renderer = PdfRenderer(pfd)
+            count = renderer.pageCount
+        } catch (t: Throwable) {
+            error = t.message ?: "پی‌دی‌اف باز نشد."
+        }
+        onDispose {
+            runCatching { renderer?.close() }
+            runCatching { pfd?.close() }
+            runCatching { f.delete() }
+        }
+    }
+    LaunchedEffect(page, count, bytes) {
+        if (count <= 0) return@LaunchedEffect
+        val f = File(cacheDir, "admin-pdf-$fileId.pdf")
+        runCatching {
+            ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY).use { pfd ->
+                PdfRenderer(pfd).use { r ->
+                    val i = page.coerceIn(0, r.pageCount - 1)
+                    r.openPage(i).use { p ->
+                        val img = Bitmap.createBitmap((p.width * 1.4f).toInt().coerceAtLeast(1), (p.height * 1.4f).toInt().coerceAtLeast(1), Bitmap.Config.ARGB_8888)
+                        p.render(img, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                        bmp = img
+                    }
+                }
+            }
+        }.onFailure { error = it.message }
+    }
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(12.dp)) }
+        val img = bmp
+        if (img != null) {
+            Image(bitmap = img.asImageBitmap(), contentDescription = "صفحه پی‌دی‌اف", modifier = Modifier.weight(1f).fillMaxWidth().padding(8.dp), contentScale = ContentScale.Fit)
+        } else if (error == null) {
+            CircularProgressIndicator(Modifier.padding(24.dp))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(8.dp)) {
+            TextButton(onClick = { if (page > 0) page -= 1 }, enabled = page > 0) { Text("قبلی") }
+            Text("${page + 1} / ${count.coerceAtLeast(1)}")
+            TextButton(onClick = { if (page + 1 < count) page += 1 }, enabled = page + 1 < count) { Text("بعدی") }
         }
     }
 }
@@ -155,10 +211,7 @@ private fun AudioPlayer(bytes: ByteArray, fileId: String, cacheDir: File) {
                 playing = true
             }
             mp.setOnCompletionListener { playing = false }
-            mp.setOnErrorListener { _, _, _ ->
-                error = "پخش نشد."
-                true
-            }
+            mp.setOnErrorListener { _, _, _ -> error = "پخش نشد."; true }
             mp.prepareAsync()
             player = mp
         } catch (t: Throwable) {
@@ -172,7 +225,6 @@ private fun AudioPlayer(bytes: ByteArray, fileId: String, cacheDir: File) {
             player = null
         }
     }
-
     LaunchedEffect(playing, player) {
         while (playing) {
             val p = player
@@ -180,19 +232,14 @@ private fun AudioPlayer(bytes: ByteArray, fileId: String, cacheDir: File) {
             delay(200)
         }
     }
-
     Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("پخش‌کننده داخلی", style = MaterialTheme.typography.titleMedium)
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         if (!ready && error == null) CircularProgressIndicator()
         Slider(
             value = if (dur <= 0f) 0f else (pos / dur).coerceIn(0f, 1f),
-            onValueChange = { v ->
-                pos = v * dur
-            },
-            onValueChangeFinished = {
-                player?.seekTo(pos.toInt())
-            },
+            onValueChange = { pos = it * dur },
+            onValueChangeFinished = { player?.seekTo(pos.toInt()) },
             enabled = ready,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -201,23 +248,11 @@ private fun AudioPlayer(bytes: ByteArray, fileId: String, cacheDir: File) {
             TextButton(
                 onClick = {
                     val p = player ?: return@TextButton
-                    if (playing) {
-                        p.pause()
-                        playing = false
-                    } else {
-                        p.start()
-                        playing = true
-                    }
+                    if (playing) { p.pause(); playing = false } else { p.start(); playing = true }
                 },
                 enabled = ready,
             ) { Text(if (playing) "مکث" else "پخش") }
-            TextButton(
-                onClick = {
-                    player?.seekTo(0)
-                    pos = 0f
-                },
-                enabled = ready,
-            ) { Text("از اول") }
+            TextButton(onClick = { player?.seekTo(0); pos = 0f }, enabled = ready) { Text("از اول") }
         }
     }
 }

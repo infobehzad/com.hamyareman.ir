@@ -54,12 +54,14 @@ class AdminApi(
     ): JSONObject = withContext(Dispatchers.IO) {
         if (apiKey.isBlank()) throw IllegalStateException("کلید سرور در این ساخت نیست.")
         val url = StringBuilder(endpoint.trimEnd('/') + path)
-        if (query.isNotEmpty()) {
-            url.append('?')
-            url.append(query.entries.joinToString("&") { e ->
-                java.net.URLEncoder.encode(e.key, "UTF-8") + "=" + java.net.URLEncoder.encode(e.value, "UTF-8")
-            })
+        val parts = mutableListOf<String>()
+        query.forEach { (k, v) ->
+            parts += java.net.URLEncoder.encode(k, "UTF-8") + "=" + java.net.URLEncoder.encode(v, "UTF-8")
         }
+        queries.forEach { q ->
+            parts += "queries%5B%5D=" + java.net.URLEncoder.encode(q, "UTF-8")
+        }
+        if (parts.isNotEmpty()) url.append('?').append(parts.joinToString("&"))
         val builder = Request.Builder()
             .url(url.toString())
             .header("X-Appwrite-Project", projectId)
@@ -241,7 +243,7 @@ class AdminApi(
     }
 
     suspend fun adminSetPremium(userId: String, paid: Boolean): AppResult<AdminUser> = run {
-        val sub = if (paid) "premium" else "free"
+        val sub = if (paid) "yearly" else "free"
         runCatching {
             call("PATCH", "/tablesdb/$databaseId/tables/student_profiles/rows/$userId", JSONObject().put("data", JSONObject().put("subscription", sub)))
         }
@@ -436,13 +438,54 @@ class AdminApi(
         }.filter { it.first.isNotBlank() }
     }
 
-    suspend fun listRows(tableId: String): AppResult<List<JSONObject>> = run {
+    suspend fun listColumns(tableId: String): AppResult<List<String>> = run {
         val o = runCatching {
-            call("GET", "/tablesdb/$databaseId/tables/$tableId/rows", query = mapOf("limit" to "100"))
+            call("GET", "/tablesdb/$databaseId/tables/$tableId/columns", query = mapOf("limit" to "100"))
         }.getOrElse {
-            call("GET", "/databases/$databaseId/collections/$tableId/documents", query = mapOf("limit" to "100"))
+            runCatching {
+                call("GET", "/databases/$databaseId/collections/$tableId/attributes", query = mapOf("limit" to "100"))
+            }.getOrNull()
         }
-        arr(o, "rows", "documents")
+        val cols = if (o != null) arr(o, "columns", "attributes") else emptyList()
+        val names = cols.map { it.optString("key").ifBlank { it.optString("\$id") } }.filter { it.isNotBlank() }
+        if (names.isNotEmpty()) names
+        else {
+            val rows = arr(
+                call("GET", "/tablesdb/$databaseId/tables/$tableId/rows", queries = listOf("limit(1)")),
+                "rows",
+                "documents",
+            )
+            if (rows.isEmpty()) emptyList()
+            else {
+                val keys = mutableListOf<String>()
+                val iter = rows.first().keys()
+                while (iter.hasNext()) {
+                    val k = iter.next()
+                    if (!k.startsWith("$")) keys += k
+                }
+                keys
+            }
+        }
+    }
+
+    suspend fun listRows(tableId: String): AppResult<List<JSONObject>> = run {
+        val out = mutableListOf<JSONObject>()
+        var cursor: String? = null
+        repeat(30) {
+            val qs = mutableListOf("limit(100)")
+            val c = cursor
+            if (!c.isNullOrBlank()) qs += "cursorAfter(\"$c\")"
+            val batch = runCatching {
+                arr(call("GET", "/tablesdb/$databaseId/tables/$tableId/rows", queries = qs), "rows", "documents")
+            }.getOrElse {
+                arr(call("GET", "/databases/$databaseId/collections/$tableId/documents", queries = qs), "documents", "rows")
+            }
+            out += batch
+            if (batch.size < 100) return@run out
+            cursor = batch.last().optString("\$id").ifBlank { batch.last().optString("id") }
+            if (cursor.isNullOrBlank()) return@run out
+        }
+        out
     }
 
     suspend fun getRow(tableId: String, rowId: String): AppResult<JSONObject> = run {
@@ -534,7 +577,19 @@ class AdminApi(
     }
 
     suspend fun listFiles(bucketId: String): AppResult<List<JSONObject>> = run {
-        arr(call("GET", "/storage/buckets/$bucketId/files", query = mapOf("limit" to "100")), "files")
+        val out = mutableListOf<JSONObject>()
+        var cursor: String? = null
+        repeat(30) {
+            val qs = mutableListOf("limit(100)")
+            val c = cursor
+            if (!c.isNullOrBlank()) qs += "cursorAfter(\"$c\")"
+            val batch = arr(call("GET", "/storage/buckets/$bucketId/files", queries = qs), "files")
+            out += batch
+            if (batch.size < 100) return@run out
+            cursor = batch.last().optString("\$id").ifBlank { batch.last().optString("id") }
+            if (cursor.isNullOrBlank()) return@run out
+        }
+        out
     }
 
     suspend fun deleteFile(bucketId: String, fileId: String): AppResult<Unit> = run {

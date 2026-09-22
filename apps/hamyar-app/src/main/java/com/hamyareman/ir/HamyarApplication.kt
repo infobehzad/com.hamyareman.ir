@@ -13,6 +13,14 @@ class HamyarApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        val previous = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, error ->
+            val name = thread.name.orEmpty()
+            if (name.contains("OkHttp", ignoreCase = true) || name.contains("DefaultDispatcher")) {
+                return@setDefaultUncaughtExceptionHandler
+            }
+            previous?.uncaughtException(thread, error)
+        }
         container = AppContainer(this)
         // پخشِ فایل‌های گاوصندوق: طرحِ vault:// به جریانِ رمزگشاییِ تنبل وصل می‌شود
         // (خوانشِ جسته‌گریخته؛ بدونِ بلوکه‌شدنِ لودرِ پلیر برای رمزگشاییِ کل فایل).

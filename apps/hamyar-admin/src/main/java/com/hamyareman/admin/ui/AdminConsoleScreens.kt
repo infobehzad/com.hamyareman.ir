@@ -1,27 +1,31 @@
 package com.hamyareman.admin.ui
 
-import android.provider.OpenableColumns
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,363 +33,362 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.hamyareman.admin.LocalAdmin
 import com.hamyareman.admin.adminIo
 import com.hamyareman.ir.platform.core.appwrite.AdminUser
 import com.hamyareman.ir.platform.core.common.AppResult
-import com.hamyareman.ir.platform.core.common.BillingConfig
 import com.hamyareman.ir.platform.core.common.BillingStatus
 import com.hamyareman.ir.platform.core.common.toPersianDigits
+import com.hamyareman.ir.platform.core.designsystem.AppTopBar
+import com.hamyareman.ir.platform.core.designsystem.PrimaryButton
 import kotlinx.coroutines.launch
+import org.json.JSONArray
 import org.json.JSONObject
 
-@Composable
-fun AdminPresentUsersScreen(onOpen: (String) -> Unit) {
-    val api = LocalAdmin.current.api
-    val scope = rememberCoroutineScope()
-    var loading by remember { mutableStateOf(true) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var users by remember { mutableStateOf<List<AdminUser>>(emptyList()) }
-    fun load() {
-        loading = true; error = null
-        scope.launch {
-            when (val r = adminIo { api.presentUsers() }) {
-                is AppResult.Ok -> users = r.value
-                is AppResult.Err -> error = r.error.userMessage
-            }
-            loading = false
-        }
-    }
-    LaunchedEffect(Unit) { load() }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("کاربران حاضر — نشست باز یعنی آنلاین. روی کارت بزن تا پرونده باز شود.", style = MaterialTheme.typography.titleMedium)
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        if (loading) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
-        OutlinedButton(onClick = { load() }, modifier = Modifier.fillMaxWidth()) { Text("تازه‌سازی") }
-        if (!loading && users.isEmpty() && error == null) Text("کاربری برنگشت. کلید API را در تنظیمات اتصال چک کن.")
-        users.forEach { u ->
-            Card(onClick = { onOpen(u.userId) }, modifier = Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text((u.profile.firstName + " " + u.profile.lastName).ifBlank { u.name }.ifBlank { u.email }, fontWeight = FontWeight.Bold)
-                    Text(u.email.ifBlank { u.userId })
-                    Text(
-                        "نشست: ${toPersianDigits(u.sessionCount.toString())} · پایه ${gradeFa(u.hamyarGrade)} · ${BillingStatus.chipFa(u.subscription)}" +
-                            if (u.sessionCount > 0) " · آنلاین" else " · آفلاین",
-                    )
-                    if (u.blocked) Text("مسدود", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
-                }
-            }
-        }
+private fun jsonId(o: JSONObject): String = o.optString("\$id").ifBlank { o.optString("id") }
+
+private fun jsonCell(o: JSONObject, key: String): String {
+    if (!o.has(key) || o.isNull(key)) return ""
+    return when (val v = o.opt(key)) {
+        null, JSONObject.NULL -> ""
+        is JSONObject, is JSONArray -> v.toString()
+        else -> v.toString()
     }
 }
 
-@Composable
-fun AdminInstallmentsScreen(onOpenUser: (String) -> Unit) {
-    val api = LocalAdmin.current.api
-    val scope = rememberCoroutineScope()
-    var loading by remember { mutableStateOf(true) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var rows by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
-    var userId by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var total by remember { mutableStateOf(BillingConfig.YEARLY.priceToman.toString()) }
-    var count by remember { mutableStateOf("3") }
-    var note by remember { mutableStateOf("") }
-    fun load() {
-        loading = true; error = null
-        scope.launch {
-            when (val r = adminIo { api.listInstallments() }) {
-                is AppResult.Ok -> rows = r.value
-                is AppResult.Err -> error = r.error.userMessage
-            }
-            loading = false
-        }
+private fun rowDataMap(o: JSONObject): Map<String, String> {
+    val out = linkedMapOf<String, String>()
+    val keys = o.keys()
+    while (keys.hasNext()) {
+        val k = keys.next()
+        if (k.startsWith("$")) continue
+        out[k] = jsonCell(o, k)
     }
-    LaunchedEffect(Unit) { load() }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("اقساط اشتراک", style = MaterialTheme.typography.titleMedium)
-        Text("بدون پرداخت کامل، اشتراک را قسطی ثبت کن. با قسط آخر پرمیوم فعال می‌شود.")
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        OutlinedTextField(userId, { userId = it.trim() }, label = { Text("شناسه کاربر") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(email, { email = it.trim() }, label = { Text("ایمیل") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(total, { total = it.filter { ch -> ch.isDigit() } }, label = { Text("مبلغ کل تومان") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(count, { count = it.filter { ch -> ch.isDigit() } }, label = { Text("تعداد قسط") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(note, { note = it }, label = { Text("یادداشت") }, modifier = Modifier.fillMaxWidth())
-        Button(
-            onClick = {
-                scope.launch {
-                    val t = total.toIntOrNull() ?: 0
-                    val n = count.toIntOrNull() ?: 0
-                    when (val r = adminIo { api.createInstallment(userId, email, "yearly", t, n, note) }) {
-                        is AppResult.Ok -> load()
-                        is AppResult.Err -> error = r.error.userMessage
-                    }
-                }
-            },
-            enabled = userId.isNotBlank() && (total.toIntOrNull() ?: 0) > 0 && (count.toIntOrNull() ?: 0) > 0,
-            modifier = Modifier.fillMaxWidth(),
-        ) { Text("ثبت قسط") }
-        if (loading) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
-        rows.forEach { row ->
-            val id = row.optString("\$id").ifBlank { row.optString("id") }
-            val paid = row.optInt("paidCount")
-            val all = row.optInt("installmentCount")
-            Card(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(row.optString("email").ifBlank { row.optString("userId") }, fontWeight = FontWeight.Bold)
-                    Text("قسط ${toPersianDigits(paid.toString())} از ${toPersianDigits(all.toString())} · هر قسط ${toPersianDigits(row.optInt("amountEach").toString())} تومان")
-                    Text("وضعیت: ${row.optString("status")}")
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(
-                            onClick = {
-                                scope.launch {
-                                    when (val r = adminIo { api.payInstallment(id) }) {
-                                        is AppResult.Ok -> load()
-                                        is AppResult.Err -> error = r.error.userMessage
-                                    }
-                                }
-                            },
-                            enabled = row.optString("status") != "done",
-                        ) { Text("ثبت قسط بعدی") }
-                        OutlinedButton(onClick = { onOpenUser(row.optString("userId")) }) { Text("پرونده") }
-                    }
-                }
-            }
-        }
-    }
+    return out
 }
 
-@Composable
-fun AdminDatabaseScreen() {
-    val api = LocalAdmin.current.api
-    val scope = rememberCoroutineScope()
-    var tables by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
-    var table by remember { mutableStateOf<String?>(null) }
-    var rows by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
-    var edit by remember { mutableStateOf<JSONObject?>(null) }
-    var json by remember { mutableStateOf("") }
-    var creating by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var info by remember { mutableStateOf<String?>(null) }
-    var loading by remember { mutableStateOf(false) }
-    fun loadTables() {
-        loading = true; error = null
-        scope.launch {
-            when (val r = adminIo { api.listTables() }) {
-                is AppResult.Ok -> tables = r.value
-                is AppResult.Err -> error = r.error.userMessage
-            }
-            loading = false
-        }
-    }
-    fun loadRows(id: String) {
-        loading = true; error = null
-        scope.launch {
-            when (val r = adminIo { api.listRows(id) }) {
-                is AppResult.Ok -> rows = r.value
-                is AppResult.Err -> error = r.error.userMessage
-            }
-            loading = false
-        }
-    }
-    LaunchedEffect(Unit) { loadTables() }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("دیتابیس — همه جدول‌ها و سطرها قابل خواندن، ویرایش، ساخت و حذف", style = MaterialTheme.typography.titleMedium)
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        info?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = {
-                scope.launch {
-                    when (val r = adminIo { api.backupDatabase() }) {
-                        is AppResult.Ok -> info = "پشتیبان گرفته شد (${r.value.optString("fileName")})"
-                        is AppResult.Err -> error = r.error.userMessage
-                    }
-                }
-            }) { Text("بکاپ") }
-            OutlinedButton(onClick = {
-                scope.launch {
-                    val dump = runCatching { JSONObject(json) }.getOrNull()
-                    if (dump == null) { error = "JSON پشتیبان را در کادر بچسبان."; return@launch }
-                    when (val r = adminIo { api.restoreDatabase(dump) }) {
-                        is AppResult.Ok -> info = r.value
-                        is AppResult.Err -> error = r.error.userMessage
-                    }
-                }
-            }) { Text("ریستور از JSON") }
-        }
-        if (loading) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
-        val e = edit
-        if ((e != null || creating) && table != null) {
-            Text(if (creating) "سطر تازه" else "ویرایش سطر ${e?.optString("\$id").orEmpty()}", fontWeight = FontWeight.Bold)
-            OutlinedTextField(json, { json = it }, modifier = Modifier.fillMaxWidth().height(220.dp), label = { Text("JSON سطر") })
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = {
-                    val data = runCatching { JSONObject(json) }.getOrNull()
-                    if (data == null) { error = "JSON نامعتبر"; return@Button }
-                    val clean = JSONObject()
-                    data.keys().forEach { k -> if (!k.startsWith("$")) clean.put(k, data.get(k)) }
-                    val rowId = e?.optString("\$id").orEmpty().ifBlank { e?.optString("id").orEmpty() }
-                    scope.launch {
-                        when (val r = adminIo { api.saveRow(table!!, rowId, clean, creating) }) {
-                            is AppResult.Ok -> { edit = null; creating = false; loadRows(table!!) }
-                            is AppResult.Err -> error = r.error.userMessage
-                        }
-                    }
-                }) { Text("ذخیره") }
-                if (!creating) {
-                    OutlinedButton(onClick = {
-                        val rowId = e?.optString("\$id").orEmpty().ifBlank { e?.optString("id").orEmpty() }
-                        scope.launch {
-                            when (val r = adminIo { api.deleteRow(table!!, rowId) }) {
-                                is AppResult.Ok -> { edit = null; loadRows(table!!) }
-                                is AppResult.Err -> error = r.error.userMessage
-                            }
-                        }
-                    }) { Text("حذف") }
-                }
-                OutlinedButton(onClick = { edit = null; creating = false }) { Text("بستن") }
-            }
-            return
-        }
-        if (table == null) {
-            OutlinedButton(onClick = { loadTables() }, modifier = Modifier.fillMaxWidth()) { Text("تازه‌سازی جدول‌ها") }
-            if (!loading && tables.isEmpty()) Text("جدولی نیامد. شناسه دیتابیس را در تنظیمات اتصال چک کن.")
-            tables.forEach { (id, name) ->
-                Card(onClick = { table = id; loadRows(id) }, modifier = Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(12.dp)) {
-                        Text(name.ifBlank { id }, fontWeight = FontWeight.Bold)
-                        Text(id, style = MaterialTheme.typography.bodySmall)
-                    }
-                }
-            }
-        } else {
-            OutlinedButton(onClick = { table = null; rows = emptyList() }, modifier = Modifier.fillMaxWidth()) { Text("بازگشت به جدول‌ها") }
-            Text("جدول $table — ${toPersianDigits(rows.size.toString())} سطر")
-            Button(
-                onClick = { creating = true; edit = JSONObject(); json = "{}" },
-                modifier = Modifier.fillMaxWidth(),
-            ) { Text("سطر تازه") }
-            if (!loading && rows.isEmpty()) Text("این جدول خالی است.")
-            rows.forEach { row ->
-                Card(onClick = { creating = false; edit = row; json = row.toString(2) }, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-                    Text(row.toString().take(180), modifier = Modifier.padding(12.dp), fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall)
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AdminStorageScreen() {
     val api = LocalAdmin.current.api
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     var buckets by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
-    var bucket by remember { mutableStateOf<String?>(null) }
     var files by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var bucketId by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
-    var preview by remember { mutableStateOf<Triple<String, String, JSONObject>?>(null) }
-    fun loadB() {
-        loading = true; error = null
+    var error by remember { mutableStateOf<String?>(null) }
+    var newName by remember { mutableStateOf("") }
+    var preview by remember { mutableStateOf<Triple<String, String, String>?>(null) }
+    val scope = rememberCoroutineScope()
+    val pick = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        if (uri == null || bucketId.isBlank()) return@rememberLauncherForActivityResult
         scope.launch {
-            when (val r = adminIo { api.listBuckets() }) {
-                is AppResult.Ok -> buckets = r.value
+            loading = true
+            error = null
+            val bytes = runCatching { context.contentResolver.openInputStream(uri)?.use { it.readBytes() } }.getOrNull()
+            if (bytes == null) {
+                error = "خواندن فایل انتخاب‌شده ممکن نشد."
+                loading = false
+                return@launch
+            }
+            val mime = context.contentResolver.getType(uri) ?: "application/octet-stream"
+            val name = newName.ifBlank { uri.lastPathSegment?.substringAfterLast('/') ?: "file" }
+            when (val r = adminIo { api.uploadFile(bucketId, name, bytes, mime) }) {
+                is AppResult.Ok -> files = (adminIo { api.listFiles(bucketId) } as? AppResult.Ok)?.value ?: files
                 is AppResult.Err -> error = r.error.userMessage
             }
             loading = false
         }
     }
-    fun loadF(id: String) {
-        loading = true; error = null
-        scope.launch {
-            when (val r = adminIo { api.listFiles(id) }) {
-                is AppResult.Ok -> files = r.value
-                is AppResult.Err -> error = r.error.userMessage
+
+    LaunchedEffect(Unit) {
+        loading = true
+        when (val r = adminIo { api.listBuckets() }) {
+            is AppResult.Ok -> {
+                buckets = r.value
+                if (bucketId.isBlank()) bucketId = r.value.firstOrNull()?.let { jsonId(it) }.orEmpty()
             }
-            loading = false
+            is AppResult.Err -> error = r.error.userMessage
+        }
+        loading = false
+    }
+    LaunchedEffect(bucketId) {
+        if (bucketId.isBlank()) return@LaunchedEffect
+        loading = true
+        when (val r = adminIo { api.listFiles(bucketId) }) {
+            is AppResult.Ok -> files = r.value
+            is AppResult.Err -> error = r.error.userMessage
+        }
+        loading = false
+    }
+
+    val open = preview
+    if (open != null) {
+        AdminFilePreview(bucketId = bucketId, fileId = open.first, name = open.second, mime = open.third, onClose = { preview = null })
+        return
+    }
+
+    Column(Modifier.fillMaxSize()) {
+        AppTopBar("Storage")
+        Column(Modifier.verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text("همهٔ نوع فایل‌ها با صفحه‌بندی کامل. عکس، صدا، پی‌دی‌اف، HTML و متن داخل همین اپ باز می‌شوند.")
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                buckets.forEach { b ->
+                    val id = jsonId(b)
+                    FilterChip(selected = bucketId == id, onClick = { bucketId = id }, label = { Text(b.optString("name").ifBlank { id }) })
+                }
+            }
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            if (loading) CircularProgressIndicator()
+            Text(toPersianDigits(files.size.toString()) + " فایل")
+            OutlinedTextField(newName, { newName = it }, label = { Text("نام فایل برای آپلود") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            PrimaryButton("انتخاب و آپلود") { pick.launch("*/*") }
+            files.forEach { f ->
+                val id = jsonId(f)
+                val name = f.optString("name").ifBlank { id }
+                val mime = f.optString("mimeType").ifBlank { f.optString("mime_type") }
+                val size = f.optLong("sizeOriginal")
+                Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(name, style = MaterialTheme.typography.titleSmall)
+                        Text("$mime · ${if (size > 0) toPersianDigits(size.toString()) + " بایت" else id}", style = MaterialTheme.typography.bodySmall)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            TextButton(onClick = { preview = Triple(id, name, mime) }) { Text("باز کردن داخل اپ") }
+                            TextButton(onClick = {
+                                scope.launch {
+                                    when (val r = adminIo { api.deleteFile(bucketId, id) }) {
+                                        is AppResult.Ok -> files = files.filterNot { jsonId(it) == id }
+                                        is AppResult.Err -> error = r.error.userMessage
+                                    }
+                                }
+                            }) { Text("حذف") }
+                        }
+                    }
+                }
+            }
         }
     }
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        val b = bucket ?: return@rememberLauncherForActivityResult
-        if (uri == null) return@rememberLauncherForActivityResult
-        scope.launch {
-            val cr = context.contentResolver
-            val name = cr.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
-                if (c.moveToFirst()) c.getString(0) else "file"
-            } ?: "file"
-            val mime = cr.getType(uri).orEmpty()
-            val bytes = cr.openInputStream(uri)?.use { it.readBytes() }
-            if (bytes == null) { error = "فایل خوانده نشد."; return@launch }
-            when (val r = adminIo { api.uploadFile(b, name, bytes, mime) }) {
-                is AppResult.Ok -> loadF(b)
-                is AppResult.Err -> error = r.error.userMessage
+}
+
+@Composable
+fun AdminTablesScreen() {
+    val api = LocalAdmin.current.api
+    var tables by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
+    var tableId by remember { mutableStateOf("") }
+    var columns by remember { mutableStateOf<List<String>>(emptyList()) }
+    var rows by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
+    var loading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var editing by remember { mutableStateOf<JSONObject?>(null) }
+    var creating by remember { mutableStateOf(false) }
+    var dump by remember { mutableStateOf("") }
+    var ok by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+
+    suspend fun reloadRows() {
+        when (val c = adminIo { api.listColumns(tableId) }) {
+            is AppResult.Ok -> columns = c.value
+            is AppResult.Err -> error = c.error.userMessage
+        }
+        when (val r = adminIo { api.listRows(tableId) }) {
+            is AppResult.Ok -> {
+                rows = r.value
+                if (columns.isEmpty() && r.value.isNotEmpty()) {
+                    columns = rowDataMap(r.value.first()).keys.toList()
+                }
             }
+            is AppResult.Err -> error = r.error.userMessage
         }
     }
-    LaunchedEffect(Unit) { loadB() }
-    val p = preview
-    if (p != null) {
-        AdminFilePreview(
-            bucketId = p.first,
-            fileId = p.second,
-            name = p.third.optString("name"),
-            mime = p.third.optString("mimeType"),
-            onClose = { preview = null },
+
+    LaunchedEffect(Unit) {
+        loading = true
+        when (val r = adminIo { api.listTables() }) {
+            is AppResult.Ok -> {
+                tables = r.value
+                if (tableId.isBlank()) tableId = r.value.firstOrNull()?.first.orEmpty()
+            }
+            is AppResult.Err -> error = r.error.userMessage
+        }
+        loading = false
+    }
+    LaunchedEffect(tableId) {
+        if (tableId.isBlank()) return@LaunchedEffect
+        loading = true
+        error = null
+        columns = emptyList()
+        rows = emptyList()
+        reloadRows()
+        loading = false
+    }
+
+    val edit = editing
+    if (edit != null) {
+        AdminRowEditor(
+            title = "ویرایش ردیف",
+            columns = columns.ifEmpty { rowDataMap(edit).keys.toList() },
+            initial = rowDataMap(edit),
+            onCancel = { editing = null },
+            onSave = { map ->
+                scope.launch {
+                    loading = true
+                    val data = JSONObject()
+                    map.forEach { (k, v) -> data.put(k, v) }
+                    when (val r = adminIo { api.saveRow(tableId, jsonId(edit), data, false) }) {
+                        is AppResult.Ok -> {
+                            editing = null
+                            reloadRows()
+                        }
+                        is AppResult.Err -> error = r.error.userMessage
+                    }
+                    loading = false
+                }
+            },
         )
         return
     }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Storage — مکث یا کلیک روی فایل = پیش‌نمایش داخلی (html / txt / jpg / png / mp3)", style = MaterialTheme.typography.titleMedium)
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        if (loading) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
-        val b = bucket
-        if (b == null) {
-            if (!loading && buckets.isEmpty()) Text("باکتی نیست. اتصال سرور را در تنظیمات چک کن.")
-            buckets.forEach { o ->
-                val id = o.optString("\$id").ifBlank { o.optString("id") }
-                Card(onClick = { bucket = id; loadF(id) }, modifier = Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(12.dp)) {
-                        Text(o.optString("name").ifBlank { id }, fontWeight = FontWeight.Bold)
-                        Text(id)
+    if (creating) {
+        AdminRowEditor(
+            title = "ردیف تازه",
+            columns = columns,
+            initial = emptyMap(),
+            onCancel = { creating = false },
+            onSave = { map ->
+                scope.launch {
+                    loading = true
+                    val data = JSONObject()
+                    map.forEach { (k, v) -> data.put(k, v) }
+                    when (val r = adminIo { api.saveRow(tableId, "", data, true) }) {
+                        is AppResult.Ok -> {
+                            creating = false
+                            reloadRows()
+                        }
+                        is AppResult.Err -> error = r.error.userMessage
                     }
+                    loading = false
+                }
+            },
+        )
+        return
+    }
+
+    Column(Modifier.fillMaxSize()) {
+        AppTopBar("جداول")
+        Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text("هر ستون جدا دیده و ویرایش می‌شود؛ JSON خام نشان داده نمی‌شود.")
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                tables.forEach { (id, name) ->
+                    FilterChip(selected = tableId == id, onClick = { tableId = id }, label = { Text(name.ifBlank { id }) })
                 }
             }
-        } else {
-            OutlinedButton(onClick = { bucket = null; files = emptyList() }, modifier = Modifier.fillMaxWidth()) { Text("بازگشت به باکت‌ها") }
-            Button(onClick = { picker.launch("*/*") }, modifier = Modifier.fillMaxWidth()) { Text("آپلود فایل") }
-            if (!loading && files.isEmpty()) Text("این باکت خالی است.")
-            files.forEach { f ->
-                val id = f.optString("\$id").ifBlank { f.optString("id") }
-                val fname = f.optString("name").ifBlank { id }
-                val mime = f.optString("mimeType")
-                Card(
-                    modifier = Modifier.fillMaxWidth().combinedClickable(
-                        onClick = { preview = Triple(b, id, f) },
-                        onLongClick = { preview = Triple(b, id, f) },
-                    ),
-                ) {
-                    Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(fname, fontWeight = FontWeight.Bold)
-                        Text("${toPersianDigits((f.optLong("sizeOriginal") / 1024).toString())} کیلوبایت · ${mime.ifBlank { "فایل" }}")
-                        OutlinedButton(onClick = {
-                            scope.launch {
-                                when (val r = adminIo { api.deleteFile(b, id) }) {
-                                    is AppResult.Ok -> loadF(b)
-                                    is AppResult.Err -> error = r.error.userMessage
-                                }
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            ok?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
+            if (loading) CircularProgressIndicator()
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = { creating = true }, enabled = tableId.isNotBlank()) { Text("ردیف تازه") }
+                OutlinedButton(onClick = {
+                    scope.launch {
+                        loading = true
+                        error = null
+                        ok = null
+                        when (val r = adminIo { api.backupDatabase() }) {
+                            is AppResult.Ok -> {
+                                dump = r.value.toString(2)
+                                ok = "بکاپ گرفته شد" + r.value.optString("fileName").let { if (it.isBlank()) "" else " · $it" }
                             }
-                        }) { Text("حذف فایل") }
+                            is AppResult.Err -> error = r.error.userMessage
+                        }
+                        loading = false
+                    }
+                }) { Text("بکاپ") }
+            }
+            Text(toPersianDigits(rows.size.toString()) + " ردیف · " + toPersianDigits(columns.size.toString()) + " ستون")
+            val hScroll = rememberScrollState()
+            Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).horizontalScroll(hScroll)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 8.dp)) {
+                    Text("عمل", modifier = Modifier.width(96.dp), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                    columns.forEach { col ->
+                        Text(col, modifier = Modifier.widthIn(min = 120.dp, max = 220.dp), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                    }
+                }
+                rows.forEach { row ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp)) {
+                        Column(Modifier.width(96.dp)) {
+                            TextButton(onClick = { editing = row }) { Text("ویرایش") }
+                            TextButton(onClick = {
+                                scope.launch {
+                                    when (val r = adminIo { api.deleteRow(tableId, jsonId(row)) }) {
+                                        is AppResult.Ok -> rows = rows.filterNot { jsonId(it) == jsonId(row) }
+                                        is AppResult.Err -> error = r.error.userMessage
+                                    }
+                                }
+                            }) { Text("حذف") }
+                        }
+                        columns.forEach { col ->
+                            Text(jsonCell(row, col).ifBlank { "—" }, modifier = Modifier.widthIn(min = 120.dp, max = 220.dp), style = MaterialTheme.typography.bodySmall, maxLines = 3)
+                        }
                     }
                 }
             }
+            if (dump.isNotBlank()) {
+                OutlinedTextField(dump, { dump = it }, label = { Text("JSON بکاپ") }, modifier = Modifier.fillMaxWidth().heightIn(min = 120.dp), minLines = 6)
+                PrimaryButton("بازیابی بکاپ") {
+                    scope.launch {
+                        loading = true
+                        error = null
+                        ok = null
+                        val obj = runCatching { JSONObject(dump) }.getOrNull()
+                        if (obj == null) {
+                            error = "JSON نامعتبر است."
+                            loading = false
+                            return@launch
+                        }
+                        when (val r = adminIo { api.restoreDatabase(obj) }) {
+                            is AppResult.Ok -> {
+                                ok = r.value
+                                reloadRows()
+                            }
+                            is AppResult.Err -> error = r.error.userMessage
+                        }
+                        loading = false
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AdminRowEditor(
+    title: String,
+    columns: List<String>,
+    initial: Map<String, String>,
+    onCancel: () -> Unit,
+    onSave: (Map<String, String>) -> Unit,
+) {
+    var values by remember(initial, columns) {
+        mutableStateOf(columns.associateWith { initial[it].orEmpty() })
+    }
+    Column(Modifier.fillMaxSize()) {
+        AppTopBar(title, onBack = onCancel)
+        Column(Modifier.verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            if (columns.isEmpty()) Text("ستونی برای این جدول خوانده نشد.")
+            columns.forEach { col ->
+                OutlinedTextField(
+                    value = values[col].orEmpty(),
+                    onValueChange = { v -> values = values.toMutableMap().also { it[col] = v } },
+                    label = { Text(col) },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 1,
+                    maxLines = 6,
+                )
+            }
+            PrimaryButton("ذخیره") { onSave(values) }
+            TextButton(onClick = onCancel) { Text("انصراف") }
         }
     }
 }
@@ -393,166 +396,310 @@ fun AdminStorageScreen() {
 @Composable
 fun AdminFunctionsScreen() {
     val api = LocalAdmin.current.api
-    val scope = rememberCoroutineScope()
     var fns by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
     var selected by remember { mutableStateOf<String?>(null) }
-    var execs by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
-    var body by remember { mutableStateOf("{\"action\":\"admin_ping\"}") }
+    var body by remember { mutableStateOf("{}") }
     var result by remember { mutableStateOf<String?>(null) }
-    var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
-    fun load() {
-        loading = true; error = null
+    var error by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        loading = true
+        when (val r = adminIo { api.listFunctions() }) {
+            is AppResult.Ok -> fns = r.value
+            is AppResult.Err -> error = r.error.userMessage
+        }
+        loading = false
+    }
+
+    Column(Modifier.fillMaxSize()) {
+        AppTopBar("توابع")
+        Column(Modifier.verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text("اجرای تابع برای کار ادمین لازم نیست؛ این صفحه فقط آزمایش است.")
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            if (loading) CircularProgressIndicator()
+            fns.forEach { f ->
+                val id = jsonId(f)
+                FilterChip(selected = selected == id, onClick = { selected = id }, label = { Text(f.optString("name").ifBlank { id }) })
+            }
+            OutlinedTextField(body, { body = it }, label = { Text("بدنه JSON") }, modifier = Modifier.fillMaxWidth().heightIn(min = 80.dp), minLines = 3)
+            PrimaryButton("اجرا") {
+                val id = selected ?: return@PrimaryButton
+                scope.launch {
+                    loading = true
+                    result = null
+                    error = null
+                    when (val r = adminIo { api.executeFunction(id, body) }) {
+                        is AppResult.Ok -> result = r.value.toString(2)
+                        is AppResult.Err -> error = r.error.userMessage
+                    }
+                    loading = false
+                }
+            }
+            result?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+        }
+    }
+}
+
+@Composable
+fun AdminInstallmentsScreen(onOpenUser: (String) -> Unit = {}) {
+    val api = LocalAdmin.current.api
+    var rows by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
+    var loading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var userId by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var planId by remember { mutableStateOf("yearly") }
+    var total by remember { mutableStateOf("") }
+    var count by remember { mutableStateOf("2") }
+    var note by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+
+    fun reload() {
         scope.launch {
-            when (val r = adminIo { api.listFunctions() }) {
-                is AppResult.Ok -> fns = r.value
+            loading = true
+            when (val r = adminIo { api.listInstallments() }) {
+                is AppResult.Ok -> rows = r.value
                 is AppResult.Err -> error = r.error.userMessage
             }
             loading = false
         }
     }
-    LaunchedEffect(Unit) { load() }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Functions — روشن/خاموش، اجرا، دیدن لاگ", style = MaterialTheme.typography.titleMedium)
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        result?.let { Text(it, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall) }
-        if (loading) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
-        OutlinedButton(onClick = { load() }, modifier = Modifier.fillMaxWidth()) { Text("تازه‌سازی") }
-        if (!loading && fns.isEmpty()) Text("تابعی نیست.")
-        fns.forEach { f ->
-            val id = f.optString("\$id").ifBlank { f.optString("id") }
-            Card(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("${f.optString("name")} ($id)", fontWeight = FontWeight.Bold)
-                    Text(if (f.optBoolean("enabled", true)) "فعال" else "خاموش")
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(onClick = {
+    LaunchedEffect(Unit) { reload() }
+
+    Column(Modifier.fillMaxSize()) {
+        AppTopBar("اقساط")
+        Column(Modifier.verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            if (loading) CircularProgressIndicator()
+            OutlinedTextField(userId, { userId = it }, label = { Text("شناسه کاربر") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedTextField(email, { email = it }, label = { Text("ایمیل") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedTextField(planId, { planId = it }, label = { Text("طرح") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            OutlinedTextField(total, { total = it }, label = { Text("مبلغ کل") }, modifier = Modifier.fillMaxWidth(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true)
+            OutlinedTextField(count, { count = it }, label = { Text("تعداد قسط") }, modifier = Modifier.fillMaxWidth(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true)
+            OutlinedTextField(note, { note = it }, label = { Text("یادداشت") }, modifier = Modifier.fillMaxWidth())
+            PrimaryButton("ثبت قسط") {
+                scope.launch {
+                    loading = true
+                    error = null
+                    when (
+                        val r = adminIo {
+                            api.createInstallment(
+                                userId.trim(),
+                                email.trim(),
+                                planId.trim().ifBlank { "yearly" },
+                                total.trim().toIntOrNull() ?: 0,
+                                count.trim().toIntOrNull() ?: 1,
+                                note.trim(),
+                            )
+                        }
+                    ) {
+                        is AppResult.Ok -> {
+                            userId = ""; email = ""; total = ""; note = ""
+                            reload()
+                        }
+                        is AppResult.Err -> error = r.error.userMessage
+                    }
+                    loading = false
+                }
+            }
+            rows.forEach { row ->
+                Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(jsonId(row), style = MaterialTheme.typography.labelSmall)
+                        rowDataMap(row).forEach { (k, v) -> Text("$k: $v", style = MaterialTheme.typography.bodySmall) }
+                        TextButton(onClick = {
                             scope.launch {
-                                adminIo { api.setFunctionEnabled(id, !f.optBoolean("enabled", true)) }
-                                load()
-                            }
-                        }) { Text(if (f.optBoolean("enabled", true)) "خاموش" else "روشن") }
-                        Button(onClick = {
-                            selected = id
-                            scope.launch {
-                                when (val r = adminIo { api.listExecutions(id) }) {
-                                    is AppResult.Ok -> execs = r.value
+                                when (val r = adminIo { api.payInstallment(jsonId(row)) }) {
+                                    is AppResult.Ok -> reload()
                                     is AppResult.Err -> error = r.error.userMessage
                                 }
                             }
-                        }) { Text("اجراها") }
+                        }) { Text("ثبت پرداخت یک قسط") }
                     }
                 }
             }
         }
-        val sid = selected
-        if (sid != null) {
-            OutlinedTextField(body, { body = it }, label = { Text("بدنه JSON") }, modifier = Modifier.fillMaxWidth())
-            Button(onClick = {
-                scope.launch {
-                    when (val r = adminIo { api.executeFunction(sid, body) }) {
-                        is AppResult.Ok -> result = r.value.toString(2).take(4000)
-                        is AppResult.Err -> error = r.error.userMessage
-                    }
+    }
+}
+
+@Composable
+fun AdminPresentUsersScreen(onOpen: (String) -> Unit) {
+    val api = LocalAdmin.current.api
+    var users by remember { mutableStateOf<List<AdminUser>>(emptyList()) }
+    var loading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        loading = true
+        when (val r = adminIo { api.presentUsers() }) {
+            is AppResult.Ok -> users = r.value
+            is AppResult.Err -> error = r.error.userMessage
+        }
+        loading = false
+    }
+
+    Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("کاربرانی که نشست باز دارند بالاترند. برای پایه و اشتراک روی پرونده بزن.")
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        if (loading) CircularProgressIndicator()
+        users.forEach { u ->
+            Card(onClick = { onOpen(u.userId) }, modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text((u.profile.firstName + " " + u.profile.lastName).ifBlank { u.name }.ifBlank { u.email }.ifBlank { u.userId }, fontWeight = FontWeight.Bold)
+                    Text(u.email.ifBlank { u.userId })
+                    Text("پایه: ${gradeFa(u.hamyarGrade.ifBlank { u.profile.grade })} · ${BillingStatus.chipFa(u.subscription.ifBlank { u.profile.subscription })} · نشست: ${toPersianDigits(u.sessionCount.toString())}")
                 }
-            }, modifier = Modifier.fillMaxWidth()) { Text("اجرای تابع $sid") }
-            execs.take(10).forEach { e ->
-                Text("${e.optString("\$id")} · ${e.optString("status")} · ${e.optInt("responseStatusCode")}", style = MaterialTheme.typography.bodySmall)
             }
         }
-        Spacer(Modifier.height(24.dp))
     }
 }
 
 @Composable
 fun AdminAuthScreen(onOpen: (String) -> Unit) {
     val api = LocalAdmin.current.api
-    val scope = rememberCoroutineScope()
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf<String?>(null) }
-    var info by remember { mutableStateOf<String?>(null) }
-    var users by remember { mutableStateOf<List<AdminUser>>(emptyList()) }
-    var editId by remember { mutableStateOf<String?>(null) }
-    var editName by remember { mutableStateOf("") }
-    var editLabels by remember { mutableStateOf("") }
+    var query by remember { mutableStateOf("") }
+    var hits by remember { mutableStateOf<List<AdminUser>>(emptyList()) }
     var loading by remember { mutableStateOf(false) }
-    fun load() {
-        loading = true; error = null
+    var error by remember { mutableStateOf<String?>(null) }
+    var busyId by remember { mutableStateOf<String?>(null) }
+    var newName by remember { mutableStateOf("") }
+    var newEmail by remember { mutableStateOf("") }
+    var newPass by remember { mutableStateOf("") }
+    var info by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+
+    fun search() {
         scope.launch {
-            when (val r = adminIo { api.presentUsers() }) {
-                is AppResult.Ok -> users = r.value
+            loading = true
+            error = null
+            when (val r = adminIo { api.adminSearch(query.trim()) }) {
+                is AppResult.Ok -> {
+                    hits = r.value.map { p ->
+                        AdminUser(
+                            userId = p.userId,
+                            email = p.email,
+                            name = (p.firstName + " " + p.lastName).trim(),
+                            hamyarGrade = p.hamyarGrade.ifBlank { p.grade },
+                            subscription = p.subscription,
+                            profile = p,
+                        )
+                    }
+                }
                 is AppResult.Err -> error = r.error.userMessage
             }
             loading = false
         }
     }
-    LaunchedEffect(Unit) { load() }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Auth — ساخت، ویرایش برچسب/نام، حذف حساب", style = MaterialTheme.typography.titleMedium)
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        info?.let { Text(it) }
-        OutlinedTextField(name, { name = it }, label = { Text("نام") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(email, { email = it.trim() }, label = { Text("ایمیل") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(password, { password = it }, label = { Text("رمز (حداقل ۸)") }, modifier = Modifier.fillMaxWidth())
+
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text("پایه و اشتراک را همین‌جا مثل پرونده کاربر عوض کن. مقدار اشتراک روی سرور yearly است نه premium.")
+        info?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
+        OutlinedTextField(newName, { newName = it }, label = { Text("نام کاربر تازه") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        OutlinedTextField(newEmail, { newEmail = it }, label = { Text("ایمیل کاربر تازه") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        OutlinedTextField(newPass, { newPass = it }, label = { Text("رمز (حداقل ۸)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
         Button(
             onClick = {
                 scope.launch {
-                    when (val r = adminIo { api.createUser(name, email, password) }) {
-                        is AppResult.Ok -> { info = "ساخته شد: ${r.value}"; load() }
+                    loading = true; error = null; info = null
+                    when (val r = adminIo { api.createUser(newName.trim(), newEmail.trim(), newPass) }) {
+                        is AppResult.Ok -> { info = "ساخته شد: ${r.value}"; newName = ""; newEmail = ""; newPass = "" }
                         is AppResult.Err -> error = r.error.userMessage
                     }
+                    loading = false
                 }
             },
             modifier = Modifier.fillMaxWidth(),
         ) { Text("ساخت کاربر") }
-        if (loading) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
-        OutlinedButton(onClick = { load() }, modifier = Modifier.fillMaxWidth()) { Text("تازه‌سازی") }
-        if (!loading && users.isEmpty()) Text("کاربری نیست.")
-        users.forEach { u ->
+        OutlinedTextField(query, { query = it }, label = { Text("ایمیل یا شناسه") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        Button(onClick = { search() }, modifier = Modifier.fillMaxWidth()) { Text("جستجو در Auth") }
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        if (loading) CircularProgressIndicator()
+        hits.forEach { u ->
+            val uid = u.userId
             Card(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(u.email.ifBlank { u.userId }, fontWeight = FontWeight.Bold)
-                    Text("نام: ${u.name.ifBlank { "—" }}")
-                    Text("برچسب: ${u.labels.joinToString().ifBlank { "—" }}")
-                    if (editId == u.userId) {
-                        OutlinedTextField(editName, { editName = it }, label = { Text("نام") }, modifier = Modifier.fillMaxWidth())
-                        OutlinedTextField(editLabels, { editLabels = it }, label = { Text("برچسب‌ها با ویرگول") }, modifier = Modifier.fillMaxWidth())
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = {
-                                scope.launch {
-                                    val labels = editLabels.split(',', '،').map { it.trim() }.filter { it.isNotBlank() }
-                                    adminIo { api.adminUpdateName(u.userId, editName) }
-                                    when (val r = adminIo { api.adminSetLabels(u.userId, labels) }) {
-                                        is AppResult.Ok -> { editId = null; load() }
-                                        is AppResult.Err -> error = r.error.userMessage
-                                    }
-                                }
-                            }) { Text("ذخیره") }
-                            OutlinedButton(onClick = { editId = null }) { Text("بستن") }
-                        }
-                    } else {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedButton(onClick = { onOpen(u.userId) }) { Text("پرونده") }
-                            OutlinedButton(onClick = {
-                                editId = u.userId
-                                editName = u.name
-                                editLabels = u.labels.joinToString(",")
-                            }) { Text("ویرایش") }
-                            OutlinedButton(onClick = {
-                                scope.launch {
-                                    when (val r = adminIo { api.deleteUser(u.userId) }) {
-                                        is AppResult.Ok -> load()
-                                        is AppResult.Err -> error = r.error.userMessage
-                                    }
-                                }
-                            }) { Text("حذف حساب") }
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(u.name.ifBlank { u.email }.ifBlank { uid }, fontWeight = FontWeight.Bold)
+                    Text(u.email.ifBlank { uid })
+                    Text("اشتراک فعلی: ${BillingStatus.chipFa(u.subscription)}")
+                    Text("تعویض پایه", fontWeight = FontWeight.Bold)
+                    GRADE_OPTIONS.chunked(3).forEach { row ->
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            row.forEach { (id, fa) ->
+                                FilterChip(
+                                    selected = u.hamyarGrade == id,
+                                    onClick = {
+                                        if (busyId != null) return@FilterChip
+                                        scope.launch {
+                                            busyId = uid
+                                            when (val r = adminIo { api.adminSetGrade(uid, id) }) {
+                                                is AppResult.Ok -> hits = hits.map { if (it.userId == uid) r.value else it }
+                                                is AppResult.Err -> error = r.error.userMessage
+                                            }
+                                            busyId = null
+                                        }
+                                    },
+                                    label = { Text(fa) },
+                                    enabled = busyId == null,
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                            repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
                         }
                     }
+                    Text("اشتراک", fontWeight = FontWeight.Bold)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(
+                            onClick = {
+                                if (busyId != null) return@Button
+                                scope.launch {
+                                    busyId = uid
+                                    when (val r = adminIo { api.adminSetPremium(uid, true) }) {
+                                        is AppResult.Ok -> hits = hits.map { if (it.userId == uid) r.value else it }
+                                        is AppResult.Err -> error = r.error.userMessage
+                                    }
+                                    busyId = null
+                                }
+                            },
+                            enabled = busyId == null,
+                            modifier = Modifier.weight(1f),
+                        ) { Text("پرمیوم (yearly)") }
+                        OutlinedButton(
+                            onClick = {
+                                if (busyId != null) return@OutlinedButton
+                                scope.launch {
+                                    busyId = uid
+                                    when (val r = adminIo { api.adminSetPremium(uid, false) }) {
+                                        is AppResult.Ok -> hits = hits.map { if (it.userId == uid) r.value else it }
+                                        is AppResult.Err -> error = r.error.userMessage
+                                    }
+                                    busyId = null
+                                }
+                            },
+                            enabled = busyId == null,
+                            modifier = Modifier.weight(1f),
+                        ) { Text("مهمان") }
+                    }
+                    TextButton(onClick = { onOpen(uid) }) { Text("پرونده کامل") }
+                    TextButton(onClick = {
+                        scope.launch {
+                            busyId = uid
+                            when (val r = adminIo { api.deleteUser(uid) }) {
+                                is AppResult.Ok -> hits = hits.filterNot { it.userId == uid }
+                                is AppResult.Err -> error = r.error.userMessage
+                            }
+                            busyId = null
+                        }
+                    }, enabled = busyId == null) { Text("حذف حساب") }
                 }
             }
         }
-        Spacer(Modifier.height(24.dp))
     }
+}
+
+
+@Composable
+fun AdminDatabaseScreen() {
+    AdminTablesScreen()
 }
