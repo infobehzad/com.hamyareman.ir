@@ -2,6 +2,7 @@ package com.hamyareman.admin.ui
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -129,12 +130,16 @@ fun AdminHomeScreen(onLogout: () -> Unit, onSettings: () -> Unit = {}) {
             OutlinedButton(onClick = onLogout) { Text("خروج") }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(12.dp)) }
-        if (loading) {
-            CircularProgressIndicator(Modifier.padding(24.dp).align(Alignment.CenterHorizontally))
-        }
+        Box(Modifier.weight(1f).fillMaxWidth()) {
         when (tab) {
-            AdminTab.STATS -> AdminStatsScreen()
-            AdminTab.SEARCH -> Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            AdminTab.STATS -> AdminStatsScreen(onOpen = { selectedUser = it })
+            AdminTab.USERS -> AdminPresentUsersScreen(onOpen = { selectedUser = it })
+            AdminTab.INSTALL -> AdminInstallmentsScreen(onOpenUser = { selectedUser = it })
+            AdminTab.DB -> AdminDatabaseScreen()
+            AdminTab.STORE -> AdminStorageScreen()
+            AdminTab.FUN -> AdminFunctionsScreen()
+            AdminTab.AUTH -> AdminAuthScreen(onOpen = { selectedUser = it })
+            AdminTab.SEARCH -> Column(Modifier.fillMaxSize().padding(12.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
@@ -170,21 +175,27 @@ fun AdminHomeScreen(onLogout: () -> Unit, onSettings: () -> Unit = {}) {
                     }
                 }
             }
-            else -> LazyColumn(Modifier.fillMaxSize().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (orders.isEmpty() && !loading) {
-                    item { Text("صف خالی است.") }
+            AdminTab.PAY, AdminTab.REFUND -> Column(Modifier.fillMaxSize()) {
+                if (loading) {
+                    CircularProgressIndicator(Modifier.padding(24.dp).align(Alignment.CenterHorizontally))
                 }
-                itemsIndexed(orders, key = { i, o -> o.id.ifBlank { "row-$i-${o.userId}-${o.createdAtMs}" } }) { _, o ->
-                    Card(onClick = { selected = o.id }, modifier = Modifier.fillMaxWidth()) {
-                        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text((o.firstName + " " + o.lastName).ifBlank { o.email }.ifBlank { o.userId }, fontWeight = FontWeight.Bold)
-                            Text("${o.planTitle.ifBlank { o.planId }} · ${toPersianDigits(o.amountToman.toString())} تومان")
-                            Text(o.email)
-                            Text("وضعیت: ${o.status}")
+                LazyColumn(Modifier.weight(1f).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (orders.isEmpty() && !loading) {
+                        item { Text("صف خالی است.") }
+                    }
+                    itemsIndexed(orders, key = { i, o -> o.id.ifBlank { "row-$i-${o.userId}-${o.createdAtMs}" } }) { _, o ->
+                        Card(onClick = { selected = o.id }, modifier = Modifier.fillMaxWidth()) {
+                            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text((o.firstName + " " + o.lastName).ifBlank { o.email }.ifBlank { o.userId }, fontWeight = FontWeight.Bold)
+                                Text("${o.planTitle.ifBlank { o.planId }} · ${toPersianDigits(o.amountToman.toString())} تومان")
+                                Text(o.email)
+                                Text("وضعیت: ${o.status}")
+                            }
                         }
                     }
                 }
             }
+        }
         }
     }
 }

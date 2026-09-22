@@ -9,6 +9,8 @@ import com.hamyareman.ir.platform.core.appwrite.BillingProfile
 import com.hamyareman.ir.platform.core.common.AppError
 import com.hamyareman.ir.platform.core.common.AppResult
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
@@ -44,6 +46,7 @@ class AdminApi(
         path: String,
         body: JSONObject? = null,
         query: Map<String, String> = emptyMap(),
+        queries: List<String> = emptyList(),
         bytes: ByteArray? = null,
         mime: String? = null,
         fileName: String? = null,
@@ -89,6 +92,23 @@ class AdminApi(
             throw IllegalStateException(msg)
         }
         if (text.isBlank()) JSONObject() else runCatching { JSONObject(text) }.getOrElse { JSONObject().put("raw", text) }
+    }
+
+    private suspend fun callBytes(path: String): ByteArray = withContext(Dispatchers.IO) {
+        if (apiKey.isBlank()) throw IllegalStateException("کلید سرور را از تنظیمات اتصال بگذار.")
+        val req = Request.Builder()
+            .url(endpoint.trimEnd('/') + path)
+            .header("X-Appwrite-Project", projectId)
+            .header("X-Appwrite-Key", apiKey)
+            .get()
+            .build()
+        val resp = http.newCall(req).execute()
+        val bytes = resp.body?.bytes() ?: ByteArray(0)
+        if (!resp.isSuccessful) {
+            val msg = runCatching { JSONObject(String(bytes, Charsets.UTF_8)).optString("message") }.getOrNull()
+            throw IllegalStateException(msg?.ifBlank { null } ?: "HTTP ${resp.code}")
+        }
+        bytes
     }
 
     private fun arr(o: JSONObject, vararg keys: String): List<JSONObject> {
@@ -141,10 +161,14 @@ class AdminApi(
 
     suspend fun presentUsers(): AppResult<List<AdminUser>> = run {
         val (_, users) = listUsersRaw(100)
-        users.map { u ->
-            val id = u.optString("\$id")
-            val sessions = runCatching { listSessions(id).first }.getOrDefault(0)
-            pack(u, sessions)
+        coroutineScope {
+            users.map { u ->
+                async {
+                    val id = u.optString("\$id").ifBlank { u.optString("id") }
+                    val sessions = runCatching { listSessions(id).first }.getOrDefault(0)
+                    pack(u, sessions)
+                }
+            }.map { it.await() }
         }.sortedByDescending { it.sessionCount }
     }
 
@@ -168,7 +192,7 @@ class AdminApi(
     }
 
     private suspend fun pack(u: JSONObject, sessionCount: Int = 0, extra: Map<String, String> = emptyMap()): AdminUser {
-        val id = u.optString("\$id")
+        val id = u.optString("\$id").ifBlank { u.optString("id") }
         val labels = u.optJSONArray("labels")
         val lab = if (labels == null) emptyList() else (0 until labels.length()).map { labels.optString(it) }.filter { it.isNotBlank() }
         val blocked = u.optBoolean("status", true).not() || lab.any { it.equals("blocked", true) }
@@ -402,12 +426,23 @@ class AdminApi(
     }
 
     suspend fun listTables(): AppResult<List<Pair<String, String>>> = run {
-        val o = call("GET", "/tablesdb/$databaseId/tables", query = mapOf("limit" to "100"))
-        arr(o, "tables").map { it.optString("\$id") to it.optString("name") }
+        val o = runCatching {
+            call("GET", "/tablesdb/$databaseId/tables", query = mapOf("limit" to "100"))
+        }.getOrElse {
+            call("GET", "/databases/$databaseId/collections", query = mapOf("limit" to "100"))
+        }
+        arr(o, "tables", "collections").map {
+            it.optString("\$id").ifBlank { it.optString("id") } to it.optString("name")
+        }.filter { it.first.isNotBlank() }
     }
 
     suspend fun listRows(tableId: String): AppResult<List<JSONObject>> = run {
-        arr(call("GET", "/tablesdb/$databaseId/tables/$tableId/rows"), "rows", "documents")
+        val o = runCatching {
+            call("GET", "/tablesdb/$databaseId/tables/$tableId/rows", queries = listOf("limit(100)"))
+        }.getOrElse {
+            call("GET", "/databases/$databaseId/collections/$tableId/documents", queries = listOf("limit(100)"))
+        }
+        arr(o, "rows", "documents")
     }
 
     suspend fun getRow(tableId: String, rowId: String): AppResult<JSONObject> = run {

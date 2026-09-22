@@ -1,5 +1,10 @@
 package com.hamyareman.admin.ui
 
+import android.provider.OpenableColumns
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +31,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -58,10 +64,11 @@ fun AdminPresentUsersScreen(onOpen: (String) -> Unit) {
     }
     LaunchedEffect(Unit) { load() }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("کاربران حاضر — نشست باز یعنی آنلاین", style = MaterialTheme.typography.titleMedium)
+        Text("کاربران حاضر — نشست باز یعنی آنلاین. روی کارت بزن تا پرونده باز شود.", style = MaterialTheme.typography.titleMedium)
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         if (loading) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
         OutlinedButton(onClick = { load() }, modifier = Modifier.fillMaxWidth()) { Text("تازه‌سازی") }
+        if (!loading && users.isEmpty() && error == null) Text("کاربری برنگشت. کلید API را در تنظیمات اتصال چک کن.")
         users.forEach { u ->
             Card(onClick = { onOpen(u.userId) }, modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -126,7 +133,7 @@ fun AdminInstallmentsScreen(onOpenUser: (String) -> Unit) {
         ) { Text("ثبت قسط") }
         if (loading) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
         rows.forEach { row ->
-            val id = row.optString("\$id")
+            val id = row.optString("\$id").ifBlank { row.optString("id") }
             val paid = row.optInt("paidCount")
             val all = row.optInt("installmentCount")
             Card(Modifier.fillMaxWidth()) {
@@ -163,19 +170,22 @@ fun AdminDatabaseScreen() {
     var rows by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
     var edit by remember { mutableStateOf<JSONObject?>(null) }
     var json by remember { mutableStateOf("") }
+    var creating by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var info by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
     fun loadTables() {
+        loading = true; error = null
         scope.launch {
             when (val r = adminIo { api.listTables() }) {
                 is AppResult.Ok -> tables = r.value
                 is AppResult.Err -> error = r.error.userMessage
             }
+            loading = false
         }
     }
     fun loadRows(id: String) {
-        loading = true
+        loading = true; error = null
         scope.launch {
             when (val r = adminIo { api.listRows(id) }) {
                 is AppResult.Ok -> rows = r.value
@@ -186,7 +196,7 @@ fun AdminDatabaseScreen() {
     }
     LaunchedEffect(Unit) { loadTables() }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("دیتابیس ZahraDB — خواندن، ویرایش، نوشتن، پشتیبان", style = MaterialTheme.typography.titleMedium)
+        Text("دیتابیس — همه جدول‌ها و سطرها قابل خواندن، ویرایش، ساخت و حذف", style = MaterialTheme.typography.titleMedium)
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         info?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -201,7 +211,7 @@ fun AdminDatabaseScreen() {
             OutlinedButton(onClick = {
                 scope.launch {
                     val dump = runCatching { JSONObject(json) }.getOrNull()
-                    if (dump == null) { error = "JSON پشتیبان را در کادر پایین بچسبان."; return@launch }
+                    if (dump == null) { error = "JSON پشتیبان را در کادر بچسبان."; return@launch }
                     when (val r = adminIo { api.restoreDatabase(dump) }) {
                         is AppResult.Ok -> info = r.value
                         is AppResult.Err -> error = r.error.userMessage
@@ -209,36 +219,43 @@ fun AdminDatabaseScreen() {
                 }
             }) { Text("ریستور از JSON") }
         }
+        if (loading) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
         val e = edit
-        if (e != null && table != null) {
-            Text("ویرایش سطر ${e.optString("\$id")}", fontWeight = FontWeight.Bold)
-            OutlinedTextField(json, { json = it }, modifier = Modifier.fillMaxWidth().height(220.dp), label = { Text("JSON") })
+        if ((e != null || creating) && table != null) {
+            Text(if (creating) "سطر تازه" else "ویرایش سطر ${e?.optString("\$id").orEmpty()}", fontWeight = FontWeight.Bold)
+            OutlinedTextField(json, { json = it }, modifier = Modifier.fillMaxWidth().height(220.dp), label = { Text("JSON سطر") })
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = {
                     val data = runCatching { JSONObject(json) }.getOrNull()
                     if (data == null) { error = "JSON نامعتبر"; return@Button }
                     val clean = JSONObject()
                     data.keys().forEach { k -> if (!k.startsWith("$")) clean.put(k, data.get(k)) }
+                    val rowId = e?.optString("\$id").orEmpty().ifBlank { e?.optString("id").orEmpty() }
                     scope.launch {
-                        when (val r = adminIo { api.saveRow(table!!, e.optString("\$id"), clean, false) }) {
-                            is AppResult.Ok -> { edit = null; loadRows(table!!) }
+                        when (val r = adminIo { api.saveRow(table!!, rowId, clean, creating) }) {
+                            is AppResult.Ok -> { edit = null; creating = false; loadRows(table!!) }
                             is AppResult.Err -> error = r.error.userMessage
                         }
                     }
                 }) { Text("ذخیره") }
-                OutlinedButton(onClick = {
-                    scope.launch {
-                        when (val r = adminIo { api.deleteRow(table!!, e.optString("\$id")) }) {
-                            is AppResult.Ok -> { edit = null; loadRows(table!!) }
-                            is AppResult.Err -> error = r.error.userMessage
+                if (!creating) {
+                    OutlinedButton(onClick = {
+                        val rowId = e?.optString("\$id").orEmpty().ifBlank { e?.optString("id").orEmpty() }
+                        scope.launch {
+                            when (val r = adminIo { api.deleteRow(table!!, rowId) }) {
+                                is AppResult.Ok -> { edit = null; loadRows(table!!) }
+                                is AppResult.Err -> error = r.error.userMessage
+                            }
                         }
-                    }
-                }) { Text("حذف") }
-                OutlinedButton(onClick = { edit = null }) { Text("بستن") }
+                    }) { Text("حذف") }
+                }
+                OutlinedButton(onClick = { edit = null; creating = false }) { Text("بستن") }
             }
             return
         }
         if (table == null) {
+            OutlinedButton(onClick = { loadTables() }, modifier = Modifier.fillMaxWidth()) { Text("تازه‌سازی جدول‌ها") }
+            if (!loading && tables.isEmpty()) Text("جدولی نیامد. شناسه دیتابیس را در تنظیمات اتصال چک کن.")
             tables.forEach { (id, name) ->
                 Card(onClick = { table = id; loadRows(id) }, modifier = Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(12.dp)) {
@@ -248,11 +265,15 @@ fun AdminDatabaseScreen() {
                 }
             }
         } else {
-            OutlinedButton(onClick = { table = null; rows = emptyList() }) { Text("بازگشت به جدول‌ها") }
+            OutlinedButton(onClick = { table = null; rows = emptyList() }, modifier = Modifier.fillMaxWidth()) { Text("بازگشت به جدول‌ها") }
             Text("جدول $table — ${toPersianDigits(rows.size.toString())} سطر")
-            if (loading) CircularProgressIndicator()
+            Button(
+                onClick = { creating = true; edit = JSONObject(); json = "{}" },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("سطر تازه") }
+            if (!loading && rows.isEmpty()) Text("این جدول خالی است.")
             rows.forEach { row ->
-                Card(onClick = { edit = row; json = row.toString(2) }, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                Card(onClick = { creating = false; edit = row; json = row.toString(2) }, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                     Text(row.toString().take(180), modifier = Modifier.padding(12.dp), fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall)
                 }
             }
@@ -260,53 +281,100 @@ fun AdminDatabaseScreen() {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AdminStorageScreen() {
     val api = LocalAdmin.current.api
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var buckets by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
     var bucket by remember { mutableStateOf<String?>(null) }
     var files by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
     var error by remember { mutableStateOf<String?>(null) }
+    var loading by remember { mutableStateOf(false) }
+    var preview by remember { mutableStateOf<Triple<String, String, JSONObject>?>(null) }
     fun loadB() {
+        loading = true; error = null
         scope.launch {
             when (val r = adminIo { api.listBuckets() }) {
                 is AppResult.Ok -> buckets = r.value
                 is AppResult.Err -> error = r.error.userMessage
             }
+            loading = false
         }
     }
     fun loadF(id: String) {
+        loading = true; error = null
         scope.launch {
             when (val r = adminIo { api.listFiles(id) }) {
                 is AppResult.Ok -> files = r.value
                 is AppResult.Err -> error = r.error.userMessage
             }
+            loading = false
+        }
+    }
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        val b = bucket ?: return@rememberLauncherForActivityResult
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val cr = context.contentResolver
+            val name = cr.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
+                if (c.moveToFirst()) c.getString(0) else "file"
+            } ?: "file"
+            val mime = cr.getType(uri).orEmpty()
+            val bytes = cr.openInputStream(uri)?.use { it.readBytes() }
+            if (bytes == null) { error = "فایل خوانده نشد."; return@launch }
+            when (val r = adminIo { api.uploadFile(b, name, bytes, mime) }) {
+                is AppResult.Ok -> loadF(b)
+                is AppResult.Err -> error = r.error.userMessage
+            }
         }
     }
     LaunchedEffect(Unit) { loadB() }
+    val p = preview
+    if (p != null) {
+        AdminFilePreview(
+            bucketId = p.first,
+            fileId = p.second,
+            name = p.third.optString("name"),
+            mime = p.third.optString("mimeType"),
+            onClose = { preview = null },
+        )
+        return
+    }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Storage", style = MaterialTheme.typography.titleMedium)
+        Text("Storage — مکث یا کلیک روی فایل = پیش‌نمایش داخلی (html / txt / jpg / png / mp3)", style = MaterialTheme.typography.titleMedium)
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        if (loading) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
         val b = bucket
         if (b == null) {
+            if (!loading && buckets.isEmpty()) Text("باکتی نیست. اتصال سرور را در تنظیمات چک کن.")
             buckets.forEach { o ->
-                Card(onClick = { bucket = o.optString("\$id"); loadF(o.optString("\$id")) }, modifier = Modifier.fillMaxWidth()) {
+                val id = o.optString("\$id").ifBlank { o.optString("id") }
+                Card(onClick = { bucket = id; loadF(id) }, modifier = Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(12.dp)) {
-                        Text(o.optString("name"), fontWeight = FontWeight.Bold)
-                        Text(o.optString("\$id"))
+                        Text(o.optString("name").ifBlank { id }, fontWeight = FontWeight.Bold)
+                        Text(id)
                     }
                 }
             }
         } else {
-            OutlinedButton(onClick = { bucket = null; files = emptyList() }) { Text("بازگشت") }
+            OutlinedButton(onClick = { bucket = null; files = emptyList() }, modifier = Modifier.fillMaxWidth()) { Text("بازگشت به باکت‌ها") }
+            Button(onClick = { picker.launch("*/*") }, modifier = Modifier.fillMaxWidth()) { Text("آپلود فایل") }
+            if (!loading && files.isEmpty()) Text("این باکت خالی است.")
             files.forEach { f ->
-                val id = f.optString("\$id")
-                Card(Modifier.fillMaxWidth()) {
+                val id = f.optString("\$id").ifBlank { f.optString("id") }
+                val fname = f.optString("name").ifBlank { id }
+                val mime = f.optString("mimeType")
+                Card(
+                    modifier = Modifier.fillMaxWidth().combinedClickable(
+                        onClick = { preview = Triple(b, id, f) },
+                        onLongClick = { preview = Triple(b, id, f) },
+                    ),
+                ) {
                     Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(f.optString("name").ifBlank { id }, fontWeight = FontWeight.Bold)
-                        Text("${toPersianDigits((f.optLong("sizeOriginal") / 1024).toString())} کیلوبایت")
-                        Text(api.fileView(b, id), style = MaterialTheme.typography.bodySmall)
+                        Text(fname, fontWeight = FontWeight.Bold)
+                        Text("${toPersianDigits((f.optLong("sizeOriginal") / 1024).toString())} کیلوبایت · ${mime.ifBlank { "فایل" }}")
                         OutlinedButton(onClick = {
                             scope.launch {
                                 when (val r = adminIo { api.deleteFile(b, id) }) {
@@ -332,21 +400,27 @@ fun AdminFunctionsScreen() {
     var body by remember { mutableStateOf("{\"action\":\"admin_ping\"}") }
     var result by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
+    var loading by remember { mutableStateOf(false) }
     fun load() {
+        loading = true; error = null
         scope.launch {
             when (val r = adminIo { api.listFunctions() }) {
                 is AppResult.Ok -> fns = r.value
                 is AppResult.Err -> error = r.error.userMessage
             }
+            loading = false
         }
     }
     LaunchedEffect(Unit) { load() }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Functions", style = MaterialTheme.typography.titleMedium)
+        Text("Functions — روشن/خاموش، اجرا، دیدن لاگ", style = MaterialTheme.typography.titleMedium)
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         result?.let { Text(it, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall) }
+        if (loading) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
+        OutlinedButton(onClick = { load() }, modifier = Modifier.fillMaxWidth()) { Text("تازه‌سازی") }
+        if (!loading && fns.isEmpty()) Text("تابعی نیست.")
         fns.forEach { f ->
-            val id = f.optString("\$id")
+            val id = f.optString("\$id").ifBlank { f.optString("id") }
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text("${f.optString("name")} ($id)", fontWeight = FontWeight.Bold)
@@ -377,7 +451,7 @@ fun AdminFunctionsScreen() {
             Button(onClick = {
                 scope.launch {
                     when (val r = adminIo { api.executeFunction(sid, body) }) {
-                        is AppResult.Ok -> result = r.value.toString(2).take(2000)
+                        is AppResult.Ok -> result = r.value.toString(2).take(4000)
                         is AppResult.Err -> error = r.error.userMessage
                     }
                 }
@@ -386,6 +460,7 @@ fun AdminFunctionsScreen() {
                 Text("${e.optString("\$id")} · ${e.optString("status")} · ${e.optInt("responseStatusCode")}", style = MaterialTheme.typography.bodySmall)
             }
         }
+        Spacer(Modifier.height(24.dp))
     }
 }
 
@@ -399,17 +474,23 @@ fun AdminAuthScreen(onOpen: (String) -> Unit) {
     var error by remember { mutableStateOf<String?>(null) }
     var info by remember { mutableStateOf<String?>(null) }
     var users by remember { mutableStateOf<List<AdminUser>>(emptyList()) }
+    var editId by remember { mutableStateOf<String?>(null) }
+    var editName by remember { mutableStateOf("") }
+    var editLabels by remember { mutableStateOf("") }
+    var loading by remember { mutableStateOf(false) }
     fun load() {
+        loading = true; error = null
         scope.launch {
             when (val r = adminIo { api.presentUsers() }) {
                 is AppResult.Ok -> users = r.value
                 is AppResult.Err -> error = r.error.userMessage
             }
+            loading = false
         }
     }
     LaunchedEffect(Unit) { load() }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Auth — ساخت و حذف حساب", style = MaterialTheme.typography.titleMedium)
+        Text("Auth — ساخت، ویرایش برچسب/نام، حذف حساب", style = MaterialTheme.typography.titleMedium)
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         info?.let { Text(it) }
         OutlinedTextField(name, { name = it }, label = { Text("نام") }, modifier = Modifier.fillMaxWidth())
@@ -424,24 +505,50 @@ fun AdminAuthScreen(onOpen: (String) -> Unit) {
                     }
                 }
             },
-            enabled = email.contains("@") && password.length >= 8,
             modifier = Modifier.fillMaxWidth(),
         ) { Text("ساخت کاربر") }
+        if (loading) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
+        OutlinedButton(onClick = { load() }, modifier = Modifier.fillMaxWidth()) { Text("تازه‌سازی") }
+        if (!loading && users.isEmpty()) Text("کاربری نیست.")
         users.forEach { u ->
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(u.email.ifBlank { u.userId }, fontWeight = FontWeight.Bold)
+                    Text("نام: ${u.name.ifBlank { "—" }}")
                     Text("برچسب: ${u.labels.joinToString().ifBlank { "—" }}")
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(onClick = { onOpen(u.userId) }) { Text("پرونده") }
-                        OutlinedButton(onClick = {
-                            scope.launch {
-                                when (val r = adminIo { api.deleteUser(u.userId) }) {
-                                    is AppResult.Ok -> load()
-                                    is AppResult.Err -> error = r.error.userMessage
+                    if (editId == u.userId) {
+                        OutlinedTextField(editName, { editName = it }, label = { Text("نام") }, modifier = Modifier.fillMaxWidth())
+                        OutlinedTextField(editLabels, { editLabels = it }, label = { Text("برچسب‌ها با ویرگول") }, modifier = Modifier.fillMaxWidth())
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(onClick = {
+                                scope.launch {
+                                    val labels = editLabels.split(',', '،').map { it.trim() }.filter { it.isNotBlank() }
+                                    adminIo { api.adminUpdateName(u.userId, editName) }
+                                    when (val r = adminIo { api.adminSetLabels(u.userId, labels) }) {
+                                        is AppResult.Ok -> { editId = null; load() }
+                                        is AppResult.Err -> error = r.error.userMessage
+                                    }
                                 }
-                            }
-                        }) { Text("حذف حساب") }
+                            }) { Text("ذخیره") }
+                            OutlinedButton(onClick = { editId = null }) { Text("بستن") }
+                        }
+                    } else {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(onClick = { onOpen(u.userId) }) { Text("پرونده") }
+                            OutlinedButton(onClick = {
+                                editId = u.userId
+                                editName = u.name
+                                editLabels = u.labels.joinToString(",")
+                            }) { Text("ویرایش") }
+                            OutlinedButton(onClick = {
+                                scope.launch {
+                                    when (val r = adminIo { api.deleteUser(u.userId) }) {
+                                        is AppResult.Ok -> load()
+                                        is AppResult.Err -> error = r.error.userMessage
+                                    }
+                                }
+                            }) { Text("حذف حساب") }
+                        }
                     }
                 }
             }
