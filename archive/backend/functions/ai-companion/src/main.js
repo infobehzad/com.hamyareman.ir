@@ -254,6 +254,12 @@ module.exports = async function aiCompanion(ctx) {
   const { req, res, log: logInfo, error: logErr } = ctx;
   const body = parseBody(req);
 
+  // قفل پایه/دستگاه + صف اشتراک/ادمین — روی همین فانکشن سوار است
+  // چون پلن رایگان سقف functions دارد (user-bootstrap ساخته نمی‌شود).
+  if (body.action || (body.grade && body.deviceId && !body.mode && !body.message && !body.idToken)) {
+    return require('./ops')(req, res);
+  }
+
   // مسیریابی ورود native گوگل (Credential Manager) — idToken → سشن.
   if (body.mode === 'google-auth') {
     return googleAuthSession(body, res, logErr);

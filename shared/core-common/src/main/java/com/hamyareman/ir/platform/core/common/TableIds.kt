@@ -109,13 +109,13 @@ object BucketIds {
 
 /** شناسه‌ی توابع سرور (Function ID در کنسول Appwrite). */
 object FunctionIds {
-    const val USER_BOOTSTRAP = "user-bootstrap"
     /**
-     * عملیات ادمین و صف پرداخت/استرداد. روی پلن رایگان سقف توابع پر است،
-     * پس روی همان `user-bootstrap` سوار است (فیلد `action` در JSON).
-     * کلید سرور فقط داخل تابع است، نه در هیچ APK.
+     * قفل پایه/دستگاه + صف اشتراک/ادمین.
+     * پلن رایگان سقف توابع دارد؛ روی همان `ai-companion` سوار است
+     * (فیلد `action` یا `grade`+`deviceId`). کلید سرور داخل تابع است، نه APK.
      */
-    const val ADMIN_OPS = USER_BOOTSTRAP
+    const val USER_BOOTSTRAP = "ai-companion"
+    const val ADMIN_OPS = "ai-companion"
     const val PAIRING = "pairing"
     const val WEEKLY_SUMMARY = "weekly-summary"
     /** لایه‌ی AI «همراه زهرا» — proxy سمت سرور؛ کلید مدل هرگز در اپ نیست. */
