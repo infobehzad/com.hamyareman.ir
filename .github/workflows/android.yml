@@ -159,7 +159,7 @@ jobs:
             gh release create ci-apk --title "CI APK" --notes "آخرین فایل‌های نصبیِ ساختهٔ CI (نسخهٔ debug و R8)." || true
           shopt -s nullglob
           shopt -s globstar
-          for f in apps/hamyar-app/build/outputs/apk/**/*.apk; do
+          for f in apps/hamyar-app/build/outputs/apk/**/*.apk apps/hamyar-admin/build/outputs/apk/**/*.apk; do
             echo "↑ $f"
             gh release upload ci-apk "$f" --clobber
           done
