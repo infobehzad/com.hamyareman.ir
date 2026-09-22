@@ -1,5 +1,6 @@
 package com.hamyareman.admin.ui
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -102,7 +103,11 @@ fun AdminHomeScreen(onLogout: () -> Unit) {
 
     Column(Modifier.fillMaxSize()) {
         AppTopBar("صف ادمین همیار", onBack = null)
-        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             FilterChip(selected = tab == AdminTab.PAY, onClick = { tab = AdminTab.PAY }, label = { Text("پرداخت‌ها") })
             FilterChip(selected = tab == AdminTab.REFUND, onClick = { tab = AdminTab.REFUND }, label = { Text("بازگشت وجه") })
             FilterChip(selected = tab == AdminTab.SEARCH, onClick = { tab = AdminTab.SEARCH }, label = { Text("جستجو") })
@@ -156,7 +161,7 @@ fun AdminHomeScreen(onLogout: () -> Unit) {
                 if (orders.isEmpty() && !loading) {
                     item { Text("صف خالی است.") }
                 }
-                items(orders, key = { it.id }) { o ->
+                items(orders, key = { o -> o.id.ifBlank { o.userId + o.createdAtMs } }) { o ->
                     Card(onClick = { selected = o.id }, modifier = Modifier.fillMaxWidth()) {
                         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text((o.firstName + " " + o.lastName).ifBlank { o.email }.ifBlank { o.userId }, fontWeight = FontWeight.Bold)

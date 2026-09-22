@@ -20,13 +20,15 @@ import com.hamyareman.admin.ui.AdminLoginScreen
 import com.hamyareman.ir.platform.core.common.AppResult
 import com.hamyareman.ir.platform.core.designsystem.BrandTheme
 import com.hamyareman.ir.platform.core.designsystem.PlatformTheme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 val LocalAdmin = staticCompositionLocalOf<AdminContainer> { error("AdminContainer missing") }
 
 class AdminMainActivity : AppCompatActivity() {
 
-    private val loggedIn = mutableStateOf<Boolean?>(null)
+    private val loggedIn = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,60 +41,81 @@ class AdminMainActivity : AppCompatActivity() {
             var error by remember { mutableStateOf<String?>(null) }
 
             LaunchedEffect(Unit) {
-                if (loggedIn.value == null) {
-                    val u = runCatching { container.auth.currentUser() }.getOrNull()
-                    if (u == null) {
-                        loggedIn.value = false
-                    } else {
-                        when (val p = container.billing.adminPing()) {
-                            is AppResult.Ok -> loggedIn.value = true
+                loading = true
+                val outcome = runCatching {
+                    withContext(Dispatchers.IO) {
+                        val u = runCatching { container.auth.currentUser() }.getOrNull()
+                        if (u == null) {
+                            false to null
+                        } else when (val p = container.billing.adminPing()) {
+                            is AppResult.Ok -> true to null
                             is AppResult.Err -> {
                                 runCatching { container.auth.logout() }
-                                error = p.error.userMessage
-                                loggedIn.value = false
+                                false to p.error.userMessage
                             }
                         }
                     }
                 }
+                outcome.fold(
+                    onSuccess = { (ok, msg) ->
+                        loggedIn.value = ok
+                        if (msg != null) error = msg
+                    },
+                    onFailure = { t ->
+                        loggedIn.value = false
+                        error = t.message?.ifBlank { null } ?: "بررسی نشست ناموفق بود."
+                    },
+                )
+                loading = false
             }
 
             PlatformTheme(brand = BrandTheme.Mint, darkTheme = false) {
                 CompositionLocalProvider(LocalAdmin provides container) {
                     Surface(Modifier.fillMaxSize()) {
-                        when (loggedIn.value) {
-                            null -> Unit
-                            false -> AdminLoginScreen(
+                        if (loggedIn.value) {
+                            AdminHomeScreen(
+                                onLogout = {
+                                    scope.launch {
+                                        withContext(Dispatchers.IO) {
+                                            runCatching { container.auth.logout() }
+                                        }
+                                        loggedIn.value = false
+                                    }
+                                },
+                            )
+                        } else {
+                            AdminLoginScreen(
                                 loading = loading,
                                 error = error,
                                 onSignIn = { email, password ->
                                     loading = true
                                     error = null
                                     scope.launch {
-                                        when (val r = container.auth.signIn(email, password)) {
-                                            is AppResult.Err -> {
-                                                error = r.error.userMessage
-                                                loading = false
-                                            }
-                                            is AppResult.Ok -> when (val p = container.billing.adminPing()) {
-                                                is AppResult.Ok -> {
-                                                    loading = false
-                                                    loggedIn.value = true
-                                                }
-                                                is AppResult.Err -> {
-                                                    runCatching { container.auth.logout() }
-                                                    error = p.error.userMessage
-                                                    loading = false
+                                        val outcome = runCatching {
+                                            withContext(Dispatchers.IO) {
+                                                when (val r = container.auth.signIn(email, password)) {
+                                                    is AppResult.Err -> false to r.error.userMessage
+                                                    is AppResult.Ok -> when (val p = container.billing.adminPing()) {
+                                                        is AppResult.Ok -> true to null
+                                                        is AppResult.Err -> {
+                                                            runCatching { container.auth.logout() }
+                                                            false to p.error.userMessage
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                                },
-                            )
-                            true -> AdminHomeScreen(
-                                onLogout = {
-                                    scope.launch {
-                                        container.auth.logout()
-                                        loggedIn.value = false
+                                        outcome.fold(
+                                            onSuccess = { (ok, msg) ->
+                                                loggedIn.value = ok
+                                                error = msg
+                                            },
+                                            onFailure = { t ->
+                                                loggedIn.value = false
+                                                error = "ورود ناموفق: " + (t.message?.ifBlank { null } ?: t.javaClass.simpleName)
+                                            },
+                                        )
+                                        loading = false
                                     }
                                 },
                             )

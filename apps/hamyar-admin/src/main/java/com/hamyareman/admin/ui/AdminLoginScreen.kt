@@ -53,35 +53,37 @@ fun AdminLoginScreen(
         Spacer(Modifier.height(20.dp))
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                if (loading) {
-                    CircularProgressIndicator()
-                } else {
-                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                        OutlinedTextField(
-                            value = email,
-                            onValueChange = { email = it.trim() },
-                            label = { Text("ایمیل") },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        OutlinedTextField(
-                            value = password,
-                            onValueChange = { password = it },
-                            label = { Text("رمز") },
-                            singleLine = true,
-                            visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                    Spacer(Modifier.height(12.dp))
-                    Button(
-                        onClick = { onSignIn(email.trim(), password) },
-                        enabled = email.contains("@") && password.length >= 8,
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it.trim() },
+                        label = { Text("ایمیل") },
+                        singleLine = true,
+                        enabled = !loading,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         modifier = Modifier.fillMaxWidth(),
-                    ) { Text("ورود") }
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = { Text("رمز") },
+                        singleLine = true,
+                        enabled = !loading,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                Spacer(Modifier.height(12.dp))
+                Button(
+                    onClick = { onSignIn(email.trim(), password) },
+                    enabled = !loading && email.contains("@") && password.length >= 8,
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text(if (loading) "…" else "ورود") }
+                if (loading) {
+                    Spacer(Modifier.height(12.dp))
+                    CircularProgressIndicator()
                 }
                 error?.let {
                     Spacer(Modifier.height(10.dp))
