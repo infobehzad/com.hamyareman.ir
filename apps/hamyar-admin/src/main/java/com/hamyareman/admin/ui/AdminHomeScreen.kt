@@ -305,13 +305,4 @@ private fun OrderDetailScreen(
     }
 }
 
-@Composable
-private fun Info(label: String, value: String) {
-    Text("$label: $value", style = MaterialTheme.typography.bodyMedium)
-}
-
-private fun genderFa(raw: String): String = when (raw.trim().lowercase()) {
-    "boy", "male" -> "پسر"
-    "girl", "female" -> "دختر"
-    else -> raw.ifBlank { "—" }
-}
+private fun genderFa(raw: String): String = genderFaAdmin(raw)
