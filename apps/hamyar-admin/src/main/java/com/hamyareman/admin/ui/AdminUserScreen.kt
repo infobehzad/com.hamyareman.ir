@@ -269,12 +269,16 @@ fun AdminUserScreen(userId: String, onBack: () -> Unit) {
 }
 
 @Composable
-fun AdminStatsScreen() {
+fun AdminStatsScreen(onOpen: (String) -> Unit = {}) {
     val container = LocalAdmin.current
     val scope = rememberCoroutineScope()
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     var stats by remember { mutableStateOf<AdminStats?>(null) }
+    var users by remember { mutableStateOf<List<AdminUser>>(emptyList()) }
+    var filter by remember { mutableStateOf("all") }
+    var filterOpen by remember { mutableStateOf(false) }
+    var subOpenFor by remember { mutableStateOf<String?>(null) }
 
     fun load() {
         loading = true
@@ -284,16 +288,31 @@ fun AdminStatsScreen() {
                 is AppResult.Ok -> stats = r.value
                 is AppResult.Err -> error = r.error.userMessage
             }
+            when (val r = adminIo { container.api.presentUsers() }) {
+                is AppResult.Ok -> users = r.value
+                is AppResult.Err -> if (error == null) error = r.error.userMessage
+            }
             loading = false
         }
     }
     LaunchedEffect(Unit) { load() }
 
-    Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        if (loading) {
-            CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
+    val filterLabel = when (filter) {
+        "premium" -> "فقط پرمیوم"
+        "free" -> "فقط مهمان"
+        else -> "همه کاربران"
+    }
+    val shown = users.filter { u ->
+        when (filter) {
+            "premium" -> BillingStatus.isPaid(u.subscription)
+            "free" -> !BillingStatus.isPaid(u.subscription)
+            else -> true
         }
+    }
+
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        if (loading) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
         val s = stats
         if (s != null) {
             StatCard("کاربران", s.usersTotal)
@@ -301,9 +320,53 @@ fun AdminStatsScreen() {
             StatCard("صف بازگشت وجه", s.pendingRefund)
             StatCard("پرداخت تأییدشده", s.approved)
             StatCard("بازگشت انجام‌شده", s.refunded)
-            if (s.paidProfiles >= 0) StatCard("پروفایل با اشتراک سالانه", s.paidProfiles)
+            if (s.paidProfiles >= 0) StatCard("پروفایل با اشتراک", s.paidProfiles)
         }
         OutlinedButton(onClick = { load() }, modifier = Modifier.fillMaxWidth()) { Text("تازه‌سازی") }
+        Text("کنترل کاربران و اشتراک", fontWeight = FontWeight.Bold)
+        androidx.compose.foundation.layout.Box {
+            OutlinedButton(onClick = { filterOpen = true }, modifier = Modifier.fillMaxWidth()) {
+                Text("فیلتر: $filterLabel")
+            }
+            DropdownMenu(expanded = filterOpen, onDismissRequest = { filterOpen = false }) {
+                DropdownMenuItem(text = { Text("همه کاربران") }, onClick = { filter = "all"; filterOpen = false })
+                DropdownMenuItem(text = { Text("فقط پرمیوم") }, onClick = { filter = "premium"; filterOpen = false })
+                DropdownMenuItem(text = { Text("فقط مهمان") }, onClick = { filter = "free"; filterOpen = false })
+            }
+        }
+        if (!loading && shown.isEmpty()) Text("با این فیلتر کاربری نیست.")
+        shown.forEach { u ->
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text((u.profile.firstName + " " + u.profile.lastName).ifBlank { u.name }.ifBlank { u.email }, fontWeight = FontWeight.Bold)
+                    Text(u.email.ifBlank { u.userId })
+                    Text("پایه ${gradeFa(u.hamyarGrade)} · ${BillingStatus.chipFa(u.subscription)}")
+                    androidx.compose.foundation.layout.Box {
+                        OutlinedButton(onClick = { subOpenFor = u.userId }, modifier = Modifier.fillMaxWidth()) {
+                            Text("تغییر اشتراک (${BillingStatus.chipFa(u.subscription)})")
+                        }
+                        DropdownMenu(expanded = subOpenFor == u.userId, onDismissRequest = { subOpenFor = null }) {
+                            DropdownMenuItem(
+                                text = { Text("پرمیوم") },
+                                onClick = {
+                                    subOpenFor = null
+                                    scope.launch { adminIo { container.api.adminSetPremium(u.userId, true) }; load() }
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text("مهمان") },
+                                onClick = {
+                                    subOpenFor = null
+                                    scope.launch { adminIo { container.api.adminSetPremium(u.userId, false) }; load() }
+                                },
+                            )
+                        }
+                    }
+                    OutlinedButton(onClick = { onOpen(u.userId) }, modifier = Modifier.fillMaxWidth()) { Text("پرونده کامل") }
+                }
+            }
+        }
+        Spacer(Modifier.height(24.dp))
     }
 }
 

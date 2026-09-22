@@ -438,9 +438,9 @@ class AdminApi(
 
     suspend fun listRows(tableId: String): AppResult<List<JSONObject>> = run {
         val o = runCatching {
-            call("GET", "/tablesdb/$databaseId/tables/$tableId/rows", queries = listOf("limit(100)"))
+            call("GET", "/tablesdb/$databaseId/tables/$tableId/rows", query = mapOf("limit" to "100"))
         }.getOrElse {
-            call("GET", "/databases/$databaseId/collections/$tableId/documents", queries = listOf("limit(100)"))
+            call("GET", "/databases/$databaseId/collections/$tableId/documents", query = mapOf("limit" to "100"))
         }
         arr(o, "rows", "documents")
     }
@@ -639,6 +639,31 @@ class AdminApi(
                 }
             }
         }
+    }
+
+    suspend fun downloadFile(bucketId: String, fileId: String): AppResult<ByteArray> = run {
+        callBytes("/storage/buckets/$bucketId/files/$fileId/view")
+    }
+
+    suspend fun uploadFile(bucketId: String, name: String, bytes: ByteArray, mime: String): AppResult<Unit> = run {
+        call(
+            "POST",
+            "/storage/buckets/$bucketId/files",
+            bytes = bytes,
+            mime = mime.ifBlank { "application/octet-stream" },
+            fileName = name.ifBlank { "file" },
+        )
+        Unit
+    }
+
+    suspend fun adminSetLabels(userId: String, labels: List<String>): AppResult<AdminUser> = run {
+        call("PUT", "/users/$userId/labels", JSONObject().put("labels", JSONArray(labels)))
+        pack(getUserRaw(userId), listSessions(userId).first)
+    }
+
+    suspend fun adminUpdateName(userId: String, name: String): AppResult<AdminUser> = run {
+        call("PATCH", "/users/$userId/name", JSONObject().put("name", name))
+        pack(getUserRaw(userId), listSessions(userId).first)
     }
 
     companion object {
