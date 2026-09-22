@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.hamyareman.admin.LocalAdmin
+import com.hamyareman.admin.adminIo
 import com.hamyareman.ir.platform.core.appwrite.BillingOrder
 import com.hamyareman.ir.platform.core.appwrite.BillingProfile
 import com.hamyareman.ir.platform.core.common.AppResult
@@ -73,7 +74,7 @@ fun AdminHomeScreen(onLogout: () -> Unit) {
         error = null
         scope.launch {
             val queue = if (tab == AdminTab.REFUND) "refund" else "pay"
-            when (val r = container.billing.adminList(queue)) {
+            when (val r = adminIo { container.billing.adminList(queue) }) {
                 is AppResult.Ok -> orders = r.value
                 is AppResult.Err -> error = r.error.userMessage
             }
@@ -104,15 +105,20 @@ fun AdminHomeScreen(onLogout: () -> Unit) {
     Column(Modifier.fillMaxSize()) {
         AppTopBar("صف ادمین همیار", onBack = null)
         Row(
-            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp),
+            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            FilterChip(selected = tab == AdminTab.PAY, onClick = { tab = AdminTab.PAY }, label = { Text("پرداخت‌ها") })
-            FilterChip(selected = tab == AdminTab.REFUND, onClick = { tab = AdminTab.REFUND }, label = { Text("بازگشت وجه") })
-            FilterChip(selected = tab == AdminTab.SEARCH, onClick = { tab = AdminTab.SEARCH }, label = { Text("جستجو") })
-            FilterChip(selected = tab == AdminTab.STATS, onClick = { tab = AdminTab.STATS }, label = { Text("آمار") })
-            Spacer(Modifier.weight(1f))
+            Row(
+                Modifier.weight(1f).horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                FilterChip(selected = tab == AdminTab.PAY, onClick = { tab = AdminTab.PAY }, label = { Text("پرداخت‌ها") })
+                FilterChip(selected = tab == AdminTab.REFUND, onClick = { tab = AdminTab.REFUND }, label = { Text("بازگشت وجه") })
+                FilterChip(selected = tab == AdminTab.SEARCH, onClick = { tab = AdminTab.SEARCH }, label = { Text("جستجو") })
+                FilterChip(selected = tab == AdminTab.STATS, onClick = { tab = AdminTab.STATS }, label = { Text("آمار") })
+            }
             OutlinedButton(onClick = onLogout) { Text("خروج") }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(12.dp)) }
@@ -132,7 +138,7 @@ fun AdminHomeScreen(onLogout: () -> Unit) {
                     onClick = {
                         loading = true; error = null
                         scope.launch {
-                            when (val r = container.billing.adminSearch(query.trim())) {
+                            when (val r = adminIo { container.billing.adminSearch(query.trim()) }) {
                                 is AppResult.Ok -> hits = r.value
                                 is AppResult.Err -> error = r.error.userMessage
                             }
@@ -161,7 +167,7 @@ fun AdminHomeScreen(onLogout: () -> Unit) {
                 if (orders.isEmpty() && !loading) {
                     item { Text("صف خالی است.") }
                 }
-                items(orders, key = { o -> o.id.ifBlank { o.userId + o.createdAtMs } }) { o ->
+                itemsIndexed(orders, key = { i, o -> o.id.ifBlank { "row-$i-${o.userId}-${o.createdAtMs}" } }) { _, o ->
                     Card(onClick = { selected = o.id }, modifier = Modifier.fillMaxWidth()) {
                         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text((o.firstName + " " + o.lastName).ifBlank { o.email }.ifBlank { o.userId }, fontWeight = FontWeight.Bold)
@@ -195,7 +201,7 @@ private fun OrderDetailScreen(
     fun reload() {
         loading = true
         scope.launch {
-            when (val r = container.billing.adminGet(orderId)) {
+            when (val r = adminIo { container.billing.adminGet(orderId) }) {
                 is AppResult.Ok -> {
                     order = r.value.first
                     profile = r.value.second
@@ -235,6 +241,10 @@ private fun OrderDetailScreen(
                     Text(p?.email?.ifBlank { o.email } ?: o.email)
                 }
             }
+            OutlinedButton(
+                onClick = { onOpenUser(o.userId) },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("پرونده کاربر") }
             Info("شناسه", o.userId)
             Info("پایه", (p?.grade ?: o.grade).ifBlank { "—" })
             Info("جنسیت", genderFa(p?.gender ?: o.gender))
@@ -264,7 +274,7 @@ private fun OrderDetailScreen(
                     onClick = {
                         busy = true; error = null
                         scope.launch {
-                            when (val r = container.billing.adminRefundOk(o.id)) {
+                            when (val r = adminIo { container.billing.adminRefundOk(o.id) }) {
                                 is AppResult.Ok -> onBack()
                                 is AppResult.Err -> error = r.error.userMessage
                             }
@@ -279,7 +289,7 @@ private fun OrderDetailScreen(
                     onClick = {
                         busy = true; error = null
                         scope.launch {
-                            when (val r = container.billing.adminApprove(o.id)) {
+                            when (val r = adminIo { container.billing.adminApprove(o.id) }) {
                                 is AppResult.Ok -> onBack()
                                 is AppResult.Err -> error = r.error.userMessage
                             }
@@ -293,7 +303,7 @@ private fun OrderDetailScreen(
                     onClick = {
                         busy = true; error = null
                         scope.launch {
-                            when (val r = container.billing.adminReject(o.id)) {
+                            when (val r = adminIo { container.billing.adminReject(o.id) }) {
                                 is AppResult.Ok -> onBack()
                                 is AppResult.Err -> error = r.error.userMessage
                             }

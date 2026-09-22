@@ -20,9 +20,7 @@ import com.hamyareman.admin.ui.AdminLoginScreen
 import com.hamyareman.ir.platform.core.common.AppResult
 import com.hamyareman.ir.platform.core.designsystem.BrandTheme
 import com.hamyareman.ir.platform.core.designsystem.PlatformTheme
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 val LocalAdmin = staticCompositionLocalOf<AdminContainer> { error("AdminContainer missing") }
 
@@ -41,18 +39,20 @@ class AdminMainActivity : AppCompatActivity() {
             var error by remember { mutableStateOf<String?>(null) }
 
             LaunchedEffect(Unit) {
+                val lastCrash = app.consumeLastCrash()
+                if (lastCrash != null) {
+                    error = "اپ دفعهٔ قبل بسته شد. اگر تکرار شد این متن را بفرست:\n$lastCrash"
+                }
                 loading = true
                 val outcome = runCatching {
-                    withContext(Dispatchers.IO) {
-                        val u = runCatching { container.auth.currentUser() }.getOrNull()
-                        if (u == null) {
-                            false to null
-                        } else when (val p = container.billing.adminPing()) {
-                            is AppResult.Ok -> true to null
-                            is AppResult.Err -> {
-                                runCatching { container.auth.logout() }
-                                false to p.error.userMessage
-                            }
+                    val u = runCatching { container.auth.currentUser() }.getOrNull()
+                    if (u == null) {
+                        false to null
+                    } else when (val p = adminIo { container.billing.adminPing() }) {
+                        is AppResult.Ok -> true to null
+                        is AppResult.Err -> {
+                            runCatching { container.auth.logout() }
+                            false to p.error.userMessage
                         }
                     }
                 }
@@ -76,9 +76,7 @@ class AdminMainActivity : AppCompatActivity() {
                             AdminHomeScreen(
                                 onLogout = {
                                     scope.launch {
-                                        withContext(Dispatchers.IO) {
-                                            runCatching { container.auth.logout() }
-                                        }
+                                        runCatching { adminIo { container.auth.logout() } }
                                         loggedIn.value = false
                                     }
                                 },
@@ -92,15 +90,13 @@ class AdminMainActivity : AppCompatActivity() {
                                     error = null
                                     scope.launch {
                                         val outcome = runCatching {
-                                            withContext(Dispatchers.IO) {
-                                                when (val r = container.auth.signIn(email, password)) {
-                                                    is AppResult.Err -> false to r.error.userMessage
-                                                    is AppResult.Ok -> when (val p = container.billing.adminPing()) {
-                                                        is AppResult.Ok -> true to null
-                                                        is AppResult.Err -> {
-                                                            runCatching { container.auth.logout() }
-                                                            false to p.error.userMessage
-                                                        }
+                                            when (val r = adminIo { container.auth.signIn(email, password) }) {
+                                                is AppResult.Err -> false to r.error.userMessage
+                                                is AppResult.Ok -> when (val p = adminIo { container.billing.adminPing() }) {
+                                                    is AppResult.Ok -> true to null
+                                                    is AppResult.Err -> {
+                                                        runCatching { container.auth.logout() }
+                                                        false to p.error.userMessage
                                                     }
                                                 }
                                             }

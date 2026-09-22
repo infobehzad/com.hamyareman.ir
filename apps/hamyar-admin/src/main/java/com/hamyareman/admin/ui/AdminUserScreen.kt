@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hamyareman.admin.LocalAdmin
+import com.hamyareman.admin.adminIo
 import com.hamyareman.ir.platform.core.appwrite.AdminStats
 import com.hamyareman.ir.platform.core.appwrite.AdminUser
 import com.hamyareman.ir.platform.core.common.AppResult
@@ -82,7 +83,7 @@ fun AdminUserScreen(userId: String, onBack: () -> Unit) {
     fun load() {
         loading = true
         scope.launch {
-            apply(container.billing.adminUser(userId))
+            apply(adminIo { container.billing.adminUser(userId) })
             loading = false
         }
     }
@@ -91,7 +92,7 @@ fun AdminUserScreen(userId: String, onBack: () -> Unit) {
         busy = true
         error = null
         scope.launch {
-            apply(op())
+            apply(adminIo { op() })
             busy = false
         }
     }
