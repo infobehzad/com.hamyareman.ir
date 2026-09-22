@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   functions-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: archive/backend/functions/tests
@@ -26,7 +26,7 @@ jobs:
 
   wellness-tests:
     name: JVM tests (wellness)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -60,7 +60,7 @@ jobs:
   # بیلدِ اصلی نمی‌شکند و فقط آرتیفکت/لاگِ نتیجه می‌آید تا بررسی شود.
   study-tests:
     name: JVM tests (study/art)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 12
     continue-on-error: true
     steps:
@@ -92,7 +92,7 @@ jobs:
           if-no-files-found: ignore
 
   android:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
