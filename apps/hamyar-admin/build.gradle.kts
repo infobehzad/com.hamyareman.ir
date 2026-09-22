@@ -27,8 +27,8 @@ android {
         applicationId = "com.hamyareman.admin"
         minSdk = 26
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.03"
+        versionCode = 5
+        versionName = "1.04"
         buildConfigField("String", "APPWRITE_ENDPOINT", "\"$appwriteEndpoint\"")
         buildConfigField("String", "APPWRITE_PROJECT_ID", "\"$appwriteProjectId\"")
         manifestPlaceholders["appwriteProjectId"] = appwriteProjectId

@@ -1,9 +1,9 @@
 package com.hamyareman.ir.platform.core.appwrite
 
 import io.appwrite.exceptions.AppwriteException
-import io.appwrite.services.Functions
 import com.hamyareman.ir.platform.core.common.AppError
 import com.hamyareman.ir.platform.core.common.AppResult
+import org.json.JSONObject
 
 /** نتیجه‌ی اجرای یک تابع سرور. */
 data class FunctionResult(val statusCode: Int, val body: String) {
@@ -29,22 +29,37 @@ class AppwriteFunctionsService(
         if (!provider.isConfigured) {
             return AppResult.Err(AppError.Local("تابع سرور در حالت محلی در دسترس نیست."))
         }
-        return runCatching {
-            val execution = Functions(provider.client).createExecution(
-                functionId = functionId,
-                body = body,
-            )
-            AppResult.Ok(
-                FunctionResult(
-                    statusCode = runCatching { execution.responseStatusCode.toInt() }.getOrDefault(200),
-                    body = runCatching { execution.responseBody }.getOrDefault(""),
+        // SDKی Execution.from روی نخ OkHttp کرش می‌کند اگر فیلدی مثل
+        // requestMethod/resourceId تهی باشد. متن خام را می‌گیریم و خودمان می‌خوانیم.
+        return try {
+            val raw = provider.client.call(
+                "POST",
+                "/functions/$functionId/executions",
+                mapOf(
+                    "content-type" to "application/json",
+                    "accept" to "application/json",
+                    "X-Appwrite-Project" to provider.projectId,
                 ),
+                mapOf(
+                    "body" to body,
+                    "async" to false,
+                ),
+                String::class.java,
             )
-        }.getOrElse { t ->
-            // تابع مستقر نیست (یا شناسه‌اش در کنسول عوض شده): این وضعیتِ زیرساخت است،
-            // نه خطای کاربر. پس شناسهٔ داخلیِ تابع را در پیامِ کاربر نشان نمی‌دهیم —
-            // مثلاً در صفحهٔ «شماره‌های کمک» نوشتنِ «اجرای تابع notify-guardian ناموفق
-            // بود» در لحظهٔ بحران هیچ کمکی نمی‌کند.
+            val json = runCatching { JSONObject(raw.ifBlank { "{}" }) }.getOrElse { JSONObject() }
+            val statusCode = when (val code = json.opt("responseStatusCode")) {
+                is Number -> code.toInt()
+                is String -> code.toIntOrNull() ?: 200
+                else -> 200
+            }
+            val responseBody = when (val rb = json.opt("responseBody")) {
+                is String -> rb
+                is JSONObject -> rb.toString()
+                else -> json.optString("responseBody")
+            }
+            AppResult.Ok(FunctionResult(statusCode = statusCode, body = responseBody))
+        } catch (t: Throwable) {
+            if (t is kotlinx.coroutines.CancellationException) throw t
             val e = t as? AppwriteException
             val type = runCatching { e?.type }.getOrNull().orEmpty()
             val code = runCatching { e?.code }.getOrNull() ?: 0

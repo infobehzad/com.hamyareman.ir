@@ -20,6 +20,11 @@ class AdminApplication : Application() {
                     )
                     .commit()
             }
+            val name = thread.name.orEmpty()
+            // کرش SDK روی نخ OkHttp نباید کل فرایند را بکشد.
+            if (name.contains("OkHttp", ignoreCase = true) || name.contains("DefaultDispatcher")) {
+                return@setDefaultUncaughtExceptionHandler
+            }
             previous?.uncaughtException(thread, error)
         }
         container = AdminContainer(this)
