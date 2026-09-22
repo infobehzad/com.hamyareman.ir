@@ -171,7 +171,7 @@ class AiCompanion(
             .toString()
 
         return when (val result = functions.call(FunctionIds.AI_COMPANION, body)) {
-            is AppResult.Ok -> withGuardian(parseReply(result.value.body, text), text)
+            is AppResult.Ok -> parseReply(result.value.body, text)
             is AppResult.Err -> CompanionReply(
                 "${result.error.userMessage}\n${localRuleReply(text)}",
                 crisis = false,
