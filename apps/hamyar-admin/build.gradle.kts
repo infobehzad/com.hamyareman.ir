@@ -7,10 +7,8 @@ val appwriteEndpoint = findProperty("resolvedAppwriteEndpoint") as? String
     ?: "https://fra.cloud.appwrite.io/v1"
 val appwriteProjectId = findProperty("resolvedAppwriteProjectId") as? String ?: "6a9d59e3002751cc3ea8"
 val appwriteDatabaseId = findProperty("resolvedAppwriteDatabaseId") as? String ?: "ZahraDB"
-val secrets = java.util.Properties()
-val secretsFile = file("secrets.properties")
-if (secretsFile.exists()) secretsFile.inputStream().use { secrets.load(it) }
-val appwriteApiKey = (secrets.getProperty("APPWRITE_API_KEY") ?: "").replace("\\", "\\\\").replace("\"", "\\\"")
+// کلید API داخل APK کامپایل نمی‌شود؛ از تنظیمات اتصال سرور خوانده می‌شود.
+val appwriteApiKey = ""
 
 android {
     namespace = "com.hamyareman.admin"
