@@ -54,10 +54,10 @@ private const val PROJECT = "6a9d59e3002751cc3ea8"
 private fun fileView(id: String): String =
     if (id.isBlank()) "" else "$MEDIA/$id/view?project=$PROJECT"
 
-private enum class AdminTab { PAY, REFUND, SEARCH, STATS }
+private enum class AdminTab { PAY, REFUND, USERS, INSTALL, SEARCH, STATS, DB, STORE, FUN, AUTH }
 
 @Composable
-fun AdminHomeScreen(onLogout: () -> Unit) {
+fun AdminHomeScreen(onLogout: () -> Unit, onSettings: () -> Unit = {}) {
     val container = LocalAdmin.current
     val scope = rememberCoroutineScope()
     var tab by remember { mutableStateOf(AdminTab.PAY) }
@@ -74,7 +74,7 @@ fun AdminHomeScreen(onLogout: () -> Unit) {
         error = null
         scope.launch {
             val queue = if (tab == AdminTab.REFUND) "refund" else "pay"
-            when (val r = adminIo { container.billing.adminList(queue) }) {
+            when (val r = adminIo { container.api.adminList(queue) }) {
                 is AppResult.Ok -> orders = r.value
                 is AppResult.Err -> error = r.error.userMessage
             }
@@ -116,8 +116,15 @@ fun AdminHomeScreen(onLogout: () -> Unit) {
             ) {
                 FilterChip(selected = tab == AdminTab.PAY, onClick = { tab = AdminTab.PAY }, label = { Text("پرداخت‌ها") })
                 FilterChip(selected = tab == AdminTab.REFUND, onClick = { tab = AdminTab.REFUND }, label = { Text("بازگشت وجه") })
+                FilterChip(selected = tab == AdminTab.USERS, onClick = { tab = AdminTab.USERS }, label = { Text("کاربران حاضر") })
+                FilterChip(selected = tab == AdminTab.INSTALL, onClick = { tab = AdminTab.INSTALL }, label = { Text("اقساط") })
                 FilterChip(selected = tab == AdminTab.SEARCH, onClick = { tab = AdminTab.SEARCH }, label = { Text("جستجو") })
                 FilterChip(selected = tab == AdminTab.STATS, onClick = { tab = AdminTab.STATS }, label = { Text("آمار") })
+                FilterChip(selected = tab == AdminTab.DB, onClick = { tab = AdminTab.DB }, label = { Text("دیتابیس") })
+                FilterChip(selected = tab == AdminTab.STORE, onClick = { tab = AdminTab.STORE }, label = { Text("Storage") })
+                FilterChip(selected = tab == AdminTab.FUN, onClick = { tab = AdminTab.FUN }, label = { Text("Functions") })
+                FilterChip(selected = tab == AdminTab.AUTH, onClick = { tab = AdminTab.AUTH }, label = { Text("Auth") })
+                FilterChip(selected = false, onClick = onSettings, label = { Text("اتصال سرور") })
             }
             OutlinedButton(onClick = onLogout) { Text("خروج") }
         }
@@ -138,7 +145,7 @@ fun AdminHomeScreen(onLogout: () -> Unit) {
                     onClick = {
                         loading = true; error = null
                         scope.launch {
-                            when (val r = adminIo { container.billing.adminSearch(query.trim()) }) {
+                            when (val r = adminIo { container.api.adminSearch(query.trim()) }) {
                                 is AppResult.Ok -> hits = r.value
                                 is AppResult.Err -> error = r.error.userMessage
                             }
@@ -201,7 +208,7 @@ private fun OrderDetailScreen(
     fun reload() {
         loading = true
         scope.launch {
-            when (val r = adminIo { container.billing.adminGet(orderId) }) {
+            when (val r = adminIo { container.api.adminGet(orderId) }) {
                 is AppResult.Ok -> {
                     order = r.value.first
                     profile = r.value.second
@@ -227,7 +234,7 @@ private fun OrderDetailScreen(
         ) {
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                val url = fileView(avatarId)
+                val url = container.api.mediaView(avatarId)
                 if (url.isNotBlank()) {
                     AsyncImage(
                         model = url,
@@ -259,7 +266,7 @@ private fun OrderDetailScreen(
             if (o.receiptFileId.isNotBlank()) {
                 Text("فیش واریز", fontWeight = FontWeight.Bold)
                 AsyncImage(
-                    model = fileView(o.receiptFileId),
+                    model = container.api.mediaView(o.receiptFileId),
                     contentDescription = "فیش",
                     modifier = Modifier.fillMaxWidth().height(240.dp),
                     contentScale = ContentScale.Fit,
@@ -274,7 +281,7 @@ private fun OrderDetailScreen(
                     onClick = {
                         busy = true; error = null
                         scope.launch {
-                            when (val r = adminIo { container.billing.adminRefundOk(o.id) }) {
+                            when (val r = adminIo { container.api.adminRefundOk(o.id) }) {
                                 is AppResult.Ok -> onBack()
                                 is AppResult.Err -> error = r.error.userMessage
                             }
@@ -289,7 +296,7 @@ private fun OrderDetailScreen(
                     onClick = {
                         busy = true; error = null
                         scope.launch {
-                            when (val r = adminIo { container.billing.adminApprove(o.id) }) {
+                            when (val r = adminIo { container.api.adminApprove(o.id) }) {
                                 is AppResult.Ok -> onBack()
                                 is AppResult.Err -> error = r.error.userMessage
                             }
@@ -303,7 +310,7 @@ private fun OrderDetailScreen(
                     onClick = {
                         busy = true; error = null
                         scope.launch {
-                            when (val r = adminIo { container.billing.adminReject(o.id) }) {
+                            when (val r = adminIo { container.api.adminReject(o.id) }) {
                                 is AppResult.Ok -> onBack()
                                 is AppResult.Err -> error = r.error.userMessage
                             }

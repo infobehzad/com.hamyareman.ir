@@ -30,6 +30,10 @@ class AdminApplication : Application() {
         container = AdminContainer(this)
     }
 
+    fun rebuildContainer() {
+        container = AdminContainer(this)
+    }
+
     fun consumeLastCrash(): String? {
         val prefs = getSharedPreferences(CRASH_PREFS, MODE_PRIVATE)
         val text = prefs.getString(CRASH_KEY, null)?.trim().orEmpty()

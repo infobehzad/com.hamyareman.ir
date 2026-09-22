@@ -71,12 +71,12 @@ object BillingStatus {
 
     /** درس‌های کامل فقط با اشتراک تأییدشده (یا در انتظار استرداد، تا وقتی ادمین تأیید نکرده). */
     fun isPaid(raw: String?): Boolean = when (norm(raw)) {
-        YEARLY, "paid", REFUND_PENDING -> true
+        YEARLY, "paid", "premium", REFUND_PENDING -> true
         else -> false
     }
 
     fun chipFa(raw: String?): String = when (norm(raw)) {
-        YEARLY, "paid" -> "اشتراک فعال"
+        YEARLY, "paid", "premium" -> "اشتراک فعال"
         PENDING -> "انتظار تأیید پرداخت"
         REFUND_PENDING -> "انتظار بازگشت وجه"
         REFUNDED -> "بازگشت وجه انجام شد"

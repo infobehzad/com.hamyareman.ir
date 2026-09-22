@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -34,6 +35,7 @@ fun AdminLoginScreen(
     loading: Boolean,
     error: String?,
     onSignIn: (email: String, password: String) -> Unit,
+    onSettings: () -> Unit = {},
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -45,7 +47,7 @@ fun AdminLoginScreen(
         Text("ادمین همیار من", style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
         Spacer(Modifier.height(8.dp))
         Text(
-            "ورود فقط با حسابی که در کنسول Appwrite برچسب admin دارد. کلید سرور داخل این اپ نیست.",
+            "ورود با حساب ادمین. کلید سرور فقط داخل همین اپ است و به دانش‌آموز نمی‌رود.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

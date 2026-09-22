@@ -7,6 +7,10 @@ val appwriteEndpoint = findProperty("resolvedAppwriteEndpoint") as? String
     ?: "https://fra.cloud.appwrite.io/v1"
 val appwriteProjectId = findProperty("resolvedAppwriteProjectId") as? String ?: "6a9d59e3002751cc3ea8"
 val appwriteDatabaseId = findProperty("resolvedAppwriteDatabaseId") as? String ?: "ZahraDB"
+val secrets = java.util.Properties()
+val secretsFile = file("secrets.properties")
+if (secretsFile.exists()) secretsFile.inputStream().use { secrets.load(it) }
+val appwriteApiKey = (secrets.getProperty("APPWRITE_API_KEY") ?: "").replace("\\", "\\\\").replace("\"", "\\\"")
 
 android {
     namespace = "com.hamyareman.admin"
@@ -27,12 +31,13 @@ android {
         applicationId = "com.hamyareman.admin"
         minSdk = 26
         targetSdk = 36
-        versionCode = 5
-        versionName = "1.04"
+        versionCode = 7
+        versionName = "1.06"
         buildConfigField("String", "APPWRITE_ENDPOINT", "\"$appwriteEndpoint\"")
         buildConfigField("String", "APPWRITE_PROJECT_ID", "\"$appwriteProjectId\"")
         manifestPlaceholders["appwriteProjectId"] = appwriteProjectId
         buildConfigField("String", "APPWRITE_DATABASE_ID", "\"$appwriteDatabaseId\"")
+        buildConfigField("String", "APPWRITE_API_KEY", "\"$appwriteApiKey\"")
     }
 
     buildTypes {
@@ -85,5 +90,6 @@ dependencies {
     implementation(project(":core-common"))
     implementation(project(":core-designsystem"))
     implementation(project(":core-appwrite"))
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

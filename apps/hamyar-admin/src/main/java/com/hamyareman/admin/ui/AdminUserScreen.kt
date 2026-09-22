@@ -83,7 +83,7 @@ fun AdminUserScreen(userId: String, onBack: () -> Unit) {
     fun load() {
         loading = true
         scope.launch {
-            apply(adminIo { container.billing.adminUser(userId) })
+            apply(adminIo { container.api.adminUser(userId) })
             loading = false
         }
     }
@@ -145,7 +145,7 @@ fun AdminUserScreen(userId: String, onBack: () -> Unit) {
                         row.forEach { (id, fa) ->
                             FilterChip(
                                 selected = u.hamyarGrade == id || (u.hamyarGrade.isBlank() && p.grade == id),
-                                onClick = { if (!busy) run { container.billing.adminSetGrade(userId, id) } },
+                                onClick = { if (!busy) run { container.api.adminSetGrade(userId, id) } },
                                 label = { Text(fa) },
                                 enabled = !busy,
                                 modifier = Modifier.weight(1f),
@@ -158,12 +158,12 @@ fun AdminUserScreen(userId: String, onBack: () -> Unit) {
                 Text("اشتراک", fontWeight = FontWeight.Bold)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(
-                        onClick = { if (!busy) run { container.billing.adminSetPremium(userId, true) } },
+                        onClick = { if (!busy) run { container.api.adminSetPremium(userId, true) } },
                         enabled = !busy,
                         modifier = Modifier.weight(1f),
                     ) { Text("پرمیوم") }
                     OutlinedButton(
-                        onClick = { if (!busy) run { container.billing.adminSetPremium(userId, false) } },
+                        onClick = { if (!busy) run { container.api.adminSetPremium(userId, false) } },
                         enabled = !busy,
                         modifier = Modifier.weight(1f),
                     ) { Text("مهمان") }
@@ -185,7 +185,7 @@ fun AdminUserScreen(userId: String, onBack: () -> Unit) {
                                     if (d.id.isNotBlank()) Text(d.id.take(12) + "…", style = MaterialTheme.typography.bodySmall)
                                 }
                                 TextButton(
-                                    onClick = { if (!busy) run { container.billing.adminRevokeDevice(userId, d.id) } },
+                                    onClick = { if (!busy) run { container.api.adminRevokeDevice(userId, d.id) } },
                                     enabled = !busy,
                                 ) { Text("حذف") }
                             }
@@ -250,11 +250,11 @@ fun AdminUserScreen(userId: String, onBack: () -> Unit) {
                     onClick = {
                         confirm = null
                         when (pending) {
-                            ConfirmOp.BLOCK -> run { container.billing.adminBlock(userId, true) }
-                            ConfirmOp.UNBLOCK -> run { container.billing.adminBlock(userId, false) }
-                            ConfirmOp.LOGOUT -> run { container.billing.adminForceLogout(userId) }
-                            ConfirmOp.CLEAR_DEVICES -> run { container.billing.adminClearDevices(userId) }
-                            ConfirmOp.RESET -> run { container.billing.adminResetPassword(userId) }
+                            ConfirmOp.BLOCK -> run { container.api.adminBlock(userId, true) }
+                            ConfirmOp.UNBLOCK -> run { container.api.adminBlock(userId, false) }
+                            ConfirmOp.LOGOUT -> run { container.api.adminForceLogout(userId) }
+                            ConfirmOp.CLEAR_DEVICES -> run { container.api.adminClearDevices(userId) }
+                            ConfirmOp.RESET -> run { container.api.adminResetPassword(userId) }
                         }
                     },
                 ) { Text("انجام بده") }
@@ -278,7 +278,7 @@ fun AdminStatsScreen() {
         loading = true
         error = null
         scope.launch {
-            when (val r = container.billing.adminStats()) {
+            when (val r = adminIo { container.api.adminStats() }) {
                 is AppResult.Ok -> stats = r.value
                 is AppResult.Err -> error = r.error.userMessage
             }

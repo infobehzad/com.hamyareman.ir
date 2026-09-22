@@ -1,5 +1,8 @@
 # Local machine and secret configuration
 local.properties
+secrets.properties
+**/secrets.properties
+apps/hamyar-admin/secrets.properties
 
 # Android/Gradle generated output
 .gradle/
