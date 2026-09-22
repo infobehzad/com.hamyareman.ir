@@ -33,7 +33,6 @@ class AppwriteFunctionsService(
             val execution = Functions(provider.client).createExecution(
                 functionId = functionId,
                 body = body,
-                xasync = false,
             )
             AppResult.Ok(
                 FunctionResult(
