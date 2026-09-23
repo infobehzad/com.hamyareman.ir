@@ -82,14 +82,7 @@ import java.util.Calendar
 /** مارجینِ کناریِ بلوک‌های داشبورد (کارتِ سخن بزرگان عمداً پهن‌تر و بی‌مارجین‌تر است). */
 private val HomeSide = 16.dp
 
-/**
- * فونتِ متنِ «سخن بزرگان».
- *
- * فونتِ درخواستی («بدخط») در مخزن و در پوشهٔ `res/font` اپ نیست؛ تا فایلش برسد،
- * نزدیک‌ترین فونتِ دست‌نویسِ خودِ اپ (هیلدا) استفاده می‌شود. برای سوئیچ، فقط
- * همین یک خط را به فونتِ تازه عوض کن (یا `DashboardFonts.badkhat` را بساز).
- */
-private val WISDOM_FONT = DashboardFonts.wisdom
+private val WISDOM_FONT = DashboardFonts.content
 
 /** مارجینِ کناریِ کارتِ «سخن بزرگان» — یک‌پنجمِ حالتِ معمول. */
 private val WisdomSide = 1.dp
@@ -167,18 +160,25 @@ fun HomeScreen(nav: NavController) {
                                 Text(
                                     row1,
                                     style = MaterialTheme.typography.titleMedium,
+                                    fontFamily = DashboardFonts.clock,
                                     fontWeight = FontWeight.Bold,
                                 )
                                 Text(
                                     row2Time,
                                     style = MaterialTheme.typography.headlineSmall,
+                                    fontFamily = DashboardFonts.clock,
                                     fontWeight = FontWeight.Bold,
                                 )
                                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                                    Text(row2Greg, style = MaterialTheme.typography.bodyLarge)
+                                    Text(row2Greg, style = MaterialTheme.typography.bodyLarge, fontFamily = DashboardFonts.clock)
                                 }
                                 if (!holiday.isNullOrBlank()) {
-                                    Text(holiday, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+                                    Text(
+                                        holiday,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontFamily = DashboardFonts.label,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
                                 }
                                 Spacer(Modifier.height(8.dp))
                                 SubscriptionChip(StudentProfileState.subscription) { nav.navigate(Screen.Subscription.route) }
@@ -193,6 +193,7 @@ fun HomeScreen(nav: NavController) {
                             Text(
                                 "پروفایل من",
                                 style = MaterialTheme.typography.labelMedium,
+                                fontFamily = DashboardFonts.label,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(top = 4.dp),
                             )
@@ -235,7 +236,12 @@ fun HomeScreen(nav: NavController) {
                 ToolTile("🧬", "آزمایشگاه زیست‌شناسی", Modifier.weight(1f)) { nav.navigate(Screen.BiologyLab.route) }
             }
 
-            Text("امروز", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = HomeSide))
+            Text(
+                "امروز",
+                style = MaterialTheme.typography.titleMedium,
+                fontFamily = DashboardFonts.title,
+                modifier = Modifier.padding(horizontal = HomeSide),
+            )
             HubCard("🌤", "روتین امروز", "بلوک‌های روزت را ببین", Modifier.padding(horizontal = HomeSide)) { nav.navigate(Screen.Routine.route) }
             HubCard("💧", "آب بنوش", "لیوان‌های امروزت را ثبت کن", Modifier.padding(horizontal = HomeSide)) { nav.navigate(Screen.Water.route) }
             Spacer(Modifier.height(8.dp))
@@ -276,7 +282,7 @@ private fun GreetingBanner(title: String, subtitle: String, modifier: Modifier =
                 Text(
                     subtitle,
                     color = Color.White.copy(alpha = 0.92f),
-                    fontFamily = DashboardFonts.quote,
+                    fontFamily = DashboardFonts.label,
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
@@ -417,6 +423,7 @@ internal fun SubscriptionChip(raw: String, onClick: () -> Unit = {}) {
         Text(
             com.hamyareman.ir.platform.core.common.BillingStatus.chipFa(s),
             color = fg,
+            fontFamily = DashboardFonts.label,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
@@ -448,7 +455,7 @@ private fun ToolTile(emoji: String, label: String, modifier: Modifier = Modifier
             Spacer(Modifier.height(4.dp))
             Text(
                 label,
-                fontFamily = DashboardFonts.aria,
+                fontFamily = DashboardFonts.tile,
                 fontSize = 12.sp,
                 lineHeight = 15.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -474,7 +481,12 @@ private fun QuickTile(emoji: String, label: String, modifier: Modifier = Modifie
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(emoji, style = MaterialTheme.typography.headlineMedium)
-            Text(label, style = MaterialTheme.typography.titleMedium)
+            Text(
+                label,
+                style = MaterialTheme.typography.titleMedium,
+                fontFamily = DashboardFonts.tile,
+                textAlign = TextAlign.Center,
+            )
         }
     }
 }

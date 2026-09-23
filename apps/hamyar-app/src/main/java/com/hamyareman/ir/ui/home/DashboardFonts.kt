@@ -6,20 +6,27 @@ import androidx.compose.ui.text.font.FontWeight
 import com.hamyareman.ir.R
 
 /**
- * فونت‌ها از پوشهٔ `res/font` — یکدست برای هر نقش:
- *  - greeting / delbar: خوش‌آمد دست‌نویس
- *  - aria: عنوان بخش‌ها و کارت‌ها
- *  - lalezar: نام درس در خانه‌های برنامه
- *  - hilda / wisdom: سخن بزرگان و دفتر نکات
- *    (فونت درخواستی «بدخط بولد» در ریپوی خصوصی My-Font از این محیط قابل دانلود نبود؛
- *     هیلدا نزدیک‌ترین دست‌نویس موجود است. با گذاشتن `badkhat_bold.ttf` در res/font عوض می‌شود.)
+ * فونت‌های داشبورد از `res/font` — نقش‌ها طبق انتخاب کاربر:
+ *  - greeting / aviny: خوش‌آمد
+ *  - clock / estedad: ساعت و تاریخ
+ *  - title / titr: عنوان کارت‌ها (برنامه کلاسی و …)
+ *  - tile / parastoo: کاشی‌های میانبر
+ *  - label / shekari: برچسب‌ها
+ *  - content / badkhat: سخن بزرگان، نام درس داخل برنامه، متن ذخیره‌شونده
  */
 object DashboardFonts {
-    val greeting = FontFamily(Font(R.font.delbar, FontWeight.Normal))
-    val quote = FontFamily(Font(R.font.aria_semibold, FontWeight.SemiBold))
-    val aria = quote
-    val lalezar = FontFamily(Font(R.font.lalezar, FontWeight.Normal))
-    val hilda = FontFamily(Font(R.font.hilda, FontWeight.Normal))
-    val wisdom = hilda
-    val section = aria
+    val greeting = FontFamily(Font(R.font.aviny, FontWeight.Normal))
+    val clock = FontFamily(Font(R.font.estedad_bold, FontWeight.Bold))
+    val title = FontFamily(Font(R.font.titr, FontWeight.Normal))
+    val tile = FontFamily(Font(R.font.parastoo_bold, FontWeight.Bold))
+    val label = FontFamily(Font(R.font.shekari, FontWeight.Normal))
+    val content = FontFamily(Font(R.font.badkhat_bold, FontWeight.Bold))
+
+    val quote = label
+    val aria = title
+    val section = title
+    val lalezar = title
+    val hilda = content
+    val wisdom = content
+    val badkhat = content
 }

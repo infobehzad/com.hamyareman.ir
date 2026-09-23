@@ -126,8 +126,6 @@ private const val FREE_FILE_CAP = 10
 private val GalleryGroups = listOf("عکس", "PDF", "متن", "سایر")
 
 
-private val Lalezar = FontFamily(Font(R.font.lalezar))
-
 internal fun readNoteFiles(store: LocalStore): List<NoteFile> = runCatching {
     val array = JSONArray(store.getString(KEY_FILES, "[]"))
     buildList {
@@ -1006,7 +1004,7 @@ fun PdfUploadScreen(onBack: () -> Unit) {
 }
 
 /**
- * دفتر نکات (دفتر ۸خطِ وکتور با قاب) — فونت هیلدا و اندازه‌ی همسان با خط‌ها.
+ * دفتر نکات (دفتر ۸خطِ وکتور با قاب) — فونت بدخط و اندازه‌ی همسان با خط‌ها.
  */
 @Composable
 private fun LinedNotesPaper(value: String, onValueChange: (String) -> Unit) {
@@ -1034,7 +1032,7 @@ private fun LinedNotesPaper(value: String, onValueChange: (String) -> Unit) {
                 onValueChange(lines.take(8).joinToString("\n"))
             },
             textStyle = TextStyle(
-                fontFamily = DashboardFonts.hilda,
+                fontFamily = DashboardFonts.content,
                 fontSize = 16.sp,
                 lineHeight = lineSp,
                 color = Color(0xFF1E3A5F),
@@ -1417,7 +1415,7 @@ private fun GalleryThumb(item: NoteFile) {
         previewText.isNotBlank() -> Text(
             previewText,
             style = MaterialTheme.typography.labelSmall.copy(
-                fontFamily = DashboardFonts.hilda,
+                fontFamily = DashboardFonts.content,
                 fontSize = 11.sp,
                 textAlign = TextAlign.Right,
             ),
