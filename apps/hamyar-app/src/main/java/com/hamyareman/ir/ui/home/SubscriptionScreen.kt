@@ -51,6 +51,7 @@ import com.hamyareman.ir.platform.core.common.BillingStatus
 import com.hamyareman.ir.platform.core.common.toLatinDigits
 import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
+import com.hamyareman.ir.ui.profile.StudentProfileRepo
 import com.hamyareman.ir.ui.profile.StudentProfileState
 import com.hamyareman.ir.ui.study.StudyMedia
 import kotlinx.coroutines.launch
@@ -64,7 +65,15 @@ private fun priceFa(n: Int): String =
 fun SubscriptionScreen(onBack: () -> Unit) {
     val ctx = LocalContext.current
     val container = LocalAppContainer.current
-    val gate = remember { BillingGateway(container.functions) }
+    val gate = remember {
+        BillingGateway(
+            container.functions,
+            container.tables,
+            { container.auth.cachedUserId().orEmpty() },
+            { container.auth.cachedUser()?.email.orEmpty() },
+        )
+    }
+    var installment by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     var loading by remember { mutableStateOf(true) }
     var busy by remember { mutableStateOf(false) }
@@ -99,6 +108,11 @@ fun SubscriptionScreen(onBack: () -> Unit) {
         loading = true
         error = null
         scope.launch {
+            val uid = container.auth.cachedUserId().orEmpty()
+            if (uid.isNotBlank()) {
+                val remote = StudentProfileRepo.fetch(container.tables, uid)
+                if (remote != null) StudentProfileState.applyServer(ctx, remote)
+            }
             when (val r = gate.myOrder()) {
                 is AppResult.Ok -> {
                     applySub(r.value.first)
@@ -144,7 +158,8 @@ fun SubscriptionScreen(onBack: () -> Unit) {
                 }
             }
             Text(
-                "وضعیت: ${BillingStatus.chipFa(status)}",
+                "وضعیت: ${BillingStatus.chipFa(StudentProfileState.subscription, StudentProfileState.subscriptionEndMs)}" +
+                    BillingStatus.rangeFa(0L, StudentProfileState.subscriptionEndMs).let { if (it.isBlank()) "" else " · $it" },
                 fontFamily = DashboardFonts.quote,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -156,7 +171,7 @@ fun SubscriptionScreen(onBack: () -> Unit) {
             error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
 
             when (status) {
-                BillingStatus.YEARLY, "paid" -> {
+                BillingStatus.YEARLY, BillingStatus.MONTHLY, BillingStatus.INSTALLMENT, "paid" -> {
                     Text("اشتراک فعال است. درس‌های کامل برایت باز است.", fontFamily = DashboardFonts.quote)
                     // منوی انصراف فقط داخل همان ۷ روز بعد از خرید دیده می‌شود؛ بعدش کامل مخفی است.
                     if (withinRefund && !showRefund) {
@@ -261,6 +276,20 @@ fun SubscriptionScreen(onBack: () -> Unit) {
                     OutlinedButton(onClick = { pickReceipt.launch("image/*") }, modifier = Modifier.fillMaxWidth()) {
                         Text(if (receiptName.isBlank()) "ارسال عکس فیش" else "فیش: $receiptName")
                     }
+                    if (planId == BillingConfig.YEARLY.id) {
+                        FilterChip(
+                            selected = installment,
+                            onClick = { installment = !installment },
+                            label = { Text("خرید اقساطی سالانه — ۴ قسط ماهانه") },
+                        )
+                        if (installment) {
+                            Text(
+                                "مبلغ کل ${priceFa(BillingConfig.YEARLY.priceToman)} در ۴ قسط ${priceFa(BillingConfig.YEARLY.priceToman / 4)}. قسط اول همین الان با همین فرم واریز می‌شود. گارانتی بازگشت وجه برای اقساط هم برقرار است.",
+                                fontFamily = DashboardFonts.quote,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                    }
                     Button(
                         onClick = {
                             if (payerName.trim().length < 3) {
@@ -288,13 +317,24 @@ fun SubscriptionScreen(onBack: () -> Unit) {
                                         }
                                     }
                                 }
-                                when (val r = gate.createOrder(planId, payText.trim(), fileId, payerName.trim())) {
-                                    is AppResult.Ok -> {
-                                        applySub(r.value.first)
-                                        order = r.value.second
-                                        notice = "سفارش ثبت شد. وضعیت: انتظار برای پرداخت."
+                                if (installment && planId == BillingConfig.YEARLY.id) {
+                                    when (val r = gate.createInstallment(payerName.trim(), payText.trim(), fileId, "قسط اول از چهار")) {
+                                        is AppResult.Ok -> {
+                                            applySub(BillingStatus.INSTALLMENT)
+                                            notice = "قسط اول ثبت شد. ادمین اقساط را از کنسول می‌بیند."
+                                            refresh()
+                                        }
+                                        is AppResult.Err -> error = r.error.userMessage
                                     }
-                                    is AppResult.Err -> error = r.error.userMessage
+                                } else {
+                                    when (val r = gate.createOrder(planId, payText.trim(), fileId, payerName.trim())) {
+                                        is AppResult.Ok -> {
+                                            applySub(r.value.first)
+                                            order = r.value.second
+                                            notice = "سفارش ثبت شد. وضعیت: انتظار برای پرداخت."
+                                        }
+                                        is AppResult.Err -> error = r.error.userMessage
+                                    }
                                 }
                                 busy = false
                             }

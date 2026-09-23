@@ -42,6 +42,7 @@ fun AdminLoginScreen(
     loading: Boolean,
     error: String?,
     onSignIn: (email: String, password: String) -> Unit,
+    onGoogle: () -> Unit = {},
     onSettings: () -> Unit = {},
 ) {
     var email by remember { mutableStateOf("") }
@@ -130,6 +131,9 @@ fun AdminLoginScreen(
                     Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
                 }
                 Spacer(Modifier.height(8.dp))
+                OutlinedButton(onClick = onGoogle, enabled = !loading, modifier = Modifier.fillMaxWidth()) {
+                    Text("ورود با گوگل")
+                }
                 OutlinedButton(onClick = onSettings, modifier = Modifier.fillMaxWidth()) {
                     Text("تنظیمات اتصال سرور")
                 }

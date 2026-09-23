@@ -63,6 +63,9 @@ object StudentProfileState {
     var subscription: String by androidx.compose.runtime.mutableStateOf("free")
         private set
 
+    var subscriptionEndMs: Long by androidx.compose.runtime.mutableStateOf(0L)
+        private set
+
     var gender: String by androidx.compose.runtime.mutableStateOf("")
         private set
 
@@ -70,7 +73,7 @@ object StudentProfileState {
         private set
 
     fun isPaid(raw: String = subscription): Boolean =
-        com.hamyareman.ir.platform.core.common.BillingStatus.isPaid(raw)
+        com.hamyareman.ir.platform.core.common.BillingStatus.isPaid(raw, subscriptionEndMs)
 
     fun loadMirror(ctx: Context) {
         val store = LocalStore(ctx, STORE)
@@ -78,6 +81,7 @@ object StudentProfileState {
         hasProfile = store.getString(KEY_DONE, "0") == "1"
         firstName = store.getString(KEY_NAME, "").orEmpty()
         subscription = store.getString(KEY_SUB, "free").ifBlank { "free" }
+        subscriptionEndMs = store.getString(KEY_SUB_END, "0").toLongOrNull() ?: 0L
         gender = store.getString(KEY_GENDER, "").orEmpty()
         avatarPath = store.getString(KEY_AVATAR, "").orEmpty()
         applyLauncherIcon(ctx, gender)
@@ -99,11 +103,15 @@ object StudentProfileState {
         store.putString(KEY_DONE, if (done) "1" else "0")
         store.putString(KEY_NAME, keepName)
         store.putString(KEY_SUB, sub.ifBlank { "free" })
+        store.putString(KEY_SUB_END, subscriptionEndMs.toString())
         store.putString(KEY_GENDER, genderId)
         grade = AppEdition.grade
         hasProfile = done
         firstName = keepName
         subscription = sub.ifBlank { "free" }
+        if (com.hamyareman.ir.platform.core.common.BillingStatus.isExpired(subscriptionEndMs)) {
+            subscription = "free"
+        }
         gender = genderId
         applyLauncherIcon(ctx, genderId)
     }
@@ -134,7 +142,13 @@ object StudentProfileState {
     private const val KEY_GRADE = "grade"
     private const val KEY_DONE = "registered"
     private const val KEY_NAME = "firstName"
+    fun applyServer(ctx: Context, p: StudentProfile) {
+        subscriptionEndMs = p.subscriptionEndMs
+        writeMirror(ctx, p.grade, true, p.firstName, p.subscription, p.gender)
+    }
+
     private const val KEY_SUB = "subscription"
+    private const val KEY_SUB_END = "subscription_end_ms"
     private const val KEY_AVATAR = "avatarPath"
     private const val KEY_GENDER = "gender"
 }
@@ -164,7 +178,8 @@ data class StudentProfile(
     val city: String = "",
     val county: String = "",
     val gender: String = "", // boy | girl
-    val subscription: String = "free", // free | yearly — فقط از سمت پشتیبانی تغییر می‌کند
+    val subscription: String = "free",
+    val subscriptionEndMs: Long = 0L,
 )
 
 enum class StudentGender(val id: String, val fa: String) {
@@ -200,6 +215,7 @@ object StudentProfileRepo {
                     county = d["county"]?.toString().orEmpty(),
                     gender = d["gender"]?.toString().orEmpty(),
                     subscription = (d["subscription"]?.toString()?.ifBlank { null } ?: "free"),
+                    subscriptionEndMs = d["subscriptionEndMs"]?.toString()?.toLongOrNull() ?: 0L,
                 )
             }
             else -> null

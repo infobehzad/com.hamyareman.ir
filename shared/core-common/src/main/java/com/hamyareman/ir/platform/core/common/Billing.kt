@@ -37,16 +37,16 @@ object BillingConfig {
     val MONTHLY = Plan(
         id = "monthly",
         titleFa = "ماهانه",
-        priceToman = 49_000,
+        priceToman = 350_000,
         periodFa = "یک ماه",
         blurbFa = "دسترسی یک‌ماهه به تدریس و تمرین",
     )
     val YEARLY = Plan(
         id = "yearly",
         titleFa = "سالانه",
-        priceToman = 390_000,
-        periodFa = "یک سال",
-        blurbFa = "صرفه‌جویی نسبت به ماهانه · پیشنهاد اصلی",
+        priceToman = 3_000_000,
+        periodFa = "یک سال تا پایان شهریور سال بعد",
+        blurbFa = "چهار قسط ماهانه ممکن است · پیشنهاد اصلی",
     )
 
     val plans: List<Plan> = listOf(MONTHLY, YEARLY)
@@ -62,26 +62,59 @@ object BillingConfig {
 object BillingStatus {
     const val FREE = "free"
     const val PENDING = "pending"
+    const val MONTHLY = "monthly"
     const val YEARLY = "yearly"
+    const val INSTALLMENT = "installment"
     const val REFUND_PENDING = "refund_pending"
     const val REJECTED = "rejected"
     const val REFUNDED = "refunded"
 
     fun norm(raw: String?): String = raw.orEmpty().trim().lowercase().ifBlank { FREE }
 
-    /** درس‌های کامل فقط با اشتراک تأییدشده (یا در انتظار استرداد، تا وقتی ادمین تأیید نکرده). */
-    fun isPaid(raw: String?): Boolean = when (norm(raw)) {
-        YEARLY, "paid", "premium", REFUND_PENDING -> true
-        else -> false
+    fun isExpired(endMs: Long): Boolean = endMs > 0L && System.currentTimeMillis() > endMs
+
+    /** درس‌های کامل فقط با اشتراک تأییدشده و تاریخِ معتبر. */
+    fun isPaid(raw: String?, endMs: Long = 0L): Boolean {
+        if (isExpired(endMs)) return false
+        return when (norm(raw)) {
+            YEARLY, MONTHLY, INSTALLMENT, "paid", "premium", REFUND_PENDING -> true
+            else -> false
+        }
     }
 
-    fun chipFa(raw: String?): String = when (norm(raw)) {
-        YEARLY, "paid", "premium" -> "اشتراک فعال"
+    fun effective(raw: String?, endMs: Long = 0L): String =
+        if (isPaid(raw, endMs)) norm(raw) else FREE
+
+    fun chipFa(raw: String?, endMs: Long = 0L): String = when (effective(raw, endMs)) {
+        YEARLY, "paid", "premium" -> "اشتراک سالانه"
+        MONTHLY -> "اشتراک ماهانه"
+        INSTALLMENT -> "اقساط سالانه"
         PENDING -> "انتظار تأیید پرداخت"
         REFUND_PENDING -> "انتظار بازگشت وجه"
         REFUNDED -> "بازگشت وجه انجام شد"
         REJECTED -> "پرداخت تأیید نشد"
         else -> "مهمان همیار من"
+    }
+
+    fun monthlyEndMs(fromMs: Long = System.currentTimeMillis()): Long =
+        fromMs + 30L * 24L * 60L * 60L * 1000L
+
+    fun yearlyEndMs(fromMs: Long = System.currentTimeMillis()): Long {
+        val j = JalaliDate.toJalali(fromMs)
+        val y = j.year + 1
+        val day = JalaliDate.daysInMonth(y, 6)
+        val iso = JalaliDate.toGregorianIso(JalaliDate.Jalali(y, 6, day))
+            ?: return fromMs + 365L * 24L * 60L * 60L * 1000L
+        return runCatching {
+            java.time.LocalDate.parse(iso).atTime(23, 59, 59).atZone(JalaliDate.TEHRAN).toInstant().toEpochMilli()
+        }.getOrDefault(fromMs + 365L * 24L * 60L * 60L * 1000L)
+    }
+
+    fun rangeFa(startMs: Long, endMs: Long): String {
+        if (endMs <= 0L) return ""
+        val a = if (startMs > 0L) JalaliDate.formatFaLong(startMs) else "شروع"
+        val b = JalaliDate.formatFaLong(endMs)
+        return "$a تا $b"
     }
 }
 

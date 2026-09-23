@@ -2,6 +2,9 @@ package com.hamyareman.ir.platform.core.appwrite
 
 import com.hamyareman.ir.platform.core.common.AppError
 import com.hamyareman.ir.platform.core.common.AppResult
+import com.hamyareman.ir.platform.core.common.TableIds
+import com.hamyareman.ir.platform.core.common.BillingStatus
+import com.hamyareman.ir.platform.core.common.BillingConfig
 import com.hamyareman.ir.platform.core.common.BillingActions
 import com.hamyareman.ir.platform.core.common.FunctionIds
 import org.json.JSONArray
@@ -58,6 +61,8 @@ data class BillingProfile(
     val blocked: Boolean = false,
     val hamyarGrade: String = "",
     val deviceCount: Int = 0,
+    val subscriptionStartMs: Long = 0L,
+    val subscriptionEndMs: Long = 0L,
 )
 
 data class AdminDevice(
@@ -90,7 +95,12 @@ data class AdminStats(
     val paidProfiles: Int = 0,
 )
 
-class BillingGateway(private val functions: FunctionsService) {
+class BillingGateway(
+    private val functions: FunctionsService,
+    private val tables: TablesDbService? = null,
+    private val userId: () -> String = { "" },
+    private val email: () -> String = { "" },
+) {
 
     suspend fun call(action: String, extra: JSONObject = JSONObject()): AppResult<JSONObject> {
         extra.put("action", action)
@@ -111,14 +121,52 @@ class BillingGateway(private val functions: FunctionsService) {
         }
     }
 
-    suspend fun myOrder(): AppResult<Pair<String, BillingOrder?>> =
-        when (val r = call(BillingActions.MY_ORDER)) {
+    private fun newId(): String = java.util.UUID.randomUUID().toString().replace("-", "").take(20)
+
+    private suspend fun profileSub(): String {
+        val uid = userId()
+        val tb = tables ?: return BillingStatus.FREE
+        if (uid.isBlank()) return BillingStatus.FREE
+        return when (val r = tb.get(TableIds.STUDENT_PROFILES, uid)) {
+            is AppResult.Ok -> {
+                val d = r.value?.data ?: emptyMap()
+                val sub = d["subscription"]?.toString().orEmpty()
+                val end = d["subscriptionEndMs"]?.toString()?.toLongOrNull() ?: 0L
+                BillingStatus.effective(sub, end)
+            }
+            is AppResult.Err -> BillingStatus.FREE
+        }
+    }
+
+    private fun rowToOrder(row: TableRow): BillingOrder {
+        val extra = row.data["payload"]?.toString()?.let { runCatching { JSONObject(it) }.getOrNull() } ?: JSONObject()
+        val merged = JSONObject()
+        extra.keys().forEach { merged.put(it, extra.get(it)) }
+        row.data.forEach { (k, v) -> if (k != "payload" && v != null) merged.put(k, v) }
+        if (merged.optString("id").isBlank()) merged.put("id", row.id)
+        return parseOrder(merged)
+    }
+
+    suspend fun myOrder(): AppResult<Pair<String, BillingOrder?>> {
+        val tb = tables
+        val uid = userId()
+        if (tb != null && uid.isNotBlank()) {
+            val sub = profileSub()
+            val orders = when (val r = tb.list(TableIds.SUBSCRIPTION_ORDERS)) {
+                is AppResult.Ok -> r.value.map { rowToOrder(it) }.filter { it.userId == uid }
+                is AppResult.Err -> emptyList()
+            }
+            val latest = orders.maxByOrNull { it.createdAtMs }
+            return AppResult.Ok(sub to latest)
+        }
+        return when (val r = call(BillingActions.MY_ORDER)) {
             is AppResult.Err -> r
             is AppResult.Ok -> AppResult.Ok(
                 r.value.optString("subscription").ifBlank { "free" } to
                     r.value.optJSONObject("order")?.let { parseOrder(it) },
             )
         }
+    }
 
     suspend fun createOrder(
         planId: String,
@@ -126,6 +174,46 @@ class BillingGateway(private val functions: FunctionsService) {
         receiptFileId: String,
         payerName: String,
     ): AppResult<Pair<String, BillingOrder?>> {
+        val tb = tables
+        val uid = userId()
+        if (tb != null && uid.isNotBlank()) {
+            val id = newId()
+            val now = System.currentTimeMillis()
+            val plan = BillingConfig.plan(planId)
+            val payload = JSONObject()
+                .put("planTitle", plan.titleFa)
+                .put("amountToman", plan.priceToman)
+                .put("payText", payText)
+                .put("receiptFileId", receiptFileId)
+                .put("payerName", payerName)
+                .put("firstName", "")
+                .put("lastName", "")
+            val data = mapOf(
+                "userId" to uid,
+                "email" to email(),
+                "status" to "pending",
+                "planId" to plan.id,
+                "createdAtMs" to now,
+                "payload" to payload.toString(),
+            )
+            val perms = listOf("read(\"user:$uid\")", "update(\"user:$uid\")")
+            return when (val r = tb.create(TableIds.SUBSCRIPTION_ORDERS, data, perms, id)) {
+                is AppResult.Err -> r
+                is AppResult.Ok -> {
+                    runCatching { tb.update(TableIds.STUDENT_PROFILES, uid, mapOf("subscription" to BillingStatus.PENDING)) }
+                    val order = parseOrder(
+                        JSONObject(payload.toString())
+                            .put("id", id)
+                            .put("userId", uid)
+                            .put("email", email())
+                            .put("status", "pending")
+                            .put("planId", plan.id)
+                            .put("createdAtMs", now),
+                    )
+                    AppResult.Ok(BillingStatus.PENDING to order)
+                }
+            }
+        }
         val body = JSONObject()
             .put("planId", planId)
             .put("payText", payText)
@@ -136,6 +224,52 @@ class BillingGateway(private val functions: FunctionsService) {
             is AppResult.Ok -> AppResult.Ok(
                 r.value.optString("subscription") to r.value.optJSONObject("order")?.let { parseOrder(it) },
             )
+        }
+    }
+
+    suspend fun createInstallment(
+        payerName: String,
+        payText: String,
+        receiptFileId: String,
+        note: String,
+    ): AppResult<Unit> {
+        val tb = tables ?: return AppResult.Err(AppError.Local("اتصال جدول در دسترس نیست."))
+        val uid = userId()
+        if (uid.isBlank()) return AppResult.Err(AppError.Auth())
+        val now = System.currentTimeMillis()
+        val total = BillingConfig.YEARLY.priceToman
+        val count = 4
+        val each = total / count
+        val data = mapOf(
+            "userId" to uid,
+            "email" to email(),
+            "planId" to BillingConfig.YEARLY.id,
+            "totalToman" to total,
+            "installmentCount" to count,
+            "paidCount" to 1,
+            "amountEach" to each,
+            "status" to "active",
+            "nextDueMs" to now + 30L * 24 * 3600 * 1000,
+            "createdAtMs" to now,
+            "note" to note.ifBlank { "قسط ۱ از ۴ — $payerName — $payText — $receiptFileId" },
+        )
+        val perms = listOf("read(\"user:$uid\")", "update(\"user:$uid\")")
+        return when (val r = tb.create(TableIds.INSTALLMENTS, data, perms, newId())) {
+            is AppResult.Err -> r
+            is AppResult.Ok -> {
+                runCatching {
+                    tb.update(
+                        TableIds.STUDENT_PROFILES,
+                        uid,
+                        mapOf(
+                            "subscription" to BillingStatus.INSTALLMENT,
+                            "subscriptionStartMs" to now,
+                            "subscriptionEndMs" to BillingStatus.yearlyEndMs(now),
+                        ),
+                    )
+                }
+                AppResult.Ok(Unit)
+            }
         }
     }
 
@@ -342,6 +476,8 @@ class BillingGateway(private val functions: FunctionsService) {
                 blocked = o.optBoolean("blocked", false),
                 hamyarGrade = o.optString("hamyarGrade"),
                 deviceCount = o.optInt("deviceCount"),
+                subscriptionStartMs = o.optLong("subscriptionStartMs"),
+                subscriptionEndMs = o.optLong("subscriptionEndMs"),
             )
         }
 

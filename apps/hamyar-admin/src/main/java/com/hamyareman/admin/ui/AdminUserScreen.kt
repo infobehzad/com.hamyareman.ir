@@ -39,6 +39,7 @@ import com.hamyareman.ir.platform.core.appwrite.AdminStats
 import com.hamyareman.ir.platform.core.appwrite.AdminUser
 import com.hamyareman.ir.platform.core.common.AppResult
 import com.hamyareman.ir.platform.core.common.BillingStatus
+import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 import kotlinx.coroutines.launch
@@ -125,7 +126,8 @@ fun AdminUserScreen(userId: String, onBack: () -> Unit) {
                 Info("مدرسه", p.schoolName.ifBlank { "—" })
                 Info("استان / شهر", listOf(p.province, p.city).filter { it.isNotBlank() }.joinToString(" / ").ifBlank { "—" })
                 Info("پایه قفل‌شده", gradeFa(u.hamyarGrade.ifBlank { p.grade }))
-                Info("اشتراک", BillingStatus.chipFa(u.subscription.ifBlank { p.subscription }))
+                Info("اشتراک", subLine(u.subscription.ifBlank { p.subscription }, p.subscriptionStartMs, p.subscriptionEndMs))
+                Text("ویرایش پایه و اشتراک از آمار → کاربران انجام می‌شود؛ اینجا فقط نمایش است.", style = MaterialTheme.typography.bodySmall)
                 Info("نشست‌های باز", toPersianDigits(u.sessionCount.toString()))
                 if (u.blocked) {
                     Text("این حساب مسدود است.", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
@@ -138,37 +140,6 @@ fun AdminUserScreen(userId: String, onBack: () -> Unit) {
                             Text("برای دانش‌آموز بفرست؛ با ورود بعدی می‌تواند عوض کند.")
                         }
                     }
-                }
-
-                Text("تعویض پایه", fontWeight = FontWeight.Bold)
-                Text("ایمیل بعد از این فقط همان پایه را باز می‌کند.")
-                GRADE_OPTIONS.chunked(3).forEach { row ->
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        row.forEach { (id, fa) ->
-                            FilterChip(
-                                selected = u.hamyarGrade == id || (u.hamyarGrade.isBlank() && p.grade == id),
-                                onClick = { if (!busy) run { container.api.adminSetGrade(userId, id) } },
-                                label = { Text(fa) },
-                                enabled = !busy,
-                                modifier = Modifier.weight(1f),
-                            )
-                        }
-                        repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
-                    }
-                }
-
-                Text("اشتراک", fontWeight = FontWeight.Bold)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(
-                        onClick = { if (!busy) run { container.api.adminSetPremium(userId, true) } },
-                        enabled = !busy,
-                        modifier = Modifier.weight(1f),
-                    ) { Text("پرمیوم") }
-                    OutlinedButton(
-                        onClick = { if (!busy) run { container.api.adminSetPremium(userId, false) } },
-                        enabled = !busy,
-                        modifier = Modifier.weight(1f),
-                    ) { Text("مهمان") }
                 }
 
                 Text("دستگاه‌ها (سقف ۲)", fontWeight = FontWeight.Bold)
@@ -276,6 +247,7 @@ fun AdminStatsScreen(onOpen: (String) -> Unit = {}) {
     var error by remember { mutableStateOf<String?>(null) }
     var stats by remember { mutableStateOf<AdminStats?>(null) }
     var users by remember { mutableStateOf<List<AdminUser>>(emptyList()) }
+    var orders by remember { mutableStateOf<List<com.hamyareman.ir.platform.core.appwrite.BillingOrder>>(emptyList()) }
     var filter by remember { mutableStateOf("all") }
     var filterOpen by remember { mutableStateOf(false) }
     var subOpenFor by remember { mutableStateOf<String?>(null) }
@@ -292,20 +264,29 @@ fun AdminStatsScreen(onOpen: (String) -> Unit = {}) {
                 is AppResult.Ok -> users = r.value
                 is AppResult.Err -> if (error == null) error = r.error.userMessage
             }
+            when (val r = adminIo { container.api.listAllOrders() }) {
+                is AppResult.Ok -> orders = r.value
+                is AppResult.Err -> { }
+            }
             loading = false
         }
     }
     LaunchedEffect(Unit) { load() }
 
     val filterLabel = when (filter) {
-        "premium" -> "فقط پرمیوم"
-        "free" -> "فقط مهمان"
+        "premium" -> "دارای اشتراک"
+        "free" -> "مهمان"
+        "pay" -> "صف پرداخت"
+        "refund" -> "صف بازگشت وجه"
+        "approved" -> "پرداخت تأییدشده"
+        "refunded" -> "بازگشت انجام‌شده"
         else -> "همه کاربران"
     }
     val shown = users.filter { u ->
+        val end = u.profile.subscriptionEndMs
         when (filter) {
-            "premium" -> BillingStatus.isPaid(u.subscription)
-            "free" -> !BillingStatus.isPaid(u.subscription)
+            "premium" -> BillingStatus.isPaid(u.subscription, end)
+            "free" -> !BillingStatus.isPaid(u.subscription, end)
             else -> true
         }
     }
@@ -315,15 +296,15 @@ fun AdminStatsScreen(onOpen: (String) -> Unit = {}) {
         if (loading) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
         val s = stats
         if (s != null) {
-            StatCard("کاربران", s.usersTotal)
-            StatCard("صف پرداخت", s.pendingPay)
-            StatCard("صف بازگشت وجه", s.pendingRefund)
-            StatCard("پرداخت تأییدشده", s.approved)
-            StatCard("بازگشت انجام‌شده", s.refunded)
-            if (s.paidProfiles >= 0) StatCard("پروفایل با اشتراک", s.paidProfiles)
+            StatCard("کاربران", s.usersTotal, selected = filter == "all") { filter = "all" }
+            StatCard("صف پرداخت", s.pendingPay, selected = filter == "pay") { filter = "pay" }
+            StatCard("صف بازگشت وجه", s.pendingRefund, selected = filter == "refund") { filter = "refund" }
+            StatCard("پرداخت تأییدشده", s.approved, selected = filter == "approved") { filter = "approved" }
+            StatCard("بازگشت انجام‌شده", s.refunded, selected = filter == "refunded") { filter = "refunded" }
+            if (s.paidProfiles >= 0) StatCard("پروفایل با اشتراک", s.paidProfiles, selected = filter == "premium") { filter = "premium" }
         }
         OutlinedButton(onClick = { load() }, modifier = Modifier.fillMaxWidth()) { Text("تازه‌سازی") }
-        Text("کنترل کاربران و اشتراک", fontWeight = FontWeight.Bold)
+        Text("جزئیات: $filterLabel — پایه و اشتراک از اینجا عوض می‌شود", fontWeight = FontWeight.Bold)
         androidx.compose.foundation.layout.Box {
             OutlinedButton(onClick = { filterOpen = true }, modifier = Modifier.fillMaxWidth()) {
                 Text("فیلتر: $filterLabel")
@@ -334,54 +315,78 @@ fun AdminStatsScreen(onOpen: (String) -> Unit = {}) {
                 DropdownMenuItem(text = { Text("فقط مهمان") }, onClick = { filter = "free"; filterOpen = false })
             }
         }
+        if (filter in setOf("pay", "refund", "approved", "refunded")) {
+            val want = when (filter) {
+                "pay" -> "pending"
+                "refund" -> "refund_pending"
+                else -> filter
+            }
+            val rows = orders.filter { it.status == want }
+            if (rows.isEmpty()) Text("موردی در این صف نیست.")
+            rows.forEach { o ->
+                Card(onClick = { onOpen(o.userId) }, modifier = Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text((o.firstName + " " + o.lastName).ifBlank { o.email }.ifBlank { o.userId }, fontWeight = FontWeight.Bold)
+                        Text("${o.planTitle.ifBlank { o.planId }} · ${o.status}")
+                        Text(o.email.ifBlank { o.userId })
+                    }
+                }
+            }
+        } else {
         if (!loading && shown.isEmpty()) Text("با این فیلتر کاربری نیست.")
         shown.forEach { u ->
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text((u.profile.firstName + " " + u.profile.lastName).ifBlank { u.name }.ifBlank { u.email }, fontWeight = FontWeight.Bold)
                     Text(u.email.ifBlank { u.userId })
-                    Text("پایه ${gradeFa(u.hamyarGrade)} · ${BillingStatus.chipFa(u.subscription)}")
-                    androidx.compose.foundation.layout.Box {
-                        OutlinedButton(onClick = { subOpenFor = u.userId }, modifier = Modifier.fillMaxWidth()) {
-                            Text("تغییر اشتراک (${BillingStatus.chipFa(u.subscription)})")
+                    Text("پایه ${gradeFa(u.hamyarGrade.ifBlank { u.profile.grade })} · ${subLine(u.subscription, u.profile.subscriptionStartMs, u.profile.subscriptionEndMs)}")
+                    Text("تعویض پایه", fontWeight = FontWeight.Bold)
+                    GRADE_OPTIONS.chunked(3).forEach { row ->
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            row.forEach { (id, fa) ->
+                                FilterChip(
+                                    selected = u.hamyarGrade == id || (u.hamyarGrade.isBlank() && u.profile.grade == id),
+                                    onClick = { scope.launch { adminIo { container.api.adminSetGrade(u.userId, id) }; load() } },
+                                    label = { Text(fa) },
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                            repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
                         }
-                        DropdownMenu(expanded = subOpenFor == u.userId, onDismissRequest = { subOpenFor = null }) {
-                            DropdownMenuItem(
-                                text = { Text("پرمیوم") },
-                                onClick = {
-                                    subOpenFor = null
-                                    scope.launch { adminIo { container.api.adminSetPremium(u.userId, true) }; load() }
-                                },
-                            )
-                            DropdownMenuItem(
-                                text = { Text("مهمان") },
-                                onClick = {
-                                    subOpenFor = null
-                                    scope.launch { adminIo { container.api.adminSetPremium(u.userId, false) }; load() }
-                                },
-                            )
-                        }
+                    }
+                    Text("اشتراک", fontWeight = FontWeight.Bold)
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        FilterChip(selected = BillingStatus.effective(u.subscription, u.profile.subscriptionEndMs) == "monthly", onClick = { scope.launch { adminIo { container.api.adminSetPlan(u.userId, "monthly") }; load() } }, label = { Text("ماهانه") }, modifier = Modifier.weight(1f))
+                        FilterChip(selected = BillingStatus.effective(u.subscription, u.profile.subscriptionEndMs) == "yearly", onClick = { scope.launch { adminIo { container.api.adminSetPlan(u.userId, "yearly") }; load() } }, label = { Text("سالانه") }, modifier = Modifier.weight(1f))
+                        FilterChip(selected = !BillingStatus.isPaid(u.subscription, u.profile.subscriptionEndMs), onClick = { scope.launch { adminIo { container.api.adminSetPlan(u.userId, "free") }; load() } }, label = { Text("مهمان") }, modifier = Modifier.weight(1f))
                     }
                     OutlinedButton(onClick = { onOpen(u.userId) }, modifier = Modifier.fillMaxWidth()) { Text("پرونده کامل") }
                 }
             }
+        }
         }
         Spacer(Modifier.height(24.dp))
     }
 }
 
 @Composable
-private fun StatCard(label: String, value: Int) {
+private fun StatCard(label: String, value: Int, selected: Boolean = false, onClick: () -> Unit = {}) {
     val shown = if (value < 0) "—" else toPersianDigits(value.toString())
-    Card(Modifier.fillMaxWidth()) {
+    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Row(
             Modifier.fillMaxWidth().padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(label)
+            Text(label, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
             Text(shown, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
         }
     }
+}
+
+internal fun subLine(sub: String, startMs: Long, endMs: Long): String {
+    val chip = BillingStatus.chipFa(sub, endMs)
+    val range = BillingStatus.rangeFa(startMs, endMs)
+    return if (range.isBlank()) chip else "$chip · $range"
 }
 
 @Composable

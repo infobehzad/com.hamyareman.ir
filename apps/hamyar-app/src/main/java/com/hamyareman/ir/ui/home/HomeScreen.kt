@@ -69,7 +69,11 @@ import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.ui.hub.HubCard
 import com.hamyareman.ir.ui.hub.hubTo
 import com.hamyareman.ir.ui.navigation.Screen
+import com.hamyareman.ir.LocalAppContainer
+import com.hamyareman.ir.ui.profile.StudentProfileRepo
 import com.hamyareman.ir.ui.profile.StudentProfileState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.LocalDateTime
@@ -106,7 +110,16 @@ private val gregMonth = listOf(
 
 @Composable
 fun HomeScreen(nav: NavController) {
+    val ctx = LocalContext.current
+    val container = LocalAppContainer.current
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(Unit) {
+        val uid = container.auth.cachedUserId().orEmpty()
+        if (uid.isNotBlank()) {
+            val remote = withContext(Dispatchers.IO) { StudentProfileRepo.fetch(container.tables, uid) }
+            if (remote != null) StudentProfileState.applyServer(ctx, remote)
+        }
+    }
     LaunchedEffect(Unit) {
         while (true) {
             now = System.currentTimeMillis()
@@ -375,8 +388,8 @@ private fun val12(h24: Int): Int {
  * (پیش‌تر فقط متن بود و هیچ‌جا لینک نمی‌شد).
  */
 internal fun SubscriptionChip(raw: String, onClick: () -> Unit = {}) {
-    val s = com.hamyareman.ir.platform.core.common.BillingStatus.norm(raw)
-    val paid = com.hamyareman.ir.platform.core.common.BillingStatus.isPaid(s)
+    val s = com.hamyareman.ir.platform.core.common.BillingStatus.effective(raw, com.hamyareman.ir.ui.profile.StudentProfileState.subscriptionEndMs)
+    val paid = com.hamyareman.ir.platform.core.common.BillingStatus.isPaid(raw, com.hamyareman.ir.ui.profile.StudentProfileState.subscriptionEndMs)
     val pending = s == com.hamyareman.ir.platform.core.common.BillingStatus.PENDING
     val refunding = s == com.hamyareman.ir.platform.core.common.BillingStatus.REFUND_PENDING
     val bg = when {

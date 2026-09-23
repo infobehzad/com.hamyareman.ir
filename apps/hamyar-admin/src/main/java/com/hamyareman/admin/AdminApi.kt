@@ -41,6 +41,20 @@ class AdminApi(
 
     private fun newId(): String = UUID.randomUUID().toString().replace("-", "").take(20)
 
+    /** Appwrite 2.2 query language is JSON objects, not limit(100). */
+    private fun awQuery(method: String, vararg values: Any): String {
+        val arr = JSONArray()
+        values.forEach { v ->
+            when (v) {
+                is Int -> arr.put(v)
+                is Long -> arr.put(v)
+                is Boolean -> arr.put(v)
+                else -> arr.put(v.toString())
+            }
+        }
+        return JSONObject().put("method", method).put("values", arr).toString()
+    }
+
     private suspend fun call(
         method: String,
         path: String,
@@ -238,14 +252,39 @@ class AdminApi(
         call("PUT", "/users/$userId/labels", JSONObject().put("labels", JSONArray(next)))
         val prefs = u.optJSONObject("prefs") ?: JSONObject()
         prefs.put("hamyarGrade", grade)
-        call("PATCH", "/users/$userId/prefs", prefs)
+        call("PATCH", "/users/$userId/prefs", JSONObject().put("prefs", prefs))
         pack(getUserRaw(userId), listSessions(userId).first)
     }
 
-    suspend fun adminSetPremium(userId: String, paid: Boolean): AppResult<AdminUser> = run {
-        val sub = if (paid) "yearly" else "free"
+    suspend fun adminSetPremium(userId: String, paid: Boolean): AppResult<AdminUser> =
+        adminSetPlan(userId, if (paid) "yearly" else "free")
+
+    suspend fun adminSetPlan(userId: String, plan: String): AppResult<AdminUser> = run {
+        val now = System.currentTimeMillis()
+        val sub = when (plan.lowercase()) {
+            "monthly" -> "monthly"
+            "yearly", "premium", "paid" -> "yearly"
+            "installment" -> "installment"
+            else -> "free"
+        }
+        val start = if (sub == "free") 0L else now
+        val end = when (sub) {
+            "monthly" -> com.hamyareman.ir.platform.core.common.BillingStatus.monthlyEndMs(now)
+            "yearly", "installment" -> com.hamyareman.ir.platform.core.common.BillingStatus.yearlyEndMs(now)
+            else -> 0L
+        }
         runCatching {
-            call("PATCH", "/tablesdb/$databaseId/tables/student_profiles/rows/$userId", JSONObject().put("data", JSONObject().put("subscription", sub)))
+            call(
+                "PATCH",
+                "/tablesdb/$databaseId/tables/student_profiles/rows/$userId",
+                JSONObject().put(
+                    "data",
+                    JSONObject()
+                        .put("subscription", sub)
+                        .put("subscriptionStartMs", start)
+                        .put("subscriptionEndMs", end),
+                ),
+            )
         }
         pack(getUserRaw(userId), listSessions(userId).first)
     }
@@ -259,7 +298,7 @@ class AdminApi(
             arr.put(JSONObject().put("id", d.id).put("label", d.label).put("lastAt", d.lastAt))
         }
         prefs.put("hamyarDevices", arr.toString())
-        call("PATCH", "/users/$userId/prefs", prefs)
+        call("PATCH", "/users/$userId/prefs", JSONObject().put("prefs", prefs))
         pack(getUserRaw(userId), listSessions(userId).first)
     }
 
@@ -267,7 +306,7 @@ class AdminApi(
         val u = getUserRaw(userId)
         val prefs = u.optJSONObject("prefs") ?: JSONObject()
         prefs.put("hamyarDevices", "[]")
-        call("PATCH", "/users/$userId/prefs", prefs)
+        call("PATCH", "/users/$userId/prefs", JSONObject().put("prefs", prefs))
         pack(getUserRaw(userId), listSessions(userId).first)
     }
 
@@ -315,9 +354,16 @@ class AdminApi(
     }
 
     suspend fun adminList(queue: String): AppResult<List<BillingOrder>> = run {
-        val o = call("GET", "/tablesdb/$databaseId/tables/subscription_orders/rows")
         val status = if (queue == "refund") "refund_pending" else "pending"
-        arr(o, "rows", "documents").map { orderFromRow(it) }.filter { it.status == status }
+        listAllOrders().let { (it as AppResult.Ok).value.filter { o -> o.status == status } }
+    }
+
+    suspend fun listAllOrders(): AppResult<List<BillingOrder>> = run {
+        arr(
+            call("GET", "/tablesdb/$databaseId/tables/subscription_orders/rows", queries = listOf(awQuery("limit", 100))),
+            "rows",
+            "documents",
+        ).map { orderFromRow(it) }
     }
 
     suspend fun adminGet(orderId: String): AppResult<Triple<BillingOrder, BillingProfile, String>> = run {
@@ -348,13 +394,7 @@ class AdminApi(
             .put("status", "approved")
             .put("paidAtMs", System.currentTimeMillis())
         patchOrder(orderId, "approved", extra)
-        runCatching {
-            call(
-                "PATCH",
-                "/tablesdb/$databaseId/tables/student_profiles/rows/${order.userId}",
-                JSONObject().put("data", JSONObject().put("subscription", "premium")),
-            )
-        }
+        runCatching { adminSetPlan(order.userId, if (order.planId == "monthly") "monthly" else "yearly") }
     }
 
     suspend fun adminReject(orderId: String, note: String = ""): AppResult<Unit> = run {
@@ -362,13 +402,7 @@ class AdminApi(
         val order = orderFromRow(row)
         val extra = JSONObject().put("id", order.id).put("userId", order.userId).put("status", "rejected").put("adminNote", note)
         patchOrder(orderId, "rejected", extra)
-        runCatching {
-            call(
-                "PATCH",
-                "/tablesdb/$databaseId/tables/student_profiles/rows/${order.userId}",
-                JSONObject().put("data", JSONObject().put("subscription", "free")),
-            )
-        }
+        runCatching { adminSetPlan(order.userId, "free") }
     }
 
     suspend fun adminRefundOk(orderId: String): AppResult<Unit> = run {
@@ -376,13 +410,7 @@ class AdminApi(
         val order = orderFromRow(row)
         val extra = JSONObject().put("id", order.id).put("userId", order.userId).put("status", "refunded")
         patchOrder(orderId, "refunded", extra)
-        runCatching {
-            call(
-                "PATCH",
-                "/tablesdb/$databaseId/tables/student_profiles/rows/${order.userId}",
-                JSONObject().put("data", JSONObject().put("subscription", "free")),
-            )
-        }
+        runCatching { adminSetPlan(order.userId, "free") }
     }
 
     suspend fun adminSearch(q: String): AppResult<List<BillingProfile>> = run {
@@ -451,7 +479,7 @@ class AdminApi(
         if (names.isNotEmpty()) names
         else {
             val rows = arr(
-                call("GET", "/tablesdb/$databaseId/tables/$tableId/rows", queries = listOf("limit(1)")),
+                call("GET", "/tablesdb/$databaseId/tables/$tableId/rows", queries = listOf(awQuery("limit", 1))),
                 "rows",
                 "documents",
             )
@@ -471,10 +499,10 @@ class AdminApi(
     suspend fun listRows(tableId: String): AppResult<List<JSONObject>> = run {
         val out = mutableListOf<JSONObject>()
         var cursor: String? = null
-        repeat(30) {
-            val qs = mutableListOf("limit(100)")
+        repeat(40) {
+            val qs = mutableListOf(awQuery("limit", 100))
             val c = cursor
-            if (!c.isNullOrBlank()) qs += "cursorAfter(\"$c\")"
+            if (!c.isNullOrBlank()) qs += awQuery("cursorAfter", c)
             val batch = runCatching {
                 arr(call("GET", "/tablesdb/$databaseId/tables/$tableId/rows", queries = qs), "rows", "documents")
             }.getOrElse {
@@ -579,10 +607,10 @@ class AdminApi(
     suspend fun listFiles(bucketId: String): AppResult<List<JSONObject>> = run {
         val out = mutableListOf<JSONObject>()
         var cursor: String? = null
-        repeat(30) {
-            val qs = mutableListOf("limit(100)")
+        repeat(40) {
+            val qs = mutableListOf(awQuery("limit", 100))
             val c = cursor
-            if (!c.isNullOrBlank()) qs += "cursorAfter(\"$c\")"
+            if (!c.isNullOrBlank()) qs += awQuery("cursorAfter", c)
             val batch = arr(call("GET", "/storage/buckets/$bucketId/files", queries = qs), "files")
             out += batch
             if (batch.size < 100) return@run out

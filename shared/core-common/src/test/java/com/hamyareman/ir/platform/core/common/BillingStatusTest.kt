@@ -9,15 +9,18 @@ class BillingStatusTest {
     @Test
     fun paidOnlyYearlyOrRefundPending() {
         assertTrue(BillingStatus.isPaid("yearly"))
+        assertTrue(BillingStatus.isPaid("monthly"))
         assertTrue(BillingStatus.isPaid("refund_pending"))
         assertFalse(BillingStatus.isPaid("pending"))
         assertFalse(BillingStatus.isPaid("free"))
         assertFalse(BillingStatus.isPaid("rejected"))
+        assertFalse(BillingStatus.isPaid("yearly", 1L))
     }
 
     @Test
     fun chips() {
-        assertEquals("اشتراک فعال", BillingStatus.chipFa("yearly"))
+        assertEquals("اشتراک سالانه", BillingStatus.chipFa("yearly"))
+        assertEquals("اشتراک ماهانه", BillingStatus.chipFa("monthly"))
         assertEquals("انتظار تأیید پرداخت", BillingStatus.chipFa("pending"))
         assertEquals("انتظار بازگشت وجه", BillingStatus.chipFa("refund_pending"))
         assertEquals("مهمان همیار من", BillingStatus.chipFa("free"))

@@ -917,7 +917,7 @@ internal fun TeachPdfPages(
                 state = pager,
                 modifier = Modifier.fillMaxWidth().weight(1f),
                 userScrollEnabled = !zoomed,
-                beyondViewportPageCount = 1,
+                beyondViewportPageCount = if (zoomed) 0 else 1,
             ) { index ->
                 var bmp by remember(fileId, index) { mutableStateOf<Bitmap?>(pageCache[index]) }
                 LaunchedEffect(fileId, index) {

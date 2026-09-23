@@ -69,6 +69,8 @@ object TableIds {
      */
     const val SUBSCRIPTION_ORDERS = "subscription_orders"
 
+    const val INSTALLMENTS = "installments"
+
     // --- پرامپت ۰۲: ماژول ورزش/یوگا/تنفس/یادگیری ---
     const val WELLNESS_MOVES = "wellness_moves"
     const val SKETCH_REFERENCES = "sketch_references"

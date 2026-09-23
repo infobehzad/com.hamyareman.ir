@@ -1352,11 +1352,13 @@ private fun InternalPdfViewer(file: File, modifier: Modifier = Modifier) {
             pages.isEmpty() -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             else -> {
                 val pager = rememberPagerState(pageCount = { pages.size })
-                VerticalPager(state = pager, modifier = Modifier.fillMaxSize()) { idx ->
+                var zoomed by remember { mutableStateOf(false) }
+                VerticalPager(state = pager, userScrollEnabled = !zoomed, modifier = Modifier.fillMaxSize()) { idx ->
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         ZoomableBitmap(
                             bitmap = pages[idx],
                             modifier = Modifier.fillMaxSize().padding(4.dp),
+                            onZoomed = { zoomed = it },
                         )
                     }
                 }

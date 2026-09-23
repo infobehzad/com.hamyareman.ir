@@ -87,7 +87,8 @@ object WisdomQuotes {
         if (all.isEmpty()) return WisdomLine("همیار من کنارت است.", "")
         val store = LocalStore(context, PREF)
         val cur = store.getInt(KEY_IDX, 0)
-        val idx = if (cur in all.indices) (cur + 1) % all.size else 0
+        var idx = Random.nextInt(all.size)
+        if (all.size > 1 && idx == cur) idx = (idx + 1 + Random.nextInt(all.size - 1)) % all.size
         val hours = 3.0 + Random.nextDouble()
         store.putInt(KEY_IDX, idx)
         store.putLong(KEY_UNTIL, System.currentTimeMillis() + (hours * 3_600_000L).toLong())

@@ -60,6 +60,14 @@ fun UserProfileScreen(
     val scope = rememberCoroutineScope()
     var saveError by remember { mutableStateOf<String?>(null) }
     val ctx = LocalContext.current
+    val app = com.hamyareman.ir.LocalAppContainer.current
+    LaunchedEffect(Unit) {
+        val uid = app.auth.cachedUserId().orEmpty()
+        if (uid.isNotBlank()) {
+            val remote = StudentProfileRepo.fetch(app.tables, uid)
+            if (remote != null) StudentProfileState.applyServer(ctx, remote)
+        }
+    }
     val storage = com.hamyareman.ir.LocalAppContainer.current.storage
     var avatarPath by remember { mutableStateOf(com.hamyareman.ir.ui.profile.StudentProfileState.avatarPath) }
     var cropBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
@@ -269,7 +277,8 @@ fun UserProfileScreen(
             ) {
                 Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        com.hamyareman.ir.platform.core.common.BillingStatus.chipFa(sub),
+                        com.hamyareman.ir.platform.core.common.BillingStatus.chipFa(sub, StudentProfileState.subscriptionEndMs) +
+                            com.hamyareman.ir.platform.core.common.BillingStatus.rangeFa(0L, StudentProfileState.subscriptionEndMs).let { if (it.isBlank()) "" else " · $it" },
                         fontWeight = FontWeight.Bold,
                         color = chipFg,
                     )
