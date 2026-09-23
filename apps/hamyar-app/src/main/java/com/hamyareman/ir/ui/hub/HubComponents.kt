@@ -65,8 +65,8 @@ fun HubCard(
             Text(emoji, style = MaterialTheme.typography.headlineMedium)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.titleMedium, fontFamily = DashboardFonts.tile)
-                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = DashboardFonts.label)
+                Text(title, style = MaterialTheme.typography.titleMedium, fontFamily = DashboardFonts.tile, fontSize = DashboardFonts.bump(DashboardFonts.tile, 14))
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = DashboardFonts.label, fontSize = DashboardFonts.bump(DashboardFonts.label, 14))
             }
         }
     }

@@ -22,7 +22,7 @@ fun FreeReadingScreen(nav: NavController, onBack: () -> Unit) {
         AppTopBar("مطالعه آزاد", onBack)
         TabRow(selectedTabIndex = tab) {
             listOf("کتاب متنی", "کتاب صوتی").forEachIndexed { i, l ->
-                Tab(selected = tab == i, onClick = { tab = i }, text = { Text(l, fontFamily = DashboardFonts.quote) })
+                Tab(selected = tab == i, onClick = { tab = i }, text = { Text(l, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) })
             }
         }
         if (tab == 0) LibraryScreen(onBack = onBack)

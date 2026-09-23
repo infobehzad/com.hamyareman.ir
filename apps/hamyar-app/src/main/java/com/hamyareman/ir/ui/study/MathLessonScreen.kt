@@ -255,6 +255,8 @@ fun MathLessonScreen(
         // زوم داخلِ محتوا (مثلاً صفحهٔ PDF): سوایپِ سربرگ‌ها را قفل می‌کند تا
         // کاربر وسطِ خواندنِ شکلِ زوم‌شده، ناخواسته به سربرگِ دیگری نپرد.
         var contentZoomed by remember { mutableStateOf(false) }
+        val zoomedLock = remember { booleanArrayOf(false) }
+        zoomedLock[0] = contentZoomed
         var tugProgress by remember { mutableFloatStateOf(0f) }
         // فنرِ بازگشت در کریدینِ آزاد اجرا می‌شود (نه داخلِ AwaitPointerEventScope
         // که توابعِ suspendِ محدود دارد) و مقدارش را در همان state می‌نویسد.
@@ -265,12 +267,13 @@ fun MathLessonScreen(
         Box(
             Modifier
                 .weight(1f)
-                .pointerInput(tabs.size, rtl, contentZoomed) {
+                .pointerInput(tabs.size, rtl) {
                     val slop = viewConfiguration.touchSlop
                     val startAt = slop * 3f
                     awaitEachGesture {
                         // تا وقتی محتوا زوم است، هیچ سوایپی برای عوض‌کردنِ سربرگ نمی‌گیریم.
-                        if (contentZoomed) return@awaitEachGesture
+                        // کلیدِ pointerInput زوم نیست — عوض‌شدنِ کلید وسط پینچ ژست را می‌کشت و ANR می‌ساخت.
+                        if (zoomedLock[0]) return@awaitEachGesture
                         val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
                         val pid = down.id
                         val width = size.width.toFloat().coerceAtLeast(1f)
@@ -533,17 +536,22 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
                     factory = { c ->
                         WebView(c).apply {
                             webViewClient = object : WebViewClient() {
+                                private var lastZ: Boolean? = null
                                 override fun onScaleChanged(view: WebView, oldScale: Float, newScale: Float) {
-                                    onZoomChanged(newScale > 1.02f)
+                                    val z = newScale.isFinite() && newScale > 1.04f
+                                    if (lastZ == z) return
+                                    lastZ = z
+                                    view.post { runCatching { onZoomChanged(z) } }
                                 }
                             }
                             settings.javaScriptEnabled = true
                             settings.domStorageEnabled = true
-                            settings.loadWithOverviewMode = true
+                            settings.loadWithOverviewMode = false
                             settings.useWideViewPort = true
                             settings.setSupportZoom(true)
                             settings.builtInZoomControls = true
                             settings.displayZoomControls = false
+                            setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
                             addJavascriptInterface(TeachHtmlBridge(), "HamyarPlayer")
                             setBackgroundColor(android.graphics.Color.WHITE)
                         }
@@ -771,21 +779,31 @@ private fun MathSummaryTab(pack: StudyPack, isSum: Boolean, chapter: Int, onZoom
             factory = { ctx ->
                 WebView(ctx).apply {
                     webViewClient = object : WebViewClient() {
+                        private var lastZ: Boolean? = null
                         override fun onScaleChanged(view: WebView, oldScale: Float, newScale: Float) {
-                            onZoomChanged(newScale > 1.02f)
+                            val z = newScale.isFinite() && newScale > 1.04f
+                            if (lastZ == z) return
+                            lastZ = z
+                            view.post { runCatching { onZoomChanged(z) } }
                         }
                     }
                     settings.javaScriptEnabled = false
-                    settings.loadWithOverviewMode = true
+                    settings.loadWithOverviewMode = false
                     settings.useWideViewPort = true
-                    settings.builtInZoomControls = false
+                    settings.setSupportZoom(true)
+                    settings.builtInZoomControls = true
                     settings.displayZoomControls = false
                     settings.defaultTextEncodingName = "utf-8"
+                    setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
                     setBackgroundColor(android.graphics.Color.WHITE)
                 }
             },
             update = { wv ->
-                wv.loadDataWithBaseURL("https://local.hamyar/", html, "text/html", "utf-8", null)
+                val tag = html.hashCode()
+                if (wv.tag != tag) {
+                    wv.tag = tag
+                    wv.loadDataWithBaseURL("https://local.hamyar/", html, "text/html", "utf-8", null)
+                }
             },
             modifier = Modifier.weight(1f).padding(4.dp),
         )

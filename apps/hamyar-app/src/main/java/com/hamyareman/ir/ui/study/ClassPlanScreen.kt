@@ -77,7 +77,7 @@ private fun TimePickText(label: String, value: String, onPick: (String) -> Unit)
     ) {
         Text(
             "$label  ${toPersianDigits("%d:%02d".format(h, m))}",
-            fontFamily = DashboardFonts.quote,
+            fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
         )
     }
 }
@@ -94,7 +94,7 @@ fun ClassPlanScreen(onBack: () -> Unit, initialTab: Int = 0, onVirtualHours: (()
                 Tab(selected = tab == i, onClick = { tab = i }, text = {
                     Text(
                         label,
-                        fontFamily = DashboardFonts.section,
+                        fontFamily = DashboardFonts.section, fontSize = DashboardFonts.bump(DashboardFonts.section, 14),
                         fontWeight = FontWeight.Bold,
                     )
                 })
@@ -211,17 +211,17 @@ private fun WeeklyTimetableSection() {
     ) {
         Text(
             "شنبه تا چهارشنبه. هر خانه می‌تواند دو درس داشته باشد و ساعتِ شروع و پایانِ هر زنگ («تایم زنگ ۱…» در پایین) برای همهٔ روزها یکی است. پس از تکمیل، فهرست‌ها غیرفعال می‌شوند.",
-            fontFamily = DashboardFonts.quote,
+            fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         syncNotice?.let {
-            Text(it, fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+            Text(it, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
         }
         syncError?.let {
             Text(
                 "⚠ $it",
-                fontFamily = DashboardFonts.quote,
+                fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
             )
@@ -240,7 +240,7 @@ private fun WeeklyTimetableSection() {
                     .padding(10.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Text(name, fontFamily = DashboardFonts.greeting, fontSize = 18.sp)
+                Text(name, fontFamily = DashboardFonts.greeting, fontSize = DashboardFonts.bump(DashboardFonts.greeting, 18))
                 slots.forEachIndexed { si, value ->
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -278,7 +278,7 @@ private fun WeeklyTimetableSection() {
                         Text(
                             if (bellText.isBlank()) "تایم زنگ ${toPersianDigits((si + 1).toString())}: تنظیم نشده"
                             else "تایم زنگ ${toPersianDigits((si + 1).toString())}: $bellText",
-                            fontFamily = DashboardFonts.quote,
+                            fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
                             style = MaterialTheme.typography.bodySmall,
                             color = if (bellText.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
                         )
@@ -289,7 +289,7 @@ private fun WeeklyTimetableSection() {
                         TextButton(onClick = {
                             days = days.toMutableMap().also { it[di] = (slots + "").toMutableList() }
                             seconds = seconds.toMutableMap().also { it[di] = (slots2 + "").toMutableList() }
-                        }) { Text("افزودن خانه", fontFamily = DashboardFonts.quote) }
+                        }) { Text("افزودن خانه", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) }
                         if (slots.size > 1) {
                             TextButton(onClick = {
                                 ClassPlanStore.removeSlot(ctx, di, slots.size - 1)
@@ -301,7 +301,7 @@ private fun WeeklyTimetableSection() {
                                     it[di] = (ClassPlanStore.load(ctx).second[di].orEmpty()).toMutableList()
                                 }
                                 persistAndSync(lock = false, map = days, sec = seconds)
-                            }) { Text("حذف آخرین خانه", fontFamily = DashboardFonts.quote) }
+                            }) { Text("حذف آخرین خانه", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) }
                         }
                     }
                 }
@@ -327,20 +327,20 @@ private fun WeeklyTimetableSection() {
                 Text(
                     "تایم زنگ‌ها",
                     fontFamily = DashboardFonts.section,
-                    fontSize = 18.sp,
+                    fontSize = DashboardFonts.bump(DashboardFonts.section, 18),
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f),
                 )
                 Text(
                     toPersianDigits("$bellsSet/$maxCells") + if (bellsOpen) "  ▲ بستن" else "  ▼ باز کردن",
-                    fontFamily = DashboardFonts.quote,
+                    fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
             Text(
                 "ساعتِ شروع و پایانِ هر زنگ فقط یک‌بار این‌جا وارد می‌شود و برای هر دو شیفتِ صبح و عصر و همهٔ روزها ذخیره و با سرور همگام می‌شود.",
-                fontFamily = DashboardFonts.quote,
+                fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -352,7 +352,7 @@ private fun WeeklyTimetableSection() {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         "تایم زنگ ${toPersianDigits((si + 1).toString())}  ·  ${toPersianDigits(from)} تا ${toPersianDigits(to)}",
-                        fontFamily = DashboardFonts.quote,
+                        fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
                         fontWeight = FontWeight.Bold,
                     )
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -379,7 +379,7 @@ private fun WeeklyTimetableSection() {
 
         if (locked) {
             OutlinedButton(onClick = { confirmEdit = true }, modifier = Modifier.fillMaxWidth()) {
-                Text("ویرایش برنامه هفتگی", fontFamily = DashboardFonts.quote)
+                Text("ویرایش برنامه هفتگی", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
             }
         } else {
             OutlinedButton(
@@ -387,7 +387,7 @@ private fun WeeklyTimetableSection() {
                     persistAndSync(lock = (1..5).all { d -> (days[d]?.count { it.isNotBlank() } ?: 0) >= 3 })
                 },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("ذخیره برنامه", fontFamily = DashboardFonts.quote) }
+            ) { Text("ذخیره برنامه", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) }
         }
         // کارتِ کاملِ مرخصی به صفحهٔ جداگانهٔ «مرخصی» منتقل شد
         // (از منوی «برنامه هفتگی و مرخصی» در صفحهٔ اصلی مدرسه باز می‌شود).
@@ -421,12 +421,12 @@ private fun SubjectDropdown(
             enabled = enabled,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text(value.ifBlank { placeholder }, fontFamily = DashboardFonts.quote, maxLines = 1)
+            Text(value.ifBlank { placeholder }, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), maxLines = 1)
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             options.forEach { opt ->
                 DropdownMenuItem(
-                    text = { Text(opt, fontFamily = DashboardFonts.quote) },
+                    text = { Text(opt, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) },
                     // گزینهٔ «— خالی —» خانه را خالی می‌کند (مقدارِ ذخیره‌شده = "").
                     onClick = {
                         onPick(if (opt == ClassPlanStore.EMPTY_SUBJECT) "" else opt)
@@ -456,7 +456,7 @@ private fun ShamsiCalendarSection() {
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text("تعطیلات قمری را در صورت اختلاف اعلام، تا ۲ روز جابه‌جا کن.", fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall)
+        Text("تعطیلات قمری را در صورت اختلاف اعلام، تا ۲ روز جابه‌جا کن.", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), style = MaterialTheme.typography.bodySmall)
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             (-2..2).forEach { off ->
                 FilterChip(
@@ -465,7 +465,7 @@ private fun ShamsiCalendarSection() {
                         ClassPlanStore.saveLunarOffset(ctx, off)
                         snap = ClassPlanStore.load(ctx)
                     },
-                    label = { Text(if (off == 0) "۰" else toPersianDigits((if (off > 0) "+$off" else "$off")), fontFamily = DashboardFonts.quote) },
+                    label = { Text(if (off == 0) "۰" else toPersianDigits((if (off > 0) "+$off" else "$off")), fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) },
                 )
             }
         }
@@ -476,7 +476,7 @@ private fun ShamsiCalendarSection() {
             Text(
                 "${JalaliDate.monthName(month)} ${toPersianDigits(year.toString())}",
                 fontFamily = DashboardFonts.greeting,
-                fontSize = 20.sp,
+                fontSize = DashboardFonts.bump(DashboardFonts.greeting, 20),
             )
             TextButton(onClick = {
                 if (month == 12) { month = 1; year++ } else month++
@@ -484,7 +484,7 @@ private fun ShamsiCalendarSection() {
         }
         Row(Modifier.fillMaxWidth()) {
             weekHdr.forEach { h ->
-                Text(h, modifier = Modifier.weight(1f), textAlign = TextAlign.Center, fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+                Text(h, modifier = Modifier.weight(1f), textAlign = TextAlign.Center, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), fontWeight = FontWeight.Bold)
             }
         }
         val dim = JalaliDate.daysInMonth(year, month)
@@ -515,7 +515,7 @@ private fun ShamsiCalendarSection() {
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center,
                             ) {
-                                Text(toPersianDigits(day.toString()), color = fg, fontFamily = DashboardFonts.quote, fontSize = 13.sp)
+                                Text(toPersianDigits(day.toString()), color = fg, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 13))
                                 if (!occ.isNullOrBlank() && occ != "پنجشنبه" && occ != "جمعه") {
                                     Text("•", color = fg, fontSize = 8.sp)
                                 }
@@ -534,8 +534,8 @@ private fun ShamsiCalendarSection() {
             else toPersianDigits("$d ${JalaliDate.monthName(month)}") + " — $lab"
         }
         if (monthOccasions.isNotEmpty()) {
-            Text("مناسبات این ماه", fontFamily = DashboardFonts.greeting, fontSize = 16.sp)
-            monthOccasions.forEach { Text(it, fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall) }
+            Text("مناسبات این ماه", fontFamily = DashboardFonts.greeting, fontSize = DashboardFonts.bump(DashboardFonts.greeting, 16))
+            monthOccasions.forEach { Text(it, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), style = MaterialTheme.typography.bodySmall) }
         }
     }
 }
@@ -577,40 +577,40 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text(ClassPlanStore.captionOf(snap, today), fontFamily = DashboardFonts.section, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Text(ClassPlanStore.captionOf(snap, today), fontFamily = DashboardFonts.section, fontSize = DashboardFonts.bump(DashboardFonts.section, 20), fontWeight = FontWeight.Bold)
         OutlinedButton(onClick = { shiftSettings = true }, modifier = Modifier.fillMaxWidth()) {
-            Text("تنظیمات شیفت مدرسه", fontFamily = DashboardFonts.quote)
+            Text("تنظیمات شیفت مدرسه", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
         }
         Text(
             if (snap.cycleWeeks == 1) "همیشه ${current.label}"
             else "شیفت این هفته هفته‌ی ${toPersianDigits(ClassPlanStore.cycleWeekPos(snap, today).toString())} از ${toPersianDigits(snap.cycleWeeks.toString())} هفته، ${current.label}",
-            fontFamily = DashboardFonts.quote,
+            fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
             fontWeight = FontWeight.Bold,
         )
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text("آلارم‌های صدادار", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+            Text("آلارم‌های صدادار", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), fontWeight = FontWeight.Bold)
             IconButton(onClick = { settingsOpen = true }) {
                 Icon(Icons.Filled.Settings, contentDescription = "تنظیمات آلارم")
             }
         }
-        Text("شیفت صبح — سه کادر ساعت", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+        Text("شیفت صبح — سه کادر ساعت", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), fontWeight = FontWeight.Bold)
         TimePick("آلارم بیداری", alarm.wakeMH, alarm.wakeMM) { h, m -> flushAlarm(alarm.copy(wakeMH = h, wakeMM = m)) }
         TimePick("حضور در سرویس", alarm.busMH, alarm.busMM) { h, m -> flushAlarm(alarm.copy(busMH = h, busMM = m)) }
         TimePick("حضور در مدرسه", alarm.schoolMH, alarm.schoolMM) { h, m -> flushAlarm(alarm.copy(schoolMH = h, schoolMM = m)) }
-        Text("شیفت ظهر — سه کادر ساعت", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+        Text("شیفت ظهر — سه کادر ساعت", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), fontWeight = FontWeight.Bold)
         TimePick("آماده شدن ظهر", alarm.wakeNH, alarm.wakeNM) { h, m -> flushAlarm(alarm.copy(wakeNH = h, wakeNM = m)) }
         TimePick("حضور در سرویس", alarm.busNH, alarm.busNM) { h, m -> flushAlarm(alarm.copy(busNH = h, busNM = m)) }
         TimePick("حضور در مدرسه", alarm.schoolNH, alarm.schoolNM) { h, m -> flushAlarm(alarm.copy(schoolNH = h, schoolNM = m)) }
-        Text("خواب — دعوت به خواب آرام", fontFamily = DashboardFonts.section, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text("خواب — دعوت به خواب آرام", fontFamily = DashboardFonts.section, fontSize = DashboardFonts.bump(DashboardFonts.section, 18), fontWeight = FontWeight.Bold)
         TimePick("خواب شیفت صبح", alarm.sleepMH, alarm.sleepMM) { h, m -> flushAlarm(alarm.copy(sleepMH = h, sleepMM = m)) }
         TimePick("خواب شیفت ظهر", alarm.sleepNH, alarm.sleepNM) { h, m -> flushAlarm(alarm.copy(sleepNH = h, sleepNM = m)) }
         Text(
             "آلارم شیفت مخالف خاموش می‌شود. اگر دعوت خواب لمس نشود، یک‌بار دیگر بعد از ۵ دقیقه تکرار می‌شود.",
-            fontFamily = DashboardFonts.quote,
+            fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
             style = MaterialTheme.typography.bodySmall,
         )
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text("کلاس مجازی", fontFamily = DashboardFonts.section, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text("کلاس مجازی", fontFamily = DashboardFonts.section, fontSize = DashboardFonts.bump(DashboardFonts.section, 18), fontWeight = FontWeight.Bold)
             TextButton(onClick = { onVirtualHours?.invoke() }) {
                 Icon(
                     Icons.Outlined.Settings,
@@ -618,12 +618,12 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                     modifier = Modifier.size(18.dp),
                 )
                 Spacer(Modifier.width(4.dp))
-                Text("تنظیم ساعت کلاس‌های مجازی", fontFamily = DashboardFonts.quote)
+                Text("تنظیم ساعت کلاس‌های مجازی", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
             }
         }
         Text(
             "یک روز یا بازه را مجازی کن. روی داشبورد قرمز می‌شود و تیک کیف غیرفعال.",
-            fontFamily = DashboardFonts.quote,
+            fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
             style = MaterialTheme.typography.bodySmall,
         )
         VirtualRangeSection(
@@ -645,7 +645,7 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
             Text(
                 "جمعاً ${toPersianDigits(vdays.size.toString())} روز مجازی",
                 fontFamily = DashboardFonts.quote,
-                fontSize = 12.sp,
+                fontSize = DashboardFonts.bump(DashboardFonts.quote, 12),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -666,17 +666,17 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                         append(if (pushed) "؛ ارسال انجام شد." else "؛ چیزی برای ارسال نبود.")
                     }
                 }
-            }) { Text("همگام‌سازی با سرور", fontFamily = DashboardFonts.quote) }
+            }) { Text("همگام‌سازی با سرور", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) }
         }
-        syncNotice?.let { Text(it, fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary) }
+        syncNotice?.let { Text(it, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary) }
         val sessions = ClassPlanStore.virtualSessions(ctx)
         if (sessions.isNotEmpty()) {
-            Text("ساعت‌های ثبت‌شده", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+            Text("ساعت‌های ثبت‌شده", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), fontWeight = FontWeight.Bold)
             sessions.forEach { s ->
                 val dayName = ClassPlanStore.WEEKDAYS.getOrElse(s.dayIndex - 1) { "" }
                 Text(
                     "$dayName: ${s.timeFa}${if (s.subject.isBlank()) "" else " — ${s.subject}"}",
-                    fontFamily = DashboardFonts.quote,
+                    fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
@@ -686,11 +686,11 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
     if (shiftSettings) {
         AlertDialog(
             onDismissRequest = { shiftSettings = false },
-            title = { Text("تنظیمات شیفت مدرسه", fontFamily = DashboardFonts.quote) },
+            title = { Text("تنظیمات شیفت مدرسه", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     // ── گام ۱: شیفتِ هفتهٔ جاری
-                    Text("۱) شیفت هفتهٔ جاری", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+                    Text("۱) شیفت هفتهٔ جاری", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), fontWeight = FontWeight.Bold)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(Shift.MORNING, Shift.EVENING).forEach { sh ->
                             FilterChip(
@@ -699,12 +699,12 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                                     ClassPlanStore.setCurrentWeekShift(ctx, sh)
                                     snap = ClassPlanStore.load(ctx)
                                 },
-                                label = { Text(sh.label, fontFamily = DashboardFonts.quote) },
+                                label = { Text(sh.label, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) },
                             )
                         }
                     }
                     // ── گام ۲: چرخهٔ شیفت
-                    Text("۲) چرخهٔ شیفت", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+                    Text("۲) چرخهٔ شیفت", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), fontWeight = FontWeight.Bold)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(1 to "ثابت", 2 to "دوهفته‌ای", 4 to "چهارهفته‌ای").forEach { (w, label) ->
                             FilterChip(
@@ -713,14 +713,14 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                                     ClassPlanStore.setCycleWeeks(ctx, w)
                                     snap = ClassPlanStore.load(ctx)
                                 },
-                                label = { Text(label, fontFamily = DashboardFonts.quote) },
+                                label = { Text(label, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) },
                             )
                         }
                     }
                     // ── گام ۳: شیفتِ هر هفته (مشتق از گام ۱)
                     when (snap.cycleWeeks) {
                         1 -> {
-                            Text("۳) شیفت ثابت", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+                            Text("۳) شیفت ثابت", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), fontWeight = FontWeight.Bold)
                             OutlinedButton(
                                 onClick = {
                                     ClassPlanStore.setCurrentWeekShift(ctx, current)
@@ -728,19 +728,19 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
-                                Text("همیشه ${current.label}", fontFamily = DashboardFonts.quote)
+                                Text("همیشه ${current.label}", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
                             }
                         }
                         else -> {
                             val nowPos = ClassPlanStore.cycleWeekPos(snap, today)
                             Text(
                                 "۳) شیفتِ هر هفته — هفته‌ی ${toPersianDigits(nowPos.toString())}: ${current.label}",
-                                fontFamily = DashboardFonts.quote,
+                                fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
                                 fontWeight = FontWeight.Bold,
                             )
                             Text(
                                 "هفتهٔ جاری شما، هفتهٔ چندم از چرخهٔ ${toPersianDigits(snap.cycleWeeks.toString())} هفته‌ای است؟",
-                                fontFamily = DashboardFonts.quote,
+                                fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
                                 style = MaterialTheme.typography.bodySmall,
                             )
                             (1..snap.cycleWeeks).forEach { k ->
@@ -756,7 +756,7 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                                     label = {
                                         Text(
                                             "هفته‌ی ${toPersianDigits(k.toString())} · ${kShift.label}",
-                                            fontFamily = DashboardFonts.quote,
+                                            fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
                                         )
                                     },
                                 )
@@ -778,7 +778,7 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                         )
                         snap = ClassPlanStore.load(ctx)
                     }
-                    Text("ساعت خروج از مدرسه", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+                    Text("ساعت خروج از مدرسه", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), fontWeight = FontWeight.Bold)
                     TimePickText("خروج شیفت صبح", snap.exitMorning) { hhmm ->
                         ClassPlanStore.saveExitTimes(ctx, hhmm, snap.exitNoon)
                         snap = ClassPlanStore.load(ctx)
@@ -789,7 +789,7 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                     }
                     Text(
                         "آماده‌سازیِ پیش از حرکت: ${toPersianDigits(snap.wakeLeadMin.toString())} دقیقه",
-                        fontFamily = DashboardFonts.quote,
+                        fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(30, 45, 60, 90).forEach { lead ->
@@ -803,7 +803,7 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                                     )
                                     snap = ClassPlanStore.load(ctx)
                                 },
-                                label = { Text(toPersianDigits(lead.toString()), fontFamily = DashboardFonts.quote) },
+                                label = { Text(toPersianDigits(lead.toString()), fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) },
                             )
                         }
                     }
@@ -819,9 +819,9 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                         ClassPlanSync.push(ctx, container.tables, uid, StateSync.KEY_WEEK)
                         syncNotice = if (uid.isBlank()) "تنظیمات روی دستگاه ذخیره شد (برای سینک وارد شو)." else "تنظیمات ذخیره و با سرور همگام شد."
                     }
-                }) { Text("ذخیره", fontFamily = DashboardFonts.quote) }
+                }) { Text("ذخیره", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) }
             },
-            dismissButton = { TextButton(onClick = { shiftSettings = false }) { Text("بستن", fontFamily = DashboardFonts.quote) } },
+            dismissButton = { TextButton(onClick = { shiftSettings = false }) { Text("بستن", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) } },
         )
     }
     if (settingsOpen) {
@@ -834,7 +834,7 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         "آهنگ: ${AlarmRinger.titleOf(ctx, soundUri)}",
-                        fontFamily = DashboardFonts.quote,
+                        fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
                         fontWeight = FontWeight.Bold,
                     )
                     Column(
@@ -868,18 +868,18 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                         if (sounds.isEmpty()) {
                             Text(
                                 "آهنگی روی گوشی پیدا نشد؛ همان پیش‌فرض سیستم زنگ می‌زند.",
-                                fontFamily = DashboardFonts.quote,
+                                fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         }
                     }
-                    Text("بلندی: ${toPersianDigits(alarm.volume.toString())}٪", fontFamily = DashboardFonts.quote)
+                    Text("بلندی: ${toPersianDigits(alarm.volume.toString())}٪", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(40, 60, 80, 100).forEach { v ->
                             FilterChip(selected = alarm.volume == v, onClick = { flushAlarm(alarm.copy(volume = v)) }, label = { Text(toPersianDigits(v.toString())) })
                         }
                     }
-                    Text("تعداد تکرار", fontFamily = DashboardFonts.quote)
+                    Text("تعداد تکرار", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         (1..3).forEach { n ->
                             FilterChip(selected = alarm.repeat == n, onClick = { flushAlarm(alarm.copy(repeat = n)) }, label = { Text(toPersianDigits(n.toString())) })
@@ -888,14 +888,14 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                     FilterChip(
                         selected = alarm.crescendo,
                         onClick = { flushAlarm(alarm.copy(crescendo = !alarm.crescendo)) },
-                        label = { Text("صدای افزایشی", fontFamily = DashboardFonts.quote) },
+                        label = { Text("صدای افزایشی", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) },
                     )
                     OutlinedButton(
                         onClick = { AlarmRinger.start(ctx) },
                         modifier = Modifier.fillMaxWidth(),
-                    ) { Text("تست زنگ", fontFamily = DashboardFonts.quote) }
+                    ) { Text("تست زنگ", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) }
                     TextButton(onClick = { AlarmRinger.stop() }, modifier = Modifier.fillMaxWidth()) {
-                        Text("توقف زنگ", fontFamily = DashboardFonts.quote)
+                        Text("توقف زنگ", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
                     }
                 }
             },
@@ -915,7 +915,7 @@ internal fun TimePick(label: String, hour: Int, minute: Int, onChange: (Int, Int
     ) {
         Text(
             "$label  ${toPersianDigits("%d:%02d".format(hour, minute))}",
-            fontFamily = DashboardFonts.quote,
+            fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
         )
     }
 }
@@ -938,12 +938,12 @@ private fun AlarmSoundRow(
         androidx.compose.material3.RadioButton(selected = selected, onClick = onPick)
         Text(
             label,
-            fontFamily = DashboardFonts.quote,
+            fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
             modifier = Modifier.weight(1f),
             maxLines = 1,
             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
         )
-        TextButton(onClick = onPreview) { Text("شنیدن", fontFamily = DashboardFonts.quote) }
+        TextButton(onClick = onPreview) { Text("شنیدن", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) }
     }
 }
 
@@ -995,31 +995,31 @@ internal fun LeaveSection() {
             .padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text("مرخصی", fontFamily = DashboardFonts.section, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text("مرخصی", fontFamily = DashboardFonts.section, fontSize = DashboardFonts.bump(DashboardFonts.section, 18), fontWeight = FontWeight.Bold)
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { pickFrom = true }, modifier = Modifier.weight(1f)) {
-                Text("از: ${JalaliDate.formatFaLong(fromIso)}", fontFamily = DashboardFonts.quote)
+                Text("از: ${JalaliDate.formatFaLong(fromIso)}", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
             }
             OutlinedButton(onClick = { pickTo = true }, modifier = Modifier.weight(1f)) {
-                Text("تا: ${JalaliDate.formatFaLong(toIso)}", fontFamily = DashboardFonts.quote)
+                Text("تا: ${JalaliDate.formatFaLong(toIso)}", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
             }
         }
 
         // علتِ مرخصی
         Box {
             OutlinedButton(onClick = { reasonsOpen = true }, modifier = Modifier.fillMaxWidth()) {
-                Text(if (reason.isBlank()) "علت مرخصی" else reason, fontFamily = DashboardFonts.quote)
+                Text(if (reason.isBlank()) "علت مرخصی" else reason, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
             }
             DropdownMenu(expanded = reasonsOpen, onDismissRequest = { reasonsOpen = false }) {
                 reasons.forEach { r ->
                     DropdownMenuItem(
-                        text = { Text(r, fontFamily = DashboardFonts.quote) },
+                        text = { Text(r, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) },
                         onClick = { reason = r; medCert = false; just = ""; reasonsOpen = false },
                     )
                 }
                 DropdownMenuItem(
-                    text = { Text(ClassPlanStore.ADD_CUSTOM, fontFamily = DashboardFonts.quote) },
+                    text = { Text(ClassPlanStore.ADD_CUSTOM, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) },
                     onClick = { showCustom = true; reasonsOpen = false },
                 )
             }
@@ -1030,7 +1030,7 @@ internal fun LeaveSection() {
                 onValueChange = { custom = it },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                label = { Text("علتِ خاص", fontFamily = DashboardFonts.quote) },
+                label = { Text("علتِ خاص", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) },
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextButton(onClick = {
@@ -1042,8 +1042,8 @@ internal fun LeaveSection() {
                     custom = ""
                     showCustom = false
                     msg = "علت اضافه شد."
-                }) { Text("افزودن", fontFamily = DashboardFonts.quote) }
-                TextButton(onClick = { showCustom = false; custom = "" }) { Text("انصراف", fontFamily = DashboardFonts.quote) }
+                }) { Text("افزودن", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) }
+                TextButton(onClick = { showCustom = false; custom = "" }) { Text("انصراف", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) }
             }
         }
 
@@ -1051,13 +1051,13 @@ internal fun LeaveSection() {
         if (isSick) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = medCert, onCheckedChange = { medCert = it })
-                Text("گواهی پزشکی داشتم", fontFamily = DashboardFonts.quote)
+                Text("گواهی پزشکی داشتم", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
             }
         }
 
         // وضعیتِ توجیه — فقط یکی، و فقط یک‌بار (مگر «موجّه نشده»)
         if (reason.isNotBlank()) {
-            Text("وضعیت توجیه به مدرسه", fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold)
+            Text("وضعیت توجیه به مدرسه", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), fontWeight = FontWeight.Bold)
             val options = buildList {
                 add(ClassPlanStore.JUST_FATHER)
                 add(ClassPlanStore.JUST_MOTHER)
@@ -1074,7 +1074,7 @@ internal fun LeaveSection() {
                         enabled = just.isBlank() || just == ClassPlanStore.JUST_NONE,
                         onCheckedChange = { if (it) just = code },
                     )
-                    Text(ClassPlanStore.justificationLabel(code), fontFamily = DashboardFonts.quote)
+                    Text(ClassPlanStore.justificationLabel(code), fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
                 }
             }
         }
@@ -1094,10 +1094,10 @@ internal fun LeaveSection() {
                     "مرخصی ثبت شد."
                 }
             }
-        }, modifier = Modifier.fillMaxWidth()) { Text("ثبت مرخصی", fontFamily = DashboardFonts.quote) }
+        }, modifier = Modifier.fillMaxWidth()) { Text("ثبت مرخصی", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) }
 
         msg?.let {
-            Text(it, fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+            Text(it, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
         }
 
         // ---- آکاردیونِ مرخصی‌های ثبت‌شده (پیش‌فرض بسته) ----
@@ -1105,17 +1105,17 @@ internal fun LeaveSection() {
             Modifier.fillMaxWidth().clickable { listOpen = !listOpen }.padding(vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(if (listOpen) "▾" else "◂", fontFamily = DashboardFonts.quote)
+            Text(if (listOpen) "▾" else "◂", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
             Text(
                 "مرخصی‌های ثبت‌شده (${toPersianDigits(records.size.toString())})",
-                fontFamily = DashboardFonts.quote,
+                fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = 6.dp),
             )
         }
         if (listOpen) {
             if (records.isEmpty()) {
-                Text("هنوز مرخصی‌ای ثبت نشده است.", fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall)
+                Text("هنوز مرخصی‌ای ثبت نشده است.", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), style = MaterialTheme.typography.bodySmall)
             } else {
                 records.forEach { rec ->
                     Column(
@@ -1130,14 +1130,14 @@ internal fun LeaveSection() {
                         days.take(10).forEach { iso ->
                             Text(
                                 "${JalaliDate.weekDayFa(iso)} ${JalaliDate.formatFaLong(iso)} — ${rec.reason} — ${ClassPlanStore.justificationLabel(rec.justification)}",
-                                fontFamily = DashboardFonts.quote,
+                                fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         }
                         if (days.size > 10) {
                             Text(
                                 "و ${toPersianDigits((days.size - 10).toString())} روز دیگر",
-                                fontFamily = DashboardFonts.quote,
+                                fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -1152,12 +1152,12 @@ internal fun LeaveSection() {
                                             ClassPlanStore.updateLeaveJustification(ctx, rec.id, code)
                                             records = ClassPlanStore.leaves(ctx)
                                             pushLeaves()
-                                        }) { Text(ClassPlanStore.justificationLabel(code), fontFamily = DashboardFonts.quote) }
+                                        }) { Text(ClassPlanStore.justificationLabel(code), fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) }
                                     }
                             }
                         }
                         TextButton(onClick = { deleteId = rec.id }) {
-                            Text("حذف این مرخصی", fontFamily = DashboardFonts.quote, color = MaterialTheme.colorScheme.error)
+                            Text("حذف این مرخصی", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), color = MaterialTheme.colorScheme.error)
                         }
                     }
                 }

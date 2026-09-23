@@ -78,7 +78,7 @@ fun SleepNightScreen(onBack: () -> Unit) {
         AppTopBar("آرامش قبل خواب", onBack)
         TabRow(selectedTabIndex = tab) {
             listOf("صوت خواب", "قصهٔ شبانه", "تنفس").forEachIndexed { i, l ->
-                Tab(selected = tab == i, onClick = { tab = i }, text = { Text(l, fontFamily = DashboardFonts.quote) })
+                Tab(selected = tab == i, onClick = { tab = i }, text = { Text(l, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) })
             }
         }
         Column(
@@ -89,20 +89,20 @@ fun SleepNightScreen(onBack: () -> Unit) {
                 0 -> audioTracks.forEach { TrackRow(it, state.playing) { play(it) } }
                 1 -> stories.forEach { TrackRow(it, state.playing) { play(it) } }
                 else -> {
-                    Text("تمرین دم‌بازدم — فهرست بعداً می‌آید.", fontFamily = DashboardFonts.quote)
-                    Text("اسکلت خالی: SVG + متن + صوت + شمارش در نسخهٔ بعد.", fontFamily = DashboardFonts.quote, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("تمرین دم‌بازدم — فهرست بعداً می‌آید.", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
+                    Text("اسکلت خالی: SVG + متن + صوت + شمارش در نسخهٔ بعد.", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
         Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { if (state.playing) playback.pause() else playback.play() }, modifier = Modifier.weight(1f)) {
-                Text(if (state.playing) "استوپ" else "پلی", fontFamily = DashboardFonts.quote)
+                Text(if (state.playing) "استوپ" else "پلی", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
             }
             OutlinedButton(onClick = { playback.stop() }, modifier = Modifier.weight(1f)) {
                 Text("بستن", fontFamily = DashboardFonts.quote)
             }
         }
-        state.error?.let { Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 16.dp)) }
+        state.error?.let { Text(it, color = MaterialTheme.colorScheme.error, fontSize = DashboardFonts.bump(DashboardFonts.quote, 12), modifier = Modifier.padding(horizontal = 16.dp)) }
     }
 }
 
@@ -110,10 +110,10 @@ fun SleepNightScreen(onBack: () -> Unit) {
 private fun TrackRow(t: SleepTrack, playing: Boolean, onPlay: () -> Unit) {
     Card(Modifier.fillMaxWidth().clickable(enabled = t.uri.isNotBlank(), onClick = onPlay)) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(t.title, fontFamily = DashboardFonts.greeting, fontSize = 18.sp)
-            Text(t.subtitle, fontFamily = DashboardFonts.quote, style = MaterialTheme.typography.bodySmall)
+            Text(t.title, fontFamily = DashboardFonts.greeting, fontSize = DashboardFonts.bump(DashboardFonts.greeting, 18))
+            Text(t.subtitle, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), style = MaterialTheme.typography.bodySmall)
             if (t.uri.isBlank()) {
-                Text("فایل هنوز روی سرور نیست.", fontFamily = DashboardFonts.quote, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                Text("فایل هنوز روی سرور نیست.", fontFamily = DashboardFonts.quote, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = DashboardFonts.bump(DashboardFonts.quote, 12))
             }
         }
     }

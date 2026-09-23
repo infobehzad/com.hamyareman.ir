@@ -20,10 +20,6 @@ import androidx.compose.ui.text.style.TextAlign
 import com.hamyareman.ir.ui.home.DashboardFonts
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -1033,7 +1029,7 @@ private fun LinedNotesPaper(value: String, onValueChange: (String) -> Unit) {
             },
             textStyle = TextStyle(
                 fontFamily = DashboardFonts.content,
-                fontSize = 16.sp,
+                fontSize = DashboardFonts.bump(DashboardFonts.content, 16),
                 lineHeight = lineSp,
                 color = Color(0xFF1E3A5F),
                 textAlign = TextAlign.Right,
@@ -1183,42 +1179,15 @@ private fun ImageGalleryPager(
                 val bmp = remember(item?.localPath) {
                     item?.localPath?.let { PdfSafe.decodeFileCapped(it, maxSide = 1600) }
                 }
-                var scale by remember(page) { mutableFloatStateOf(1f) }
-                var ox by remember(page) { mutableFloatStateOf(0f) }
-                var oy by remember(page) { mutableFloatStateOf(0f) }
                 Box(
-                    Modifier
-                        .fillMaxSize()
-                        .pointerInput(page) {
-                            detectTransformGestures { _, pan, zoom, _ ->
-                                val z = if (zoom.isFinite() && zoom > 0f) zoom else 1f
-                                scale = (scale * z).coerceIn(1f, 4f)
-                                ox += pan.x
-                                oy += pan.y
-                                zoomedPage = if (scale > 1.01f) page else -1
-                            }
-                        }
-                        .clickable {
-                            // لمسِ ساده: برگشت به اندازه‌ی اولیه
-                            scale = 1f; ox = 0f; oy = 0f
-                            zoomedPage = -1
-                        },
+                    Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
                     if (bmp != null) {
-                        Image(
-                            bitmap = bmp.asImageBitmap(),
-                            contentDescription = item?.title,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(8.dp)
-                                .graphicsLayer {
-                                    scaleX = scale
-                                    scaleY = scale
-                                    translationX = ox
-                                    translationY = oy
-                                },
-                            contentScale = ContentScale.Fit,
+                        ZoomablePdfPage(
+                            bitmap = bmp,
+                            modifier = Modifier.fillMaxSize().padding(8.dp),
+                            onZoomed = { z -> zoomedPage = if (z) page else -1 },
                         )
                     } else {
                         Text("خوانده نشد", color = Color.White)
@@ -1416,7 +1385,7 @@ private fun GalleryThumb(item: NoteFile) {
             previewText,
             style = MaterialTheme.typography.labelSmall.copy(
                 fontFamily = DashboardFonts.content,
-                fontSize = 11.sp,
+                fontSize = DashboardFonts.bump(DashboardFonts.content, 11),
                 textAlign = TextAlign.Right,
             ),
             maxLines = 8,

@@ -59,7 +59,7 @@ fun ShamsiDatePickerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(title, fontFamily = DashboardFonts.quote, fontWeight = FontWeight.Bold) },
+        title = { Text(title, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), fontWeight = FontWeight.Bold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
@@ -70,16 +70,16 @@ fun ShamsiDatePickerDialog(
                     TextButton(onClick = {
                         if (month == 1) { month = 12; year-- } else month--
                         selectedDay = selectedDay.coerceAtMost(JalaliDate.daysInMonth(year, month))
-                    }) { Text("◀", fontFamily = DashboardFonts.quote) }
+                    }) { Text("◀", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) }
                     Text(
                         "${JalaliDate.monthName(month)} ${toPersianDigits(year.toString())}",
-                        fontFamily = DashboardFonts.quote,
+                        fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
                         fontWeight = FontWeight.Bold,
                     )
                     TextButton(onClick = {
                         if (month == 12) { month = 1; year++ } else month++
                         selectedDay = selectedDay.coerceAtMost(JalaliDate.daysInMonth(year, month))
-                    }) { Text("▶", fontFamily = DashboardFonts.quote) }
+                    }) { Text("▶", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) }
                 }
                 Row(Modifier.fillMaxWidth()) {
                     listOf("ش", "ی", "د", "س", "چ", "پ", "ج").forEach { h ->
@@ -87,7 +87,7 @@ fun ShamsiDatePickerDialog(
                             Text(
                                 h,
                                 fontFamily = DashboardFonts.quote,
-                                fontSize = 12.sp,
+                                fontSize = DashboardFonts.bump(DashboardFonts.quote, 12),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
@@ -132,7 +132,7 @@ fun ShamsiDatePickerDialog(
                                         toPersianDigits(day.toString()),
                                         color = fg,
                                         fontFamily = DashboardFonts.quote,
-                                        fontSize = 13.sp,
+                                        fontSize = DashboardFonts.bump(DashboardFonts.quote, 13),
                                     )
                                 }
                             }
@@ -145,7 +145,7 @@ fun ShamsiDatePickerDialog(
                         toPersianDigits(
                             "%d %s %d".format(selectedDay, JalaliDate.monthName(month), year),
                         ),
-                    fontFamily = DashboardFonts.quote,
+                    fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
@@ -155,8 +155,8 @@ fun ShamsiDatePickerDialog(
                 val iso = isoOf(selectedDay)
                 if (iso != null) onPick(iso)
                 onDismiss()
-            }) { Text("تأیید", fontFamily = DashboardFonts.quote) }
+            }) { Text("تأیید", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("انصراف", fontFamily = DashboardFonts.quote) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("انصراف", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) } },
     )
 }

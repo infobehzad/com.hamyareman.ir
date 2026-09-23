@@ -54,6 +54,15 @@ internal fun WebSettings.enableStudyPinchZoom() {
     useWideViewPort = true
 }
 
+/** آزمایشگاه تمام‌صفحه: overview/pinch کل صفحه را به نوار باریک تبدیل می‌کرد. */
+internal fun WebSettings.enableLabLayout() {
+    setSupportZoom(false)
+    builtInZoomControls = false
+    displayZoomControls = false
+    loadWithOverviewMode = false
+    useWideViewPort = false
+}
+
 @Composable
 fun ToolHubScreen(
     title: String,
@@ -93,7 +102,7 @@ fun ToolHubScreen(
                                 item.title,
                                 fontFamily = DashboardFonts.aria,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
+                                fontSize = DashboardFonts.bump(DashboardFonts.aria, 16),
                             )
                             Text(
                                 item.subtitle,
@@ -186,11 +195,26 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
                     settings.allowFileAccess = true
                     settings.allowContentAccess = true
                     settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
-                    settings.enableStudyPinchZoom()
+                    val isLab = toolId == "chemistry" || toolId == "physics" || toolId == "biology"
+                    if (isLab) settings.enableLabLayout() else settings.enableStudyPinchZoom()
                     webChromeClient = WebChromeClient()
                     webViewClient = object : WebViewClient() {
                         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest) = false
                         override fun onPageFinished(view: WebView, url: String) {
+                            if (isLab) {
+                                view.evaluateJavascript(
+                                    "(function(){try{" +
+                                        "var h=document.documentElement,b=document.body;" +
+                                        "if(h){h.style.height='100%';h.style.minHeight='100%';}" +
+                                        "if(b){b.style.height='100%';b.style.minHeight='100%';b.style.overflow='hidden';}" +
+                                        "var w=document.querySelector('.workspace');" +
+                                        "if(w){w.style.height='auto';w.style.flex='1 1 auto';w.style.minHeight='0';}" +
+                                        "var g=document.getElementById('guideOverlay');" +
+                                        "if(g){g.style.position='fixed';g.style.inset='0';}" +
+                                        "}catch(e){}})();",
+                                    null,
+                                )
+                            }
                             val saved = ToolSaveStore.get(ctx, toolId)
                             if (saved.isNotBlank()) {
                                 val quoted = JSONObject.quote(saved)
@@ -206,7 +230,7 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
                         }
                     }
                     addJavascriptInterface(bridge, "HamyarTool")
-                    setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                    setBackgroundColor(if (isLab) android.graphics.Color.parseColor("#050912") else android.graphics.Color.TRANSPARENT)
                     loadUrl("file:///android_asset/tools/$toolId.html")
                 }
             },

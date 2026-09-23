@@ -28,7 +28,7 @@
   body {
     background-color: var(--bg-main);
     color: var(--text-pure);
-    height: 100vh;
+    height: 100%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -75,7 +75,7 @@
   .top-icon-btn { width: 34px; height: 34px; border-radius: 10px; background: rgba(56, 189, 248, 0.08); border: 1px solid var(--border-ui); color: var(--accent-blue); cursor: pointer; display: grid; place-items: center; transition: all 0.2s; font-size: 0.95rem; }
   .top-icon-btn:hover { background: rgba(56, 189, 248, 0.18); box-shadow: var(--glow-blue); transform: translateY(-1px); }
 
-  .workspace { display: flex; flex: 1; height: calc(100vh - 60px); overflow: hidden; }
+  .workspace { display: flex; flex: 1; height: auto; flex: 1 1 auto; min-height: 0; overflow: hidden; }
   .sidebar-nav { width: 300px; background: var(--sidebar-bg); border-left: 1px solid var(--border-ui); display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; }
   .nav-header { padding: 14px 18px; font-size: 0.82rem; font-weight: 800; color: var(--accent-cyan); border-bottom: 1px solid rgba(255,255,255,0.06); background: linear-gradient(180deg, rgba(0, 245, 212, 0.06), transparent); display: flex; flex-direction: column; gap: 4px; }
   .nav-header .nav-desc { font-size: 0.66rem; color: var(--text-dim); font-weight: 500; line-height: 1.5; }
@@ -183,7 +183,7 @@
   .results-overlay { position: absolute; inset: 0; background: rgba(5,9,18,0.78); display: none; align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(6px); padding: 20px; }
   .results-overlay.show { display: flex; animation: fadeIn 0.35s ease; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  .results-card { background: linear-gradient(135deg, rgba(18,28,48,0.98), rgba(10,18,32,0.98)); border: 1px solid var(--accent-cyan); border-radius: 18px; padding: 24px 30px; min-width: 340px; max-width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(0,245,212,0.25), inset 0 1px 0 rgba(255,255,255,0.06); position: relative; animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+  .results-card { background: linear-gradient(135deg, rgba(18,28,48,0.98), rgba(10,18,32,0.98)); border: 1px solid var(--accent-cyan); border-radius: 18px; padding: 24px 30px; min-width: 340px; max-width: 90%; max-height: 90%; overflow-y: auto; box-shadow: 0 24px 80px rgba(0,245,212,0.25), inset 0 1px 0 rgba(255,255,255,0.06); position: relative; animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1); }
   @keyframes popIn { from { transform: scale(0.88); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   .results-card::before { content: ""; position: absolute; top: 0; left: 20%; right: 20%; height: 1px; background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent); }
   .results-card h2 { font-size: 1rem; color: var(--accent-cyan); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
@@ -231,7 +231,7 @@
 
   .guide-overlay { position: fixed; inset: 0; background: rgba(3,7,15,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(10px); animation: fadeIn 0.4s ease; padding: 20px; }
   .guide-overlay.hidden { display: none; }
-  .guide-card { background: linear-gradient(135deg, rgba(18,28,48,0.98), rgba(10,18,32,0.98)); border: 1px solid var(--accent-cyan); border-radius: 20px; padding: 26px 30px; max-width: 560px; width: 100%; box-shadow: 0 30px 90px rgba(0,245,212,0.3), inset 0 1px 0 rgba(255,255,255,0.06); position: relative; animation: guidePop 0.5s cubic-bezier(0.34,1.56,0.64,1); max-height: 90vh; overflow-y: auto; }
+  .guide-card { background: linear-gradient(135deg, rgba(18,28,48,0.98), rgba(10,18,32,0.98)); border: 1px solid var(--accent-cyan); border-radius: 20px; padding: 26px 30px; max-width: 560px; width: 100%; box-shadow: 0 30px 90px rgba(0,245,212,0.3), inset 0 1px 0 rgba(255,255,255,0.06); position: relative; animation: guidePop 0.5s cubic-bezier(0.34,1.56,0.64,1); max-height: 90%; overflow-y: auto; }
   @keyframes guidePop { from { transform: scale(0.9) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
   .guide-card::before { content: ""; position: absolute; top: 0; left: 15%; right: 15%; height: 2px; background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--accent-blue), transparent); animation: headerGlow 3s ease-in-out infinite; }
   .guide-card h2 { color: var(--accent-cyan); font-size: 1.15rem; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
@@ -260,6 +260,12 @@
 
   @media (max-width: 1400px) { .control-sidebar { width: 360px; } .sidebar-nav { width: 260px; } }
   @media (max-width: 1100px) { .workspace { flex-wrap: wrap; height: auto; overflow-y: auto; } .sidebar-nav, .control-sidebar { width: 100%; } .stage-view { min-height: 500px; } }
+
+  html, body { height: 100% !important; min-height: 100% !important; }
+  .workspace { height: auto !important; flex: 1 1 auto !important; min-height: 0 !important; }
+  .stage-view { min-height: 0 !important; flex: 1 1 auto !important; }
+  #stageContainer, #simCanvas { width: 100% !important; height: 100% !important; min-height: 240px; }
+
 </style>
 </head>
 <body>

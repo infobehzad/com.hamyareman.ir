@@ -37,9 +37,12 @@ internal fun MathInteractiveHtml(
                 webViewClient = object : WebViewClient() {
                     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest) = false
 
+                    private var lastZ: Boolean? = null
                     /** زومِ کاربر (دو انگشتی) گزارش می‌شود تا سوایپِ سربرگ‌ها قفل شود. */
                     override fun onScaleChanged(view: WebView, oldScale: Float, newScale: Float) {
-                        val zoomed = newScale.isFinite() && newScale > 1.02f
+                        val zoomed = newScale.isFinite() && newScale > 1.04f
+                        if (lastZ == zoomed) return
+                        lastZ = zoomed
                         view.post { runCatching { onZoomChanged(zoomed) } }
                     }
 

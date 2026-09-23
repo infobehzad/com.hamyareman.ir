@@ -161,22 +161,30 @@ fun HomeScreen(nav: NavController) {
                                     row1,
                                     style = MaterialTheme.typography.titleMedium,
                                     fontFamily = DashboardFonts.clock,
+                                    fontSize = DashboardFonts.bump(DashboardFonts.clock, 16),
                                     fontWeight = FontWeight.Bold,
                                 )
                                 Text(
                                     row2Time,
                                     style = MaterialTheme.typography.headlineSmall,
                                     fontFamily = DashboardFonts.clock,
+                                    fontSize = DashboardFonts.bump(DashboardFonts.clock, 24),
                                     fontWeight = FontWeight.Bold,
                                 )
                                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                                    Text(row2Greg, style = MaterialTheme.typography.bodyLarge, fontFamily = DashboardFonts.clock)
+                                    Text(
+                                        row2Greg,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontFamily = DashboardFonts.clock,
+                                        fontSize = DashboardFonts.bump(DashboardFonts.clock, 16),
+                                    )
                                 }
                                 if (!holiday.isNullOrBlank()) {
                                     Text(
                                         holiday,
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontFamily = DashboardFonts.label,
+                                        fontSize = DashboardFonts.bump(DashboardFonts.label, 14),
                                         color = MaterialTheme.colorScheme.primary,
                                     )
                                 }
@@ -194,6 +202,7 @@ fun HomeScreen(nav: NavController) {
                                 "پروفایل من",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontFamily = DashboardFonts.label,
+                                fontSize = DashboardFonts.bump(DashboardFonts.label, 12),
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(top = 4.dp),
                             )
@@ -240,6 +249,7 @@ fun HomeScreen(nav: NavController) {
                 "امروز",
                 style = MaterialTheme.typography.titleMedium,
                 fontFamily = DashboardFonts.title,
+                fontSize = DashboardFonts.bump(DashboardFonts.title, 16),
                 modifier = Modifier.padding(horizontal = HomeSide),
             )
             HubCard("🌤", "روتین امروز", "بلوک‌های روزت را ببین", Modifier.padding(horizontal = HomeSide)) { nav.navigate(Screen.Routine.route) }
@@ -275,7 +285,7 @@ private fun GreetingBanner(title: String, subtitle: String, modifier: Modifier =
                     title,
                     color = Color.White,
                     fontFamily = DashboardFonts.greeting,
-                    fontSize = 22.sp,
+                    fontSize = DashboardFonts.bump(DashboardFonts.greeting, 22),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -283,7 +293,7 @@ private fun GreetingBanner(title: String, subtitle: String, modifier: Modifier =
                     subtitle,
                     color = Color.White.copy(alpha = 0.92f),
                     fontFamily = DashboardFonts.label,
-                    fontSize = 14.sp,
+                    fontSize = DashboardFonts.bump(DashboardFonts.label, 14),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -344,10 +354,10 @@ private fun AutoFitQuote(
     BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
         val maxW = constraints.maxWidth
         val sizeSp = remember(text, maxW, fontFamily) {
-            if (maxW <= 0) 14f
+            if (maxW <= 0) 16f
             else {
-                var lo = 9f
-                var hi = 28f
+                var lo = 11f
+                var hi = 30f
                 var best = 12f
                 repeat(12) {
                     val mid = (lo + hi) / 2f
@@ -425,6 +435,7 @@ internal fun SubscriptionChip(raw: String, onClick: () -> Unit = {}) {
             color = fg,
             fontFamily = DashboardFonts.label,
             fontWeight = FontWeight.Bold,
+            fontSize = DashboardFonts.bump(DashboardFonts.label, 12),
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
         )
@@ -456,8 +467,8 @@ private fun ToolTile(emoji: String, label: String, modifier: Modifier = Modifier
             Text(
                 label,
                 fontFamily = DashboardFonts.tile,
-                fontSize = 12.sp,
-                lineHeight = 15.sp,
+                fontSize = DashboardFonts.bump(DashboardFonts.tile, 12),
+                lineHeight = 17.sp,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
@@ -484,7 +495,7 @@ private fun QuickTile(emoji: String, label: String, modifier: Modifier = Modifie
             Text(
                 label,
                 style = MaterialTheme.typography.titleMedium,
-                fontFamily = DashboardFonts.tile,
+                fontFamily = DashboardFonts.tile, fontSize = DashboardFonts.bump(DashboardFonts.tile, 14),
                 textAlign = TextAlign.Center,
             )
         }

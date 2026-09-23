@@ -156,7 +156,7 @@ fun ClassPlanCard(
             Text(
                 "برنامه کلاسی مدرسه",
                 fontFamily = DashboardFonts.title,
-                fontSize = 20.sp,
+                fontSize = DashboardFonts.bump(DashboardFonts.title, 20),
                 fontWeight = FontWeight.Bold,
             )
             Row(
@@ -165,9 +165,9 @@ fun ClassPlanCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Column(Modifier.width(80.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(dayName, fontFamily = DashboardFonts.label, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    Text(dateFa, fontFamily = DashboardFonts.label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(shift.label, fontFamily = DashboardFonts.label, fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
+                    Text(dayName, fontFamily = DashboardFonts.label, fontWeight = FontWeight.Bold, fontSize = DashboardFonts.bump(DashboardFonts.label, 14))
+                    Text(dateFa, fontFamily = DashboardFonts.label, fontSize = DashboardFonts.bump(DashboardFonts.label, 12), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(shift.label, fontFamily = DashboardFonts.label, fontSize = DashboardFonts.bump(DashboardFonts.label, 12), color = MaterialTheme.colorScheme.primary)
                 }
                 if (holiday) {
                     Box(
@@ -178,7 +178,7 @@ fun ClassPlanCard(
                         Text(
                             ClassPlanStore.holidayRoutine(today),
                             fontFamily = DashboardFonts.label,
-                            fontSize = 12.sp,
+                            fontSize = DashboardFonts.bump(DashboardFonts.label, 12),
                             color = Color(0xFF92400E),
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
@@ -195,7 +195,7 @@ fun ClassPlanCard(
                                 name,
                                 color = Color.White,
                                 fontFamily = DashboardFonts.content,
-                                fontSize = 13.sp,
+                                fontSize = DashboardFonts.bump(DashboardFonts.content, 13),
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center,
                                 maxLines = 2,
@@ -211,7 +211,7 @@ fun ClassPlanCard(
                     "$dayWord مجازی است",
                     color = Color(0xFFB91C1C),
                     fontFamily = DashboardFonts.label,
-                    fontSize = 13.sp,
+                    fontSize = DashboardFonts.bump(DashboardFonts.label, 13),
                     fontWeight = FontWeight.Bold,
                 )
             }
@@ -221,7 +221,7 @@ fun ClassPlanCard(
                     "$dayWord مرخصی است — ${leave.reason} (${ClassPlanStore.justificationLabel(leave.justification)})",
                     color = Color(0xFFB45309),
                     fontFamily = DashboardFonts.label,
-                    fontSize = 13.sp,
+                    fontSize = DashboardFonts.bump(DashboardFonts.label, 13),
                     fontWeight = FontWeight.Bold,
                 )
             }
@@ -271,7 +271,7 @@ fun ClassPlanCard(
             Text(
                 if (exam.isBlank()) "$dayLabel امتحان داری؟" else "$dayLabel امتحان $exam",
                 fontFamily = DashboardFonts.label,
-                fontSize = 13.sp,
+                fontSize = DashboardFonts.bump(DashboardFonts.label, 13),
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.fillMaxWidth().clickable(onClick = onOpenPrep),
             )
@@ -287,14 +287,14 @@ fun ClassPlanCard(
                     label = { Text("گزارش نتیجه امتحان", fontFamily = DashboardFonts.content) },
                     textStyle = androidx.compose.ui.text.TextStyle(
                         fontFamily = DashboardFonts.content,
-                        fontSize = 18.sp,
+                        fontSize = DashboardFonts.bump(DashboardFonts.content, 18),
                     ),
                 )
             }
             Text(
                 "آماده‌سازی کامل‌تر",
                 fontFamily = DashboardFonts.label,
-                fontSize = 12.sp,
+                fontSize = DashboardFonts.bump(DashboardFonts.label, 12),
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.clickable(onClick = onOpenPrep),
             )
@@ -316,6 +316,6 @@ private fun PrepTick(
             onCheckedChange = { if (enabled && onChecked != null) onChecked(it) },
             enabled = enabled,
         )
-        Text(label, fontFamily = DashboardFonts.label, fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(label, fontFamily = DashboardFonts.label, fontSize = DashboardFonts.bump(DashboardFonts.label, 12), maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
 }
