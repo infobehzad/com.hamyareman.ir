@@ -899,64 +899,65 @@ internal fun TeachPdfPages(
             }
         }
         is TeachPdfState.Ready -> Column(modifier = modifier) {
-            var zoomed by remember { mutableStateOf(false) }
-            // وضعیتِ زوم را هم به بیرون خبر می‌دهیم (قفلِ سوایپ) و هم به داخلِ نماها.
-            LaunchedEffect(zoomed) { onZoomChange(zoomed) }
-            DisposableEffect(Unit) { onDispose { onZoomChange(false) } }
-            val pager = rememberPagerState(pageCount = { st.pageCount })
+            var pageIdx by remember(fileId) { mutableIntStateOf(0) }
             val seenPages = remember(fileId) { mutableSetOf<Int>() }
             val screenW = remember {
                 ctx.resources.displayMetrics.widthPixels.coerceIn(640, 1080)
             }
+            val index = pageIdx.coerceIn(0, (st.pageCount - 1).coerceAtLeast(0))
             Text(
-                "📕 کتاب درس — صفحه ${toPersianDigits((pager.currentPage + 1).toString())} از ${toPersianDigits(st.pageCount.toString())}",
+                "📕 کتاب درس — صفحه ${toPersianDigits((index + 1).toString())} از ${toPersianDigits(st.pageCount.toString())}",
                 style = MaterialTheme.typography.titleMedium,
             )
             Spacer(Modifier.height(6.dp))
-            VerticalPager(
-                state = pager,
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                userScrollEnabled = !zoomed,
-                beyondViewportPageCount = 1,
-            ) { index ->
-                var bmp by remember(fileId, index) { mutableStateOf<Bitmap?>(pageCache[index]) }
-                LaunchedEffect(fileId, index) {
-                    if (bmp == null) {
-                        val rendered: Bitmap? = withContext(Dispatchers.IO) {
-                            try {
-                                synchronized(renderLock) {
-                                    val r = renderer ?: return@synchronized null
-                                    r.openPage(index).use { page ->
-                                        val b = PdfSafe.renderPage(page, maxW = screenW) ?: return@use null
-                                        val deg = com.hamyareman.ir.platform.feature.study.PdfRotations.degrees[fileId] ?: 0
-                                        PdfSafe.rotate(b, deg)
-                                    }
-                                }
-                            } catch (oom: OutOfMemoryError) {
-                                runCatching { System.gc() }
-                                null
-                            } catch (e: Exception) { null }
-                        }
-                        if (rendered != null) {
-                            synchronized(pageCache) { pageCache[index] = rendered }
-                            bmp = rendered
-                            if (seenPages.add(index)) {
-                                StudyActivity.add(ctx, pack.packId, "pdf", "مشاهده صفحه ${index + 1} کتاب درسی")
-                            }
-                        }
-                    }
-                }
+            var bmp by remember(fileId, index) { mutableStateOf<Bitmap?>(pageCache[index]) }
+            LaunchedEffect(fileId, index) {
                 if (bmp == null) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                    val rendered: Bitmap? = withContext(Dispatchers.IO) {
+                        try {
+                            synchronized(renderLock) {
+                                val r = renderer ?: return@synchronized null
+                                r.openPage(index).use { page ->
+                                    val b = PdfSafe.renderPage(page, maxW = screenW) ?: return@use null
+                                    val deg = com.hamyareman.ir.platform.feature.study.PdfRotations.degrees[fileId] ?: 0
+                                    PdfSafe.rotate(b, deg)
+                                }
+                            }
+                        } catch (oom: OutOfMemoryError) {
+                            runCatching { System.gc() }
+                            null
+                        } catch (e: Exception) { null }
                     }
-                } else {
-                    ZoomablePdfPage(
-                        bitmap = bmp!!,
-                        modifier = Modifier.fillMaxSize(),
-                        onZoomed = { z -> zoomed = z },
-                    )
+                    if (rendered != null) {
+                        synchronized(pageCache) { pageCache[index] = rendered }
+                        bmp = rendered
+                        if (seenPages.add(index)) {
+                            StudyActivity.add(ctx, pack.packId, "pdf", "مشاهده صفحه ${index + 1} کتاب درسی")
+                        }
+                    }
                 }
+            }
+            Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                if (bmp == null) {
+                    CircularProgressIndicator()
+                } else {
+                    ZoomablePdfPage(bitmap = bmp!!, modifier = Modifier.fillMaxSize())
+                }
+            }
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                OutlinedButton(
+                    onClick = { pageIdx = (index - 1).coerceAtLeast(0) },
+                    enabled = index > 0,
+                    modifier = Modifier.weight(1f),
+                ) { Text("صفحه قبل") }
+                OutlinedButton(
+                    onClick = { pageIdx = (index + 1).coerceAtMost(st.pageCount - 1) },
+                    enabled = index < st.pageCount - 1,
+                    modifier = Modifier.weight(1f),
+                ) { Text("صفحه بعد") }
             }
         }
         TeachPdfState.Idle -> Card(modifier.fillMaxWidth()) {

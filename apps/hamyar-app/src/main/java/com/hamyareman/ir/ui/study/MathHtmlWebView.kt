@@ -37,13 +37,8 @@ internal fun MathInteractiveHtml(
                 webViewClient = object : WebViewClient() {
                     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest) = false
 
-                    private var lastZ: Boolean? = null
-                    /** زومِ کاربر (دو انگشتی) گزارش می‌شود تا سوایپِ سربرگ‌ها قفل شود. */
                     override fun onScaleChanged(view: WebView, oldScale: Float, newScale: Float) {
-                        val zoomed = newScale.isFinite() && newScale > 1.04f
-                        if (lastZ == zoomed) return
-                        lastZ = zoomed
-                        view.post { runCatching { onZoomChanged(zoomed) } }
+                        /* زوم فقط مالِ WebView است — به Compose خبر نمی‌دهیم. */
                     }
 
                     override fun onPageFinished(view: WebView, url: String) {
@@ -55,14 +50,19 @@ internal fun MathInteractiveHtml(
                 }
                 settings.javaScriptEnabled = true
                 settings.domStorageEnabled = true
-                settings.loadWithOverviewMode = true
+                settings.loadWithOverviewMode = false
                 settings.useWideViewPort = true
                 settings.setSupportZoom(true)
                 settings.builtInZoomControls = true
                 settings.displayZoomControls = false
                 settings.allowFileAccess = true
                 addJavascriptInterface(bridge, "Hamyar")
+                setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
                 setBackgroundColor(android.graphics.Color.WHITE)
+                setOnTouchListener { v, _ ->
+                    v.parent?.requestDisallowInterceptTouchEvent(true)
+                    false
+                }
             }
         },
         update = { wv ->

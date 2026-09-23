@@ -226,17 +226,6 @@ fun MathLessonScreen(
         }
         val currentKey = tabs.getOrNull(tab)?.key ?: "teach"
         val currentLabel = tabs.getOrNull(tab)?.label ?: "تدریس"
-        val pagerState = rememberPagerState(
-            initialPage = tab.coerceIn(0, tabs.lastIndex),
-        ) { tabs.size }
-        // سوایپِ چپ/راست = جابه‌جایی بینِ سربرگ‌ها (و برعکس: لمسِ سربرگ = سوایپِ نرم).
-        LaunchedEffect(tab) {
-            val target = tab.coerceIn(0, tabs.lastIndex)
-            if (pagerState.currentPage != target) pagerState.animateScrollToPage(target)
-        }
-        LaunchedEffect(pagerState.settledPage) {
-            if (pagerState.settledPage in tabs.indices && pagerState.settledPage != tab) tab = pagerState.settledPage
-        }
         DisposableEffect(pack.packId, currentKey) {
             val start = System.currentTimeMillis()
             StudyActivity.add(ctx, pack.packId, "tab", "باز کردن سربرگ $currentLabel")
@@ -247,137 +236,22 @@ fun MathLessonScreen(
                 }
             }
         }
-        // ۵) سوایپِ سربرگ‌ها: آستانه‌ی شروع «سه برابر» (سه برابر کمتر حساس) +
-        //    افکتِ جهت‌دار. کمتر از آستانه هیچ اثری ندارد (نه جابه‌جایی، نه انیمیشن).
-        val swipeScope = rememberCoroutineScope()
-        val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
-        var tugPx by remember { mutableFloatStateOf(0f) }
-        // زوم داخلِ محتوا (مثلاً صفحهٔ PDF): سوایپِ سربرگ‌ها را قفل می‌کند تا
-        // کاربر وسطِ خواندنِ شکلِ زوم‌شده، ناخواسته به سربرگِ دیگری نپرد.
-        var contentZoomed by remember { mutableStateOf(false) }
-        val zoomedLock = remember { booleanArrayOf(false) }
-        zoomedLock[0] = contentZoomed
-        var tugProgress by remember { mutableFloatStateOf(0f) }
-        // فنرِ بازگشت در کریدینِ آزاد اجرا می‌شود (نه داخلِ AwaitPointerEventScope
-        // که توابعِ suspendِ محدود دارد) و مقدارش را در همان state می‌نویسد.
-        val tugSpring = remember { Animatable(1f) }
-        var tugDestLeft by remember { mutableStateOf(true) }
-        var tugLabel by remember { mutableStateOf<String?>(null) }
-        var tugJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
-        Box(
-            Modifier
-                .weight(1f)
-                .pointerInput(tabs.size, rtl) {
-                    val slop = viewConfiguration.touchSlop
-                    val startAt = slop * 3f
-                    awaitEachGesture {
-                        // تا وقتی محتوا زوم است، هیچ سوایپی برای عوض‌کردنِ سربرگ نمی‌گیریم.
-                        // کلیدِ pointerInput زوم نیست — عوض‌شدنِ کلید وسط پینچ ژست را می‌کشت و ANR می‌ساخت.
-                        if (zoomedLock[0]) return@awaitEachGesture
-                        val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-                        val pid = down.id
-                        val width = size.width.toFloat().coerceAtLeast(1f)
-                        val commitAt = width * 0.34f
-                        var dx = 0f
-                        var dy = 0f
-                        var dir = 0f
-                        var target = -1
-                        while (true) {
-                            val event = awaitPointerEvent(PointerEventPass.Initial)
-                            // پینچ دو انگشتی مالِ زوم است — سوایپ سربرگ را ول کن.
-                            if (event.changes.count { it.pressed } >= 2) return@awaitEachGesture
-                            val change = event.changes.firstOrNull { it.id == pid } ?: break
-                            if (!change.pressed) break
-                            dx += change.position.x - change.previousPosition.x
-                            dy += change.position.y - change.previousPosition.y
-                            if (dir == 0f) {
-                                if (abs(dx) >= startAt && abs(dx) > abs(dy) * 1.2f) {
-                                    dir = if (dx > 0) 1f else -1f
-                                    // در RTL سربرگِ بعدی سمتِ چپ است، در LTR سمتِ راست.
-                                    val next = if (rtl) dx > 0 else dx < 0
-                                    val cand = pagerState.currentPage + if (next) 1 else -1
-                                    if (cand !in tabs.indices) {
-                                        dir = 0f; dx = 0f; dy = 0f
-                                    } else {
-                                        target = cand
-                                        tugDestLeft = dx > 0
-                                        tugLabel = tabs[cand].label
-                                        tugProgress = 0f
-                                        tugJob?.cancel()
-                                        change.consume()
-                                    }
-                                }
-                            } else {
-                                change.consume()
-                                val extra = (dx - dir * startAt) * dir
-                                tugProgress = (extra / commitAt).coerceIn(0f, 1f)
-                                tugPx = dir * (extra * 0.35f).coerceIn(-width * 0.25f, width * 0.25f)
-                            }
-                        }
-                        if (dir != 0f) {
-                            val commit = tugProgress >= 1f && target >= 0
-                            val to = target
-                            val fromPx = tugPx
-                            val fromP = tugProgress
-                            tugJob = swipeScope.launch {
-                                if (commit) {
-                                    // انیمیشنِ خودِ پیجر، جابه‌جایی را نرم نشان می‌دهد.
-                                    tugPx = 0f
-                                    tugProgress = 0f
-                                    tugLabel = null
-                                    pagerState.animateScrollToPage(to)
-                                } else {
-                                    // فنر: کشش و افکتِ لبه با هم به صفر برمی‌گردند.
-                                    tugSpring.snapTo(1f)
-                                    tugSpring.animateTo(
-                                        0f,
-                                        spring(dampingRatio = 0.6f, stiffness = 620f),
-                                    ) {
-                                        tugPx = fromPx * value
-                                        tugProgress = fromP * value
-                                    }
-                                    tugPx = 0f
-                                    tugProgress = 0f
-                                    tugLabel = null
-                                }
-                            }
-                        }
-                    }
-                },
-        ) {
-            HorizontalPager(
-                state = pagerState,
-                userScrollEnabled = false,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        translationX = tugPx
-                        val pr = tugProgress
-                        scaleX = 1f - 0.03f * pr
-                        scaleY = 1f - 0.03f * pr
-                        alpha = 1f - 0.28f * pr
-                    },
-            ) { page ->
-            when (tabs.getOrNull(page)?.key) {
-                "teach" -> MathTeachTab(pack, bookTitle, showPlayer = false, onZoomChanged = { contentZoomed = it })
-                "book" -> MathBookHtmlTab(pack, html, onZoomChanged = { contentZoomed = it })
-                "flash" -> MathFlashHtmlTab(pack, html, onZoomChanged = { contentZoomed = it })
-                "summary" -> MathSummaryTab(pack, isSum = isSum, chapter = chapter, onZoomChanged = { contentZoomed = it })
-                "exam" -> MathExamHtmlTab(pack, html, onZoomChanged = { contentZoomed = it })
+        // زوم مالِ WebView/PDF است. سوایپِ سربرگ روی همان لایه پینچ را می‌دزدید و
+        // هنگ می‌ساخت — عوض‌کردن سربرگ فقط با خودِ سربرگ‌ها.
+        Box(Modifier.weight(1f).fillMaxSize()) {
+            when (currentKey) {
+                "teach" -> MathTeachTab(pack, bookTitle, showPlayer = false)
+                "book" -> MathBookHtmlTab(pack, html)
+                "flash" -> MathFlashHtmlTab(pack, html)
+                "summary" -> MathSummaryTab(pack, isSum = isSum, chapter = chapter)
+                "exam" -> MathExamHtmlTab(pack, html)
                 "pdf" -> TeachPdfPages(
                     modifier = Modifier.fillMaxSize(),
                     fileId = pack.pdfFileName,
                     pack = pack,
-                    onZoomChange = { contentZoomed = it },
                 )
-                else -> MathTeachTab(pack, bookTitle, showPlayer = false, onZoomChanged = { contentZoomed = it })
+                else -> MathTeachTab(pack, bookTitle, showPlayer = false)
             }
-            }
-            TabSwipeHint(
-                destLeft = tugDestLeft,
-                label = tugLabel,
-                progress = { tugProgress },
-            )
         }
     }
 }
@@ -535,15 +409,7 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
                 AndroidView(
                     factory = { c ->
                         WebView(c).apply {
-                            webViewClient = object : WebViewClient() {
-                                private var lastZ: Boolean? = null
-                                override fun onScaleChanged(view: WebView, oldScale: Float, newScale: Float) {
-                                    val z = newScale.isFinite() && newScale > 1.04f
-                                    if (lastZ == z) return
-                                    lastZ = z
-                                    view.post { runCatching { onZoomChanged(z) } }
-                                }
-                            }
+                            webViewClient = WebViewClient()
                             settings.javaScriptEnabled = true
                             settings.domStorageEnabled = true
                             settings.loadWithOverviewMode = false
@@ -554,6 +420,10 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
                             setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
                             addJavascriptInterface(TeachHtmlBridge(), "HamyarPlayer")
                             setBackgroundColor(android.graphics.Color.WHITE)
+                            setOnTouchListener { v, e ->
+                                v.parent?.requestDisallowInterceptTouchEvent(true)
+                                false
+                            }
                         }
                     },
                     update = { wv ->
@@ -778,15 +648,7 @@ private fun MathSummaryTab(pack: StudyPack, isSum: Boolean, chapter: Int, onZoom
         AndroidView(
             factory = { ctx ->
                 WebView(ctx).apply {
-                    webViewClient = object : WebViewClient() {
-                        private var lastZ: Boolean? = null
-                        override fun onScaleChanged(view: WebView, oldScale: Float, newScale: Float) {
-                            val z = newScale.isFinite() && newScale > 1.04f
-                            if (lastZ == z) return
-                            lastZ = z
-                            view.post { runCatching { onZoomChanged(z) } }
-                        }
-                    }
+                    webViewClient = WebViewClient()
                     settings.javaScriptEnabled = false
                     settings.loadWithOverviewMode = false
                     settings.useWideViewPort = true
@@ -796,6 +658,10 @@ private fun MathSummaryTab(pack: StudyPack, isSum: Boolean, chapter: Int, onZoom
                     settings.defaultTextEncodingName = "utf-8"
                     setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
                     setBackgroundColor(android.graphics.Color.WHITE)
+                    setOnTouchListener { v, _ ->
+                        v.parent?.requestDisallowInterceptTouchEvent(true)
+                        false
+                    }
                 }
             },
             update = { wv ->

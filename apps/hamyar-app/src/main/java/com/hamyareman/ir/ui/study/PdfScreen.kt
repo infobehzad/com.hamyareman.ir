@@ -1318,22 +1318,31 @@ private fun InternalPdfViewer(file: File, modifier: Modifier = Modifier) {
             )
             pages.isEmpty() -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             else -> {
-                val pager = rememberPagerState(pageCount = { pages.size })
-                var zoomed by remember { mutableStateOf(false) }
-                VerticalPager(state = pager, userScrollEnabled = !zoomed, modifier = Modifier.fillMaxSize()) { idx ->
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        ZoomablePdfPage(
-                            bitmap = pages[idx],
-                            modifier = Modifier.fillMaxSize().padding(4.dp),
-                            onZoomed = { zoomed = it },
-                        )
+                var idx by remember { mutableIntStateOf(0) }
+                val i = idx.coerceIn(0, pages.lastIndex)
+                Column(Modifier.fillMaxSize()) {
+                    ZoomablePdfPage(
+                        bitmap = pages[i],
+                        modifier = Modifier.weight(1f).fillMaxWidth().padding(4.dp),
+                    )
+                    Text(
+                        "${toPersianDigits((i + 1).toString())} از ${toPersianDigits(pages.size.toString())}",
+                        modifier = Modifier.align(Alignment.CenterHorizontally).padding(4.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(
+                            onClick = { idx = (i - 1).coerceAtLeast(0) },
+                            enabled = i > 0,
+                            modifier = Modifier.weight(1f),
+                        ) { Text("صفحه قبل") }
+                        OutlinedButton(
+                            onClick = { idx = (i + 1).coerceAtMost(pages.lastIndex) },
+                            enabled = i < pages.lastIndex,
+                            modifier = Modifier.weight(1f),
+                        ) { Text("صفحه بعد") }
                     }
                 }
-                Text(
-                    "${toPersianDigits((pager.currentPage + 1).toString())} از ${toPersianDigits(pages.size.toString())}",
-                    modifier = Modifier.align(Alignment.BottomCenter).padding(8.dp),
-                    style = MaterialTheme.typography.labelMedium,
-                )
             }
         }
     }

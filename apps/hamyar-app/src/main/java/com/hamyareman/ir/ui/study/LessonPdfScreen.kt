@@ -172,55 +172,12 @@ fun LessonPdfScreen(packId: String, onBack: () -> Unit) {
                     Text("در حال آماده‌سازی کتاب… (${st.progressPct}٪)", style = MaterialTheme.typography.bodySmall)
                 }
             }
-            is PdfState.Ready -> LazyColumn(
-                Modifier.fillMaxSize(),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                items(st.pageCount) { index ->
-                    Card(Modifier.fillMaxWidth()) {
-                        Column {
-                            var bmp by remember(fileId, index) { mutableStateOf<Bitmap?>(pageCache[index]) }
-                            LaunchedEffect(fileId, index) {
-                                if (bmp == null) {
-                                    val r = renderer ?: return@LaunchedEffect
-                                    val rendered: Bitmap? = try {
-                                        synchronized(renderLock) {
-                                            r.openPage(index).use { page ->
-                                                val b = PdfSafe.renderPage(page) ?: return@use null
-                                                val deg = com.hamyareman.ir.platform.feature.study.PdfRotations.degrees[fileId] ?: 0
-                                                PdfSafe.rotate(b, deg)
-                                            }
-                                        }
-                                    } catch (oom: OutOfMemoryError) {
-                                        runCatching { System.gc() }
-                                        null
-                                    } catch (e: Exception) { null }
-                                    if (rendered != null) {
-                                        synchronized(pageCache) { pageCache[index] = rendered }
-                                        bmp = rendered
-                                    }
-                                }
-                            }
-                            if (bmp == null) {
-                                Box(Modifier.fillMaxWidth().height(320.dp), contentAlignment = Alignment.Center) {
-                                    CircularProgressIndicator(Modifier.padding(16.dp))
-                                }
-                            } else {
-                                ZoomablePdfPage(
-                                    bitmap = bmp!!,
-                                    modifier = Modifier.fillMaxWidth().height(480.dp),
-                                    onZoomed = {},
-                                )
-                            }
-                            Text(
-                                "صفحه ${index + 1} از ${st.pageCount}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(8.dp),
-                            )
-                        }
-                    }
+            is PdfState.Ready -> {
+                val p = pack
+                if (p != null) {
+                    TeachPdfPages(modifier = Modifier.weight(1f).fillMaxSize(), fileId = fileId, pack = p)
+                } else {
+                    Text("کتاب پیدا نشد.", modifier = Modifier.padding(16.dp))
                 }
             }
             PdfState.Idle -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

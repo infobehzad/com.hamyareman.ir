@@ -34,8 +34,8 @@ jobs:
           src=$(echo apps/hamyar-app/build/outputs/apk/**/*.apk | awk '{print $1}')
           test -n "$src" && test -f "$src"
           mkdir -p dist
-          cp -f "$src" dist/hamyar-1.80.apk
-          ls -l dist/hamyar-1.80.apk
+          cp -f "$src" dist/hamyar-1.82.apk
+          ls -l dist/hamyar-1.82.apk
       - name: انتشارِ APK روی Release (ci-apk)
         if: success()
         env:
@@ -49,7 +49,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: hamyar-1.80-debug
-          path: dist/hamyar-1.80.apk
+          name: hamyar-1.82-debug
+          path: dist/hamyar-1.82.apk
           if-no-files-found: error
           retention-days: 3
