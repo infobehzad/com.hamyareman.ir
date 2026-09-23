@@ -85,15 +85,21 @@ object BillingStatus {
     fun effective(raw: String?, endMs: Long = 0L): String =
         if (isPaid(raw, endMs)) norm(raw) else FREE
 
-    fun chipFa(raw: String?, endMs: Long = 0L): String = when (effective(raw, endMs)) {
-        YEARLY, "paid", "premium" -> "اشتراک سالانه"
-        MONTHLY -> "اشتراک ماهانه"
-        INSTALLMENT -> "اقساط سالانه"
-        PENDING -> "انتظار تأیید پرداخت"
-        REFUND_PENDING -> "انتظار بازگشت وجه"
-        REFUNDED -> "بازگشت وجه انجام شد"
-        REJECTED -> "پرداخت تأیید نشد"
-        else -> "مهمان همیار من"
+    fun chipFa(raw: String?, endMs: Long = 0L): String {
+        val n = norm(raw)
+        if (isExpired(endMs) && n in setOf(YEARLY, MONTHLY, INSTALLMENT, "paid", "premium", REFUND_PENDING)) {
+            return "مهمان همیار من"
+        }
+        return when (n) {
+            YEARLY, "paid", "premium" -> "اشتراک سالانه"
+            MONTHLY -> "اشتراک ماهانه"
+            INSTALLMENT -> "اقساط سالانه"
+            PENDING -> "انتظار تأیید پرداخت"
+            REFUND_PENDING -> "انتظار بازگشت وجه"
+            REFUNDED -> "بازگشت وجه انجام شد"
+            REJECTED -> "پرداخت تأیید نشد"
+            else -> "مهمان همیار من"
+        }
     }
 
     fun monthlyEndMs(fromMs: Long = System.currentTimeMillis()): Long =
