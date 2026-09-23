@@ -238,7 +238,7 @@ fun SubscriptionScreen(onBack: () -> Unit) {
                                 Text(
                                     if (BillingConfig.cardReady()) BillingConfig.CARD_NUMBER else "شماره کارت از پشتیبانی اعلام می‌شود",
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 18.sp,
+                                    style = HamyarType.h2,
                                 )
                             }
                             OutlinedButton(

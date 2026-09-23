@@ -37,8 +37,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.hamyareman.ir.platform.core.common.toPersianDigits
+import com.hamyareman.ir.ui.home.HamyarType
 import com.hamyareman.ir.platform.core.designsystem.BrandTheme
 import com.hamyareman.ir.platform.core.designsystem.ThemeGender
 import com.hamyareman.ir.platform.core.designsystem.themeGender
@@ -189,7 +189,7 @@ private fun ThemeGroup(brands: List<BrandTheme>, prefs: UiPrefs, onPreview: (Bra
                     Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f)) {
                         Text(brand.label, style = MaterialTheme.typography.titleMedium)
-                        if (selected) Text("انتخاب‌شده ✓", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
+                        if (selected) Text("انتخاب‌شده ✓", style = HamyarType.caption, color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -210,6 +210,6 @@ private fun FontRow(title: String, downloaded: Boolean, selected: Boolean, onSel
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(title, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-        if (selected) Text("✓", color = MaterialTheme.colorScheme.primary, fontSize = 18.sp)
+        if (selected) Text("✓", color = MaterialTheme.colorScheme.primary, style = HamyarType.h2)
     }
 }

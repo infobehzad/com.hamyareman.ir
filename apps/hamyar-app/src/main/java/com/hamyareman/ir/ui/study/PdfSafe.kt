@@ -7,8 +7,11 @@ import android.graphics.pdf.PdfRenderer
 import android.content.Context
 
 /**
- * رندر امن صفحهٔ PDF — سقفِ پیکسل تا گوشی‌های ضعیف با زوم قفل/کرش نکنند.
- * خطای حافظه یا رندر، null برمی‌گرداند نه استثنا.
+ * رندر امن صفحهٔ PDF.
+ *
+ * PdfRenderer فقط ARGB_8888 می‌پذیرد؛ بلافاصله به RGB_565 جمع می‌شود
+ * (صفحات کتاب آلفا لازم ندارند — نصف حافظه). OOM → بدون System.gc،
+ * یک‌بار با نصف سقف دوباره امتحان، وگرنه null.
  */
 internal object PdfSafe {
 
@@ -16,6 +19,12 @@ internal object PdfSafe {
     const val MAX_H = 1400
 
     fun renderPage(page: PdfRenderer.Page, maxW: Int = MAX_W, maxH: Int = MAX_H): Bitmap? {
+        return renderOnce(page, maxW, maxH)
+            ?: renderOnce(page, (maxW / 2).coerceAtLeast(320), (maxH / 2).coerceAtLeast(480))
+    }
+
+    private fun renderOnce(page: PdfRenderer.Page, maxW: Int, maxH: Int): Bitmap? {
+        var argb: Bitmap? = null
         return try {
             val pw = page.width.coerceAtLeast(1)
             val ph = page.height.coerceAtLeast(1)
@@ -27,7 +36,6 @@ internal object PdfSafe {
                 w = (pw * scale).toInt().coerceIn(1, maxW)
                 h = maxH
             }
-            // سقف مطلق پیکسل (حدود ۱۶ مگاپیکسل) تا GPU/OOM نترکاند.
             val px = w.toLong() * h.toLong()
             if (px > 16L * 1024L * 1024L) {
                 val f = kotlin.math.sqrt((12L * 1024L * 1024L).toDouble() / px.toDouble()).toFloat()
@@ -35,15 +43,31 @@ internal object PdfSafe {
                 h = (h * f).toInt().coerceAtLeast(1)
                 scale = w.toFloat() / pw.toFloat()
             }
-            val b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-            b.eraseColor(Color.WHITE)
+            val created = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+            argb = created
+            created.eraseColor(Color.WHITE)
             val m = android.graphics.Matrix().apply { setScale(scale, scale) }
-            page.render(b, null, m, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-            b
-        } catch (oom: OutOfMemoryError) {
-            runCatching { System.gc() }
+            page.render(created, null, m, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+            val rgb = try {
+                created.copy(Bitmap.Config.RGB_565, false)
+            } catch (_: OutOfMemoryError) {
+                null
+            } catch (_: Throwable) {
+                null
+            }
+            if (rgb != null) {
+                if (!created.isRecycled) created.recycle()
+                argb = null
+                rgb
+            } else {
+                argb = null
+                created
+            }
+        } catch (_: OutOfMemoryError) {
+            if (argb != null && !argb.isRecycled) argb.recycle()
             null
-        } catch (t: Throwable) {
+        } catch (_: Throwable) {
+            if (argb != null && !argb.isRecycled) argb.recycle()
             null
         }
     }
@@ -52,8 +76,21 @@ internal object PdfSafe {
         if (deg % 360 == 0) return src
         return try {
             val m = android.graphics.Matrix().apply { postRotate(deg.toFloat()) }
-            Bitmap.createBitmap(src, 0, 0, src.width, src.height, m, true)
-        } catch (t: Throwable) {
+            val out = Bitmap.createBitmap(src, 0, 0, src.width, src.height, m, true)
+            if (out === src) return src
+            val compact = if (out.config != Bitmap.Config.RGB_565) {
+                try {
+                    out.copy(Bitmap.Config.RGB_565, false)
+                } catch (_: Throwable) {
+                    null
+                }
+            } else {
+                out
+            }
+            if (compact != null && compact !== out && !out.isRecycled) out.recycle()
+            if (!src.isRecycled) src.recycle()
+            compact ?: out
+        } catch (_: Throwable) {
             src
         }
     }

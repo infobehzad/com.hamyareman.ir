@@ -1292,15 +1292,9 @@ private fun InternalPdfViewer(file: File, modifier: Modifier = Modifier) {
                 val count = renderer.pageCount.coerceAtMost(40)
                 for (i in 0 until count) {
                     val page = renderer.openPage(i)
-                    val scale = 900f / page.width.coerceAtLeast(1)
-                    val bmp = Bitmap.createBitmap(
-                        (page.width * scale).toInt().coerceAtLeast(1),
-                        (page.height * scale).toInt().coerceAtLeast(1),
-                        Bitmap.Config.ARGB_8888,
-                    )
-                    page.render(bmp, null, null, android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-                    out += bmp
+                    val bmp = PdfSafe.renderPage(page, maxW = 900, maxH = 1400)
                     page.close()
+                    if (bmp != null) out += bmp
                 }
             }
             runCatching { renderer.close() }

@@ -219,7 +219,11 @@ class MainActivity : FragmentActivity() {
                 PlatformTheme(
                     brand = uiPrefs.theme,
                     darkTheme = uiPrefs.darkTheme,
-                    fontFamily = FontLibrary.fontFamilyFor(activity, uiPrefs.fontKey),
+                    fontFamily = if (uiPrefs.fontKey.isBlank()) {
+                        com.hamyareman.ir.ui.home.DashboardFonts.content
+                    } else {
+                        FontLibrary.fontFamilyFor(activity, uiPrefs.fontKey)
+                    },
                     textSizeOffset = uiPrefs.textSizeOffset,
                 ) {
                 CompositionLocalProvider(LocalAppContainer provides container) {

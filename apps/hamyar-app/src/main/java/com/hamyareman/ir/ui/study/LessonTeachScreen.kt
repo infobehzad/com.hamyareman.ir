@@ -799,14 +799,38 @@ private fun openTeachPdf(ctx: android.content.Context, fileId: String, onProgres
     return PdfRenderer(fd)
 }
 
-/** کش LRU صفحه‌های PDF (~۴ صفحهٔ نزدیک) تا اسکرول سبک بماند. */
+/** کش LRU صفحه‌های PDF (~۴ صفحهٔ نزدیک). بیت‌مپِ بیرون‌رفته recycle می‌شود. */
 private class TeachPageCache(private val maxPages: Int = 4) {
     private val map = LinkedHashMap<Int, Bitmap>(16, 0.75f, true)
-    operator fun get(index: Int): Bitmap? = synchronized(this) { map[index] }
+
+    operator fun get(index: Int): Bitmap? = synchronized(this) {
+        val b = map[index] ?: return null
+        if (b.isRecycled) {
+            map.remove(index)
+            null
+        } else b
+    }
+
     operator fun set(index: Int, value: Bitmap) {
         synchronized(this) {
-            map[index] = value
-            while (map.size > maxPages) map.remove(map.keys.first())
+            val old = map.put(index, value)
+            if (old != null && old !== value && !old.isRecycled) old.recycle()
+            while (map.size > maxPages) {
+                val k = map.keys.first()
+                val evicted = map.remove(k)
+                if (evicted != null && evicted !== value && !evicted.isRecycled) evicted.recycle()
+            }
+        }
+    }
+
+    fun evictAll(keep: Bitmap? = null) {
+        synchronized(this) {
+            val it = map.entries.iterator()
+            while (it.hasNext()) {
+                val b = it.next().value
+                if (b !== keep && !b.isRecycled) b.recycle()
+                it.remove()
+            }
         }
     }
 }
@@ -831,6 +855,7 @@ internal fun TeachPdfPages(
 
     DisposableEffect(fileId) {
         onDispose {
+            pageCache.evictAll()
             synchronized(renderLock) {
                 runCatching { renderer?.close() }
                 renderer = null
@@ -912,28 +937,36 @@ internal fun TeachPdfPages(
             Spacer(Modifier.height(6.dp))
             var bmp by remember(fileId, index) { mutableStateOf<Bitmap?>(pageCache[index]) }
             LaunchedEffect(fileId, index) {
-                if (bmp == null) {
-                    val rendered: Bitmap? = withContext(Dispatchers.IO) {
-                        try {
-                            synchronized(renderLock) {
-                                val r = renderer ?: return@synchronized null
-                                r.openPage(index).use { page ->
-                                    val b = PdfSafe.renderPage(page, maxW = screenW) ?: return@use null
-                                    val deg = com.hamyareman.ir.platform.feature.study.PdfRotations.degrees[fileId] ?: 0
-                                    PdfSafe.rotate(b, deg)
-                                }
+                val current = bmp
+                if (current != null && !current.isRecycled) return@LaunchedEffect
+                val rendered: Bitmap? = withContext(Dispatchers.IO) {
+                    fun once(maxW: Int): Bitmap? {
+                        val raw = synchronized(renderLock) {
+                            val r = renderer ?: return@synchronized null
+                            r.openPage(index).use { page ->
+                                PdfSafe.renderPage(page, maxW = maxW)
                             }
-                        } catch (oom: OutOfMemoryError) {
-                            runCatching { System.gc() }
-                            null
-                        } catch (e: Exception) { null }
+                        } ?: return null
+                        val deg = com.hamyareman.ir.platform.feature.study.PdfRotations.degrees[fileId] ?: 0
+                        return PdfSafe.rotate(raw, deg)
                     }
-                    if (rendered != null) {
-                        synchronized(pageCache) { pageCache[index] = rendered }
-                        bmp = rendered
-                        if (seenPages.add(index)) {
-                            StudyActivity.add(ctx, pack.packId, "pdf", "مشاهده صفحه ${index + 1} کتاب درسی")
+                    try {
+                        once(screenW) ?: run {
+                            pageCache.evictAll()
+                            once((screenW / 2).coerceAtLeast(320))
                         }
+                    } catch (_: OutOfMemoryError) {
+                        pageCache.evictAll()
+                        runCatching { once((screenW / 2).coerceAtLeast(320)) }.getOrNull()
+                    } catch (_: Exception) {
+                        null
+                    }
+                }
+                if (rendered != null) {
+                    pageCache[index] = rendered
+                    bmp = rendered
+                    if (seenPages.add(index)) {
+                        StudyActivity.add(ctx, pack.packId, "pdf", "مشاهده صفحه ${index + 1} کتاب درسی")
                     }
                 }
             }
