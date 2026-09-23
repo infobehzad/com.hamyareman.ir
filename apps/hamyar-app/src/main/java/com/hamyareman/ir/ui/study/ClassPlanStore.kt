@@ -661,6 +661,26 @@ object ClassPlanStore {
         return if (now.hour < 4) today else today.plusDays(1)
     }
 
+    /**
+     * روزی که کارت داشبورد باید نشان بدهد:
+     *  - تا وقتی ساعت خروج (یا پایان کلاس مجازی) نرسیده، **امروز**؛
+     *  - بعد از آن، نخستین روز مدرسه‌ی بعد.
+     * باگ قبلی: بعد از ساعت ۴ صبح همیشه «فردا» بود و پنجشنبه/جمعه به شنبه می‌پرید
+     * در حالی که تاریخِ روی کارت هنوز امروز بود.
+     */
+    fun dashboardShowDate(
+        snap: Snapshot,
+        now: LocalDateTime = LocalDateTime.now(JalaliDate.TEHRAN),
+        virtualEndMin: Int? = null,
+    ): LocalDate {
+        val today = now.toLocalDate()
+        if (isSchoolHoliday(snap, today)) return firstSchoolDay(snap, today.plusDays(1))
+        val shift = shiftOf(snap, today)
+        val gate = virtualEndMin ?: minutesOf(exitOf(snap, shift))
+        val nowMin = now.hour * 60 + now.minute
+        return if (nowMin < gate) today else firstSchoolDay(snap, today.plusDays(1))
+    }
+
     /** برچسب کاملِ روز مقصد همراه با شیفت: «امروز صبح» / «فردا ظهر». */
     fun dayLabelFor(date: LocalDate, today: LocalDate, shift: Shift): String =
         "${dayWordFor(date, today)} ${if (shift == Shift.MORNING) "صبح" else "ظهر"}"

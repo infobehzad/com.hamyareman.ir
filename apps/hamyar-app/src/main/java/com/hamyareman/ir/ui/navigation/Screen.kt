@@ -130,7 +130,11 @@ sealed class Screen(val route: String) {
     data object GeneralToolkit : Screen("toolkit-general")
     data object ChemistryLab : Screen("lab-chemistry")
     data object PhysicsLab : Screen("lab-physics")
+    data object BiologyLab : Screen("lab-biology")
     data object MathToolkit : Screen("toolkit-math")
+    data object ToolHtml : Screen("tool/{toolId}") {
+        fun of(toolId: String) = "tool/${Uri.encode(toolId)}"
+    }
 }
 
 data class Tab(val route: String, val icon: ImageVector, val label: String)

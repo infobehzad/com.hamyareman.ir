@@ -1,0 +1,2564 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>همیار من | Hamyar e Man — آزمایشگاه شیمی پایه نهم</title>
+<style>
+  :root {
+    --bg-main: #050912;
+    --sidebar-bg: #0a1220;
+    --card-bg: rgba(18, 28, 48, 0.92);
+    --card-bg-hover: rgba(24, 36, 60, 0.95);
+    --border-ui: rgba(56, 189, 248, 0.22);
+    --border-ui-strong: rgba(56, 189, 248, 0.45);
+    --accent-cyan: #00f5d4;
+    --accent-blue: #38bdf8;
+    --accent-gold: #facc15;
+    --accent-rose: #f43f5e;
+    --accent-emerald: #10b981;
+    --accent-violet: #a78bfa;
+    --text-pure: #f8fafc;
+    --text-dim: #94a3b8;
+    --text-faint: #64748b;
+    --glow-cyan: 0 0 20px rgba(0, 245, 212, 0.35);
+    --glow-blue: 0 0 20px rgba(56, 189, 248, 0.35);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, 'Vazirmatn', sans-serif; -webkit-tap-highlight-color: transparent; }
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-pure);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(56, 189, 248, 0.06), transparent 55%),
+      radial-gradient(ellipse at 80% 100%, rgba(0, 245, 212, 0.05), transparent 55%);
+  }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+  ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #38bdf8, #0284c7); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #00f5d4; }
+
+  header {
+    background: linear-gradient(180deg, #0b1526 0%, #08101c 100%);
+    border-bottom: 1px solid var(--border-ui);
+    min-height: 60px; padding: 8px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 100; box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    position: relative;
+    flex-wrap: wrap; gap: 10px;
+  }
+  header::after {
+    content: ""; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--accent-blue), transparent);
+    opacity: 0.5;
+    animation: headerGlow 4s ease-in-out infinite;
+  }
+  @keyframes headerGlow { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
+  .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; font-size: 1.02rem; color: var(--accent-cyan); text-shadow: 0 0 14px rgba(0, 245, 212, 0.5); letter-spacing: -0.3px; }
+  .brand .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
+  .brand .brand-text small { font-size: 0.66rem; color: var(--accent-blue); font-weight: 600; opacity: 0.85; letter-spacing: 0; }
+  .brand .hamyar-tag {
+    background: linear-gradient(135deg, var(--accent-cyan), #0369a1);
+    color: #030712; font-size: 0.6rem; padding: 3px 9px; border-radius: 6px;
+    font-weight: 800; letter-spacing: 0.5px;
+    animation: tagPulse 2.6s ease-in-out infinite;
+    margin-inline-start: 8px;
+  }
+  @keyframes tagPulse { 0%, 100% { box-shadow: 0 0 0 rgba(0,245,212,0); } 50% { box-shadow: 0 0 18px rgba(0,245,212,0.65); } }
+  .brand svg { filter: drop-shadow(0 0 8px rgba(0, 245, 212, 0.7)); animation: pulse-glow 3s ease-in-out infinite; flex-shrink: 0; }
+  @keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 6px rgba(0, 245, 212, 0.5)); } 50% { filter: drop-shadow(0 0 14px rgba(0, 245, 212, 0.9)); } }
+  .header-info { display: flex; align-items: center; gap: 10px; }
+  .nav-status-badge { background: linear-gradient(135deg, rgba(56, 189, 248, 0.14), rgba(0, 245, 212, 0.1)); border: 1px solid var(--border-ui-strong); padding: 5px 16px; border-radius: 20px; font-size: 0.78rem; color: var(--accent-blue); font-weight: 700; box-shadow: inset 0 0 12px rgba(56, 189, 248, 0.12); transition: all 0.3s; }
+  .top-icon-btn { width: 34px; height: 34px; border-radius: 10px; background: rgba(56, 189, 248, 0.08); border: 1px solid var(--border-ui); color: var(--accent-blue); cursor: pointer; display: grid; place-items: center; transition: all 0.2s; font-size: 0.95rem; }
+  .top-icon-btn:hover { background: rgba(56, 189, 248, 0.18); box-shadow: var(--glow-blue); transform: translateY(-1px); }
+
+  .workspace { display: flex; flex: 1; height: calc(100vh - 60px); overflow: hidden; }
+  .sidebar-nav { width: 300px; background: var(--sidebar-bg); border-left: 1px solid var(--border-ui); display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; }
+  .nav-header { padding: 14px 18px; font-size: 0.82rem; font-weight: 800; color: var(--accent-cyan); border-bottom: 1px solid rgba(255,255,255,0.06); background: linear-gradient(180deg, rgba(0, 245, 212, 0.06), transparent); display: flex; flex-direction: column; gap: 4px; }
+  .nav-header .nav-desc { font-size: 0.66rem; color: var(--text-dim); font-weight: 500; line-height: 1.5; }
+
+  .chapter-group { border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .chapter-accordion { display: block; }
+  .chapter-accordion > summary {
+    list-style: none; cursor: pointer; outline: none;
+    padding: 11px 18px; font-size: 0.79rem; font-weight: 800;
+    color: var(--accent-blue);
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(56, 189, 248, 0.05);
+    position: relative;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+  }
+  .chapter-accordion > summary::-webkit-details-marker { display: none; }
+  .chapter-accordion > summary::marker { content: ''; }
+  .chapter-accordion > summary::before {
+    content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 3px;
+    background: linear-gradient(180deg, var(--accent-cyan), transparent);
+    transition: all 0.3s;
+  }
+  .chapter-accordion > summary:hover { background: rgba(56, 189, 248, 0.1); padding-right: 22px; }
+  .chapter-accordion[open] > summary {
+    background: linear-gradient(90deg, transparent, rgba(0, 245, 212, 0.10));
+    color: var(--accent-cyan);
+    box-shadow: inset -20px 0 30px -20px rgba(0, 245, 212, 0.4);
+  }
+  .chapter-accordion[open] > summary::before { background: linear-gradient(180deg, var(--accent-cyan), var(--accent-blue), transparent); width: 3px; }
+  .chapter-accordion > summary .chapter-label { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+  .chapter-accordion > summary .chapter-label .chev-icon {
+    font-size: 0.7rem; color: var(--text-dim);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0; display: inline-block; width: 12px; text-align: center;
+  }
+  .chapter-accordion[open] > summary .chapter-label .chev-icon { transform: rotate(-90deg); color: var(--accent-cyan); }
+  .chapter-accordion > summary .chapter-label .chapter-name { text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+  .chapter-accordion > summary .chapter-count {
+    color: var(--accent-cyan); font-weight: 700; font-size: 0.68rem;
+    background: rgba(0, 245, 212, 0.1);
+    padding: 2px 8px; border-radius: 10px;
+    border: 1px solid rgba(0, 245, 212, 0.25);
+    flex-shrink: 0; transition: all 0.25s;
+  }
+  .chapter-accordion[open] > summary .chapter-count { background: rgba(0, 245, 212, 0.2); border-color: var(--accent-cyan); }
+  .chapter-accordion[open] .exp-list { animation: listOpen 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  @keyframes listOpen { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .exp-list { list-style: none; padding: 4px 0; }
+  .exp-item { padding: 9px 22px 9px 18px; font-size: 0.75rem; color: var(--text-dim); cursor: pointer; border-right: 3px solid transparent; transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
+  .exp-item:hover { background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.08)); color: #e2e8f0; padding-right: 26px; }
+  .exp-item.active { background: linear-gradient(90deg, transparent, rgba(0, 245, 212, 0.12)); color: var(--accent-cyan); border-right-color: var(--accent-cyan); font-weight: 700; box-shadow: inset -20px 0 30px -20px rgba(0, 245, 212, 0.4); }
+  .exp-item.active::before { content: ""; position: absolute; right: -3px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; border-radius: 50%; background: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-cyan); animation: dot-pulse 1.6s ease-in-out infinite; }
+  @keyframes dot-pulse { 0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); } 50% { opacity: 0.5; transform: translateY(-50%) scale(0.85); } }
+
+  .stage-view { flex: 1; display: flex; flex-direction: column; position: relative; background: radial-gradient(ellipse at 50% 60%, rgba(30, 58, 100, 0.5) 0%, #050912 80%); border-left: 1px solid var(--border-ui); min-width: 0; }
+  .stage-bar { padding: 9px 20px; background: rgba(0,0,0,0.55); border-bottom: 1px solid var(--border-ui); display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; backdrop-filter: blur(6px); flex-wrap: wrap; gap: 8px; }
+  .stage-bar .status-text { color: var(--text-dim); display: flex; align-items: center; gap: 8px; }
+  .stage-bar .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-emerald); box-shadow: 0 0 8px var(--accent-emerald); animation: dot-pulse-simple 1.6s ease-in-out infinite; }
+  @keyframes dot-pulse-simple { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
+  .stage-bar .telemetry { color: var(--accent-cyan); font-family: 'Courier New', monospace; direction: ltr; font-size: 0.76rem; background: rgba(0, 245, 212, 0.08); padding: 3px 12px; border-radius: 6px; border: 1px solid rgba(0, 245, 212, 0.2); font-weight: 700; }
+
+  .desc-banner {
+    margin: 8px 12px 0; padding: 10px 16px;
+    background: linear-gradient(135deg, rgba(0,245,212,0.10), rgba(56,189,248,0.06));
+    border: 1px solid var(--border-ui-strong);
+    border-radius: 12px; font-size: 0.78rem; color: var(--text-pure);
+    line-height: 1.7; display: flex; align-items: flex-start; gap: 10px;
+    position: relative; overflow: hidden;
+    animation: bannerSlideIn 0.55s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes bannerSlideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  .desc-banner::before {
+    content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    animation: bannerShine 4.5s ease-in-out infinite;
+  }
+  @keyframes bannerShine { 0% { left: -60%; } 60%, 100% { left: 130%; } }
+  .desc-banner .db-icon { font-size: 1.1rem; flex-shrink: 0; animation: iconFloat 2.8s ease-in-out infinite; }
+  @keyframes iconFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+  .desc-banner .db-body strong { color: var(--accent-cyan); }
+  .desc-banner .db-body .db-eq {
+    display: inline-block; background: #0e1014; color: #7dd3fc;
+    padding: 2px 8px; border-radius: 5px;
+    font-family: 'Courier New', monospace; direction: ltr; font-size: 0.72rem;
+    margin-top: 5px; animation: eqPulse 3s ease-in-out infinite;
+  }
+  @keyframes eqPulse { 0%, 100% { box-shadow: 0 0 0 rgba(56,189,248,0); } 50% { box-shadow: 0 0 12px rgba(56,189,248,0.35); } }
+
+  .svg-canvas-container { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; padding: 12px; min-height: 0; }
+  svg#simCanvas { width: 100%; height: 100%; max-height: 100%; filter: drop-shadow(0 8px 40px rgba(0, 245, 212, 0.08)); }
+
+  .stage-toolbar { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; background: rgba(10, 18, 32, 0.9); border: 1px solid var(--border-ui-strong); border-radius: 14px; padding: 8px 12px; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0,0,0,0.6); z-index: 10; }
+  .stage-toolbar .speed-group { display: flex; align-items: center; gap: 8px; padding: 0 10px; border-inline-end: 1px solid var(--border-ui); }
+  .stage-toolbar .speed-group label { font-size: 0.72rem; color: var(--text-dim); }
+  .stage-toolbar input[type="range"] { width: 90px; height: 5px; background: #1c2a47; }
+  .stage-toolbar .speed-val { color: var(--accent-cyan); font-family: monospace; font-size: 0.75rem; font-weight: 700; min-width: 32px; }
+  .tool-btn { width: 34px; height: 34px; border-radius: 9px; background: rgba(56, 189, 248, 0.1); border: 1px solid var(--border-ui); color: var(--accent-blue); cursor: pointer; display: grid; place-items: center; transition: all 0.2s; font-size: 0.9rem; }
+  .tool-btn:hover { background: rgba(56, 189, 248, 0.22); box-shadow: var(--glow-blue); transform: translateY(-2px); }
+
+  .results-overlay { position: absolute; inset: 0; background: rgba(5,9,18,0.78); display: none; align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(6px); padding: 20px; }
+  .results-overlay.show { display: flex; animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .results-card { background: linear-gradient(135deg, rgba(18,28,48,0.98), rgba(10,18,32,0.98)); border: 1px solid var(--accent-cyan); border-radius: 18px; padding: 24px 30px; min-width: 340px; max-width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(0,245,212,0.25), inset 0 1px 0 rgba(255,255,255,0.06); position: relative; animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes popIn { from { transform: scale(0.88); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .results-card::before { content: ""; position: absolute; top: 0; left: 20%; right: 20%; height: 1px; background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent); }
+  .results-card h2 { font-size: 1rem; color: var(--accent-cyan); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .results-card .subtitle { font-size: 0.72rem; color: var(--text-dim); margin-bottom: 16px; }
+  .result-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed rgba(56,189,248,0.15); font-size: 0.82rem; gap: 12px; }
+  .result-row .rlabel { color: var(--text-dim); }
+  .result-row .rvalue { color: var(--accent-cyan); font-weight: 800; font-family: 'Courier New', monospace; direction: ltr; text-align: left; }
+  .result-row .rvalue.gold { color: var(--accent-gold); }
+  .results-actions { display: flex; gap: 8px; margin-top: 18px; }
+
+  .control-sidebar { width: 420px; background: var(--sidebar-bg); display: flex; flex-direction: column; overflow-y: auto; padding: 14px; gap: 12px; flex-shrink: 0; }
+  .panel-box { background: var(--card-bg); border: 1px solid var(--border-ui); border-radius: 12px; padding: 14px; transition: all 0.3s; position: relative; overflow: hidden; height: auto; }
+  .panel-box::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(0, 245, 212, 0.4), transparent); opacity: 0.6; }
+  .panel-box:hover { border-color: var(--border-ui-strong); background: var(--card-bg-hover); }
+  .panel-box h3 { font-size: 0.83rem; color: var(--accent-cyan); margin-bottom: 11px; display: flex; align-items: center; gap: 7px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 7px; font-weight: 800; }
+  .panel-box h3 .h3-desc { font-size: 0.62rem; color: var(--text-dim); font-weight: 500; margin-right: auto; margin-left: 0; opacity: 0.85; }
+
+  .control-row { margin-bottom: 11px; display: flex; flex-direction: column; gap: 5px; }
+  .control-row label { font-size: 0.73rem; color: var(--text-dim); display: flex; justify-content: space-between; font-weight: 600; }
+  .control-row span.val { color: var(--accent-cyan); font-weight: 800; direction: ltr; font-family: 'Courier New', monospace; font-size: 0.75rem; }
+  select { background: #0d1729; color: var(--accent-cyan); border: 1px solid var(--border-ui); padding: 9px 10px; border-radius: 8px; font-size: 0.79rem; outline: none; width: 100%; cursor: pointer; transition: all 0.2s; font-weight: 600; }
+  select:hover, select:focus { border-color: var(--accent-cyan); box-shadow: 0 0 0 3px rgba(0, 245, 212, 0.1); }
+  select option { background: #0d1729; color: #e2e8f0; }
+  input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; background: linear-gradient(90deg, #1c2a47, #0f1a30); border-radius: 4px; outline: none; cursor: pointer; }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #7dd3fc, #0284c7); cursor: pointer; box-shadow: 0 0 10px rgba(56, 189, 248, 0.8), 0 2px 6px rgba(0,0,0,0.5); border: 2px solid #0a1220; }
+  input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #7dd3fc, #0284c7); cursor: pointer; box-shadow: 0 0 10px rgba(56, 189, 248, 0.8); border: 2px solid #0a1220; }
+  .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  button.btn { padding: 10px 12px; border-radius: 9px; font-size: 0.78rem; font-weight: 800; cursor: pointer; border: 1px solid transparent; transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; gap: 6px; position: relative; overflow: hidden; font-family: inherit; }
+  button.btn:active { transform: scale(0.97); }
+  .btn-run { background: linear-gradient(135deg, #0369a1, #00f5d4); color: #030712; box-shadow: 0 4px 16px rgba(0, 245, 212, 0.35); }
+  .btn-run:hover { box-shadow: 0 6px 24px rgba(0, 245, 212, 0.6); transform: translateY(-2px); }
+  .btn-run:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-danger { background: linear-gradient(135deg, #7f1d1d, #b91c1c); border-color: var(--accent-rose); color: #fee2e2; box-shadow: 0 4px 16px rgba(244, 63, 94, 0.25); }
+  .btn-danger:hover { box-shadow: 0 6px 24px rgba(244, 63, 94, 0.5); transform: translateY(-2px); }
+  .btn-record { background: linear-gradient(135deg, #b45309, #f59e0b); color: #fff; grid-column: span 2; box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35); }
+  .btn-record:hover { box-shadow: 0 6px 24px rgba(245, 158, 11, 0.6); transform: translateY(-2px); }
+
+  canvas#rtChart { width: 100%; height: 140px; background: #040810; border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.15); display: block; box-shadow: inset 0 0 30px rgba(0, 245, 212, 0.05); }
+  .table-box { max-height: 160px; overflow-y: auto; border: 1px solid var(--border-ui); border-radius: 7px; background: rgba(0,0,0,0.2); }
+  table.lab-table { width: 100%; border-collapse: collapse; font-size: 0.68rem; text-align: center; }
+  table.lab-table th { background: linear-gradient(180deg, #0f1d33, #0a1424); color: var(--accent-cyan); padding: 7px 5px; position: sticky; top: 0; font-weight: 800; font-size: 0.66rem; border-bottom: 1px solid var(--border-ui); }
+  table.lab-table td { padding: 5px 4px; border-bottom: 1px solid rgba(255,255,255,0.04); color: #cbd5e1; font-family: 'Courier New', monospace; }
+  table.lab-table tbody tr:hover { background: rgba(56, 189, 248, 0.06); }
+  .chem-eq { background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(0, 245, 212, 0.05)); border-right: 3px solid var(--accent-blue); padding: 8px 12px; margin: 8px 0 0; direction: ltr; text-align: center; font-family: 'Courier New', monospace; font-size: 0.78rem; color: #7dd3fc; border-radius: 0 6px 6px 0; font-weight: 700; animation: eqPulse 3s ease-in-out infinite; }
+
+  .guide-overlay { position: fixed; inset: 0; background: rgba(3,7,15,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(10px); animation: fadeIn 0.4s ease; padding: 20px; }
+  .guide-overlay.hidden { display: none; }
+  .guide-card { background: linear-gradient(135deg, rgba(18,28,48,0.98), rgba(10,18,32,0.98)); border: 1px solid var(--accent-cyan); border-radius: 20px; padding: 26px 30px; max-width: 560px; width: 100%; box-shadow: 0 30px 90px rgba(0,245,212,0.3), inset 0 1px 0 rgba(255,255,255,0.06); position: relative; animation: guidePop 0.5s cubic-bezier(0.34,1.56,0.64,1); max-height: 90vh; overflow-y: auto; }
+  @keyframes guidePop { from { transform: scale(0.9) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+  .guide-card::before { content: ""; position: absolute; top: 0; left: 15%; right: 15%; height: 2px; background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--accent-blue), transparent); animation: headerGlow 3s ease-in-out infinite; }
+  .guide-card h2 { color: var(--accent-cyan); font-size: 1.15rem; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+  .guide-card h2 .hamyar-badge { background: linear-gradient(135deg, var(--accent-cyan), #0369a1); color: #030712; font-size: 0.65rem; padding: 3px 10px; border-radius: 6px; font-weight: 800; letter-spacing: 0.5px; animation: tagPulse 2.6s ease-in-out infinite; }
+  .guide-card .guide-sub { color: var(--text-dim); font-size: 0.78rem; margin-bottom: 18px; }
+  .guide-steps { display: flex; flex-direction: column; gap: 10px; }
+  .guide-step { display: flex; gap: 12px; align-items: flex-start; padding: 11px 14px; background: rgba(56,189,248,0.05); border: 1px solid var(--border-ui); border-radius: 10px; animation: stepIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .guide-step:nth-child(1) { animation-delay: 0.10s; }
+  .guide-step:nth-child(2) { animation-delay: 0.20s; }
+  .guide-step:nth-child(3) { animation-delay: 0.30s; }
+  .guide-step:nth-child(4) { animation-delay: 0.40s; }
+  .guide-step:nth-child(5) { animation-delay: 0.50s; }
+  .guide-step:nth-child(6) { animation-delay: 0.60s; }
+  @keyframes stepIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  .guide-step .gs-num { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-cyan), #0369a1); color: #030712; font-weight: 800; font-size: 0.75rem; display: grid; place-items: center; flex-shrink: 0; box-shadow: 0 0 12px rgba(0,245,212,0.4); animation: numPop 1.8s ease-in-out infinite; }
+  @keyframes numPop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+  .guide-step .gs-body { font-size: 0.78rem; color: var(--text-pure); line-height: 1.7; }
+  .guide-step .gs-body strong { color: var(--accent-cyan); }
+  .guide-step .gs-body .gs-hint { display: block; font-size: 0.7rem; color: var(--text-dim); margin-top: 3px; }
+  .guide-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-start; }
+  .guide-actions button { padding: 11px 22px; border-radius: 10px; font-weight: 800; font-size: 0.82rem; cursor: pointer; border: none; transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1); font-family: inherit; }
+  .guide-actions .primary { background: linear-gradient(135deg, #0369a1, #00f5d4); color: #030712; box-shadow: 0 6px 20px rgba(0,245,212,0.4); }
+  .guide-actions .primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,245,212,0.65); }
+  .guide-actions .secondary { background: rgba(56,189,248,0.1); color: var(--accent-blue); border: 1px solid var(--border-ui-strong); }
+  .guide-actions .secondary:hover { background: rgba(56,189,248,0.2); }
+
+  @media (max-width: 1400px) { .control-sidebar { width: 360px; } .sidebar-nav { width: 260px; } }
+  @media (max-width: 1100px) { .workspace { flex-wrap: wrap; height: auto; overflow-y: auto; } .sidebar-nav, .control-sidebar { width: 100%; } .stage-view { min-height: 500px; } }
+</style>
+</head>
+<body>
+
+<!-- ============ ANIMATED INTRO GUIDE ============ -->
+<div class="guide-overlay" id="guideOverlay">
+  <div class="guide-card">
+    <h2>🧪 همیار من <span class="hamyar-badge">HAMYAR E MAN</span></h2>
+    <div class="guide-sub">راهنمای سریع شروع کار با آزمایشگاه تعاملی شیمی پایه نهم</div>
+    <div class="guide-steps">
+      <div class="guide-step"><div class="gs-num">۱</div><div class="gs-body"><strong>انتخاب آزمایش از فهرست کناری</strong><span class="gs-hint">روی هر فصل کلیک کنید تا باز شود، سپس آزمایش مورد نظر را انتخاب کنید.</span></div></div>
+      <div class="guide-step"><div class="gs-num">۲</div><div class="gs-body"><strong>تنظیم متغیرها</strong><span class="gs-hint">نمونه، جرم و حجم واکنش‌دهنده‌ها را در پنل «کنترلرها» تعیین کنید.</span></div></div>
+      <div class="guide-step"><div class="gs-num">۳</div><div class="gs-body"><strong>شروع واکنش</strong><span class="gs-hint">دکمه «آغاز واکنش شیمیایی» را بزنید. در آزمایش‌های گرمادوست، مشعل بونزن را روشن کنید.</span></div></div>
+      <div class="guide-step"><div class="gs-num">۴</div><div class="gs-body"><strong>تماشای نمودار برخط</strong><span class="gs-hint">نمودار سمت راست به‌طور زنده پیشرفت واکنش را نشان می‌دهد.</span></div></div>
+      <div class="guide-step"><div class="gs-num">۵</div><div class="gs-body"><strong>ثبت نتایج در دفترچه</strong><span class="gs-hint">با هر بار اجرا، روی «ثبت نتایج در دفترچه» بزنید تا داده‌ها ذخیره شوند.</span></div></div>
+      <div class="guide-step"><div class="gs-num">۶</div><div class="gs-body"><strong>خروجی گرفتن CSV</strong><span class="gs-hint">در پایان، با دکمه «CSV⇩» تمام داده‌ها را به‌صورت صفحه‌گسترده دانلود کنید.</span></div></div>
+    </div>
+    <div class="guide-actions">
+      <button class="primary" onclick="closeGuide()">✅ شروع می‌کنم</button>
+      <button class="secondary" onclick="closeGuide()">بستن</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HEADER ============ -->
+<header>
+  <div class="brand">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M10 2v7.31L4.1 18.5A2 2 0 0 0 5.8 22h12.4a2 2 0 0 0 1.7-3.5L14 9.31V2"/>
+      <path d="M8.5 2h7"/>
+      <circle cx="12" cy="15" r="2" fill="currentColor" stroke="none"/>
+    </svg>
+    <div class="brand-text">
+      <div>همیار من <span class="hamyar-tag">HAMYAR E MAN</span></div>
+      <small>آزمایشگاه تعاملی شیمی — پایه نهم</small>
+    </div>
+  </div>
+  <div class="header-info">
+    <div class="nav-status-badge" id="topNavStatus">فصل ۱ ◄ آزمایش ۱</div>
+    <button class="top-icon-btn" onclick="openGuide()" title="راهنمای سریع">؟</button>
+    <button class="top-icon-btn" onclick="toggleTheme()" title="تغییر تم">◐</button>
+  </div>
+</header>
+
+<div class="workspace">
+  <aside class="sidebar-nav">
+    <div class="nav-header">
+      <div>فهرست موضوعی دروس شیمی علوم نهم</div>
+      <div class="nav-desc">روی هر فصل کلیک کنید تا باز شود — ۳ فصل، ۱۵ آزمایش</div>
+    </div>
+    <div id="navTree"></div>
+  </aside>
+
+  <main class="stage-view">
+    <div class="stage-bar">
+      <span class="status-text">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="txtSimState">آماده آزمایش</span>
+      </span>
+      <span class="telemetry" id="txtTelemetry">T: 25.0 °C | t: 0.00 s</span>
+    </div>
+
+    <div class="desc-banner" id="descBanner">
+      <span class="db-icon">💡</span>
+      <div class="db-body">
+        <div id="descTitle"><strong>به آزمایشگاه شیمی خوش آمدید</strong></div>
+        <div id="descText">آزمایش مورد نظر خود را از فهرست کناری انتخاب کنید و سپس دکمه «آغاز واکنش شیمیایی» را بزنید.</div>
+        <div class="db-eq" id="descEq">2H₂O₂ → 2H₂O + O₂</div>
+      </div>
+    </div>
+
+    <div class="svg-canvas-container" id="stageContainer">
+      <svg id="simCanvas" viewBox="0 0 900 600" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="metal_cu" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#f87171"/><stop offset="35%" stop-color="#b45309"/>
+            <stop offset="65%" stop-color="#d97706"/><stop offset="100%" stop-color="#7c2d12"/>
+          </linearGradient>
+          <linearGradient id="metal_mg" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#ffffff"/><stop offset="30%" stop-color="#e2e8f0"/>
+            <stop offset="70%" stop-color="#cbd5e1"/><stop offset="100%" stop-color="#94a3b8"/>
+          </linearGradient>
+          <linearGradient id="metal_zn" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#94a3b8"/><stop offset="50%" stop-color="#64748b"/><stop offset="100%" stop-color="#475569"/>
+          </linearGradient>
+          <linearGradient id="metal_fe" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#64748b"/><stop offset="50%" stop-color="#334155"/><stop offset="100%" stop-color="#0f172a"/>
+          </linearGradient>
+          <linearGradient id="metal_al" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#ffffff"/><stop offset="40%" stop-color="#cbd5e1"/><stop offset="100%" stop-color="#ffffff"/>
+          </linearGradient>
+          <linearGradient id="metal_pb" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#475569"/><stop offset="60%" stop-color="#334155"/><stop offset="100%" stop-color="#1e293b"/>
+          </linearGradient>
+          <linearGradient id="metal_au" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#fef08a"/><stop offset="40%" stop-color="#eab308"/><stop offset="100%" stop-color="#a16207"/>
+          </linearGradient>
+          <linearGradient id="pyrexGlassWall" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.38"/>
+            <stop offset="5%" stop-color="#ffffff" stop-opacity="0.08"/>
+            <stop offset="90%" stop-color="#ffffff" stop-opacity="0.04"/>
+            <stop offset="97%" stop-color="#38bdf8" stop-opacity="0.25"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0.45"/>
+          </linearGradient>
+          <linearGradient id="glassThickBase" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#1e293b" stop-opacity="0.2"/>
+            <stop offset="60%" stop-color="#38bdf8" stop-opacity="0.25"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0.45"/>
+          </linearGradient>
+          <linearGradient id="fluidShader" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.45"/>
+            <stop offset="100%" stop-color="#0284c7" stop-opacity="0.6"/>
+          </linearGradient>
+          <linearGradient id="phSpectrum" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#b91c1c"/><stop offset="7%" stop-color="#dc2626"/>
+            <stop offset="14%" stop-color="#ef4444"/><stop offset="21%" stop-color="#f97316"/>
+            <stop offset="29%" stop-color="#f59e0b"/><stop offset="36%" stop-color="#eab308"/>
+            <stop offset="43%" stop-color="#a3e635"/><stop offset="50%" stop-color="#22c55e"/>
+            <stop offset="57%" stop-color="#10b981"/><stop offset="64%" stop-color="#14b8a6"/>
+            <stop offset="71%" stop-color="#06b6d4"/><stop offset="79%" stop-color="#0ea5e9"/>
+            <stop offset="86%" stop-color="#3b82f6"/><stop offset="93%" stop-color="#8b5cf6"/>
+            <stop offset="100%" stop-color="#6b21a8"/>
+          </linearGradient>
+          <filter id="flameNaturalGlow" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur stdDeviation="5" result="glow1"/>
+            <feGaussianBlur stdDeviation="14" result="glow2"/>
+            <feMerge><feMergeNode in="glow2"/><feMergeNode in="glow1"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="8" result="bloom"/>
+            <feMerge><feMergeNode in="bloom"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="dropShadow">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+            <feOffset dx="0" dy="3" result="offsetBlur"/>
+            <feComponentTransfer><feFuncA type="linear" slope="0.4"/></feComponentTransfer>
+            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <pattern id="gridPattern" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(56,189,248,0.08)" stroke-width="1"/>
+          </pattern>
+        </defs>
+
+        <rect x="0" y="0" width="900" height="600" fill="url(#gridPattern)" opacity="0.5"/>
+
+        <!-- میز کار -->
+        <rect x="50" y="540" width="800" height="18" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+
+        <!-- مشعل بونزن -->
+        <g id="bunsenBurner" transform="translate(450, 475)" style="display:none;">
+          <path d="M-35,60 L35,60 L22,46 L-22,46 Z" fill="#0f172a" stroke="#1e293b"/>
+          <rect x="-8" y="10" width="16" height="36" fill="#334155"/>
+          <g id="flameGroup" style="opacity:0; transition:opacity 0.25s;">
+            <path id="flameOuter" d="M0,5 C-26,-20 -35,-80 0,-125 C35,-80 26,-20 0,5 Z" fill="#ff4d00" opacity="0.6" filter="url(#flameNaturalGlow)"/>
+            <path id="flameMid" d="M0,5 C-18,-15 -22,-60 0,-95 C22,-60 18,-15 0,5 Z" fill="#fbbf24" opacity="0.85" filter="url(#flameNaturalGlow)"/>
+            <path id="flameCore" d="M0,5 C-9,-5 -10,-32 0,-50 C10,-32 9,-5 0,5 Z" fill="#00f5d4" opacity="0.95"/>
+          </g>
+        </g>
+
+        <!-- سه‌پایه -->
+        <g id="tripodStand" transform="translate(450, 400)" style="display:none;">
+          <line x1="-85" y1="135" x2="-65" y2="0" stroke="#334155" stroke-width="5"/>
+          <line x1="85" y1="135" x2="65" y2="0" stroke="#334155" stroke-width="5"/>
+          <ellipse cx="0" cy="0" rx="78" ry="14" fill="#1e293b" stroke="#475569" stroke-width="3"/>
+          <ellipse cx="0" cy="0" rx="70" ry="11" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="3 3"/>
+        </g>
+
+        <g id="apparatusMount"></g>
+        <g id="particleLayer"></g>
+        <g id="vectorLayer"></g>
+      </svg>
+
+      <div class="results-overlay" id="resultsOverlay">
+        <div class="results-card">
+          <h2>✅ آزمایش به پایان رسید</h2>
+          <div class="subtitle" id="resultSubtitle">نتایج نهایی اندازه‌گیری</div>
+          <div id="resultRows"></div>
+          <div class="results-actions">
+            <button class="btn btn-run" style="flex:1;" onclick="hideResultsAndReset()">🔁 تکرار آزمایش</button>
+            <button class="btn btn-run" style="flex:1;" onclick="recordAndClose()">📝 ثبت نتایج</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage-toolbar">
+      <div class="speed-group">
+        <label>سرعت</label>
+        <input type="range" id="speedSlider" min="0.1" max="3" step="0.1" value="1">
+        <span class="speed-val" id="speedVal">۱×</span>
+      </div>
+      <button class="tool-btn" onclick="takeScreenshot()" title="عکس‌برداری">📷</button>
+      <button class="tool-btn" onclick="toggleFullscreen()" title="تمام‌صفحه">⛶</button>
+      <button class="tool-btn" onclick="toggleParticles()" title="ذرات" id="particleBtn">✦</button>
+    </div>
+  </main>
+
+  <aside class="control-sidebar">
+    <div class="panel-box">
+      <h3>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        کنترلرها و متغیرهای آزمایش
+        <span class="h3-desc">تنظیم پارامترها</span>
+      </h3>
+      <div id="dynamicInputs"></div>
+      <div class="control-row" id="heatControlRow" style="display:none;">
+        <label>دمای مشعل بونزن: <span class="val" id="lblHeat">۲۵ °C (خاموش)</span></label>
+        <input type="range" id="sliderHeat" min="0" max="100" value="0" oninput="setHeatIntensity(this.value)">
+      </div>
+      <div class="btn-grid">
+        <button id="btnRun" class="btn btn-run" onclick="toggleChemSim()">▶ آغاز واکنش شیمیایی</button>
+        <button class="btn btn-danger" onclick="resetChemExp(true)">↺ شستشوی ابزار</button>
+        <button class="btn btn-record" onclick="recordDataPoint()">📝 ثبت نتایج در دفترچه</button>
+      </div>
+    </div>
+
+    <div class="panel-box">
+      <h3>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        آنالیز برخط سینتیک واکنش
+        <span class="h3-desc">رشد زنده</span>
+      </h3>
+      <canvas id="rtChart"></canvas>
+      <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:0.68rem; color:var(--text-dim);">
+        <span id="chartYLabel">مقدار خروجی Y</span>
+        <span id="chartXLabel">زمان t (s)</span>
+      </div>
+    </div>
+
+    <div class="panel-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:9px;">
+        <h3 style="margin-bottom:0; border:none; padding:0;">دفترچه آزمایشگاه (<span id="recordCount">۰</span>)</h3>
+        <button class="btn btn-run" style="padding:4px 10px; font-size:0.66rem;" onclick="exportCSV()">⇩ CSV</button>
+      </div>
+      <div class="table-box">
+        <table class="lab-table" id="dataTable">
+          <thead><tr><th>#</th><th>نمونه</th><th>مقدار</th><th>دما</th><th>خروجی</th><th>زمان</th></tr></thead>
+          <tbody id="tableBody"><tr><td colspan="6" style="padding:12px; color:var(--text-dim);">هنوز داده‌ای ثبت نشده است.</td></tr></tbody>
+        </table>
+      </div>
+      <div style="margin-top:11px; font-size:0.73rem; line-height:1.6;">
+        <div style="color:var(--accent-cyan); font-weight:800; margin-bottom:4px;">📚 مبنای علمی کتاب درسی:</div>
+        <p id="theoryText" style="color:var(--text-dim);"></p>
+        <div class="chem-eq" id="theoryEq"></div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   DATABASE — 15 آزمایش شیمی
+   ============================================================ */
+const CHEM_DATABASE = {
+  1: [
+    { title: "واکنش‌پذیری فلزات با هیدروکلریک اسید", type: "metal_acid", hasBurner: true,
+      items: [
+        { name: "منیزیم (Mg)", density: 1.74, atomicMass: 24.30, h2: 1.0, k: 14.0, fill: "url(#metal_mg)", eq: "Mg + 2HCl → MgCl₂ + H₂ ↑" },
+        { name: "آلومینیوم (Al)", density: 2.70, atomicMass: 26.98, h2: 1.5, k: 5.0, fill: "url(#metal_al)", eq: "2Al + 6HCl → 2AlCl₃ + 3H₂ ↑" },
+        { name: "روی (Zn)", density: 7.14, atomicMass: 65.38, h2: 1.0, k: 2.9, fill: "url(#metal_zn)", eq: "Zn + 2HCl → ZnCl₂ + H₂ ↑" },
+        { name: "آهن (Fe)", density: 7.87, atomicMass: 55.85, h2: 1.0, k: 0.9, fill: "url(#metal_fe)", eq: "Fe + 2HCl → FeCl₂ + H₂ ↑" },
+        { name: "سرب (Pb)", density: 11.34, atomicMass: 207.20, h2: 1.0, k: 0.35, fill: "url(#metal_pb)", eq: "Pb + 2HCl → PbCl₂ + H₂ ↑" },
+        { name: "مس (Cu)", density: 8.96, atomicMass: 63.55, h2: 0.0, k: 0.0, fill: "url(#metal_cu)", eq: "Cu + HCl → فاقد واکنش (زیر H در سری واکنش‌پذیری)", noReaction: true },
+        { name: "طلا (Au)", density: 19.32, atomicMass: 196.97, h2: 0.0, k: 0.0, fill: "url(#metal_au)", eq: "Au + HCl → فاقد واکنش (فلز نجیب)", noReaction: true }
+      ],
+      theory: "فلزات مختلف با سرعت متفاوتی با اسید واکنش می‌دهند. ترتیب واکنش‌پذیری: Mg > Al > Zn > Fe > Pb > Cu > Au. فلزات پایین‌تر از H (Cu, Au) با HCl رقیق واکنش نمی‌دهند.",
+      eq: "M + n HCl → MClₙ + (n/2) H₂ ↑",
+      yLabel: "حجم گاز H₂ (mL)", xLabel: "زمان t (s)",
+      simpleDesc: "نوار فلزی در اسید کلریدریک قرار می‌گیرد؛ حباب‌های هیدروژن آزاد می‌شود.",
+      simpleAnim: "نوار فلز کوچک می‌شود و حباب‌های گاز به سطح می‌آیند." },
+
+    { title: "اثر کاتالیزگر بر تجزیه آب‌اکسیژنه", type: "catalyst_h2o2", hasBurner: false,
+      items: [
+        { name: "بدون کاتالیزگر (شاهد)", k: 0.15, desc: "تجزیه بسیار آرام" },
+        { name: "دی‌اکسید منگنز (MnO₂)", k: 12.0, desc: "فوران شدید اکسیژن" },
+        { name: "آهن(III) کلرید (FeCl₃)", k: 4.5, desc: "واکنش سریع" },
+        { name: "عصاره کاتالاز سیب‌زمینی", k: 7.5, desc: "کاتالیزگر زیستی" }
+      ],
+      theory: "H₂O₂ خودبه‌خود آرام تجزیه می‌شود. کاتالیزگرها با کاهش انرژی فعال‌سازی، فوران اکسیژن ایجاد می‌کنند.",
+      eq: "2H₂O₂ —[کاتالیزگر]→ 2H₂O + O₂ ↑",
+      yLabel: "حجم گاز اکسیژن (mL)", xLabel: "زمان t (s)",
+      simpleDesc: "محلول آب‌اکسیژنه در بالون؛ با افزودن کاتالیزگر، اکسیژن آزاد می‌شود.",
+      simpleAnim: "حباب‌های اکسیژن در ظرف جمع‌آوری بالا می‌آیند." },
+
+    { title: "جانشینی تیغه آهن با کات‌کبود (CuSO₄)", type: "fe_cuso4", hasBurner: false,
+      items: [
+        { name: "میخ آهنی تازه (Fe)", k: 1.0, nailFill: "url(#metal_fe)", eq: "Fe + CuSO₄ → FeSO₄ + Cu ↓" },
+        { name: "تیغه روی (Zn)", k: 2.2, nailFill: "url(#metal_zn)", eq: "Zn + CuSO₄ → ZnSO₄ + Cu ↓" }
+      ],
+      theory: "فلز فعال‌تر الکترون به یون مس می‌دهد؛ مس سرخ‌فام روی فلز رسوب و رنگ آبی محلول به سبز کم‌رنگ تغییر می‌کند.",
+      eq: "M (s) + Cu²⁺ (aq) → M²⁺ (aq) + Cu (s)",
+      yLabel: "جرم مس رسوب‌کرده (mg)", xLabel: "زمان t (s)",
+      simpleDesc: "میخ آهنی در محلول کات‌کبود قرار می‌گیرد؛ لایه مس روی آن رسوب می‌کند.",
+      simpleAnim: "رنگ آبی محلول کم‌رنگ می‌شود و میخ قهوه‌ای-مسی می‌گردد." },
+
+    { title: "شناسایی نشاسته با محلول ید (لوگول)", type: "starch_test", hasBurner: false,
+      items: [
+        { name: "محلول نشاسته ذرت", starch: true },
+        { name: "سیب‌زمینی رنده‌شده", starch: true },
+        { name: "سفیده تخم‌مرغ (پروتئین)", starch: false },
+        { name: "محلول آب و شکر (ساکارز)", starch: false }
+      ],
+      theory: "نشاسته با ید کمپلکس آبی-سیاه می‌سازد. در نمونه‌های فاقد نشاسته، رنگ ید قهوه‌ای-کهربایی می‌ماند.",
+      eq: "نشاسته + I₂/KI → کمپلکس آبی تیره",
+      yLabel: "تراکم رنگ آبی (%)", xLabel: "زمان t (s)",
+      simpleDesc: "چند قطره محلول ید به نمونه افزوده می‌شود؛ اگر نشاسته باشد، آبی تیره می‌شود.",
+      simpleAnim: "قطره ید در چاهک می‌افتد و رنگ نمونه تغییر می‌کند." },
+
+    { title: "اکسایش و سوختن منیزیم و گوگرد در هوا", type: "combustion_mg_s", hasBurner: true,
+      items: [
+        { name: "نوار منیزیم (Mg)", isMg: true, k: 18, color: "#e2e8f0", eq: "2Mg + O₂ → 2MgO (نور سفید درخشان)" },
+        { name: "پودر گوگرد (S)", isMg: false, k: 7, color: "#a855f7", eq: "S + O₂ → SO₂ (شعله آبی-بنفش)" }
+      ],
+      theory: "منیزیم با نور سفید روشن می‌سوزد و MgO می‌دهد؛ گوگرد با شعله آبی کم‌رنگ می‌سوزد و SO₂ تولید می‌کند. هر دو اکسایش گرماده هستند.",
+      eq: "2Mg + O₂ → 2MgO  |  S + O₂ → SO₂",
+      yLabel: "شدت تابش (Lumens)", xLabel: "زمان t (s)",
+      simpleDesc: "نوار منیزیم یا پودر گوگرد روی قاشقک سوختنی، با شعله بونزن مشتعل می‌شود.",
+      simpleAnim: "منیزیم با نور سفید خیره‌کننده و گوگرد با شعله آبی-بنفش می‌سوزد." }
+  ],
+
+  2: [
+    { title: "رسانایی الکتریکی محلول‌های یونی و مولکولی", type: "ionic_conductivity", hasBurner: false,
+      items: [
+        { name: "محلول سدیم کلرید (نمک خوراکی)", current: 90, color: "#38bdf8", desc: "یونی، تفکیک کامل" },
+        { name: "محلول کات‌کبود (CuSO₄)", current: 75, color: "#0284c7", desc: "رسانای قوی" },
+        { name: "محلول شکر (ساکارز)", current: 0.5, color: "#94a3b8", desc: "مولکولی، نارسانا" },
+        { name: "آب مقطر خالص", current: 0.1, color: "#e2e8f0", desc: "فاقد یون آزاد" },
+        { name: "اتانول (الکل)", current: 0.2, color: "#cbd5e1", desc: "مولکولی نارسانا" }
+      ],
+      theory: "ترکیبات یونی در آب به یون‌های متحرک تجزیه و مدار را کامل می‌کنند. ترکیبات مولکولی یون تولید نمی‌کنند.",
+      eq: "NaCl (s) —[H₂O]→ Na⁺ (aq) + Cl⁻ (aq)",
+      yLabel: "شدت جریان (mA)", xLabel: "زمان t (s)",
+      simpleDesc: "الکترودها در محلول فرو می‌روند؛ اگر محلول رسانا باشد لامپ روشن می‌شود.",
+      simpleAnim: "با ورود الکترودها، لامپ روشن می‌شود و آمپرسنج جریان را نشان می‌دهد." },
+
+    { title: "الکترولیز (برق‌کافت) و تفکیک آب", type: "electrolysis", hasBurner: false,
+      items: [
+        { name: "آب + سدیم سولفات (رسانا)", k: 1.0, eq: "2H₂O —[DC]→ 2H₂ ↑ + O₂ ↑" },
+        { name: "آب + اسید سولفوریک رقیق", k: 1.6, eq: "2H₂O —[DC]→ 2H₂ ↑ + O₂ ↑" }
+      ],
+      theory: "عبور جریان مستقیم از آب در کاتد H₂ (حجم دوبرابر) و در آند O₂ تولید می‌کند. نسبت حجمی همیشه ۲:۱ است.",
+      eq: "کاتد: ۲H₂O + 2e⁻ → H₂ + 2OH⁻  |  آند: 2H₂O → O₂ + 4H⁺ + 4e⁻",
+      yLabel: "حجم هیدروژن (mL)", xLabel: "زمان t (s)",
+      simpleDesc: "جریان برق از آب می‌گذرد؛ در دو لوله، گاز هیدروژن و اکسیژن جمع می‌شود.",
+      simpleAnim: "حباب‌ها در دو الکترود بالا می‌آیند و سطح آب در لوله‌ها پایین می‌رود." },
+
+    { title: "سنتز نمک طعام (سدیم + گاز کلر)", type: "nacl_synthesis", hasBurner: true,
+      items: [{ name: "سدیم فلزی + گاز کلر", k: 10.0 }],
+      theory: "سدیم یک الکترون به کلر می‌دهد؛ پیوند یونی با آزاد شدن گرمای شدید، جرقه زرد و دود سفید NaCl همراه است.",
+      eq: "2Na (s) + Cl₂ (g) → 2NaCl (s) + گرما و نور",
+      yLabel: "دمای محفظه (°C)", xLabel: "زمان t (s)",
+      simpleDesc: "سدیم مذاب در گاز کلر می‌سوزد و ذرات سفید NaCl تولید می‌کند.",
+      simpleAnim: "جرقه زرد و دود سفید نمک در محفظه واکنش پدیدار می‌شود." },
+
+    { title: "طیف‌سنجی pH با شناساگر عمومی", type: "ph_rainbow", hasBurner: false,
+      items: [
+        { name: "جوهرنمک (HCl) - اسید قوی", ph: 1.0, color: "#dc2626" },
+        { name: "آب لیمو ترش - اسید ملایم", ph: 3.0, color: "#f97316" },
+        { name: "آب مقطر خالص - خنثی", ph: 7.0, color: "#22c55e" },
+        { name: "محلول جوش شیرین - باز ضعیف", ph: 9.0, color: "#06b6d4" },
+        { name: "سود سوزآور (NaOH) - باز قوی", ph: 13.0, color: "#8b5cf6" }
+      ],
+      theory: "شناساگر در محیط اسیدی/بازی تغییر رنگ می‌دهد. pH<7 اسیدی، =7 خنثی، >7 بازی.",
+      eq: "pH = -log[H⁺]",
+      yLabel: "شاخص pH", xLabel: "زمان t (s)",
+      simpleDesc: "چند قطره شناساگر به نمونه افزوده می‌شود و رنگ آن با نوار pH مقایسه می‌گردد.",
+      simpleAnim: "رنگ ظرف تغییر می‌کند و نشانگر روی نوار pH جابجا می‌شود." },
+
+    { title: "پیوند یونی و تشکیل رسوب باریم سولفات", type: "barium_precipitate", hasBurner: false,
+      items: [{ name: "افزودن Na₂SO₄ به BaCl₂", k: 5.0 }],
+      theory: "یون‌های Ba²⁺ و SO₄²⁻ پیوند یونی مستحکم برقرار می‌کنند که در آب نامحلول است و رسوب سفید BaSO₄ می‌دهد.",
+      eq: "Ba²⁺ (aq) + SO₄²⁻ (aq) → BaSO₄ (s) ↓",
+      yLabel: "کدورت (NTU)", xLabel: "زمان t (s)",
+      simpleDesc: "دو محلول شفاف با هم مخلوط می‌شوند و رسوب سفید ایجاد می‌گردد.",
+      simpleAnim: "ذرات سفید در محلول پدیدار و به آرامی ته‌نشین می‌شوند." }
+  ],
+
+  3: [
+    { title: "تقطیر جزء‌به‌جزء برش‌های نفت خام", type: "oil_fraction", hasBurner: true,
+      items: [{ name: "نفت خام طبیعی سنگین", k: 1.0 }],
+      theory: "هیدروکربن‌ها بر اساس نقطه جوش در برج تقطیر جدا می‌شوند. هر برش بازه دمایی مشخصی دارد.",
+      eq: "نفت خام → گاز | بنزین | نفت سفید | گازوئیل | قیر",
+      yLabel: "دمای برج تقطیر (°C)", xLabel: "زمان t (s)",
+      simpleDesc: "نفت خام در فلاسک گرم می‌شود؛ بخارات در برج تقطیر جدا و در ظرف جمع‌آوری می‌چکند.",
+      simpleAnim: "با گرم شدن مشعل، رنگ و سطح مایع در ظرف جمع‌آوری تغییر می‌کند.",
+      fractions: [
+        { minT: 25,  maxT: 40,  name: "گازهای سبک (C₁-C₄)", color: "#bae6fd", purity: "—" },
+        { minT: 40,  maxT: 100, name: "بنزین (C₅-C₁₀)", color: "#fef08a", purity: "خلوص ۹۵٪" },
+        { minT: 100, maxT: 180, name: "نفت سفید (C₁₀-C₁₄)", color: "#fde047", purity: "خلوص ۹۰٪" },
+        { minT: 180, maxT: 250, name: "گازوئیل (C₁₄-C₂₀)", color: "#eab308", purity: "خلوص ۸۵٪" },
+        { minT: 250, maxT: 350, name: "روغن سنگین (C₂₀⁺)", color: "#b45309", purity: "خلوص ۷۵٪" },
+        { minT: 350, maxT: 500, name: "قیر (باقیمانده)", color: "#1e293b", purity: "باقیمانده" }
+      ] },
+
+    { title: "مقایسه گرانروی هیدروکربن‌ها", type: "viscosity_test", hasBurner: false,
+      items: [
+        { name: "هگزان (C₆H₁₄ - سبک)", visc: 1.0, color: "#fef08a" },
+        { name: "اکتان (C₈H₁₈ - میان)", visc: 2.5, color: "#fde047" },
+        { name: "روغن موتور (زنجیره بلند)", visc: 10.0, color: "#eab308" },
+        { name: "وازلین سنگین (طویل)", visc: 25.0, color: "#ca8a04" }
+      ],
+      theory: "با افزایش تعداد کربن، ربایش وان‌دروالس بیشتر و گرانروی افزایش می‌یابد؛ گوی دیرتر سقوط می‌کند.",
+      eq: "گرانروی: C₂₀H₄₂ >> C₈H₁₈ > C₆H₁₄",
+      yLabel: "عمق نفوذ گوی (cm)", xLabel: "زمان t (s)",
+      simpleDesc: "گوی فولادی در ستون مایع رها می‌شود؛ هرچه گرانروی بیشتر، سقوط کندتر.",
+      simpleAnim: "گوی در مایع فرو می‌رود و در مایع غلیظ‌تر دیرتر به ته می‌رسد." },
+
+    { title: "شناسایی بخار آب و CO₂ با آب‌آهک", type: "limewater_co2", hasBurner: false,
+      items: [
+        { name: "سوختن شمع پارافینی", k: 2.0, eq: "Ca(OH)₂ + CO₂ → CaCO₃ ↓ + H₂O" },
+        { name: "سوختن الکل اتانول", k: 1.2, eq: "C₂H₅OH + 3O₂ → 2CO₂ + 3H₂O" }
+      ],
+      theory: "سوختن کامل هیدروکربن‌ها CO₂ و H₂O می‌دهد. عبور CO₂ از آب‌آهک شفاف، رسوب سفید CaCO₃ ایجاد و کدر می‌کند.",
+      eq: "Ca(OH)₂ + CO₂ → CaCO₃ ↓ + H₂O",
+      yLabel: "کدورت آب‌آهک (%)", xLabel: "زمان t (s)",
+      simpleDesc: "گازهای حاصل از سوختن از آب‌آهک شفاف می‌گذرند و آن را کدر می‌کنند.",
+      simpleAnim: "حباب‌های گاز در آب‌آهک بالا می‌آیند و مایع شیری می‌شود." },
+
+    { title: "شبیه‌سازی اثر گلخانه‌ای CO₂", type: "greenhouse_chamber", hasBurner: false,
+      items: [
+        { name: "هوای معمولی (شاهد)", rate: 1.0, Tmax: 33.0, color: "rgba(56,189,248,0.10)" },
+        { name: "هوای غنی از CO₂", rate: 3.2, Tmax: 58.0, color: "rgba(244,63,94,0.20)" }
+      ],
+      theory: "مولکول‌های CO₂ امواج فروسرخ بازتابیده از زمین را جذب و مانع خروج گرما می‌شوند (گرمایش جهانی).",
+      eq: "CO₂ + IR → ارتعاش مولکولی + گرما",
+      yLabel: "دمای محفظه (°C)", xLabel: "زمان t (s)",
+      simpleDesc: "دو محفظه در معرض نور؛ محفظه دارای CO₂ بیشتر، گرم‌تر می‌شود.",
+      simpleAnim: "دمای محفظه پرشده با CO₂ سریع‌تر بالا می‌رود." },
+
+    { title: "بررسی سوختن ناقص و میزان تولید دوده", type: "soot_combustion", hasBurner: true,
+      items: [
+        { name: "شمع پارافینی سنگین", soot: 18, color: "#090d16" },
+        { name: "بنزین سبک", soot: 7, color: "#1e293b" },
+        { name: "الکل اتانول", soot: 0.2, color: "#64748b" }
+      ],
+      theory: "هیدروکربن‌های سنگین با کمبود اکسیژن، سوختن ناقص و دوده سیاه (کربن آزاد) تولید می‌کنند.",
+      eq: "CₙHₘ + O₂ محدود → C (دوده) + CO + H₂O",
+      yLabel: "تراکم دوده (ppm)", xLabel: "زمان t (s)",
+      simpleDesc: "بالای شعله، شیشه ساعت گرفته می‌شود؛ لایه سیاه دوده روی آن رسوب می‌کند.",
+      simpleAnim: "ذرات دوده روی شیشه رسوب کرده و لکه سیاه پدیدار می‌شود." }
+  ]
+};
+
+const CHAPTER_TITLES = {
+  1: { title: "فصل ۱: مواد و نقش آن‌ها در زندگی", count: 5, icon: "🧪" },
+  2: { title: "فصل ۲: رفتار اتم‌ها با یکدیگر", count: 5, icon: "⚛️" },
+  3: { title: "فصل ۳: به دنبال محیطی بهتر برای زندگی", count: 5, icon: "🌍" }
+};
+
+function toFa(n) { return String(n).replace(/[0-9]/g, d => "۰۱۲۳۴۵۶۷۸۹"[+d]); }
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let currentChap = 1;
+let currentExpIdx = 0;
+let activeItemIdx = 0;
+let isSimulating = false;
+let simComplete = false;
+let simTime = 0;
+let simSpeed = 1;
+let primaryMetric = 0;
+let chartSeries = [];
+let tableRecords = [];
+let particles = [];
+let particlesEnabled = true;
+let lastFrameTime = 0;
+let lastChartPush = 0;
+let heatIntensity = 0;
+let specimenMass = 0.5;
+let reactantVolume = 150.0;
+let reactionYield = 0;
+let currentTemp = 25.0;
+let bubbleAccumulator = 0;
+let starchDropProgress = 0;
+let phDropProgress = 0;
+let viscDone = false;
+let collectedFractions = [];
+
+/* ============================================================
+   GUIDE
+   ============================================================ */
+function openGuide() { document.getElementById("guideOverlay").classList.remove("hidden"); }
+function closeGuide() {
+  document.getElementById("guideOverlay").classList.add("hidden");
+  try { localStorage.setItem("hamyar_chem_intro_seen", "1"); } catch(e) {}
+}
+
+/* ============================================================
+   DESCRIPTION BANNER
+   ============================================================ */
+function updateDescBanner(exp, item) {
+  if (!exp) return;
+  const banner = document.getElementById("descBanner");
+  if (!banner) return;
+  banner.style.animation = "none";
+  void banner.offsetWidth;
+  banner.style.animation = "bannerSlideIn 0.55s cubic-bezier(0.34,1.56,0.64,1)";
+  document.getElementById("descTitle").innerHTML = `<strong>${exp.title}</strong>`;
+  document.getElementById("descText").textContent = exp.simpleDesc || exp.theory;
+  document.getElementById("descEq").textContent = item.eq || exp.eq || "";
+}
+
+/* ============================================================
+   NAV TREE — ACCORDION
+   ============================================================ */
+function buildNavTree() {
+  const tree = document.getElementById("navTree");
+  let html = "";
+  for (const chap in CHAPTER_TITLES) {
+    const c = CHAPTER_TITLES[chap];
+    html += `<div class="chapter-group">
+      <details class="chapter-accordion" data-chap="${chap}">
+        <summary>
+          <span class="chapter-label">
+            <span class="chev-icon">◀</span>
+            <span class="chapter-name">${c.icon} ${c.title}</span>
+          </span>
+          <span class="chapter-count">${toFa(c.count)} آزمایش</span>
+        </summary>
+        <ul class="exp-list">`;
+    CHEM_DATABASE[chap].forEach((exp, idx) => {
+      const isActive = (chap == currentChap && idx === currentExpIdx);
+      html += `<li class="exp-item${isActive ? " active" : ""}" onclick="navigateChemLab(${chap}, ${idx}, this)">${toFa(idx + 1)}. ${exp.title}</li>`;
+    });
+    html += `</ul></details></div>`;
+  }
+  tree.innerHTML = html;
+  document.querySelectorAll(".chapter-accordion").forEach(det => {
+    det.addEventListener("toggle", () => {
+      if (det.open) {
+        document.querySelectorAll(".chapter-accordion").forEach(other => {
+          if (other !== det && other.open) other.open = false;
+        });
+      }
+    });
+  });
+}
+
+function navigateChemLab(chap, expIdx, element) {
+  currentChap = parseInt(chap);
+  currentExpIdx = parseInt(expIdx);
+  activeItemIdx = 0;
+  document.querySelectorAll(".exp-item").forEach(item => item.classList.remove("active"));
+  if (element) element.classList.add("active");
+  document.querySelectorAll(".chapter-accordion").forEach(det => {
+    if (det.dataset.chap == chap) det.open = true;
+    else det.open = false;
+  });
+  const exp = CHEM_DATABASE[currentChap][currentExpIdx];
+  document.getElementById("topNavStatus").textContent = `فصل ${toFa(currentChap)} ◄ ${exp.title}`;
+  resetChemExp(false);
+  setupChemEnvironment();
+}
+
+/* ============================================================
+   SETUP
+   ============================================================ */
+function setupChemEnvironment() {
+  const exp = CHEM_DATABASE[currentChap][currentExpIdx];
+  const burner = document.getElementById("bunsenBurner");
+  const tripod = document.getElementById("tripodStand");
+  const heatRow = document.getElementById("heatControlRow");
+
+  if (exp.hasBurner) {
+    burner.style.display = "block";
+    tripod.style.display = "block";
+    heatRow.style.display = "flex";
+  } else {
+    burner.style.display = "none";
+    tripod.style.display = "none";
+    heatRow.style.display = "none";
+    heatIntensity = 0;
+    const slider = document.getElementById("sliderHeat");
+    if (slider) slider.value = 0;
+    document.getElementById("lblHeat").textContent = "۲۵ °C (خاموش)";
+  }
+
+  document.getElementById("theoryText").textContent = exp.theory;
+  const item = exp.items[activeItemIdx];
+  document.getElementById("theoryEq").textContent = item.eq || exp.eq || "";
+  document.getElementById("chartYLabel").textContent = exp.yLabel;
+  document.getElementById("chartXLabel").textContent = exp.xLabel;
+
+  const ctrlBox = document.getElementById("dynamicInputs");
+  ctrlBox.innerHTML = "";
+
+  const row = document.createElement("div");
+  row.className = "control-row";
+  const opts = exp.items.map((it, idx) => `<option value="${idx}"${idx === activeItemIdx ? " selected" : ""}>${it.name}</option>`).join("");
+  row.innerHTML = `<label>انتخاب نمونه: <span class="val">پیش‌نمایش زنده</span></label>
+    <select id="selSubstance" onchange="onSubstanceChange(this.value)">${opts}</select>`;
+  ctrlBox.appendChild(row);
+
+  if (exp.type === "metal_acid") {
+    const massRow = document.createElement("div");
+    massRow.className = "control-row";
+    massRow.innerHTML = `<label>جرم فلز: <span class="val" id="lblMass">۰٫۵ g</span></label>
+      <input type="range" id="rngMass" min="0.1" max="2.0" step="0.1" value="0.5"
+        oninput="specimenMass=parseFloat(this.value); document.getElementById('lblMass').textContent=toFa(this.value)+' g'; applySubstanceVisuals();">`;
+    ctrlBox.appendChild(massRow);
+    const volRow = document.createElement("div");
+    volRow.className = "control-row";
+    volRow.innerHTML = `<label>حجم اسید ۱M: <span class="val" id="lblVol">۱۵۰ mL</span></label>
+      <input type="range" id="rngVol" min="60" max="360" step="10" value="150"
+        oninput="reactantVolume=parseFloat(this.value); document.getElementById('lblVol').textContent=toFa(this.value)+' mL'; applySubstanceVisuals();">`;
+    ctrlBox.appendChild(volRow);
+  }
+
+  buildApparatusSVG(exp);
+  applySubstanceVisuals();
+  updateDescBanner(exp, item);
+  renderChart();
+}
+
+function onSubstanceChange(val) {
+  activeItemIdx = parseInt(val);
+  resetChemExp(false);
+  const exp = CHEM_DATABASE[currentChap][currentExpIdx];
+  const item = exp.items[activeItemIdx];
+  document.getElementById("theoryEq").textContent = item.eq || exp.eq || "";
+  document.getElementById("chartYLabel").textContent = exp.yLabel;
+  buildApparatusSVG(exp);
+  applySubstanceVisuals();
+  updateDescBanner(exp, item);
+  const svg = document.getElementById("simCanvas");
+  svg.style.transition = "filter 0.4s";
+  svg.style.filter = "drop-shadow(0 0 30px rgba(0,245,212,0.5))";
+  setTimeout(() => { svg.style.filter = ""; }, 400);
+}
+
+/* ============================================================
+   APPARATUS SVG BUILDERS
+   ============================================================ */
+function buildApparatusSVG(exp) {
+  const mount = document.getElementById("apparatusMount");
+  mount.innerHTML = "";
+
+  if (exp.type === "metal_acid") {
+    mount.innerHTML = `
+      <g id="beakerGroup" transform="translate(450, 230)">
+        <path id="liquidPath" d="M-82,120 L82,120 L82,162 C82,168 65,170 0,170 C-65,170 -82,168 -82,162 Z" fill="url(#fluidShader)"/>
+        <ellipse id="liquidMeniscus" cx="0" cy="120" rx="82" ry="8" fill="#38bdf8" opacity="0.5"/>
+        <g id="specimenGroup">
+          <rect id="metalStrip" x="-11" y="154" width="22" height="16" rx="3" fill="url(#metal_mg)" stroke="rgba(0,0,0,0.5)" stroke-width="1.5"/>
+          <line id="specimenHighlight" x1="-8" y1="156" x2="8" y2="156" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+        </g>
+        <ellipse cx="0" cy="0" rx="88" ry="12" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.3"/>
+        <path d="M-98,-3 C-94,4 -88,0 -88,0 L-86,158 C-86,170 -70,176 0,176 C70,176 86,170 86,158 L86,0 C86,0 88,0 88,-1 C88,-5 80,-6 72,-6 L-80,-6 C-90,-6 -100,-7 -98,-3 Z" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2"/>
+        <path d="M-82,164 C-55,174 55,174 82,164 L82,172 C60,176 -60,176 -82,172 Z" fill="url(#glassThickBase)"/>
+        <g opacity="0.7" fill="#ffffff" stroke="#ffffff">
+          <line x1="56" y1="35" x2="78" y2="35" stroke-width="1.5"/><text x="50" y="38" font-size="9" text-anchor="end" stroke="none">400 mL</text>
+          <line x1="60" y1="75" x2="78" y2="75" stroke-width="1.5"/><text x="54" y="78" font-size="9" text-anchor="end" stroke="none">300 mL</text>
+          <line x1="56" y1="115" x2="78" y2="115" stroke-width="1.5"/><text x="50" y="118" font-size="9" text-anchor="end" stroke="none">200 mL</text>
+          <line x1="60" y1="145" x2="78" y2="145" stroke-width="1.5"/><text x="54" y="148" font-size="9" text-anchor="end" stroke="none">100 mL</text>
+          <text x="-40" y="50" font-size="7" text-anchor="middle" stroke="none">PYREX®</text>
+        </g>
+        <rect x="-80" y="6" width="7" height="155" rx="3" fill="#ffffff" opacity="0.25"/>
+      </g>
+      <g transform="translate(750, 180)">
+        <rect x="-110" y="-55" width="220" height="110" rx="12" fill="rgba(10,18,32,0.92)" stroke="#00f5d4" stroke-width="1.5"/>
+        <text x="0" y="-30" fill="#94a3b8" font-size="11" text-anchor="middle">حجم گاز هیدروژن</text>
+        <text id="h2Readout" x="0" y="10" fill="#00f5d4" font-family="Courier New" font-size="26" font-weight="700" text-anchor="middle">۰٫۰</text>
+        <text x="70" y="10" fill="#64748b" font-family="Courier New" font-size="11">mL</text>
+        <text id="metalNameLbl" x="0" y="38" fill="#facc15" font-family="Tahoma" font-size="11" text-anchor="middle">—</text>
+      </g>`;
+  }
+  else if (exp.type === "catalyst_h2o2") {
+    mount.innerHTML = `
+      <g transform="translate(280, 360)">
+        <polygon points="-60,160 60,160 22,20 -22,20" fill="url(#fluidShader)"/>
+        <polygon points="-75,170 75,170 24,0 -24,0" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2"/>
+        <rect x="-26" y="-12" width="52" height="15" rx="2" fill="#334155" stroke="#475569"/>
+        <polygon points="-20,-12 20,-12 16,-28 -16,-28" fill="#1e293b"/>
+        <text x="0" y="120" font-size="11" text-anchor="middle" fill="#94a3b8">H₂O₂</text>
+      </g>
+      <path d="M280,332 L280,250 L490,250 L490,440 L530,440" fill="none" stroke="#38bdf8" stroke-width="8" opacity="0.35"/>
+      <path d="M280,332 L280,250 L490,250 L490,440 L530,440" fill="none" stroke="#ffffff" stroke-width="2"/>
+      <rect x="460" y="450" width="200" height="85" rx="8" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2"/>
+      <rect x="464" y="470" width="192" height="61" fill="#0ea5e9" opacity="0.4"/>
+      <text x="560" y="525" font-size="11" text-anchor="middle" fill="#38bdf8">ظرف آب</text>
+      <g transform="translate(560, 490)">
+        <rect x="-22" y="-190" width="44" height="200" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2"/>
+        <rect x="-19" y="-188" width="38" height="196" fill="#0ea5e9" opacity="0.30"/>
+        <rect id="o2GasPocket" x="-19" y="-188" width="38" height="0" fill="#e2e8f0" opacity="0.75"/>
+        <line x1="-19" y1="-140" x2="-6" y2="-140" stroke="#fff" stroke-width="1" opacity="0.6"/>
+        <line x1="-19" y1="-90"  x2="-6" y2="-90"  stroke="#fff" stroke-width="1" opacity="0.6"/>
+        <line x1="-19" y1="-40"  x2="-6" y2="-40"  stroke="#fff" stroke-width="1" opacity="0.6"/>
+        <text x="0" y="24" font-size="11" text-anchor="middle" fill="#00f5d4" id="o2VolLabel">O₂: 0 mL</text>
+      </g>
+      <g transform="translate(750, 180)">
+        <rect x="-110" y="-55" width="220" height="110" rx="12" fill="rgba(10,18,32,0.92)" stroke="#00f5d4" stroke-width="1.5"/>
+        <text x="0" y="-30" fill="#94a3b8" font-size="11" text-anchor="middle">اکسیژن آزادشده</text>
+        <text id="h2Readout" x="0" y="10" fill="#00f5d4" font-family="Courier New" font-size="26" font-weight="700" text-anchor="middle">۰٫۰</text>
+        <text x="70" y="10" fill="#64748b" font-family="Courier New" font-size="11">mL</text>
+      </g>`;
+  }
+  else if (exp.type === "fe_cuso4") {
+    mount.innerHTML = `
+      <g transform="translate(450, 300)">
+        <rect x="-75" y="0" width="150" height="200" rx="10" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2"/>
+        <path id="cuso4Fluid" d="M-73,45 L73,45 L73,194 C73,198 55,200 0,200 C-55,200 -73,198 -73,194 Z" fill="#0284c7" opacity="0.75"/>
+        <text id="cuLabel" x="0" y="150" font-size="13" text-anchor="middle" fill="#ffffff" opacity="0.85" font-weight="bold">CuSO₄</text>
+        <line x1="0" y1="-80" x2="0" y2="80" stroke="#cbd5e1" stroke-width="1.5"/>
+        <g id="suspendedNail" transform="translate(0, 120)">
+          <rect id="nailBody" x="-6" y="-38" width="12" height="76" rx="2" fill="url(#metal_fe)" stroke="#0f172a"/>
+          <ellipse id="nailHead" cx="0" cy="-38" rx="10" ry="3" fill="#475569"/>
+          <polygon id="nailTip" points="-6,38 6,38 0,54" fill="url(#metal_fe)"/>
+        </g>
+      </g>
+      <g transform="translate(750, 180)">
+        <rect x="-110" y="-55" width="220" height="110" rx="12" fill="rgba(10,18,32,0.92)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="0" y="-30" fill="#94a3b8" font-size="11" text-anchor="middle">مس رسوب‌کرده</text>
+        <text id="cuYieldReadout" x="0" y="10" fill="#f59e0b" font-family="Courier New" font-size="26" font-weight="700" text-anchor="middle">۰٫۰</text>
+        <text x="70" y="10" fill="#64748b" font-family="Courier New" font-size="11">mg</text>
+      </g>`;
+  }
+  else if (exp.type === "starch_test") {
+    mount.innerHTML = `
+      <g transform="translate(450, 440)">
+        <rect x="-160" y="-30" width="320" height="80" rx="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="3"/>
+        <ellipse cx="-80" cy="10" rx="42" ry="22" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="2"/>
+        <ellipse id="wellTarget" cx="-80" cy="10" rx="38" ry="18" fill="#ffffff"/>
+        <ellipse cx="80" cy="10" rx="42" ry="22" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="2"/>
+        <ellipse id="wellControl" cx="80" cy="10" rx="38" ry="18" fill="#ffffff"/>
+        <text x="-80" y="42" font-size="10" text-anchor="middle" fill="#475569">نمونه انتخابی</text>
+        <text x="80"  y="42" font-size="10" text-anchor="middle" fill="#475569">شاهد (آب مقطر)</text>
+      </g>
+      <g id="iodineDropper" transform="translate(370, 220)">
+        <rect x="-5" y="0" width="10" height="120" fill="url(#pyrexGlassWall)" stroke="#38bdf8"/>
+        <path d="M-5,120 L0,142 L5,120 Z" fill="#b45309"/>
+        <ellipse cx="0" cy="-10" rx="14" ry="20" fill="#dc2626"/>
+        <rect x="-3" y="30" width="6" height="90" fill="#78350f" opacity="0.85"/>
+      </g>
+      <g transform="translate(750, 180)">
+        <rect x="-110" y="-55" width="220" height="110" rx="12" fill="rgba(10,18,32,0.92)" stroke="#00f5d4" stroke-width="1.5"/>
+        <text x="0" y="-30" fill="#94a3b8" font-size="11" text-anchor="middle">نتیجه آزمون</text>
+        <text id="starchResult" x="0" y="10" fill="#00f5d4" font-family="Tahoma" font-size="18" font-weight="700" text-anchor="middle">در انتظار…</text>
+        <text id="starchPct" x="0" y="38" fill="#facc15" font-family="Courier New" font-size="12" text-anchor="middle">۰٪</text>
+      </g>`;
+  }
+  else if (exp.type === "combustion_mg_s") {
+    mount.innerHTML = `
+      <g transform="translate(450, 360)">
+        <path d="M-120,-120 L0,15" stroke="url(#metal_fe)" stroke-width="4"/>
+        <ellipse cx="0" cy="18" rx="22" ry="9" fill="#334155" stroke="#1e293b" stroke-width="2"/>
+        <ellipse id="spoonFuel" cx="0" cy="17" rx="15" ry="6" fill="#e2e8f0"/>
+        <circle id="mgGlow" cx="0" cy="10" r="60" fill="#ffffff" opacity="0" filter="url(#softGlow)"/>
+        <circle id="mgCore" cx="0" cy="10" r="18" fill="#f8fafc" opacity="0"/>
+        <ellipse id="sFlame" cx="0" cy="5" rx="20" ry="32" fill="#7c3aed" opacity="0" filter="url(#flameNaturalGlow)"/>
+        <ellipse id="sFlameCore" cx="0" cy="5" rx="10" ry="18" fill="#a78bfa" opacity="0"/>
+      </g>
+      <g transform="translate(750, 180)">
+        <rect x="-110" y="-55" width="220" height="110" rx="12" fill="rgba(10,18,32,0.92)" stroke="#f43f5e" stroke-width="1.5"/>
+        <text x="0" y="-30" fill="#94a3b8" font-size="11" text-anchor="middle">شدت سوختن</text>
+        <text id="combustionReadout" x="0" y="10" fill="#f43f5e" font-family="Courier New" font-size="26" font-weight="700" text-anchor="middle">۰</text>
+        <text id="combustionUnit" x="80" y="10" fill="#64748b" font-family="Courier New" font-size="11">lm</text>
+      </g>`;
+  }
+  else if (exp.type === "ionic_conductivity") {
+    mount.innerHTML = `
+      <g transform="translate(450, 350)">
+        <rect x="-80" y="0" width="160" height="160" rx="8" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2"/>
+        <rect id="condSolution" x="-77" y="30" width="154" height="126" fill="#38bdf8" opacity="0.45"/>
+        <rect x="-40" y="-30" width="14" height="145" rx="2" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+        <rect x="26"  y="-30" width="14" height="145" rx="2" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+      </g>
+      <rect x="160" y="240" width="90" height="60" rx="6" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+      <text x="205" y="275" font-size="12" fill="#38bdf8" font-weight="bold" text-anchor="middle">12V DC</text>
+      <text id="ammeterText" x="205" y="228" font-size="12" fill="#00f5d4" text-anchor="middle" font-family="monospace">0.0 mA</text>
+      <g id="circuitBulb" transform="translate(450, 160)">
+        <circle id="bulbGlowCircle" cx="0" cy="15" r="48" fill="#fde047" opacity="0" filter="url(#softGlow)"/>
+        <circle cx="0" cy="15" r="24" fill="#ffffff" opacity="0.25" stroke="#94a3b8" stroke-width="1.5"/>
+        <path id="filamentLine" d="M-8,22 L-3,5 L3,5 L8,22" fill="none" stroke="#78350f" stroke-width="2"/>
+        <rect x="-12" y="30" width="24" height="14" fill="#64748b"/>
+      </g>
+      <path d="M205,240 L205,120 L450,120 L450,160" fill="none" stroke="#ef4444" stroke-width="3"/>
+      <path d="M450,204 L450,260 L476,260 L476,320" fill="none" stroke="#f59e0b" stroke-width="3"/>
+      <path d="M250,240 L250,290 L410,290 L410,320" fill="none" stroke="#38bdf8" stroke-width="3"/>
+      <g transform="translate(750, 180)">
+        <rect x="-110" y="-55" width="220" height="110" rx="12" fill="rgba(10,18,32,0.92)" stroke="#00f5d4" stroke-width="1.5"/>
+        <text x="0" y="-30" fill="#94a3b8" font-size="11" text-anchor="middle">جریان عبوری</text>
+        <text id="ionicReadout" x="0" y="10" fill="#00f5d4" font-family="Courier New" font-size="26" font-weight="700" text-anchor="middle">۰٫۰</text>
+        <text x="70" y="10" fill="#64748b" font-family="Courier New" font-size="11">mA</text>
+        <text id="ionicState" x="0" y="38" fill="#facc15" font-family="Tahoma" font-size="11" text-anchor="middle">—</text>
+      </g>`;
+  }
+  else if (exp.type === "electrolysis") {
+    mount.innerHTML = `
+      <rect x="355" y="470" width="190" height="65" rx="6" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2"/>
+      <rect x="359" y="485" width="182" height="46" fill="#0ea5e9" opacity="0.35"/>
+      <text x="450" y="555" font-size="11" text-anchor="middle" fill="#94a3b8">ظرف آب + الکترولیت</text>
+      <g transform="translate(410, 480)">
+        <rect x="-18" y="-280" width="36" height="280" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2"/>
+        <rect x="-15" y="-278" width="30" height="276" fill="#0ea5e9" opacity="0.30"/>
+        <rect id="h2Column" x="-15" y="-278" width="30" height="0" fill="#7dd3fc" opacity="0.85"/>
+        <line x1="-15" y1="-220" x2="0" y2="-220" stroke="#fff" stroke-width="1" opacity="0.6"/>
+        <line x1="-15" y1="-160" x2="0" y2="-160" stroke="#fff" stroke-width="1" opacity="0.6"/>
+        <line x1="-15" y1="-100" x2="0" y2="-100" stroke="#fff" stroke-width="1" opacity="0.6"/>
+        <line x1="-15" y1="-40"  x2="0" y2="-40"  stroke="#fff" stroke-width="1" opacity="0.6"/>
+        <text x="0" y="-292" fill="#7dd3fc" font-size="11" font-weight="bold" text-anchor="middle">کاتد (−) — H₂</text>
+        <rect x="-4" y="-282" width="8" height="8" rx="1" fill="#94a3b8"/>
+      </g>
+      <g transform="translate(490, 480)">
+        <rect x="-18" y="-280" width="36" height="280" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2"/>
+        <rect x="-15" y="-278" width="30" height="276" fill="#0ea5e9" opacity="0.30"/>
+        <rect id="o2Column" x="-15" y="-278" width="30" height="0" fill="#fca5a5" opacity="0.85"/>
+        <line x1="-15" y1="-220" x2="0" y2="-220" stroke="#fff" stroke-width="1" opacity="0.6"/>
+        <line x1="-15" y1="-160" x2="0" y2="-160" stroke="#fff" stroke-width="1" opacity="0.6"/>
+        <line x1="-15" y1="-100" x2="0" y2="-100" stroke="#fff" stroke-width="1" opacity="0.6"/>
+        <line x1="-15" y1="-40"  x2="0" y2="-40"  stroke="#fff" stroke-width="1" opacity="0.6"/>
+        <text x="0" y="-292" fill="#fca5a5" font-size="11" font-weight="bold" text-anchor="middle">آند (+) — O₂</text>
+        <rect x="-4" y="-282" width="8" height="8" rx="1" fill="#94a3b8"/>
+      </g>
+      <rect x="380" y="500" width="140" height="26" rx="4" fill="#1e293b" stroke="#475569"/>
+      <text x="450" y="518" font-size="12" fill="#00f5d4" text-anchor="middle" font-family="monospace">DC 6V</text>
+      <text id="h2VolLabel" x="410" y="200" font-size="10" fill="#7dd3fc" text-anchor="middle" font-family="monospace">H₂: 0 mL</text>
+      <text id="o2VolLabel" x="490" y="200" font-size="10" fill="#fca5a5" text-anchor="middle" font-family="monospace">O₂: 0 mL</text>
+      <text id="ratioLabel" x="450" y="230" font-size="11" fill="#00f5d4" text-anchor="middle" font-weight="bold">نسبت H₂:O₂ = ۲:۱</text>
+      <g transform="translate(750, 180)">
+        <rect x="-110" y="-55" width="220" height="110" rx="12" fill="rgba(10,18,32,0.92)" stroke="#00f5d4" stroke-width="1.5"/>
+        <text x="0" y="-30" fill="#94a3b8" font-size="11" text-anchor="middle">هیدروژن تولیدی</text>
+        <text id="electroReadout" x="0" y="10" fill="#00f5d4" font-family="Courier New" font-size="26" font-weight="700" text-anchor="middle">۰٫۰</text>
+        <text x="70" y="10" fill="#64748b" font-family="Courier New" font-size="11">mL</text>
+      </g>`;
+  }
+  else if (exp.type === "nacl_synthesis") {
+    mount.innerHTML = `
+      <g transform="translate(450, 350)">
+        <rect x="-100" y="-130" width="200" height="260" rx="14" fill="#a3e635" opacity="0.20"/>
+        <rect x="-100" y="-130" width="200" height="260" rx="14" fill="url(#pyrexGlassWall)" stroke="#84cc16" stroke-width="2.5"/>
+        <rect id="cl2Gas" x="-96" y="-126" width="192" height="252" rx="12" fill="#a3e635" opacity="0.10"/>
+        <text x="0" y="-105" font-size="13" text-anchor="middle" fill="#bef264" font-weight="bold">Cl₂ (گاز)</text>
+        <ellipse cx="0" cy="60" rx="55" ry="14" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+        <ellipse cx="0" cy="55" rx="45" ry="10" fill="#0f172a"/>
+        <ellipse id="naMetal" cx="0" cy="55" rx="38" ry="8" fill="#fbbf24"/>
+        <text x="0" y="88" font-size="11" text-anchor="middle" fill="#fbbf24">Na (فلز مذاب)</text>
+        <circle id="naclFlash" cx="0" cy="30" r="40" fill="#fef08a" opacity="0" filter="url(#softGlow)"/>
+        <circle id="naclFireball" cx="0" cy="30" r="22" fill="#f59e0b" opacity="0" filter="url(#flameNaturalGlow)"/>
+        <ellipse id="naclDeposit" cx="0" cy="70" rx="0" ry="0" fill="#f8fafc" opacity="0.9"/>
+        <rect x="-55" y="-50" width="110" height="30" rx="5" fill="#0f172a" stroke="#38bdf8"/>
+        <text id="naclTemp" x="0" y="-28" font-size="13" text-anchor="middle" fill="#00f5d4" font-family="monospace" font-weight="bold">۲۵ °C</text>
+        <text x="0" y="-58" font-size="11" text-anchor="middle" fill="#94a3b8">دمای محفظه</text>
+      </g>
+      <g transform="translate(750, 180)">
+        <rect x="-110" y="-55" width="220" height="110" rx="12" fill="rgba(10,18,32,0.92)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="0" y="-30" fill="#94a3b8" font-size="11" text-anchor="middle">دمای محفظه</text>
+        <text id="naclReadout" x="0" y="10" fill="#f59e0b" font-family="Courier New" font-size="26" font-weight="700" text-anchor="middle">۲۵</text>
+        <text x="70" y="10" fill="#64748b" font-family="Courier New" font-size="11">°C</text>
+      </g>`;
+  }
+  else if (exp.type === "ph_rainbow") {
+    mount.innerHTML = `
+      <g transform="translate(280, 300)">
+        <rect x="-45" y="0" width="90" height="200" rx="10" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2"/>
+        <rect id="phLiquid" x="-42" y="25" width="84" height="170" rx="8" fill="#ffffff" opacity="0.85"/>
+        <text id="phValue" x="0" y="115" font-size="20" text-anchor="middle" fill="#0f172a" font-family="monospace" font-weight="bold">?</text>
+        <text x="0" y="160" font-size="11" text-anchor="middle" fill="#0f172a" opacity="0.7">شناساگر</text>
+        <text x="0" y="220" font-size="12" text-anchor="middle" fill="#94a3b8" id="phSampleName">—</text>
+      </g>
+      <g id="phDropper" transform="translate(280, 200)">
+        <rect x="-5" y="0" width="10" height="60" fill="url(#pyrexGlassWall)" stroke="#38bdf8"/>
+        <path d="M-5,60 L0,76 L5,60 Z" fill="#64748b"/>
+        <ellipse cx="0" cy="-10" rx="14" ry="20" fill="#dc2626"/>
+        <rect x="-3" y="20" width="6" height="40" fill="#78350f" opacity="0.8"/>
+      </g>
+      <g transform="translate(480, 250)">
+        <text x="0" y="-20" font-size="13" fill="#00f5d4" font-weight="bold" text-anchor="middle">نوار کامل طیف pH (۰ تا ۱۴)</text>
+        <rect x="0" y="0" width="360" height="60" rx="6" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+        <rect x="6" y="6" width="348" height="48" rx="4" fill="url(#phSpectrum)"/>
+        <g font-size="10" fill="#ffffff" text-anchor="middle" font-weight="bold">
+          <text x="6" y="35">۰</text><text x="55" y="35">۲</text><text x="105" y="35">۴</text>
+          <text x="155" y="35">۶</text><text x="180" y="35">۷</text><text x="205" y="35">۸</text>
+          <text x="255" y="35">۱۰</text><text x="305" y="35">۱۲</text><text x="354" y="35">۱۴</text>
+        </g>
+        <g id="phMarker" opacity="0" transform="translate(180, 0)">
+          <polygon points="0,-8 -8,4 8,4" fill="#facc15" stroke="#000" stroke-width="1"/>
+          <line x1="0" y1="4" x2="0" y2="60" stroke="#facc15" stroke-width="3"/>
+        </g>
+        <text x="180" y="80" font-size="10" fill="#94a3b8" text-anchor="middle">اسیدی | خنثی | بازی</text>
+      </g>
+      <g transform="translate(750, 430)">
+        <rect x="-110" y="-55" width="220" height="110" rx="12" fill="rgba(10,18,32,0.92)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="0" y="-30" fill="#94a3b8" font-size="11" text-anchor="middle">شاخص pH</text>
+        <text id="phReadout" x="0" y="10" fill="#a78bfa" font-family="Courier New" font-size="26" font-weight="700" text-anchor="middle">—</text>
+        <text id="phClass" x="0" y="38" fill="#facc15" font-family="Tahoma" font-size="11" text-anchor="middle">—</text>
+      </g>`;
+  }
+  else if (exp.type === "barium_precipitate") {
+    mount.innerHTML = `
+      <g transform="translate(450, 330)">
+        <rect x="-75" y="0" width="150" height="190" rx="8" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2"/>
+        <path id="precipFluid" d="M-73,45 L73,45 L73,184 C73,188 50,190 0,190 C-50,190 -73,188 -73,184 Z" fill="#7dd3fc" opacity="0.35"/>
+        <text id="precipLabel" x="0" y="110" font-size="12" text-anchor="middle" fill="#ffffff" opacity="0.75">BaCl₂ شفاف</text>
+      </g>
+      <g transform="translate(450, 150)">
+        <polygon points="-25,0 25,0 8,80 -8,80" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="1.5"/>
+        <line x1="0" y1="80" x2="0" y2="150" stroke="#38bdf8" stroke-width="5" opacity="0.6"/>
+        <ellipse cx="0" cy="0" rx="25" ry="6" fill="#38bdf8" opacity="0.5"/>
+        <text x="0" y="-12" font-size="10" text-anchor="middle" fill="#38bdf8">Na₂SO₄</text>
+      </g>
+      <g transform="translate(750, 180)">
+        <rect x="-110" y="-55" width="220" height="110" rx="12" fill="rgba(10,18,32,0.92)" stroke="#00f5d4" stroke-width="1.5"/>
+        <text x="0" y="-30" fill="#94a3b8" font-size="11" text-anchor="middle">کدورت محلول</text>
+        <text id="precipReadout" x="0" y="10" fill="#00f5d4" font-family="Courier New" font-size="26" font-weight="700" text-anchor="middle">۰</text>
+        <text x="70" y="10" fill="#64748b" font-family="Courier New" font-size="11">NTU</text>
+      </g>`;
+  }
+  else if (exp.type === "oil_fraction") {
+    mount.innerHTML = `
+      <g transform="translate(450, 290)">
+        <ellipse cx="0" cy="50" rx="58" ry="52" fill="#0f172a" stroke="#38bdf8" stroke-width="2.5"/>
+        <path id="crudeOilFill" d="M-53,50 C-53,88 -28,100 0,100 C28,100 53,88 53,50 Z" fill="#1e293b" opacity="0.95"/>
+        <text x="0" y="80" font-size="11" text-anchor="middle" fill="#fbbf24" font-weight="bold">نفت خام</text>
+        <rect x="-12" y="-180" width="24" height="230" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2"/>
+        <line x1="-12" y1="-150" x2="-2" y2="-150" stroke="#fff" stroke-width="1" opacity="0.6"/>
+        <line x1="-12" y1="-120" x2="-2" y2="-120" stroke="#fff" stroke-width="1" opacity="0.6"/>
+        <line x1="-12" y1="-90"  x2="-2" y2="-90"  stroke="#fff" stroke-width="1" opacity="0.6"/>
+        <line x1="-12" y1="-60"  x2="-2" y2="-60"  stroke="#fff" stroke-width="1" opacity="0.6"/>
+        <line x1="-12" y1="-30"  x2="-2" y2="-30"  stroke="#fff" stroke-width="1" opacity="0.6"/>
+        <rect x="-3" y="-220" width="6" height="45" fill="#f8fafc" stroke="#94a3b8" stroke-width="1"/>
+        <circle cx="0" cy="-215" r="6" fill="#ef4444"/>
+        <text id="oilTempLabel" x="0" y="-230" font-size="12" text-anchor="middle" fill="#f87171" font-family="monospace" font-weight="bold">۲۵ °C</text>
+        <path d="M12,-150 L120,-150" stroke="#38bdf8" stroke-width="14" fill="none" opacity="0.30"/>
+        <path d="M12,-150 L120,-150" stroke="#ffffff" stroke-width="3" fill="none"/>
+        <rect x="120" y="-180" width="160" height="60" rx="8" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2"/>
+        <line x1="135" y1="-150" x2="265" y2="-150" stroke="#94a3b8" stroke-width="10" opacity="0.4"/>
+        <line x1="135" y1="-150" x2="265" y2="-150" stroke="#e2e8f0" stroke-width="3"/>
+        <text x="200" y="-195" font-size="10" text-anchor="middle" fill="#38bdf8">کندانسور (سرد)</text>
+        <text x="200" y="-110" font-size="10" text-anchor="middle" fill="#94a3b8">آب خنک‌کننده</text>
+        <path d="M280,-150 L280,-60 L280,20 L280,110" stroke="#38bdf8" stroke-width="14" fill="none" opacity="0.30"/>
+        <path d="M280,-150 L280,-60 L280,20 L280,110" stroke="#ffffff" stroke-width="3" fill="none"/>
+        <rect x="200" y="110" width="130" height="130" rx="8" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2"/>
+        <path id="collectedFluid" d="M202,240 L328,240 L328,240 C328,242 265,242 265,242 C265,242 202,242 202,240 Z" fill="#fef08a" opacity="0"/>
+        <text id="fractionName" x="265" y="260" font-size="13" text-anchor="middle" fill="#00f5d4" font-weight="bold">—</text>
+        <text id="fractionPurity" x="265" y="278" font-size="11" text-anchor="middle" fill="#facc15">—</text>
+        <text id="fractionRange" x="265" y="296" font-size="10" text-anchor="middle" fill="#94a3b8">—</text>
+      </g>
+      <g transform="translate(60, 210)">
+        <text x="0" y="0" font-size="13" fill="#00f5d4" font-weight="bold">برش‌های نفت خام:</text>
+        <g font-size="11" fill="#cbd5e1">
+          <text x="0" y="25">• گازهای سبک: ۲۵-۴۰°C</text>
+          <text x="0" y="45">• بنزین: ۴۰-۱۰۰°C</text>
+          <text x="0" y="65">• نفت سفید: ۱۰۰-۱۸۰°C</text>
+          <text x="0" y="85">• گازوئیل: ۱۸۰-۲۵۰°C</text>
+          <text x="0" y="105">• روغن سنگین: ۲۵۰-۳۵۰°C</text>
+          <text x="0" y="125">• قیر: بیش از ۳۵۰°C</text>
+        </g>
+      </g>`;
+  }
+  else if (exp.type === "viscosity_test") {
+    mount.innerHTML = `
+      <g transform="translate(450, 190)">
+        <rect x="-38" y="0" width="76" height="330" rx="8" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2"/>
+        <rect id="viscLiquid" x="-35" y="20" width="70" height="305" rx="4" fill="#f59e0b" opacity="0.55"/>
+        <circle id="steelSphere" cx="0" cy="34" r="11" fill="url(#metal_fe)" stroke="#0f172a"/>
+        <line x1="-34" y1="60"  x2="-18" y2="60"  stroke="#fff" opacity="0.55"/>
+        <line x1="-34" y1="120" x2="-18" y2="120" stroke="#fff" opacity="0.55"/>
+        <line x1="-34" y1="180" x2="-18" y2="180" stroke="#fff" opacity="0.55"/>
+        <line x1="-34" y1="240" x2="-18" y2="240" stroke="#fff" opacity="0.55"/>
+        <line x1="-34" y1="300" x2="-18" y2="300" stroke="#fff" opacity="0.55"/>
+        <text id="viscTimer" x="0" y="355" font-size="13" text-anchor="middle" fill="#00f5d4" font-family="monospace" font-weight="bold">t = 0.00 s</text>
+        <text id="viscState" x="0" y="375" font-size="11" text-anchor="middle" fill="#facc15">در حال سقوط...</text>
+      </g>
+      <g transform="translate(750, 180)">
+        <rect x="-110" y="-55" width="220" height="110" rx="12" fill="rgba(10,18,32,0.92)" stroke="#00f5d4" stroke-width="1.5"/>
+        <text x="0" y="-30" fill="#94a3b8" font-size="11" text-anchor="middle">زمان سقوط گوی</text>
+        <text id="viscReadout" x="0" y="10" fill="#00f5d4" font-family="Courier New" font-size="26" font-weight="700" text-anchor="middle">۰٫۰۰</text>
+        <text x="80" y="10" fill="#64748b" font-family="Courier New" font-size="11">s</text>
+        <text id="viscDepth" x="0" y="38" fill="#facc15" font-family="Courier New" font-size="12" text-anchor="middle">عمق: ۰٫۰ cm</text>
+      </g>`;
+  }
+  else if (exp.type === "limewater_co2") {
+    mount.innerHTML = `
+      <g transform="translate(280, 470)">
+        <rect x="-16" y="-45" width="32" height="62" rx="3" fill="#f8fafc"/>
+        <line x1="0" y1="-45" x2="0" y2="-58" stroke="#000" stroke-width="2"/>
+        <path id="candleFlame" d="M0,-58 Q-7,-74 0,-90 Q7,-74 0,-58 Z" fill="#f59e0b" filter="url(#flameNaturalGlow)"/>
+        <polygon points="-42,-115 42,-115 9,-165 -9,-165" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2"/>
+        <text x="0" y="-100" font-size="10" text-anchor="middle" fill="#38bdf8">شمع</text>
+      </g>
+      <path d="M280,310 L280,230 L520,230 L520,420" fill="none" stroke="#38bdf8" stroke-width="7" opacity="0.35"/>
+      <path d="M280,310 L280,230 L520,230 L520,420" fill="none" stroke="#ffffff" stroke-width="2"/>
+      <g transform="translate(520, 340)">
+        <rect x="-22" y="0" width="44" height="170" rx="10" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2"/>
+        <path id="limewaterFill" d="M-19,60 L19,60 L19,158 C19,164 12,166 0,166 C-12,166 -19,164 -19,158 Z" fill="#e2e8f0" opacity="0.25"/>
+        <text x="0" y="-8" font-size="10" text-anchor="middle" fill="#38bdf8">آب‌آهک</text>
+      </g>
+      <g transform="translate(750, 180)">
+        <rect x="-110" y="-55" width="220" height="110" rx="12" fill="rgba(10,18,32,0.92)" stroke="#00f5d4" stroke-width="1.5"/>
+        <text x="0" y="-30" fill="#94a3b8" font-size="11" text-anchor="middle">کدورت آب‌آهک</text>
+        <text id="limeReadout" x="0" y="10" fill="#00f5d4" font-family="Courier New" font-size="26" font-weight="700" text-anchor="middle">۰</text>
+        <text x="70" y="10" fill="#64748b" font-family="Courier New" font-size="11">٪</text>
+      </g>`;
+  }
+  else if (exp.type === "greenhouse_chamber") {
+    mount.innerHTML = `
+      <g transform="translate(450, 330)">
+        <rect x="-110" y="-130" width="220" height="230" rx="16" fill="url(#pyrexGlassWall)" stroke="#38bdf8" stroke-width="2.5"/>
+        <rect id="co2Fog" x="-108" y="-128" width="216" height="226" rx="14" fill="rgba(56,189,248,0.1)"/>
+        <path d="M-60,-180 L60,-180 L40,-140 L-40,-140 Z" fill="#b91c1c" stroke="#dc2626"/>
+        <circle cx="0" cy="-135" r="20" fill="#ef4444" filter="url(#softGlow)"/>
+        <g id="irRays" stroke="#f97316" stroke-width="2" opacity="0.55" fill="none">
+          <path d="M-60,60 L-60,-90 M-20,60 L-20,-90 M20,60 L20,-90 M60,60 L60,-90"/>
+        </g>
+        <rect x="-55" y="15" width="110" height="36" rx="4" fill="#0f172a" stroke="#38bdf8"/>
+        <text id="chamberTemp" x="0" y="40" fill="#00f5d4" font-family="monospace" font-size="16" font-weight="bold" text-anchor="middle">۲۵٫۰ °C</text>
+      </g>
+      <g transform="translate(750, 180)">
+        <rect x="-110" y="-55" width="220" height="110" rx="12" fill="rgba(10,18,32,0.92)" stroke="#f43f5e" stroke-width="1.5"/>
+        <text x="0" y="-30" fill="#94a3b8" font-size="11" text-anchor="middle">دمای محفظه</text>
+        <text id="greenReadout" x="0" y="10" fill="#f43f5e" font-family="Courier New" font-size="26" font-weight="700" text-anchor="middle">۲۵٫۰</text>
+        <text x="80" y="10" fill="#64748b" font-family="Courier New" font-size="11">°C</text>
+      </g>`;
+  }
+  else if (exp.type === "soot_combustion") {
+    mount.innerHTML = `
+      <g transform="translate(450, 330)">
+        <ellipse cx="0" cy="0" rx="78" ry="17" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+        <ellipse id="sootDeposit" cx="0" cy="1" rx="58" ry="12" fill="#090d16" opacity="0"/>
+        <path d="M-150,-55 L-72,2" stroke="#64748b" stroke-width="6"/>
+        <text x="0" y="-24" font-size="11" text-anchor="middle" fill="#94a3b8">شیشه ساعت</text>
+      </g>
+      <g transform="translate(750, 180)">
+        <rect x="-110" y="-55" width="220" height="110" rx="12" fill="rgba(10,18,32,0.92)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="0" y="-30" fill="#94a3b8" font-size="11" text-anchor="middle">تراکم دوده</text>
+        <text id="sootReadout" x="0" y="10" fill="#f59e0b" font-family="Courier New" font-size="26" font-weight="700" text-anchor="middle">۰</text>
+        <text x="70" y="10" fill="#64748b" font-family="Courier New" font-size="11">ppm</text>
+      </g>`;
+  }
+}
+
+/* ============================================================
+   APPLY SUBSTANCE VISUALS
+   ============================================================ */
+function applySubstanceVisuals() {
+  const exp = CHEM_DATABASE[currentChap][currentExpIdx];
+  const item = exp.items[activeItemIdx];
+  if (!item) return;
+
+  if (exp.type === "metal_acid") updateMetalBeaker(item);
+  else if (exp.type === "fe_cuso4") {
+    const nail = document.getElementById("nailBody");
+    const tip  = document.getElementById("nailTip");
+    const head = document.getElementById("nailHead");
+    if (nail && tip && head) {
+      nail.setAttribute("fill", item.nailFill);
+      tip.setAttribute("fill", item.nailFill);
+      head.setAttribute("fill", "#475569");
+    }
+  }
+  else if (exp.type === "starch_test") {
+    const well = document.getElementById("wellTarget");
+    const ctrl = document.getElementById("wellControl");
+    if (well) well.setAttribute("fill", "#ffffff");
+    if (ctrl) ctrl.setAttribute("fill", "#ffffff");
+    const res = document.getElementById("starchResult");
+    if (res) res.textContent = "در انتظار…";
+  }
+  else if (exp.type === "combustion_mg_s") {
+    const spoon = document.getElementById("spoonFuel");
+    if (spoon) spoon.setAttribute("fill", item.color);
+    ["mgGlow","mgCore","sFlame","sFlameCore"].forEach(id => {
+      const e = document.getElementById(id);
+      if (e) e.setAttribute("opacity", "0");
+    });
+    const unit = document.getElementById("combustionUnit");
+    if (unit) unit.textContent = item.isMg ? "lm" : "mL";
+  }
+  else if (exp.type === "ionic_conductivity") {
+    const sol = document.getElementById("condSolution");
+    if (sol) sol.setAttribute("fill", item.color);
+    const amm = document.getElementById("ammeterText");
+    if (amm) amm.textContent = "0.0 mA";
+  }
+  else if (exp.type === "ph_rainbow") {
+    const liq = document.getElementById("phLiquid");
+    const val = document.getElementById("phValue");
+    const marker = document.getElementById("phMarker");
+    const name = document.getElementById("phSampleName");
+    if (liq) { liq.setAttribute("fill", "#ffffff"); liq.setAttribute("opacity", "0.85"); }
+    if (val) val.textContent = "?";
+    if (marker) marker.setAttribute("opacity", "0");
+    if (name) name.textContent = item.name;
+  }
+  else if (exp.type === "viscosity_test") {
+    const liq = document.getElementById("viscLiquid");
+    const sphere = document.getElementById("steelSphere");
+    if (liq) liq.setAttribute("fill", item.color);
+    if (sphere) sphere.setAttribute("cy", "34");
+    viscDone = false;
+    const t = document.getElementById("viscTimer");
+    const s = document.getElementById("viscState");
+    if (t) t.textContent = "t = 0.00 s";
+    if (s) { s.textContent = "در حال سقوط..."; s.setAttribute("fill", "#facc15"); }
+  }
+  else if (exp.type === "greenhouse_chamber") {
+    const fog = document.getElementById("co2Fog");
+    if (fog) fog.setAttribute("fill", item.color);
+    const t = document.getElementById("chamberTemp");
+    if (t) t.textContent = "۲۵٫۰ °C";
+  }
+  else if (exp.type === "barium_precipitate") {
+    const fluid = document.getElementById("precipFluid");
+    const lbl = document.getElementById("precipLabel");
+    if (fluid) { fluid.setAttribute("fill", "#7dd3fc"); fluid.setAttribute("opacity", "0.35"); }
+    if (lbl) { lbl.textContent = "BaCl₂ شفاف"; lbl.setAttribute("opacity", "0.75"); }
+  }
+  else if (exp.type === "soot_combustion") {
+    const soot = document.getElementById("sootDeposit");
+    if (soot) { soot.setAttribute("opacity", "0"); soot.setAttribute("fill", "#090d16"); }
+  }
+  else if (exp.type === "oil_fraction") {
+    const dist = document.getElementById("collectedFluid");
+    if (dist) { dist.setAttribute("opacity", "0"); dist.setAttribute("fill", "#fef08a"); }
+    collectedFractions = [];
+    const fn = document.getElementById("fractionName");
+    const fp = document.getElementById("fractionPurity");
+    const fr = document.getElementById("fractionRange");
+    if (fn) fn.textContent = "—";
+    if (fp) fp.textContent = "—";
+    if (fr) fr.textContent = "—";
+  }
+  else if (exp.type === "limewater_co2") {
+    const lime = document.getElementById("limewaterFill");
+    if (lime) { lime.setAttribute("fill", "#e2e8f0"); lime.setAttribute("opacity", "0.25"); }
+  }
+  else if (exp.type === "electrolysis") {
+    const h2 = document.getElementById("h2Column");
+    const o2 = document.getElementById("o2Column");
+    if (h2) h2.setAttribute("height", "0");
+    if (o2) o2.setAttribute("height", "0");
+    const h2l = document.getElementById("h2VolLabel");
+    const o2l = document.getElementById("o2VolLabel");
+    if (h2l) h2l.textContent = "H₂: 0 mL";
+    if (o2l) o2l.textContent = "O₂: 0 mL";
+  }
+  else if (exp.type === "nacl_synthesis") {
+    const dep = document.getElementById("naclDeposit");
+    if (dep) { dep.setAttribute("rx", "0"); dep.setAttribute("ry", "0"); }
+    const flash = document.getElementById("naclFlash");
+    const fb = document.getElementById("naclFireball");
+    if (flash) flash.setAttribute("opacity", "0");
+    if (fb) fb.setAttribute("opacity", "0");
+  }
+}
+
+function updateMetalBeaker(item) {
+  const strip = document.getElementById("metalStrip");
+  const hl = document.getElementById("specimenHighlight");
+  if (!strip || !hl) return;
+
+  const volDisplaced = specimenMass / item.density;
+  const s = Math.cbrt(Math.max(0.015, volDisplaced));
+  const w0 = Math.min(64, Math.max(14, 40 * s));
+  const h0 = Math.min(50, Math.max(10, 28 * s));
+  const maxH2 = computeMaxH2(item);
+  const conv = maxH2 > 0 ? Math.min(1, reactionYield / maxH2) : 0;
+  const w = w0 * (1 - 0.85 * conv);
+  const h = h0 * (1 - 0.70 * conv);
+
+  const bottomY = 168;
+  const x = -w / 2;
+  const y = bottomY - h;
+
+  strip.setAttribute("x", x);
+  strip.setAttribute("y", y);
+  strip.setAttribute("width", Math.max(2, w));
+  strip.setAttribute("height", Math.max(2, h));
+  strip.setAttribute("fill", item.fill);
+
+  hl.setAttribute("x1", x + 3);
+  hl.setAttribute("y1", y + 2);
+  hl.setAttribute("x2", x + Math.max(4, w - 3));
+  hl.setAttribute("y2", y + 2);
+
+  const totalVol = reactantVolume + volDisplaced;
+  const liquidY = Math.max(14, 170 - (totalVol * 0.36));
+  const men = document.getElementById("liquidMeniscus");
+  const lp  = document.getElementById("liquidPath");
+  if (men) men.setAttribute("cy", liquidY);
+  if (lp) lp.setAttribute("d", `M-82,${liquidY} L82,${liquidY} L82,162 C82,168 65,170 0,170 C-65,170 -82,168 -82,162 Z`);
+}
+
+function computeMaxH2(item) {
+  if (!item.atomicMass || !item.h2) return 0;
+  const metalLimit = (specimenMass / item.atomicMass) * item.h2 * 22400;
+  const acidLimit  = (reactantVolume / 1000) * 1.0 / 2 * 22400;
+  return Math.max(0, Math.min(metalLimit, acidLimit));
+}
+
+/* ============================================================
+   HEAT
+   ============================================================ */
+function setHeatIntensity(val) {
+  heatIntensity = parseInt(val);
+  const exp = CHEM_DATABASE[currentChap][currentExpIdx];
+  if (exp.type === "oil_fraction") {
+    const t = 25 + heatIntensity * 4.75;
+    document.getElementById("lblHeat").textContent = heatIntensity === 0 ? "۲۵ °C (خاموش)" : `${t.toFixed(0)} °C`;
+  } else {
+    const t = 25 + heatIntensity * 0.75;
+    document.getElementById("lblHeat").textContent = heatIntensity === 0 ? "۲۵ °C (خاموش)" : `${t.toFixed(0)} °C`;
+  }
+  if (exp.type === "metal_acid") updateMetalBeaker(exp.items[activeItemIdx]);
+}
+
+/* ============================================================
+   SIM CONTROL
+   ============================================================ */
+function toggleChemSim() {
+  if (simComplete) { resetChemExp(true); return; }
+  isSimulating = !isSimulating;
+  const btn = document.getElementById("btnRun");
+  if (isSimulating) {
+    btn.innerHTML = "⏸ توقف فرآیند";
+    btn.style.background = "linear-gradient(135deg, #e11d48, #be123c)";
+    document.getElementById("txtSimState").textContent = "فرآیند واکنش در جریان است…";
+  } else {
+    btn.innerHTML = "▶ ادامه واکنش";
+    btn.style.background = "linear-gradient(135deg, #0369a1, #00f5d4)";
+    document.getElementById("txtSimState").textContent = "واکنش معلق گردید";
+  }
+}
+
+function resetChemExp(rebuild) {
+  isSimulating = false;
+  simComplete = false;
+  simTime = 0;
+  primaryMetric = 0;
+  chartSeries = [];
+  particles = [];
+  lastChartPush = 0;
+  reactionYield = 0;
+  currentTemp = 25;
+  bubbleAccumulator = 0;
+  starchDropProgress = 0;
+  phDropProgress = 0;
+  viscDone = false;
+  collectedFractions = [];
+
+  const btn = document.getElementById("btnRun");
+  if (btn) { btn.innerHTML = "▶ آغاز واکنش شیمیایی"; btn.style.background = "linear-gradient(135deg, #0369a1, #00f5d4)"; }
+  const st = document.getElementById("txtSimState");
+  if (st) st.textContent = "آماده آزمایش";
+  const dot = document.getElementById("statusDot");
+  if (dot) { dot.style.background = "var(--accent-emerald)"; dot.style.boxShadow = "0 0 8px var(--accent-emerald)"; dot.style.animation = "dot-pulse-simple 1.6s ease-in-out infinite"; }
+  const pLayer = document.getElementById("particleLayer");
+  if (pLayer) pLayer.innerHTML = "";
+  hideResults();
+  renderChart();
+  if (rebuild) {
+    const exp = CHEM_DATABASE[currentChap][currentExpIdx];
+    if (exp) { buildApparatusSVG(exp); applySubstanceVisuals(); updateDescBanner(exp, exp.items[activeItemIdx]); }
+  }
+}
+
+/* ============================================================
+   PARTICLE SYSTEM
+   ============================================================ */
+function spawnParticle(x, y, opts = {}) {
+  if (!particlesEnabled) return;
+  if (particles.length > 400) particles.shift();
+  particles.push({
+    x, y,
+    vx: opts.vx ?? (Math.random() - 0.5) * 60,
+    vy: opts.vy ?? (Math.random() - 0.8) * 60,
+    r: opts.r ?? 2.5,
+    life: opts.life ?? 1.0,
+    maxLife: opts.life ?? 1.0,
+    color: opts.color ?? "#94a3b8",
+    gravity: opts.gravity ?? 0,
+    type: opts.type ?? "generic",
+    popY: opts.popY ?? null
+  });
+}
+
+function updateParticles(dt) {
+  const layer = document.getElementById("particleLayer");
+  if (!layer) return;
+  let html = "";
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.vy += p.gravity * dt;
+    p.life -= dt;
+    if (p.life <= 0) { particles.splice(i, 1); continue; }
+    if (p.type === "bubble" && p.popY !== null && p.y <= p.popY) { particles.splice(i, 1); continue; }
+    if (p.y < -60) { particles.splice(i, 1); continue; }
+    const alpha = Math.max(0, p.life / p.maxLife);
+    html += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(1)}" fill="${p.color}" opacity="${alpha.toFixed(2)}"/>`;
+  }
+  layer.innerHTML = html;
+}
+
+/* ============================================================
+   MAIN LOOP
+   ============================================================ */
+function chemEngineLoop(now) {
+  if (!lastFrameTime) lastFrameTime = now;
+  let dt = (now - lastFrameTime) / 1000;
+  lastFrameTime = now;
+  if (!isFinite(dt) || dt <= 0) dt = 0.016;
+  if (dt > 0.1) dt = 0.1;
+
+  renderBurnerFlame();
+
+  if (isSimulating && !simComplete) {
+    const step = dt * simSpeed;
+    simTime += step;
+    computeChemistry(step);
+  }
+  updateParticles(dt);
+  requestAnimationFrame(chemEngineLoop);
+}
+
+/* ============================================================
+   PHYSICS / CHEMISTRY
+   ============================================================ */
+function computeChemistry(dt) {
+  const exp = CHEM_DATABASE[currentChap][currentExpIdx];
+  const item = exp.items[activeItemIdx];
+  const tel = document.getElementById("txtTelemetry");
+
+  switch (exp.type) {
+
+    case "metal_acid": {
+      const tempK = 298 + heatIntensity * 0.75;
+      currentTemp = 25 + heatIntensity * 0.75;
+      const arrhenius = Math.exp(3.0 * (1 - 298 / tempK));
+      const maxH2 = computeMaxH2(item);
+
+      if (item.noReaction) {
+        primaryMetric = 0;
+        const readout = document.getElementById("h2Readout");
+        if (readout) readout.textContent = "۰٫۰";
+        document.getElementById("txtSimState").textContent =
+          `${item.name} زیر H در سری واکنش‌پذیری است؛ واکنشی رخ نمی‌دهد.`;
+        // Finish immediately
+        if (!simComplete) {
+          setTimeout(() => {
+            finishExperiment([
+              { label: "فلز انتخاب‌شده", value: item.name },
+              { label: "جایگاه در سری واکنش‌پذیری", value: "پایین‌تر از هیدروژن" },
+              { label: "واکنش با HCl رقیق", value: "انجام نمی‌شود" },
+              { label: "نتیجه", value: "هیچ گاز هیدروژنی تولید نشد" }
+            ], "H2");
+          }, 800);
+        }
+      } else if (maxH2 > 0 && reactionYield < maxH2) {
+        const conv = reactionYield / maxH2;
+        const rate = item.k * 8 * arrhenius * Math.pow(Math.max(0.02, 1 - conv), 0.6);
+        reactionYield = Math.min(maxH2, reactionYield + rate * dt);
+        primaryMetric = reactionYield;
+        bubbleAccumulator += rate * dt * 0.55;
+        let emitted = 0;
+        while (bubbleAccumulator >= 1 && emitted < 6) {
+          bubbleAccumulator -= 1; emitted++;
+          spawnParticle(
+            450 + (Math.random() - 0.5) * 30,
+            380 + (Math.random() - 0.5) * 14,
+            { vx: (Math.random() - 0.5) * 18, vy: -(50 + Math.random() * 60),
+              r: 1.4 + Math.random() * 2.2, life: 1.0, color: "#ffffff",
+              type: "bubble", popY: 230 }
+          );
+        }
+        updateMetalBeaker(item);
+        const ro = document.getElementById("h2Readout");
+        if (ro) ro.textContent = reactionYield.toFixed(1);
+        const mn = document.getElementById("metalNameLbl");
+        if (mn) mn.textContent = item.name;
+        document.getElementById("txtSimState").textContent =
+          `${item.name} + HCl — H₂ تولیدی: ${reactionYield.toFixed(1)} از ${maxH2.toFixed(1)} mL`;
+      } else if (reactionYield >= maxH2 && maxH2 > 0) {
+        primaryMetric = reactionYield;
+        if (!simComplete) {
+          finishExperiment([
+            { label: "فلز", value: item.name },
+            { label: "جرم فلز", value: `${specimenMass.toFixed(2)} g` },
+            { label: "حجم اسید", value: `${reactantVolume.toFixed(0)} mL (1M)` },
+            { label: "حجم H₂ تولیدی", value: `${reactionYield.toFixed(1)} mL` },
+            { label: "واکنش‌دهنده محدودکننده", value: reactionYield >= (specimenMass/item.atomicMass)*item.h2*22400 - 0.5 ? "فلز" : "اسید" }
+          ], "H2");
+        }
+      }
+      if (tel) tel.textContent = `T: ${currentTemp.toFixed(1)} °C | H₂: ${reactionYield.toFixed(1)} mL`;
+      break;
+    }
+
+    case "catalyst_h2o2": {
+      currentTemp = 25 + heatIntensity * 0.75;
+      const max = 100;
+      if (reactionYield < max) {
+        const rate = item.k * 1.6 * (1 + heatIntensity / 100);
+        reactionYield = Math.min(max, reactionYield + rate * dt);
+        primaryMetric = reactionYield;
+        bubbleAccumulator += rate * dt * 0.9;
+        let emitted = 0;
+        while (bubbleAccumulator >= 1 && emitted < 8) {
+          bubbleAccumulator -= 1; emitted++;
+          spawnParticle(
+            280 + (Math.random() - 0.5) * 55,
+            490,
+            { vx: (Math.random() - 0.5) * 20, vy: -(60 + Math.random() * 70),
+              r: 1.8 + Math.random() * 2.2, life: 1.0,
+              color: item.k > 4 ? "#ffffff" : "#bae6fd",
+              type: "bubble", popY: 340 }
+          );
+        }
+        const pocket = document.getElementById("o2GasPocket");
+        if (pocket) pocket.setAttribute("height", ((reactionYield / max) * 190).toFixed(1));
+        const lbl = document.getElementById("o2VolLabel");
+        if (lbl) lbl.textContent = `O₂: ${reactionYield.toFixed(0)} mL`;
+        const ro = document.getElementById("h2Readout");
+        if (ro) ro.textContent = reactionYield.toFixed(1);
+        document.getElementById("txtSimState").textContent =
+          `${item.name} — ${item.desc} | O₂: ${reactionYield.toFixed(1)} mL`;
+      } else if (!simComplete) {
+        finishExperiment([
+          { label: "کاتالیزگر", value: item.name },
+          { label: "شرح", value: item.desc },
+          { label: "حجم O₂ آزادشده", value: `${reactionYield.toFixed(1)} mL` },
+          { label: "نتیجه", value: "کاتالیزگر سرعت واکنش را افزایش داد" }
+        ], "O2");
+      }
+      if (tel) tel.textContent = `T: ${currentTemp.toFixed(1)} °C | O₂: ${reactionYield.toFixed(1)} mL`;
+      break;
+    }
+
+    case "fe_cuso4": {
+      currentTemp = 25;
+      const max = 250;
+      if (reactionYield < max) {
+        reactionYield = Math.min(max, reactionYield + item.k * 25 * dt);
+        primaryMetric = reactionYield;
+        const nail = document.getElementById("nailBody");
+        const tip  = document.getElementById("nailTip");
+        const head = document.getElementById("nailHead");
+        if (nail && tip && head) {
+          const conv = reactionYield / max;
+          const copper = `rgb(${Math.round(100 + 90 * conv)}, ${Math.round(60 + 45 * conv)}, ${Math.round(30 + 20 * conv)})`;
+          nail.setAttribute("fill", copper);
+          tip.setAttribute("fill", copper);
+        }
+        const fluid = document.getElementById("cuso4Fluid");
+        const lbl = document.getElementById("cuLabel");
+        if (fluid) {
+          const c = reactionYield / max;
+          const r = Math.round(2 + 100 * c);
+          const g = Math.round(132 + 100 * c);
+          const b = Math.round(199 - 60 * c);
+          fluid.setAttribute("fill", `rgb(${r},${g},${b})`);
+          fluid.setAttribute("opacity", (0.75 - 0.25 * c).toFixed(2));
+        }
+        if (lbl) {
+          const c = reactionYield / max;
+          lbl.textContent = c > 0.6 ? "FeSO₄ (سبز کم‌رنگ)" : "CuSO₄ (آبی)";
+          lbl.setAttribute("fill", c > 0.6 ? "#14532d" : "#ffffff");
+        }
+        const ro = document.getElementById("cuYieldReadout");
+        if (ro) ro.textContent = reactionYield.toFixed(1);
+        document.getElementById("txtSimState").textContent =
+          `جانشینی — مس رسوب‌کرده: ${reactionYield.toFixed(1)} mg`;
+      } else if (!simComplete) {
+        finishExperiment([
+          { label: "فلز جایگزین", value: item.name },
+          { label: "جرم مس رسوب‌کرده", value: `${reactionYield.toFixed(1)} mg` },
+          { label: "رنگ محلول", value: "از آبی به سبز کم‌رنگ تغییر کرد" },
+          { label: "نتیجه", value: "فلز فعال‌تر، مس را جانشین کرد" }
+        ], "Cu");
+      }
+      if (tel) tel.textContent = `T: ${currentTemp.toFixed(1)} °C | Cu: ${reactionYield.toFixed(1)} mg`;
+      break;
+    }
+
+    case "starch_test": {
+      currentTemp = 25;
+      if (starchDropProgress < 1) {
+        starchDropProgress = Math.min(1, starchDropProgress + dt / 1.4);
+        const drop = document.getElementById("iodineDropper");
+        if (drop) drop.setAttribute("transform", `translate(370, ${220 + 20 * starchDropProgress})`);
+      }
+      if (reactionYield < 100 && starchDropProgress > 0.35) {
+        reactionYield = Math.min(100, reactionYield + 70 * dt);
+      }
+      primaryMetric = reactionYield;
+      const well = document.getElementById("wellTarget");
+      const ctrl = document.getElementById("wellControl");
+      const p = reactionYield / 100;
+
+      if (well) {
+        if (item.starch) {
+          const r = Math.round(255 - 245 * p);
+          const g = Math.round(255 - 235 * p);
+          const b = Math.round(255 - 175 * p);
+          well.setAttribute("fill", `rgb(${r},${g},${b})`);
+        } else {
+          const r = Math.round(255 - 55 * p);
+          const g = Math.round(255 - 110 * p);
+          const b = Math.round(255 - 190 * p);
+          well.setAttribute("fill", `rgb(${r},${g},${b})`);
+        }
+      }
+      if (ctrl) {
+        const r = Math.round(255 - 55 * p);
+        const g = Math.round(255 - 110 * p);
+        const b = Math.round(255 - 190 * p);
+        ctrl.setAttribute("fill", `rgb(${r},${g},${b})`);
+      }
+      const res = document.getElementById("starchResult");
+      const pct = document.getElementById("starchPct");
+      if (res) res.textContent = item.starch ? "آبی تیره — نشاسته دارد ✓" : "قهوه‌ای-کهربایی — نشاسته ندارد ✗";
+      if (pct) pct.textContent = toFa(reactionYield.toFixed(0)) + "٪";
+
+      if (reactionYield >= 99.5 && !simComplete) {
+        finishExperiment([
+          { label: "نمونه آزمایش", value: item.name },
+          { label: "نتیجه آزمون ید", value: item.starch ? "کمپلکس آبی-سیاه (مثبت)" : "رنگ قهوه‌ای-کهربایی (منفی)" },
+          { label: "وجود نشاسته", value: item.starch ? "دارد ✓" : "ندارد ✗" },
+          { label: "توضیح", value: "نشاسته با ید کمپلکس رنگی می‌سازد" }
+        ], "I2");
+      }
+      document.getElementById("txtSimState").textContent = item.starch
+        ? `کمپلکس نشاسته-ید → آبی تیره (${reactionYield.toFixed(0)}٪)`
+        : `${item.name} فاقد نشاسته — رنگ ید قهوه‌ای-کهربایی`;
+      if (tel) tel.textContent = `T: 25.0 °C | شدت واکنش رنگ: ${reactionYield.toFixed(0)}٪`;
+      break;
+    }
+
+    case "combustion_mg_s": {
+      const ignition = item.isMg ? 32 : 45;
+      const mgGlow = document.getElementById("mgGlow");
+      const mgCore = document.getElementById("mgCore");
+      const sFlame = document.getElementById("sFlame");
+      const sFlameCore = document.getElementById("sFlameCore");
+
+      if (heatIntensity >= ignition) {
+        currentTemp = 25 + heatIntensity * 0.75;
+        const max = item.isMg ? 1200 : 400;
+        reactionYield = Math.min(max, reactionYield + item.k * 55 * dt);
+        primaryMetric = reactionYield;
+
+        if (item.isMg) {
+          const a = Math.min(0.85, reactionYield / 500);
+          if (mgGlow) {
+            mgGlow.setAttribute("opacity", (a * 0.7).toFixed(2));
+            mgGlow.setAttribute("r", (40 + 50 * a).toFixed(1));
+          }
+          if (mgCore) {
+            mgCore.setAttribute("opacity", (a * 0.9).toFixed(2));
+            mgCore.setAttribute("r", (12 + 12 * a).toFixed(1));
+          }
+          if (sFlame) sFlame.setAttribute("opacity", "0");
+          if (sFlameCore) sFlameCore.setAttribute("opacity", "0");
+        } else {
+          const a = Math.min(0.9, reactionYield / 260);
+          if (sFlame) { sFlame.setAttribute("opacity", a.toFixed(2)); sFlame.setAttribute("rx", (18 + 14 * a).toFixed(1)); sFlame.setAttribute("ry", (28 + 20 * a).toFixed(1)); }
+          if (sFlameCore) { sFlameCore.setAttribute("opacity", (a * 0.95).toFixed(2)); sFlameCore.setAttribute("rx", (8 + 8 * a).toFixed(1)); sFlameCore.setAttribute("ry", (14 + 12 * a).toFixed(1)); }
+          if (mgGlow) mgGlow.setAttribute("opacity", "0");
+          if (mgCore) mgCore.setAttribute("opacity", "0");
+        }
+
+        if (Math.random() < 0.55) {
+          spawnParticle(
+            450 + (Math.random() - 0.5) * 26, 362,
+            { vx: (Math.random() - 0.5) * 40, vy: -(35 + Math.random() * 55),
+              r: 2 + Math.random() * 3.5, life: 1.0,
+              color: item.isMg ? "#f1f5f9" : "#c4b5fd", type: "smoke" }
+          );
+        }
+        const ro = document.getElementById("combustionReadout");
+        if (ro) ro.textContent = reactionYield.toFixed(0);
+        document.getElementById("txtSimState").textContent = item.isMg
+          ? `سوختن منیزیم — نور سفید درخشان، شدت: ${reactionYield.toFixed(0)} lm`
+          : `سوختن گوگرد — شعله آبی-بنفش، SO₂: ${reactionYield.toFixed(0)} mL`;
+
+        if (reactionYield >= max - 0.5 && !simComplete) {
+          finishExperiment([
+            { label: "ماده سوختنی", value: item.name },
+            { label: "شعله", value: item.isMg ? "سفید درخشان" : "آبی-بنفش" },
+            { label: "محصول", value: item.isMg ? "MgO (اکسید منیزیم)" : "SO₂ (دی‌اکسید گوگرد)" },
+            { label: "نوع واکنش", value: "اکسایش گرماده" },
+            { label: item.isMg ? "شدت تابش" : "حجم SO₂", value: `${reactionYield.toFixed(0)} ${item.isMg ? "lm" : "mL"}` }
+          ], item.isMg ? "Lum" : "SO2");
+        }
+      } else {
+        if (mgGlow) mgGlow.setAttribute("opacity", "0");
+        if (mgCore) mgCore.setAttribute("opacity", "0");
+        if (sFlame) sFlame.setAttribute("opacity", "0");
+        if (sFlameCore) sFlameCore.setAttribute("opacity", "0");
+        document.getElementById("txtSimState").textContent = "دما برای اشتعال کافی نیست. مشعل را گرم‌تر کنید.";
+      }
+      if (tel) tel.textContent = `T: ${currentTemp.toFixed(1)} °C | سوختن: ${reactionYield.toFixed(0)}`;
+      break;
+    }
+
+    case "ionic_conductivity": {
+      currentTemp = 25;
+      const target = item.current;
+      reactionYield += (target - reactionYield) * Math.min(1, dt * 4);
+      primaryMetric = reactionYield;
+      const glow = document.getElementById("bulbGlowCircle");
+      const fil  = document.getElementById("filamentLine");
+      const a = Math.min(1, reactionYield / 100);
+      if (glow) glow.setAttribute("opacity", (a * 0.95).toFixed(2));
+      if (fil)  fil.setAttribute("stroke", a > 0.08 ? "#fde047" : "#78350f");
+      const amm = document.getElementById("ammeterText");
+      if (amm) amm.textContent = `${reactionYield.toFixed(1)} mA`;
+      const ro = document.getElementById("ionicReadout");
+      if (ro) ro.textContent = reactionYield.toFixed(1);
+      const st = document.getElementById("ionicState");
+      if (st) st.textContent = a > 0.08 ? "رسانا" : "نارسانا";
+      document.getElementById("txtSimState").textContent = a > 0.08
+        ? `${item.name} رسانا (${reactionYield.toFixed(1)} mA) — ${item.desc}`
+        : `${item.name} نارسانا (${reactionYield.toFixed(1)} mA) — ${item.desc}`;
+
+      if (Math.abs(reactionYield - target) < 0.5 && simTime > 3 && !simComplete) {
+        finishExperiment([
+          { label: "نمونه محلول", value: item.name },
+          { label: "جریان عبوری", value: `${reactionYield.toFixed(1)} mA` },
+          { label: "ماهیت", value: item.desc },
+          { label: "نتیجه", value: item.current > 20 ? "رسانای الکتریکی ✓" : "نارسانا ✗" }
+        ], "I");
+      }
+      if (tel) tel.textContent = `T: 25.0 °C | I: ${reactionYield.toFixed(1)} mA`;
+      break;
+    }
+
+    case "electrolysis": {
+      currentTemp = 25;
+      const max = 100;
+      if (reactionYield < max) {
+        reactionYield = Math.min(max, reactionYield + item.k * 12 * dt);
+        primaryMetric = reactionYield;
+        const h2 = document.getElementById("h2Column");
+        const o2 = document.getElementById("o2Column");
+        if (h2) h2.setAttribute("height", ((reactionYield / max) * 270).toFixed(1));
+        if (o2) o2.setAttribute("height", ((reactionYield / (max * 2)) * 270).toFixed(1));
+
+        const h2l = document.getElementById("h2VolLabel");
+        const o2l = document.getElementById("o2VolLabel");
+        if (h2l) h2l.textContent = `H₂: ${reactionYield.toFixed(1)} mL`;
+        if (o2l) o2l.textContent = `O₂: ${(reactionYield / 2).toFixed(1)} mL`;
+
+        bubbleAccumulator += dt * 22;
+        let emitted = 0;
+        while (bubbleAccumulator >= 1 && emitted < 5) {
+          bubbleAccumulator -= 1; emitted++;
+          const isCathode = Math.random() < 0.66;
+          spawnParticle(
+            isCathode ? 410 : 490, 480,
+            { vx: (Math.random() - 0.5) * 8, vy: -(55 + Math.random() * 45),
+              r: 1.6 + Math.random(), life: 1.0,
+              color: isCathode ? "#7dd3fc" : "#fca5a5", type: "bubble", popY: 200 }
+          );
+        }
+        const ro = document.getElementById("electroReadout");
+        if (ro) ro.textContent = reactionYield.toFixed(1);
+        document.getElementById("txtSimState").textContent =
+          `الکترولیز آب — H₂: ${reactionYield.toFixed(1)} mL | O₂: ${(reactionYield/2).toFixed(1)} mL | نسبت ۲:۱`;
+      } else if (!simComplete) {
+        finishExperiment([
+          { label: "الکترولیت", value: item.name },
+          { label: "حجم H₂ (کاتد)", value: `${reactionYield.toFixed(1)} mL` },
+          { label: "حجم O₂ (آند)", value: `${(reactionYield/2).toFixed(1)} mL` },
+          { label: "نسبت حجمی", value: "۲ : ۱ ✓ (تأیید قانون)" },
+          { label: "تجزیه", value: "2H₂O → 2H₂ + O₂" }
+        ], "H2");
+      }
+      if (tel) tel.textContent = `T: 25.0 °C | H₂: ${reactionYield.toFixed(1)} mL`;
+      break;
+    }
+
+    case "nacl_synthesis": {
+      if (heatIntensity > 25) {
+        const max = 800;
+        reactionYield = Math.min(max, reactionYield + item.k * 12 * dt);
+        currentTemp = reactionYield;
+        primaryMetric = reactionYield;
+
+        const flash = document.getElementById("naclFlash");
+        const fb = document.getElementById("naclFireball");
+        if (flash) flash.setAttribute("opacity", Math.min(0.7, reactionYield / 500).toFixed(2));
+        if (fb) fb.setAttribute("opacity", Math.min(0.95, reactionYield / 250).toFixed(2));
+
+        const dep = document.getElementById("naclDeposit");
+        if (dep) {
+          const p = Math.min(1, reactionYield / 500);
+          dep.setAttribute("rx", (10 + 45 * p).toFixed(1));
+          dep.setAttribute("ry", (3 + 10 * p).toFixed(1));
+          dep.setAttribute("opacity", (0.5 + 0.5 * p).toFixed(2));
+        }
+
+        if (Math.random() < 0.75) {
+          spawnParticle(
+            450 + (Math.random() - 0.5) * 90, 380 + (Math.random() - 0.5) * 40,
+            { vx: (Math.random() - 0.5) * 70, vy: -(30 + Math.random() * 65),
+              r: 2 + Math.random() * 4, life: 1.0, color: "#f8fafc", type: "smoke" }
+          );
+        }
+        const t = document.getElementById("naclTemp");
+        if (t) t.textContent = `${reactionYield.toFixed(0)} °C`;
+        const ro = document.getElementById("naclReadout");
+        if (ro) ro.textContent = reactionYield.toFixed(0);
+
+        let state = "شروع واکنش...";
+        if (reactionYield > 200) state = "جرقه زرد و تشکیل NaCl";
+        if (reactionYield > 500) state = "تشکیل رسوب نمک سفید";
+        if (reactionYield > 700) state = "واکنش کامل — NaCl سنتز شد";
+        document.getElementById("txtSimState").textContent =
+          `${state} — دما: ${reactionYield.toFixed(0)} °C`;
+
+        if (reactionYield >= max - 0.5 && !simComplete) {
+          finishExperiment([
+            { label: "واکنش‌دهنده‌ها", value: "2Na + Cl₂" },
+            { label: "محصول", value: "2NaCl (نمک طعام)" },
+            { label: "دمای نهایی", value: `${reactionYield.toFixed(0)} °C` },
+            { label: "نوع پیوند", value: "یونی (Na⁺ Cl⁻)" },
+            { label: "نشانه‌های واکنش", value: "جرقه زرد + دود سفید" }
+          ], "T");
+        }
+      } else {
+        currentTemp = 25;
+        document.getElementById("txtSimState").textContent = "برای شروع واکنش، دمای مشعل را افزایش دهید (Na باید ذوب شود).";
+      }
+      if (tel) tel.textContent = `T: ${currentTemp.toFixed(0)} °C | واکنش: ${reactionYield.toFixed(0)}`;
+      break;
+    }
+
+    case "ph_rainbow": {
+      currentTemp = 25;
+      if (phDropProgress < 1) {
+        phDropProgress = Math.min(1, phDropProgress + dt / 1.2);
+        const d = document.getElementById("phDropper");
+        if (d) d.setAttribute("transform", `translate(280, ${200 + 30 * phDropProgress})`);
+      }
+      reactionYield = item.ph;
+      primaryMetric = item.ph;
+      const liq = document.getElementById("phLiquid");
+      const val = document.getElementById("phValue");
+      const marker = document.getElementById("phMarker");
+
+      if (liq && phDropProgress > 0.4) {
+        const p = Math.min(1, (phDropProgress - 0.4) / 0.6);
+        liq.setAttribute("fill", item.color);
+        liq.setAttribute("opacity", (0.35 + 0.6 * p).toFixed(2));
+      }
+      if (val && phDropProgress > 0.5) val.textContent = `pH = ${item.ph.toFixed(1)}`;
+
+      if (marker && phDropProgress > 0.6) {
+        const markerX = 6 + (item.ph / 14) * 348;
+        marker.setAttribute("opacity", "1");
+        marker.setAttribute("transform", `translate(${markerX}, 0)`);
+      }
+      const ro = document.getElementById("phReadout");
+      if (ro) ro.textContent = item.ph.toFixed(1);
+      const cls = document.getElementById("phClass");
+      if (cls) cls.textContent = item.ph < 7 ? "اسیدی" : item.ph > 7 ? "بازی" : "خنثی";
+
+      document.getElementById("txtSimState").textContent =
+        `شناساگر — ${item.name} → pH = ${item.ph.toFixed(1)} (${item.ph < 7 ? "اسیدی" : item.ph > 7 ? "بازی" : "خنثی"})`;
+
+      if (phDropProgress >= 1 && !simComplete) {
+        finishExperiment([
+          { label: "نمونه", value: item.name },
+          { label: "شاخص pH", value: item.ph.toFixed(1) },
+          { label: "طبقه‌بندی", value: item.ph < 7 ? "اسیدی" : item.ph > 7 ? "بازی" : "خنثی" },
+          { label: "رنگ شناساگر", value: item.color }
+        ], "pH");
+      }
+      if (tel) tel.textContent = `T: 25.0 °C | pH: ${item.ph.toFixed(1)}`;
+      break;
+    }
+
+    case "barium_precipitate": {
+      currentTemp = 25;
+      const max = 400;
+      reactionYield = Math.min(max, reactionYield + item.k * 55 * dt);
+      primaryMetric = reactionYield;
+      const p = reactionYield / max;
+
+      const fluid = document.getElementById("precipFluid");
+      const lbl = document.getElementById("precipLabel");
+      if (fluid) {
+        const r = Math.round(125 + 130 * p);
+        const g = Math.round(211 + 44 * p);
+        const b = Math.round(252 + 3 * p);
+        fluid.setAttribute("fill", `rgb(${Math.min(255, r)},${Math.min(255, g)},${Math.min(255, b)})`);
+        fluid.setAttribute("opacity", (0.35 + 0.55 * p).toFixed(2));
+      }
+      if (lbl) lbl.textContent = p > 0.5 ? "BaSO₄ ↓ (رسوب سفید)" : "BaCl₂ + Na₂SO₄";
+
+      if (Math.random() < 0.7) {
+        spawnParticle(
+          450 + (Math.random() - 0.5) * 130, 380,
+          { vx: (Math.random() - 0.5) * 10, vy: 18 + Math.random() * 25,
+            r: 1.2 + Math.random() * 2.4, life: 1.0,
+            color: "#ffffff", type: "precip" }
+        );
+      }
+      const ro = document.getElementById("precipReadout");
+      if (ro) ro.textContent = reactionYield.toFixed(0);
+      document.getElementById("txtSimState").textContent =
+        `تشکیل رسوب BaSO₄ — کدورت: ${reactionYield.toFixed(0)} NTU`;
+
+      if (reactionYield >= max - 0.5 && !simComplete) {
+        finishExperiment([
+          { label: "واکنش‌دهنده‌ها", value: "BaCl₂ + Na₂SO₄" },
+          { label: "محصول رسوب", value: "BaSO₄ (باریم سولفات)" },
+          { label: "رنگ رسوب", value: "سفید" },
+          { label: "کدورت نهایی", value: `${reactionYield.toFixed(0)} NTU` },
+          { label: "نوع پیوند", value: "یونی — نامحلول در آب" }
+        ], "NTU");
+      }
+      if (tel) tel.textContent = `T: 25.0 °C | NTU: ${reactionYield.toFixed(0)}`;
+      break;
+    }
+
+    case "oil_fraction": {
+      currentTemp = 25 + heatIntensity * 4.75;
+      reactionYield = currentTemp;
+      primaryMetric = currentTemp;
+
+      const tl = document.getElementById("oilTempLabel");
+      if (tl) tl.textContent = `${currentTemp.toFixed(0)} °C`;
+
+      let activeFrac = null;
+      for (const f of exp.fractions) {
+        if (currentTemp >= f.minT && currentTemp < f.maxT) { activeFrac = f; break; }
+      }
+      if (!activeFrac && currentTemp >= 350) activeFrac = exp.fractions[exp.fractions.length - 1];
+
+      if (activeFrac) {
+        const last = collectedFractions[collectedFractions.length - 1];
+        if (!last || last.name !== activeFrac.name) {
+          collectedFractions.push({
+            name: activeFrac.name, color: activeFrac.color,
+            purity: activeFrac.purity, minT: activeFrac.minT, maxT: activeFrac.maxT
+          });
+        }
+      }
+
+      const fluid = document.getElementById("collectedFluid");
+      if (fluid && activeFrac) {
+        fluid.setAttribute("fill", activeFrac.color);
+        const totalFracs = collectedFractions.length;
+        const fillH = Math.min(90, 15 + totalFracs * 15);
+        fluid.setAttribute("d",
+          `M202,${240 - fillH} L328,${240 - fillH} L328,240 C328,242 265,242 265,242 C265,242 202,242 202,240 Z`);
+        fluid.setAttribute("opacity", "0.85");
+      }
+
+      const fn = document.getElementById("fractionName");
+      const fp = document.getElementById("fractionPurity");
+      const fr = document.getElementById("fractionRange");
+      if (fn && activeFrac) fn.textContent = activeFrac.name;
+      if (fp && activeFrac) fp.textContent = activeFrac.purity;
+      if (fr && activeFrac) fr.textContent = `بازه: ${activeFrac.minT} - ${activeFrac.maxT} °C`;
+
+      document.getElementById("txtSimState").textContent =
+        `برج تقطیر — ${currentTemp.toFixed(0)} °C | ${activeFrac ? activeFrac.name : "در حال گرم شدن..."}`;
+
+      if (currentTemp >= 500 && !simComplete) {
+        finishExperiment([
+          { label: "ماده اولیه", value: "نفت خام" },
+          { label: "تعداد برش‌های جدا شده", value: `${collectedFractions.length}` },
+          { label: "برش‌ها", value: collectedFractions.map(f => f.name.split(" ")[0]).join(" | ") },
+          { label: "مبنای جداسازی", value: "تفاوت نقطه جوش" },
+          { label: "دمای نهایی", value: `${currentTemp.toFixed(0)} °C` }
+        ], "T");
+      }
+      if (tel) tel.textContent = `T: ${currentTemp.toFixed(0)} °C | برش‌ها: ${collectedFractions.length}`;
+      break;
+    }
+
+    /* ============================================================
+       ★ آزمایش گرانروی — زمان با رسیدن گوی به ته متوقف می‌شود ★
+       ============================================================ */
+    case "viscosity_test": {
+      currentTemp = 25;
+      const sphere = document.getElementById("steelSphere");
+      const speed = 260 / Math.pow(item.visc, 0.8);
+      const topY = 34, bottomY = 300;
+      let currentY = parseFloat(sphere.getAttribute("cy")) || topY;
+
+      if (!viscDone && currentY < bottomY) {
+        currentY = Math.min(bottomY, currentY + speed * dt);
+        sphere.setAttribute("cy", currentY.toFixed(1));
+        if (currentY >= bottomY - 0.3) {
+          viscDone = true;
+          // توقف کامل شبیه‌سازی
+          isSimulating = false;
+        }
+      }
+      const depthCm = Math.max(0, (currentY - topY) / (bottomY - topY) * 30);
+      reactionYield = depthCm;
+      primaryMetric = depthCm;
+
+      const t = document.getElementById("viscTimer");
+      if (t) t.textContent = `t = ${simTime.toFixed(2)} s  |  عمق: ${depthCm.toFixed(1)} cm`;
+      const s = document.getElementById("viscState");
+      if (s) {
+        if (viscDone) { s.textContent = "✓ گوی به ته رسید — تایمر متوقف شد"; s.setAttribute("fill", "#22c55e"); }
+        else { s.textContent = "در حال سقوط..."; s.setAttribute("fill", "#facc15"); }
+      }
+      const ro = document.getElementById("viscReadout");
+      if (ro) ro.textContent = simTime.toFixed(2);
+      const vd = document.getElementById("viscDepth");
+      if (vd) vd.textContent = `عمق: ${depthCm.toFixed(1)} cm`;
+
+      document.getElementById("txtSimState").textContent = viscDone
+        ? `${item.name} — گرانروی: ${item.visc} | زمان نهایی: ${simTime.toFixed(2)} s`
+        : `${item.name} — گرانروی نسبی: ${item.visc} | عمق: ${depthCm.toFixed(1)} cm`;
+
+      if (viscDone && !simComplete) {
+        finishExperiment([
+          { label: "نمونه مایع", value: item.name },
+          { label: "گرانروی نسبی", value: `${item.visc}` },
+          { label: "زمان سقوط گوی", value: `${simTime.toFixed(2)} s` },
+          { label: "عمق نهایی", value: `${depthCm.toFixed(1)} cm` },
+          { label: "رابطه", value: "با افزایش زنجیره کربنی، گرانروی بیشتر و زمان سقوط طولانی‌تر" }
+        ], "t");
+      }
+      if (tel) tel.textContent = `T: 25.0 °C | t: ${simTime.toFixed(2)} s | عمق: ${depthCm.toFixed(1)} cm`;
+      break;
+    }
+
+    case "limewater_co2": {
+      currentTemp = 25;
+      const max = 100;
+      reactionYield = Math.min(max, reactionYield + item.k * 20 * dt);
+      primaryMetric = reactionYield;
+      const p = reactionYield / max;
+      const lime = document.getElementById("limewaterFill");
+      if (lime) {
+        const r = Math.round(226 + 29 * p);
+        const g = Math.round(232 + 23 * p);
+        const b = Math.round(240 + 15 * p);
+        lime.setAttribute("fill", `rgb(${Math.min(255,r)},${Math.min(255,g)},${Math.min(255,b)})`);
+        lime.setAttribute("opacity", (0.25 + 0.72 * p).toFixed(2));
+      }
+      if (Math.random() < 0.5) {
+        spawnParticle(
+          520 + (Math.random() - 0.5) * 26, 400 + Math.random() * 40,
+          { vx: (Math.random() - 0.5) * 10, vy: -(35 + Math.random() * 40),
+            r: 1.4 + Math.random() * 1.6, life: 1.0,
+            color: "#ffffff", type: "bubble", popY: 400 }
+        );
+      }
+      const ro = document.getElementById("limeReadout");
+      if (ro) ro.textContent = reactionYield.toFixed(0);
+      document.getElementById("txtSimState").textContent =
+        `عبور CO₂ از آب‌آهک — کدورت شیری: ${reactionYield.toFixed(0)}٪`;
+
+      if (reactionYield >= max - 0.5 && !simComplete) {
+        finishExperiment([
+          { label: "سوخت", value: item.name },
+          { label: "واکنش‌دهنده در آب‌آهک", value: "Ca(OH)₂" },
+          { label: "گاز شناسایی‌شده", value: "CO₂ (کربن دی‌اکسید)" },
+          { label: "محصول رسوب", value: "CaCO₃ (کلسیم کربنات)" },
+          { label: "شاهد", value: "کدر شدن آب‌آهک شفاف" }
+        ], "%");
+      }
+      if (tel) tel.textContent = `T: 25.0 °C | کدورت: ${reactionYield.toFixed(0)}٪`;
+      break;
+    }
+
+    case "greenhouse_chamber": {
+      const T0 = 25;
+      const Teq = item.Tmax;
+      const tau = 8 / Math.max(0.2, item.rate);
+      const T = Teq - (Teq - T0) * Math.exp(-simTime / tau);
+      currentTemp = T;
+      reactionYield = T;
+      primaryMetric = T;
+      const disp = document.getElementById("chamberTemp");
+      if (disp) disp.textContent = `${T.toFixed(1)} °C`;
+      const ro = document.getElementById("greenReadout");
+      if (ro) ro.textContent = T.toFixed(1);
+      document.getElementById("txtSimState").textContent =
+        `${item.name} — دما: ${T.toFixed(1)} °C (تعادل: ${Teq.toFixed(0)} °C)`;
+
+      if (Math.abs(T - Teq) < 0.5 && simTime > 6 && !simComplete) {
+        finishExperiment([
+          { label: "محفظه", value: item.name },
+          { label: "دمای تعادل", value: `${T.toFixed(1)} °C` },
+          { label: "دمای اولیه", value: "۲۵٫۰ °C" },
+          { label: "افزایش دما", value: `+${(T - 25).toFixed(1)} °C` },
+          { label: "علت", value: "جذب پرتوهای فروسرخ توسط CO₂" }
+        ], "T");
+      }
+      if (tel) tel.textContent = `T: ${T.toFixed(1)} °C | t: ${simTime.toFixed(1)} s`;
+      break;
+    }
+
+    case "soot_combustion": {
+      currentTemp = 25 + heatIntensity * 0.75;
+      const max = 100;
+      if (heatIntensity > 15) {
+        reactionYield = Math.min(max, reactionYield + item.soot * 1.6 * dt);
+        primaryMetric = reactionYield;
+        const soot = document.getElementById("sootDeposit");
+        if (soot) {
+          soot.setAttribute("opacity", (reactionYield / 100 * 0.95).toFixed(2));
+          soot.setAttribute("fill", item.color);
+        }
+        if (Math.random() < 0.45) {
+          spawnParticle(
+            450 + (Math.random() - 0.5) * 30, 300,
+            { vx: (Math.random() - 0.5) * 50, vy: -(30 + Math.random() * 55),
+              r: 1.5 + Math.random() * 3, life: 1.0,
+              color: item.soot > 10 ? "#0f172a" : "#334155", type: "smoke" }
+          );
+        }
+        const ro = document.getElementById("sootReadout");
+        if (ro) ro.textContent = reactionYield.toFixed(0);
+        document.getElementById("txtSimState").textContent =
+          `سوختن ناقص — دوده: ${reactionYield.toFixed(0)} ppm`;
+
+        if (reactionYield >= max - 0.5 && !simComplete) {
+          finishExperiment([
+            { label: "سوخت", value: item.name },
+            { label: "شدت دوده‌زایی", value: `${item.soot} ppm/g` },
+            { label: "تراکم دوده نهایی", value: `${reactionYield.toFixed(0)} ppm` },
+            { label: "علت", value: "کمبود اکسیژن در سوختن ناقص" },
+            { label: "محصولات", value: "C (دوده) + CO + H₂O" }
+          ], "ppm");
+        }
+      } else {
+        document.getElementById("txtSimState").textContent = "مشعل خاموش — سوختنی نیست.";
+      }
+      if (tel) tel.textContent = `T: ${currentTemp.toFixed(1)} °C | دوده: ${reactionYield.toFixed(0)} ppm`;
+      break;
+    }
+  }
+
+  if (simTime - lastChartPush >= 0.2 && !simComplete) {
+    chartSeries.push({ t: simTime, val: primaryMetric });
+    if (chartSeries.length > 100) chartSeries.shift();
+    lastChartPush = simTime;
+    renderChart();
+  }
+}
+
+/* ============================================================
+   BURNER FLAME RENDER
+   ============================================================ */
+function renderBurnerFlame() {
+  const exp = CHEM_DATABASE[currentChap][currentExpIdx];
+  const g = document.getElementById("flameGroup");
+  if (!g) return;
+  if (!exp.hasBurner || heatIntensity <= 0) { g.style.opacity = "0"; return; }
+  g.style.opacity = "1";
+  const t = Date.now() * 0.0075;
+  const wave1 = Math.sin(t * 1.8) * 7;
+  const power = 0.35 + (heatIntensity / 100) * 0.8;
+
+  const hOut = -170 * power + Math.cos(t * 3.2) * 5;
+  document.getElementById("flameOuter").setAttribute("d",
+    `M0,5 C${-26 + wave1},-20 ${-32 - wave1},${hOut * 0.6} 0,${hOut} C${32 + wave1},${hOut * 0.6} ${26 - wave1},-20 0,5 Z`);
+  const hMid = -125 * power;
+  document.getElementById("flameMid").setAttribute("d",
+    `M0,5 C${-18 + wave1},-15 ${-20 - wave1},${hMid * 0.6} 0,${hMid} C${20 + wave1},${hMid * 0.6} ${18 - wave1},-15 0,5 Z`);
+  const hCore = -70 * power;
+  document.getElementById("flameCore").setAttribute("d",
+    `M0,5 C-9,-5 -10,${hCore * 0.6} 0,${hCore} C10,${hCore * 0.6} 9,-5 0,5 Z`);
+}
+
+/* ============================================================
+   FINISH / RESULTS
+   ============================================================ */
+function finishExperiment(rows) {
+  if (simComplete) return;
+  simComplete = true;
+  isSimulating = false;
+  const btn = document.getElementById("btnRun");
+  if (btn) { btn.innerHTML = "🔁 تکرار آزمایش"; btn.style.background = "linear-gradient(135deg, #b45309, #f59e0b)"; }
+  const st = document.getElementById("txtSimState");
+  if (st) st.textContent = "✅ آزمایش کامل شد";
+  const dot = document.getElementById("statusDot");
+  if (dot) { dot.style.background = "#facc15"; dot.style.boxShadow = "0 0 10px #facc15"; dot.style.animation = "none"; }
+  renderChart();
+  setTimeout(() => showResults(rows), 400);
+}
+
+function showResults(rows) {
+  const overlay = document.getElementById("resultsOverlay");
+  const rowBox = document.getElementById("resultRows");
+  const subtitle = document.getElementById("resultSubtitle");
+  const exp = CHEM_DATABASE[currentChap][currentExpIdx];
+  const item = exp.items[activeItemIdx];
+  subtitle.textContent = item.name;
+  rowBox.innerHTML = rows.map((r, i) => `
+    <div class="result-row">
+      <span class="rlabel">${r.label}</span>
+      <span class="rvalue${i === rows.length-1 ? ' gold' : ''}">${r.value}</span>
+    </div>
+  `).join("");
+  overlay.classList.add("show");
+}
+
+function hideResults() { document.getElementById("resultsOverlay").classList.remove("show"); }
+function hideResultsAndReset() { hideResults(); resetChemExp(true); }
+function recordAndClose() { recordDataPoint(); hideResults(); }
+
+/* ============================================================
+   CHART
+   ============================================================ */
+function renderChart() {
+  const canvas = document.getElementById("rtChart");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = "#040810"; ctx.fillRect(0, 0, w, h);
+  const padL = 42, padR = 12, padT = 12, padB = 22;
+  const plotW = w - padL - padR; const plotH = h - padT - padB;
+  ctx.strokeStyle = "rgba(56,189,248,0.08)"; ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) { const y = padT + (plotH / 4) * i; ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke(); }
+  for (let i = 0; i <= 5; i++) { const x = padL + (plotW / 5) * i; ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, h - padB); ctx.stroke(); }
+  ctx.strokeStyle = "rgba(56,189,248,0.4)"; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, h - padB); ctx.lineTo(w - padR, h - padB); ctx.stroke();
+  let maxAbs = 0.001;
+  chartSeries.forEach(p => { if (Math.abs(p.val) > maxAbs) maxAbs = Math.abs(p.val); });
+  const yMax = maxAbs * 1.2;
+  const yMin = chartSeries.some(p => p.val < 0) ? -yMax : 0;
+  ctx.fillStyle = "#64748b"; ctx.font = "9px Tahoma"; ctx.textAlign = "right";
+  for (let i = 0; i <= 4; i++) { const val = yMax - ((yMax - yMin) * i / 4); const y = padT + (plotH / 4) * i; ctx.fillText(val.toFixed(1), padL - 5, y + 3); }
+  if (chartSeries.length < 2) {
+    ctx.fillStyle = "rgba(148,163,184,0.4)"; ctx.font = "11px Tahoma"; ctx.textAlign = "center";
+    ctx.fillText("واکنش را آغاز کنید…", w / 2, h / 2);
+    return;
+  }
+  const tMin = chartSeries[0].t; const tMax = chartSeries[chartSeries.length - 1].t;
+  const tRange = Math.max(0.1, tMax - tMin);
+  ctx.beginPath();
+  chartSeries.forEach((p, i) => {
+    const x = padL + ((p.t - tMin) / tRange) * plotW;
+    const y = padT + plotH - ((p.val - yMin) / (yMax - yMin)) * plotH;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  const grad = ctx.createLinearGradient(padL, 0, w - padR, 0);
+  grad.addColorStop(0, "#38bdf8"); grad.addColorStop(1, "#00f5d4");
+  ctx.strokeStyle = grad; ctx.lineWidth = 2.2; ctx.lineJoin = "round";
+  ctx.shadowColor = "#00f5d4"; ctx.shadowBlur = 8; ctx.stroke(); ctx.shadowBlur = 0;
+  ctx.lineTo(padL + plotW, h - padB); ctx.lineTo(padL, h - padB); ctx.closePath();
+  const fillGrad = ctx.createLinearGradient(0, padT, 0, h - padB);
+  fillGrad.addColorStop(0, "rgba(0,245,212,0.22)"); fillGrad.addColorStop(1, "rgba(0,245,212,0)");
+  ctx.fillStyle = fillGrad; ctx.fill();
+  const last = chartSeries[chartSeries.length - 1];
+  const lx = padL + ((last.t - tMin) / tRange) * plotW;
+  const ly = padT + plotH - ((last.val - yMin) / (yMax - yMin)) * plotH;
+  ctx.beginPath(); ctx.arc(lx, ly, 4, 0, 7); ctx.fillStyle = "#00f5d4"; ctx.fill();
+  ctx.strokeStyle = "rgba(0,245,212,0.4)"; ctx.lineWidth = 6; ctx.stroke();
+}
+
+/* ============================================================
+   DATA RECORDING
+   ============================================================ */
+function getRecordContext() {
+  const exp = CHEM_DATABASE[currentChap][currentExpIdx];
+  const item = exp.items[activeItemIdx];
+  let amount = "—";
+  switch (exp.type) {
+    case "metal_acid":     amount = `${specimenMass.toFixed(1)} g / ${reactantVolume.toFixed(0)} mL`; break;
+    case "catalyst_h2o2":  amount = "10 mL H₂O₂"; break;
+    case "fe_cuso4":       amount = "50 mL CuSO₄"; break;
+    case "starch_test":    amount = "2 mL + 2 قطره ید"; break;
+    case "combustion_mg_s":amount = item.isMg ? "0.5 g Mg" : "0.5 g S"; break;
+    case "ionic_conductivity": amount = "50 mL محلول 0.1M"; break;
+    case "electrolysis":   amount = "200 mL آب"; break;
+    case "nacl_synthesis": amount = "2.3 g Na"; break;
+    case "ph_rainbow":     amount = "20 mL نمونه"; break;
+    case "barium_precipitate": amount = "50 mL BaCl₂"; break;
+    case "oil_fraction":   amount = `100 mL نفت خام | برش: ${collectedFractions.length}`; break;
+    case "viscosity_test": amount = "100 mL"; break;
+    case "limewater_co2":  amount = "50 mL آب‌آهک"; break;
+    case "greenhouse_chamber": amount = "1 L هوا"; break;
+    case "soot_combustion":amount = "1 g سوخت"; break;
+  }
+  return { exp, item, amount };
+}
+
+function recordDataPoint() {
+  const { exp, item, amount } = getRecordContext();
+  const unit = item.yLabel || exp.yLabel;
+  const entry = {
+    id: tableRecords.length + 1,
+    name: item.name,
+    amount: amount,
+    temp: `${currentTemp.toFixed(1)} °C`,
+    yield: `${primaryMetric.toFixed(2)}`,
+    unit: unit,
+    time: `${simTime.toFixed(1)}s`
+  };
+  tableRecords.push(entry);
+  document.getElementById("recordCount").textContent = toFa(tableRecords.length);
+  const tbody = document.getElementById("tableBody");
+  if (tableRecords.length === 1) tbody.innerHTML = "";
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${toFa(entry.id)}</td>
+    <td style="color:var(--accent-cyan); font-weight:700; font-size:0.66rem;">${entry.name}</td>
+    <td>${entry.amount}</td>
+    <td>${entry.temp}</td>
+    <td style="color:var(--accent-gold); font-weight:700;">${entry.yield}</td>
+    <td>${entry.time}</td>`;
+  tbody.prepend(tr);
+}
+
+function exportCSV() {
+  if (tableRecords.length === 0) { alert("هنوز داده‌ای ثبت نشده است!"); return; }
+  const exp = CHEM_DATABASE[currentChap][currentExpIdx];
+  let csv = "\uFEFF";
+  csv += `آزمایش: ${exp.title} (فصل ${currentChap})\n`;
+  csv += "ردیف,نمونه,مقدار,دما,خروجی,زمان\n";
+  tableRecords.forEach(r => { csv += `${r.id},"${r.name}","${r.amount}","${r.temp}","${r.yield}","${r.time}"\n`; });
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `نتایج_آزمایشگاه_شیمی_نهم_فصل${currentChap}.csv`;
+  a.click();
+}
+
+/* ============================================================
+   TOOLBAR
+   ============================================================ */
+function takeScreenshot() {
+  const svg = document.getElementById("simCanvas");
+  const clone = svg.cloneNode(true);
+  const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  bg.setAttribute("x", "0"); bg.setAttribute("y", "0");
+  bg.setAttribute("width", "900"); bg.setAttribute("height", "600");
+  bg.setAttribute("fill", "#050912");
+  clone.insertBefore(bg, clone.firstChild);
+  const data = new XMLSerializer().serializeToString(clone);
+  const blob = new Blob([data], { type: "image/svg+xml" });
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1800; canvas.height = 1200;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#050912"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(b => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(b);
+      a.download = `azmayesh-shimi-${Date.now()}.png`;
+      a.click();
+    });
+    URL.revokeObjectURL(url);
+  };
+  img.onerror = () => { alert("در تهیه تصویر خطایی رخ داد."); URL.revokeObjectURL(url); };
+  img.src = url;
+}
+
+function toggleFullscreen() {
+  const el = document.getElementById("stageContainer");
+  if (!document.fullscreenElement) el.requestFullscreen && el.requestFullscreen();
+  else document.exitFullscreen();
+}
+
+function toggleParticles() {
+  particlesEnabled = !particlesEnabled;
+  const btn = document.getElementById("particleBtn");
+  if (btn) btn.style.color = particlesEnabled ? "" : "#475569";
+  if (!particlesEnabled) particles = [];
+  const layer = document.getElementById("particleLayer");
+  if (layer && !particlesEnabled) layer.innerHTML = "";
+}
+
+function toggleTheme() { document.body.classList.toggle("light-theme"); }
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.addEventListener("DOMContentLoaded", () => {
+  buildNavTree();
+  setupChemEnvironment();
+  requestAnimationFrame(chemEngineLoop);
+
+  const ss = document.getElementById("speedSlider");
+  const sv = document.getElementById("speedVal");
+  if (ss) ss.addEventListener("input", e => { simSpeed = parseFloat(e.target.value); if (sv) sv.textContent = simSpeed.toFixed(1) + "×"; });
+  renderChart();
+
+  window.addEventListener("resize", () => {
+    const c = document.getElementById("rtChart");
+    if (c) { c.width = c.offsetWidth; c.height = 140; }
+    renderChart();
+  });
+  const c = document.getElementById("rtChart");
+  if (c) { c.width = c.offsetWidth; c.height = 140; }
+
+  let seen = false;
+  try { seen = localStorage.getItem("hamyar_chem_intro_seen") === "1"; } catch(e) {}
+  if (!seen) setTimeout(() => openGuide(), 600);
+});
+</script>
+</body>
+</html>

@@ -28,10 +28,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -121,6 +123,8 @@ private fun todayDayIndex(): Int {
 @Composable
 fun WeeklyScheduleScreen(onBack: () -> Unit) {
     val context = LocalContext.current
+    val container = LocalAppContainer.current
+    val scope = rememberCoroutineScope()
     val store = remember { LocalStore(context, "hamyar_week_plan") }
     var blocks by remember { mutableStateOf(readBlocks(store)) }
     var day by remember { mutableIntStateOf(todayDayIndex()) }
@@ -132,9 +136,44 @@ fun WeeklyScheduleScreen(onBack: () -> Unit) {
     var note by remember { mutableStateOf("") }
     var notice by remember { mutableStateOf<String?>(null) }
 
+    fun payloadOf(list: List<PlanBlock>): String {
+        val arr = JSONArray()
+        list.forEach { b ->
+            arr.put(
+                JSONObject()
+                    .put("id", b.id).put("day", b.day).put("startH", b.startH).put("endH", b.endH)
+                    .put("title", b.title).put("kind", b.kind).put("note", b.note),
+            )
+        }
+        return arr.toString()
+    }
+
     fun save(list: List<PlanBlock>) {
         blocks = list
         writeBlocks(store, list)
+        StateSync.markLocal(context, StateSync.KEY_WEEK_PLAN)
+        scope.launch {
+            val uid = container.auth.cachedUserId()
+                ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+            if (uid.isNotBlank()) StateSync.push(context, container.tables, uid, StateSync.KEY_WEEK_PLAN, payloadOf(list))
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        val uid = container.auth.cachedUserId()
+            ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
+        if (uid.isBlank()) return@LaunchedEffect
+        val remote = StateSync.pull(context, container.tables, uid, StateSync.KEY_WEEK_PLAN)
+        val local = payloadOf(readBlocks(store))
+        if (remote != null && remote.first.isNotBlank() && remote.first != local &&
+            remote.second >= StateSync.localAt(context, StateSync.KEY_WEEK_PLAN)
+        ) {
+            store.putString(KEY, remote.first)
+            blocks = readBlocks(store)
+            StateSync.markSyncedAt(context, StateSync.KEY_WEEK_PLAN, remote.second)
+        } else if (local != "[]") {
+            StateSync.push(context, container.tables, uid, StateSync.KEY_WEEK_PLAN, local)
+        }
     }
 
     val todayBlocks = blocks.filter { it.day == day }.sortedBy { it.startH }

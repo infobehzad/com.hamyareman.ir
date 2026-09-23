@@ -222,10 +222,32 @@ fun ZahraNavHost() {
             composable(Screen.CalmHub.route) { com.hamyareman.ir.ui.calmdown.CalmHubScreen(nav) { nav.popBackStack() } }
             composable(Screen.FreeReading.route) { com.hamyareman.ir.ui.study.FreeReadingScreen(nav) { nav.popBackStack() } }
             composable(Screen.PeriodTraining.route) { com.hamyareman.ir.ui.cycle.PeriodTrainingScreen { nav.popBackStack() } }
-            composable(Screen.GeneralToolkit.route) { com.hamyareman.ir.ui.tools.GeneralToolkitScreen { nav.popBackStack() } }
+            composable(Screen.GeneralToolkit.route) {
+                com.hamyareman.ir.ui.tools.GeneralToolkitScreen(
+                    onBack = { nav.popBackStack() },
+                    onOpen = { id -> nav.navigate(Screen.ToolHtml.of(id)) },
+                )
+            }
             composable(Screen.ChemistryLab.route) { com.hamyareman.ir.ui.tools.ChemistryLabScreen { nav.popBackStack() } }
             composable(Screen.PhysicsLab.route) { com.hamyareman.ir.ui.tools.PhysicsLabScreen { nav.popBackStack() } }
-            composable(Screen.MathToolkit.route) { com.hamyareman.ir.ui.tools.MathToolkitScreen { nav.popBackStack() } }
+            composable(Screen.BiologyLab.route) { com.hamyareman.ir.ui.tools.BiologyLabScreen { nav.popBackStack() } }
+            composable(Screen.MathToolkit.route) {
+                com.hamyareman.ir.ui.tools.MathToolkitScreen(
+                    onBack = { nav.popBackStack() },
+                    onOpen = { id -> nav.navigate(Screen.ToolHtml.of(id)) },
+                )
+            }
+            composable(
+                Screen.ToolHtml.route,
+                listOf(navArgument("toolId") { type = NavType.StringType }),
+            ) { entry ->
+                val id = entry.arguments?.getString("toolId").orEmpty()
+                com.hamyareman.ir.ui.tools.ToolWebScreen(
+                    toolId = id,
+                    title = com.hamyareman.ir.ui.tools.toolTitle(id),
+                    onBack = { nav.popBackStack() },
+                )
+            }
             composable(Screen.Journal.route) { JournalScreen { nav.popBackStack() } }
             composable(Screen.Breath.route) { BreathingScreen { nav.popBackStack() } }
             composable(Screen.Routine.route) { RoutineScreen { nav.popBackStack() } }

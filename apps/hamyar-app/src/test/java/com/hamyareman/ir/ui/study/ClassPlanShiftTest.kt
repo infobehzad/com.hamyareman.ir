@@ -103,6 +103,17 @@ class ClassPlanShiftTest {
     }
 
     @Test
+    fun `dashboard shows today until exit then next school day`() {
+        val wed = LocalDate.of(2026, 9, 23) // چهارشنبه ۱ مهر ۱۴۰۵
+        val sat = LocalDate.of(2026, 9, 26)
+        val s = snap(1, base = Shift.EVENING).copy(exitNoon = "17:30", days = (1..5).associateWith { listOf("ریاضی") })
+        val before = java.time.LocalDateTime.of(2026, 9, 23, 15, 0)
+        val after = java.time.LocalDateTime.of(2026, 9, 23, 18, 0)
+        assertEquals(wed, ClassPlanStore.dashboardShowDate(s, before))
+        assertEquals(sat, ClassPlanStore.dashboardShowDate(s, after))
+    }
+
+    @Test
     fun `captions use the stored wording`() {
         assertEquals("همیشه شیفت صبح", ClassPlanStore.captionOf(snap(1, base = Shift.MORNING), saturday))
         assertEquals("همیشه شیفت ظهر", ClassPlanStore.captionOf(snap(1, base = Shift.EVENING), saturday))

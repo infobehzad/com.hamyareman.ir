@@ -89,7 +89,7 @@ private val HomeSide = 16.dp
  * نزدیک‌ترین فونتِ دست‌نویسِ خودِ اپ (هیلدا) استفاده می‌شود. برای سوئیچ، فقط
  * همین یک خط را به فونتِ تازه عوض کن (یا `DashboardFonts.badkhat` را بساز).
  */
-private val WISDOM_FONT = DashboardFonts.hilda
+private val WISDOM_FONT = DashboardFonts.wisdom
 
 /** مارجینِ کناریِ کارتِ «سخن بزرگان» — یک‌پنجمِ حالتِ معمول. */
 private val WisdomSide = 1.dp
@@ -219,7 +219,6 @@ fun HomeScreen(nav: NavController) {
                 onOpenAlarm = { nav.navigate(Screen.ClassPlanShift.route) },
             )
 
-            // چهار کارتِ کم‌عرض در یک ردیف — جای کارتِ «مطالعه آزاد» (مطالعه از تب «مدرسه» در دسترس است).
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = HomeSide),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -227,7 +226,13 @@ fun HomeScreen(nav: NavController) {
                 ToolTile("🧰", "جعبه‌ابزار عمومی", Modifier.weight(1f)) { nav.navigate(Screen.GeneralToolkit.route) }
                 ToolTile("⚗️", "آزمایشگاه شیمی", Modifier.weight(1f)) { nav.navigate(Screen.ChemistryLab.route) }
                 ToolTile("🔬", "آزمایشگاه فیزیک", Modifier.weight(1f)) { nav.navigate(Screen.PhysicsLab.route) }
+            }
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = HomeSide),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 ToolTile("🧮", "جعبه‌ابزار ریاضی", Modifier.weight(1f)) { nav.navigate(Screen.MathToolkit.route) }
+                ToolTile("🧬", "آزمایشگاه زیست‌شناسی", Modifier.weight(1f)) { nav.navigate(Screen.BiologyLab.route) }
             }
 
             Text("امروز", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = HomeSide))

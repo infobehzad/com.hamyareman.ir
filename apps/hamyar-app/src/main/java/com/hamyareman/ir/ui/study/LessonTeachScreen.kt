@@ -951,7 +951,7 @@ internal fun TeachPdfPages(
                         CircularProgressIndicator()
                     }
                 } else {
-                    ZoomableBitmap(
+                    ZoomablePdfPage(
                         bitmap = bmp!!,
                         modifier = Modifier.fillMaxSize(),
                         onZoomed = { z -> zoomed = z },

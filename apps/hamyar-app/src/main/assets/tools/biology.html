@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=4.0, user-scalable=yes">
+<title>آزمایشگاه زیست‌شناسی پایه نهم</title>
+<style>
+:root{
+  --bg:#0f1014; --panel:linear-gradient(175deg,#1d3a2a 0%,#121816 50%,#0c100e 100%);
+  --card:#16241c; --gold:#d4b96a; --cyan:#34d399; --text:#f0f2f6; --muted:#8b92a5; --border:#2a4336;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Vazirmatn",Tahoma,sans-serif;}
+body{background:var(--bg);color:var(--text);padding:16px 12px;min-height:100vh;}
+.wrap{max-width:920px;margin:0 auto;background:var(--panel);border:1.5px solid var(--border);border-radius:24px;padding:20px;box-shadow:0 24px 60px rgba(0,0,0,.7);}
+h1{font-size:1.25rem;color:var(--gold);margin-bottom:6px;}
+.sub{color:var(--muted);font-size:.85rem;margin-bottom:16px;}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.tab{background:#0f1713;border:1px solid var(--border);color:var(--text);border-radius:999px;padding:8px 14px;cursor:pointer;}
+.tab.on{background:var(--gold);color:#111;font-weight:800;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:12px;}
+.card h2{font-size:1rem;color:var(--cyan);margin-bottom:8px;}
+p,li{line-height:1.9;font-size:.92rem;}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
+button.btn{background:var(--gold);color:#111;border:0;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer;}
+button.ghost{background:transparent;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:8px 12px;cursor:pointer;}
+input,textarea,select{width:100%;background:#0c1210;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:8px;margin-top:6px;}
+.cell{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.part{background:#0c1210;border:1px solid var(--border);border-radius:12px;padding:10px;cursor:pointer;}
+.part.on{border-color:var(--gold);}
+.meter{height:10px;background:#0c1210;border-radius:99px;overflow:hidden;margin-top:8px;}
+.meter>i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--gold));width:40%;}
+table{width:100%;border-collapse:collapse;font-size:.82rem;}
+th,td{border-bottom:1px solid var(--border);padding:6px;text-align:right;}
+.hide{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🧬 آزمایشگاه زیست‌شناسی پایه نهم</h1>
+  <div class="sub">سلول، فتوسنتز، تنفس و زنجیرهٔ غذایی — نتایج در دفترچه ذخیره و با سرور همگام می‌شود.</div>
+  <div class="tabs">
+    <button class="tab on" onclick="show('cell')">سلول</button>
+    <button class="tab" onclick="show('photo')">فتوسنتز</button>
+    <button class="tab" onclick="show('resp')">تنفس یاخته‌ای</button>
+    <button class="tab" onclick="show('food')">زنجیرهٔ غذایی</button>
+    <button class="tab" onclick="show('note')">دفترچه</button>
+  </div>
+
+  <section id="cell" class="card">
+    <h2>ساختار سلول گیاهی و جانوری</h2>
+    <p>روی هر بخش بزن تا کارش را ببینی. بعد در دفترچه ثبت کن.</p>
+    <div class="cell" id="parts"></div>
+    <p id="partInfo" style="margin-top:10px;color:var(--gold)">یک اندامک را انتخاب کن.</p>
+    <div class="row">
+      <button class="btn" onclick="record('سلول', selectedPart||'—', partText||'—')">ثبت در دفترچه</button>
+    </div>
+  </section>
+
+  <section id="photo" class="card hide">
+    <h2>فتوسنتز</h2>
+    <p>نور + آب + کربن‌دی‌اکسید → قند + اکسیژن. شدت نور را عوض کن و مقدار اکسیژن را ببین.</p>
+    <label>شدت نور
+      <input type="range" min="0" max="100" value="40" id="light" oninput="photoSim()">
+    </label>
+    <div class="meter"><i id="o2bar"></i></div>
+    <p id="photoOut">اکسیژن نسبی: ۴۰٪</p>
+    <div class="row"><button class="btn" onclick="record('فتوسنتز','نور='+document.getElementById('light').value, document.getElementById('photoOut').textContent)">ثبت در دفترچه</button></div>
+  </section>
+
+  <section id="resp" class="card hide">
+    <h2>تنفس یاخته‌ای</h2>
+    <p>قند + اکسیژن → انرژی (ATP) + آب + کربن‌دی‌اکسید. اگر اکسیژن کم شود، انرژی افت می‌کند.</p>
+    <label>اکسیژن محیط
+      <input type="range" min="0" max="100" value="70" id="ox" oninput="respSim()">
+    </label>
+    <div class="meter"><i id="atpbar"></i></div>
+    <p id="respOut">ATP نسبی: ۷۰٪</p>
+    <div class="row"><button class="btn" onclick="record('تنفس','O2='+document.getElementById('ox').value, document.getElementById('respOut').textContent)">ثبت در دفترچه</button></div>
+  </section>
+
+  <section id="food" class="card hide">
+    <h2>زنجیرهٔ غذایی</h2>
+    <p>یک تولیدکننده، یک مصرف‌کنندهٔ اول و یک مصرف‌کنندهٔ دوم انتخاب کن.</p>
+    <select id="p1"><option>جلبک</option><option>علف</option><option>درخت</option></select>
+    <select id="p2"><option>ماهی کوچک</option><option>ملخ</option><option>آهو</option></select>
+    <select id="p3"><option>ماهی بزرگ</option><option>قورباغه</option><option>گرگ</option></select>
+    <p id="foodOut" style="margin-top:8px"></p>
+    <div class="row">
+      <button class="ghost" onclick="foodSim()">نمایش زنجیره</button>
+      <button class="btn" onclick="foodSim();record('زنجیره', document.getElementById('p1').value+'→'+document.getElementById('p2').value+'→'+document.getElementById('p3').value, document.getElementById('foodOut').textContent)">ثبت در دفترچه</button>
+    </div>
+  </section>
+
+  <section id="note" class="card hide">
+    <h2>دفترچه آزمایشگاه (<span id="recordCount">۰</span>)</h2>
+    <table>
+      <thead><tr><th>#</th><th>آزمایش</th><th>ورودی</th><th>نتیجه</th><th>زمان</th></tr></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div class="row" style="margin-top:10px">
+      <button class="ghost" onclick="clearNotes()">پاک کردن دفترچه</button>
+    </div>
+  </section>
+</div>
+<script>
+const PARTS = [
+  {n:"غشا", t:"کنترل ورود و خروج مواد."},
+  {n:"هسته", t:"مرکز فرمان و محل DNA."},
+  {n:"میتوکندری", t:"نیروگاه سلول؛ ساخت ATP."},
+  {n:"کلروپلاست", t:"فقط گیاه؛ محل فتوسنتز."},
+  {n:"واکوئل", t:"ذخیرهٔ آب و مواد؛ در گیاه بزرگ است."},
+  {n:"دیواره", t:"فقط گیاه؛ استحکام سلول."},
+];
+let selectedPart="", partText="";
+window.tableRecords = [];
+window.HamyarBioNotes = [];
+function fa(n){return String(n).replace(/[0-9]/g,d=>String.fromCharCode(0x06F0+parseInt(d)));}
+function show(id){
+  ["cell","photo","resp","food","note"].forEach(k=>document.getElementById(k).classList.toggle("hide", k!==id));
+  document.querySelectorAll(".tab").forEach((b,i)=>{
+    const map=["cell","photo","resp","food","note"];
+    b.classList.toggle("on", map[i]===id);
+  });
+}
+function buildParts(){
+  const box=document.getElementById("parts");
+  PARTS.forEach(p=>{
+    const d=document.createElement("div");
+    d.className="part"; d.textContent=p.n;
+    d.onclick=()=>{
+      document.querySelectorAll(".part").forEach(x=>x.classList.remove("on"));
+      d.classList.add("on"); selectedPart=p.n; partText=p.t;
+      document.getElementById("partInfo").textContent=p.n+" — "+p.t;
+    };
+    box.appendChild(d);
+  });
+}
+function photoSim(){
+  const v=+document.getElementById("light").value;
+  document.getElementById("o2bar").style.width=v+"%";
+  document.getElementById("photoOut").textContent="اکسیژن نسبی: "+fa(v)+"٪";
+}
+function respSim(){
+  const v=+document.getElementById("ox").value;
+  document.getElementById("atpbar").style.width=v+"%";
+  document.getElementById("respOut").textContent="ATP نسبی: "+fa(v)+"٪";
+}
+function foodSim(){
+  const a=document.getElementById("p1").value,b=document.getElementById("p2").value,c=document.getElementById("p3").value;
+  document.getElementById("foodOut").textContent="تولیدکننده («"+a+"») انرژی را می‌سازد؛ «"+b+"» مصرف‌کنندهٔ اول و «"+c+"» مصرف‌کنندهٔ دوم است.";
+}
+function record(name, input, output){
+  const entry={id:tableRecords.length+1,name,input,output,time:new Date().toLocaleTimeString("fa-IR")};
+  tableRecords.push(entry);
+  HamyarBioNotes = tableRecords;
+  const tbody=document.getElementById("tableBody");
+  if(tableRecords.length===1) tbody.innerHTML="";
+  const tr=document.createElement("tr");
+  tr.innerHTML=`<td>${fa(entry.id)}</td><td>${entry.name}</td><td>${entry.input}</td><td>${entry.output}</td><td>${entry.time}</td>`;
+  tbody.prepend(tr);
+  document.getElementById("recordCount").textContent=fa(tableRecords.length);
+  try{localStorage.setItem("hamyar_bio_notebook", JSON.stringify(tableRecords));}catch(e){}
+}
+function clearNotes(){
+  tableRecords=[]; HamyarBioNotes=[];
+  document.getElementById("tableBody").innerHTML="";
+  document.getElementById("recordCount").textContent=fa(0);
+  try{localStorage.removeItem("hamyar_bio_notebook");}catch(e){}
+}
+buildParts(); photoSim(); respSim(); foodSim();
+try{
+  const saved=JSON.parse(localStorage.getItem("hamyar_bio_notebook")||"[]");
+  if(Array.isArray(saved) && saved.length){
+    tableRecords=saved; HamyarBioNotes=saved;
+    document.getElementById("tableBody").innerHTML="";
+    saved.slice().reverse().forEach(entry=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML=`<td>${fa(entry.id)}</td><td>${entry.name}</td><td>${entry.input}</td><td>${entry.output}</td><td>${entry.time}</td>`;
+      document.getElementById("tableBody").appendChild(tr);
+    });
+    document.getElementById("recordCount").textContent=fa(saved.length);
+  }
+}catch(e){}
+</script>
+</body>
+</html>

@@ -28,6 +28,8 @@ object StateSync {
     const val KEY_CHECKS = "daily_checks"
     const val KEY_LEAVES = "class_plan_leaves"
     const val KEY_NOTE_TITLES = "note_titles"
+    /** برنامهٔ شخصی هفتگی (جدول زمانی جدا از برنامهٔ کلاسی). */
+    const val KEY_WEEK_PLAN = "week_plan"
 
     private const val PREF = "hamyar_state_sync"
     private const val KEY_LAST = "last_sync_at"

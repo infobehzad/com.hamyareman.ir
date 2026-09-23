@@ -207,10 +207,10 @@ fun LessonPdfScreen(packId: String, onBack: () -> Unit) {
                                     CircularProgressIndicator(Modifier.padding(16.dp))
                                 }
                             } else {
-                                Image(
-                                    bitmap = bmp!!.asImageBitmap(),
-                                    contentDescription = "صفحه ${index + 1}",
-                                    modifier = Modifier.fillMaxWidth(),
+                                ZoomablePdfPage(
+                                    bitmap = bmp!!,
+                                    modifier = Modifier.fillMaxWidth().height(480.dp),
+                                    onZoomed = {},
                                 )
                             }
                             Text(

@@ -45,7 +45,9 @@ import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.ui.study.ClassPlanStore
 import com.hamyareman.ir.ui.study.ClassPlanSync
+import com.hamyareman.ir.ui.study.SchoolShift
 import com.hamyareman.ir.ui.study.StateSync
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -73,30 +75,40 @@ fun ClassPlanCard(
         owner.lifecycle.addObserver(obs)
         onDispose { owner.lifecycle.removeObserver(obs) }
     }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(30_000)
+            tick++
+        }
+    }
     val today = remember(tick) { LocalDate.now(JalaliDate.TEHRAN) }
-    // «فردا» متغیر است: بعد از نیمه‌شب، همان روزِ پیش‌رو «امروز» است.
-    val prepDate = remember(tick) { ClassPlanStore.prepTargetDate() }
     val snap = remember(tick) { ClassPlanStore.load(ctx) }
     LaunchedEffect(tick, snap.cycleWeeks, snap.anchorIso, snap.fixedEvening, snap.morningHour, snap.noonHour) {
-        // رفرشِ تیک‌ها و اطلاع‌رسانی‌های فردا در ساعت خروج / پایان کلاس مجازی
         ClassPlanStore.maybeRefreshAtExit(ctx, reminders = reminders)
         ClassPlanStore.syncAlarms(ctx, reminders, snap, today)
     }
-    // تیک‌ها از سرور هم «کشیده» می‌شوند تا گزارشِ آمادگی روی هر دو دستگاه یکی باشد.
     val syncBox = LocalAppContainer.current
-    LaunchedEffect(tick) {
+    LaunchedEffect(Unit) {
         val uid = runCatching { syncBox.auth.currentUserId() }.getOrNull().orEmpty()
         if (uid.isBlank()) return@LaunchedEffect
-        val got = ClassPlanSync.pull(ctx, syncBox.tables, uid, StateSync.KEY_CHECKS)
-        val pushed = ClassPlanSync.pushIfNewer(ctx, syncBox.tables, uid, StateSync.KEY_CHECKS)
-        if (got || pushed) tick++
+        val got = ClassPlanSync.pullAll(ctx, syncBox.tables, uid)
+        ClassPlanSync.keys.forEach { key ->
+            runCatching { ClassPlanSync.pushIfNewer(ctx, syncBox.tables, uid, key) }
+        }
+        if (got) tick++
     }
-    val j = JalaliDate.toJalali(today.toString())
-    val dayName = JalaliDate.weekDayFa(today.toString())
+    val virtEnd = remember(tick) {
+        ClassPlanStore.virtualSessions(ctx).firstOrNull { it.dayIndex == SchoolShift.dayIndex(today) }
+            ?.let { it.endH * 60 + it.endM }
+    }
+    val showDate = remember(tick, snap.exitMorning, snap.exitNoon, snap.anchorIso, virtEnd) {
+        ClassPlanStore.dashboardShowDate(snap, virtualEndMin = virtEnd)
+    }
+    val j = JalaliDate.toJalali(showDate.toString())
+    val dayName = JalaliDate.weekDayFa(showDate.toString())
     val dateFa = j?.let { toPersianDigits("${it.day} ${JalaliDate.monthName(it.month)}") } ?: ""
-    val shift = ClassPlanStore.shiftOf(snap, today)
-    val holiday = ClassPlanStore.isSchoolHoliday(snap, today)
-    val showDate = ClassPlanStore.firstSchoolDay(snap, prepDate)
+    val shift = ClassPlanStore.shiftOf(snap, showDate)
+    val holiday = ClassPlanStore.isSchoolHoliday(snap, showDate)
     val dayWord = ClassPlanStore.dayWordFor(showDate, today)
     val dayLabel = ClassPlanStore.dayLabelFor(showDate, today, ClassPlanStore.shiftOf(snap, showDate))
     // هر خانه می‌تواند دو درس داشته باشد: «درسِ اول / درسِ دوم» در یک کادر.

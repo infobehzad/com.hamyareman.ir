@@ -281,6 +281,8 @@ fun MathLessonScreen(
                         var target = -1
                         while (true) {
                             val event = awaitPointerEvent(PointerEventPass.Initial)
+                            // پینچ دو انگشتی مالِ زوم است — سوایپ سربرگ را ول کن.
+                            if (event.changes.count { it.pressed } >= 2) return@awaitEachGesture
                             val change = event.changes.firstOrNull { it.id == pid } ?: break
                             if (!change.pressed) break
                             dx += change.position.x - change.previousPosition.x
@@ -539,7 +541,8 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
                             settings.domStorageEnabled = true
                             settings.loadWithOverviewMode = true
                             settings.useWideViewPort = true
-                            settings.builtInZoomControls = false
+                            settings.setSupportZoom(true)
+                            settings.builtInZoomControls = true
                             settings.displayZoomControls = false
                             addJavascriptInterface(TeachHtmlBridge(), "HamyarPlayer")
                             setBackgroundColor(android.graphics.Color.WHITE)

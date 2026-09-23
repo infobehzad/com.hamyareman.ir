@@ -84,12 +84,17 @@ internal class PdfPageZoomView @JvmOverloads constructor(
         isClickable = true
     }
 
+    private var bound: Bitmap? = null
+
     fun bind(bitmap: Bitmap?) {
         runCatching {
+            if (bitmap != null && bitmap === bound && drawable != null) return
             if (bitmap != null && bitmap.isRecycled) {
                 setImageBitmap(null)
+                bound = null
                 return
             }
+            bound = bitmap
             setImageBitmap(bitmap)
             if (bitmap == null) {
                 bmpW = 1f; bmpH = 1f
@@ -157,6 +162,9 @@ internal class PdfPageZoomView @JvmOverloads constructor(
                     last.set(event.x, event.y)
                     panning = true
                     if (currentScale() > minScale * 1.02f) parent?.requestDisallowInterceptTouchEvent(true)
+                }
+                MotionEvent.ACTION_POINTER_DOWN -> {
+                    parent?.requestDisallowInterceptTouchEvent(true)
                 }
                 MotionEvent.ACTION_MOVE -> {
                     if (panning && !scaleDet.isInProgress && currentScale() > minScale * 1.02f) {

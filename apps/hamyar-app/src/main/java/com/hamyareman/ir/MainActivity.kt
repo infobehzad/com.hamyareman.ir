@@ -196,6 +196,21 @@ class MainActivity : FragmentActivity() {
                     runCatching {
                         com.hamyareman.ir.ui.study.ClassPlanSync.pushAll(activity, container.tables, uid.orEmpty())
                     }
+                    runCatching {
+                        com.hamyareman.ir.ui.tools.ToolSaveStore.pull(activity, container.tables, uid.orEmpty())
+                    }
+                    runCatching {
+                        val weekKey = com.hamyareman.ir.ui.study.StateSync.KEY_WEEK_PLAN
+                        val remote = com.hamyareman.ir.ui.study.StateSync.pull(activity, container.tables, uid.orEmpty(), weekKey)
+                        if (remote != null && remote.first.isNotBlank()) {
+                            val localAt = com.hamyareman.ir.ui.study.StateSync.localAt(activity, weekKey)
+                            if (remote.second >= localAt) {
+                                com.hamyareman.ir.platform.core.common.LocalStore(activity, "hamyar_week_plan")
+                                    .putString("week_plan_blocks", remote.first)
+                                com.hamyareman.ir.ui.study.StateSync.markSyncedAt(activity, weekKey, remote.second)
+                            }
+                        }
+                    }
                 }
             }
 
