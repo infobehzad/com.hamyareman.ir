@@ -44,7 +44,7 @@ jobs:
           set -e
           gh release view ci-apk >/dev/null 2>&1 || \
             gh release create ci-apk --title "CI APK" --notes "آخرین فایل نصبی debug نهم." || true
-          gh release upload ci-apk dist/hamyar-1.80.apk --clobber
+          gh release upload ci-apk dist/hamyar-1.82.apk --clobber
           gh release view ci-apk
       - uses: actions/upload-artifact@v4
         if: success()
