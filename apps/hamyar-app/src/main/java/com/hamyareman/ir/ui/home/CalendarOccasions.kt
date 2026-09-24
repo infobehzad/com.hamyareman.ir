@@ -24,7 +24,7 @@ data class Occasion(
     val holiday: Boolean = false,
 )
 
-internal data class CalEvent(
+data class CalEvent(
     val category: String,
     val title: String,
     val holiday: Boolean,
