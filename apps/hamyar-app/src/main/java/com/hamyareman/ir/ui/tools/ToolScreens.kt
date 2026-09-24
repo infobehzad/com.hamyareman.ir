@@ -1,6 +1,8 @@
 package com.hamyareman.ir.ui.tools
 
 import android.annotation.SuppressLint
+import android.util.Log
+import android.webkit.ConsoleMessage
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -213,13 +215,24 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
                         settings.domStorageEnabled = true
                         settings.allowFileAccess = true
                         settings.allowContentAccess = true
+                        @Suppress("DEPRECATION")
+                        run {
+                            settings.allowFileAccessFromFileURLs = true
+                            settings.allowUniversalAccessFromFileURLs = true
+                        }
                         settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
                         if (isLab) settings.enableLabLayout() else settings.enableStudyPinchZoom()
-                        webChromeClient = WebChromeClient()
+                        webChromeClient = object : WebChromeClient() {
+                            override fun onConsoleMessage(msg: ConsoleMessage): Boolean {
+                                Log.d("LabWebView", "${msg.message()} — ${msg.sourceId()}:${msg.lineNumber()}")
+                                return true
+                            }
+                        }
                         webViewClient = object : WebViewClient() {
                             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest) = false
                             override fun onPageFinished(view: WebView, url: String) {
                                 view.evaluateJavascript(toolPageJs(toolId, premium), null)
+                                view.post { applyLabViewport(view) }
                                 applySaved(view)
                             }
                         }
@@ -229,7 +242,9 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
                         loadUrl("file:///android_asset/tools/$toolId.html")
                     }
                 },
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().onSizeChanged {
+                    webRef[0]?.let { applyLabViewport(it) }
+                },
                 onRelease = { webRef[0] = null; it.destroy() })
             if (executeLocked) {
                 Box(
@@ -251,6 +266,19 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
             }
         }
     }
+}
+
+private fun applyLabViewport(view: WebView) {
+    val wPx = view.width
+    val hPx = view.height
+    if (wPx <= 0 || hPx <= 0) return
+    val d = view.resources.displayMetrics.density.coerceAtLeast(0.5f)
+    val w = (wPx / d).toInt().coerceAtLeast(1)
+    val h = (hPx / d).toInt().coerceAtLeast(1)
+    view.evaluateJavascript(
+        "window.__labW=$w;window.__labH=$h;if(typeof window.__hamyarLabLayout==='function')window.__hamyarLabLayout();",
+        null,
+    )
 }
 
 private fun toolPageJs(toolId: String, premium: Boolean): String = buildString {
