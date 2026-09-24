@@ -90,7 +90,8 @@ object JalaliDate {
     }.getOrNull()
 
     fun toJalali(epochMillis: Long): Jalali {
-        val date = LocalDate.ofInstant(Instant.ofEpochMilli(epochMillis), TEHRAN)
+        // LocalDate.ofInstant از جاوا ۹ / API ۳۳ است؛ روی Android 10 → NoSuchMethodError بعد از لاگین.
+        val date = LocalDateTime.ofInstant(Instant.ofEpochMilli(epochMillis), TEHRAN).toLocalDate()
         return fromGregorian(date.year, date.monthValue, date.dayOfMonth)
     }
 
