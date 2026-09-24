@@ -365,27 +365,41 @@ object ClassPlanStore {
         StateSync.markLocal(ctx, StateSync.KEY_SHIFT)
     }
 
+    /**
+     * آلفا = شیفتِ بلوکِ لنگر ([thisWeekShift]).
+     * بتا = هفته‌ی چندمِ همان بلوک ([cycleWeekOffset]، ۱..N).
+     * هر بلوک N هفته همان شیفت می‌ماند، بعد به شیفت مخالف برمی‌گردد.
+     */
     fun shiftOf(snap: Snapshot, date: LocalDate): Shift {
-        // الگوی هفتگیِ دستیِ قدیمی (فقط داده‌های نسخه‌های قبل تا اولین ذخیره‌ی تازه)
         if (snap.weekPattern.size == snap.cycleWeeks && snap.weekPattern.isNotEmpty()) {
             val pos = Math.floorMod(SchoolShift.weekIndex(snap.anchorIso, date), snap.cycleWeeks.toLong()).toInt()
             return if (snap.weekPattern.getOrNull(pos) == "evening") Shift.EVENING else Shift.MORNING
         }
         if (snap.cycleWeeks == 1) return snap.thisWeekShift
-        // چرخه: شیفتِ هفته‌ها از شیفتِ هفته‌ی جاری (لنگر) به‌صورتِ متناوبِ هفتگی مشتق می‌شود.
-        return derivedShift(snap.thisWeekShift, SchoolShift.weekIndex(snap.anchorIso, date))
+        val k = SchoolShift.weekIndex(snap.anchorIso, date)
+        val totalPos = snap.cycleWeekOffset - 1L + k
+        val block = Math.floorDiv(totalPos, snap.cycleWeeks.toLong())
+        return if (Math.floorMod(block, 2L) == 0L) snap.thisWeekShift else snap.thisWeekShift.opposite()
     }
 
-    /** هفته‌ی چندمِ چرخه (۱..cycleWeeks) با [date] هم‌زمان است؟ */
+    /** هفته‌ی چندمِ بلوکِ جاری (۱..cycleWeeks) — متغیر بتا برای [date]. */
     fun cycleWeekPos(snap: Snapshot, date: LocalDate): Int {
         if (snap.cycleWeeks <= 1) return 1
         return Math.floorMod(snap.cycleWeekOffset - 1L + SchoolShift.weekIndex(snap.anchorIso, date), snap.cycleWeeks.toLong()).toInt() + 1
     }
 
+    fun weekOrdinal(n: Int): String = when (n) {
+        1 -> "اولین"
+        2 -> "دومین"
+        3 -> "سومین"
+        4 -> "چهارمین"
+        else -> toPersianDigits(n.toString()) + "مین"
+    }
+
     fun captionOf(snap: Snapshot, date: LocalDate): String {
         val shift = shiftOf(snap, date)
-        return if (snap.cycleWeeks == 1) "همیشه ${shift.label}"
-        else "هفته‌ی ${toPersianDigits(cycleWeekPos(snap, date).toString())} از ${toPersianDigits(snap.cycleWeeks.toString())} هفته · ${shift.label}"
+        if (snap.cycleWeeks == 1) return "همیشه ${shift.label}"
+        return "این هفته ${weekOrdinal(cycleWeekPos(snap, date))} هفته از ${shift.label} است"
     }
 
     fun lessonsFor(snap: Snapshot, date: LocalDate): List<String> {
@@ -748,17 +762,10 @@ object ClassPlanStore {
         if (snap.cycleWeeks <= 1) return null
         if (!weekClassesDone(snap, now, ctx)) return null
         val next = firstSchoolDay(snap, now.toLocalDate().plusDays(1), ctx)
-        val pos = cycleWeekPos(snap, next)
         val day = JalaliDate.weekDayFa(next.toString())
-        val ord = when (pos) {
-            1 -> "اولین"
-            2 -> "دومین"
-            3 -> "سومین"
-            4 -> "چهارمین"
-            else -> toPersianDigits(pos.toString()) + "مین"
-        }
-        val n = toPersianDigits(snap.cycleWeeks.toString())
-        return "کلاس‌های این هفته تمام شده و از روز $day ${ord} هفته از ${n}هفته شیفتت شروع میشود"
+        val nShift = shiftOf(snap, next)
+        val nPos = cycleWeekPos(snap, next)
+        return "کلاس‌های این هفته تمام شده و از روز $day ${weekOrdinal(nPos)} هفته از ${nShift.label} شروع میشود"
     }
 
 
@@ -1172,6 +1179,13 @@ object ClassPlanStore {
                 obj("bag")?.keys()?.forEach { k -> s.putBool("bag_$k", obj("bag")!!.optBoolean(k)) }
                 obj("hw")?.keys()?.forEach { k -> s.putBool("hw_$k", obj("hw")!!.optBoolean(k)) }
                 obj("exam")?.keys()?.forEach { k -> s.putString("exam_$k", obj("exam")!!.optString(k)) }
+                obj("report")?.keys()?.forEach { k -> s.putString("rep_$k", obj("report")!!.optString(k)) }
+                obj("examprep")?.keys()?.forEach { k -> s.putBool("examprep_$k", obj("examprep")!!.optBoolean(k)) }
+            }
+        }
+    }
+}
+)?.keys()?.forEach { k -> s.putString("exam_$k", obj("exam")!!.optString(k)) }
                 obj("report")?.keys()?.forEach { k -> s.putString("rep_$k", obj("report")!!.optString(k)) }
                 obj("examprep")?.keys()?.forEach { k -> s.putBool("examprep_$k", obj("examprep")!!.optBoolean(k)) }
             }

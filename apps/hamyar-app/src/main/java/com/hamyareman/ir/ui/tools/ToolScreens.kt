@@ -176,6 +176,19 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     val webRef = remember { arrayOfNulls<WebView>(1) }
     val premium = StudentProfileState.isPaid()
+    var pageUrl by remember(toolId) { mutableStateOf<String?>(null) }
+    var loadErr by remember(toolId) { mutableStateOf<String?>(null) }
+    LaunchedEffect(toolId) {
+        loadErr = null
+        val local = runCatching { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { ToolRemote.ensure(ctx, toolId) } }.getOrNull()
+        pageUrl = when {
+            local != null -> "file://$local"
+            else -> {
+                loadErr = "برای نمایش این صفحه به اینترنت نیاز است."
+                null
+            }
+        }
+    }
     val isLab = toolId == "chemistry" || toolId == "physics" || toolId == "biology"
     val isCalc = toolId == "ti_nspire" || toolId == "casio991" || toolId == "dj120d"
     val hideChrome = isLab || isCalc
@@ -219,45 +232,49 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
     }
     Column(Modifier.fillMaxSize()) {
         if (!hideChrome) AppTopBar(title, onBack)
-        Box(Modifier.weight(1f).fillMaxWidth()) {
-            AndroidView(
-                factory = { c ->
-                    WebView(c).apply {
-                        settings.javaScriptEnabled = true
-                        settings.domStorageEnabled = true
-                        settings.allowFileAccess = true
-                        settings.allowContentAccess = true
-                        @Suppress("DEPRECATION")
-                        run {
-                            settings.allowFileAccessFromFileURLs = true
-                            settings.allowUniversalAccessFromFileURLs = true
-                        }
-                        settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
-                        if (isLab) settings.enableLabLayout() else settings.enableStudyPinchZoom()
-                        webChromeClient = object : WebChromeClient() {
-                            override fun onConsoleMessage(msg: ConsoleMessage): Boolean {
-                                Log.d("LabWebView", "${msg.message()} — ${msg.sourceId()}:${msg.lineNumber()}")
-                                return true
+        Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+            when {
+                pageUrl == null && loadErr != null -> Text(loadErr ?: "", color = MaterialTheme.colorScheme.error)
+                pageUrl == null -> CircularProgressIndicator()
+                else -> AndroidView(
+                    factory = { c ->
+                        WebView(c).apply {
+                            settings.javaScriptEnabled = true
+                            settings.domStorageEnabled = true
+                            settings.allowFileAccess = true
+                            settings.allowContentAccess = true
+                            @Suppress("DEPRECATION")
+                            run {
+                                settings.allowFileAccessFromFileURLs = true
+                                settings.allowUniversalAccessFromFileURLs = true
                             }
-                        }
-                        webViewClient = object : WebViewClient() {
-                            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest) = false
-                            override fun onPageFinished(view: WebView, url: String) {
-                                view.evaluateJavascript(toolPageJs(toolId, premium), null)
-                                view.post { applyLabViewport(view) }
-                                applySaved(view)
+                            settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+                            if (isLab) settings.enableLabLayout() else settings.enableStudyPinchZoom()
+                            webChromeClient = object : WebChromeClient() {
+                                override fun onConsoleMessage(msg: ConsoleMessage): Boolean {
+                                    Log.d("LabWebView", "${msg.message()} — ${msg.sourceId()}:${msg.lineNumber()}")
+                                    return true
+                                }
                             }
+                            webViewClient = object : WebViewClient() {
+                                override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest) = false
+                                override fun onPageFinished(view: WebView, url: String) {
+                                    view.evaluateJavascript(toolPageJs(toolId, premium), null)
+                                    view.post { applyLabViewport(view) }
+                                    applySaved(view)
+                                }
+                            }
+                            addJavascriptInterface(bridge, "HamyarTool")
+                            setBackgroundColor(if (isLab) android.graphics.Color.parseColor("#050912") else android.graphics.Color.TRANSPARENT)
+                            webRef[0] = this
+                            loadUrl(pageUrl!!)
                         }
-                        addJavascriptInterface(bridge, "HamyarTool")
-                        setBackgroundColor(if (isLab) android.graphics.Color.parseColor("#050912") else android.graphics.Color.TRANSPARENT)
-                        webRef[0] = this
-                        loadUrl("file:///android_asset/tools/$toolId.html")
-                    }
-                },
-                modifier = Modifier.fillMaxSize().onSizeChanged {
-                    webRef[0]?.let { applyLabViewport(it) }
-                },
-                onRelease = { webRef[0] = null; it.destroy() })
+                    },
+                    modifier = Modifier.fillMaxSize().onSizeChanged {
+                        webRef[0]?.let { applyLabViewport(it) }
+                    },
+                    onRelease = { webRef[0] = null; it.destroy() })
+            }
         }
     }
 }

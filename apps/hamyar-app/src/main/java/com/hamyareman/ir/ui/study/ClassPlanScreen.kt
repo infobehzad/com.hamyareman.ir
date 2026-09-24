@@ -586,14 +586,10 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(ClassPlanStore.captionOf(snap, today), fontWeight = FontWeight.Bold)
         OutlinedButton(onClick = { shiftSettings = true }, modifier = Modifier.fillMaxWidth()) {
             Text("تنظیمات شیفت مدرسه")
         }
-        Text(
-            if (snap.cycleWeeks == 1) "همیشه ${current.label}"
-            else "شیفت این هفته هفته‌ی ${toPersianDigits(ClassPlanStore.cycleWeekPos(snap, today).toString())} از ${toPersianDigits(snap.cycleWeeks.toString())} هفته، ${current.label}",
-            fontWeight = FontWeight.Bold)
+        Text(ClassPlanStore.captionOf(snap, today), fontWeight = FontWeight.Bold)
         ClassPlanStore.nextCycleStartCaption(snap, ctx = ctx)?.let { cap ->
             Text(cap, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
         }
@@ -611,9 +607,7 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
         TimePick("آماده شدن ظهر", alarm.wakeNH, alarm.wakeNM) { h, m -> flushAlarm(alarm.copy(wakeNH = h, wakeNM = m)) }
         TimePick("حضور در سرویس", alarm.busNH, alarm.busNM) { h, m -> flushAlarm(alarm.copy(busNH = h, busNM = m)) }
         TimePick("حضور در مدرسه", alarm.schoolNH, alarm.schoolNM) { h, m -> flushAlarm(alarm.copy(schoolNH = h, schoolNM = m)) }
-        Text("خواب — دعوت به خواب آرام", fontWeight = FontWeight.Bold)
-        TimePick("خواب شیفت صبح", alarm.sleepMH, alarm.sleepMM) { h, m -> flushAlarm(alarm.copy(sleepMH = h, sleepMM = m)) }
-        TimePick("خواب شیفت ظهر", alarm.sleepNH, alarm.sleepNM) { h, m -> flushAlarm(alarm.copy(sleepNH = h, sleepNM = m)) }
+        Text("خواب — دعوت به خواب  h, m -> flushAlarm(alarm.copy(sleepNH = h, sleepNM = m)) }
         Text(
             "آلارم شیفت مخالف خاموش می‌شود. اگر دعوت خواب لمس نشود، یک‌بار دیگر بعد از ۵ دقیقه تکرار می‌شود.",
             style = MaterialTheme.typography.bodySmall)
@@ -729,23 +723,8 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                         }
                         else -> {
                             val nowPos = ClassPlanStore.cycleWeekPos(snap, today)
-                            Text(
-                                "۳) شیفتِ هر هفته — هفته‌ی ${toPersianDigits(nowPos.toString())}: ${current.label}",
-                                fontWeight = FontWeight.Bold)
-                            Text(
-                                "هفتهٔ جاری شما، هفتهٔ چندم از چرخهٔ ${toPersianDigits(snap.cycleWeeks.toString())} هفته‌ای است؟",
-                                style = MaterialTheme.typography.bodySmall)
+                            Text("۳) هفتهٔ جاری از ${current.label}", fontWeight = FontWeight.Bold)
                             (1..snap.cycleWeeks).forEach { k ->
-                                val kShift =
-                                    if (Math.floorMod((k - nowPos).toLong(), 2L) == 0L) current
-                                    else current.opposite()
-                                val weekFa = when (k) {
-                                    1 -> "اول"
-                                    2 -> "دوم"
-                                    3 -> "سوم"
-                                    4 -> "چهارم"
-                                    else -> toPersianDigits(k.toString())
-                                }
                                 FilterChip(
                                     selected = nowPos == k,
                                     onClick = {
@@ -753,7 +732,7 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                                         snap = ClassPlanStore.load(ctx)
                                     },
                                     label = {
-                                        Text("هفته $weekFa (${kShift.label})")
+                                        Text("${ClassPlanStore.weekOrdinal(k)} هفته از ${current.label}")
                                     })
                             }
                         }
@@ -919,19 +898,7 @@ private fun AlarmSoundRow(
 }
 
 /**
- * بخش «مرخصی» در انتهای کادرِ برنامهٔ هفتگی:
- * بازه با تقویم شمسی، علت (با امکانِ افزودن علتِ خاص)، گواهی پزشکی (فقط مریضی)
- * و وضعیتِ توجیه (فقط یکی و فقط یک‌بار — مگر «موجّه نشده» که قابلِ تغییر می‌ماند).
- * مرخصی‌های ثبت‌شده در یک آکاردیونِ **پیش‌فرض بسته** فهرست می‌شوند.
- */
-@Composable
-internal fun LeaveSection() {
-    val ctx = LocalContext.current
-    val container = LocalAppContainer.current
-    val syncScope = rememberCoroutineScope()
-    val today = LocalDate.now(JalaliDate.TEHRAN)
-
-    var records by remember { mutableStateOf(ClassPlanStore.leaves(ctx)) }
+ * بخش «مرخصی» در انتهای کادرِ بر�bleStateOf(ClassPlanStore.leaves(ctx)) }
     var fromIso by remember { mutableStateOf(today.toString()) }
     var toIso by remember { mutableStateOf(today.toString()) }
     var reason by remember { mutableStateOf("") }
@@ -1135,6 +1102,24 @@ internal fun LeaveSection() {
             title = "تا روز",
             onDismiss = { pickTo = false },
             onPick = { toIso = it; pickTo = false })
+    }
+    if (deleteId != null) {
+        AlertDialog(
+            onDismissRequest = { deleteId = null },
+            title = { Text("حذف مرخصی؟") },
+            text = { Text("این مرخصی از فهرست پاک می‌شود.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    deleteId?.let { ClassPlanStore.removeLeave(ctx, it) }
+                    deleteId = null
+                    records = ClassPlanStore.leaves(ctx)
+                    pushLeaves()
+                }) { Text("حذف") }
+            },
+            dismissButton = { TextButton(onClick = { deleteId = null }) { Text("انصراف") } })
+    }
+}
+o = false })
     }
     if (deleteId != null) {
         AlertDialog(
