@@ -54,16 +54,17 @@ class ClassPlanShiftTest {
     }
 
     @Test
-    fun `two week cycle alternates from this week shift`() {
+    fun `two week cycle keeps alpha then flips at next block`() {
         val s = snap(2, base = Shift.MORNING)
         assertEquals(Shift.MORNING, ClassPlanStore.shiftOf(s, saturday))
-        assertEquals(Shift.EVENING, ClassPlanStore.shiftOf(s, saturday.plusDays(7)))
-        assertEquals(Shift.MORNING, ClassPlanStore.shiftOf(s, saturday.plusDays(14)))
+        assertEquals(Shift.MORNING, ClassPlanStore.shiftOf(s, saturday.plusDays(7)))
+        assertEquals(Shift.EVENING, ClassPlanStore.shiftOf(s, saturday.plusDays(14)))
         assertEquals(Shift.EVENING, ClassPlanStore.shiftOf(s, saturday.minusDays(7)))
 
         val sEven = snap(2, base = Shift.EVENING)
         assertEquals(Shift.EVENING, ClassPlanStore.shiftOf(sEven, saturday))
-        assertEquals(Shift.MORNING, ClassPlanStore.shiftOf(sEven, saturday.plusDays(7)))
+        assertEquals(Shift.EVENING, ClassPlanStore.shiftOf(sEven, saturday.plusDays(7)))
+        assertEquals(Shift.MORNING, ClassPlanStore.shiftOf(sEven, saturday.plusDays(14)))
     }
 
     @Test
@@ -118,16 +119,20 @@ class ClassPlanShiftTest {
         assertEquals("همیشه شیفت صبح", ClassPlanStore.captionOf(snap(1, base = Shift.MORNING), saturday))
         assertEquals("همیشه شیفت ظهر", ClassPlanStore.captionOf(snap(1, base = Shift.EVENING), saturday))
         assertEquals(
-            "هفته‌ی ۱ از ۲ هفته · شیفت صبح",
+            "این هفته اولین هفته از شیفت صبح است",
             ClassPlanStore.captionOf(snap(2, offset = 1), saturday),
         )
         assertEquals(
-            "هفته‌ی ۳ از ۴ هفته · شیفت ظهر",
+            "این هفته سومین هفته از شیفت ظهر است",
             ClassPlanStore.captionOf(snap(4, offset = 3, base = Shift.EVENING), saturday),
         )
         assertEquals(
-            "هفته‌ی ۴ از ۴ هفته · شیفت صبح",
+            "این هفته چهارمین هفته از شیفت ظهر است",
             ClassPlanStore.captionOf(snap(4, offset = 3, base = Shift.EVENING), saturday.plusDays(7)),
+        )
+        assertEquals(
+            "این هفته دومین هفته از شیفت ظهر است",
+            ClassPlanStore.captionOf(snap(4, offset = 2, base = Shift.EVENING), saturday),
         )
     }
 }
