@@ -607,7 +607,9 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
         TimePick("آماده شدن ظهر", alarm.wakeNH, alarm.wakeNM) { h, m -> flushAlarm(alarm.copy(wakeNH = h, wakeNM = m)) }
         TimePick("حضور در سرویس", alarm.busNH, alarm.busNM) { h, m -> flushAlarm(alarm.copy(busNH = h, busNM = m)) }
         TimePick("حضور در مدرسه", alarm.schoolNH, alarm.schoolNM) { h, m -> flushAlarm(alarm.copy(schoolNH = h, schoolNM = m)) }
-        Text("خواب — دعوت به خواب  h, m -> flushAlarm(alarm.copy(sleepNH = h, sleepNM = m)) }
+        Text("خواب — دعوت به خواب آرام", fontWeight = FontWeight.Bold)
+        TimePick("خواب شیفت صبح", alarm.sleepMH, alarm.sleepMM) { h, m -> flushAlarm(alarm.copy(sleepMH = h, sleepMM = m)) }
+        TimePick("خواب شیفت ظهر", alarm.sleepNH, alarm.sleepNM) { h, m -> flushAlarm(alarm.copy(sleepNH = h, sleepNM = m)) }
         Text(
             "آلارم شیفت مخالف خاموش می‌شود. اگر دعوت خواب لمس نشود، یک‌بار دیگر بعد از ۵ دقیقه تکرار می‌شود.",
             style = MaterialTheme.typography.bodySmall)
@@ -898,7 +900,19 @@ private fun AlarmSoundRow(
 }
 
 /**
- * بخش «مرخصی» در انتهای کادرِ بر�bleStateOf(ClassPlanStore.leaves(ctx)) }
+ * بخش «مرخصی» در انتهای کادرِ برنامهٔ هفتگی:
+ * بازه با تقویم شمسی، علت (با امکانِ افزودن علتِ خاص)، گواهی پزشکی (فقط مریضی)
+ * و وضعیتِ توجیه (فقط یکی و فقط یک‌بار — مگر «موجّه نشده» که قابلِ تغییر می‌ماند).
+ * مرخصی‌های ثبت‌شده در یک آکاردیونِ **پیش‌فرض بسته** فهرست می‌شوند.
+ */
+@Composable
+internal fun LeaveSection() {
+    val ctx = LocalContext.current
+    val container = LocalAppContainer.current
+    val syncScope = rememberCoroutineScope()
+    val today = LocalDate.now(JalaliDate.TEHRAN)
+
+    var records by remember { mutableStateOf(ClassPlanStore.leaves(ctx)) }
     var fromIso by remember { mutableStateOf(today.toString()) }
     var toIso by remember { mutableStateOf(today.toString()) }
     var reason by remember { mutableStateOf("") }
@@ -1102,24 +1116,6 @@ private fun AlarmSoundRow(
             title = "تا روز",
             onDismiss = { pickTo = false },
             onPick = { toIso = it; pickTo = false })
-    }
-    if (deleteId != null) {
-        AlertDialog(
-            onDismissRequest = { deleteId = null },
-            title = { Text("حذف مرخصی؟") },
-            text = { Text("این مرخصی از فهرست پاک می‌شود.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    deleteId?.let { ClassPlanStore.removeLeave(ctx, it) }
-                    deleteId = null
-                    records = ClassPlanStore.leaves(ctx)
-                    pushLeaves()
-                }) { Text("حذف") }
-            },
-            dismissButton = { TextButton(onClick = { deleteId = null }) { Text("انصراف") } })
-    }
-}
-o = false })
     }
     if (deleteId != null) {
         AlertDialog(

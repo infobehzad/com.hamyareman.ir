@@ -1185,10 +1185,3 @@ object ClassPlanStore {
         }
     }
 }
-)?.keys()?.forEach { k -> s.putString("exam_$k", obj("exam")!!.optString(k)) }
-                obj("report")?.keys()?.forEach { k -> s.putString("rep_$k", obj("report")!!.optString(k)) }
-                obj("examprep")?.keys()?.forEach { k -> s.putBool("examprep_$k", obj("examprep")!!.optBoolean(k)) }
-            }
-        }
-    }
-}

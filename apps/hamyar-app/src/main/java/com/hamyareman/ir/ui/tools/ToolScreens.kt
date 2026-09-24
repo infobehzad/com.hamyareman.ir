@@ -28,13 +28,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -234,9 +238,11 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
         if (!hideChrome) AppTopBar(title, onBack)
         Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
             when {
-                pageUrl == null && loadErr != null -> Text(loadErr ?: "", color = MaterialTheme.colorScheme.error)
+                pageUrl == null && loadErr != null -> Text(loadErr.orEmpty(), color = MaterialTheme.colorScheme.error)
                 pageUrl == null -> CircularProgressIndicator()
-                else -> AndroidView(
+                else -> {
+                    val url = pageUrl.orEmpty()
+                    AndroidView(
                     factory = { c ->
                         WebView(c).apply {
                             settings.javaScriptEnabled = true
@@ -267,13 +273,14 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
                             addJavascriptInterface(bridge, "HamyarTool")
                             setBackgroundColor(if (isLab) android.graphics.Color.parseColor("#050912") else android.graphics.Color.TRANSPARENT)
                             webRef[0] = this
-                            loadUrl(pageUrl!!)
+                            loadUrl(url)
                         }
                     },
                     modifier = Modifier.fillMaxSize().onSizeChanged {
                         webRef[0]?.let { applyLabViewport(it) }
                     },
                     onRelease = { webRef[0] = null; it.destroy() })
+                }
             }
         }
     }
