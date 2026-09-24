@@ -64,7 +64,7 @@ object FontCatalog {
         return nav + extras
     }
 
-    fun pageTitle(route: String): String = PAGE_TITLES[normalize(route)] ?: route
+    fun pageTitle(route: String?): String = PAGE_TITLES[normalize(route)] ?: (route ?: "")
 
     private fun buildAll(): List<FontSlot> {
         val out = mutableListOf<FontSlot>()
@@ -109,7 +109,7 @@ object FontCatalog {
         }
 
         add("hub.academy.header", "هدر آموزشگاه", "آموزشگاه — کارت اصلی", ROLE_HEADING, "titr", "آموزشگاه")
-        defaultAcademy().forEach { g ->
+        HubCatalog.academy().forEach { g ->
             add("hub.academy.group.${g.id}", "آکاردئون ${g.title}", "آموزشگاه — کارت اصلی", ROLE_HEADING, "titr", g.title)
             g.items.forEach { it ->
                 val key = it.route.substringBefore("?").substringBefore("/")

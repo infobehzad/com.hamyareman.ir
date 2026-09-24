@@ -167,7 +167,7 @@ fun AppearanceScreen(onBack: () -> Unit) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                 OutlinedButton(
                     onClick = {
-                        runCatching { shareFontTheme(context, prefs.fontTheme) }
+                        runCatching { shareFontTheme(context, prefs.fontTheme, prefs.slotMapObject()) }
                             .onFailure {
                                 Toast.makeText(context, "بکاپ ساخته نشد", Toast.LENGTH_SHORT).show()
                             }

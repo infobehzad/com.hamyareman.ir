@@ -218,5 +218,27 @@ class UiPrefs(context: Context) {
         private const val KEY_SIZE = "appearance_text_offset"
         private const val KEY_FONT_THEME = "appearance_font_theme"
         private const val KEY_SLOTS = "appearance_font_slots"
+        private const val KEY_SLOT_MAP = "appearance_slot_map"
     }
+}
+
+private fun slotMapJson(map: Map<String, SlotChoice>): String {
+    val o = JSONObject()
+    map.forEach { (id, c) ->
+        o.put(id, JSONObject().put("font", c.font).put("size", c.size))
+    }
+    return o.toString()
+}
+
+private fun parseSlotMap(raw: JSONObject): Map<String, SlotChoice> {
+    val out = mutableMapOf<String, SlotChoice>()
+    val keys = raw.keys()
+    while (keys.hasNext()) {
+        val id = keys.next()
+        val o = raw.optJSONObject(id) ?: continue
+        val font = o.optString("font")
+        if (!EmbeddedFonts.isKnown(font)) continue
+        out[id] = SlotChoice(font, o.optInt("size", 0).coerceIn(-20, 20))
+    }
+    return out
 }

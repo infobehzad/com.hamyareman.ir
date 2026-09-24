@@ -100,6 +100,7 @@ fun HubMenuGroup(
     subtitle: String,
     open: Boolean? = null,
     onToggle: (() -> Unit)? = null,
+    slotId: String = FontCatalog.ROLE_HEADING,
     content: @Composable () -> Unit,
 ) {
     var selfOpen by rememberSaveable { mutableStateOf(false) }
@@ -110,8 +111,8 @@ fun HubMenuGroup(
         Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.weight(1f)) {
-                    Text(title, style = MaterialTheme.typography.titleMedium)
-                    Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(title, style = MaterialTheme.typography.titleMedium, fontFamily = TypeSlots.family(slotId), fontSize = TypeSlots.size(slotId, 16))
+                    Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = TypeSlots.family(slotId), fontSize = TypeSlots.size(slotId, 12))
                 }
                 Icon(if (isOpen) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore, contentDescription = if (isOpen) "بستن" else "بازکردن")
             }
