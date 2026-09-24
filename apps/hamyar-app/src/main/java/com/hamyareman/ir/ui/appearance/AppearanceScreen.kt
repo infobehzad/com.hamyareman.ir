@@ -1,5 +1,9 @@
 package com.hamyareman.ir.ui.appearance
 
+import android.content.Intent
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,9 +25,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,29 +40,45 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import com.hamyareman.ir.platform.core.common.toPersianDigits
-import com.hamyareman.ir.ui.home.HamyarType
+import com.hamyareman.ir.ui.AppTypography
 import com.hamyareman.ir.platform.core.designsystem.BrandTheme
 import com.hamyareman.ir.platform.core.designsystem.ThemeGender
 import com.hamyareman.ir.platform.core.designsystem.themeGender
 import com.hamyareman.ir.platform.core.designsystem.swatches
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
-import kotlinx.coroutines.launch
+import java.io.File
 
-/** صفحه‌ی «ظاهر و فونت»: ۱۶ تم (۸ دختر / ۸ پسر)، روشن/تاریک، سایز متن، فونت. */
+/** صفحه‌ی «ظاهر و فونت»: تم رنگ، اندازهٔ سراسری، پنج نقش فونت، ۵ اسلات بکاپ. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppearanceScreen(onBack: () -> Unit) {
     val prefs = LocalUiPrefs.current
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var busy by remember { mutableStateOf<String?>(null) }
     var pendingTheme by remember { mutableStateOf<BrandTheme?>(null) }
+    var confirmClear by remember { mutableStateOf<Int?>(null) }
+
+    val importJson = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        val txt = runCatching {
+            context.contentResolver.openInputStream(uri)?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }
+        }.getOrNull()
+        val parsed = txt?.let { FontTheme.parse(it) }
+        if (parsed == null) {
+            Toast.makeText(context, "فایل JSON معتبر نبود", Toast.LENGTH_SHORT).show()
+        } else {
+            prefs.updateFontTheme(parsed)
+            Toast.makeText(context, "تم «${parsed.name}» بارگذاری شد", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Column(Modifier.fillMaxSize()) {
         AppTopBar("ظاهر و فونت", onBack)
@@ -63,7 +88,7 @@ fun AppearanceScreen(onBack: () -> Unit) {
         ) {
             Text("تم، اندازهٔ نوشته و فونت را خودت انتخاب کن ✨", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-            Text("اندازهٔ نوشته", style = MaterialTheme.typography.titleMedium)
+            Text("اندازهٔ نوشتهٔ سراسری", style = MaterialTheme.typography.titleMedium)
             Text(
                 if (prefs.textSizeOffset == 0) "استاندارد (۱۳)"
                 else {
@@ -122,47 +147,76 @@ fun AppearanceScreen(onBack: () -> Unit) {
                 )
             }
 
-            Text("فونت", style = MaterialTheme.typography.titleMedium)
-            Card {
-                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    FontRow(
-                        title = "فونت سیستم (پیش‌فرض)",
-                        downloaded = true,
-                        selected = prefs.fontKey.isBlank(),
-                        onSelect = { prefs.updateFontKey("") },
-                    )
-                    FontLibrary.catalog.forEach { entry ->
-                        val downloaded = FontLibrary.isDownloaded(context, entry.key)
-                        FontRow(
-                            title = entry.title + if (!downloaded) "  ⬇ دانلود از اینترنت" else "",
-                            downloaded = downloaded,
-                            selected = prefs.fontKey == entry.key,
-                            onSelect = {
-                                if (downloaded) {
-                                    prefs.updateFontKey(entry.key)
-                                } else {
-                                    busy = entry.key
-                                    scope.launch {
-                                        val r = FontLibrary.download(context, entry)
-                                        busy = null
-                                        if (r.isSuccess) prefs.updateFontKey(entry.key)
-                                    }
-                                }
-                            },
-                        )
-                    }
-                    busy?.let {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                            Text("در حال دانلود…", style = MaterialTheme.typography.bodySmall)
-                        }
-                    }
-                    Text(
-                        "فونت‌ها فقط یک‌بار دانلود و برای همیشه روی گوشی ذخیره می‌شوند؛ دفعه‌ی بعد بدون اینترنت هم کار می‌کنند.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+            Text("فونت هر بخش", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "پنج نقش جدا: خوش‌آمد، ساعت، عنوان، کاشی، متن. فونت‌ها داخل اپ‌اند و اینترنت نمی‌خواهند.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            FontTheme.ROLES.forEach { (role, title) ->
+                RoleFontCard(
+                    title = title,
+                    sample = FontTheme.SAMPLES[role].orEmpty(),
+                    fontKey = prefs.fontTheme.fontOf(role),
+                    size = prefs.fontTheme.sizeOf(role),
+                    onFont = { prefs.updateRoleFont(role, it) },
+                    onSize = { prefs.updateRoleSize(role, it) },
+                )
+            }
+
+            Text("نام تم فونت و بکاپ", style = MaterialTheme.typography.titleMedium)
+            OutlinedTextField(
+                value = prefs.fontTheme.name,
+                onValueChange = { prefs.updateThemeName(it) },
+                label = { Text("نام تم فونت") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                OutlinedButton(
+                    onClick = {
+                        runCatching { shareFontTheme(context, prefs.fontTheme) }
+                            .onFailure {
+                                Toast.makeText(context, "بکاپ ساخته نشد", Toast.LENGTH_SHORT).show()
+                            }
+                    },
+                    modifier = Modifier.weight(1f),
+                ) { Text("بکاپ JSON") }
+                OutlinedButton(
+                    onClick = { importJson.launch("*/*") },
+                    modifier = Modifier.weight(1f),
+                ) { Text("بارگذاری JSON") }
+            }
+            Text(
+                "تا ۵ تنظیم ذخیره می‌شود. خالی را بزن تا ذخیره شود؛ پر را بزن تا بار شود.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                prefs.fontSlots.forEachIndexed { i, slot ->
+                    SlotCard(
+                        index = i,
+                        theme = slot,
+                        selected = slot != null && slot == prefs.fontTheme,
+                        onSave = { prefs.saveSlot(i) },
+                        onLoad = { prefs.loadSlot(i) },
+                        onClear = { confirmClear = i },
+                        modifier = Modifier.weight(1f),
                     )
                 }
+            }
+            confirmClear?.let { idx ->
+                AlertDialog(
+                    onDismissRequest = { confirmClear = null },
+                    title = { Text("حذف اسلات ${toPersianDigits((idx + 1).toString())}؟") },
+                    text = { Text("تنظیم ذخیره‌شده پاک می‌شود.") },
+                    confirmButton = {
+                        TextButton(onClick = { prefs.clearSlot(idx); confirmClear = null }) { Text("حذف") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { confirmClear = null }) { Text("انصراف") }
+                    },
+                )
             }
             Spacer(Modifier.height(24.dp))
         }
@@ -189,7 +243,7 @@ private fun ThemeGroup(brands: List<BrandTheme>, prefs: UiPrefs, onPreview: (Bra
                     Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f)) {
                         Text(brand.label, style = MaterialTheme.typography.titleMedium)
-                        if (selected) Text("انتخاب‌شده ✓", style = HamyarType.caption, color = MaterialTheme.colorScheme.primary)
+                        if (selected) Text("انتخاب‌شده ✓", style = AppTypography.caption, color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -197,19 +251,124 @@ private fun ThemeGroup(brands: List<BrandTheme>, prefs: UiPrefs, onPreview: (Bra
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FontRow(title: String, downloaded: Boolean, selected: Boolean, onSelect: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth()
-            .background(
-                if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                RoundedCornerShape(12.dp),
+private fun RoleFontCard(
+    title: String,
+    sample: String,
+    fontKey: String,
+    size: Int,
+    onFont: (String) -> Unit,
+    onSize: (Int) -> Unit,
+) {
+    var open by remember { mutableStateOf(false) }
+    val face = remember(fontKey) { EmbeddedFonts.face(fontKey) }
+    val family = remember(fontKey) { EmbeddedFonts.family(fontKey) }
+    val sign = if (size > 0) "+" else ""
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(
+                sample,
+                fontFamily = family,
+                fontSize = (16 + size).coerceIn(8, 40).sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
-            .clickable(onClick = onSelect)
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(title, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-        if (selected) Text("✓", color = MaterialTheme.colorScheme.primary, style = HamyarType.h2)
+            ExposedDropdownMenuBox(expanded = open, onExpandedChange = { open = it }) {
+                OutlinedTextField(
+                    value = face.label,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("فونت") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(open) },
+                    modifier = Modifier.fillMaxWidth().menuAnchor(),
+                )
+                ExposedDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+                    EmbeddedFonts.catalog.forEach { item ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(item.label, fontFamily = EmbeddedFonts.family(item.key))
+                            },
+                            onClick = { onFont(item.key); open = false },
+                        )
+                    }
+                }
+            }
+            Text(
+                "سایز ${toPersianDigits(sign + size.toString())}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Slider(
+                value = size.toFloat(),
+                onValueChange = { onSize(it.toInt()) },
+                valueRange = -20f..20f,
+                steps = 39,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
     }
+}
+
+@Composable
+private fun SlotCard(
+    index: Int,
+    theme: FontTheme?,
+    selected: Boolean,
+    onSave: () -> Unit,
+    onLoad: () -> Unit,
+    onClear: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val bg = when {
+        selected -> MaterialTheme.colorScheme.primaryContainer
+        theme != null -> MaterialTheme.colorScheme.surfaceVariant
+        else -> MaterialTheme.colorScheme.surface
+    }
+    Card(
+        colors = CardDefaults.cardColors(containerColor = bg),
+        modifier = modifier
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
+            .clickable { if (theme == null) onSave() else onLoad() },
+    ) {
+        Column(
+            Modifier.padding(horizontal = 6.dp, vertical = 10.dp).fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(toPersianDigits((index + 1).toString()), style = MaterialTheme.typography.titleMedium)
+            Text(
+                theme?.name ?: "خالی",
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (theme != null) {
+                Text(
+                    "حذف",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.clickable(onClick = onClear),
+                )
+            } else {
+                Text("ذخیره", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+            }
+        }
+    }
+}
+
+private fun shareFontTheme(context: android.content.Context, theme: FontTheme) {
+    val dir = File(context.cacheDir, "font_themes").apply { mkdirs() }
+    val safe = theme.name.replace(Regex("[^\\w\\u0600-\\u06FF-]+"), "_").ifBlank { "hamyar-font" }
+    val file = File(dir, "$safe.json")
+    file.writeText(theme.toJson().toString(2))
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "application/json"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        putExtra(Intent.EXTRA_SUBJECT, "بکاپ فونت همیار")
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(intent, "بکاپ JSON فونت"))
 }

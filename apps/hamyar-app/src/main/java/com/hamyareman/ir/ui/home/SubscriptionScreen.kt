@@ -56,6 +56,7 @@ import com.hamyareman.ir.ui.profile.StudentProfileState
 import com.hamyareman.ir.ui.study.StudyMedia
 import kotlinx.coroutines.launch
 import java.io.File
+import com.hamyareman.ir.ui.AppTypography
 
 private fun priceFa(n: Int): String =
     toPersianDigits("%,d".format(n).replace(',', '٬')) + " تومان"
@@ -153,30 +154,30 @@ fun SubscriptionScreen(onBack: () -> Unit) {
         ) {
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("گارانتی بازگشت وجه", fontFamily = DashboardFonts.greeting, fontWeight = FontWeight.Bold, fontSize = DashboardFonts.bump(DashboardFonts.greeting, 18))
-                    Text(BillingConfig.GUARANTEE_FA, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), style = MaterialTheme.typography.bodyMedium)
+                    Text("گارانتی بازگشت وجه", fontFamily = AppTypography.greeting, fontWeight = FontWeight.Bold, fontSize = AppTypography.bump(AppTypography.greeting, 18))
+                    Text(BillingConfig.GUARANTEE_FA, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), style = MaterialTheme.typography.bodyMedium)
                 }
             }
             Text(
                 "وضعیت: ${BillingStatus.chipFa(StudentProfileState.subscription, StudentProfileState.subscriptionEndMs)}" +
                     BillingStatus.rangeFa(0L, StudentProfileState.subscriptionEndMs).let { if (it.isBlank()) "" else " · $it" },
-                fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
+                fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
             )
             if (loading) {
                 CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
             }
-            notice?.let { Text(it, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), color = MaterialTheme.colorScheme.primary) }
+            notice?.let { Text(it, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), color = MaterialTheme.colorScheme.primary) }
             error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
 
             when (status) {
                 BillingStatus.YEARLY, BillingStatus.MONTHLY, BillingStatus.INSTALLMENT, "paid" -> {
-                    Text("اشتراک فعال است. درس‌های کامل برایت باز است.", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
+                    Text("اشتراک فعال است. درس‌های کامل برایت باز است.", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
                     // منوی انصراف فقط داخل همان ۷ روز بعد از خرید دیده می‌شود؛ بعدش کامل مخفی است.
                     if (withinRefund && !showRefund) {
                         OutlinedButton(onClick = { showRefund = true }, modifier = Modifier.fillMaxWidth()) {
-                            Text("انصراف و بازگشت وجه (تا ۷ روز)", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
+                            Text("انصراف و بازگشت وجه (تا ۷ روز)", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
                         }
                     }
                     if (withinRefund && showRefund) RefundForm(
@@ -203,7 +204,7 @@ fun SubscriptionScreen(onBack: () -> Unit) {
                 BillingStatus.PENDING -> {
                     Text(
                         "سفارشت ثبت شد و در انتظار تأیید پرداخت است. به‌محض تأیید ادمین، اشتراک فعال می‌شود.",
-                        fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
+                        fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                     )
                     order?.payText?.takeIf { it.isNotBlank() }?.let {
                         Text("متن واریز: $it", style = MaterialTheme.typography.bodySmall)
@@ -212,7 +213,7 @@ fun SubscriptionScreen(onBack: () -> Unit) {
                 BillingStatus.REFUND_PENDING -> {
                     Text(
                         "درخواست بازگشت وجه به ادمین رسیده. تا تأیید نهایی اشتراک هنوز فعال است.",
-                        fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
+                        fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                     )
                 }
                 else -> {
@@ -223,22 +224,22 @@ fun SubscriptionScreen(onBack: () -> Unit) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     FilterChip(selected = selected, onClick = { planId = p.id }, label = { Text(p.titleFa) })
                                     Spacer(Modifier.weight(1f))
-                                    Text(priceFa(p.priceToman), fontFamily = DashboardFonts.lalezar, fontSize = DashboardFonts.bump(DashboardFonts.lalezar, 18), color = MaterialTheme.colorScheme.primary)
+                                    Text(priceFa(p.priceToman), fontFamily = AppTypography.heading, fontSize = AppTypography.bump(AppTypography.heading, 18), color = MaterialTheme.colorScheme.primary)
                                 }
-                                Text(p.blurbFa, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), style = MaterialTheme.typography.bodySmall)
+                                Text(p.blurbFa, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }
                     Card(Modifier.fillMaxWidth()) {
                         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("کارت‌به‌کارت", fontWeight = FontWeight.Bold, fontFamily = DashboardFonts.greeting, fontSize = DashboardFonts.bump(DashboardFonts.greeting, 14))
-                            Text("به نام: ${BillingConfig.ACCOUNT_HOLDER}", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
-                            Text("بانک: ${BillingConfig.BANK_NAME}", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14))
+                            Text("کارت‌به‌کارت", fontWeight = FontWeight.Bold, fontFamily = AppTypography.greeting, fontSize = AppTypography.bump(AppTypography.greeting, 14))
+                            Text("به نام: ${BillingConfig.ACCOUNT_HOLDER}", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                            Text("بانک: ${BillingConfig.BANK_NAME}", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
                             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                                 Text(
                                     if (BillingConfig.cardReady()) BillingConfig.CARD_NUMBER else "شماره کارت از پشتیبانی اعلام می‌شود",
                                     fontWeight = FontWeight.Bold,
-                                    style = HamyarType.h2,
+                                    style = AppTypography.h2,
                                 )
                             }
                             OutlinedButton(
@@ -285,7 +286,7 @@ fun SubscriptionScreen(onBack: () -> Unit) {
                         if (installment) {
                             Text(
                                 "مبلغ کل ${priceFa(BillingConfig.YEARLY.priceToman)} در ۴ قسط ${priceFa(BillingConfig.YEARLY.priceToman / 4)}. قسط اول همین الان با همین فرم واریز می‌شود. گارانتی بازگشت وجه برای اقساط هم برقرار است.",
-                                fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
+                                fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         }
@@ -367,7 +368,7 @@ private fun RefundForm(
 ) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("بازگشت وجه", fontWeight = FontWeight.Bold, fontFamily = DashboardFonts.greeting, fontSize = DashboardFonts.bump(DashboardFonts.greeting, 14))
+            Text("بازگشت وجه", fontWeight = FontWeight.Bold, fontFamily = AppTypography.greeting, fontSize = AppTypography.bump(AppTypography.greeting, 14))
             Text(
                 "شبا و کارت باید متعلق به همان حسابی باشد که خرید از آن انجام شده، نه لزوماً به نام خودت.",
                 style = MaterialTheme.typography.bodySmall,

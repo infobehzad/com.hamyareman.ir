@@ -17,7 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Card
 import androidx.compose.ui.text.style.TextAlign
-import com.hamyareman.ir.ui.home.DashboardFonts
+import com.hamyareman.ir.ui.AppTypography
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -1028,8 +1028,8 @@ private fun LinedNotesPaper(value: String, onValueChange: (String) -> Unit) {
                 onValueChange(lines.take(8).joinToString("\n"))
             },
             textStyle = TextStyle(
-                fontFamily = DashboardFonts.content,
-                fontSize = DashboardFonts.bump(DashboardFonts.content, 16),
+                fontFamily = AppTypography.body,
+                fontSize = AppTypography.bump(AppTypography.body, 16),
                 lineHeight = lineSp,
                 color = Color(0xFF1E3A5F),
                 textAlign = TextAlign.Right,
@@ -1387,8 +1387,8 @@ private fun GalleryThumb(item: NoteFile) {
         previewText.isNotBlank() -> Text(
             previewText,
             style = MaterialTheme.typography.labelSmall.copy(
-                fontFamily = DashboardFonts.content,
-                fontSize = DashboardFonts.bump(DashboardFonts.content, 11),
+                fontFamily = AppTypography.body,
+                fontSize = AppTypography.bump(AppTypography.body, 11),
                 textAlign = TextAlign.Right,
             ),
             maxLines = 8,

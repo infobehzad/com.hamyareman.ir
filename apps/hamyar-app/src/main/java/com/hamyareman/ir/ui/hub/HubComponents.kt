@@ -32,7 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.hamyareman.ir.ui.home.DashboardFonts
+import com.hamyareman.ir.ui.AppTypography
 
 /** سربرگ مشترک صفحات هاب با دکمه‌ی بازگشت. */
 @Composable
@@ -65,8 +65,8 @@ fun HubCard(
             Text(emoji, style = MaterialTheme.typography.headlineMedium)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.titleMedium, fontFamily = DashboardFonts.tile, fontSize = DashboardFonts.bump(DashboardFonts.tile, 14))
-                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = DashboardFonts.label, fontSize = DashboardFonts.bump(DashboardFonts.label, 14))
+                Text(title, style = MaterialTheme.typography.titleMedium, fontFamily = AppTypography.tile, fontSize = AppTypography.bump(AppTypography.tile, 14))
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
             }
         }
     }

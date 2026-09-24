@@ -34,8 +34,8 @@ jobs:
           src=$(echo apps/hamyar-app/build/outputs/apk/**/*.apk | awk '{print $1}')
           test -n "$src" && test -f "$src"
           mkdir -p dist
-          cp -f "$src" dist/hamyar-1.82.apk
-          ls -l dist/hamyar-1.82.apk
+          cp -f "$src" dist/hamyar-1.83.apk
+          ls -l dist/hamyar-1.83.apk
       - name: انتشارِ APK روی Release (ci-apk)
         if: success()
         env:
@@ -44,12 +44,12 @@ jobs:
           set -e
           gh release view ci-apk >/dev/null 2>&1 || \
             gh release create ci-apk --title "CI APK" --notes "آخرین فایل نصبی debug نهم." || true
-          gh release upload ci-apk dist/hamyar-1.82.apk --clobber
+          gh release upload ci-apk dist/hamyar-1.83.apk --clobber
           gh release view ci-apk
       - uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: hamyar-1.82-debug
-          path: dist/hamyar-1.82.apk
+          name: hamyar-1.83-debug
+          path: dist/hamyar-1.83.apk
           if-no-files-found: error
           retention-days: 3

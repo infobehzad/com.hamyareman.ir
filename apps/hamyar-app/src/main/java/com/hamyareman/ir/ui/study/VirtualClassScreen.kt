@@ -48,7 +48,7 @@ import kotlinx.coroutines.launch
 import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
-import com.hamyareman.ir.ui.home.DashboardFonts
+import com.hamyareman.ir.ui.AppTypography
 import java.time.LocalDate
 
 /**
@@ -100,7 +100,7 @@ fun VirtualClassScreen(onBack: () -> Unit) {
         ) {
             Text(
                 "ساعت شروع و پایان کلاس مجازی هر روز را بنویس. این ساعت‌ها در برنامه‌ی کلاسی و آماده‌سازی همان روز نشان داده می‌شود.",
-                fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
+                fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Right,
@@ -113,7 +113,7 @@ fun VirtualClassScreen(onBack: () -> Unit) {
                     ?: ClassPlanStore.VirtualSession(di, 8, 0, 9, 0, "")
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(dayName, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), fontWeight = FontWeight.Bold)
+                        Text(dayName, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), fontWeight = FontWeight.Bold)
                         TimePick("شروع", s.startH, s.startM) { h, m ->
                             sessions = upsertSession(sessions, s.copy(startH = h, startM = m))
                             ClassPlanStore.saveVirtualSessions(ctx, sessions)
@@ -130,7 +130,7 @@ fun VirtualClassScreen(onBack: () -> Unit) {
                                 sessions = upsertSession(sessions, s.copy(subject = v))
                                 ClassPlanStore.saveVirtualSessions(ctx, sessions)
                             },
-                            label = { Text("درس (اختیاری)", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) },
+                            label = { Text("درس (اختیاری)", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                         )
@@ -140,8 +140,8 @@ fun VirtualClassScreen(onBack: () -> Unit) {
 
             Text(
                 "بازه‌های روزهای مجازی",
-                fontFamily = DashboardFonts.quote,
-                fontSize = DashboardFonts.bump(DashboardFonts.quote, 18),
+                fontFamily = AppTypography.body,
+                fontSize = AppTypography.bump(AppTypography.body, 18),
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Right,
                 modifier = Modifier.fillMaxWidth(),
@@ -163,7 +163,7 @@ fun VirtualClassScreen(onBack: () -> Unit) {
             syncNotice?.let { notice ->
                 Text(
                     notice,
-                    fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
+                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.fillMaxWidth(),
@@ -203,16 +203,16 @@ fun VirtualRangeSection(
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { pickFrom = true }, modifier = Modifier.weight(1f)) {
-                Text("از: ${faDate(fromIso)}", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), maxLines = 1)
+                Text("از: ${faDate(fromIso)}", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), maxLines = 1)
             }
             OutlinedButton(onClick = { pickTo = true }, modifier = Modifier.weight(1f)) {
-                Text("تا: ${faDate(toIso)}", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), maxLines = 1)
+                Text("تا: ${faDate(toIso)}", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), maxLines = 1)
             }
         }
         OutlinedButton(
             onClick = { onAdd(fromIso, toIso) },
             modifier = Modifier.fillMaxWidth(),
-        ) { Text("افزودن این بازه", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) }
+        ) { Text("افزودن این بازه", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) }
 
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -229,7 +229,7 @@ fun VirtualRangeSection(
                     Spacer(Modifier.width(6.dp))
                     Text(
                         "بازه‌های ثبت‌شده (${toPersianDigits(ranges.size.toString())})",
-                        fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
+                        fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.weight(1f),
                         textAlign = TextAlign.Right,
@@ -240,7 +240,7 @@ fun VirtualRangeSection(
                         if (ranges.isEmpty()) {
                             Text(
                                 "بازه‌ای ثبت نشده است.",
-                                fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
+                                fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Right,
@@ -266,7 +266,7 @@ fun VirtualRangeSection(
                                 }
                                 Text(
                                     "${faDate(r.fromIso)} → ${faDate(r.toIso)}",
-                                    fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
+                                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                                     modifier = Modifier.weight(1f),
                                     textAlign = TextAlign.Right,
                                 )
@@ -297,11 +297,11 @@ fun VirtualRangeSection(
     askDelete?.let { r ->
         AlertDialog(
             onDismissRequest = { askDelete = null },
-            title = { Text("حذف این بازه؟", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) },
+            title = { Text("حذف این بازه؟", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) },
             text = {
                 Text(
                     "روزهای ${faDate(r.fromIso)} تا ${faDate(r.toIso)} از حالت مجازی خارج می‌شوند.",
-                    fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
+                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                     textAlign = TextAlign.Right,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -310,9 +310,9 @@ fun VirtualRangeSection(
                 TextButton(onClick = {
                     onDelete(r.id)
                     askDelete = null
-                }) { Text("حذف", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14), color = MaterialTheme.colorScheme.error) }
+                }) { Text("حذف", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), color = MaterialTheme.colorScheme.error) }
             },
-            dismissButton = { TextButton(onClick = { askDelete = null }) { Text("انصراف", fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) } },
+            dismissButton = { TextButton(onClick = { askDelete = null }) { Text("انصراف", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) } },
         )
     }
 }
@@ -335,7 +335,7 @@ fun VirtualRangeChipBox(range: ClassPlanStore.VirtualRange) {
         Text(
             "${faDate(range.fromIso)} → ${faDate(range.toIso)}",
             color = Color(0xFFB91C1C),
-            fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
+            fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
             style = MaterialTheme.typography.labelLarge,
         )
     }

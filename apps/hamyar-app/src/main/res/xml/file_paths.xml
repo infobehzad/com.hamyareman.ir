@@ -6,6 +6,7 @@
 <paths>
     <cache-path name="heart" path="heart/" />
     <cache-path name="voice" path="voice/" />
+    <cache-path name="font_themes" path="font_themes/" />
     <files-path name="private_media" path="media/" />
     <files-path name="notes_gallery" path="notes_gallery/" />
     <!-- کانالِ آپدیت: APKِ دانلودشده تا نصب‌کنندهٔ سیستم بتواند بخواندش -->

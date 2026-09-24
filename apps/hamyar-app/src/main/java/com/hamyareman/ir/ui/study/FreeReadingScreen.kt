@@ -13,7 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
-import com.hamyareman.ir.ui.home.DashboardFonts
+import com.hamyareman.ir.ui.AppTypography
 
 @Composable
 fun FreeReadingScreen(nav: NavController, onBack: () -> Unit) {
@@ -22,7 +22,7 @@ fun FreeReadingScreen(nav: NavController, onBack: () -> Unit) {
         AppTopBar("مطالعه آزاد", onBack)
         TabRow(selectedTabIndex = tab) {
             listOf("کتاب متنی", "کتاب صوتی").forEachIndexed { i, l ->
-                Tab(selected = tab == i, onClick = { tab = i }, text = { Text(l, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) })
+                Tab(selected = tab == i, onClick = { tab = i }, text = { Text(l, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) })
             }
         }
         if (tab == 0) LibraryScreen(onBack = onBack)

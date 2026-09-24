@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
-import com.hamyareman.ir.ui.home.DashboardFonts
+import com.hamyareman.ir.ui.AppTypography
 
 @Composable
 fun CalmHubScreen(nav: NavController, onBack: () -> Unit) {
@@ -26,7 +26,7 @@ fun CalmHubScreen(nav: NavController, onBack: () -> Unit) {
         AppTopBar("آرامش", onBack)
         TabRow(selectedTabIndex = tab) {
             listOf("سفر ذهنی", "آرامش با تنفس", "تصویرسازی ذهنی").forEachIndexed { i, l ->
-                Tab(selected = tab == i, onClick = { tab = i }, text = { Text(l, fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14)) })
+                Tab(selected = tab == i, onClick = { tab = i }, text = { Text(l, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) })
             }
         }
         when (tab) {
@@ -34,12 +34,12 @@ fun CalmHubScreen(nav: NavController, onBack: () -> Unit) {
             else -> Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     if (tab == 0) "سفر ذهنی — فهرست تمرین‌ها به‌زودی." else "تصویرسازی ذهنی — فهرست به‌زودی.",
-                    fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
+                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 Text(
                     "از منوی آرامش سریع هم می‌توانی تنفس را شروع کنی.",
-                    fontFamily = DashboardFonts.quote, fontSize = DashboardFonts.bump(DashboardFonts.quote, 14),
+                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }

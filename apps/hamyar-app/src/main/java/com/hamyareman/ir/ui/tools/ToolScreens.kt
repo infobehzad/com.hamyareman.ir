@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.hamyareman.ir.LocalAppContainer
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
-import com.hamyareman.ir.ui.home.DashboardFonts
+import com.hamyareman.ir.ui.AppTypography
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
@@ -100,9 +100,9 @@ fun ToolHubScreen(
                         Column(Modifier.weight(1f)) {
                             Text(
                                 item.title,
-                                fontFamily = DashboardFonts.aria,
+                                fontFamily = AppTypography.heading,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = DashboardFonts.bump(DashboardFonts.aria, 16),
+                                fontSize = AppTypography.bump(AppTypography.heading, 16),
                             )
                             Text(
                                 item.subtitle,

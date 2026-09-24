@@ -25,11 +25,11 @@ import com.hamyareman.ir.platform.core.notifications.NotificationPermissions
 import com.hamyareman.ir.platform.core.security.AppLock
 import com.hamyareman.ir.platform.core.security.BiometricPromptRunner
 import com.hamyareman.ir.di.AppContainer
-import com.hamyareman.ir.ui.appearance.FontLibrary
 import com.hamyareman.ir.ui.appearance.LocalUiPrefs
 import com.hamyareman.ir.ui.auth.LoginScreen
 import com.hamyareman.ir.ui.navigation.ZahraNavHost
 import kotlinx.coroutines.launch
+import com.hamyareman.ir.ui.AppTypography
 
 val LocalAppContainer = staticCompositionLocalOf<AppContainer> { error("AppContainer missing") }
 
@@ -219,11 +219,7 @@ class MainActivity : FragmentActivity() {
                 PlatformTheme(
                     brand = uiPrefs.theme,
                     darkTheme = uiPrefs.darkTheme,
-                    fontFamily = if (uiPrefs.fontKey.isBlank()) {
-                        com.hamyareman.ir.ui.home.DashboardFonts.content
-                    } else {
-                        FontLibrary.fontFamilyFor(activity, uiPrefs.fontKey)
-                    },
+                    fontFamily = AppTypography.body,
                     textSizeOffset = uiPrefs.textSizeOffset,
                 ) {
                 CompositionLocalProvider(LocalAppContainer provides container) {

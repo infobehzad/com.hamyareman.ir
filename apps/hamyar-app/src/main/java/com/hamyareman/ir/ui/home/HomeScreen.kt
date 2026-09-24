@@ -78,11 +78,10 @@ import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.LocalDateTime
 import java.util.Calendar
+import com.hamyareman.ir.ui.AppTypography
 
 /** مارجینِ کناریِ بلوک‌های داشبورد (کارتِ سخن بزرگان عمداً پهن‌تر و بی‌مارجین‌تر است). */
 private val HomeSide = 16.dp
-
-private val WISDOM_FONT = DashboardFonts.content
 
 /** مارجینِ کناریِ کارتِ «سخن بزرگان» — یک‌پنجمِ حالتِ معمول. */
 private val WisdomSide = 1.dp
@@ -160,31 +159,31 @@ fun HomeScreen(nav: NavController) {
                                 Text(
                                     row1,
                                     style = MaterialTheme.typography.titleMedium,
-                                    fontFamily = DashboardFonts.clock,
-                                    fontSize = DashboardFonts.bump(DashboardFonts.clock, 16),
+                                    fontFamily = AppTypography.clock,
+                                    fontSize = AppTypography.bump(AppTypography.clock, 16),
                                     fontWeight = FontWeight.Bold,
                                 )
                                 Text(
                                     row2Time,
                                     style = MaterialTheme.typography.headlineSmall,
-                                    fontFamily = DashboardFonts.clock,
-                                    fontSize = DashboardFonts.bump(DashboardFonts.clock, 24),
+                                    fontFamily = AppTypography.clock,
+                                    fontSize = AppTypography.bump(AppTypography.clock, 24),
                                     fontWeight = FontWeight.Bold,
                                 )
                                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                                     Text(
                                         row2Greg,
                                         style = MaterialTheme.typography.bodyLarge,
-                                        fontFamily = DashboardFonts.clock,
-                                        fontSize = DashboardFonts.bump(DashboardFonts.clock, 16),
+                                        fontFamily = AppTypography.clock,
+                                        fontSize = AppTypography.bump(AppTypography.clock, 16),
                                     )
                                 }
                                 if (!holiday.isNullOrBlank()) {
                                     Text(
                                         holiday,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        fontFamily = DashboardFonts.label,
-                                        fontSize = DashboardFonts.bump(DashboardFonts.label, 14),
+                                        fontFamily = AppTypography.body,
+                                        fontSize = AppTypography.bump(AppTypography.body, 14),
                                         color = MaterialTheme.colorScheme.primary,
                                     )
                                 }
@@ -201,8 +200,8 @@ fun HomeScreen(nav: NavController) {
                             Text(
                                 "پروفایل من",
                                 style = MaterialTheme.typography.labelMedium,
-                                fontFamily = DashboardFonts.label,
-                                fontSize = DashboardFonts.bump(DashboardFonts.label, 12),
+                                fontFamily = AppTypography.body,
+                                fontSize = AppTypography.bump(AppTypography.body, 12),
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(top = 4.dp),
                             )
@@ -248,8 +247,8 @@ fun HomeScreen(nav: NavController) {
             Text(
                 "امروز",
                 style = MaterialTheme.typography.titleMedium,
-                fontFamily = DashboardFonts.title,
-                fontSize = DashboardFonts.bump(DashboardFonts.title, 16),
+                fontFamily = AppTypography.heading,
+                fontSize = AppTypography.bump(AppTypography.heading, 16),
                 modifier = Modifier.padding(horizontal = HomeSide),
             )
             HubCard("🌤", "روتین امروز", "بلوک‌های روزت را ببین", Modifier.padding(horizontal = HomeSide)) { nav.navigate(Screen.Routine.route) }
@@ -284,16 +283,16 @@ private fun GreetingBanner(title: String, subtitle: String, modifier: Modifier =
                 Text(
                     title,
                     color = Color.White,
-                    fontFamily = DashboardFonts.greeting,
-                    fontSize = DashboardFonts.bump(DashboardFonts.greeting, 22),
+                    fontFamily = AppTypography.greeting,
+                    fontSize = AppTypography.bump(AppTypography.greeting, 22),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(
                     subtitle,
                     color = Color.White.copy(alpha = 0.92f),
-                    fontFamily = DashboardFonts.label,
-                    fontSize = DashboardFonts.bump(DashboardFonts.label, 14),
+                    fontFamily = AppTypography.body,
+                    fontSize = AppTypography.bump(AppTypography.body, 14),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -333,7 +332,7 @@ private fun WisdomCard(modifier: Modifier = Modifier) {
     ) {
         AutoFitQuote(
             text = body,
-            fontFamily = WISDOM_FONT,
+            fontFamily = AppTypography.body,
             color = Color(0xFFFDE68A),
             modifier = Modifier.fillMaxWidth().height(36.dp),
         )
@@ -433,9 +432,9 @@ internal fun SubscriptionChip(raw: String, onClick: () -> Unit = {}) {
         Text(
             com.hamyareman.ir.platform.core.common.BillingStatus.chipFa(s),
             color = fg,
-            fontFamily = DashboardFonts.label,
+            fontFamily = AppTypography.body,
             fontWeight = FontWeight.Bold,
-            fontSize = DashboardFonts.bump(DashboardFonts.label, 12),
+            fontSize = AppTypography.bump(AppTypography.body, 12),
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
         )
@@ -466,8 +465,8 @@ private fun ToolTile(emoji: String, label: String, modifier: Modifier = Modifier
             Spacer(Modifier.height(4.dp))
             Text(
                 label,
-                fontFamily = DashboardFonts.tile,
-                fontSize = DashboardFonts.bump(DashboardFonts.tile, 12),
+                fontFamily = AppTypography.tile,
+                fontSize = AppTypography.bump(AppTypography.tile, 12),
                 lineHeight = 17.sp,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center,
@@ -495,7 +494,7 @@ private fun QuickTile(emoji: String, label: String, modifier: Modifier = Modifie
             Text(
                 label,
                 style = MaterialTheme.typography.titleMedium,
-                fontFamily = DashboardFonts.tile, fontSize = DashboardFonts.bump(DashboardFonts.tile, 14),
+                fontFamily = AppTypography.tile, fontSize = AppTypography.bump(AppTypography.tile, 14),
                 textAlign = TextAlign.Center,
             )
         }

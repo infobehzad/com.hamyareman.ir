@@ -49,7 +49,7 @@ import com.hamyareman.ir.platform.core.common.JalaliDate
 import com.hamyareman.ir.platform.core.common.LocalStore
 import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
-import com.hamyareman.ir.ui.home.HamyarType
+import com.hamyareman.ir.ui.AppTypography
 import com.hamyareman.ir.platform.core.designsystem.PrimaryButton
 import com.hamyareman.ir.platform.feature.study.BookModuleRegistry
 import com.hamyareman.ir.ui.study.StateSync
@@ -414,7 +414,7 @@ fun WeeklyScheduleScreen(onBack: () -> Unit) {
 private fun StatMini(label: String, value: String, modifier: Modifier = Modifier) {
     Card(modifier, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
         Column(Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(value, style = HamyarType.h2, fontWeight = FontWeight.Bold)
+            Text(value, style = AppTypography.h2, fontWeight = FontWeight.Bold)
             Text(label, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
         }
     }
