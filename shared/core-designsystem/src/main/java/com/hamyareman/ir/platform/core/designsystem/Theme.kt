@@ -2,6 +2,7 @@ package com.hamyareman.ir.platform.core.designsystem
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -168,6 +169,7 @@ fun PlatformTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     fontFamily: FontFamily = FontFamily.Default,
     textSizeOffset: Int = 0,
+    typography: Typography? = null,
     content: @Composable () -> Unit,
 ) {
     val scheme = extraScheme(brand, darkTheme) ?: when (brand) {
@@ -187,7 +189,7 @@ fun PlatformTheme(
     ) {
         MaterialTheme(
             colorScheme = scheme,
-            typography = platformTypography(fontFamily),
+            typography = typography ?: platformTypography(fontFamily),
             shapes = PlatformShapes,
             content = content,
         )

@@ -117,20 +117,15 @@ fun TomorrowPrepScreen(onBack: () -> Unit) {
         AppTopBar("آماده‌سازی $dayWord", onBack)
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
+            verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
-                "$dayWord $tomorrowWeekDay $tomorrowFa · ${ClassPlanStore.captionOf(snap, tomorrow)}",
-                fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-            )
+                "$dayWord $tomorrowWeekDay $tomorrowFa · ${ClassPlanStore.captionOf(snap, tomorrow)}")
             if (lessons.isNotEmpty()) {
-                Text("درس‌های $dayWord: ${lessons.joinToString("، ")}", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                Text("درس‌های $dayWord: ${lessons.joinToString("، ")}")
             } else {
                 Text(
                     "برای $dayWord درسی در برنامهٔ هفتگی نیست.",
-                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -143,9 +138,8 @@ fun TomorrowPrepScreen(onBack: () -> Unit) {
                         ClassPlanStore.setPrepBag(ctx, isoN, it)
                         reportTick++
                         pushChecks()
-                    },
-                )
-                Text("کیف مدرسه آماده است", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                    })
+                Text("کیف مدرسه آماده است")
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
@@ -157,71 +151,54 @@ fun TomorrowPrepScreen(onBack: () -> Unit) {
                         ClassPlanStore.setPrepHw(ctx, isoN, it)
                         reportTick++
                         pushChecks()
-                    },
-                )
-                Text("تکالیف انجام شده", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                    })
+                Text("تکالیف انجام شده")
             }
             if (bagLock || hwLock) {
                 Text(
                     "این تیک‌ها تا ساعت خروج از مدرسه (یا پایان کلاس مجازی) قفل‌اند؛ بعد از آن برای $dayWord آزاد می‌شوند.",
-                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                )
+                    color = MaterialTheme.colorScheme.primary)
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = alarmOn, onCheckedChange = {}, enabled = false)
-                Text("آلارم برای ساعت ${toPersianDigits("%d:%02d".format(ah, am))} تنظیم شده", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                Text("آلارم برای ساعت ${toPersianDigits("%d:%02d".format(ah, am))} تنظیم شده")
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = true, onCheckedChange = null, enabled = false)
-                Text("ساعت خوابت ${toPersianDigits(sleep)} باشد", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                Text("ساعت خوابت ${toPersianDigits(sleep)} باشد")
             }
 
             // --- اطلاع‌رسانی‌های فردا ---
             Text(
                 "اطلاع‌رسانی‌های $dayWord",
-                fontFamily = AppTypography.heading,
-                fontSize = AppTypography.bump(AppTypography.body, 18),
-                fontWeight = FontWeight.Bold,
-            )
+                fontWeight = FontWeight.Bold)
             if (alarmList.isEmpty()) {
                 Text(
                     "اطلاع‌رسانی فعالی برای $dayWord نیست.",
-                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                    style = MaterialTheme.typography.bodySmall,
-                )
+                    style = MaterialTheme.typography.bodySmall)
             } else {
                 alarmList.forEach { r ->
                     Text(
                         "• ${r.title} — ساعت ${toPersianDigits("%d:%02d".format(r.hour, r.minute))}",
-                        fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
+                        style = MaterialTheme.typography.bodySmall)
                 }
             }
             Text(
                 "همهٔ این‌ها در ساعت خروج از مدرسه یا پایان کلاس مجازی، برای روزِ بعد تازه می‌شوند.",
-                fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary,
-            )
+                color = MaterialTheme.colorScheme.primary)
 
             // --- امتحانِ فردا (با تاریخِ روز و گزارشِ ضمیمه) ---
             Text(
                 "$dayWord امتحان داری؟ ($tomorrowWeekDay $tomorrowFa)",
-                fontFamily = AppTypography.heading,
-                fontSize = AppTypography.bump(AppTypography.heading, 18),
-                fontWeight = FontWeight.Bold,
-            )
+                fontWeight = FontWeight.Bold)
             Text(
                 "اگر امتحان داری، از درس‌های همان روز انتخاب کن.",
-                fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                style = MaterialTheme.typography.bodySmall,
-            )
+                style = MaterialTheme.typography.bodySmall)
             androidx.compose.foundation.layout.Box {
                 OutlinedButton(onClick = { examOpen = true }, modifier = Modifier.fillMaxWidth()) {
-                    Text(exam.ifBlank { "بدون امتحان / انتخاب درس" }, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                    Text(exam.ifBlank { "بدون امتحان / انتخاب درس" })
                 }
                 DropdownMenu(expanded = examOpen, onDismissRequest = { examOpen = false }) {
                     DropdownMenuItem(text = { Text("بدون امتحان") }, onClick = {
@@ -231,7 +208,7 @@ fun TomorrowPrepScreen(onBack: () -> Unit) {
                         pushChecks()
                     })
                     lessons.forEach { sub ->
-                        DropdownMenuItem(text = { Text(sub, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) }, onClick = {
+                        DropdownMenuItem(text = { Text(sub) }, onClick = {
                             exam = sub
                             ClassPlanStore.setExam(ctx, isoN, sub)
                             examOpen = false
@@ -244,9 +221,7 @@ fun TomorrowPrepScreen(onBack: () -> Unit) {
             if (exam.isNotBlank()) {
                 Text(
                     "آمادگیِ امتحان $exam — $tomorrowWeekDay $tomorrowFa",
-                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                    fontWeight = FontWeight.Bold,
-                )
+                    fontWeight = FontWeight.Bold)
                 ClassPlanStore.examPrepOptions().forEach { opt ->
                     var done by remember(exam, isoN) { mutableStateOf(ClassPlanStore.examPrepDone(ctx, isoN, opt)) }
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -256,9 +231,8 @@ fun TomorrowPrepScreen(onBack: () -> Unit) {
                                 done = it
                                 ClassPlanStore.setExamPrepDone(ctx, isoN, opt, it)
                                 pushChecks()
-                            },
-                        )
-                        Text(opt, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                            })
+                        Text(opt)
                     }
                 }
                 OutlinedTextField(
@@ -270,15 +244,11 @@ fun TomorrowPrepScreen(onBack: () -> Unit) {
                     },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,
-                    label = { Text("گزارش نتیجه امتحان", fontFamily = AppTypography.body) },
-                    textStyle = androidx.compose.ui.text.TextStyle(
-                        fontFamily = AppTypography.body,
-                        fontSize = AppTypography.bump(AppTypography.body, 18),
-                    ),
-                )
+                    label = { Text("گزارش نتیجه امتحان") },
+                    textStyle = androidx.compose.ui.text.TextStyle())
             }
 
-            Text("گزارش عملکرد امروز (بعد از رسیدن به خانه)", fontFamily = AppTypography.greeting, fontSize = AppTypography.bump(AppTypography.greeting, 18))
+            Text("گزارش عملکرد امروز (بعد از رسیدن به خانه)")
             OutlinedTextField(
                 value = todayReport,
                 onValueChange = {
@@ -288,16 +258,13 @@ fun TomorrowPrepScreen(onBack: () -> Unit) {
                 },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3,
-                label = { Text("چه کارهایی انجام شد؟") },
-            )
+                label = { Text("چه کارهایی انجام شد؟") })
 
             syncNotice?.let {
                 Text(
                     it,
-                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                )
+                    color = MaterialTheme.colorScheme.primary)
             }
 
             // --- آکاردیونِ گزارشِ ماهانه (پیش‌فرض بسته) ---
@@ -320,36 +287,28 @@ private fun MonthlyChecksAccordion(tick: Int = 0) {
     Column(Modifier.fillMaxWidth()) {
         Row(
             Modifier.fillMaxWidth().clickable { open = !open }.padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(if (open) "▾" else "◂", fontFamily = AppTypography.body)
+            verticalAlignment = Alignment.CenterVertically) {
+            Text(if (open) "▾" else "◂")
             Text(
                 "گزارش ماهانه آمادگی حضور در مدرسه",
-                fontFamily = AppTypography.heading,
-                fontSize = AppTypography.bump(AppTypography.body, 16),
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 6.dp),
-            )
+                modifier = Modifier.padding(start = 6.dp))
         }
         if (open) {
             if (entries.isEmpty()) {
                 Text(
                     "همهٔ روزها کامل تیک خورده‌اند — مورد جامانده‌ای نیست.",
-                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                    style = MaterialTheme.typography.bodySmall,
-                )
+                    style = MaterialTheme.typography.bodySmall)
             } else {
                 groups.forEach { (month, list) ->
-                    Text(month, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), fontWeight = FontWeight.Bold)
+                    Text(month, fontWeight = FontWeight.Bold)
                     list.forEach { e ->
                         val fa = JalaliDate.formatFaLong(e.iso)
                         Text(
                             "• $fa — ${e.title} تیک نخورده",
-                            fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(start = 8.dp),
-                        )
+                            modifier = Modifier.padding(start = 8.dp))
                     }
                 }
             }

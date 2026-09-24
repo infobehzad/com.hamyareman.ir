@@ -73,12 +73,9 @@ private fun TimePickText(label: String, value: String, onPick: (String) -> Unit)
         onClick = {
             android.app.TimePickerDialog(ctx, { _, hh, mm -> onPick("%d:%02d".format(hh, mm)) }, h, m, true).show()
         },
-        modifier = Modifier.fillMaxWidth(),
-    ) {
+        modifier = Modifier.fillMaxWidth()) {
         Text(
-            "$label  ${toPersianDigits("%d:%02d".format(h, m))}",
-            fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-        )
+            "$label  ${toPersianDigits("%d:%02d".format(h, m))}")
     }
 }
 
@@ -94,9 +91,7 @@ fun ClassPlanScreen(onBack: () -> Unit, initialTab: Int = 0, onVirtualHours: (()
                 Tab(selected = tab == i, onClick = { tab = i }, text = {
                     Text(
                         label,
-                        fontFamily = AppTypography.heading, fontSize = AppTypography.bump(AppTypography.heading, 14),
-                        fontWeight = FontWeight.Bold,
-                    )
+                        fontWeight = FontWeight.Bold)
                 })
             }
         }
@@ -124,8 +119,7 @@ private fun WeeklyTimetableSection() {
             (1..5).associateWith { d ->
                 val v = snap.days[d].orEmpty()
                 (if (v.isEmpty()) listOf("", "", "") else v).toMutableList()
-            },
-        )
+            })
     }
     // هر خانه می‌تواند «دو درس» داشته باشد: درسِ دوم هم‌اندازهٔ درسِ اول.
     var seconds by remember {
@@ -134,8 +128,7 @@ private fun WeeklyTimetableSection() {
                 val n = days[d]?.size ?: 3
                 val v = snap.second[d].orEmpty()
                 (v + List((n - v.size).coerceAtLeast(0)) { "" }).take(n).toMutableList()
-            },
-        )
+            })
     }
     var bells by remember { mutableStateOf(snap.bells) }
     var locked by remember { mutableStateOf(snap.locked) }
@@ -207,24 +200,19 @@ private fun WeeklyTimetableSection() {
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
+        verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             "شنبه تا چهارشنبه. هر خانه می‌تواند دو درس داشته باشد و ساعتِ شروع و پایانِ هر زنگ («تایم زنگ ۱…» در پایین) برای همهٔ روزها یکی است. پس از تکمیل، فهرست‌ها غیرفعال می‌شوند.",
-            fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
         syncNotice?.let {
-            Text(it, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
         }
         syncError?.let {
             Text(
                 "⚠ $it",
-                fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error,
-            )
+                color = MaterialTheme.colorScheme.error)
         }
         ClassPlanStore.WEEKDAYS.forEachIndexed { i, name ->
             val di = i + 1
@@ -238,9 +226,8 @@ private fun WeeklyTimetableSection() {
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
                     .padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Text(name, fontFamily = AppTypography.greeting, fontSize = AppTypography.bump(AppTypography.greeting, 18))
+                verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(name)
                 slots.forEachIndexed { si, value ->
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -256,8 +243,7 @@ private fun WeeklyTimetableSection() {
                                     val map = days.toMutableMap().also { it[di] = next }
                                     days = map
                                     persistAndSync(lock = false, map = map)
-                                },
-                            )
+                                })
                             SubjectDropdown(
                                 value = slots2.getOrElse(si) { "" },
                                 options = options,
@@ -271,17 +257,14 @@ private fun WeeklyTimetableSection() {
                                     val sec = seconds.toMutableMap().also { it[di] = next }
                                     seconds = sec
                                     persistAndSync(lock = false, sec = sec)
-                                },
-                            )
+                                })
                         }
                         val bellText = ClassPlanStore.bellLabel(snap, si)
                         Text(
                             if (bellText.isBlank()) "تایم زنگ ${toPersianDigits((si + 1).toString())}: تنظیم نشده"
                             else "تایم زنگ ${toPersianDigits((si + 1).toString())}: $bellText",
-                            fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (bellText.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
-                        )
+                            color = if (bellText.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary)
                     }
                 }
                 if (!locked) {
@@ -289,7 +272,7 @@ private fun WeeklyTimetableSection() {
                         TextButton(onClick = {
                             days = days.toMutableMap().also { it[di] = (slots + "").toMutableList() }
                             seconds = seconds.toMutableMap().also { it[di] = (slots2 + "").toMutableList() }
-                        }) { Text("افزودن خانه", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) }
+                        }) { Text("افزودن خانه") }
                         if (slots.size > 1) {
                             TextButton(onClick = {
                                 ClassPlanStore.removeSlot(ctx, di, slots.size - 1)
@@ -301,7 +284,7 @@ private fun WeeklyTimetableSection() {
                                     it[di] = (ClassPlanStore.load(ctx).second[di].orEmpty()).toMutableList()
                                 }
                                 persistAndSync(lock = false, map = days, sec = seconds)
-                            }) { Text("حذف آخرین خانه", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) }
+                            }) { Text("حذف آخرین خانه") }
                         }
                     }
                 }
@@ -316,34 +299,25 @@ private fun WeeklyTimetableSection() {
             Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
                 .padding(10.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
+            verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
                     .clickable { bellsOpen = !bellsOpen }
                     .padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+                verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     "تایم زنگ‌ها",
-                    fontFamily = AppTypography.heading,
-                    fontSize = AppTypography.bump(AppTypography.heading, 18),
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f),
-                )
+                    modifier = Modifier.weight(1f))
                 Text(
                     toPersianDigits("$bellsSet/$maxCells") + if (bellsOpen) "  ▲ بستن" else "  ▼ باز کردن",
-                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                )
+                    color = MaterialTheme.colorScheme.primary)
             }
             Text(
                 "ساعتِ شروع و پایانِ هر زنگ فقط یک‌بار این‌جا وارد می‌شود و برای هر دو شیفتِ صبح و عصر و همهٔ روزها ذخیره و با سرور همگام می‌شود.",
-                fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
             if (bellsOpen) (0 until maxCells).forEach { si ->
                 val raw = bells.getOrElse(si) { "" }
                 val parts = raw.split("-")
@@ -352,9 +326,7 @@ private fun WeeklyTimetableSection() {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         "تایم زنگ ${toPersianDigits((si + 1).toString())}  ·  ${toPersianDigits(from)} تا ${toPersianDigits(to)}",
-                        fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                        fontWeight = FontWeight.Bold,
-                    )
+                        fontWeight = FontWeight.Bold)
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         Box(Modifier.weight(1f)) {
                             TimePickText("شروع", from) { hh ->
@@ -379,15 +351,14 @@ private fun WeeklyTimetableSection() {
 
         if (locked) {
             OutlinedButton(onClick = { confirmEdit = true }, modifier = Modifier.fillMaxWidth()) {
-                Text("ویرایش برنامه هفتگی", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                Text("ویرایش برنامه هفتگی")
             }
         } else {
             OutlinedButton(
                 onClick = {
                     persistAndSync(lock = (1..5).all { d -> (days[d]?.count { it.isNotBlank() } ?: 0) >= 3 })
                 },
-                modifier = Modifier.fillMaxWidth(),
-            ) { Text("ذخیره برنامه", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) }
+                modifier = Modifier.fillMaxWidth()) { Text("ذخیره برنامه") }
         }
         // کارتِ کاملِ مرخصی به صفحهٔ جداگانهٔ «مرخصی» منتقل شد
         // (از منوی «برنامه هفتگی و مرخصی» در صفحهٔ اصلی مدرسه باز می‌شود).
@@ -400,8 +371,7 @@ private fun WeeklyTimetableSection() {
             confirmButton = {
                 TextButton(onClick = { confirmEdit = false; locked = false }) { Text("بله، ویرایش") }
             },
-            dismissButton = { TextButton(onClick = { confirmEdit = false }) { Text("انصراف") } },
-        )
+            dismissButton = { TextButton(onClick = { confirmEdit = false }) { Text("انصراف") } })
     }
 }
 
@@ -412,27 +382,24 @@ private fun SubjectDropdown(
     enabled: Boolean,
     modifier: Modifier = Modifier,
     placeholder: String = "انتخاب درس",
-    onPick: (String) -> Unit,
-) {
+    onPick: (String) -> Unit) {
     var open by remember { mutableStateOf(false) }
     Box(modifier) {
         OutlinedButton(
             onClick = { if (enabled) open = true },
             enabled = enabled,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(value.ifBlank { placeholder }, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), maxLines = 1)
+            modifier = Modifier.fillMaxWidth()) {
+            Text(value.ifBlank { placeholder }, maxLines = 1)
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             options.forEach { opt ->
                 DropdownMenuItem(
-                    text = { Text(opt, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) },
+                    text = { Text(opt) },
                     // گزینهٔ «— خالی —» خانه را خالی می‌کند (مقدارِ ذخیره‌شده = "").
                     onClick = {
                         onPick(if (opt == ClassPlanStore.EMPTY_SUBJECT) "" else opt)
                         open = false
-                    },
-                )
+                    })
             }
         }
     }
@@ -454,9 +421,8 @@ private fun ShamsiCalendarSection() {
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Text("تعطیلات قمری را در صورت اختلاف اعلام، تا ۲ روز جابه‌جا کن.", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), style = MaterialTheme.typography.bodySmall)
+        verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text("تعطیلات قمری را در صورت اختلاف اعلام، تا ۲ روز جابه‌جا کن.", style = MaterialTheme.typography.bodySmall)
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             (-2..2).forEach { off ->
                 FilterChip(
@@ -465,8 +431,7 @@ private fun ShamsiCalendarSection() {
                         ClassPlanStore.saveLunarOffset(ctx, off)
                         snap = ClassPlanStore.load(ctx)
                     },
-                    label = { Text(if (off == 0) "۰" else toPersianDigits((if (off > 0) "+$off" else "$off")), fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) },
-                )
+                    label = { Text(if (off == 0) "۰" else toPersianDigits((if (off > 0) "+$off" else "$off"))) })
             }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -474,17 +439,14 @@ private fun ShamsiCalendarSection() {
                 if (month == 1) { month = 12; year-- } else month--
             }) { Text("ماه قبل") }
             Text(
-                "${JalaliDate.monthName(month)} ${toPersianDigits(year.toString())}",
-                fontFamily = AppTypography.greeting,
-                fontSize = AppTypography.bump(AppTypography.greeting, 20),
-            )
+                "${JalaliDate.monthName(month)} ${toPersianDigits(year.toString())}")
             TextButton(onClick = {
                 if (month == 12) { month = 1; year++ } else month++
             }) { Text("ماه بعد") }
         }
         Row(Modifier.fillMaxWidth()) {
             weekHdr.forEach { h ->
-                Text(h, modifier = Modifier.weight(1f), textAlign = TextAlign.Center, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), fontWeight = FontWeight.Bold)
+                Text(h, modifier = Modifier.weight(1f), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
             }
         }
         val dim = JalaliDate.daysInMonth(year, month)
@@ -513,9 +475,8 @@ private fun ShamsiCalendarSection() {
                             Column(
                                 Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)).background(bg),
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center,
-                            ) {
-                                Text(toPersianDigits(day.toString()), color = fg, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 13))
+                                verticalArrangement = Arrangement.Center) {
+                                Text(toPersianDigits(day.toString()), color = fg)
                                 if (!occ.isNullOrBlank() && occ != "پنجشنبه" && occ != "جمعه") {
                                     Text("•", color = fg, fontSize = 8.sp)
                                 }
@@ -534,8 +495,8 @@ private fun ShamsiCalendarSection() {
             else toPersianDigits("$d ${JalaliDate.monthName(month)}") + " — $lab"
         }
         if (monthOccasions.isNotEmpty()) {
-            Text("مناسبات این ماه", fontFamily = AppTypography.greeting, fontSize = AppTypography.bump(AppTypography.greeting, 16))
-            monthOccasions.forEach { Text(it, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), style = MaterialTheme.typography.bodySmall) }
+            Text("مناسبات این ماه")
+            monthOccasions.forEach { Text(it, style = MaterialTheme.typography.bodySmall) }
         }
     }
 }
@@ -575,57 +536,49 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Text(ClassPlanStore.captionOf(snap, today), fontFamily = AppTypography.heading, fontSize = AppTypography.bump(AppTypography.heading, 20), fontWeight = FontWeight.Bold)
+        verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(ClassPlanStore.captionOf(snap, today), fontWeight = FontWeight.Bold)
         OutlinedButton(onClick = { shiftSettings = true }, modifier = Modifier.fillMaxWidth()) {
-            Text("تنظیمات شیفت مدرسه", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+            Text("تنظیمات شیفت مدرسه")
         }
         Text(
             if (snap.cycleWeeks == 1) "همیشه ${current.label}"
             else "شیفت این هفته هفته‌ی ${toPersianDigits(ClassPlanStore.cycleWeekPos(snap, today).toString())} از ${toPersianDigits(snap.cycleWeeks.toString())} هفته، ${current.label}",
-            fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-            fontWeight = FontWeight.Bold,
-        )
+            fontWeight = FontWeight.Bold)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text("آلارم‌های صدادار", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), fontWeight = FontWeight.Bold)
+            Text("آلارم‌های صدادار", fontWeight = FontWeight.Bold)
             IconButton(onClick = { settingsOpen = true }) {
                 Icon(Icons.Filled.Settings, contentDescription = "تنظیمات آلارم")
             }
         }
-        Text("شیفت صبح — سه کادر ساعت", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), fontWeight = FontWeight.Bold)
+        Text("شیفت صبح — سه کادر ساعت", fontWeight = FontWeight.Bold)
         TimePick("آلارم بیداری", alarm.wakeMH, alarm.wakeMM) { h, m -> flushAlarm(alarm.copy(wakeMH = h, wakeMM = m)) }
         TimePick("حضور در سرویس", alarm.busMH, alarm.busMM) { h, m -> flushAlarm(alarm.copy(busMH = h, busMM = m)) }
         TimePick("حضور در مدرسه", alarm.schoolMH, alarm.schoolMM) { h, m -> flushAlarm(alarm.copy(schoolMH = h, schoolMM = m)) }
-        Text("شیفت ظهر — سه کادر ساعت", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), fontWeight = FontWeight.Bold)
+        Text("شیفت ظهر — سه کادر ساعت", fontWeight = FontWeight.Bold)
         TimePick("آماده شدن ظهر", alarm.wakeNH, alarm.wakeNM) { h, m -> flushAlarm(alarm.copy(wakeNH = h, wakeNM = m)) }
         TimePick("حضور در سرویس", alarm.busNH, alarm.busNM) { h, m -> flushAlarm(alarm.copy(busNH = h, busNM = m)) }
         TimePick("حضور در مدرسه", alarm.schoolNH, alarm.schoolNM) { h, m -> flushAlarm(alarm.copy(schoolNH = h, schoolNM = m)) }
-        Text("خواب — دعوت به خواب آرام", fontFamily = AppTypography.heading, fontSize = AppTypography.bump(AppTypography.heading, 18), fontWeight = FontWeight.Bold)
+        Text("خواب — دعوت به خواب آرام", fontWeight = FontWeight.Bold)
         TimePick("خواب شیفت صبح", alarm.sleepMH, alarm.sleepMM) { h, m -> flushAlarm(alarm.copy(sleepMH = h, sleepMM = m)) }
         TimePick("خواب شیفت ظهر", alarm.sleepNH, alarm.sleepNM) { h, m -> flushAlarm(alarm.copy(sleepNH = h, sleepNM = m)) }
         Text(
             "آلارم شیفت مخالف خاموش می‌شود. اگر دعوت خواب لمس نشود، یک‌بار دیگر بعد از ۵ دقیقه تکرار می‌شود.",
-            fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-            style = MaterialTheme.typography.bodySmall,
-        )
+            style = MaterialTheme.typography.bodySmall)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text("کلاس مجازی", fontFamily = AppTypography.heading, fontSize = AppTypography.bump(AppTypography.heading, 18), fontWeight = FontWeight.Bold)
+            Text("کلاس مجازی", fontWeight = FontWeight.Bold)
             TextButton(onClick = { onVirtualHours?.invoke() }) {
                 Icon(
                     Icons.Outlined.Settings,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                )
+                    modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(4.dp))
-                Text("تنظیم ساعت کلاس‌های مجازی", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                Text("تنظیم ساعت کلاس‌های مجازی")
             }
         }
         Text(
             "یک روز یا بازه را مجازی کن. روی داشبورد قرمز می‌شود و تیک کیف غیرفعال.",
-            fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-            style = MaterialTheme.typography.bodySmall,
-        )
+            style = MaterialTheme.typography.bodySmall)
         VirtualRangeSection(
             today = today,
             ranges = ranges,
@@ -638,16 +591,12 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                 ClassPlanStore.removeVirtualRange(ctx, id)
                 ranges = ClassPlanStore.virtualRanges(ctx)
                 snap = ClassPlanStore.load(ctx)
-            },
-        )
+            })
         val vdays = ClassPlanStore.virtualDays(ctx)
         if (vdays.isNotEmpty()) {
             Text(
                 "جمعاً ${toPersianDigits(vdays.size.toString())} روز مجازی",
-                fontFamily = AppTypography.body,
-                fontSize = AppTypography.bump(AppTypography.body, 12),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = {
@@ -666,19 +615,17 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                         append(if (pushed) "؛ ارسال انجام شد." else "؛ چیزی برای ارسال نبود.")
                     }
                 }
-            }) { Text("همگام‌سازی با سرور", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) }
+            }) { Text("همگام‌سازی با سرور") }
         }
-        syncNotice?.let { Text(it, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary) }
+        syncNotice?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary) }
         val sessions = ClassPlanStore.virtualSessions(ctx)
         if (sessions.isNotEmpty()) {
-            Text("ساعت‌های ثبت‌شده", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), fontWeight = FontWeight.Bold)
+            Text("ساعت‌های ثبت‌شده", fontWeight = FontWeight.Bold)
             sessions.forEach { s ->
                 val dayName = ClassPlanStore.WEEKDAYS.getOrElse(s.dayIndex - 1) { "" }
                 Text(
                     "$dayName: ${s.timeFa}${if (s.subject.isBlank()) "" else " — ${s.subject}"}",
-                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                    style = MaterialTheme.typography.bodySmall,
-                )
+                    style = MaterialTheme.typography.bodySmall)
             }
         }
     }
@@ -686,11 +633,11 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
     if (shiftSettings) {
         AlertDialog(
             onDismissRequest = { shiftSettings = false },
-            title = { Text("تنظیمات شیفت مدرسه", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) },
+            title = { Text("تنظیمات شیفت مدرسه") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     // ── گام ۱: شیفتِ هفتهٔ جاری
-                    Text("۱) شیفت هفتهٔ جاری", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), fontWeight = FontWeight.Bold)
+                    Text("۱) شیفت هفتهٔ جاری", fontWeight = FontWeight.Bold)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(Shift.MORNING, Shift.EVENING).forEach { sh ->
                             FilterChip(
@@ -699,12 +646,11 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                                     ClassPlanStore.setCurrentWeekShift(ctx, sh)
                                     snap = ClassPlanStore.load(ctx)
                                 },
-                                label = { Text(sh.label, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) },
-                            )
+                                label = { Text(sh.label) })
                         }
                     }
                     // ── گام ۲: چرخهٔ شیفت
-                    Text("۲) چرخهٔ شیفت", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), fontWeight = FontWeight.Bold)
+                    Text("۲) چرخهٔ شیفت", fontWeight = FontWeight.Bold)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(1 to "ثابت", 2 to "دوهفته‌ای", 4 to "چهارهفته‌ای").forEach { (w, label) ->
                             FilterChip(
@@ -713,36 +659,30 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                                     ClassPlanStore.setCycleWeeks(ctx, w)
                                     snap = ClassPlanStore.load(ctx)
                                 },
-                                label = { Text(label, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) },
-                            )
+                                label = { Text(label) })
                         }
                     }
                     // ── گام ۳: شیفتِ هر هفته (مشتق از گام ۱)
                     when (snap.cycleWeeks) {
                         1 -> {
-                            Text("۳) شیفت ثابت", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), fontWeight = FontWeight.Bold)
+                            Text("۳) شیفت ثابت", fontWeight = FontWeight.Bold)
                             OutlinedButton(
                                 onClick = {
                                     ClassPlanStore.setCurrentWeekShift(ctx, current)
                                     snap = ClassPlanStore.load(ctx)
                                 },
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Text("همیشه ${current.label}", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                                modifier = Modifier.fillMaxWidth()) {
+                                Text("همیشه ${current.label}")
                             }
                         }
                         else -> {
                             val nowPos = ClassPlanStore.cycleWeekPos(snap, today)
                             Text(
                                 "۳) شیفتِ هر هفته — هفته‌ی ${toPersianDigits(nowPos.toString())}: ${current.label}",
-                                fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                                fontWeight = FontWeight.Bold,
-                            )
+                                fontWeight = FontWeight.Bold)
                             Text(
                                 "هفتهٔ جاری شما، هفتهٔ چندم از چرخهٔ ${toPersianDigits(snap.cycleWeeks.toString())} هفته‌ای است؟",
-                                fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                                style = MaterialTheme.typography.bodySmall,
-                            )
+                                style = MaterialTheme.typography.bodySmall)
                             (1..snap.cycleWeeks).forEach { k ->
                                 val kShift =
                                     if (Math.floorMod((k - nowPos).toLong(), 2L) == 0L) current
@@ -755,11 +695,8 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                                     },
                                     label = {
                                         Text(
-                                            "هفته‌ی ${toPersianDigits(k.toString())} · ${kShift.label}",
-                                            fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                                        )
-                                    },
-                                )
+                                            "هفته‌ی ${toPersianDigits(k.toString())} · ${kShift.label}")
+                                    })
                             }
                         }
                     }
@@ -767,18 +704,16 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                         ClassPlanStore.saveTimes(
                             ctx, h, m, snap.wakeLeadMin,
                             snap.noonHour, snap.noonMinute,
-                            snap.sleepMorning, snap.sleepEvening,
-                        )
+                            snap.sleepMorning, snap.sleepEvening)
                         snap = ClassPlanStore.load(ctx)
                     }
                     TimePick("ساعت ورود شیفت ظهر", snap.noonHour, snap.noonMinute) { h, m ->
                         ClassPlanStore.saveTimes(
                             ctx, snap.morningHour, snap.morningMinute, snap.wakeLeadMin,
-                            h, m, snap.sleepMorning, snap.sleepEvening,
-                        )
+                            h, m, snap.sleepMorning, snap.sleepEvening)
                         snap = ClassPlanStore.load(ctx)
                     }
-                    Text("ساعت خروج از مدرسه", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), fontWeight = FontWeight.Bold)
+                    Text("ساعت خروج از مدرسه", fontWeight = FontWeight.Bold)
                     TimePickText("خروج شیفت صبح", snap.exitMorning) { hhmm ->
                         ClassPlanStore.saveExitTimes(ctx, hhmm, snap.exitNoon)
                         snap = ClassPlanStore.load(ctx)
@@ -788,9 +723,7 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                         snap = ClassPlanStore.load(ctx)
                     }
                     Text(
-                        "آماده‌سازیِ پیش از حرکت: ${toPersianDigits(snap.wakeLeadMin.toString())} دقیقه",
-                        fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                    )
+                        "آماده‌سازیِ پیش از حرکت: ${toPersianDigits(snap.wakeLeadMin.toString())} دقیقه")
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(30, 45, 60, 90).forEach { lead ->
                             FilterChip(
@@ -799,12 +732,10 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                                     ClassPlanStore.saveTimes(
                                         ctx, snap.morningHour, snap.morningMinute, lead,
                                         snap.noonHour, snap.noonMinute,
-                                        snap.sleepMorning, snap.sleepEvening,
-                                    )
+                                        snap.sleepMorning, snap.sleepEvening)
                                     snap = ClassPlanStore.load(ctx)
                                 },
-                                label = { Text(toPersianDigits(lead.toString()), fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) },
-                            )
+                                label = { Text(toPersianDigits(lead.toString())) })
                         }
                     }
                 }
@@ -819,10 +750,9 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                         ClassPlanSync.push(ctx, container.tables, uid, StateSync.KEY_WEEK)
                         syncNotice = if (uid.isBlank()) "تنظیمات روی دستگاه ذخیره شد (برای سینک وارد شو)." else "تنظیمات ذخیره و با سرور همگام شد."
                     }
-                }) { Text("ذخیره", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) }
+                }) { Text("ذخیره") }
             },
-            dismissButton = { TextButton(onClick = { shiftSettings = false }) { Text("بستن", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) } },
-        )
+            dismissButton = { TextButton(onClick = { shiftSettings = false }) { Text("بستن") } })
     }
     if (settingsOpen) {
         val sounds = remember(ctx) { AlarmRinger.deviceSounds(ctx) }
@@ -834,15 +764,12 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         "آهنگ: ${AlarmRinger.titleOf(ctx, soundUri)}",
-                        fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                        fontWeight = FontWeight.Bold,
-                    )
+                        fontWeight = FontWeight.Bold)
                     Column(
                         Modifier
                             .fillMaxWidth()
                             .height(180.dp)
-                            .verticalScroll(rememberScrollState()),
-                    ) {
+                            .verticalScroll(rememberScrollState())) {
                         AlarmSoundRow(
                             label = "پیش‌فرض گوشی",
                             selected = soundUri.isBlank(),
@@ -851,8 +778,7 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                                 AlarmRinger.saveSound(ctx, "")
                                 flushAlarm(alarm.copy(sound = "default"))
                             },
-                            onPreview = { AlarmRinger.preview(ctx, "", alarm.volume) },
-                        )
+                            onPreview = { AlarmRinger.preview(ctx, "", alarm.volume) })
                         sounds.forEach { (name, uri) ->
                             AlarmSoundRow(
                                 label = name,
@@ -862,24 +788,21 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                                     AlarmRinger.saveSound(ctx, uri)
                                     flushAlarm(alarm.copy(sound = uri))
                                 },
-                                onPreview = { AlarmRinger.preview(ctx, uri, alarm.volume) },
-                            )
+                                onPreview = { AlarmRinger.preview(ctx, uri, alarm.volume) })
                         }
                         if (sounds.isEmpty()) {
                             Text(
                                 "آهنگی روی گوشی پیدا نشد؛ همان پیش‌فرض سیستم زنگ می‌زند.",
-                                fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                                style = MaterialTheme.typography.bodySmall,
-                            )
+                                style = MaterialTheme.typography.bodySmall)
                         }
                     }
-                    Text("بلندی: ${toPersianDigits(alarm.volume.toString())}٪", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                    Text("بلندی: ${toPersianDigits(alarm.volume.toString())}٪")
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(40, 60, 80, 100).forEach { v ->
                             FilterChip(selected = alarm.volume == v, onClick = { flushAlarm(alarm.copy(volume = v)) }, label = { Text(toPersianDigits(v.toString())) })
                         }
                     }
-                    Text("تعداد تکرار", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                    Text("تعداد تکرار")
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         (1..3).forEach { n ->
                             FilterChip(selected = alarm.repeat == n, onClick = { flushAlarm(alarm.copy(repeat = n)) }, label = { Text(toPersianDigits(n.toString())) })
@@ -888,19 +811,16 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                     FilterChip(
                         selected = alarm.crescendo,
                         onClick = { flushAlarm(alarm.copy(crescendo = !alarm.crescendo)) },
-                        label = { Text("صدای افزایشی", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) },
-                    )
+                        label = { Text("صدای افزایشی") })
                     OutlinedButton(
                         onClick = { AlarmRinger.start(ctx) },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) { Text("تست زنگ", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) }
+                        modifier = Modifier.fillMaxWidth()) { Text("تست زنگ") }
                     TextButton(onClick = { AlarmRinger.stop() }, modifier = Modifier.fillMaxWidth()) {
-                        Text("توقف زنگ", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                        Text("توقف زنگ")
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = { AlarmRinger.stop(); settingsOpen = false }) { Text("بستن") } },
-        )
+            confirmButton = { TextButton(onClick = { AlarmRinger.stop(); settingsOpen = false }) { Text("بستن") } })
     }
 }
 
@@ -911,12 +831,9 @@ internal fun TimePick(label: String, hour: Int, minute: Int, onChange: (Int, Int
         onClick = {
             android.app.TimePickerDialog(ctx, { _, h, m -> onChange(h, m) }, hour, minute, true).show()
         },
-        modifier = Modifier.fillMaxWidth(),
-    ) {
+        modifier = Modifier.fillMaxWidth()) {
         Text(
-            "$label  ${toPersianDigits("%d:%02d".format(hour, minute))}",
-            fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-        )
+            "$label  ${toPersianDigits("%d:%02d".format(hour, minute))}")
     }
 }
 
@@ -925,25 +842,21 @@ private fun AlarmSoundRow(
     label: String,
     selected: Boolean,
     onPick: () -> Unit,
-    onPreview: () -> Unit,
-) {
+    onPreview: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
             .clickable(onClick = onPick)
             .padding(vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
+        horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         androidx.compose.material3.RadioButton(selected = selected, onClick = onPick)
         Text(
             label,
-            fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
             modifier = Modifier.weight(1f),
             maxLines = 1,
-            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-        )
-        TextButton(onClick = onPreview) { Text("شنیدن", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) }
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+        TextButton(onClick = onPreview) { Text("شنیدن") }
     }
 }
 
@@ -993,35 +906,32 @@ internal fun LeaveSection() {
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
             .padding(10.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Text("مرخصی", fontFamily = AppTypography.heading, fontSize = AppTypography.bump(AppTypography.heading, 18), fontWeight = FontWeight.Bold)
+        verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("مرخصی", fontWeight = FontWeight.Bold)
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { pickFrom = true }, modifier = Modifier.weight(1f)) {
-                Text("از: ${JalaliDate.formatFaLong(fromIso)}", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                Text("از: ${JalaliDate.formatFaLong(fromIso)}")
             }
             OutlinedButton(onClick = { pickTo = true }, modifier = Modifier.weight(1f)) {
-                Text("تا: ${JalaliDate.formatFaLong(toIso)}", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                Text("تا: ${JalaliDate.formatFaLong(toIso)}")
             }
         }
 
         // علتِ مرخصی
         Box {
             OutlinedButton(onClick = { reasonsOpen = true }, modifier = Modifier.fillMaxWidth()) {
-                Text(if (reason.isBlank()) "علت مرخصی" else reason, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                Text(if (reason.isBlank()) "علت مرخصی" else reason)
             }
             DropdownMenu(expanded = reasonsOpen, onDismissRequest = { reasonsOpen = false }) {
                 reasons.forEach { r ->
                     DropdownMenuItem(
-                        text = { Text(r, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) },
-                        onClick = { reason = r; medCert = false; just = ""; reasonsOpen = false },
-                    )
+                        text = { Text(r) },
+                        onClick = { reason = r; medCert = false; just = ""; reasonsOpen = false })
                 }
                 DropdownMenuItem(
-                    text = { Text(ClassPlanStore.ADD_CUSTOM, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) },
-                    onClick = { showCustom = true; reasonsOpen = false },
-                )
+                    text = { Text(ClassPlanStore.ADD_CUSTOM) },
+                    onClick = { showCustom = true; reasonsOpen = false })
             }
         }
         if (showCustom) {
@@ -1030,8 +940,7 @@ internal fun LeaveSection() {
                 onValueChange = { custom = it },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                label = { Text("علتِ خاص", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) },
-            )
+                label = { Text("علتِ خاص") })
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextButton(onClick = {
                     if (custom.isBlank()) return@TextButton
@@ -1042,8 +951,8 @@ internal fun LeaveSection() {
                     custom = ""
                     showCustom = false
                     msg = "علت اضافه شد."
-                }) { Text("افزودن", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) }
-                TextButton(onClick = { showCustom = false; custom = "" }) { Text("انصراف", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) }
+                }) { Text("افزودن") }
+                TextButton(onClick = { showCustom = false; custom = "" }) { Text("انصراف") }
             }
         }
 
@@ -1051,13 +960,13 @@ internal fun LeaveSection() {
         if (isSick) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = medCert, onCheckedChange = { medCert = it })
-                Text("گواهی پزشکی داشتم", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                Text("گواهی پزشکی داشتم")
             }
         }
 
         // وضعیتِ توجیه — فقط یکی، و فقط یک‌بار (مگر «موجّه نشده»)
         if (reason.isNotBlank()) {
-            Text("وضعیت توجیه به مدرسه", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), fontWeight = FontWeight.Bold)
+            Text("وضعیت توجیه به مدرسه", fontWeight = FontWeight.Bold)
             val options = buildList {
                 add(ClassPlanStore.JUST_FATHER)
                 add(ClassPlanStore.JUST_MOTHER)
@@ -1067,14 +976,12 @@ internal fun LeaveSection() {
             options.forEach { code ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth().clickable { if (just.isBlank() || just == ClassPlanStore.JUST_NONE) just = code },
-                ) {
+                    modifier = Modifier.fillMaxWidth().clickable { if (just.isBlank() || just == ClassPlanStore.JUST_NONE) just = code }) {
                     Checkbox(
                         checked = just == code,
                         enabled = just.isBlank() || just == ClassPlanStore.JUST_NONE,
-                        onCheckedChange = { if (it) just = code },
-                    )
-                    Text(ClassPlanStore.justificationLabel(code), fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                        onCheckedChange = { if (it) just = code })
+                    Text(ClassPlanStore.justificationLabel(code))
                 }
             }
         }
@@ -1094,28 +1001,25 @@ internal fun LeaveSection() {
                     "مرخصی ثبت شد."
                 }
             }
-        }, modifier = Modifier.fillMaxWidth()) { Text("ثبت مرخصی", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) }
+        }, modifier = Modifier.fillMaxWidth()) { Text("ثبت مرخصی") }
 
         msg?.let {
-            Text(it, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
         }
 
         // ---- آکاردیونِ مرخصی‌های ثبت‌شده (پیش‌فرض بسته) ----
         Row(
             Modifier.fillMaxWidth().clickable { listOpen = !listOpen }.padding(vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(if (listOpen) "▾" else "◂", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+            verticalAlignment = Alignment.CenterVertically) {
+            Text(if (listOpen) "▾" else "◂")
             Text(
                 "مرخصی‌های ثبت‌شده (${toPersianDigits(records.size.toString())})",
-                fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 6.dp),
-            )
+                modifier = Modifier.padding(start = 6.dp))
         }
         if (listOpen) {
             if (records.isEmpty()) {
-                Text("هنوز مرخصی‌ای ثبت نشده است.", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), style = MaterialTheme.typography.bodySmall)
+                Text("هنوز مرخصی‌ای ثبت نشده است.", style = MaterialTheme.typography.bodySmall)
             } else {
                 records.forEach { rec ->
                     Column(
@@ -1124,23 +1028,18 @@ internal fun LeaveSection() {
                             .clip(RoundedCornerShape(12.dp))
                             .background(MaterialTheme.colorScheme.surface)
                             .padding(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                    ) {
+                        verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         val days = ClassPlanStore.daysBetween(rec.fromIso, rec.toIso)
                         days.take(10).forEach { iso ->
                             Text(
                                 "${JalaliDate.weekDayFa(iso)} ${JalaliDate.formatFaLong(iso)} — ${rec.reason} — ${ClassPlanStore.justificationLabel(rec.justification)}",
-                                fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                                style = MaterialTheme.typography.bodySmall,
-                            )
+                                style = MaterialTheme.typography.bodySmall)
                         }
                         if (days.size > 10) {
                             Text(
                                 "و ${toPersianDigits((days.size - 10).toString())} روز دیگر",
-                                fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         // اگر «موجّه نشده» ثبت شده، بعداً هم می‌توان آن را اصلاح کرد.
                         if (rec.justification == ClassPlanStore.JUST_NONE) {
@@ -1152,12 +1051,12 @@ internal fun LeaveSection() {
                                             ClassPlanStore.updateLeaveJustification(ctx, rec.id, code)
                                             records = ClassPlanStore.leaves(ctx)
                                             pushLeaves()
-                                        }) { Text(ClassPlanStore.justificationLabel(code), fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) }
+                                        }) { Text(ClassPlanStore.justificationLabel(code)) }
                                     }
                             }
                         }
                         TextButton(onClick = { deleteId = rec.id }) {
-                            Text("حذف این مرخصی", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), color = MaterialTheme.colorScheme.error)
+                            Text("حذف این مرخصی", color = MaterialTheme.colorScheme.error)
                         }
                     }
                 }
@@ -1170,16 +1069,14 @@ internal fun LeaveSection() {
             initialIso = fromIso,
             title = "از روز",
             onDismiss = { pickFrom = false },
-            onPick = { fromIso = it; if (it > toIso) toIso = it; pickFrom = false },
-        )
+            onPick = { fromIso = it; if (it > toIso) toIso = it; pickFrom = false })
     }
     if (pickTo) {
         ShamsiDatePickerDialog(
             initialIso = toIso,
             title = "تا روز",
             onDismiss = { pickTo = false },
-            onPick = { toIso = it; pickTo = false },
-        )
+            onPick = { toIso = it; pickTo = false })
     }
     if (deleteId != null) {
         AlertDialog(
@@ -1194,7 +1091,6 @@ internal fun LeaveSection() {
                     pushLeaves()
                 }) { Text("حذف") }
             },
-            dismissButton = { TextButton(onClick = { deleteId = null }) { Text("انصراف") } },
-        )
+            dismissButton = { TextButton(onClick = { deleteId = null }) { Text("انصراف") } })
     }
 }

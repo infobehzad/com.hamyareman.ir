@@ -112,8 +112,7 @@ internal data class NoteFile(
     val ext: String,
     val sizeKb: Long,
     val addedIso: String,
-    val localPath: String,
-)
+    val localPath: String)
 
 private const val KEY_FILES = "study_pdfs"
 private const val KEY_NOTES = "lesson_notes_text"
@@ -138,9 +137,7 @@ internal fun readNoteFiles(store: LocalStore): List<NoteFile> = runCatching {
                     ext = ext,
                     sizeKb = o.optLong("sizeKb"),
                     addedIso = o.optString("addedIso"),
-                    localPath = path,
-                ),
-            )
+                    localPath = path))
         }
     }
 }.getOrDefault(emptyList())
@@ -158,8 +155,7 @@ private fun writeNoteFiles(store: LocalStore, items: List<NoteFile>) {
                 .put("sizeKb", item.sizeKb)
                 .put("addedIso", item.addedIso)
                 .put("localPath", item.localPath)
-                .put("reference", ""),
-        )
+                .put("reference", ""))
     }
     store.putString(KEY_FILES, array.toString())
 }
@@ -176,8 +172,7 @@ internal data class LessonNote(
     val id: String,
     val title: String,
     val text: String,
-    val updatedAt: Long,
-)
+    val updatedAt: Long)
 
 private val DEFAULT_NOTE_TITLES = listOf(
     "نکته مهم",
@@ -185,8 +180,7 @@ private val DEFAULT_NOTE_TITLES = listOf(
     "اشتباه‌های من",
     "تمرین‌ها",
     "خلاصهٔ درس",
-    "سؤال از معلم",
-)
+    "سؤال از معلم")
 
 internal fun readNoteTitles(store: LocalStore): List<String> =
     (DEFAULT_NOTE_TITLES + parseNoteTitles(store.getString("note_titles", "[]"))).distinct()
@@ -216,9 +210,7 @@ internal fun readNotes(store: LocalStore): List<LessonNote> = runCatching {
                     id = o.optString("id"),
                     title = o.optString("title"),
                     text = o.optString("text"),
-                    updatedAt = o.optLong("updatedAt"),
-                ),
-            )
+                    updatedAt = o.optLong("updatedAt")))
         }
     }.sortedByDescending { it.updatedAt }
 }.getOrDefault(emptyList())
@@ -231,8 +223,7 @@ internal fun writeNotes(store: LocalStore, notes: List<LessonNote>) {
                 .put("id", n.id)
                 .put("title", n.title)
                 .put("text", n.text)
-                .put("updatedAt", n.updatedAt),
-        )
+                .put("updatedAt", n.updatedAt))
     }
     store.putString(KEY_NOTES_ITEMS, arr.toString())
 }
@@ -246,8 +237,7 @@ internal fun encodeNotesForServer(notes: List<LessonNote>): String {
                 .put("id", n.id)
                 .put("title", n.title)
                 .put("text", n.text)
-                .put("updatedAt", n.updatedAt),
-        )
+                .put("updatedAt", n.updatedAt))
     }
     return arr.toString()
 }
@@ -264,9 +254,7 @@ internal fun decodeNotesFromServer(raw: String): List<LessonNote> {
                         id = o.optString("id").ifBlank { "n_${System.currentTimeMillis()}_$i" },
                         title = o.optString("title"),
                         text = o.optString("text"),
-                        updatedAt = o.optLong("updatedAt"),
-                    ),
-                )
+                        updatedAt = o.optLong("updatedAt")))
             }
         }
     }.getOrNull()
@@ -407,8 +395,7 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                     tables = container.tables,
                     uid = uid0,
                     key = StateSync.KEY_NOTE_TITLES,
-                    payload = noteTitlesJson(noteTitles),
-                )
+                    payload = noteTitlesJson(noteTitles))
             }
         }
     }
@@ -453,8 +440,7 @@ fun PdfUploadScreen(onBack: () -> Unit) {
             ext = ext,
             sizeKb = (file.length() / 1024).coerceAtLeast(1),
             addedIso = JalaliDate.todayIso(),
-            localPath = file.absolutePath,
-        )
+            localPath = file.absolutePath)
         items = listOf(item) + items
         writeNoteFiles(store, items)
         notice = "فقط روی همین گوشی ذخیره شد — فایل‌ها هرگز به سرور نمی‌روند."
@@ -523,8 +509,7 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                                         JSONObject()
                                             .put("id", it.id).put("title", it.title).put("mime", it.mime)
                                             .put("ext", it.ext).put("addedIso", it.addedIso)
-                                            .put("file", File(it.localPath).name),
-                                    )
+                                            .put("file", File(it.localPath).name))
                                 }
                             }.toString().toByteArray())
                             zip.closeEntry()
@@ -583,8 +568,7 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                                     ext = o.optString("ext").ifBlank { File(fname).extension },
                                     sizeKb = (f.length() / 1024).coerceAtLeast(1),
                                     addedIso = o.optString("addedIso").ifBlank { JalaliDate.todayIso() },
-                                    localPath = f.absolutePath,
-                                )
+                                    localPath = f.absolutePath)
                             }
                         }
                     }
@@ -608,15 +592,13 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+            verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(
                 "ثبت نکات درسی",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Right,
-            )
+                textAlign = TextAlign.Right)
             NoteTitlePicker(
                 titles = noteTitles,
                 selected = noteTitle,
@@ -634,12 +616,10 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                         }
                     }
                     noteTitle = title
-                },
-            )
+                })
             LinedNotesPaper(
                 value = notes,
-                onValueChange = { notes = it },
-            )
+                onValueChange = { notes = it })
             PrimaryButton(if (editingNoteId == null) "ذخیره نکات و همگام با سرور" else "به‌روزرسانی نکته") {
                 val now = System.currentTimeMillis()
                 val title = noteTitle.trim().ifBlank { "بدون عنوان" }
@@ -664,8 +644,7 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                         "userId" to uid,
                         "payload" to encoded,
                         "text" to encoded.take(7000),
-                        "updatedAt" to now,
-                    )
+                        "updatedAt" to now)
                     val perms = AppwriteClientProvider.ownerOnly(uid)
                     when (val saved = container.tables.upsert(TableIds.LESSON_NOTES, "notes_$uid", payload, perms)) {
                         is AppResult.Ok -> notice = "نکات ذخیره شد و با سرور همگام شد."
@@ -695,39 +674,33 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                     notes = n.text
                     notice = "«${n.title}» در دفتر بارگذاری شد."
                 },
-                onDelete = { askDeleteNote = it },
-            )
+                onDelete = { askDeleteNote = it })
 
             Text(
                 "گالری جزوه — فقط همین گوشی",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Right,
-            )
+                textAlign = TextAlign.Right)
             Text(
                 "عکس جزوه و کتاب، متن، PDF یا هر فرمت دیگر. فایل‌ها هرگز به سرور نمی‌روند. مهمان همیار من تا ۱۰ فایل؛ از یازدهم اشتراک فعال. بکاپ و بازگردانی هم با اشتراک فعال.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Right,
-            )
+                textAlign = TextAlign.Right)
             Text(
                 "الان ${toPersianDigits(items.size.toString())} فایل" +
                     if (!paid) " از ${toPersianDigits(FREE_FILE_CAP.toString())} سهمیهٔ مهمان" else "",
                 style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Right,
-            )
+                textAlign = TextAlign.Right)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(
                     onClick = { if (!busy && canAddMore()) imagePicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
-                    modifier = Modifier.weight(1f),
-                ) { Text("عکس + برش") }
+                    modifier = Modifier.weight(1f)) { Text("عکس + برش") }
                 OutlinedButton(
                     onClick = { if (!busy && canAddMore()) filePicker.launch("*/*") },
-                    modifier = Modifier.weight(1f),
-                ) { Text("هر فایل") }
+                    modifier = Modifier.weight(1f)) { Text("هر فایل") }
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(
@@ -735,15 +708,13 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                         if (!paid) needSubMsg = "بکاپ جزوه‌ها فقط با اشتراک فعال."
                         else backupCreate.launch("hamyar-joozve-${JalaliDate.todayIso()}.zip")
                     },
-                    modifier = Modifier.weight(1f),
-                ) { Text("بکاپ روی گوشی") }
+                    modifier = Modifier.weight(1f)) { Text("بکاپ روی گوشی") }
                 OutlinedButton(
                     onClick = {
                         if (!paid) needSubMsg = "بازگردانی جزوه‌ها فقط با اشتراک فعال."
                         else restoreOpen.launch(arrayOf("application/zip", "*/*"))
                     },
-                    modifier = Modifier.weight(1f),
-                ) { Text("بازگردانی") }
+                    modifier = Modifier.weight(1f)) { Text("بازگردانی") }
             }
             notice?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
             if (busy) Text("در حال ذخیره…", style = MaterialTheme.typography.bodySmall)
@@ -759,8 +730,7 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Right,
-                )
+                    textAlign = TextAlign.Right)
                 groupItems.chunked(3).forEach { row ->
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         row.forEach { item ->
@@ -778,8 +748,7 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                                         writeNoteFiles(store, items)
                                         notice = "از گالری حذف شد."
                                     }
-                                },
-                            )
+                                })
                         }
                         repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
                     }
@@ -819,8 +788,7 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                         titleDraft = saved to "image/jpeg"
                     }
                 }
-            },
-        )
+            })
     }
 
     imageAlbum?.let { album ->
@@ -852,8 +820,7 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                         cropBmp = bmp
                     }
                 }
-            },
-        )
+            })
     }
 
     titleDraft?.let { (file, mime) ->
@@ -866,8 +833,7 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                     onValueChange = { titleText = it },
                     label = { Text("عنوان + فرمت در گالری دیده می‌شود") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                    modifier = Modifier.fillMaxWidth())
             },
             confirmButton = {
                 TextButton(onClick = {
@@ -880,28 +846,24 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                     file.delete()
                     titleDraft = null
                 }) { Text("انصراف") }
-            },
-        )
+            })
     }
 
     pdfView?.let { item ->
         Dialog(
             onDismissRequest = { pdfView = null },
-            properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true),
-        ) {
+            properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true)) {
             Column(
                 Modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.surface)
-                    .padding(12.dp),
-            ) {
+                    .padding(12.dp)) {
                 Text(
                     item.title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Right,
-                )
+                    textAlign = TextAlign.Right)
                 Spacer(Modifier.height(8.dp))
                 InternalPdfViewer(file = File(item.localPath), modifier = Modifier.weight(1f).fillMaxWidth())
                 OutlinedButton(onClick = { pdfView = null }, modifier = Modifier.fillMaxWidth()) {
@@ -937,16 +899,13 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                             mapOf(
                                 "userId" to uid,
                                 "text" to encodeNotesForServer(next),
-                                "updatedAt" to System.currentTimeMillis(),
-                            ),
-                            AppwriteClientProvider.ownerOnly(uid),
-                        )
+                                "updatedAt" to System.currentTimeMillis()),
+                            AppwriteClientProvider.ownerOnly(uid))
                     }
                     notice = "نکته حذف شد."
                 }) { Text("حذف", color = MaterialTheme.colorScheme.error) }
             },
-            dismissButton = { TextButton(onClick = { askDeleteNote = null }) { Text("انصراف") } },
-        )
+            dismissButton = { TextButton(onClick = { askDeleteNote = null }) { Text("انصراف") } })
     }
 
     needSubMsg?.let { msg ->
@@ -954,21 +913,18 @@ fun PdfUploadScreen(onBack: () -> Unit) {
             onDismissRequest = { needSubMsg = null },
             title = { Text("نیاز به اشتراک فعال") },
             text = { Text(msg) },
-            confirmButton = { TextButton(onClick = { needSubMsg = null }) { Text("متوجه شدم") } },
-        )
+            confirmButton = { TextButton(onClick = { needSubMsg = null }) { Text("متوجه شدم") } })
     }
 
     internalView?.let { item ->
         Dialog(
             onDismissRequest = { internalView = null },
-            properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true),
-        ) {
+            properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true)) {
             Column(
                 Modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.surface)
-                    .padding(16.dp),
-            ) {
+                    .padding(16.dp)) {
                 Text(item.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(8.dp))
                 val body = remember(item.localPath) {
@@ -984,8 +940,7 @@ fun PdfUploadScreen(onBack: () -> Unit) {
                                 loadDataWithBaseURL(null, body, "text/html", "utf-8", null)
                             }
                         },
-                        modifier = Modifier.weight(1f).fillMaxWidth(),
-                    )
+                        modifier = Modifier.weight(1f).fillMaxWidth())
                 } else {
                     Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
                         Text(body, style = MaterialTheme.typography.bodyMedium)
@@ -1013,14 +968,12 @@ private fun LinedNotesPaper(value: String, onValueChange: (String) -> Unit) {
             .height(236.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(Color(0xFFFFFBEB), RoundedCornerShape(16.dp))
-            .border(2.dp, Color(0xFFF59E0B), RoundedCornerShape(16.dp)),
-    ) {
+            .border(2.dp, Color(0xFFF59E0B), RoundedCornerShape(16.dp))) {
         Image(
             painter = painterResource(R.drawable.notes_lined_paper),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds,
-        )
+            contentScale = ContentScale.FillBounds)
         BasicTextField(
             value = value,
             onValueChange = { raw ->
@@ -1028,22 +981,17 @@ private fun LinedNotesPaper(value: String, onValueChange: (String) -> Unit) {
                 onValueChange(lines.take(8).joinToString("\n"))
             },
             textStyle = TextStyle(
-                fontFamily = AppTypography.body,
-                fontSize = AppTypography.bump(AppTypography.body, 16),
                 lineHeight = lineSp,
                 color = Color(0xFF1E3A5F),
                 textAlign = TextAlign.Right,
                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                 lineHeightStyle = LineHeightStyle(
                     alignment = LineHeightStyle.Alignment.Bottom,
-                    trim = LineHeightStyle.Trim.None,
-                ),
-            ),
+                    trim = LineHeightStyle.Trim.None)),
             cursorBrush = SolidColor(Color(0xFF1E3A5F)),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 18.dp, vertical = 6.dp),
-        )
+                .padding(horizontal = 18.dp, vertical = 6.dp))
     }
 }
 
@@ -1057,27 +1005,23 @@ private fun NotesAccordion(
     expanded: Boolean,
     onToggle: () -> Unit,
     onPick: (LessonNote) -> Unit,
-    onDelete: (LessonNote) -> Unit,
-) {
+    onDelete: (LessonNote) -> Unit) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(
                 Modifier
                     .fillMaxWidth()
                     .clickable(onClick = onToggle),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+                verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
-                    contentDescription = null,
-                )
+                    contentDescription = null)
                 Spacer(Modifier.width(6.dp))
                 Text(
                     "نکته‌های ذخیره‌شده (${toPersianDigits(notes.size.toString())})",
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Right,
-                )
+                    textAlign = TextAlign.Right)
             }
             AnimatedVisibility(visible = expanded) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1086,33 +1030,28 @@ private fun NotesAccordion(
                             "هنوز نکته‌ای ذخیره نشده است.",
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Right,
-                        )
+                            textAlign = TextAlign.Right)
                     }
                     notes.groupBy { it.title.ifBlank { "بدون عنوان" } }.forEach { (title, group) ->
                         Text(
                             "$title · ${toPersianDigits(group.size.toString())}",
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Right,
-                        )
+                            textAlign = TextAlign.Right)
                         group.forEach { n ->
                             Row(
                                 Modifier
                                     .fillMaxWidth()
                                     .background(
                                         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                        RoundedCornerShape(10.dp),
-                                    )
+                                        RoundedCornerShape(10.dp))
                                     .padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
+                                verticalAlignment = Alignment.CenterVertically) {
                                 IconButton(onClick = { onDelete(n) }) {
                                     Icon(
                                         Icons.Outlined.Delete,
                                         contentDescription = "حذف نکته",
-                                        tint = MaterialTheme.colorScheme.error,
-                                    )
+                                        tint = MaterialTheme.colorScheme.error)
                                 }
                                 IconButton(onClick = { onPick(n) }) {
                                     Icon(Icons.Outlined.Edit, contentDescription = "ویرایش نکته")
@@ -1121,22 +1060,18 @@ private fun NotesAccordion(
                                     Modifier
                                         .weight(1f)
                                         .clickable { onPick(n) },
-                                    horizontalAlignment = Alignment.End,
-                                ) {
+                                    horizontalAlignment = Alignment.End) {
                                     Text(
                                         n.text.take(60),
                                         maxLines = 2,
                                         style = MaterialTheme.typography.bodySmall,
-                                        textAlign = TextAlign.Right,
-                                    )
+                                        textAlign = TextAlign.Right)
                                     Text(
                                         JalaliDate.toJalali(
                                             java.time.Instant.ofEpochMilli(n.updatedAt)
-                                                .atZone(JalaliDate.TEHRAN).toLocalDate().toString(),
-                                        )?.fa ?: "",
+                                                .atZone(JalaliDate.TEHRAN).toLocalDate().toString())?.fa ?: "",
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
                         }
@@ -1156,39 +1091,33 @@ private fun ImageGalleryPager(
     start: Int,
     onClose: () -> Unit,
     onDelete: (NoteFile) -> Unit,
-    onEdit: (NoteFile) -> Unit,
-) {
+    onEdit: (NoteFile) -> Unit) {
     val pager = rememberPagerState(
         initialPage = start.coerceIn(0, (album.size - 1).coerceAtLeast(0)),
-        pageCount = { album.size.coerceAtLeast(1) },
-    )
+        pageCount = { album.size.coerceAtLeast(1) })
     // صفحه‌ای که کاربر در آن زوم کرده است؛ تا وقتی زوم است، سوایپِ گالری کار نمی‌کند
     // تا وسطِ دیدنِ جزئیاتِ عکس، ناخواسته به عکسِ بعدی نپرد.
     var zoomedPage by remember { mutableIntStateOf(-1) }
     Dialog(
         onDismissRequest = onClose,
-        properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true),
-    ) {
+        properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true)) {
         Box(Modifier.fillMaxSize().background(Color(0xFF0F172A))) {
             HorizontalPager(
                 state = pager,
                 userScrollEnabled = zoomedPage != pager.currentPage,
-                modifier = Modifier.fillMaxSize(),
-            ) { page ->
+                modifier = Modifier.fillMaxSize()) { page ->
                 val item = album.getOrNull(page)
                 val bmp = remember(item?.localPath) {
                     item?.localPath?.let { PdfSafe.decodeFileCapped(it, maxSide = 1600) }
                 }
                 Box(
                     Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
+                    contentAlignment = Alignment.Center) {
                     if (bmp != null) {
                         ZoomablePdfPage(
                             bitmap = bmp,
                             modifier = Modifier.fillMaxSize().padding(8.dp),
-                            onZoomed = { z -> zoomedPage = if (z) page else -1 },
-                        )
+                            onZoomed = { z -> zoomedPage = if (z) page else -1 })
                     } else {
                         Text("خوانده نشد", color = Color.White)
                     }
@@ -1196,29 +1125,24 @@ private fun ImageGalleryPager(
             }
             Column(
                 Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
+                horizontalAlignment = Alignment.CenterHorizontally) {
                 val cur = album.getOrNull(pager.currentPage)
                 Text(cur?.title.orEmpty(), color = Color.White, fontWeight = FontWeight.Bold)
                 Text(
                     "${toPersianDigits((pager.currentPage + 1).toString())} از ${toPersianDigits(album.size.toString())}",
-                    color = Color.White.copy(alpha = 0.8f),
-                )
+                    color = Color.White.copy(alpha = 0.8f))
                 Text(
                     "دو انگشت برای زوم؛ لمس برای برگشت",
                     color = Color.White.copy(alpha = 0.7f),
-                    style = MaterialTheme.typography.labelSmall,
-                )
+                    style = MaterialTheme.typography.labelSmall)
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(onClick = onClose, modifier = Modifier.weight(1f)) { Text("بستن") }
                     OutlinedButton(
                         onClick = { cur?.let(onEdit) },
-                        modifier = Modifier.weight(1f),
-                    ) { Text("ویرایش") }
+                        modifier = Modifier.weight(1f)) { Text("ویرایش") }
                     OutlinedButton(
                         onClick = { cur?.let(onDelete) },
-                        modifier = Modifier.weight(1f),
-                    ) { Text("حذف") }
+                        modifier = Modifier.weight(1f)) { Text("حذف") }
                 }
             }
         }
@@ -1231,8 +1155,7 @@ private fun GalleryTile(
     modifier: Modifier,
     onOpen: () -> Unit,
     onDelete: () -> Unit,
-    onExternal: () -> Unit = {},
-) {
+    onExternal: () -> Unit = {}) {
     Column(modifier.clickable(onClick = onOpen)) {
         Box(
             Modifier
@@ -1240,8 +1163,7 @@ private fun GalleryTile(
                 .aspectRatio(0.78f)
                 .clip(RoundedCornerShape(12.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentAlignment = Alignment.Center,
-        ) {
+            contentAlignment = Alignment.Center) {
             GalleryThumb(item = item)
         }
         Text(
@@ -1249,16 +1171,14 @@ private fun GalleryTile(
             style = MaterialTheme.typography.labelMedium,
             maxLines = 1,
             modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Right,
-        )
+            textAlign = TextAlign.Right)
         Text(
             "${item.ext.uppercase()} · ${toPersianDigits(item.sizeKb.toString())}کب",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Right,
-        )
+            textAlign = TextAlign.Right)
         if (canOpenInternal(item)) {
             TextButton(onClick = onExternal, modifier = Modifier.fillMaxWidth()) { Text("با برنامهٔ دیگر") }
         }
@@ -1280,9 +1200,7 @@ private fun InternalPdfViewer(file: File, modifier: Modifier = Modifier) {
                 android.graphics.pdf.PdfRenderer(
                     android.os.ParcelFileDescriptor.open(
                         file,
-                        android.os.ParcelFileDescriptor.MODE_READ_ONLY,
-                    ),
-                )
+                        android.os.ParcelFileDescriptor.MODE_READ_ONLY))
             }.getOrNull()
             if (renderer == null) {
                 error = "این PDF روی گوشی باز نشد."
@@ -1308,8 +1226,7 @@ private fun InternalPdfViewer(file: File, modifier: Modifier = Modifier) {
                 error!!,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.align(Alignment.Center),
-                textAlign = TextAlign.Center,
-            )
+                textAlign = TextAlign.Center)
             pages.isEmpty() -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             else -> {
                 var idx by remember { mutableIntStateOf(0) }
@@ -1317,24 +1234,20 @@ private fun InternalPdfViewer(file: File, modifier: Modifier = Modifier) {
                 Column(Modifier.fillMaxSize()) {
                     ZoomablePdfPage(
                         bitmap = pages[i],
-                        modifier = Modifier.weight(1f).fillMaxWidth().padding(4.dp),
-                    )
+                        modifier = Modifier.weight(1f).fillMaxWidth().padding(4.dp))
                     Text(
                         "${toPersianDigits((i + 1).toString())} از ${toPersianDigits(pages.size.toString())}",
                         modifier = Modifier.align(Alignment.CenterHorizontally).padding(4.dp),
-                        style = MaterialTheme.typography.labelMedium,
-                    )
+                        style = MaterialTheme.typography.labelMedium)
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(
                             onClick = { idx = (i - 1).coerceAtLeast(0) },
                             enabled = i > 0,
-                            modifier = Modifier.weight(1f),
-                        ) { Text("صفحه قبل") }
+                            modifier = Modifier.weight(1f)) { Text("صفحه قبل") }
                         OutlinedButton(
                             onClick = { idx = (i + 1).coerceAtMost(pages.lastIndex) },
                             enabled = i < pages.lastIndex,
-                            modifier = Modifier.weight(1f),
-                        ) { Text("صفحه بعد") }
+                            modifier = Modifier.weight(1f)) { Text("صفحه بعد") }
                     }
                 }
             }
@@ -1354,16 +1267,13 @@ private fun GalleryThumb(item: NoteFile) {
                 val renderer = android.graphics.pdf.PdfRenderer(
                     android.os.ParcelFileDescriptor.open(
                         File(item.localPath),
-                        android.os.ParcelFileDescriptor.MODE_READ_ONLY,
-                    ),
-                )
+                        android.os.ParcelFileDescriptor.MODE_READ_ONLY))
                 val page = renderer.openPage(0)
                 val scale = 320f / page.width.coerceAtLeast(1)
                 val out = Bitmap.createBitmap(
                     (page.width * scale).toInt().coerceAtLeast(1),
                     (page.height * scale).toInt().coerceAtLeast(1),
-                    Bitmap.Config.ARGB_8888,
-                )
+                    Bitmap.Config.ARGB_8888)
                 page.render(out, null, null, android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
                 page.close()
                 renderer.close()
@@ -1382,18 +1292,13 @@ private fun GalleryThumb(item: NoteFile) {
             bitmap = bmp.asImageBitmap(),
             contentDescription = item.title,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-        )
+            contentScale = ContentScale.Crop)
         previewText.isNotBlank() -> Text(
             previewText,
             style = MaterialTheme.typography.labelSmall.copy(
-                fontFamily = AppTypography.body,
-                fontSize = AppTypography.bump(AppTypography.body, 11),
-                textAlign = TextAlign.Right,
-            ),
+                textAlign = TextAlign.Right),
             maxLines = 8,
-            modifier = Modifier.fillMaxSize().padding(6.dp),
-        )
+            modifier = Modifier.fillMaxSize().padding(6.dp))
         else -> Text(item.ext.uppercase().ifBlank { "FILE" }, fontWeight = FontWeight.Bold)
     }
 }
@@ -1406,8 +1311,7 @@ private fun NoteTitlePicker(
     titles: List<String>,
     selected: String,
     onSelect: (String) -> Unit,
-    onAdd: (String) -> Unit,
-) {
+    onAdd: (String) -> Unit) {
     var menu by remember { mutableStateOf(false) }
     var adding by remember { mutableStateOf(false) }
     var draft by remember { mutableStateOf("") }
@@ -1418,15 +1322,13 @@ private fun NoteTitlePicker(
                 Text(
                     selected.ifBlank { "انتخاب عنوان نکته" },
                     modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Right,
-                )
+                    textAlign = TextAlign.Right)
             }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                 titles.forEach { t ->
                     DropdownMenuItem(
                         text = { Text(t, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Right) },
-                        onClick = { onSelect(t); menu = false },
-                    )
+                        onClick = { onSelect(t); menu = false })
                 }
                 DropdownMenuItem(
                     text = {
@@ -1434,11 +1336,9 @@ private fun NoteTitlePicker(
                             "＋ افزودن عنوان جدید…",
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Right,
-                            fontWeight = FontWeight.Bold,
-                        )
+                            fontWeight = FontWeight.Bold)
                     },
-                    onClick = { menu = false; adding = true },
-                )
+                    onClick = { menu = false; adding = true })
             }
         }
         if (adding) {
@@ -1448,13 +1348,11 @@ private fun NoteTitlePicker(
                 label = { Text("عنوان جدید") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                textStyle = androidx.compose.ui.text.TextStyle(textAlign = TextAlign.Right),
-            )
+                textStyle = androidx.compose.ui.text.TextStyle(textAlign = TextAlign.Right))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(
                     onClick = { adding = false; draft = "" },
-                    modifier = Modifier.weight(1f),
-                ) { Text("انصراف") }
+                    modifier = Modifier.weight(1f)) { Text("انصراف") }
                 OutlinedButton(
                     onClick = {
                         val t = draft.trim()
@@ -1462,8 +1360,7 @@ private fun NoteTitlePicker(
                         adding = false
                         draft = ""
                     },
-                    modifier = Modifier.weight(1f),
-                ) { Text("افزودن") }
+                    modifier = Modifier.weight(1f)) { Text("افزودن") }
             }
         }
     }

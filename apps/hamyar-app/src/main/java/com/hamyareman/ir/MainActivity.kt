@@ -76,8 +76,7 @@ class MainActivity : FragmentActivity() {
             val activity = this@MainActivity
 
             val notificationLauncher = rememberLauncherForActivityResult(
-                ActivityResultContracts.RequestPermission(),
-            ) { /* اگر کاربر نداد، یادآورها بی‌صدا می‌مانند؛ اصرار نمی‌کنیم */ }
+                ActivityResultContracts.RequestPermission()) { /* اگر کاربر نداد، یادآورها بی‌صدا می‌مانند؛ اصرار نمی‌کنیم */ }
 
             LaunchedEffect(Unit) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
@@ -112,8 +111,7 @@ class MainActivity : FragmentActivity() {
                         bioBusy = false
                         bioNotice = message
                     },
-                    onCancelled = { bioBusy = false },
-                )
+                    onCancelled = { bioBusy = false })
             }
 
             // وقتی اپ قفل است و بیومتریک فعال، پرامپت خودش بالا می‌آید تا کاربر معطل نشود.
@@ -168,8 +166,7 @@ class MainActivity : FragmentActivity() {
                         com.hamyareman.ir.ui.profile.StudentProfileState.writeMirror(
                             activity, fetched.grade, /* done = */ true,
                             name = fetched.firstName, sub = sub,
-                            genderId = fetched.gender,
-                        )
+                            genderId = fetched.gender)
                         container.uiPrefs.applyDefaultForGender(fetched.gender)
                         runCatching { com.hamyareman.ir.ui.profile.AvatarSync.pull(activity, uid) }
                     }
@@ -219,9 +216,9 @@ class MainActivity : FragmentActivity() {
                 PlatformTheme(
                     brand = uiPrefs.theme,
                     darkTheme = uiPrefs.darkTheme,
-                    fontFamily = AppTypography.body,
+                    fontFamily = AppTypography.pageBody.family,
                     textSizeOffset = uiPrefs.textSizeOffset,
-                ) {
+                    typography = AppTypography.material()) {
                 CompositionLocalProvider(LocalAppContainer provides container) {
                     Surface(Modifier.fillMaxSize()) {
                         when {
@@ -306,8 +303,7 @@ class MainActivity : FragmentActivity() {
                                             is AppResult.Err -> { loginError = r.error.userMessage; loginLoading = false }
                                         }
                                     }
-                                },
-                            )
+                                })
 
                             // ۱.۵) وارد شده ولی پروفایل دانش‌آموز ندارد → فرم ثبت‌نام (یک‌بار).
                             loggedIn.value == true && profileNeeded.value == true -> {
@@ -347,15 +343,12 @@ class MainActivity : FragmentActivity() {
                                                 com.hamyareman.ir.ui.profile.StudentProfile(
                                                     userId = uid, email = email, firstName = fn,
                                                     lastName = ln, age = age, birthDate = birthDate, grade = grade, phone = phone,
-                                                    province = province, county = county, city = city, gender = gender,
-                                                ),
-                                            )
+                                                    province = province, county = county, city = city, gender = gender))
                                             if (ok) {
                                                 com.hamyareman.ir.ui.profile.StudentProfileState.writeMirror(
                                                     activity, grade, true, fn,
                                                     com.hamyareman.ir.ui.profile.StudentProfileState.subscription,
-                                                    gender,
-                                                )
+                                                    gender)
                                                 container.uiPrefs.applyDefaultForGender(gender)
                                                 profileNeeded.value = false
                                             } else {
@@ -363,8 +356,7 @@ class MainActivity : FragmentActivity() {
                                             }
                                             saving = false
                                         }
-                                    },
-                                )
+                                    })
                             }
 
                             // ۲) وارد شده و قفل باز: اپ.
@@ -395,8 +387,7 @@ class MainActivity : FragmentActivity() {
                                 onVerify = { pin ->
                                     container.lock.verify(pin).also { ok -> if (ok) container.lock.markUnlocked() }
                                 },
-                                onUnlocked = { unlocked.value = true },
-                            )
+                                onUnlocked = { unlocked.value = true })
                             }
                         }
                     }

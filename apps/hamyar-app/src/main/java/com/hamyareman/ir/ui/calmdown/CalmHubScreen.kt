@@ -23,10 +23,10 @@ import com.hamyareman.ir.ui.AppTypography
 fun CalmHubScreen(nav: NavController, onBack: () -> Unit) {
     var tab by remember { mutableIntStateOf(0) }
     Column(Modifier.fillMaxSize()) {
-        AppTopBar("آرامش", onBack)
+        AppTopBar("آرامش", onBack, titleStyle = AppTypography.pageTitle.style)
         TabRow(selectedTabIndex = tab) {
             listOf("سفر ذهنی", "آرامش با تنفس", "تصویرسازی ذهنی").forEachIndexed { i, l ->
-                Tab(selected = tab == i, onClick = { tab = i }, text = { Text(l, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) })
+                Tab(selected = tab == i, onClick = { tab = i }, text = { Text(l, style = AppTypography.pageHeading.style) })
             }
         }
         when (tab) {
@@ -34,14 +34,11 @@ fun CalmHubScreen(nav: NavController, onBack: () -> Unit) {
             else -> Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     if (tab == 0) "سفر ذهنی — فهرست تمرین‌ها به‌زودی." else "تصویرسازی ذهنی — فهرست به‌زودی.",
-                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                    style = MaterialTheme.typography.bodyLarge,
-                )
+                    style = AppTypography.pageBody.style)
                 Text(
                     "از منوی آرامش سریع هم می‌توانی تنفس را شروع کنی.",
-                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                    style = AppTypography.pageBody.style,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

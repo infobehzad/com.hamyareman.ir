@@ -42,8 +42,7 @@ fun ShamsiDatePickerDialog(
     initialIso: String,
     title: String = "انتخاب تاریخ",
     onDismiss: () -> Unit,
-    onPick: (String) -> Unit,
-) {
+    onPick: (String) -> Unit) {
     val startJ = JalaliDate.toJalali(initialIso) ?: JalaliDate.todayJalali()
     var year by remember { mutableIntStateOf(startJ.year) }
     var month by remember { mutableIntStateOf(startJ.month) }
@@ -59,37 +58,31 @@ fun ShamsiDatePickerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(title, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), fontWeight = FontWeight.Bold) },
+        title = { Text(title, fontWeight = FontWeight.Bold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
+                    verticalAlignment = Alignment.CenterVertically) {
                     TextButton(onClick = {
                         if (month == 1) { month = 12; year-- } else month--
                         selectedDay = selectedDay.coerceAtMost(JalaliDate.daysInMonth(year, month))
-                    }) { Text("◀", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) }
+                    }) { Text("◀") }
                     Text(
                         "${JalaliDate.monthName(month)} ${toPersianDigits(year.toString())}",
-                        fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                        fontWeight = FontWeight.Bold,
-                    )
+                        fontWeight = FontWeight.Bold)
                     TextButton(onClick = {
                         if (month == 12) { month = 1; year++ } else month++
                         selectedDay = selectedDay.coerceAtMost(JalaliDate.daysInMonth(year, month))
-                    }) { Text("▶", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) }
+                    }) { Text("▶") }
                 }
                 Row(Modifier.fillMaxWidth()) {
                     listOf("ش", "ی", "د", "س", "چ", "پ", "ج").forEach { h ->
                         Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
                             Text(
                                 h,
-                                fontFamily = AppTypography.body,
-                                fontSize = AppTypography.bump(AppTypography.body, 12),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
@@ -121,19 +114,13 @@ fun ShamsiDatePickerDialog(
                                                 Modifier.border(
                                                     1.dp,
                                                     MaterialTheme.colorScheme.primary,
-                                                    RoundedCornerShape(8.dp),
-                                                )
-                                            } else Modifier,
-                                        )
+                                                    RoundedCornerShape(8.dp))
+                                            } else Modifier)
                                         .clickable { selectedDay = day },
-                                    contentAlignment = Alignment.Center,
-                                ) {
+                                    contentAlignment = Alignment.Center) {
                                     Text(
                                         toPersianDigits(day.toString()),
-                                        color = fg,
-                                        fontFamily = AppTypography.body,
-                                        fontSize = AppTypography.bump(AppTypography.body, 13),
-                                    )
+                                        color = fg)
                                 }
                             }
                         }
@@ -143,11 +130,8 @@ fun ShamsiDatePickerDialog(
                 Text(
                     "انتخاب‌شده: ${JalaliDate.weekDayFa(isoOf(selectedDay) ?: initialIso)} " +
                         toPersianDigits(
-                            "%d %s %d".format(selectedDay, JalaliDate.monthName(month), year),
-                        ),
-                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-                    style = MaterialTheme.typography.bodySmall,
-                )
+                            "%d %s %d".format(selectedDay, JalaliDate.monthName(month), year)),
+                    style = MaterialTheme.typography.bodySmall)
             }
         },
         confirmButton = {
@@ -155,8 +139,7 @@ fun ShamsiDatePickerDialog(
                 val iso = isoOf(selectedDay)
                 if (iso != null) onPick(iso)
                 onDismiss()
-            }) { Text("تأیید", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) }
+            }) { Text("تأیید") }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("انصراف", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) } },
-    )
+        dismissButton = { TextButton(onClick = onDismiss) { Text("انصراف") } })
 }

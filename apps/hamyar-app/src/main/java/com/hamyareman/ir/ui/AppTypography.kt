@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -259,4 +260,34 @@ object AppTypography {
     }
 
     val quoteSide get() = quoteSideDp.dp
+
+    /**
+     * تایپ Material کل اپ برای صفحات داخلی = الگوی C
+     * (عنوان بالا، عناوین دیگر، متن، جدول، دکمه).
+     * داشبورد/کارت/آکاردئون فونت نقش خود را صریح می‌گذارند و این را دور می‌زنند.
+     */
+    fun material(): Typography {
+        val title = pageTitle.style
+        val heading = pageHeading.style
+        val body = pageBody.style
+        val table = pageTable.style
+        val button = pageButton.style
+        return Typography(
+            displayLarge = title.copy(lineHeight = 32.sp),
+            displayMedium = title.copy(lineHeight = 32.sp),
+            displaySmall = heading.copy(lineHeight = 26.sp),
+            headlineLarge = title.copy(lineHeight = 32.sp),
+            headlineMedium = heading.copy(lineHeight = 28.sp),
+            headlineSmall = heading.copy(lineHeight = 26.sp),
+            titleLarge = title.copy(lineHeight = 28.sp),
+            titleMedium = heading.copy(lineHeight = 26.sp),
+            titleSmall = heading.copy(lineHeight = 22.sp),
+            bodyLarge = body.copy(lineHeight = 26.sp),
+            bodyMedium = body.copy(lineHeight = 24.sp),
+            bodySmall = body.copy(lineHeight = 22.sp),
+            labelLarge = button.copy(lineHeight = 22.sp),
+            labelMedium = table.copy(lineHeight = 22.sp),
+            labelSmall = table.copy(lineHeight = 20.sp),
+        )
+    }
 }

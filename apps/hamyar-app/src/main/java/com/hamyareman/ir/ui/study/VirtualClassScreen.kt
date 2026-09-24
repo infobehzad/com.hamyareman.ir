@@ -96,16 +96,13 @@ fun VirtualClassScreen(onBack: () -> Unit) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+            verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(
                 "ساعت شروع و پایان کلاس مجازی هر روز را بنویس. این ساعت‌ها در برنامه‌ی کلاسی و آماده‌سازی همان روز نشان داده می‌شود.",
-                fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Right,
-                modifier = Modifier.fillMaxWidth(),
-            )
+                modifier = Modifier.fillMaxWidth())
 
             ClassPlanStore.WEEKDAYS.forEachIndexed { i, dayName ->
                 val di = i + 1
@@ -113,7 +110,7 @@ fun VirtualClassScreen(onBack: () -> Unit) {
                     ?: ClassPlanStore.VirtualSession(di, 8, 0, 9, 0, "")
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(dayName, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), fontWeight = FontWeight.Bold)
+                        Text(dayName, fontWeight = FontWeight.Bold)
                         TimePick("شروع", s.startH, s.startM) { h, m ->
                             sessions = upsertSession(sessions, s.copy(startH = h, startM = m))
                             ClassPlanStore.saveVirtualSessions(ctx, sessions)
@@ -130,22 +127,18 @@ fun VirtualClassScreen(onBack: () -> Unit) {
                                 sessions = upsertSession(sessions, s.copy(subject = v))
                                 ClassPlanStore.saveVirtualSessions(ctx, sessions)
                             },
-                            label = { Text("درس (اختیاری)", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) },
+                            label = { Text("درس (اختیاری)") },
                             modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                        )
+                            singleLine = true)
                     }
                 }
             }
 
             Text(
                 "بازه‌های روزهای مجازی",
-                fontFamily = AppTypography.body,
-                fontSize = AppTypography.bump(AppTypography.body, 18),
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Right,
-                modifier = Modifier.fillMaxWidth(),
-            )
+                modifier = Modifier.fillMaxWidth())
             VirtualRangeSection(
                 today = today,
                 ranges = ranges,
@@ -158,17 +151,14 @@ fun VirtualClassScreen(onBack: () -> Unit) {
                     ClassPlanStore.removeVirtualRange(ctx, id)
                     ranges = ClassPlanStore.virtualRanges(ctx)
                     pushVirtual()
-                },
-            )
+                })
             syncNotice?.let { notice ->
                 Text(
                     notice,
-                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Right,
-                )
+                    textAlign = TextAlign.Right)
             }
         }
     }
@@ -176,8 +166,7 @@ fun VirtualClassScreen(onBack: () -> Unit) {
 
 private fun upsertSession(
     list: List<ClassPlanStore.VirtualSession>,
-    next: ClassPlanStore.VirtualSession,
-): List<ClassPlanStore.VirtualSession> {
+    next: ClassPlanStore.VirtualSession): List<ClassPlanStore.VirtualSession> {
     val out = list.filterNot { it.dayIndex == next.dayIndex }.toMutableList()
     out += next
     return out.sortedBy { it.dayIndex }
@@ -191,8 +180,7 @@ fun VirtualRangeSection(
     today: LocalDate,
     ranges: List<ClassPlanStore.VirtualRange>,
     onAdd: (String, String) -> Unit,
-    onDelete: (String) -> Unit,
-) {
+    onDelete: (String) -> Unit) {
     var fromIso by remember { mutableStateOf(today.toString()) }
     var toIso by remember { mutableStateOf(today.toString()) }
     var pickFrom by remember { mutableStateOf(false) }
@@ -203,16 +191,15 @@ fun VirtualRangeSection(
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { pickFrom = true }, modifier = Modifier.weight(1f)) {
-                Text("از: ${faDate(fromIso)}", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), maxLines = 1)
+                Text("از: ${faDate(fromIso)}", maxLines = 1)
             }
             OutlinedButton(onClick = { pickTo = true }, modifier = Modifier.weight(1f)) {
-                Text("تا: ${faDate(toIso)}", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), maxLines = 1)
+                Text("تا: ${faDate(toIso)}", maxLines = 1)
             }
         }
         OutlinedButton(
             onClick = { onAdd(fromIso, toIso) },
-            modifier = Modifier.fillMaxWidth(),
-        ) { Text("افزودن این بازه", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) }
+            modifier = Modifier.fillMaxWidth()) { Text("افزودن این بازه") }
 
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -220,31 +207,25 @@ fun VirtualRangeSection(
                     Modifier
                         .fillMaxWidth()
                         .clickable { expanded = !expanded },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
+                    verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
-                        contentDescription = null,
-                    )
+                        contentDescription = null)
                     Spacer(Modifier.width(6.dp))
                     Text(
                         "بازه‌های ثبت‌شده (${toPersianDigits(ranges.size.toString())})",
-                        fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Right,
-                    )
+                        textAlign = TextAlign.Right)
                 }
                 AnimatedVisibility(visible = expanded) {
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         if (ranges.isEmpty()) {
                             Text(
                                 "بازه‌ای ثبت نشده است.",
-                                fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Right,
-                            )
+                                textAlign = TextAlign.Right)
                         }
                         ranges.forEach { r ->
                             Row(
@@ -252,24 +233,19 @@ fun VirtualRangeSection(
                                     .fillMaxWidth()
                                     .background(
                                         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                        RoundedCornerShape(10.dp),
-                                    )
+                                        RoundedCornerShape(10.dp))
                                     .padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
+                                verticalAlignment = Alignment.CenterVertically) {
                                 IconButton(onClick = { askDelete = r }) {
                                     Icon(
                                         Icons.Outlined.Delete,
                                         contentDescription = "حذف بازه",
-                                        tint = MaterialTheme.colorScheme.error,
-                                    )
+                                        tint = MaterialTheme.colorScheme.error)
                                 }
                                 Text(
                                     "${faDate(r.fromIso)} → ${faDate(r.toIso)}",
-                                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                                     modifier = Modifier.weight(1f),
-                                    textAlign = TextAlign.Right,
-                                )
+                                    textAlign = TextAlign.Right)
                             }
                         }
                     }
@@ -283,37 +259,32 @@ fun VirtualRangeSection(
             initialIso = fromIso,
             title = "انتخاب تاریخ شروع",
             onDismiss = { pickFrom = false },
-            onPick = { fromIso = it },
-        )
+            onPick = { fromIso = it })
     }
     if (pickTo) {
         ShamsiDatePickerDialog(
             initialIso = toIso,
             title = "انتخاب تاریخ پایان",
             onDismiss = { pickTo = false },
-            onPick = { toIso = it },
-        )
+            onPick = { toIso = it })
     }
     askDelete?.let { r ->
         AlertDialog(
             onDismissRequest = { askDelete = null },
-            title = { Text("حذف این بازه؟", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) },
+            title = { Text("حذف این بازه؟") },
             text = {
                 Text(
                     "روزهای ${faDate(r.fromIso)} تا ${faDate(r.toIso)} از حالت مجازی خارج می‌شوند.",
-                    fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
                     textAlign = TextAlign.Right,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                    modifier = Modifier.fillMaxWidth())
             },
             confirmButton = {
                 TextButton(onClick = {
                     onDelete(r.id)
                     askDelete = null
-                }) { Text("حذف", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14), color = MaterialTheme.colorScheme.error) }
+                }) { Text("حذف", color = MaterialTheme.colorScheme.error) }
             },
-            dismissButton = { TextButton(onClick = { askDelete = null }) { Text("انصراف", fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14)) } },
-        )
+            dismissButton = { TextButton(onClick = { askDelete = null }) { Text("انصراف") } })
     }
 }
 
@@ -330,13 +301,10 @@ fun VirtualRangeChipBox(range: ClassPlanStore.VirtualRange) {
             .fillMaxWidth()
             .background(Color(0xFFFEE2E2), RoundedCornerShape(10.dp))
             .padding(horizontal = 10.dp, vertical = 6.dp),
-        contentAlignment = Alignment.CenterStart,
-    ) {
+        contentAlignment = Alignment.CenterStart) {
         Text(
             "${faDate(range.fromIso)} → ${faDate(range.toIso)}",
             color = Color(0xFFB91C1C),
-            fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14),
-            style = MaterialTheme.typography.labelLarge,
-        )
+            style = MaterialTheme.typography.labelLarge)
     }
 }
