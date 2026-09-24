@@ -1,25 +1,6 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-
-<style id="hamyar-lab-fonts">
-@font-face{font-family:Vazirmatn;src:url("file:///android_res/font/vazirmatn_regular.ttf")}
-@font-face{font-family:Vazirmatn;src:url("file:///android_res/font/vazirmatn_bold.ttf");font-weight:700}
-@font-face{font-family:Vazirmatn;src:url("file:///android_res/font/vazirmatn_thin.ttf");font-weight:100}
-@font-face{font-family:Lalezar;src:url("file:///android_res/font/lalezar.ttf")}
-@font-face{font-family:Titr;src:url("file:///android_res/font/titr.ttf")}
-@font-face{font-family:Aviny;src:url("file:///android_res/font/aviny.ttf")}
-@font-face{font-family:Estedad;src:url("file:///android_res/font/estedad_bold.ttf");font-weight:700}
-@font-face{font-family:Parastoo;src:url("file:///android_res/font/parastoo_bold.ttf");font-weight:700}
-@font-face{font-family:Badkhat;src:url("file:///android_res/font/badkhat_bold.ttf");font-weight:700}
-@font-face{font-family:Shekari;src:url("file:///android_res/font/shekari.ttf")}
-@font-face{font-family:Sahel;src:url("file:///android_res/font/sahel.ttf")}
-@font-face{font-family:Tanha;src:url("file:///android_res/font/tanha.ttf")}
-@font-face{font-family:Gandom;src:url("file:///android_res/font/gandom.ttf")}
-html,body,button,input,select,textarea,table,th,td,.card,.btn,.menu,.sidebar,.workspace{font-family:Vazirmatn,Tahoma,sans-serif}
-h1,h2,h3,.brand,.lab-title,.app-title{font-family:Lalezar,Vazirmatn,sans-serif}
-</style>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>آزمایشگاه فیزیک نهم — موتورهای اختصاصی v3 کامل (همه برچسب‌ها متناسب، شیشه‌ای واقعی، پرتاب متغیر، سرریز مدرج)</title>
@@ -681,7 +662,7 @@ const G = 9.8, PX_PER_M = 100, RHO_AIR = 1.225, CD_CHUTE = 1.4;
 /* ================= STATE ================= */
 let currentChap = 1, currentExpIdx = 0, activeItemIdx = 0;
 let isSimulating = false, simComplete = false, simTime = 0, simSpeed = 1;
-let primaryMetric = 0, chartSeries = []; var tableRecords = [];
+let primaryMetric = 0, chartSeries = [], tableRecords = [];
 let particles = [], particlesEnabled = true, vectors = [];
 let lastFrameTime = 0, physicsAccumulator = 0, lastChartPush = 0;
 let currentParams = {}, engineMem = {}, lastResults = [], lastPhaseFa = "";
