@@ -170,6 +170,7 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
     val ctx = LocalContext.current
     val container = LocalAppContainer.current
     val scope = rememberCoroutineScope()
+    val webRef = remember { arrayOfNulls<WebView>(1) }
     val bridge = remember(toolId) {
         HamyarToolBridge(ctx.applicationContext, toolId) { json ->
             ToolSaveStore.put(ctx, toolId, json)
@@ -180,10 +181,27 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
             }
         }
     }
+    fun applySaved(view: WebView?) {
+        if (view == null) return
+        val saved = ToolSaveStore.get(ctx, toolId)
+        val quoted = if (saved.isBlank()) "null" else JSONObject.quote(saved)
+        view.evaluateJavascript(
+            "(function(){" +
+                "function go(){try{if(window.HamyarToolApply&&$quoted)HamyarToolApply($quoted);}catch(e){}}" +
+                "if(window.HamyarToolApply){go();return;}" +
+                "var s=document.createElement('script');" +
+                "s.src='file:///android_asset/tools/hamyar-tool-persist.js';" +
+                "s.onload=go;" +
+                "document.documentElement.appendChild(s);" +
+                "})();",
+            null,
+        )
+    }
     LaunchedEffect(toolId) {
         val uid = container.auth.cachedUserId()
             ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
         if (uid.isNotBlank()) runCatching { ToolSaveStore.pull(ctx, container.tables, uid) }
+        applySaved(webRef[0])
     }
     Column(Modifier.fillMaxSize()) {
         AppTopBar(title, onBack)
@@ -215,27 +233,17 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
                                     null,
                                 )
                             }
-                            val saved = ToolSaveStore.get(ctx, toolId)
-                            if (saved.isNotBlank()) {
-                                val quoted = JSONObject.quote(saved)
-                                view.evaluateJavascript(
-                                    "(function(){try{if(window.HamyarToolApply)HamyarToolApply($quoted);}catch(e){}})();",
-                                    null,
-                                )
-                            }
-                            view.evaluateJavascript(
-                                "(function(){var s=document.createElement('script');s.src='file:///android_asset/tools/hamyar-tool-persist.js';document.documentElement.appendChild(s);})();",
-                                null,
-                            )
+                            applySaved(view)
                         }
                     }
                     addJavascriptInterface(bridge, "HamyarTool")
                     setBackgroundColor(if (isLab) android.graphics.Color.parseColor("#050912") else android.graphics.Color.TRANSPARENT)
+                    webRef[0] = this
                     loadUrl("file:///android_asset/tools/$toolId.html")
                 }
             },
             modifier = Modifier.fillMaxSize(),
-            onRelease = { it.destroy() },
+            onRelease = { webRef[0] = null; it.destroy() },
         )
     }
 }

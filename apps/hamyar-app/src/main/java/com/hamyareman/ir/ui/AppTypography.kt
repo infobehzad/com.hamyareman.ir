@@ -36,20 +36,21 @@ object AppTypography {
         val group: String,
         val defaultFont: String,
         val baseSp: Int,
+        val defaultWeight: String,
         val sample: String,
     )
 
     class Role(val spec: Spec) {
         var fontKey by mutableStateOf(spec.defaultFont)
             internal set
-        var sizeSp by mutableIntStateOf(spec.baseSp + BUMP)
+        var sizeSp by mutableIntStateOf(spec.baseSp)
             internal set
-        var weightKey by mutableStateOf(EmbeddedFonts.defaultWeightOf(spec.defaultFont))
+        var weightKey by mutableStateOf(spec.defaultWeight)
             internal set
-        var family by mutableStateOf(EmbeddedFonts.familyFresh(spec.defaultFont, EmbeddedFonts.defaultWeightOf(spec.defaultFont)))
+        var family by mutableStateOf(EmbeddedFonts.familyFresh(spec.defaultFont, spec.defaultWeight))
             internal set
 
-        val delta: Int get() = sizeSp - spec.baseSp - BUMP
+        val delta: Int get() = sizeSp - spec.baseSp
         val weight: FontWeight get() = EmbeddedFonts.fontWeight(weightKey)
         val size: TextUnit get() = sizeSp.sp
         val style: TextStyle get() = TextStyle(fontFamily = family, fontSize = size, fontWeight = weight)
@@ -63,53 +64,60 @@ object AppTypography {
             }
             if (weight != null) weightKey = EmbeddedFonts.normalizeWeight(weight)
             if (size != null) {
-                sizeSp = if (absolute) size.coerceIn(8, 40) else (spec.baseSp + BUMP + size).coerceIn(8, 40)
+                sizeSp = if (absolute) size.coerceIn(8, 40) else (spec.baseSp + size).coerceIn(8, 40)
             }
             family = EmbeddedFonts.familyFresh(fontKey, weightKey)
         }
     }
 
-    private fun role(id: String, title: String, group: String, font: String, base: Int, sample: String) =
-        Role(Spec(id, title, group, font, base, sample))
+    private fun role(
+        id: String,
+        title: String,
+        group: String,
+        font: String,
+        base: Int,
+        sample: String,
+        weight: String = EmbeddedFonts.defaultWeightOf(font),
+    ) = Role(Spec(id, title, group, font, base, weight, sample))
 
-    /** A — کارت آکاردئونی */
-    val accordionTitle = role("a.title", "عنوان آکاردئون", "A آکاردئون", "titr", 16, "کتاب‌ها")
-    val accordionSub = role("a.sub", "توضیح آکاردئون", "A آکاردئون", "badkhat_bold", 12, "هر کتاب با درس‌ها")
+    /** A — کارت آکاردئونی — از بکاپ پیش‌فرض.json */
+    val accordionTitle = role("a.title", "عنوان آکاردئون", "A آکاردئون", "parastoo_bold", 19, "کتاب‌ها", "regular")
+    val accordionSub = role("a.sub", "توضیح آکاردئون", "A آکاردئون", "tanha", 14, "هر کتاب با درس‌ها", "bold")
 
     /** B — کارت و زیرکارت */
-    val cardTitle = role("b.title", "عنوان کارت", "B کارت", "parastoo_bold", 14, "برنامه‌ی هفتگی من")
-    val cardSub = role("b.sub", "توضیح کارت", "B کارت", "badkhat_bold", 12, "جدول زمانی شخصی")
+    val cardTitle = role("b.title", "عنوان کارت", "B کارت", "estedad_bold", 20, "برنامه‌ی هفتگی من", "bold")
+    val cardSub = role("b.sub", "توضیح کارت", "B کارت", "tanha", 14, "جدول زمانی شخصی", "bold")
 
     /** C — صفحات بازشده از زیرکارت */
-    val pageTitle = role("c.title", "عنوان اصلی بالای صفحه", "C صفحه", "titr", 22, "برنامه هفتگی")
-    val pageHeading = role("c.heading", "عناوین دیگر صفحه", "C صفحه", "titr", 18, "شنبه")
-    val pageBody = role("c.body", "متن صفحه", "C صفحه", "badkhat_bold", 16, "متن بدنه")
-    val pageTable = role("c.table", "جدول", "C صفحه", "badkhat_bold", 13, "درس / زنگ")
-    val pageButton = role("c.button", "دکمه", "C صفحه", "badkhat_bold", 16, "ذخیره")
+    val pageTitle = role("c.title", "عنوان اصلی بالای صفحه", "C صفحه", "vazirmatn", 19, "برنامه هفتگی", "bold")
+    val pageHeading = role("c.heading", "عناوین دیگر صفحه", "C صفحه", "vazirmatn", 21, "شنبه", "bold")
+    val pageBody = role("c.body", "متن صفحه", "C صفحه", "gandom", 18, "متن بدنه", "bold")
+    val pageTable = role("c.table", "جدول", "C صفحه", "badkhat_bold", 17, "درس / زنگ", "bold")
+    val pageButton = role("c.button", "دکمه", "C صفحه", "estedad_bold", 16, "ذخیره", "bold")
 
     /** E — همهٔ عناوین */
-    val title = role("e.title", "متن عنوان", "E عنوان", "titr", 18, "مدرسه")
-    val titleSub = role("e.sub", "توضیح زیر عنوان", "E عنوان", "badkhat_bold", 14, "کلاسِ درس همیشه باز است")
+    val title = role("e.title", "متن عنوان", "E عنوان", "aviny", 25, "مدرسه", "bold")
+    val titleSub = role("e.sub", "توضیح زیر عنوان", "E عنوان", "tanha", 14, "کلاسِ درس همیشه باز است", "bold")
 
     /** داشبورد */
-    val d1Greeting = role("d1", "D1 خوش‌آمدگویی", "D داشبورد", "aviny", 22, "صبح‌ت بخیر")
-    val d2GreetingSub = role("d2", "D2 متن زیر خوش‌آمد", "D داشبورد", "badkhat_bold", 14, "همیار من کنارت است")
-    val d3Date = role("d3", "D3 تاریخ", "D داشبورد", "estedad_bold", 16, "چهارشنبه ۲ مهر")
-    val d4Clock = role("d4", "D4 ساعت", "D داشبورد", "estedad_bold", 24, "۲:۳۰ بعد از ظهر")
-    val d5Gregorian = role("d5", "D5 تاریخ میلادی", "D داشبورد", "estedad_bold", 16, "2026/Sep/24")
-    val d6Subscription = role("d6", "D6 کادر اشتراک", "D داشبورد", "badkhat_bold", 12, "اشتراک تا تاریخ")
-    val d7Quote = role("d7", "D7 کادر سخنان", "D داشبورد", "badkhat_bold", 16, "سخن بزرگان")
-    val d8Tile = role("d8", "D8 نه کاشی داشبورد", "D داشبورد", "parastoo_bold", 14, "مدرسه")
-    val d9Section = role("d9", "D9 عناوین بخش (برنامه کلاسی / امروز / امتحان داری؟)", "D داشبورد", "titr", 16, "برنامه کلاسی مدرسه")
-    val d10ClassBox = role("d10", "D10 سه کادر برنامه کلاسی", "D داشبورد", "badkhat_bold", 13, "ریاضی")
-    val d11Check = role("d11", "D11 متن تیک‌ها", "D داشبورد", "badkhat_bold", 12, "کیف مدرسه آماده است")
-    val d12ClassDate = role("d12", "D12 تاریخ و روز کنار کادرها", "D داشبورد", "badkhat_bold", 12, "چهارشنبه")
+    val d1Greeting = role("d1", "D1 خوش‌آمدگویی", "D داشبورد", "aviny", 29, "صبح‌ت بخیر", "bold")
+    val d2GreetingSub = role("d2", "D2 متن زیر خوش‌آمد", "D داشبورد", "shekari", 22, "همیار من کنارت است", "bold")
+    val d3Date = role("d3", "D3 تاریخ", "D داشبورد", "estedad_bold", 18, "چهارشنبه ۲ مهر", "bold")
+    val d4Clock = role("d4", "D4 ساعت", "D داشبورد", "estedad_bold", 18, "۲:۳۰ بعد از ظهر", "bold")
+    val d5Gregorian = role("d5", "D5 تاریخ میلادی", "D داشبورد", "estedad_bold", 18, "2026/Sep/24", "thin")
+    val d6Subscription = role("d6", "D6 کادر اشتراک", "D داشبورد", "sahel", 17, "اشتراک تا تاریخ", "bold")
+    val d7Quote = role("d7", "D7 کادر سخنان", "D داشبورد", "tanha", 17, "سخن بزرگان", "bold")
+    val d8Tile = role("d8", "D8 نه کاشی داشبورد", "D داشبورد", "parastoo_bold", 18, "مدرسه", "bold")
+    val d9Section = role("d9", "D9 عناوین بخش (برنامه کلاسی / امروز / امتحان داری؟)", "D داشبورد", "lalezar", 19, "برنامه کلاسی مدرسه", "thin")
+    val d10ClassBox = role("d10", "D10 سه کادر برنامه کلاسی", "D داشبورد", "badkhat_bold", 21, "ریاضی", "bold")
+    val d11Check = role("d11", "D11 متن تیک‌ها", "D داشبورد", "sahel", 12, "کیف مدرسه آماده است", "bold")
+    val d12ClassDate = role("d12", "D12 تاریخ و روز کنار کادرها", "D داشبورد", "sahel", 15, "چهارشنبه", "bold")
 
     /** نوار پایین جدا از بقیهٔ نقش‌ها. */
-    val navBar = role("nav.bar", "نوار پایین", "نوار پایین", "titr", 11, "خانه")
+    val navBar = role("nav.bar", "نوار پایین", "نوار پایین", "titr", 13, "خانه", "thin")
 
     /** فاصلهٔ افقی کارت سخنان از دو طرف (۰ تا ۳۲ dp). */
-    var quoteSideDp by mutableIntStateOf(1)
+    var quoteSideDp by mutableIntStateOf(17)
         internal set
 
     val slots: List<Role> = listOf(

@@ -1,5 +1,21 @@
 (function () {
   "use strict";
+  if (window.__hamyarPersist) return;
+  window.__hamyarPersist = true;
+
+  function faDigits(n) {
+    return String(n).replace(/[0-9]/g, function (d) {
+      return String.fromCharCode(0x06f0 + parseInt(d, 10));
+    });
+  }
+
+  function records() {
+    try {
+      if (Array.isArray(window.tableRecords)) return window.tableRecords;
+    } catch (e) {}
+    return null;
+  }
+
   function dump() {
     var o = {};
     try {
@@ -9,43 +25,53 @@
       }
     } catch (e) {}
     try {
-      if (Array.isArray(window.tableRecords)) o.__tableRecords = JSON.stringify(window.tableRecords);
+      var arr = records();
+      if (arr) o.__tableRecords = JSON.stringify(arr);
     } catch (e) {}
     try {
       if (window.HamyarBioNotes) o.__bioNotes = JSON.stringify(window.HamyarBioNotes);
     } catch (e) {}
     return JSON.stringify(o);
   }
-  function faDigits(n) {
-    return String(n).replace(/[0-9]/g, function (d) {
-      return String.fromCharCode(0x06f0 + parseInt(d, 10));
-    });
-  }
+
   function rebuildTable() {
+    var arr = records();
+    if (!arr) return;
     var tbody = document.getElementById("tableBody");
     var cnt = document.getElementById("recordCount");
-    if (!window.tableRecords) return;
-    if (cnt) cnt.textContent = faDigits(window.tableRecords.length);
+    var fa = typeof window.toFa === "function" ? window.toFa : faDigits;
+    if (cnt) cnt.textContent = fa(arr.length);
     if (!tbody) return;
     tbody.innerHTML = "";
-    window.tableRecords.slice().reverse().forEach(function (entry) {
+    arr.slice().reverse().forEach(function (entry) {
       var tr = document.createElement("tr");
-      tr.innerHTML =
-        "<td>" + faDigits(entry.id || "") + "</td>" +
-        "<td>" + (entry.name || "") + "</td>" +
-        "<td>" + (entry.input || "") + "</td>" +
-        "<td>" + (entry.output || "") + "</td>" +
-        "<td>" + (entry.time || "") + "</td>";
+      var tds = "<td>" + fa(entry.id || "") + "</td>";
+      if (entry.cells && entry.cells.length) {
+        entry.cells.forEach(function (c) {
+          tds += "<td>" + c + "</td>";
+        });
+      } else {
+        tds += "<td>" + (entry.name || "") + "</td>";
+        tds += "<td>" + (entry.input || entry.conditions || "") + "</td>";
+        tds += "<td>" + (entry.output || "") + "</td>";
+        tds += "<td>" + (entry.time || "") + "</td>";
+      }
+      tr.innerHTML = tds;
       tbody.appendChild(tr);
     });
   }
+
   function apply(json) {
     if (!json) return;
     try {
       var o = JSON.parse(json);
       Object.keys(o).forEach(function (k) {
         if (k === "__tableRecords") {
-          try { window.tableRecords = JSON.parse(o[k] || "[]"); rebuildTable(); } catch (e) {}
+          try {
+            window.tableRecords = JSON.parse(o[k] || "[]");
+            rebuildTable();
+            hookRecords();
+          } catch (e) {}
           return;
         }
         if (k === "__bioNotes") {
@@ -56,26 +82,65 @@
       });
     } catch (e) {}
   }
+
+  function saveNow() {
+    try { if (window.HamyarTool) HamyarTool.onSave(dump()); } catch (e) {}
+  }
+
   var origSet = Storage.prototype.setItem;
   Storage.prototype.setItem = function (k, v) {
     origSet.call(this, k, v);
-    try { if (window.HamyarTool) HamyarTool.onSave(dump()); } catch (e) {}
+    saveNow();
   };
+
   function hookRecords() {
-    if (!window.tableRecords || window.tableRecords.__hamyarHooked) return;
-    var arr = window.tableRecords;
+    var arr = records();
+    if (!arr || arr.__hamyarHooked) return;
     arr.__hamyarHooked = true;
     var p = arr.push.bind(arr);
     arr.push = function () {
       var r = p.apply(this, arguments);
-      try { if (window.HamyarTool) HamyarTool.onSave(dump()); } catch (e) {}
+      saveNow();
       return r;
     };
   }
-  setInterval(hookRecords, 700);
+
+  function wrap(name) {
+    try {
+      var fn = window[name];
+      if (typeof fn !== "function" || fn.__hamyarWrapped) return;
+      var wrapped = function () {
+        var r = fn.apply(this, arguments);
+        hookRecords();
+        saveNow();
+        return r;
+      };
+      wrapped.__hamyarWrapped = true;
+      window[name] = wrapped;
+    } catch (e) {}
+  }
+
+  var lastN = -1;
+  setInterval(function () {
+    hookRecords();
+    wrap("recordDataPoint");
+    wrap("recordAndClose");
+    wrap("clearNotes");
+    wrap("exportCSV");
+    try {
+      var arr = records();
+      var n = arr ? arr.length : -1;
+      if (n !== lastN) {
+        lastN = n;
+        saveNow();
+      }
+    } catch (e) {}
+  }, 700);
+
   window.HamyarToolDump = dump;
   window.HamyarToolApply = apply;
   document.addEventListener("visibilitychange", function () {
-    try { if (window.HamyarTool) HamyarTool.onSave(dump()); } catch (e) {}
+    saveNow();
   });
+  hookRecords();
 })();
