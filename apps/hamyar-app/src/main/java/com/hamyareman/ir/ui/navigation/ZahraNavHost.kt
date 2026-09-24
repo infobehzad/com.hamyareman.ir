@@ -30,7 +30,6 @@ import com.hamyareman.ir.platform.feature.study.BookModuleRegistry
 import com.hamyareman.ir.ui.ailearning.AiAssessmentScreen
 import com.hamyareman.ir.ui.ailearning.AiLearningHomeScreen
 import com.hamyareman.ir.ui.appearance.AppearanceScreen
-import com.hamyareman.ir.ui.appearance.FontFloater
 import com.hamyareman.ir.ui.art.ArtGalleryScreen
 import com.hamyareman.ir.ui.art.DailyArtPromptScreen
 import com.hamyareman.ir.ui.calmdown.BreathingScreen
@@ -450,6 +449,5 @@ fun ZahraNavHost() {
             }
         }
     }
-    FontFloater(route)
     }
 }

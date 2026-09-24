@@ -283,7 +283,7 @@ private fun LessonCard(
                     onDismissRequest = { gateDialog = false },
                     confirmButton = { androidx.compose.material3.TextButton(onClick = { gateDialog = false }) { Text("باشه") } },
                     title = { Text("نیاز به تهیه اشتراک") },
-                    text = { Text("درس اول هر فصل و فصل ۱ ریاضی برای مهمان همیار من باز است. برای بقیهٔ درس‌ها اشتراک فعال لازم است.") },
+                    text = { Text("فصل ۱ ریاضی و اولین درس هر کتاب دیگر بدون اشتراک باز است. برای بقیهٔ درس‌ها اشتراک فعال لازم است.") },
                 )
             }
             Button(

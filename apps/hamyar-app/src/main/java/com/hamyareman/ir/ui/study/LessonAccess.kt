@@ -6,29 +6,31 @@ import com.hamyareman.ir.platform.feature.study.BookToc
 import com.hamyareman.ir.ui.profile.StudentProfileState
 
 /**
- * ورود به درس: درس اول هر فصل و کل فصل ۱ ریاضی رایگان؛ بقیه نیاز به اشتراک.
- * قفل سیک/سرعت/سربرگ اعمال نمی‌شود.
+ * رایگان: کل فصل ۱ ریاضی؛ در بقیهٔ کتاب‌ها فقط اولین درس کتاب.
+ * TOC و pdfOnly باز می‌مانند. بقیه نیاز به اشتراک فعال.
  */
 object LessonAccess {
 
     enum class Gate { Open, NeedSub }
 
-    fun isPremium(): Boolean {
-        val s = StudentProfileState.subscription.trim().lowercase()
-        return s.isNotBlank() && s != "free"
-    }
+    fun isPremium(): Boolean = StudentProfileState.isPaid()
 
     fun isToc(packId: String): Boolean =
         packId.endsWith("_TOC") || packId.substringAfter('_', "") == "TOC"
+
+    fun firstLessonPack(bookCode: String): String? =
+        orderedPackIds(bookCode).firstOrNull { id ->
+            !isToc(id) && BookModuleRegistry.pack(id)?.pdfOnly != true
+        }
 
     fun isAlwaysOpen(packId: String): Boolean {
         if (isToc(packId)) return true
         val pack = BookModuleRegistry.pack(packId)
         if (pack?.pdfOnly == true) return true
-        // کل فصل ۱ ریاضی نهم (درس‌ها + جمع‌بندی)
         if (packId.startsWith("C905_E01")) return true
-        val lesson = packId.substringAfter('_', packId)
-        return lesson == "L01" || lesson.endsWith("-L01") || lesson.endsWith("_L01")
+        if (packId.startsWith("C905_")) return false
+        val book = pack?.bookCode ?: return false
+        return packId == firstLessonPack(book)
     }
 
     fun orderedPackIds(bookCode: String): List<String> {

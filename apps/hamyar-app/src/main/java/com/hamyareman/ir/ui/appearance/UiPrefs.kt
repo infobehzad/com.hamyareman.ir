@@ -63,8 +63,7 @@ class UiPrefs(context: Context) {
         }
 
     init {
-        AppTypography.apply(fontTheme)
-        TypeSlots.load(slotChoices)
+        // تایپ قفل‌شده در AppTypography؛ فلوتر و بکاپ فونت اعمال نمی‌شود.
     }
 
     fun updateTheme(value: BrandTheme) {

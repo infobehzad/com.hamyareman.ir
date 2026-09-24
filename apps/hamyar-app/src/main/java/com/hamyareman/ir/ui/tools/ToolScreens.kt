@@ -7,7 +7,11 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -100,14 +104,18 @@ fun ToolHubScreen(
                         Column(Modifier.weight(1f)) {
                             Text(
                                 item.title,
-                                fontFamily = AppTypography.heading,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = AppTypography.bump(AppTypography.heading, 16),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontFamily = AppTypography.cardTitle.family,
+                                fontWeight = AppTypography.cardTitle.weight,
+                                fontSize = AppTypography.cardTitle.size,
                             )
                             Text(
                                 item.subtitle,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontFamily = AppTypography.cardSub.family,
+                                fontWeight = AppTypography.cardSub.weight,
+                                fontSize = AppTypography.cardSub.size,
                             )
                         }
                     }
@@ -171,6 +179,9 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
     val container = LocalAppContainer.current
     val scope = rememberCoroutineScope()
     val webRef = remember { arrayOfNulls<WebView>(1) }
+    val premium = StudentProfileState.isPaid()
+    val isLab = toolId == "chemistry" || toolId == "physics" || toolId == "biology"
+    val executeLocked = !premium && (toolId == "ti_nspire" || toolId == "casio991")
     val bridge = remember(toolId) {
         HamyarToolBridge(ctx.applicationContext, toolId) { json ->
             ToolSaveStore.put(ctx, toolId, json)
@@ -205,47 +216,144 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
     }
     Column(Modifier.fillMaxSize()) {
         AppTopBar(title, onBack)
-        AndroidView(
-            factory = { c ->
-                WebView(c).apply {
-                    settings.javaScriptEnabled = true
-                    settings.domStorageEnabled = true
-                    settings.allowFileAccess = true
-                    settings.allowContentAccess = true
-                    settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
-                    val isLab = toolId == "chemistry" || toolId == "physics" || toolId == "biology"
-                    if (isLab) settings.enableLabLayout() else settings.enableStudyPinchZoom()
-                    webChromeClient = WebChromeClient()
-                    webViewClient = object : WebViewClient() {
-                        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest) = false
-                        override fun onPageFinished(view: WebView, url: String) {
-                            if (isLab) {
-                                view.evaluateJavascript(
-                                    "(function(){try{" +
-                                        "var h=document.documentElement,b=document.body;" +
-                                        "if(h){h.style.height='100%';h.style.minHeight='100%';}" +
-                                        "if(b){b.style.height='100%';b.style.minHeight='100%';b.style.overflow='hidden';}" +
-                                        "var w=document.querySelector('.workspace');" +
-                                        "if(w){w.style.height='auto';w.style.flex='1 1 auto';w.style.minHeight='0';}" +
-                                        "var g=document.getElementById('guideOverlay');" +
-                                        "if(g){g.style.position='fixed';g.style.inset='0';}" +
-                                        "}catch(e){}})();",
-                                    null,
-                                )
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            AndroidView(
+                factory = { c ->
+                    WebView(c).apply {
+                        settings.javaScriptEnabled = true
+                        settings.domStorageEnabled = true
+                        settings.allowFileAccess = true
+                        settings.allowContentAccess = true
+                        settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+                        if (isLab) settings.enableLabLayout() else settings.enableStudyPinchZoom()
+                        webChromeClient = WebChromeClient()
+                        webViewClient = object : WebViewClient() {
+                            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest) = false
+                            override fun onPageFinished(view: WebView, url: String) {
+                                if (isLab) {
+                                    view.evaluateJavascript(
+                                        "(function(){try{" +
+                                            "var h=document.documentElement,b=document.body;" +
+                                            "if(h){h.style.height='100%';h.style.minHeight='100%';}" +
+                                            "if(b){b.style.height='100%';b.style.minHeight='100%';b.style.overflow='hidden';}" +
+                                            "var w=document.querySelector('.workspace');" +
+                                            "if(w){w.style.height='auto';w.style.flex='1 1 auto';w.style.minHeight='0';}" +
+                                            "var g=document.getElementById('guideOverlay');" +
+                                            "if(g){g.style.position='fixed';g.style.inset='0';}" +
+                                            "}catch(e){}})();",
+                                        null,
+                                    )
+                                    view.evaluateJavascript(labLockJs(premium), null)
+                                }
+                                applySaved(view)
                             }
-                            applySaved(view)
                         }
+                        addJavascriptInterface(bridge, "HamyarTool")
+                        setBackgroundColor(if (isLab) android.graphics.Color.parseColor("#050912") else android.graphics.Color.TRANSPARENT)
+                        webRef[0] = this
+                        loadUrl("file:///android_asset/tools/$toolId.html")
                     }
-                    addJavascriptInterface(bridge, "HamyarTool")
-                    setBackgroundColor(if (isLab) android.graphics.Color.parseColor("#050912") else android.graphics.Color.TRANSPARENT)
-                    webRef[0] = this
-                    loadUrl("file:///android_asset/tools/$toolId.html")
-                }
-            },
-            modifier = Modifier.fillMaxSize(),
-            onRelease = { webRef[0] = null; it.destroy() },
-        )
+                },
+                modifier = Modifier.fillMaxSize(),
+                onRelease = { webRef[0] = null; it.destroy() },
+            )
+            if (executeLocked) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.22f))
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                        ) {},
+                )
+                Text(
+                    "ماشین‌حساب را می‌بینی؛ اجرا با اشتراک فعال است.",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp)
+                        .background(Color(0xE67F1D1D), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                )
+            }
+        }
     }
+}
+
+private fun labLockJs(premium: Boolean): String {
+    val flag = if (premium) "true" else "false"
+    return """
+    (function(){
+      if (window.__hamyarLabLock) return;
+      window.__hamyarLabLock = true;
+      window.HamyarPremium = $flag;
+      window.__labLinear = 0;
+      function items(){ return Array.prototype.slice.call(document.querySelectorAll('.exp-item')); }
+      function linear(){
+        var a = document.querySelector('.exp-item.active');
+        var i = items().indexOf(a);
+        return i < 0 ? (window.__labLinear||0) : i;
+      }
+      function free(){ return !!window.HamyarPremium || linear() <= 1; }
+      function banner(on){
+        var el = document.getElementById('hamyar-sub-banner');
+        if (!on) { if (el) el.style.display = 'none'; return; }
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'hamyar-sub-banner';
+          el.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;z-index:2147483647;background:#7f1d1d;color:#fff;padding:10px 14px;border-radius:12px;font-family:Tahoma,sans-serif;text-align:center;font-size:13px;pointer-events:none';
+          el.textContent = 'این آزمایش با اشتراک فعال اجرا می‌شود. محتوا را می‌بینی؛ اجرا قفل است.';
+          document.body.appendChild(el);
+        }
+        el.style.display = 'block';
+      }
+      function decorate(){
+        if (window.HamyarPremium) return;
+        items().forEach(function(el, i){
+          if (i <= 1) return;
+          if (el.dataset.hyLock) return;
+          el.dataset.hyLock = '1';
+          el.style.opacity = '0.72';
+          el.appendChild(document.createTextNode(' 🔒'));
+        });
+      }
+      function wrap(name){
+        var fn = window[name];
+        if (typeof fn !== 'function' || fn.__hy) return;
+        var wrapped = function(){
+          if (name.indexOf('navigate') === 0) {
+            var el = arguments[2];
+            if (el) window.__labLinear = items().indexOf(el);
+            var r = fn.apply(this, arguments);
+            decorate();
+            banner(!free());
+            return r;
+          }
+          if (name === 'buildNavTree') {
+            var r2 = fn.apply(this, arguments);
+            decorate();
+            banner(!free());
+            return r2;
+          }
+          if (!free()) { banner(true); return; }
+          return fn.apply(this, arguments);
+        };
+        wrapped.__hy = true;
+        window[name] = wrapped;
+      }
+      ['buildNavTree','navigateChemLab','navigatePhysLab','navigateBioLab','toggleChemSim','togglePhysSim','toggleBioSim','startSim'].forEach(wrap);
+      document.addEventListener('click', function(e){
+        var t = e.target;
+        if (!t || free()) return;
+        var run = (t.id === 'btnRun') || (t.closest && t.closest('#btnRun,.btn-run'));
+        if (run) { e.preventDefault(); e.stopPropagation(); banner(true); }
+      }, true);
+      decorate();
+      banner(!free());
+    })();
+    """.trimIndent()
 }
 
 internal class HamyarToolBridge(

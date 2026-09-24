@@ -65,7 +65,7 @@ fun NeedSubScreen(onBack: () -> Unit) {
         Text("این درس با اشتراک فعال باز می‌شود", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(10.dp))
         Text(
-            "درس اول هر فصل و کل فصل ۱ ریاضی بدون اشتراک در دسترس است. بقیهٔ درس‌ها بعد از فعال‌شدن اشتراک در پروفایل باز می‌شوند.",
+            "فصل ۱ ریاضی و اولین درس هر کتاب دیگر بدون اشتراک باز است. بقیهٔ درس‌ها با اشتراک فعال باز می‌شوند.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
