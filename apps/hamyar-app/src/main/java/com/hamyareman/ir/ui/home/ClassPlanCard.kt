@@ -156,9 +156,8 @@ fun ClassPlanCard(
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
                 "برنامه کلاسی مدرسه",
-                fontFamily = AppTypography.heading,
-                fontSize = AppTypography.bump(AppTypography.heading, 20),
-                fontWeight = FontWeight.Bold,
+                fontFamily = AppTypography.d9Section.family, fontWeight = AppTypography.d9Section.weight,
+                fontSize = AppTypography.d9Section.size,
             )
             Row(
                 Modifier.fillMaxWidth().clickable(onClick = onOpenPlan),
@@ -166,9 +165,9 @@ fun ClassPlanCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Column(Modifier.width(80.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(dayName, fontFamily = AppTypography.body, fontWeight = FontWeight.Bold, fontSize = AppTypography.bump(AppTypography.body, 14))
-                    Text(dateFa, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 12), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(shift.label, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 12), color = MaterialTheme.colorScheme.primary)
+                    Text(dayName, fontFamily = AppTypography.d12ClassDate.family, fontWeight = AppTypography.d12ClassDate.weight, fontSize = AppTypography.d12ClassDate.size)
+                    Text(dateFa, fontFamily = AppTypography.d12ClassDate.family, fontWeight = AppTypography.d12ClassDate.weight, fontSize = AppTypography.d12ClassDate.size, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(shift.label, fontFamily = AppTypography.d12ClassDate.family, fontWeight = AppTypography.d12ClassDate.weight, fontSize = AppTypography.d12ClassDate.size, color = MaterialTheme.colorScheme.primary)
                 }
                 if (holiday) {
                     Box(
@@ -178,8 +177,8 @@ fun ClassPlanCard(
                     ) {
                         Text(
                             ClassPlanStore.holidayRoutine(today),
-                            fontFamily = AppTypography.body,
-                            fontSize = AppTypography.bump(AppTypography.body, 12),
+                            fontFamily = AppTypography.d10ClassBox.family, fontWeight = AppTypography.d10ClassBox.weight,
+                            fontSize = AppTypography.d10ClassBox.size,
                             color = Color(0xFF92400E),
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
@@ -195,9 +194,8 @@ fun ClassPlanCard(
                             Text(
                                 name,
                                 color = Color.White,
-                                fontFamily = AppTypography.body,
-                                fontSize = AppTypography.bump(AppTypography.body, 13),
-                                fontWeight = FontWeight.Bold,
+                                fontFamily = AppTypography.d10ClassBox.family, fontWeight = AppTypography.d10ClassBox.weight,
+                                fontSize = AppTypography.d10ClassBox.size,
                                 textAlign = TextAlign.Center,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
@@ -211,9 +209,8 @@ fun ClassPlanCard(
                 Text(
                     "$dayWord مجازی است",
                     color = Color(0xFFB91C1C),
-                    fontFamily = AppTypography.body,
-                    fontSize = AppTypography.bump(AppTypography.body, 13),
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = AppTypography.d9Section.family, fontWeight = AppTypography.d9Section.weight,
+                    fontSize = AppTypography.d9Section.size,
                 )
             }
             val leave = ClassPlanStore.leaveOn(ctx, isoN)
@@ -221,9 +218,8 @@ fun ClassPlanCard(
                 Text(
                     "$dayWord مرخصی است — ${leave.reason} (${ClassPlanStore.justificationLabel(leave.justification)})",
                     color = Color(0xFFB45309),
-                    fontFamily = AppTypography.body,
-                    fontSize = AppTypography.bump(AppTypography.body, 13),
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = AppTypography.d9Section.family, fontWeight = AppTypography.d9Section.weight,
+                    fontSize = AppTypography.d9Section.size,
                 )
             }
             Column(Modifier.fillMaxWidth()) {
@@ -271,8 +267,8 @@ fun ClassPlanCard(
             // در داشبورد فقط نمایش است؛ خودِ متن به صفحهٔ آماده‌سازی فردا می‌رود.
             Text(
                 if (exam.isBlank()) "$dayLabel امتحان داری؟" else "$dayLabel امتحان $exam",
-                fontFamily = AppTypography.body,
-                fontSize = AppTypography.bump(AppTypography.body, 13),
+                fontFamily = AppTypography.d9Section.family, fontWeight = AppTypography.d9Section.weight,
+                fontSize = AppTypography.d9Section.size,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.fillMaxWidth().clickable(onClick = onOpenPrep),
             )
@@ -285,20 +281,13 @@ fun ClassPlanCard(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2,
-                    label = { Text("گزارش نتیجه امتحان", fontFamily = AppTypography.body) },
+                    label = { Text("گزارش نتیجه امتحان", fontFamily = AppTypography.d11Check.family, fontWeight = AppTypography.d11Check.weight) },
                     textStyle = androidx.compose.ui.text.TextStyle(
-                        fontFamily = AppTypography.body,
-                        fontSize = AppTypography.bump(AppTypography.body, 18),
+                        fontFamily = AppTypography.d11Check.family, fontWeight = AppTypography.d11Check.weight,
+                        fontSize = AppTypography.d11Check.size,
                     ),
                 )
             }
-            Text(
-                "آماده‌سازی کامل‌تر",
-                fontFamily = AppTypography.body,
-                fontSize = AppTypography.bump(AppTypography.body, 12),
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable(onClick = onOpenPrep),
-            )
         }
     }
 }
@@ -317,6 +306,6 @@ private fun PrepTick(
             onCheckedChange = { if (enabled && onChecked != null) onChecked(it) },
             enabled = enabled,
         )
-        Text(label, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 12), maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(label, fontFamily = AppTypography.d11Check.family, fontWeight = AppTypography.d11Check.weight, fontSize = AppTypography.d11Check.size, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
 }

@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.hamyareman.ir.ui.AppTypography
 import com.hamyareman.ir.ui.appearance.FontCatalog
-import com.hamyareman.ir.ui.appearance.TypeSlots
 
 /** سربرگ مشترک صفحات هاب با دکمه‌ی بازگشت. */
 @Composable
@@ -44,8 +43,8 @@ fun HubHeader(title: String, subtitle: String, onBack: (() -> Unit)? = null, slo
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "بازگشت") }
         }
         Column {
-            Text(title, style = MaterialTheme.typography.headlineMedium, fontFamily = TypeSlots.family(slotId), fontSize = TypeSlots.size(slotId, 22))
-            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = TypeSlots.family(slotId), fontSize = TypeSlots.size(slotId, 14))
+            Text(title, style = MaterialTheme.typography.headlineMedium, fontFamily = AppTypography.title.family, fontWeight = AppTypography.title.weight, fontSize = AppTypography.title.size)
+            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = AppTypography.titleSub.family, fontWeight = AppTypography.titleSub.weight, fontSize = AppTypography.titleSub.size)
         }
     }
 }
@@ -68,8 +67,8 @@ fun HubCard(
             Text(emoji, style = MaterialTheme.typography.headlineMedium)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.titleMedium, fontFamily = TypeSlots.family(slotId), fontSize = TypeSlots.size(slotId, 14))
-                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = TypeSlots.family(slotId), fontSize = TypeSlots.size(slotId, 12))
+                Text(title, style = MaterialTheme.typography.titleMedium, fontFamily = AppTypography.cardTitle.family, fontWeight = AppTypography.cardTitle.weight, fontSize = AppTypography.cardTitle.size)
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = AppTypography.cardSub.family, fontWeight = AppTypography.cardSub.weight, fontSize = AppTypography.cardSub.size)
             }
         }
     }
@@ -111,8 +110,8 @@ fun HubMenuGroup(
         Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.weight(1f)) {
-                    Text(title, style = MaterialTheme.typography.titleMedium, fontFamily = TypeSlots.family(slotId), fontSize = TypeSlots.size(slotId, 16))
-                    Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = TypeSlots.family(slotId), fontSize = TypeSlots.size(slotId, 12))
+                    Text(title, style = MaterialTheme.typography.titleMedium, fontFamily = AppTypography.accordionTitle.family, fontWeight = AppTypography.accordionTitle.weight, fontSize = AppTypography.accordionTitle.size)
+                    Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = AppTypography.accordionSub.family, fontWeight = AppTypography.accordionSub.weight, fontSize = AppTypography.accordionSub.size)
                 }
                 Icon(if (isOpen) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore, contentDescription = if (isOpen) "بستن" else "بازکردن")
             }

@@ -5,33 +5,42 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import com.hamyareman.ir.R
 
-/** فونت‌های امبدشده در APK — ریپو همیار + وزیر + چند خانوادهٔ آزاد فارسی. */
+/** فونت‌های امبدشده در APK — هر خانواده سه وزن نازک / معمولی / ضخیم. */
 object EmbeddedFonts {
+
+    const val W_THIN = "thin"
+    const val W_REGULAR = "regular"
+    const val W_BOLD = "bold"
 
     data class Face(
         val key: String,
         val label: String,
         val group: String,
         val resId: Int,
-        val weight: FontWeight = FontWeight.Normal,
-    )
+        val thinRes: Int = resId,
+        val regularRes: Int = resId,
+        val boldRes: Int = resId,
+        val defaultWeight: String = W_REGULAR,
+    ) {
+        val hasRealWeights: Boolean get() = thinRes != regularRes || boldRes != regularRes
+    }
 
     val catalog: List<Face> = listOf(
-        Face("aviny", "آوینی — خوش‌آمد", "ریپو همیار", R.font.aviny),
-        Face("estedad_bold", "استعداد — ساعت", "ریپو همیار", R.font.estedad_bold, FontWeight.Bold),
-        Face("titr", "تیتر — عنوان", "ریپو همیار", R.font.titr),
-        Face("parastoo_bold", "پرستو — کاشی", "ریپو همیار", R.font.parastoo_bold, FontWeight.Bold),
+        Face("aviny", "آوینی", "ریپو همیار", R.font.aviny),
+        Face("estedad_bold", "استعداد", "ریپو همیار", R.font.estedad_bold, defaultWeight = W_BOLD),
+        Face("titr", "تیتر", "ریپو همیار", R.font.titr),
+        Face("parastoo_bold", "پرستو", "ریپو همیار", R.font.parastoo_bold, defaultWeight = W_BOLD),
         Face("shekari", "شکاری", "ریپو همیار", R.font.shekari),
-        Face("badkhat_bold", "بدخط — متن", "ریپو همیار", R.font.badkhat_bold, FontWeight.Bold),
-        Face("vazirmatn_thin", "وزیر نازک", "وزیرمتن", R.font.vazirmatn_thin, FontWeight.Thin),
-        Face("vazirmatn_extralight", "وزیر خیلی‌نازک", "وزیرمتن", R.font.vazirmatn_extralight, FontWeight.ExtraLight),
-        Face("vazirmatn_light", "وزیر لایت", "وزیرمتن", R.font.vazirmatn_light, FontWeight.Light),
-        Face("vazirmatn_regular", "وزیر معمولی", "وزیرمتن", R.font.vazirmatn_regular),
-        Face("vazirmatn_medium", "وزیر متوسط", "وزیرمتن", R.font.vazirmatn_medium, FontWeight.Medium),
-        Face("vazirmatn_semibold", "وزیر نیمه‌ضخیم", "وزیرمتن", R.font.vazirmatn_semibold, FontWeight.SemiBold),
-        Face("vazirmatn_bold", "وزیر ضخیم", "وزیرمتن", R.font.vazirmatn_bold, FontWeight.Bold),
-        Face("vazirmatn_extrabold", "وزیر خیلی‌ضخیم", "وزیرمتن", R.font.vazirmatn_extrabold, FontWeight.ExtraBold),
-        Face("vazirmatn_black", "وزیر سیاه", "وزیرمتن", R.font.vazirmatn_black, FontWeight.Black),
+        Face("badkhat_bold", "بدخط", "ریپو همیار", R.font.badkhat_bold, defaultWeight = W_BOLD),
+        Face(
+            "vazirmatn",
+            "وزیرمتن",
+            "وزیرمتن",
+            R.font.vazirmatn_regular,
+            thinRes = R.font.vazirmatn_thin,
+            regularRes = R.font.vazirmatn_regular,
+            boldRes = R.font.vazirmatn_bold,
+        ),
         Face("lalezar", "لاله‌زار", "آزاد فارسی", R.font.lalezar),
         Face("sahel", "ساحل", "آزاد فارسی", R.font.sahel),
         Face("samim", "صمیم", "آزاد فارسی", R.font.samim),
@@ -43,27 +52,84 @@ object EmbeddedFonts {
         Face("noto_naskh", "نوتو نسخ", "آزاد عربی", R.font.noto_naskh),
     )
 
+    private val aliases = mapOf(
+        "vazirmatn_thin" to ("vazirmatn" to W_THIN),
+        "vazirmatn_extralight" to ("vazirmatn" to W_THIN),
+        "vazirmatn_light" to ("vazirmatn" to W_THIN),
+        "vazirmatn_regular" to ("vazirmatn" to W_REGULAR),
+        "vazirmatn_medium" to ("vazirmatn" to W_REGULAR),
+        "vazirmatn_semibold" to ("vazirmatn" to W_BOLD),
+        "vazirmatn_bold" to ("vazirmatn" to W_BOLD),
+        "vazirmatn_extrabold" to ("vazirmatn" to W_BOLD),
+        "vazirmatn_black" to ("vazirmatn" to W_BOLD),
+    )
+
     private val byKey: Map<String, Face> = catalog.associateBy { it.key }
 
     private val cache = mutableMapOf<String, FontFamily>()
 
-    fun face(key: String): Face = byKey[key] ?: byKey.getValue("badkhat_bold")
+    fun normalizeWeight(w: String?): String = when (w?.lowercase()?.trim()) {
+        "thin", "light", "extralight", "نازک" -> W_THIN
+        "bold", "semibold", "extrabold", "black", "ضخیم" -> W_BOLD
+        else -> W_REGULAR
+    }
+
+    fun fontWeight(w: String?): FontWeight = when (normalizeWeight(w)) {
+        W_THIN -> FontWeight.Thin
+        W_BOLD -> FontWeight.Bold
+        else -> FontWeight.Normal
+    }
+
+    fun weightLabel(w: String?): String = when (normalizeWeight(w)) {
+        W_THIN -> "نازک"
+        W_BOLD -> "ضخیم"
+        else -> "معمولی"
+    }
+
+    fun canonicalKey(key: String): String = aliases[key]?.first ?: key
+
+    fun weightFromKey(key: String, fallback: String = W_REGULAR): String =
+        aliases[key]?.second ?: run {
+            val face = byKey[key]
+            when {
+                face != null -> face.defaultWeight
+                key.contains("thin") || key.contains("light") -> W_THIN
+                key.contains("bold") || key.contains("black") -> W_BOLD
+                else -> fallback
+            }
+        }
+
+    fun defaultWeightOf(key: String): String = byKey[canonicalKey(key)]?.defaultWeight ?: W_REGULAR
+
+    fun face(key: String): Face = byKey[canonicalKey(key)] ?: byKey.getValue("badkhat_bold")
 
     fun labelOf(key: String): String = face(key).label
 
+    fun isKnown(key: String): Boolean = byKey.containsKey(canonicalKey(key)) || key in aliases
+
     @Synchronized
-    fun family(key: String): FontFamily {
-        cache[key]?.let { return it }
-        val f = face(key)
-        val fam = runCatching { FontFamily(Font(f.resId, f.weight)) }.getOrDefault(FontFamily.Default)
-        cache[key] = fam
+    fun family(key: String, weight: String = W_REGULAR): FontFamily {
+        val canon = canonicalKey(key)
+        val w = normalizeWeight(weight)
+        val ck = "$canon|$w"
+        cache[ck]?.let { return it }
+        val fam = familyFresh(canon, w)
+        cache[ck] = fam
         return fam
     }
 
-    fun familyFresh(key: String): FontFamily {
-        val f = face(key)
-        return runCatching { FontFamily(Font(f.resId, f.weight)) }.getOrDefault(FontFamily.Default)
+    fun familyFresh(key: String, weight: String = W_REGULAR): FontFamily {
+        val face = face(key)
+        return runCatching {
+            if (face.hasRealWeights) {
+                FontFamily(
+                    Font(face.thinRes, FontWeight.Thin),
+                    Font(face.regularRes, FontWeight.Normal),
+                    Font(face.boldRes, FontWeight.Bold),
+                )
+            } else {
+                FontFamily(Font(face.resId, FontWeight.Normal))
+            }
+        }.getOrDefault(FontFamily.Default)
     }
-
-    fun isKnown(key: String): Boolean = byKey.containsKey(key)
 }

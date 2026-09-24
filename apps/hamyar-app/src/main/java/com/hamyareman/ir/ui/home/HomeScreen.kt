@@ -83,9 +83,6 @@ import com.hamyareman.ir.ui.AppTypography
 /** مارجینِ کناریِ بلوک‌های داشبورد (کارتِ سخن بزرگان عمداً پهن‌تر و بی‌مارجین‌تر است). */
 private val HomeSide = 16.dp
 
-/** مارجینِ کناریِ کارتِ «سخن بزرگان» — یک‌پنجمِ حالتِ معمول. */
-private val WisdomSide = 1.dp
-
 private fun greeting(): String {
     val h = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     return when (h) {
@@ -159,31 +156,29 @@ fun HomeScreen(nav: NavController) {
                                 Text(
                                     row1,
                                     style = MaterialTheme.typography.titleMedium,
-                                    fontFamily = AppTypography.clock,
-                                    fontSize = AppTypography.bump(AppTypography.clock, 16),
-                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = AppTypography.d3Date.family, fontWeight = AppTypography.d3Date.weight,
+                                    fontSize = AppTypography.d3Date.size,
                                 )
                                 Text(
                                     row2Time,
                                     style = MaterialTheme.typography.headlineSmall,
-                                    fontFamily = AppTypography.clock,
-                                    fontSize = AppTypography.bump(AppTypography.clock, 24),
-                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = AppTypography.d4Clock.family, fontWeight = AppTypography.d4Clock.weight,
+                                    fontSize = AppTypography.d4Clock.size,
                                 )
                                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                                     Text(
                                         row2Greg,
                                         style = MaterialTheme.typography.bodyLarge,
-                                        fontFamily = AppTypography.clock,
-                                        fontSize = AppTypography.bump(AppTypography.clock, 16),
+                                        fontFamily = AppTypography.d5Gregorian.family, fontWeight = AppTypography.d5Gregorian.weight,
+                                        fontSize = AppTypography.d5Gregorian.size,
                                     )
                                 }
                                 if (!holiday.isNullOrBlank()) {
                                     Text(
                                         holiday,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        fontFamily = AppTypography.body,
-                                        fontSize = AppTypography.bump(AppTypography.body, 14),
+                                        fontFamily = AppTypography.d3Date.family, fontWeight = AppTypography.d3Date.weight,
+                                        fontSize = AppTypography.d3Date.size,
                                         color = MaterialTheme.colorScheme.primary,
                                     )
                                 }
@@ -200,9 +195,8 @@ fun HomeScreen(nav: NavController) {
                             Text(
                                 "پروفایل من",
                                 style = MaterialTheme.typography.labelMedium,
-                                fontFamily = AppTypography.body,
-                                fontSize = AppTypography.bump(AppTypography.body, 12),
-                                fontWeight = FontWeight.Bold,
+                                fontFamily = AppTypography.titleSub.family, fontWeight = AppTypography.titleSub.weight,
+                                fontSize = AppTypography.titleSub.size,
                                 modifier = Modifier.padding(top = 4.dp),
                             )
                         }
@@ -210,7 +204,7 @@ fun HomeScreen(nav: NavController) {
                 }
             }
 
-            WisdomCard(Modifier.padding(horizontal = WisdomSide))
+            WisdomCard(Modifier.padding(horizontal = AppTypography.quoteSide))
 
             Row(Modifier.fillMaxWidth().padding(horizontal = HomeSide), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 QuickTile("🎒", "مدرسه", Modifier.weight(1f)) { nav.hubTo(Screen.Study.route) }
@@ -247,8 +241,8 @@ fun HomeScreen(nav: NavController) {
             Text(
                 "امروز",
                 style = MaterialTheme.typography.titleMedium,
-                fontFamily = AppTypography.heading,
-                fontSize = AppTypography.bump(AppTypography.heading, 16),
+                fontFamily = AppTypography.d9Section.family, fontWeight = AppTypography.d9Section.weight,
+                fontSize = AppTypography.d9Section.size,
                 modifier = Modifier.padding(horizontal = HomeSide),
             )
             HubCard("🌤", "روتین امروز", "بلوک‌های روزت را ببین", Modifier.padding(horizontal = HomeSide), slotId = "page.home.tile") { nav.navigate(Screen.Routine.route) }
@@ -283,16 +277,16 @@ private fun GreetingBanner(title: String, subtitle: String, modifier: Modifier =
                 Text(
                     title,
                     color = Color.White,
-                    fontFamily = AppTypography.greeting,
-                    fontSize = AppTypography.bump(AppTypography.greeting, 22),
+                    fontFamily = AppTypography.d1Greeting.family, fontWeight = AppTypography.d1Greeting.weight,
+                    fontSize = AppTypography.d1Greeting.size,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(
                     subtitle,
                     color = Color.White.copy(alpha = 0.92f),
-                    fontFamily = AppTypography.body,
-                    fontSize = AppTypography.bump(AppTypography.body, 14),
+                    fontFamily = AppTypography.d2GreetingSub.family, fontWeight = AppTypography.d2GreetingSub.weight,
+                    fontSize = AppTypography.d2GreetingSub.size,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -332,7 +326,7 @@ private fun WisdomCard(modifier: Modifier = Modifier) {
     ) {
         AutoFitQuote(
             text = body,
-            fontFamily = AppTypography.body,
+            fontFamily = AppTypography.d7Quote.family, fontWeight = AppTypography.d7Quote.weight,
             color = Color(0xFFFDE68A),
             modifier = Modifier.fillMaxWidth().height(36.dp),
         )
@@ -348,11 +342,12 @@ private fun AutoFitQuote(
     fontFamily: FontFamily,
     color: Color,
     modifier: Modifier = Modifier,
+    fontWeight: FontWeight = FontWeight.Normal,
 ) {
     val measurer = rememberTextMeasurer()
     BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
         val maxW = constraints.maxWidth
-        val sizeSp = remember(text, maxW, fontFamily) {
+        val sizeSp = remember(text, maxW, fontFamily, fontWeight) {
             if (maxW <= 0) 16f
             else {
                 var lo = 11f
@@ -365,6 +360,7 @@ private fun AutoFitQuote(
                         style = TextStyle(
                             fontSize = mid.sp,
                             fontFamily = fontFamily,
+                            fontWeight = fontWeight,
                             textAlign = TextAlign.Center,
                         ),
                         maxLines = 1,
@@ -386,6 +382,7 @@ private fun AutoFitQuote(
         Text(
             text,
             fontFamily = fontFamily,
+            fontWeight = fontWeight,
             fontSize = sizeSp.sp,
             color = color,
             textAlign = TextAlign.Center,
@@ -432,9 +429,8 @@ internal fun SubscriptionChip(raw: String, onClick: () -> Unit = {}) {
         Text(
             com.hamyareman.ir.platform.core.common.BillingStatus.chipFa(s),
             color = fg,
-            fontFamily = AppTypography.body,
-            fontWeight = FontWeight.Bold,
-            fontSize = AppTypography.bump(AppTypography.body, 12),
+            fontFamily = AppTypography.d6Subscription.family, fontWeight = AppTypography.d6Subscription.weight,
+            fontSize = AppTypography.d6Subscription.size,
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
         )
@@ -465,10 +461,9 @@ private fun ToolTile(emoji: String, label: String, modifier: Modifier = Modifier
             Spacer(Modifier.height(4.dp))
             Text(
                 label,
-                fontFamily = AppTypography.tile,
-                fontSize = AppTypography.bump(AppTypography.tile, 12),
+                fontFamily = AppTypography.d8Tile.family, fontWeight = AppTypography.d8Tile.weight,
+                fontSize = AppTypography.d8Tile.size,
                 lineHeight = 17.sp,
-                fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
@@ -494,7 +489,7 @@ private fun QuickTile(emoji: String, label: String, modifier: Modifier = Modifie
             Text(
                 label,
                 style = MaterialTheme.typography.titleMedium,
-                fontFamily = AppTypography.tile, fontSize = AppTypography.bump(AppTypography.tile, 14),
+                fontFamily = AppTypography.d8Tile.family, fontWeight = AppTypography.d8Tile.weight, fontSize = AppTypography.d8Tile.size,
                 textAlign = TextAlign.Center,
             )
         }

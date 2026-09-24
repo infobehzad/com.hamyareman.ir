@@ -256,14 +256,14 @@ private fun RoleFontCard(
     var open by remember { mutableStateOf(false) }
     val face = remember(fontKey) { EmbeddedFonts.face(fontKey) }
     val family = remember(fontKey) { EmbeddedFonts.family(fontKey) }
-    val sign = if (size > 0) "+" else ""
+    val abs = (16 + size).coerceIn(8, 40)
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
             Text(
                 sample,
                 fontFamily = family,
-                fontSize = (16 + size).coerceIn(8, 40).sp,
+                fontSize = abs.sp,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -288,15 +288,15 @@ private fun RoleFontCard(
                 }
             }
             Text(
-                "سایز ${toPersianDigits(sign + size.toString())}",
+                "سایز ${toPersianDigits(abs.toString())}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Slider(
-                value = size.toFloat(),
-                onValueChange = { onSize(it.toInt()) },
-                valueRange = -20f..20f,
-                steps = 39,
+                value = abs.toFloat(),
+                onValueChange = { onSize(it.toInt() - 16) },
+                valueRange = 8f..40f,
+                steps = 31,
                 modifier = Modifier.fillMaxWidth(),
             )
         }

@@ -31,7 +31,6 @@ import com.hamyareman.ir.ui.ailearning.AiAssessmentScreen
 import com.hamyareman.ir.ui.ailearning.AiLearningHomeScreen
 import com.hamyareman.ir.ui.appearance.AppearanceScreen
 import com.hamyareman.ir.ui.appearance.FontFloater
-import com.hamyareman.ir.ui.appearance.TypeSlots
 import com.hamyareman.ir.ui.art.ArtGalleryScreen
 import com.hamyareman.ir.ui.art.DailyArtPromptScreen
 import com.hamyareman.ir.ui.calmdown.BreathingScreen
@@ -148,8 +147,9 @@ fun ZahraNavHost() {
                         label = {
                             Text(
                                 tab.label,
-                                fontFamily = TypeSlots.family(navId),
-                                fontSize = TypeSlots.size(navId, 11),
+                                fontFamily = com.hamyareman.ir.ui.AppTypography.navBar.family,
+                                fontWeight = com.hamyareman.ir.ui.AppTypography.navBar.weight,
+                                fontSize = com.hamyareman.ir.ui.AppTypography.navBar.size,
                             )
                         },
                     )

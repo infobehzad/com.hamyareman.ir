@@ -124,11 +124,14 @@ class UiPrefs(context: Context) {
         updateFontTheme(fontTheme.withRole(role, size = size))
     }
 
-    fun updateSlot(id: String, font: String? = null, size: Int? = null) {
-        val cur = slotChoices[id] ?: TypeSlots.resolved(id)
-        val next = cur.copy(
-            font = font?.takeIf { EmbeddedFonts.isKnown(it) } ?: cur.font,
-            size = (size ?: cur.size).coerceIn(-20, 20),
+    fun updateSlot(id: String, font: String? = null, size: Int? = null, weight: String? = null) {
+        val live = TypeSlots.resolved(id)
+        val pad = id == "d7.pad"
+        val next = SlotChoice(
+            font = font?.takeIf { EmbeddedFonts.isKnown(it) }?.let { EmbeddedFonts.canonicalKey(it) } ?: live.font,
+            size = if (pad) (size ?: live.size).coerceIn(0, 32) else (size ?: live.size).coerceIn(8, 40),
+            weight = weight?.let { EmbeddedFonts.normalizeWeight(it) } ?: live.weight,
+            absolute = true,
         )
         val map = slotChoices.toMutableMap()
         map[id] = next
@@ -148,7 +151,7 @@ class UiPrefs(context: Context) {
     fun slotMapObject(): JSONObject {
         val o = JSONObject()
         slotChoices.forEach { (id, c) ->
-            o.put(id, JSONObject().put("font", c.font).put("size", c.size))
+            o.put(id, JSONObject().put("font", c.font).put("sp", c.size).put("size", c.size).put("weight", c.weight))
         }
         return o
     }
@@ -225,7 +228,7 @@ class UiPrefs(context: Context) {
 private fun slotMapJson(map: Map<String, SlotChoice>): String {
     val o = JSONObject()
     map.forEach { (id, c) ->
-        o.put(id, JSONObject().put("font", c.font).put("size", c.size))
+        o.put(id, JSONObject().put("font", c.font).put("sp", c.size).put("size", c.size).put("weight", c.weight))
     }
     return o.toString()
 }
@@ -238,7 +241,14 @@ private fun parseSlotMap(raw: JSONObject): Map<String, SlotChoice> {
         val o = raw.optJSONObject(id) ?: continue
         val font = o.optString("font")
         if (!EmbeddedFonts.isKnown(font)) continue
-        out[id] = SlotChoice(font, o.optInt("size", 0).coerceIn(-20, 20))
+        val hasSp = o.has("sp")
+        val hasWeight = o.has("weight") && o.optString("weight").isNotBlank()
+        val absolute = hasSp || hasWeight || id == "d7.pad"
+        val size = if (hasSp) o.optInt("sp") else o.optInt("size", 0)
+        val weight = EmbeddedFonts.normalizeWeight(
+            o.optString("weight").ifBlank { EmbeddedFonts.weightFromKey(font) },
+        )
+        out[id] = SlotChoice(EmbeddedFonts.canonicalKey(font), size, weight, absolute)
     }
     return out
 }
