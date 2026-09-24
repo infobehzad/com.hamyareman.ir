@@ -307,65 +307,41 @@ private fun webTitleFontJs(): String = """
 """.trimIndent()
 
 /**
- * روی گوشی media-query عرض<۱۱۰۰ ارتفاع workspace را auto می‌کند و body overflow:hidden
- * آن را می‌بُرد — فقط هدر دیده می‌شود. workspace باید ارتفاع باقی‌مانده را بگیرد و خودش اسکرول شود.
+ * ارتفاع را از پیکسل واقعی WebView می‌گیرد (نه 100vh که در WebView اندروید صفر/غلط است).
+ * media-query عرض<۱۱۰۰ را با CSS خنثی می‌کند تا workspace بریده نشود.
  */
 private fun labLayoutJs(): String = """
     (function(){
-      function layout(){
+      if (!document.getElementById('hamyar-lab-css')) {
+        var s = document.createElement('style');
+        s.id = 'hamyar-lab-css';
+        s.textContent =
+          'html,body{margin:0!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;}' +
+          '.workspace{display:flex!important;flex-wrap:wrap!important;overflow:auto!important;min-height:0!important;}' +
+          '.sidebar-nav,.control-sidebar{width:100%!important;max-width:none!important;}' +
+          '.stage-view{width:100%!important;min-height:240px!important;}';
+        document.head.appendChild(s);
+      }
+      window.__hamyarLabLayout = function(){
         try {
+          var vh = window.__labH || window.innerHeight || (document.documentElement && document.documentElement.clientHeight) || 0;
+          if (vh < 80) return;
+          var header = document.querySelector('header');
+          var hh = header ? header.offsetHeight : 56;
+          var rest = Math.max(160, vh - hh);
           var h = document.documentElement, b = document.body;
-          if (h) { h.style.height = '100%'; h.style.maxHeight = '100%'; }
-          if (b) {
-            b.style.height = '100%';
-            b.style.maxHeight = '100%';
-            b.style.margin = '0';
-            b.style.display = 'flex';
-            b.style.flexDirection = 'column';
-            b.style.overflow = 'hidden';
-          }
+          if (h) { h.style.height = vh + 'px'; h.style.maxHeight = vh + 'px'; }
+          if (b) { b.style.height = vh + 'px'; b.style.maxHeight = vh + 'px'; }
           var w = document.querySelector('.workspace');
           if (w) {
-            w.style.flex = '1 1 0%';
-            w.style.height = '0';
-            w.style.minHeight = '0';
-            w.style.maxHeight = 'none';
-            w.style.overflowX = 'hidden';
-            w.style.overflowY = 'auto';
-            w.style.display = 'flex';
-            w.style.flexDirection = 'column';
-            w.style.flexWrap = 'nowrap';
+            w.style.height = rest + 'px';
+            w.style.maxHeight = rest + 'px';
+            w.style.minHeight = rest + 'px';
           }
-          var nav = document.querySelector('.sidebar-nav');
-          if (nav) {
-            nav.style.width = '100%';
-            nav.style.maxWidth = 'none';
-            nav.style.flex = '0 0 auto';
-            nav.style.maxHeight = '34%';
-            nav.style.overflowY = 'auto';
-          }
-          var stage = document.querySelector('.stage-view');
-          if (stage) {
-            stage.style.width = '100%';
-            stage.style.flex = '1 1 auto';
-            stage.style.minHeight = '220px';
-            stage.style.height = 'auto';
-            stage.style.overflow = 'auto';
-          }
-          var ctrl = document.querySelector('.control-sidebar');
-          if (ctrl) {
-            ctrl.style.width = '100%';
-            ctrl.style.maxWidth = 'none';
-            ctrl.style.flex = '0 0 auto';
-            ctrl.style.maxHeight = '38%';
-            ctrl.style.overflowY = 'auto';
-          }
-        } catch (e) {}
-      }
-      layout();
-      window.addEventListener('resize', layout);
-      setTimeout(layout, 50);
-      setTimeout(layout, 300);
+        } catch (e) { console.log('labLayout', e); }
+      };
+      window.__hamyarLabLayout();
+      window.addEventListener('resize', function(){ window.__hamyarLabLayout(); });
     })();
 """.trimIndent()
 
