@@ -23,7 +23,7 @@ import com.hamyareman.ir.ui.AppTypography
 fun CalmHubScreen(nav: NavController, onBack: () -> Unit) {
     var tab by remember { mutableIntStateOf(0) }
     Column(Modifier.fillMaxSize()) {
-        AppTopBar("آرامش", onBack, titleStyle = AppTypography.pageTitle.style)
+        AppTopBar("آرامش", onBack)
         TabRow(selectedTabIndex = tab) {
             listOf("سفر ذهنی", "آرامش با تنفس", "تصویرسازی ذهنی").forEachIndexed { i, l ->
                 Tab(selected = tab == i, onClick = { tab = i }, text = { Text(l, style = AppTypography.pageHeading.style) })

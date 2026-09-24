@@ -76,7 +76,7 @@ fun ToolHubScreen(
     onBack: () -> Unit,
     onOpen: (ToolCard) -> Unit) {
     Column(Modifier.fillMaxSize()) {
-        AppTopBar(title, onBack, titleStyle = AppTypography.pageTitle.style)
+        AppTopBar(title, onBack)
         Column(
             Modifier.fillMaxSize().padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -204,7 +204,7 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
         applySaved(webRef[0])
     }
     Column(Modifier.fillMaxSize()) {
-        AppTopBar(title, onBack, titleStyle = AppTypography.pageTitle.style)
+        AppTopBar(title, onBack)
         Box(Modifier.weight(1f).fillMaxWidth()) {
             AndroidView(
                 factory = { c ->

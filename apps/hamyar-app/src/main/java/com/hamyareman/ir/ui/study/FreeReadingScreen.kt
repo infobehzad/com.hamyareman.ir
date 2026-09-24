@@ -19,7 +19,7 @@ import com.hamyareman.ir.ui.AppTypography
 fun FreeReadingScreen(nav: NavController, onBack: () -> Unit) {
     var tab by remember { mutableIntStateOf(0) }
     Column(Modifier.fillMaxSize()) {
-        AppTopBar("مطالعه آزاد", onBack, titleStyle = AppTypography.pageTitle.style)
+        AppTopBar("مطالعه آزاد", onBack)
         TabRow(selectedTabIndex = tab) {
             listOf("کتاب متنی", "کتاب صوتی").forEachIndexed { i, l ->
                 Tab(selected = tab == i, onClick = { tab = i }, text = { Text(l, style = AppTypography.pageHeading.style) })

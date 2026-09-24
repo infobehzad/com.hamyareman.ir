@@ -145,7 +145,7 @@ fun SubscriptionScreen(onBack: () -> Unit) {
     val withinRefund = order?.paidAtMs?.let { it > 0L && System.currentTimeMillis() - it <= BillingConfig.REFUND_DAYS * 24L * 60 * 60 * 1000 } == true
 
     Column(Modifier.fillMaxSize()) {
-        AppTopBar("اشتراک همیار من", onBack, titleStyle = AppTypography.pageTitle.style)
+        AppTopBar("اشتراک همیار من", onBack)
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
