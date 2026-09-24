@@ -39,6 +39,8 @@ sealed class Screen(val route: String) {
     data object Leave : Screen("leave")
     data object ClassPlan : Screen("class-plan")
     data object ClassPlanShift : Screen("class-plan-shift")
+    /** سربرگ تقویم برنامه کلاسی — از تاریخ داشبورد. */
+    data object ClassPlanCalendar : Screen("class-plan-cal")
     /** ساعت‌های کلاس مجازی + بازه‌های روزهای مجازی. */
     data object VirtualClass : Screen("virtual-class")
     data object Subscription : Screen("subscription")

@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -40,8 +43,7 @@ import kotlin.math.sin
 @Composable
 internal fun ProfileClockAvatar(
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+    modifier: Modifier = Modifier) {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -61,22 +63,19 @@ internal fun ProfileClockAvatar(
         modifier
             .size(124.dp)
             .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
+        contentAlignment = Alignment.Center) {
         Box(
             Modifier
                 .fillMaxSize()
                 .padding(3.dp)
                 .clip(CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
+            contentAlignment = Alignment.Center) {
             if (bmp != null) {
                 Image(
                     bmp.asImageBitmap(),
                     contentDescription = "عکس پروفایل",
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                )
+                    contentScale = ContentScale.Crop)
             } else {
                 Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primaryContainer, modifier = Modifier.fillMaxSize()) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -90,10 +89,13 @@ internal fun ProfileClockAvatar(
             val cy = size.height / 2f
             val r = size.minDimension / 2f
             drawCircle(
+                color = Color.Black,
+                radius = r - 1.dp.toPx(),
+                style = Stroke(width = 2f))
+            drawCircle(
                 color = ring,
-                radius = r - 1.5.dp.toPx(),
-                style = Stroke(width = 3.dp.toPx()),
-            )
+                radius = r - 4.dp.toPx(),
+                style = Stroke(width = 2.dp.toPx()))
             for (i in 0 until 12) {
                 val rad = Math.toRadians(i * 30.0 - 90.0)
                 val outer = r - 3.dp.toPx()
@@ -103,8 +105,7 @@ internal fun ProfileClockAvatar(
                     start = Offset(cx + cos(rad).toFloat() * inner, cy + sin(rad).toFloat() * inner),
                     end = Offset(cx + cos(rad).toFloat() * outer, cy + sin(rad).toFloat() * outer),
                     strokeWidth = if (i % 3 == 0) 2.6.dp.toPx() else 1.5.dp.toPx(),
-                    cap = StrokeCap.Round,
-                )
+                    cap = StrokeCap.Round)
             }
             val sec = time.second + time.nano / 1_000_000_000f
             val min = time.minute + sec / 60f
@@ -116,15 +117,13 @@ internal fun ProfileClockAvatar(
                         start = Offset(cx, cy + back),
                         end = Offset(cx, cy - length),
                         strokeWidth = width + 2.4.dp.toPx(),
-                        cap = StrokeCap.Round,
-                    )
+                        cap = StrokeCap.Round)
                     drawLine(
                         color = color,
                         start = Offset(cx, cy + back),
                         end = Offset(cx, cy - length),
                         strokeWidth = width,
-                        cap = StrokeCap.Round,
-                    )
+                        cap = StrokeCap.Round)
                 }
             }
             hand(hour * 30f, r * 0.52f, r * 0.10f, Color(0xFF0F172A), 5.2.dp.toPx())
@@ -133,5 +132,15 @@ internal fun ProfileClockAvatar(
             drawCircle(color = Color.White, radius = 5.4.dp.toPx(), center = Offset(cx, cy))
             drawCircle(color = Color(0xFF0F172A), radius = 3.4.dp.toPx(), center = Offset(cx, cy))
         }
+        Text(
+            "پروفایل من",
+            color = Color.White,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.labelSmall.copy(
+                shadow = Shadow(color = Color.Black, offset = Offset(0f, 1f), blurRadius = 4f)),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 14.dp))
     }
 }

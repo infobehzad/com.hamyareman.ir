@@ -88,10 +88,14 @@ fun AppearanceScreen(onBack: () -> Unit) {
                 }
             }
 
-            Text("تم‌های دخترانه", style = MaterialTheme.typography.titleMedium)
-            ThemeGroup(BrandTheme.entries.filter { it.themeGender == ThemeGender.GIRL }, prefs) { pendingTheme = it }
-            Text("تم‌های پسرانه", style = MaterialTheme.typography.titleMedium)
-            ThemeGroup(BrandTheme.entries.filter { it.themeGender == ThemeGender.BOY }, prefs) { pendingTheme = it }
+            val girl = com.hamyareman.ir.ui.profile.StudentProfileState.gender.equals("girl", ignoreCase = true)
+            if (girl) {
+                Text("تم‌های دخترانه", style = MaterialTheme.typography.titleMedium)
+                ThemeGroup(BrandTheme.entries.filter { it.themeGender == ThemeGender.GIRL }, prefs) { pendingTheme = it }
+            } else {
+                Text("تم‌های پسرانه", style = MaterialTheme.typography.titleMedium)
+                ThemeGroup(BrandTheme.entries.filter { it.themeGender == ThemeGender.BOY }, prefs) { pendingTheme = it }
+            }
 
             pendingTheme?.let { brand ->
                 AlertDialog(

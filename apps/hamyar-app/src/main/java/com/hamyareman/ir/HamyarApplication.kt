@@ -30,6 +30,12 @@ class HamyarApplication : Application() {
         NotificationChannels.ensure(this)
         com.hamyareman.ir.ui.profile.StudentProfileState.loadMirror(this)
         com.hamyareman.ir.ui.profile.StudentProfileState.applyLauncherIcon(this, com.hamyareman.ir.ui.profile.StudentProfileState.gender)
+        runCatching {
+            val snap = com.hamyareman.ir.ui.study.ClassPlanStore.load(this)
+            com.hamyareman.ir.ui.study.ClassPlanStore.refreshOffCache(this)
+            com.hamyareman.ir.ui.study.ClassPlanStore.syncAlarms(
+                this, container.reminders, snap, java.time.LocalDate.now(com.hamyareman.ir.platform.core.common.JalaliDate.TEHRAN))
+        }
         seedDefaultReminders()
     }
 
@@ -44,8 +50,7 @@ class HamyarApplication : Application() {
             listOf(
                 Reminder("water-morning", "یک لیوان آب", "صبح‌ها با یک لیوان آب شروع کن 🙂", 9, 30),
                 Reminder("study-review", "مرور درس امروز", "ده دقیقه مرور، فردا خیلی راحت‌تر می‌شود.", 18, 0),
-                Reminder("calm-evening", "آرام‌سازی شبانه", "چند نفس عمیق و یک کشش کوتاه پیش از خواب.", 21, 30),
-            ).forEach { scheduler.upsert(it) }
+                Reminder("calm-evening", "آرام‌سازی شبانه", "چند نفس عمیق و یک کشش کوتاه پیش از خواب.", 21, 30)).forEach { scheduler.upsert(it) }
         }
         // یادآور روزانه‌ی ماژول هوش مصنوعی — با شناسه‌ی ثابت، پس فقط یک‌بار ساخته می‌شود
         // و از داخل خود ماژول قابل خاموش‌کردن است (ساعات سکوت هم رعایت می‌شود).
@@ -56,9 +61,7 @@ class HamyarApplication : Application() {
                     title = "درس امروز هوش مصنوعی",
                     body = "ده دقیقه یادگیری AI: یک درس کوتاه + یک آزمون کوچولو.",
                     hour = 17,
-                    minute = 0,
-                ),
-            )
+                    minute = 0))
         }
     }
 }

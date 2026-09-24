@@ -12,8 +12,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import com.hamyareman.ir.platform.core.common.toPersianDigits
+import com.hamyareman.ir.ui.study.ClassPlanStore
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,8 +62,7 @@ fun MoreScreen(nav: NavController) {
         Text(
             "همیار من — نسخه‌ی " + com.hamyareman.ir.BuildConfig.VERSION_NAME,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -81,8 +84,7 @@ private fun QuietModeCard() {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontFamily = com.hamyareman.ir.ui.appearance.TypeSlots.family("hub.more.item.quiet"),
-                    fontSize = com.hamyareman.ir.ui.appearance.TypeSlots.size("hub.more.item.quiet", 12),
-                )
+                    fontSize = com.hamyareman.ir.ui.appearance.TypeSlots.size("hub.more.item.quiet", 12))
             }
             Spacer(Modifier.width(8.dp))
             Switch(
@@ -90,8 +92,34 @@ private fun QuietModeCard() {
                 onCheckedChange = {
                     on = it
                     store.putString("quiet_mode", if (it) "1" else "0")
-                },
-            )
+                })
+        }
+    }
+}
+
+/** تیک انواع مناسبت که زیر تاریخ داشبورد دیده می‌شوند. */
+@Composable
+private fun CalendarOccasionCard() {
+    val ctx = LocalContext.current
+    Card(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text("📅 تنظیم تقویم", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "مناسبت‌هایی که زیر تاریخ داشبورد نشان داده می‌شوند.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            com.hamyareman.ir.ui.home.OccasionKind.entries.forEach { kind ->
+                var on by remember(kind) { mutableStateOf(com.hamyareman.ir.ui.home.CalendarPrefs.show(ctx, kind)) }
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    Checkbox(
+                        checked = on,
+                        onCheckedChange = {
+                            on = it
+                            com.hamyareman.ir.ui.home.CalendarPrefs.setShow(ctx, kind, it)
+                        })
+                    Text(kind.fa, style = MaterialTheme.typography.bodyMedium)
+                }
+            }
         }
     }
 }

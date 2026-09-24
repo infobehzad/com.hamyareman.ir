@@ -111,13 +111,25 @@ fun VirtualClassScreen(onBack: () -> Unit) {
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(dayName, fontWeight = FontWeight.Bold)
-                        TimePick("شروع", s.startH, s.startM) { h, m ->
+                        Text("شیفت صبح", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall)
+                        TimePick("شروع صبح", s.startH, s.startM) { h, m ->
                             sessions = upsertSession(sessions, s.copy(startH = h, startM = m))
                             ClassPlanStore.saveVirtualSessions(ctx, sessions)
                             pushVirtual()
                         }
-                        TimePick("پایان", s.endH, s.endM) { h, m ->
+                        TimePick("پایان صبح", s.endH, s.endM) { h, m ->
                             sessions = upsertSession(sessions, s.copy(endH = h, endM = m))
+                            ClassPlanStore.saveVirtualSessions(ctx, sessions)
+                            pushVirtual()
+                        }
+                        Text("شیفت ظهر", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall)
+                        TimePick("شروع ظهر", s.eveStartH, s.eveStartM) { h, m ->
+                            sessions = upsertSession(sessions, s.copy(eveStartH = h, eveStartM = m))
+                            ClassPlanStore.saveVirtualSessions(ctx, sessions)
+                            pushVirtual()
+                        }
+                        TimePick("پایان ظهر", s.eveEndH, s.eveEndM) { h, m ->
+                            sessions = upsertSession(sessions, s.copy(eveEndH = h, eveEndM = m))
                             ClassPlanStore.saveVirtualSessions(ctx, sessions)
                             pushVirtual()
                         }

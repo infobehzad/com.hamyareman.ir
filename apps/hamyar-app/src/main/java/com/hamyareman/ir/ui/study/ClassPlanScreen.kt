@@ -1,6 +1,9 @@
 package com.hamyareman.ir.ui.study
 
+import android.annotation.SuppressLint
+
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -408,76 +411,110 @@ private fun SubjectDropdown(
 @Composable
 private fun ShamsiCalendarSection() {
     val ctx = LocalContext.current
-    var snap by remember { mutableStateOf(ClassPlanStore.load(ctx)) }
     val todayJ = JalaliDate.todayJalali()
     var year by remember { mutableIntStateOf(todayJ.year) }
     var month by remember { mutableIntStateOf(todayJ.month) }
     val weekHdr = listOf("ش", "ی", "د", "س", "چ", "پ", "ج")
+    val offset = com.hamyareman.ir.ui.home.CalendarPrefs.lunarOffset(ctx)
 
     fun firstDow(y: Int, m: Int): Int {
         val iso = JalaliDate.toGregorianIso(JalaliDate.Jalali(y, m, 1)) ?: return 0
         return (SchoolShift.dayIndex(LocalDate.parse(iso)) - 1).coerceIn(0, 6)
     }
 
+    val dim = JalaliDate.daysInMonth(year, month)
+    val todayIso = JalaliDate.toGregorianIso(todayJ)
+    val todayG = todayIso?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+    val todayH = todayG?.let { com.hamyareman.ir.ui.home.CalendarOccasions.hijriOf(it) }
+
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("تعطیلات قمری را در صورت اختلاف اعلام، تا ۲ روز جابه‌جا کن.", style = MaterialTheme.typography.bodySmall)
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            (-2..2).forEach { off ->
-                FilterChip(
-                    selected = snap.lunarOffset == off,
-                    onClick = {
-                        ClassPlanStore.saveLunarOffset(ctx, off)
-                        snap = ClassPlanStore.load(ctx)
-                    },
-                    label = { Text(if (off == 0) "۰" else toPersianDigits((if (off > 0) "+$off" else "$off"))) })
-            }
+        Text("تقویم شمسی، قمری و میلادی", fontWeight = FontWeight.Bold)
+        if (todayG != null && todayH != null) {
+            Text(
+                "شمسی: ${todayJ.faLong}",
+                style = MaterialTheme.typography.bodyMedium)
+            Text(
+                "میلادی: ${todayG.year}/${todayG.monthValue}/${todayG.dayOfMonth}",
+                style = MaterialTheme.typography.bodyMedium)
+            Text(
+                "قمری: ${com.hamyareman.ir.ui.home.CalendarOccasions.hijriFa(todayG)}",
+                style = MaterialTheme.typography.bodyMedium)
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = {
                 if (month == 1) { month = 12; year-- } else month--
             }) { Text("ماه قبل") }
-            Text(
-                "${JalaliDate.monthName(month)} ${toPersianDigits(year.toString())}")
+            Text("${JalaliDate.monthName(month)} ${toPersianDigits(year.toString())}", fontWeight = FontWeight.Bold)
             TextButton(onClick = {
                 if (month == 12) { month = 1; year++ } else month++
             }) { Text("ماه بعد") }
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Box(Modifier.size(10.dp).clip(RoundedCornerShape(2.dp)).background(Color(0xFFDC2626)))
+                Text("تعطیل رسمی", style = MaterialTheme.typography.labelSmall)
+            }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Box(Modifier.size(10.dp).clip(RoundedCornerShape(2.dp)).background(Color(0xFF93C5FD)))
+                Text("تعطیل مدرسه", style = MaterialTheme.typography.labelSmall)
+            }
         }
         Row(Modifier.fillMaxWidth()) {
             weekHdr.forEach { h ->
                 Text(h, modifier = Modifier.weight(1f), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
             }
         }
-        val dim = JalaliDate.daysInMonth(year, month)
         val pad = firstDow(year, month)
         val cells = List(pad) { 0 } + (1..dim).toList()
         cells.chunked(7).forEach { row ->
             Row(Modifier.fillMaxWidth()) {
                 row.forEach { day ->
-                    Box(Modifier.weight(1f).aspectRatio(1f).padding(2.dp), contentAlignment = Alignment.Center) {
+                    Box(Modifier.weight(1f).aspectRatio(0.85f).padding(1.dp), contentAlignment = Alignment.Center) {
                         if (day > 0) {
                             val iso = JalaliDate.toGregorianIso(JalaliDate.Jalali(year, month, day))
                             val date = iso?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                            val occ = date?.let { ClassPlanStore.occasionLabel(snap, it) }
-                            val holiday = date?.let { ClassPlanStore.isSchoolHoliday(snap, it) } == true
+                            val evs = date?.let { com.hamyareman.ir.ui.home.CalendarOccasions.matching(ctx, it, offset) }.orEmpty()
+                            val official = date != null && com.hamyareman.ir.ui.home.CalendarOccasions.isOfficialHoliday(ctx, date, offset)
+                            val school = date != null && com.hamyareman.ir.ui.home.CalendarOccasions.isSchoolWeekend(date) && !official
                             val isToday = year == todayJ.year && month == todayJ.month && day == todayJ.day
+                            val g = date
+                            val h = date?.let { com.hamyareman.ir.ui.home.CalendarOccasions.hijriOf(it) }
                             val bg = when {
-                                isToday -> MaterialTheme.colorScheme.primary
-                                holiday -> Color(0xFFFECACA)
+                                official -> Color(0xFFFECACA)
+                                school -> Color(0xFFDBEAFE)
                                 else -> Color.Transparent
                             }
                             val fg = when {
-                                isToday -> Color.White
-                                holiday -> Color(0xFF9F1239)
+                                official -> Color(0xFF9F1239)
+                                school -> Color(0xFF1D4ED8)
                                 else -> MaterialTheme.colorScheme.onSurface
                             }
                             Column(
-                                Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)).background(bg),
+                                Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(bg)
+                                    .then(
+                                        if (isToday) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
+                                        else Modifier),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center) {
-                                Text(toPersianDigits(day.toString()), color = fg)
-                                if (!occ.isNullOrBlank() && occ != "پنجشنبه" && occ != "جمعه") {
+                                Text(toPersianDigits(day.toString()), color = fg, fontWeight = FontWeight.Bold)
+                                if (g != null) {
+                                    Text(
+                                        "${g.dayOfMonth}",
+                                        color = fg.copy(alpha = 0.8f),
+                                        fontSize = 9.sp)
+                                }
+                                if (h != null) {
+                                    Text(
+                                        toPersianDigits(h[2].toString()),
+                                        color = fg.copy(alpha = 0.8f),
+                                        fontSize = 9.sp)
+                                }
+                                if (evs.isNotEmpty()) {
                                     Text("•", color = fg, fontSize = 8.sp)
                                 }
                             }
@@ -487,16 +524,28 @@ private fun ShamsiCalendarSection() {
                 repeat(7 - row.size) { Spacer(Modifier.weight(1f)) }
             }
         }
-        val monthOccasions = (1..dim).mapNotNull { d ->
-            val iso = JalaliDate.toGregorianIso(JalaliDate.Jalali(year, month, d)) ?: return@mapNotNull null
-            val date = runCatching { LocalDate.parse(iso) }.getOrNull() ?: return@mapNotNull null
-            val lab = ClassPlanStore.occasionLabel(snap, date) ?: return@mapNotNull null
-            if (lab == "پنجشنبه" || lab == "جمعه") null
-            else toPersianDigits("$d ${JalaliDate.monthName(month)}") + " — $lab"
+        Text("مناسبات این ماه", fontWeight = FontWeight.Bold)
+        val monthOcc = com.hamyareman.ir.ui.home.CalendarOccasions.monthOccasions(ctx, year, month, dim, offset)
+        (1..dim).forEach { d ->
+            val iso = JalaliDate.toGregorianIso(JalaliDate.Jalali(year, month, d)) ?: return@forEach
+            val date = runCatching { LocalDate.parse(iso) }.getOrNull() ?: return@forEach
+            when (SchoolShift.dayIndex(date)) {
+                7 -> Text(
+                    toPersianDigits("$d ${JalaliDate.monthName(month)}") + " — جمعه — تعطیل رسمی",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF9F1239))
+                6 -> Text(
+                    toPersianDigits("$d ${JalaliDate.monthName(month)}") + " — پنجشنبه — تعطیل مدرسه",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF1D4ED8))
+            }
         }
-        if (monthOccasions.isNotEmpty()) {
-            Text("مناسبات این ماه")
-            monthOccasions.forEach { Text(it, style = MaterialTheme.typography.bodySmall) }
+        monthOcc.distinctBy { it.first to it.second.title }.forEach { (d, e) ->
+            val mark = if (e.holiday) " — تعطیل رسمی" else ""
+            Text(
+                toPersianDigits("$d ${JalaliDate.monthName(month)}") + " — ${e.title}$mark",
+                style = MaterialTheme.typography.bodySmall,
+                color = if (e.holiday) Color(0xFF9F1239) else MaterialTheme.colorScheme.onSurface)
         }
     }
 }
@@ -545,6 +594,9 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
             if (snap.cycleWeeks == 1) "همیشه ${current.label}"
             else "شیفت این هفته هفته‌ی ${toPersianDigits(ClassPlanStore.cycleWeekPos(snap, today).toString())} از ${toPersianDigits(snap.cycleWeeks.toString())} هفته، ${current.label}",
             fontWeight = FontWeight.Bold)
+        ClassPlanStore.nextCycleStartCaption(snap, ctx = ctx)?.let { cap ->
+            Text(cap, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+        }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text("آلارم‌های صدادار", fontWeight = FontWeight.Bold)
             IconButton(onClick = { settingsOpen = true }) {
@@ -687,6 +739,13 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                                 val kShift =
                                     if (Math.floorMod((k - nowPos).toLong(), 2L) == 0L) current
                                     else current.opposite()
+                                val weekFa = when (k) {
+                                    1 -> "اول"
+                                    2 -> "دوم"
+                                    3 -> "سوم"
+                                    4 -> "چهارم"
+                                    else -> toPersianDigits(k.toString())
+                                }
                                 FilterChip(
                                     selected = nowPos == k,
                                     onClick = {
@@ -694,8 +753,7 @@ private fun ShiftSection(onVirtualHours: (() -> Unit)? = null) {
                                         snap = ClassPlanStore.load(ctx)
                                     },
                                     label = {
-                                        Text(
-                                            "هفته‌ی ${toPersianDigits(k.toString())} · ${kShift.label}")
+                                        Text("هفته $weekFa (${kShift.label})")
                                     })
                             }
                         }

@@ -1,6 +1,8 @@
 package com.hamyareman.ir.ui.tools
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.pm.ActivityInfo
 import android.util.Log
 import android.webkit.ConsoleMessage
 import android.webkit.JavascriptInterface
@@ -29,6 +31,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -62,10 +65,10 @@ internal fun WebSettings.enableStudyPinchZoom() {
     useWideViewPort = true
 }
 
-/** آزمایشگاه تمام‌صفحه: overview/pinch کل صفحه را به نوار باریک تبدیل می‌کرد. */
+/** آزمایشگاه تمام‌صفحه: pinch بدون overview تا صفحه به نوار باریک تبدیل نشود. */
 internal fun WebSettings.enableLabLayout() {
-    setSupportZoom(false)
-    builtInZoomControls = false
+    setSupportZoom(true)
+    builtInZoomControls = true
     displayZoomControls = false
     loadWithOverviewMode = false
     useWideViewPort = false
@@ -174,7 +177,15 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
     val webRef = remember { arrayOfNulls<WebView>(1) }
     val premium = StudentProfileState.isPaid()
     val isLab = toolId == "chemistry" || toolId == "physics" || toolId == "biology"
-    val executeLocked = !premium && (toolId == "ti_nspire" || toolId == "casio991")
+    val isCalc = toolId == "ti_nspire" || toolId == "casio991" || toolId == "dj120d"
+    val hideChrome = isLab || isCalc
+    val activity = ctx as? Activity
+    DisposableEffect(isLab) {
+        if (!isLab) return@DisposableEffect onDispose { }
+        val prev = activity?.requestedOrientation ?: ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+        onDispose { activity?.requestedOrientation = prev }
+    }
     val bridge = remember(toolId) {
         HamyarToolBridge(ctx.applicationContext, toolId) { json ->
             ToolSaveStore.put(ctx, toolId, json)
@@ -207,7 +218,7 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
         applySaved(webRef[0])
     }
     Column(Modifier.fillMaxSize()) {
-        AppTopBar(title, onBack)
+        if (!hideChrome) AppTopBar(title, onBack)
         Box(Modifier.weight(1f).fillMaxWidth()) {
             AndroidView(
                 factory = { c ->
@@ -247,24 +258,6 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
                     webRef[0]?.let { applyLabViewport(it) }
                 },
                 onRelease = { webRef[0] = null; it.destroy() })
-            if (executeLocked) {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.22f))
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }) {})
-                Text(
-                    "ماشین‌حساب را می‌بینی؛ اجرا با اشتراک فعال است.",
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp)
-                        .background(Color(0xE67F1D1D), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 14.dp, vertical = 10.dp))
-            }
         }
     }
 }
@@ -346,6 +339,31 @@ private fun labLayoutJs(): String = """
     })();
 """.trimIndent()
 
+private fun calcLockJs(): String = """
+    (function(){
+      if (window.__hamyarCalcLock) return;
+      window.__hamyarCalcLock = true;
+      var s = document.createElement('style');
+      s.textContent =
+        '.k-btn,.keypad,button.k-btn{pointer-events:none!important;opacity:.55!important;}' +
+        'html,body{overflow:auto!important;pointer-events:auto!important;}';
+      document.head.appendChild(s);
+      document.addEventListener('click', function(e){
+        var t = e.target;
+        if (!t) return;
+        if (t.closest && t.closest('.k-btn,.keypad')) { e.preventDefault(); e.stopPropagation(); }
+      }, true);
+      var el = document.getElementById('hamyar-sub-banner');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'hamyar-sub-banner';
+        el.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;z-index:2147483647;background:#7f1d1d;color:#fff;padding:10px 14px;border-radius:12px;font-family:Tahoma,sans-serif;text-align:center;font-size:13px;pointer-events:none';
+        el.textContent = 'استفاده مخصوص اعضای مشترک 🔒';
+        document.body.appendChild(el);
+      }
+    })();
+""".trimIndent()
+
 private fun calendarLockJs(premium: Boolean): String {
     val flag = if (premium) "true" else "false"
     return """
@@ -411,7 +429,7 @@ private fun labLockJs(premium: Boolean): String {
           el = document.createElement('div');
           el.id = 'hamyar-sub-banner';
           el.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;z-index:2147483647;background:#7f1d1d;color:#fff;padding:10px 14px;border-radius:12px;font-family:Tahoma,sans-serif;text-align:center;font-size:13px;pointer-events:none';
-          el.textContent = 'این آزمایش با اشتراک فعال اجرا می‌شود. محتوا را می‌بینی؛ اجرا قفل است.';
+          el.textContent = 'اجرای این آزمایش با اشتراک فعال ممکن هست 🔒';
           document.body.appendChild(el);
         }
         el.style.display = 'block';

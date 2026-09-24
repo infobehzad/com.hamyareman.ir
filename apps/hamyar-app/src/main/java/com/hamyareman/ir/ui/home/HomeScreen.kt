@@ -125,7 +125,7 @@ fun HomeScreen(nav: NavController) {
     val period = if (h24 < 12) "قبل از ظهر" else "بعد از ظهر"
     val row2Time = toPersianDigits("%d:%02d".format(h12, time.minute)) + " $period"
     val row2Greg = "${time.year}/${gregMonth[time.monthValue - 1]}/${time.dayOfMonth}"
-    val holiday = IranOfficialHolidays.occasion(jalali)
+    val holiday = CalendarOccasions.dashboardLine(ctx, jalali)
     val who = StudentProfileState.firstName.ifBlank { "دوست من" }
 
     Scaffold(floatingActionButton = {
@@ -158,6 +158,7 @@ fun HomeScreen(nav: NavController) {
                                     style = MaterialTheme.typography.titleMedium,
                                     fontFamily = AppTypography.d3Date.family, fontWeight = AppTypography.d3Date.weight,
                                     fontSize = AppTypography.d3Date.size,
+                                    modifier = Modifier.clickable { nav.navigate(Screen.ClassPlanCalendar.route) },
                                 )
                                 Text(
                                     row2Time,
@@ -182,23 +183,15 @@ fun HomeScreen(nav: NavController) {
                                         color = MaterialTheme.colorScheme.primary,
                                     )
                                 }
-                                Spacer(Modifier.height(8.dp))
-                                SubscriptionChip(StudentProfileState.subscription) { nav.navigate(Screen.Subscription.route) }
                             }
                         }
                         Spacer(Modifier.width(28.dp))
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.clickable { nav.navigate(Screen.UserProfile.route) },
                         ) {
                             ProfileClockAvatar(onClick = { nav.navigate(Screen.UserProfile.route) })
-                            Text(
-                                "پروفایل من",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontFamily = AppTypography.titleSub.family, fontWeight = AppTypography.titleSub.weight,
-                                fontSize = AppTypography.titleSub.size,
-                                modifier = Modifier.padding(top = 4.dp),
-                            )
+                            Spacer(Modifier.height(6.dp))
+                            SubscriptionChip(StudentProfileState.subscription) { nav.navigate(Screen.Subscription.route) }
                         }
                     }
                 }
@@ -220,6 +213,7 @@ fun HomeScreen(nav: NavController) {
                 onOpenPlan = { nav.navigate(Screen.ClassPlan.route) },
                 onOpenPrep = { nav.navigate(Screen.TomorrowPrep.route) },
                 onOpenAlarm = { nav.navigate(Screen.ClassPlanShift.route) },
+                onOpenLeave = { nav.navigate(Screen.Leave.route) },
             )
 
             Row(

@@ -29,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -57,8 +58,7 @@ private val LessonColors = listOf(
     Color(0xFF4338CA),
     Color(0xFFB45309),
     Color(0xFFBE185D),
-    Color(0xFF0369A1),
-)
+    Color(0xFF0369A1))
 
 @Composable
 fun ClassPlanCard(
@@ -66,7 +66,7 @@ fun ClassPlanCard(
     onOpenPlan: () -> Unit,
     onOpenPrep: () -> Unit,
     onOpenAlarm: () -> Unit,
-) {
+    onOpenLeave: () -> Unit = {}) {
     val ctx = LocalContext.current
     val reminders = LocalAppContainer.current.reminders
     var tick by remember { mutableIntStateOf(0) }
@@ -99,17 +99,18 @@ fun ClassPlanCard(
         if (got) tick++
     }
     val virtEnd = remember(tick) {
+        val sh = ClassPlanStore.shiftOf(snap, today)
         ClassPlanStore.virtualSessions(ctx).firstOrNull { it.dayIndex == SchoolShift.dayIndex(today) }
-            ?.let { it.endH * 60 + it.endM }
+            ?.endMinFor(sh)
     }
     val showDate = remember(tick, snap.exitMorning, snap.exitNoon, snap.anchorIso, virtEnd) {
-        ClassPlanStore.dashboardShowDate(snap, virtualEndMin = virtEnd)
+        ClassPlanStore.dashboardShowDate(snap, virtualEndMin = virtEnd, ctx = ctx)
     }
     val j = JalaliDate.toJalali(showDate.toString())
     val dayName = JalaliDate.weekDayFa(showDate.toString())
     val dateFa = j?.let { toPersianDigits("${it.day} ${JalaliDate.monthName(it.month)}") } ?: ""
     val shift = ClassPlanStore.shiftOf(snap, showDate)
-    val holiday = ClassPlanStore.isSchoolHoliday(snap, showDate)
+    val holiday = ClassPlanStore.isSchoolHoliday(snap, showDate, ctx)
     val dayWord = ClassPlanStore.dayWordFor(showDate, today)
     val dayLabel = ClassPlanStore.dayLabelFor(showDate, today, ClassPlanStore.shiftOf(snap, showDate))
     // هر خانه می‌تواند دو درس داشته باشد: «درسِ اول / درسِ دوم» در یک کادر.
@@ -131,8 +132,7 @@ fun ClassPlanCard(
     val alarmLabel = toPersianDigits("%d:%02d".format(ah, am))
     val sleep = toPersianDigits(
         if (shift == com.hamyareman.ir.ui.study.Shift.MORNING) "%d:%02d".format(alarmPrefs.sleepMH, alarmPrefs.sleepMM)
-        else "%d:%02d".format(alarmPrefs.sleepNH, alarmPrefs.sleepNM),
-    )
+        else "%d:%02d".format(alarmPrefs.sleepNH, alarmPrefs.sleepNM))
     val virtual = ClassPlanStore.isVirtual(ctx, isoN)
     var exam by remember(tick, isoN) { mutableStateOf(ClassPlanStore.examOf(ctx, isoN)) }
     var report by remember(tick, isoN, exam) { mutableStateOf(ClassPlanStore.reportOf(ctx, isoN)) }
@@ -151,19 +151,16 @@ fun ClassPlanCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-    ) {
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
                 "برنامه کلاسی مدرسه",
                 fontFamily = AppTypography.d9Section.family, fontWeight = AppTypography.d9Section.weight,
-                fontSize = AppTypography.d9Section.size,
-            )
+                fontSize = AppTypography.d9Section.size)
             Row(
                 Modifier.fillMaxWidth().clickable(onClick = onOpenPlan),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
+                horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Column(Modifier.width(80.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(dayName, fontFamily = AppTypography.d12ClassDate.family, fontWeight = AppTypography.d12ClassDate.weight, fontSize = AppTypography.d12ClassDate.size)
                     Text(dateFa, fontFamily = AppTypography.d12ClassDate.family, fontWeight = AppTypography.d12ClassDate.weight, fontSize = AppTypography.d12ClassDate.size, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -173,24 +170,21 @@ fun ClassPlanCard(
                     Box(
                         Modifier.weight(1f).height(56.dp).clip(RoundedCornerShape(14.dp))
                             .background(Color(0xFFFEF3C7)).padding(horizontal = 10.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
+                        contentAlignment = Alignment.Center) {
                         Text(
                             ClassPlanStore.holidayRoutine(today),
                             fontFamily = AppTypography.d10ClassBox.family, fontWeight = AppTypography.d10ClassBox.weight,
                             fontSize = AppTypography.d10ClassBox.size,
                             color = Color(0xFF92400E),
                             maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                            overflow = TextOverflow.Ellipsis)
                     }
                 } else {
                     boxes.forEachIndexed { i, name ->
                         Box(
                             Modifier.weight(1f).height(56.dp).clip(RoundedCornerShape(14.dp))
                                 .background(LessonColors[i % LessonColors.size]),
-                            contentAlignment = Alignment.Center,
-                        ) {
+                            contentAlignment = Alignment.Center) {
                             Text(
                                 name,
                                 color = Color.White,
@@ -199,8 +193,7 @@ fun ClassPlanCard(
                                 textAlign = TextAlign.Center,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(4.dp),
-                            )
+                                modifier = Modifier.padding(4.dp))
                         }
                     }
                 }
@@ -210,8 +203,7 @@ fun ClassPlanCard(
                     "$dayWord مجازی است",
                     color = Color(0xFFB91C1C),
                     fontFamily = AppTypography.d9Section.family, fontWeight = AppTypography.d9Section.weight,
-                    fontSize = AppTypography.d9Section.size,
-                )
+                    fontSize = AppTypography.d9Section.size)
             }
             val leave = ClassPlanStore.leaveOn(ctx, isoN)
             if (leave != null) {
@@ -219,8 +211,7 @@ fun ClassPlanCard(
                     "$dayWord مرخصی است — ${leave.reason} (${ClassPlanStore.justificationLabel(leave.justification)})",
                     color = Color(0xFFB45309),
                     fontFamily = AppTypography.d9Section.family, fontWeight = AppTypography.d9Section.weight,
-                    fontSize = AppTypography.d9Section.size,
-                )
+                    fontSize = AppTypography.d9Section.size)
             }
             Column(Modifier.fillMaxWidth()) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -228,8 +219,7 @@ fun ClassPlanCard(
                         label = "کیف مدرسه آماده است",
                         checked = bag && !virtual,
                         enabled = !virtual && !bagLock,
-                        modifier = Modifier.weight(1f),
-                    ) {
+                        modifier = Modifier.weight(1f)) {
                         bag = it
                         ClassPlanStore.setPrepBag(ctx, isoN, it)
                         pushChecks()
@@ -238,8 +228,7 @@ fun ClassPlanCard(
                         label = "تکالیف انجام شده",
                         checked = hw,
                         enabled = !hwLock,
-                        modifier = Modifier.weight(1f).padding(start = 8.dp),
-                    ) {
+                        modifier = Modifier.weight(1f).padding(start = 8.dp)) {
                         hw = it
                         ClassPlanStore.setPrepHw(ctx, isoN, it)
                         pushChecks()
@@ -248,30 +237,37 @@ fun ClassPlanCard(
                 Row(
                     Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     PrepTick(
-                        label = "آلارم برای ساعت $alarmLabel تنظیم شده",
+                        label = "آلارم برای $alarmLabel",
                         checked = alarmOn,
                         enabled = false,
-                        modifier = Modifier.weight(1f).clickable(onClick = onOpenAlarm),
-                    )
+                        modifier = Modifier.weight(1f).clickable(onClick = onOpenAlarm))
                     PrepTick(
                         label = "ساعت خوابت $sleep باشد",
                         checked = true,
                         enabled = false,
-                        modifier = Modifier.weight(1f).padding(start = 8.dp),
-                    )
+                        modifier = Modifier.weight(1f).padding(start = 8.dp))
                 }
             }
             // در داشبورد فقط نمایش است؛ خودِ متن به صفحهٔ آماده‌سازی فردا می‌رود.
-            Text(
-                if (exam.isBlank()) "$dayLabel امتحان داری؟" else "$dayLabel امتحان $exam",
-                fontFamily = AppTypography.d9Section.family, fontWeight = AppTypography.d9Section.weight,
-                fontSize = AppTypography.d9Section.size,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.fillMaxWidth().clickable(onClick = onOpenPrep),
-            )
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(
+                    if (exam.isBlank()) "$dayLabel امتحان داری؟" else "$dayLabel امتحان $exam",
+                    fontFamily = AppTypography.d9Section.family, fontWeight = AppTypography.d9Section.weight,
+                    fontSize = AppTypography.d9Section.size,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f).clickable(onClick = onOpenPrep))
+                Text(
+                    "ثبت مرخصی",
+                    fontFamily = AppTypography.d9Section.family, fontWeight = AppTypography.d9Section.weight,
+                    fontSize = AppTypography.d9Section.size,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable(onClick = onOpenLeave))
+            }
             if (exam.isNotBlank()) {
                 OutlinedTextField(
                     value = report,
@@ -284,9 +280,7 @@ fun ClassPlanCard(
                     label = { Text("گزارش نتیجه امتحان", fontFamily = AppTypography.d11Check.family, fontWeight = AppTypography.d11Check.weight) },
                     textStyle = androidx.compose.ui.text.TextStyle(
                         fontFamily = AppTypography.d11Check.family, fontWeight = AppTypography.d11Check.weight,
-                        fontSize = AppTypography.d11Check.size,
-                    ),
-                )
+                        fontSize = AppTypography.d11Check.size))
             }
         }
     }
@@ -298,14 +292,12 @@ private fun PrepTick(
     checked: Boolean,
     enabled: Boolean = false,
     modifier: Modifier = Modifier,
-    onChecked: ((Boolean) -> Unit)? = null,
-) {
+    onChecked: ((Boolean) -> Unit)? = null) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
         Checkbox(
             checked = checked,
             onCheckedChange = { if (enabled && onChecked != null) onChecked(it) },
-            enabled = enabled,
-        )
+            enabled = enabled)
         Text(label, fontFamily = AppTypography.d11Check.family, fontWeight = AppTypography.d11Check.weight, fontSize = AppTypography.d11Check.size, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
 }

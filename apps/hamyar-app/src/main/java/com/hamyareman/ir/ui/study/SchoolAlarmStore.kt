@@ -21,8 +21,7 @@ object SchoolAlarmStore {
         val busNH: Int = 11, val busNM: Int = 45,
         val schoolNH: Int = 12, val schoolNM: Int = 0,
         val sleepMH: Int = 21, val sleepMM: Int = 30,
-        val sleepNH: Int = 23, val sleepNM: Int = 0,
-    )
+        val sleepNH: Int = 23, val sleepNM: Int = 0)
 
     const val WAKE_M = ClassPlanStore.ALARM_MORNING
     const val BUS_M = "school_bus_morning"
@@ -57,8 +56,7 @@ object SchoolAlarmStore {
             busNH = s.getInt("bus_n_h", 11), busNM = s.getInt("bus_n_m", 45),
             schoolNH = s.getInt("school_n_h", snap.noonHour), schoolNM = s.getInt("school_n_m", snap.noonMinute),
             sleepMH = s.getInt("sleep_m_h", smh), sleepMM = s.getInt("sleep_m_m", smm),
-            sleepNH = s.getInt("sleep_n_h", snh), sleepNM = s.getInt("sleep_n_m", snm),
-        )
+            sleepNH = s.getInt("sleep_n_h", snh), sleepNM = s.getInt("sleep_n_m", snm))
     }
 
     fun save(ctx: Context, p: Prefs) {
@@ -81,13 +79,16 @@ object SchoolAlarmStore {
             snap.morningHour, snap.morningMinute, snap.wakeLeadMin,
             snap.noonHour, snap.noonMinute,
             "%d:%02d".format(p.sleepMH, p.sleepMM),
-            "%d:%02d".format(p.sleepNH, p.sleepNM),
-        )
+            "%d:%02d".format(p.sleepNH, p.sleepNM))
     }
 
     fun sync(ctx: Context, reminders: ReminderScheduler, snap: ClassPlanStore.Snapshot, date: LocalDate) {
+        ClassPlanStore.refreshOffCache(ctx)
         val p = load(ctx)
-        val shift = ClassPlanStore.shiftOf(snap, date)
+        val target = if (ClassPlanStore.isSchoolOff(ctx, snap, date)) {
+            ClassPlanStore.firstSchoolDay(snap, date.plusDays(1), ctx)
+        } else date
+        val shift = ClassPlanStore.shiftOf(snap, target)
         val ch = NotificationChannels.SCHOOL_ALARM
         fun up(id: String, title: String, body: String, h: Int, m: Int) {
             reminders.upsert(Reminder(id, title, body, h, m, channel = ch, enabled = true))

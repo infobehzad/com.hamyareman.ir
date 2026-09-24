@@ -328,7 +328,7 @@ fun LoginScreen(
         }
         Spacer(Modifier.height(16.dp))
         Text(
-            "نسخه‌ی " + com.hamyareman.ir.BuildConfig.VERSION_NAME + " — اگر این عدد را نمی‌بینی، APK قدیمی نصب است.",
+            "نسخه‌ی " + com.hamyareman.ir.BuildConfig.VERSION_NAME,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center,

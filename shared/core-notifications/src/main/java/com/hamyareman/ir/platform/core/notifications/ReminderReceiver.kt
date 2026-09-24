@@ -9,7 +9,7 @@ import android.content.pm.PackageManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import com.hamyareman.ir.platform.core.common.LocalStore
+import com.hamyareman.ir.platform.core.common.SchoolOffCache
 import com.hamyareman.ir.platform.core.notifications.R
 
 /**
@@ -29,6 +29,12 @@ class ReminderReceiver : BroadcastReceiver() {
 
         val scheduler = ReminderScheduler(context)
         val school = id.startsWith("school_")
+        val schoolDayAlarm = school && id != "school_sleep"
+        if (schoolDayAlarm && SchoolOffCache.isOff(context)) {
+            // تعطیل رسمی، پنجشنبه/جمعه یا مرخصی ثبت‌شده: بیداری/سرویس/حضور خاموش.
+            scheduler.find(id)?.let { scheduler.schedule(it) }
+            return
+        }
         if (!school && scheduler.quietHours.isQuietNow()) {
             // سکوت یعنی سکوت: فقط فردا دوباره زمان‌بندی می‌کنیم.
             scheduler.find(id)?.let { scheduler.schedule(it) }

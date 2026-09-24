@@ -210,6 +210,13 @@ fun ZahraNavHost() {
                     onVirtualHours = { nav.navigate(Screen.VirtualClass.route) },
                 )
             }
+            composable(Screen.ClassPlanCalendar.route) {
+                ClassPlanScreen(
+                    onBack = { nav.popBackStack() },
+                    initialTab = 1,
+                    onVirtualHours = { nav.navigate(Screen.VirtualClass.route) },
+                )
+            }
             composable(Screen.VirtualClass.route) { VirtualClassScreen { nav.popBackStack() } }
             composable(Screen.Subscription.route) { com.hamyareman.ir.ui.home.SubscriptionScreen { nav.popBackStack() } }
             composable(Screen.TomorrowPrep.route) { TomorrowPrepScreen { nav.popBackStack() } }
