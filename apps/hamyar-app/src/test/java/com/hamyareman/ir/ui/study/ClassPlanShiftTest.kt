@@ -5,8 +5,8 @@ import org.junit.Test
 import java.time.LocalDate
 
 /**
- * منطقِ تازهٔ شیفت: شیفتِ هفته‌ی جاری (بخش اول) لنگر است و شیفتِ هفته‌های
- * چرخه از آن به‌صورتِ متناوبِ هفتگی مشتق می‌شود. این تست‌ها روی JVM خالص اجرا می‌شوند.
+ * منطقِ شیفت: آلفا = شیفتِ بلوکِ لنگر؛ بتا = هفته داخل بلوک.
+ * بلوکِ ۲ یا ۴ هفته همان آلفا می‌ماند و بعد به شیفت مخالف می‌رود.
  */
 class ClassPlanShiftTest {
 
@@ -88,11 +88,11 @@ class ClassPlanShiftTest {
     }
 
     @Test
-    fun `four week cycle still alternates weekly`() {
+    fun `four week cycle keeps alpha for the block then flips`() {
         val s = snap(4, offset = 3, base = Shift.EVENING)
         assertEquals(Shift.EVENING, ClassPlanStore.shiftOf(s, saturday))
-        assertEquals(Shift.MORNING, ClassPlanStore.shiftOf(s, saturday.plusDays(7)))
-        assertEquals(Shift.EVENING, ClassPlanStore.shiftOf(s, saturday.plusDays(14)))
+        assertEquals(Shift.EVENING, ClassPlanStore.shiftOf(s, saturday.plusDays(7)))
+        assertEquals(Shift.MORNING, ClassPlanStore.shiftOf(s, saturday.plusDays(14)))
         assertEquals(Shift.MORNING, ClassPlanStore.shiftOf(s, saturday.plusDays(21)))
     }
 
