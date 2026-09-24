@@ -251,8 +251,8 @@ fun HomeScreen(nav: NavController) {
                 fontSize = AppTypography.bump(AppTypography.heading, 16),
                 modifier = Modifier.padding(horizontal = HomeSide),
             )
-            HubCard("🌤", "روتین امروز", "بلوک‌های روزت را ببین", Modifier.padding(horizontal = HomeSide)) { nav.navigate(Screen.Routine.route) }
-            HubCard("💧", "آب بنوش", "لیوان‌های امروزت را ثبت کن", Modifier.padding(horizontal = HomeSide)) { nav.navigate(Screen.Water.route) }
+            HubCard("🌤", "روتین امروز", "بلوک‌های روزت را ببین", Modifier.padding(horizontal = HomeSide), slotId = "page.home.tile") { nav.navigate(Screen.Routine.route) }
+            HubCard("💧", "آب بنوش", "لیوان‌های امروزت را ثبت کن", Modifier.padding(horizontal = HomeSide), slotId = "page.home.tile") { nav.navigate(Screen.Water.route) }
             Spacer(Modifier.height(8.dp))
         }
     }

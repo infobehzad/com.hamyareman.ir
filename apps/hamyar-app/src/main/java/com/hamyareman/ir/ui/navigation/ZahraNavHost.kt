@@ -30,6 +30,8 @@ import com.hamyareman.ir.platform.feature.study.BookModuleRegistry
 import com.hamyareman.ir.ui.ailearning.AiAssessmentScreen
 import com.hamyareman.ir.ui.ailearning.AiLearningHomeScreen
 import com.hamyareman.ir.ui.appearance.AppearanceScreen
+import com.hamyareman.ir.ui.appearance.FontFloater
+import com.hamyareman.ir.ui.appearance.TypeSlots
 import com.hamyareman.ir.ui.art.ArtGalleryScreen
 import com.hamyareman.ir.ui.art.DailyArtPromptScreen
 import com.hamyareman.ir.ui.calmdown.BreathingScreen
@@ -117,10 +119,12 @@ fun ZahraNavHost() {
     }
     val hideBar = route?.startsWith("study-teach") == true ||
         route?.startsWith("video-teach") == true
+    Box(Modifier.fillMaxSize()) {
     Scaffold(bottomBar = {
         if (!hideBar) {
             NavigationBar {
                 Tabs.forEach { tab ->
+                    val navId = "nav.bottom.${tab.route}"
                     NavigationBarItem(
                         selected = route == tab.route ||
                             (tab.route == Screen.Study.route && (route?.startsWith("study-book") == true || route == Screen.StudyHome.route)),
@@ -141,7 +145,13 @@ fun ZahraNavHost() {
                             }
                         },
                         icon = { Icon(tab.icon, tab.label) },
-                        label = { Text(tab.label) },
+                        label = {
+                            Text(
+                                tab.label,
+                                fontFamily = TypeSlots.family(navId),
+                                fontSize = TypeSlots.size(navId, 11),
+                            )
+                        },
                     )
                 }
             }
@@ -439,5 +449,7 @@ fun ZahraNavHost() {
                 SketchGalleryScreen(onBack = { nav.popBackStack() })
             }
         }
+    }
+    FontFloater(route)
     }
 }

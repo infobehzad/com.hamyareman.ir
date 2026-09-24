@@ -5,7 +5,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import com.hamyareman.ir.R
 
-/** فونت‌های امبدشده در APK — ریپو همیار + ۹ وزن وزیرمتن. */
+/** فونت‌های امبدشده در APK — ریپو همیار + وزیر + چند خانوادهٔ آزاد فارسی. */
 object EmbeddedFonts {
 
     data class Face(
@@ -32,6 +32,15 @@ object EmbeddedFonts {
         Face("vazirmatn_bold", "وزیر ضخیم", "وزیرمتن", R.font.vazirmatn_bold, FontWeight.Bold),
         Face("vazirmatn_extrabold", "وزیر خیلی‌ضخیم", "وزیرمتن", R.font.vazirmatn_extrabold, FontWeight.ExtraBold),
         Face("vazirmatn_black", "وزیر سیاه", "وزیرمتن", R.font.vazirmatn_black, FontWeight.Black),
+        Face("lalezar", "لاله‌زار", "آزاد فارسی", R.font.lalezar),
+        Face("sahel", "ساحل", "آزاد فارسی", R.font.sahel),
+        Face("samim", "صمیم", "آزاد فارسی", R.font.samim),
+        Face("shabnam", "شبنم", "آزاد فارسی", R.font.shabnam),
+        Face("tanha", "تنها", "آزاد فارسی", R.font.tanha),
+        Face("gandom", "گندم", "آزاد فارسی", R.font.gandom),
+        Face("markazi", "مرکزی", "آزاد فارسی", R.font.markazi),
+        Face("amiri", "امیری", "آزاد عربی", R.font.amiri),
+        Face("noto_naskh", "نوتو نسخ", "آزاد عربی", R.font.noto_naskh),
     )
 
     private val byKey: Map<String, Face> = catalog.associateBy { it.key }
@@ -42,7 +51,6 @@ object EmbeddedFonts {
 
     fun labelOf(key: String): String = face(key).label
 
-    /** نمونهٔ کش‌شده برای پیش‌نمایش فهرست. */
     @Synchronized
     fun family(key: String): FontFamily {
         cache[key]?.let { return it }
@@ -52,7 +60,6 @@ object EmbeddedFonts {
         return fam
     }
 
-    /** نمونهٔ تازه برای هر نقش تا هویت FontFamily در bump جدا بماند. */
     fun familyFresh(key: String): FontFamily {
         val f = face(key)
         return runCatching { FontFamily(Font(f.resId, f.weight)) }.getOrDefault(FontFamily.Default)

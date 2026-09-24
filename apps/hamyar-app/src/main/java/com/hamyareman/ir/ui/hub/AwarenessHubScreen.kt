@@ -52,7 +52,7 @@ fun AwarenessHubScreen(nav: NavController) {
     var answer by remember { mutableStateOf(store.getString("self_answer_$dateKey", "")) }
 
     HubBody {
-        HubHeader("آگاهی 🪷", "هر روز یک قدم به خودت نزدیک‌تر")
+        HubHeader("آگاهی 🪷", "هر روز یک قدم به خودت نزدیک‌تر", slotId = "hub.awareness.header")
 
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -68,12 +68,12 @@ fun AwarenessHubScreen(nav: NavController) {
             }
         }
 
-        HubCard("📓", "دفترچه‌ی من", "حرف‌های بلندتر؛ روزنوشت آزاد") { nav.hubTo(Screen.Journal.route) }
-        HubCard("🌬", "تمرین نفس", "با شمارش صوتی و انیمیشن") { nav.hubTo(Screen.Breath.route) }
-        HubCard("🧠", "ذهن‌آگاهی", "تمرین‌های کوتاه حضور") { nav.hubTo(Screen.Mindfulness.route) }
-        HubCard("💛", "آرامش سریع", "امواج، جنگل بارانی و ریست طلایی") { nav.hubTo(Screen.Calm.route) }
-        HubCard("📖", "مطالعه‌ی غیردرسی", "قفسه‌ی کتاب‌های خودم") { nav.hubTo(Screen.ReadingCorner.route) }
-        HubCard("🎧", "صداهای آرامش‌بخش", "جلسه‌های صوتی کامل") { nav.hubTo(Screen.Wellness.route) }
+        HubCard("📓", "دفترچه‌ی من", "حرف‌های بلندتر؛ روزنوشت آزاد", slotId = "hub.awareness.item.journal") { nav.hubTo(Screen.Journal.route) }
+        HubCard("🌬", "تمرین نفس", "با شمارش صوتی و انیمیشن", slotId = "hub.awareness.item.breath") { nav.hubTo(Screen.Breath.route) }
+        HubCard("🧠", "ذهن‌آگاهی", "تمرین‌های کوتاه حضور", slotId = "hub.awareness.item.mindfulness") { nav.hubTo(Screen.Mindfulness.route) }
+        HubCard("💛", "آرامش سریع", "امواج، جنگل بارانی و ریست طلایی", slotId = "hub.awareness.item.calm") { nav.hubTo(Screen.Calm.route) }
+        HubCard("📖", "مطالعه‌ی غیردرسی", "قفسه‌ی کتاب‌های خودم", slotId = "hub.awareness.item.reading-corner") { nav.hubTo(Screen.ReadingCorner.route) }
+        HubCard("🎧", "صداهای آرامش‌بخش", "جلسه‌های صوتی کامل", slotId = "hub.awareness.item.wellness") { nav.hubTo(Screen.Wellness.route) }
     }
 }
 

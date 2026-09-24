@@ -30,17 +30,17 @@ import java.util.Locale
 @Composable
 fun HealthHubScreen(nav: NavController) {
     HubBody {
-        HubHeader("سلامتی 💚", "بدنت دوست توست — هر روز یک قدم مهربانی")
-        HubCard("📊", "پیشرفت سلامتی", "آب/ورزش/نقاشی + آمار تدریس، مرور و آزمون‌ها") { nav.hubTo(Screen.HealthProgress.route) }
-        HubCard("🧘", "حرکات ورزشی و یوگا", "۴۳ حرکت با راهنمای صوتی آزرا و تایمر") { nav.hubTo(Screen.Wellness.route) }
-        HubCard("💧", "آب بنوش", "لیوان‌های امروز را ثبت کن") { nav.hubTo(Screen.Water.route) }
-        HubCard("😴", "خواب من", "خوابیدن و بیدار شدن را ثبت کن؛ رشته‌ات را نگه دار") { nav.hubTo(Screen.SleepLog.route) }
+        HubHeader("سلامتی 💚", "بدنت دوست توست — هر روز یک قدم مهربانی", slotId = "hub.health.header")
+        HubCard("📊", "پیشرفت سلامتی", "آب/ورزش/نقاشی + آمار تدریس، مرور و آزمون‌ها", slotId = "hub.health.item.health-progress") { nav.hubTo(Screen.HealthProgress.route) }
+        HubCard("🧘", "حرکات ورزشی و یوگا", "۴۳ حرکت با راهنمای صوتی آزرا و تایمر", slotId = "hub.health.item.wellness") { nav.hubTo(Screen.Wellness.route) }
+        HubCard("💧", "آب بنوش", "لیوان‌های امروز را ثبت کن", slotId = "hub.health.item.water") { nav.hubTo(Screen.Water.route) }
+        HubCard("😴", "خواب من", "خوابیدن و بیدار شدن را ثبت کن؛ رشته‌ات را نگه دار", slotId = "hub.health.item.sleep-log") { nav.hubTo(Screen.SleepLog.route) }
         // «چرخه ی ماهانه» فقط برای دخترها دیده می‌شود (کارت کامل برای پسرها پنهان است).
         if (com.hamyareman.ir.ui.profile.StudentProfileState.gender != "boy") {
-            HubCard("🌸", "چرخه ی ماهانه", "تقویم پریود، راهنمای روزبه‌روز و کم‌کردن درد") { nav.hubTo(Screen.Cycle.route) }
+            HubCard("🌸", "چرخه ی ماهانه", "تقویم پریود، راهنمای روزبه‌روز و کم‌کردن درد", slotId = "hub.health.item.cycle") { nav.hubTo(Screen.Cycle.route) }
         }
-        HubCard("💊", "یادآور دارو و مراقبت", "دارو یا مراقبت روزانه با هشدار سرِ وقت") { nav.hubTo(Screen.Meds.route) }
-        HubCard("🌤", "روتین روز", "بلوک‌های روزت را ببین یا روز سبک انتخاب کن") { nav.hubTo(Screen.Routine.route) }
+        HubCard("💊", "یادآور دارو و مراقبت", "دارو یا مراقبت روزانه با هشدار سرِ وقت", slotId = "hub.health.item.meds") { nav.hubTo(Screen.Meds.route) }
+        HubCard("🌤", "روتین روز", "بلوک‌های روزت را ببین یا روز سبک انتخاب کن", slotId = "hub.health.item.routine") { nav.hubTo(Screen.Routine.route) }
         // کارت/گروه «آگاهی» فقط در داشبورد می‌ماند.
     }
 }

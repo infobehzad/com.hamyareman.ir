@@ -40,17 +40,17 @@ import com.hamyareman.ir.ui.update.UpdateCheckCard
 @Composable
 fun MoreScreen(nav: NavController) {
     HubBody {
-        HubHeader("بیشتر", "هر چیز دیگر که به کارت می‌آید")
+        HubHeader("بیشتر", "هر چیز دیگر که به کارت می‌آید", slotId = "hub.more.header")
 
 
-        HubCard("🛟", "فضای امن من", "نوشتن، آلبوم، شماره‌های کمک") { nav.hubTo(Screen.SafeSpace.route) }
-        HubCard("🚨", "شماره‌های کمک", "همیشه در دسترس") { nav.hubTo(Screen.Helplines.route) }
+        HubCard("🛟", "فضای امن من", "نوشتن، آلبوم، شماره‌های کمک", slotId = "hub.more.item.safespace") { nav.hubTo(Screen.SafeSpace.route) }
+        HubCard("🚨", "شماره‌های کمک", "همیشه در دسترس", slotId = "hub.more.item.helplines") { nav.hubTo(Screen.Helplines.route) }
 
         QuietModeCard()
 
-        HubCard("👤", "پروفایل من", "مشخصات من، مدرسه، عکس و وضعیت اشتراک") { nav.hubTo(Screen.UserProfile.route) }
-        HubCard("🎨", "ظاهر و فونت", "تم رنگی، حالت تاریک/روشن، فونت دانلودی") { nav.hubTo(Screen.Appearance.route) }
-        HubCard("⚙️", "تنظیمات", "حریم، قفل، کش و همگام‌سازی خودکار") { nav.hubTo(Screen.Settings.route) }
+        HubCard("👤", "پروفایل من", "مشخصات من، مدرسه، عکس و وضعیت اشتراک", slotId = "hub.more.item.user-profile") { nav.hubTo(Screen.UserProfile.route) }
+        HubCard("🎨", "ظاهر و فونت", "تم رنگی و بکاپ فونت — فونت هر صفحه از دکمهٔ آ", slotId = "hub.more.item.appearance") { nav.hubTo(Screen.Appearance.route) }
+        HubCard("⚙️", "تنظیمات", "حریم، قفل، کش و همگام‌سازی خودکار", slotId = "hub.more.item.settings") { nav.hubTo(Screen.Settings.route) }
 
         // بررسیِ دستیِ آپدیت (کانالِ آپدیت: تنظیمات روی سرور، فایل در مخزنِ عمومی).
         UpdateCheckCard()
@@ -75,11 +75,13 @@ private fun QuietModeCard() {
     Card(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text("🔇 زمان درس", style = MaterialTheme.typography.titleMedium)
+                Text("🔇 زمان درس", style = MaterialTheme.typography.titleMedium, fontFamily = com.hamyareman.ir.ui.appearance.TypeSlots.family("hub.more.item.quiet"), fontSize = com.hamyareman.ir.ui.appearance.TypeSlots.size("hub.more.item.quiet", 16))
                 Text(
                     "وقتی روشن است هیچ صدایی از پلیر دروس (صوت و ویدیوی تدریس) فعال نمی‌شود.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontFamily = com.hamyareman.ir.ui.appearance.TypeSlots.family("hub.more.item.quiet"),
+                    fontSize = com.hamyareman.ir.ui.appearance.TypeSlots.size("hub.more.item.quiet", 12),
                 )
             }
             Spacer(Modifier.width(8.dp))

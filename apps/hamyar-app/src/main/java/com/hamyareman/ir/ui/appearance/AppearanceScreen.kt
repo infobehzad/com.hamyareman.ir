@@ -71,11 +71,13 @@ fun AppearanceScreen(onBack: () -> Unit) {
         val txt = runCatching {
             context.contentResolver.openInputStream(uri)?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }
         }.getOrNull()
-        val parsed = txt?.let { FontTheme.parse(it) }
+        val obj = txt?.let { runCatching { org.json.JSONObject(it) }.getOrNull() }
+        val parsed = obj?.let { FontTheme.fromJson(it) }
         if (parsed == null) {
             Toast.makeText(context, "فایل JSON معتبر نبود", Toast.LENGTH_SHORT).show()
         } else {
             prefs.updateFontTheme(parsed)
+            obj.optJSONObject("slots")?.let { prefs.importSlotMap(it) }
             Toast.makeText(context, "تم «${parsed.name}» بارگذاری شد", Toast.LENGTH_SHORT).show()
         }
     }
@@ -147,22 +149,12 @@ fun AppearanceScreen(onBack: () -> Unit) {
                 )
             }
 
-            Text("فونت هر بخش", style = MaterialTheme.typography.titleMedium)
+            Text("فونت صفحات", style = MaterialTheme.typography.titleMedium)
             Text(
-                "پنج نقش جدا: خوش‌آمد، ساعت، عنوان، کاشی، متن. فونت‌ها داخل اپ‌اند و اینترنت نمی‌خواهند.",
+                "فونت هر منو و صفحه از دکمهٔ شناور «آ» پایین صفحه تنظیم می‌شود. نوار پایین، کارت‌های اصلی و زیرکارت‌ها جدا هستند. اینجا فقط نام تم و بکاپ JSON است.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            FontTheme.ROLES.forEach { (role, title) ->
-                RoleFontCard(
-                    title = title,
-                    sample = FontTheme.SAMPLES[role].orEmpty(),
-                    fontKey = prefs.fontTheme.fontOf(role),
-                    size = prefs.fontTheme.sizeOf(role),
-                    onFont = { prefs.updateRoleFont(role, it) },
-                    onSize = { prefs.updateRoleSize(role, it) },
-                )
-            }
 
             Text("نام تم فونت و بکاپ", style = MaterialTheme.typography.titleMedium)
             OutlinedTextField(
@@ -358,11 +350,12 @@ private fun SlotCard(
     }
 }
 
-private fun shareFontTheme(context: android.content.Context, theme: FontTheme) {
+private fun shareFontTheme(context: android.content.Context, theme: FontTheme, slots: org.json.JSONObject) {
     val dir = File(context.cacheDir, "font_themes").apply { mkdirs() }
     val safe = theme.name.replace(Regex("[^\\w\\u0600-\\u06FF-]+"), "_").ifBlank { "hamyar-font" }
     val file = File(dir, "$safe.json")
-    file.writeText(theme.toJson().toString(2))
+    val json = theme.toJson().put("slots", slots)
+    file.writeText(json.toString(2))
     val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
     val intent = Intent(Intent.ACTION_SEND).apply {
         type = "application/json"

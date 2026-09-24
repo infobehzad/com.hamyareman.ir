@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>همیار من | Hamyar e Man — آزمایشگاه فیزیک پایه نهم</title>
+<title>آزمایشگاه جامع و فوق‌واقع‌گرایانه فیزیک پایه نهم</title>
 <style>
   :root {
     --bg-main: #050912;
@@ -28,7 +28,7 @@
   body {
     background-color: var(--bg-main);
     color: var(--text-pure);
-    height: 100%;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -44,130 +44,42 @@
   header {
     background: linear-gradient(180deg, #0b1526 0%, #08101c 100%);
     border-bottom: 1px solid var(--border-ui);
-    min-height: 60px; padding: 8px 20px;
+    height: 56px; padding: 0 20px;
     display: flex; justify-content: space-between; align-items: center;
     z-index: 100; box-shadow: 0 4px 24px rgba(0,0,0,0.5);
     position: relative;
-    flex-wrap: wrap; gap: 10px;
   }
   header::after {
     content: ""; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
     background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--accent-blue), transparent);
     opacity: 0.5;
-    animation: headerGlow 4s ease-in-out infinite;
   }
-  @keyframes headerGlow { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
   .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; font-size: 1.02rem; color: var(--accent-cyan); text-shadow: 0 0 14px rgba(0, 245, 212, 0.5); letter-spacing: -0.3px; }
-  .brand .brand-text { display: flex; flex-direction: column; line-height: 1.2; }
-  .brand .brand-text small { font-size: 0.66rem; color: var(--accent-blue); font-weight: 600; opacity: 0.85; letter-spacing: 0; }
-  .brand .hamyar-tag {
-    background: linear-gradient(135deg, var(--accent-cyan), #0369a1);
-    color: #030712; font-size: 0.6rem; padding: 3px 9px; border-radius: 6px;
-    font-weight: 800; letter-spacing: 0.5px;
-    animation: tagPulse 2.6s ease-in-out infinite;
-    margin-inline-start: 8px;
-  }
-  @keyframes tagPulse { 0%, 100% { box-shadow: 0 0 0 rgba(0,245,212,0); } 50% { box-shadow: 0 0 18px rgba(0,245,212,0.65); } }
-  .brand svg { filter: drop-shadow(0 0 8px rgba(0, 245, 212, 0.7)); animation: pulse-glow 3s ease-in-out infinite; flex-shrink: 0; }
+  .brand svg { filter: drop-shadow(0 0 8px rgba(0, 245, 212, 0.7)); animation: pulse-glow 3s ease-in-out infinite; }
   @keyframes pulse-glow { 0%, 100% { filter: drop-shadow(0 0 6px rgba(0, 245, 212, 0.5)); } 50% { filter: drop-shadow(0 0 14px rgba(0, 245, 212, 0.9)); } }
   .header-info { display: flex; align-items: center; gap: 10px; }
-  .nav-status-badge { background: linear-gradient(135deg, rgba(56, 189, 248, 0.14), rgba(0, 245, 212, 0.1)); border: 1px solid var(--border-ui-strong); padding: 5px 16px; border-radius: 20px; font-size: 0.78rem; color: var(--accent-blue); font-weight: 700; box-shadow: inset 0 0 12px rgba(56, 189, 248, 0.12); transition: all 0.3s; }
-  .top-icon-btn { width: 34px; height: 34px; border-radius: 10px; background: rgba(56, 189, 248, 0.08); border: 1px solid var(--border-ui); color: var(--accent-blue); cursor: pointer; display: grid; place-items: center; transition: all 0.2s; font-size: 0.95rem; }
+  .nav-status-badge { background: linear-gradient(135deg, rgba(56, 189, 248, 0.14), rgba(0, 245, 212, 0.1)); border: 1px solid var(--border-ui-strong); padding: 5px 16px; border-radius: 20px; font-size: 0.78rem; color: var(--accent-blue); font-weight: 700; box-shadow: inset 0 0 12px rgba(56, 189, 248, 0.12); }
+  .top-icon-btn { width: 34px; height: 34px; border-radius: 10px; background: rgba(56, 189, 248, 0.08); border: 1px solid var(--border-ui); color: var(--accent-blue); cursor: pointer; display: grid; place-items: center; transition: all 0.2s; }
   .top-icon-btn:hover { background: rgba(56, 189, 248, 0.18); box-shadow: var(--glow-blue); transform: translateY(-1px); }
 
-  .workspace { display: flex; flex: 1; height: auto; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+  .workspace { display: flex; flex: 1; height: calc(100vh - 56px); overflow: hidden; }
   .sidebar-nav { width: 300px; background: var(--sidebar-bg); border-left: 1px solid var(--border-ui); display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; }
-  .nav-header { padding: 14px 18px; font-size: 0.82rem; font-weight: 800; color: var(--accent-cyan); border-bottom: 1px solid rgba(255,255,255,0.06); background: linear-gradient(180deg, rgba(0, 245, 212, 0.06), transparent); display: flex; flex-direction: column; gap: 4px; }
-  .nav-header .nav-desc { font-size: 0.66rem; color: var(--text-dim); font-weight: 500; line-height: 1.5; }
-
-  /* =========================================================
-     ACCORDION CHAPTER (پیش‌فرض بسته)
-     ========================================================= */
+  .nav-header { padding: 14px 18px; font-size: 0.82rem; font-weight: 800; color: var(--accent-cyan); border-bottom: 1px solid rgba(255,255,255,0.06); background: linear-gradient(180deg, rgba(0, 245, 212, 0.06), transparent); }
   .chapter-group { border-bottom: 1px solid rgba(255,255,255,0.04); }
-  .chapter-accordion { display: block; }
-  .chapter-accordion > summary {
-    list-style: none; cursor: pointer; outline: none;
-    padding: 11px 18px; font-size: 0.79rem; font-weight: 800;
-    color: var(--accent-blue);
-    display: flex; align-items: center; justify-content: space-between;
-    background: rgba(56, 189, 248, 0.05);
-    position: relative;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    user-select: none;
-  }
-  .chapter-accordion > summary::-webkit-details-marker { display: none; }
-  .chapter-accordion > summary::marker { content: ''; }
-  .chapter-accordion > summary::before {
-    content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 3px;
-    background: linear-gradient(180deg, var(--accent-cyan), transparent);
-    transition: all 0.3s;
-  }
-  .chapter-accordion > summary:hover { background: rgba(56, 189, 248, 0.1); padding-right: 22px; }
-  .chapter-accordion[open] > summary {
-    background: linear-gradient(90deg, transparent, rgba(0, 245, 212, 0.10));
-    color: var(--accent-cyan);
-    box-shadow: inset -20px 0 30px -20px rgba(0, 245, 212, 0.4);
-  }
-  .chapter-accordion[open] > summary::before { background: linear-gradient(180deg, var(--accent-cyan), var(--accent-blue), transparent); width: 3px; }
-  .chapter-accordion > summary .chapter-label { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
-  .chapter-accordion > summary .chapter-label .chev-icon {
-    font-size: 0.7rem; color: var(--text-dim);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    flex-shrink: 0; display: inline-block; width: 12px; text-align: center;
-  }
-  .chapter-accordion[open] > summary .chapter-label .chev-icon { transform: rotate(-90deg); color: var(--accent-cyan); }
-  .chapter-accordion > summary .chapter-label .chapter-name { text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
-  .chapter-accordion > summary .chapter-count {
-    color: var(--accent-cyan); font-weight: 700; font-size: 0.68rem;
-    background: rgba(0, 245, 212, 0.1);
-    padding: 2px 8px; border-radius: 10px;
-    border: 1px solid rgba(0, 245, 212, 0.25);
-    flex-shrink: 0; transition: all 0.25s;
-  }
-  .chapter-accordion[open] > summary .chapter-count { background: rgba(0, 245, 212, 0.2); border-color: var(--accent-cyan); }
-  .chapter-accordion[open] .exp-list { animation: listOpen 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
-  @keyframes listOpen { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
-
+  .chapter-title { padding: 11px 18px; font-size: 0.79rem; font-weight: 800; color: var(--accent-blue); display: flex; align-items: center; justify-content: space-between; background: rgba(56, 189, 248, 0.05); position: relative; }
+  .chapter-title::before { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--accent-cyan), transparent); }
   .exp-list { list-style: none; padding: 4px 0; }
   .exp-item { padding: 9px 22px 9px 18px; font-size: 0.75rem; color: var(--text-dim); cursor: pointer; border-right: 3px solid transparent; transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
   .exp-item:hover { background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.08)); color: #e2e8f0; padding-right: 26px; }
   .exp-item.active { background: linear-gradient(90deg, transparent, rgba(0, 245, 212, 0.12)); color: var(--accent-cyan); border-right-color: var(--accent-cyan); font-weight: 700; box-shadow: inset -20px 0 30px -20px rgba(0, 245, 212, 0.4); }
-  .exp-item.active::before { content: ""; position: absolute; right: -3px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; border-radius: 50%; background: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-cyan); animation: dot-pulse 1.6s ease-in-out infinite; }
-  @keyframes dot-pulse { 0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); } 50% { opacity: 0.5; transform: translateY(-50%) scale(0.85); } }
+  .exp-item.active::before { content: ""; position: absolute; right: -3px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; border-radius: 50%; background: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-cyan); }
 
   .stage-view { flex: 1; display: flex; flex-direction: column; position: relative; background: radial-gradient(ellipse at 50% 60%, rgba(30, 58, 100, 0.5) 0%, #050912 80%); border-left: 1px solid var(--border-ui); min-width: 0; }
   .stage-bar { padding: 9px 20px; background: rgba(0,0,0,0.55); border-bottom: 1px solid var(--border-ui); display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; backdrop-filter: blur(6px); flex-wrap: wrap; gap: 8px; }
   .stage-bar .status-text { color: var(--text-dim); display: flex; align-items: center; gap: 8px; }
-  .stage-bar .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-emerald); box-shadow: 0 0 8px var(--accent-emerald); animation: dot-pulse-simple 1.6s ease-in-out infinite; }
-  @keyframes dot-pulse-simple { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
+  .stage-bar .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-emerald); box-shadow: 0 0 8px var(--accent-emerald); animation: dot-pulse 1.6s ease-in-out infinite; }
+  @keyframes dot-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
   .stage-bar .telemetry { color: var(--accent-cyan); font-family: 'Courier New', monospace; direction: ltr; font-size: 0.76rem; background: rgba(0, 245, 212, 0.08); padding: 3px 12px; border-radius: 6px; border: 1px solid rgba(0, 245, 212, 0.2); font-weight: 700; }
-
-  .desc-banner {
-    margin: 8px 12px 0; padding: 10px 16px;
-    background: linear-gradient(135deg, rgba(0,245,212,0.10), rgba(56,189,248,0.06));
-    border: 1px solid var(--border-ui-strong);
-    border-radius: 12px; font-size: 0.78rem; color: var(--text-pure);
-    line-height: 1.7; display: flex; align-items: flex-start; gap: 10px;
-    position: relative; overflow: hidden;
-    animation: bannerSlideIn 0.55s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  @keyframes bannerSlideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-  .desc-banner::before {
-    content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
-    animation: bannerShine 4.5s ease-in-out infinite;
-  }
-  @keyframes bannerShine { 0% { left: -60%; } 60%, 100% { left: 130%; } }
-  .desc-banner .db-icon { font-size: 1.1rem; flex-shrink: 0; animation: iconFloat 2.8s ease-in-out infinite; }
-  @keyframes iconFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-  .desc-banner .db-body strong { color: var(--accent-cyan); }
-  .desc-banner .db-body .db-eq {
-    display: inline-block; background: #0e1014; color: #7dd3fc;
-    padding: 2px 8px; border-radius: 5px;
-    font-family: 'Courier New', monospace; direction: ltr; font-size: 0.72rem;
-    margin-top: 5px; animation: eqPulse 3s ease-in-out infinite;
-  }
-  @keyframes eqPulse { 0%, 100% { box-shadow: 0 0 0 rgba(56,189,248,0); } 50% { box-shadow: 0 0 12px rgba(56,189,248,0.35); } }
 
   .svg-canvas-container { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; padding: 12px; min-height: 0; }
   svg#physCanvas { width: 100%; height: 100%; max-height: 100%; filter: drop-shadow(0 8px 40px rgba(0, 245, 212, 0.08)); }
@@ -180,27 +92,27 @@
   .tool-btn { width: 34px; height: 34px; border-radius: 9px; background: rgba(56, 189, 248, 0.1); border: 1px solid var(--border-ui); color: var(--accent-blue); cursor: pointer; display: grid; place-items: center; transition: all 0.2s; font-size: 0.9rem; }
   .tool-btn:hover { background: rgba(56, 189, 248, 0.22); box-shadow: var(--glow-blue); transform: translateY(-2px); }
 
-  .results-overlay { position: absolute; inset: 0; background: rgba(5,9,18,0.78); display: none; align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(6px); padding: 20px; }
+  /* ===== RESULTS MODAL ===== */
+  .results-overlay { position: absolute; inset: 0; background: rgba(5,9,18,0.78); display: none; align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(6px); }
   .results-overlay.show { display: flex; animation: fadeIn 0.35s ease; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  .results-card { background: linear-gradient(135deg, rgba(18,28,48,0.98), rgba(10,18,32,0.98)); border: 1px solid var(--accent-cyan); border-radius: 18px; padding: 24px 30px; min-width: 340px; max-width: 90%; max-height: 90%; overflow-y: auto; box-shadow: 0 24px 80px rgba(0,245,212,0.25), inset 0 1px 0 rgba(255,255,255,0.06); position: relative; animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+  .results-card { background: linear-gradient(135deg, rgba(18,28,48,0.98), rgba(10,18,32,0.98)); border: 1px solid var(--accent-cyan); border-radius: 18px; padding: 24px 30px; min-width: 340px; max-width: 90%; box-shadow: 0 24px 80px rgba(0,245,212,0.25), inset 0 1px 0 rgba(255,255,255,0.06); position: relative; animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1); }
   @keyframes popIn { from { transform: scale(0.88); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   .results-card::before { content: ""; position: absolute; top: 0; left: 20%; right: 20%; height: 1px; background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent); }
   .results-card h2 { font-size: 1rem; color: var(--accent-cyan); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
   .results-card .subtitle { font-size: 0.72rem; color: var(--text-dim); margin-bottom: 16px; }
-  .result-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed rgba(56,189,248,0.15); font-size: 0.82rem; gap: 12px; }
+  .result-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed rgba(56,189,248,0.15); font-size: 0.82rem; }
   .result-row .rlabel { color: var(--text-dim); }
-  .result-row .rvalue { color: var(--accent-cyan); font-weight: 800; font-family: 'Courier New', monospace; direction: ltr; text-align: left; }
+  .result-row .rvalue { color: var(--accent-cyan); font-weight: 800; font-family: 'Courier New', monospace; direction: ltr; }
   .result-row .rvalue.gold { color: var(--accent-gold); }
+  .result-row .rvalue.rose { color: var(--accent-rose); }
   .results-actions { display: flex; gap: 8px; margin-top: 18px; }
 
   .control-sidebar { width: 420px; background: var(--sidebar-bg); display: flex; flex-direction: column; overflow-y: auto; padding: 14px; gap: 12px; flex-shrink: 0; }
-  .panel-box { background: var(--card-bg); border: 1px solid var(--border-ui); border-radius: 12px; padding: 14px; transition: all 0.3s; position: relative; overflow: hidden; height: auto; }
+  .panel-box { background: var(--card-bg); border: 1px solid var(--border-ui); border-radius: 12px; padding: 14px; transition: all 0.3s; position: relative; overflow: hidden; }
   .panel-box::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(0, 245, 212, 0.4), transparent); opacity: 0.6; }
   .panel-box:hover { border-color: var(--border-ui-strong); background: var(--card-bg-hover); }
   .panel-box h3 { font-size: 0.83rem; color: var(--accent-cyan); margin-bottom: 11px; display: flex; align-items: center; gap: 7px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 7px; font-weight: 800; }
-  .panel-box h3 .h3-desc { font-size: 0.62rem; color: var(--text-dim); font-weight: 500; margin-right: auto; margin-left: 0; opacity: 0.85; }
-
   .control-row { margin-bottom: 11px; display: flex; flex-direction: column; gap: 5px; }
   .control-row label { font-size: 0.73rem; color: var(--text-dim); display: flex; justify-content: space-between; font-weight: 600; }
   .control-row span.val { color: var(--accent-cyan); font-weight: 800; direction: ltr; font-family: 'Courier New', monospace; font-size: 0.75rem; }
@@ -220,77 +132,20 @@
   .btn-danger:hover { box-shadow: 0 6px 24px rgba(244, 63, 94, 0.5); transform: translateY(-2px); }
   .btn-record { background: linear-gradient(135deg, #b45309, #f59e0b); color: #fff; grid-column: span 2; box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35); }
   .btn-record:hover { box-shadow: 0 6px 24px rgba(245, 158, 11, 0.6); transform: translateY(-2px); }
-
   canvas#rtChart { width: 100%; height: 140px; background: #040810; border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.15); display: block; box-shadow: inset 0 0 30px rgba(0, 245, 212, 0.05); }
-  .table-box { max-height: 160px; overflow-y: auto; border: 1px solid var(--border-ui); border-radius: 7px; background: rgba(0,0,0,0.2); }
+  .table-box { max-height: 140px; overflow-y: auto; border: 1px solid var(--border-ui); border-radius: 7px; background: rgba(0,0,0,0.2); }
   table.lab-table { width: 100%; border-collapse: collapse; font-size: 0.68rem; text-align: center; }
   table.lab-table th { background: linear-gradient(180deg, #0f1d33, #0a1424); color: var(--accent-cyan); padding: 7px 5px; position: sticky; top: 0; font-weight: 800; font-size: 0.66rem; border-bottom: 1px solid var(--border-ui); }
   table.lab-table td { padding: 5px 4px; border-bottom: 1px solid rgba(255,255,255,0.04); color: #cbd5e1; font-family: 'Courier New', monospace; }
   table.lab-table tbody tr:hover { background: rgba(56, 189, 248, 0.06); }
-  .phys-eq { background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(0, 245, 212, 0.05)); border-right: 3px solid var(--accent-blue); padding: 8px 12px; margin: 8px 0 0; direction: ltr; text-align: center; font-family: 'Courier New', monospace; font-size: 0.78rem; color: #7dd3fc; border-radius: 0 6px 6px 0; font-weight: 700; animation: eqPulse 3s ease-in-out infinite; }
-
-  .guide-overlay { position: fixed; inset: 0; background: rgba(3,7,15,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(10px); animation: fadeIn 0.4s ease; padding: 20px; }
-  .guide-overlay.hidden { display: none; }
-  .guide-card { background: linear-gradient(135deg, rgba(18,28,48,0.98), rgba(10,18,32,0.98)); border: 1px solid var(--accent-cyan); border-radius: 20px; padding: 26px 30px; max-width: 560px; width: 100%; box-shadow: 0 30px 90px rgba(0,245,212,0.3), inset 0 1px 0 rgba(255,255,255,0.06); position: relative; animation: guidePop 0.5s cubic-bezier(0.34,1.56,0.64,1); max-height: 90%; overflow-y: auto; }
-  @keyframes guidePop { from { transform: scale(0.9) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
-  .guide-card::before { content: ""; position: absolute; top: 0; left: 15%; right: 15%; height: 2px; background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--accent-blue), transparent); animation: headerGlow 3s ease-in-out infinite; }
-  .guide-card h2 { color: var(--accent-cyan); font-size: 1.15rem; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
-  .guide-card h2 .hamyar-badge { background: linear-gradient(135deg, var(--accent-cyan), #0369a1); color: #030712; font-size: 0.65rem; padding: 3px 10px; border-radius: 6px; font-weight: 800; letter-spacing: 0.5px; animation: tagPulse 2.6s ease-in-out infinite; }
-  .guide-card .guide-sub { color: var(--text-dim); font-size: 0.78rem; margin-bottom: 18px; }
-  .guide-steps { display: flex; flex-direction: column; gap: 10px; }
-  .guide-step { display: flex; gap: 12px; align-items: flex-start; padding: 11px 14px; background: rgba(56,189,248,0.05); border: 1px solid var(--border-ui); border-radius: 10px; animation: stepIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both; }
-  .guide-step:nth-child(1) { animation-delay: 0.10s; }
-  .guide-step:nth-child(2) { animation-delay: 0.20s; }
-  .guide-step:nth-child(3) { animation-delay: 0.30s; }
-  .guide-step:nth-child(4) { animation-delay: 0.40s; }
-  .guide-step:nth-child(5) { animation-delay: 0.50s; }
-  .guide-step:nth-child(6) { animation-delay: 0.60s; }
-  @keyframes stepIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-  .guide-step .gs-num { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-cyan), #0369a1); color: #030712; font-weight: 800; font-size: 0.75rem; display: grid; place-items: center; flex-shrink: 0; box-shadow: 0 0 12px rgba(0,245,212,0.4); animation: numPop 1.8s ease-in-out infinite; }
-  @keyframes numPop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-  .guide-step .gs-body { font-size: 0.78rem; color: var(--text-pure); line-height: 1.7; }
-  .guide-step .gs-body strong { color: var(--accent-cyan); }
-  .guide-step .gs-body .gs-hint { display: block; font-size: 0.7rem; color: var(--text-dim); margin-top: 3px; }
-  .guide-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-start; }
-  .guide-actions button { padding: 11px 22px; border-radius: 10px; font-weight: 800; font-size: 0.82rem; cursor: pointer; border: none; transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1); font-family: inherit; }
-  .guide-actions .primary { background: linear-gradient(135deg, #0369a1, #00f5d4); color: #030712; box-shadow: 0 6px 20px rgba(0,245,212,0.4); }
-  .guide-actions .primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,245,212,0.65); }
-  .guide-actions .secondary { background: rgba(56,189,248,0.1); color: var(--accent-blue); border: 1px solid var(--border-ui-strong); }
-  .guide-actions .secondary:hover { background: rgba(56,189,248,0.2); }
+  .phys-eq { background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(0, 245, 212, 0.05)); border-right: 3px solid var(--accent-blue); padding: 8px 12px; margin: 8px 0 0; direction: ltr; text-align: center; font-family: 'Courier New', monospace; font-size: 0.78rem; color: #7dd3fc; border-radius: 0 6px 6px 0; font-weight: 700; }
 
   @media (max-width: 1400px) { .control-sidebar { width: 360px; } .sidebar-nav { width: 260px; } }
   @media (max-width: 1100px) { .workspace { flex-wrap: wrap; height: auto; overflow-y: auto; } .sidebar-nav, .control-sidebar { width: 100%; } .stage-view { min-height: 500px; } }
-
-  html, body { height: 100% !important; min-height: 100% !important; }
-  .workspace { height: auto !important; flex: 1 1 auto !important; min-height: 0 !important; }
-  .stage-view { min-height: 0 !important; flex: 1 1 auto !important; }
-  #stageContainer, #simCanvas { width: 100% !important; height: 100% !important; min-height: 240px; }
-
 </style>
 </head>
 <body>
 
-<!-- ============ ANIMATED INTRO GUIDE ============ -->
-<div class="guide-overlay" id="guideOverlay">
-  <div class="guide-card">
-    <h2>🧪 همیار من <span class="hamyar-badge">HAMYAR E MAN</span></h2>
-    <div class="guide-sub">راهنمای سریع شروع کار با آزمایشگاه تعاملی فیزیک پایه نهم</div>
-    <div class="guide-steps">
-      <div class="guide-step"><div class="gs-num">۱</div><div class="gs-body"><strong>انتخاب آزمایش از فهرست کناری</strong><span class="gs-hint">روی هر فصل کلیک کنید تا باز شود، سپس آزمایش مورد نظر را انتخاب کنید.</span></div></div>
-      <div class="guide-step"><div class="gs-num">۲</div><div class="gs-body"><strong>تنظیم متغیرهای فیزیکی</strong><span class="gs-hint">در پنل «کنترلرها» پیکربندی مورد نظر را از منوی کشویی انتخاب کنید.</span></div></div>
-      <div class="guide-step"><div class="gs-num">۳</div><div class="gs-body"><strong>شروع شبیه‌سازی</strong><span class="gs-hint">دکمه «آغاز شبیه‌سازی» را بزنید و حرکت متحرک را روی پرده تماشا کنید.</span></div></div>
-      <div class="guide-step"><div class="gs-num">۴</div><div class="gs-body"><strong>تماشای نمودار برخط</strong><span class="gs-hint">نمودار سمت راست به‌طور زنده رشد می‌کند و رابطه بین کمیت‌ها را نشان می‌دهد.</span></div></div>
-      <div class="guide-step"><div class="gs-num">۵</div><div class="gs-body"><strong>ثبت نتایج در دفترچه</strong><span class="gs-hint">با هر بار اجرا، روی «ثبت نتایج در دفترچه» بزنید تا داده‌ها ذخیره شوند.</span></div></div>
-      <div class="guide-step"><div class="gs-num">۶</div><div class="gs-body"><strong>خروجی گرفتن CSV</strong><span class="gs-hint">در پایان، با دکمه «CSV⇩» تمام داده‌ها را به‌صورت صفحه‌گسترده دانلود کنید.</span></div></div>
-    </div>
-    <div class="guide-actions">
-      <button class="primary" onclick="closeGuide()">✅ شروع می‌کنم</button>
-      <button class="secondary" onclick="closeGuide()">بستن</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ HEADER ============ -->
 <header>
   <div class="brand">
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -298,24 +153,17 @@
       <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
       <circle cx="12" cy="12" r="3.5" fill="currentColor" stroke="none"/>
     </svg>
-    <div class="brand-text">
-      <div>همیار من <span class="hamyar-tag">HAMYAR E MAN</span></div>
-      <small>آزمایشگاه تعاملی فیزیک — پایه نهم</small>
-    </div>
+    <span>آزمایشگاه فیزیک پایه نهم</span>
   </div>
   <div class="header-info">
     <div class="nav-status-badge" id="topNavStatus">فصل ۴ ◄ آزمایش ۱</div>
-    <button class="top-icon-btn" onclick="openGuide()" title="راهنمای سریع">؟</button>
     <button class="top-icon-btn" onclick="toggleTheme()" title="تغییر تم">◐</button>
   </div>
 </header>
 
 <div class="workspace">
   <aside class="sidebar-nav">
-    <div class="nav-header">
-      <div>فهرست موضوعی دروس فیزیک علوم نهم</div>
-      <div class="nav-desc">روی هر فصل کلیک کنید تا باز شود — ۳ فصل، ۱۵ آزمایش</div>
-    </div>
+    <div class="nav-header">فهرست موضوعی دروس فیزیک علوم نهم</div>
     <div id="navTree"></div>
   </aside>
 
@@ -326,15 +174,6 @@
         <span id="txtSimState">آماده آزمایش</span>
       </span>
       <span class="telemetry" id="txtTelemetry">v: 0.00 m/s | a: 0.00 m/s²</span>
-    </div>
-
-    <div class="desc-banner" id="descBanner">
-      <span class="db-icon">💡</span>
-      <div class="db-body">
-        <div id="descTitle"><strong>به آزمایشگاه خوش آمدید</strong></div>
-        <div id="descText">آزمایش مورد نظر خود را از فهرست کناری انتخاب کنید و سپس دکمه «آغاز شبیه‌سازی» را بزنید.</div>
-        <div class="db-eq" id="descEq">F = m · a</div>
-      </div>
     </div>
 
     <div class="svg-canvas-container" id="stageContainer">
@@ -355,6 +194,10 @@
             <stop offset="60%" stop-color="#eab308"/><stop offset="85%" stop-color="#a16207"/>
             <stop offset="100%" stop-color="#422006"/>
           </linearGradient>
+          <linearGradient id="steelWeight" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#e2e8f0"/><stop offset="35%" stop-color="#94a3b8"/>
+            <stop offset="70%" stop-color="#475569"/><stop offset="100%" stop-color="#1e293b"/>
+          </linearGradient>
           <linearGradient id="cartBodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stop-color="#38bdf8"/><stop offset="35%" stop-color="#0284c7"/>
             <stop offset="100%" stop-color="#082f49"/>
@@ -363,6 +206,10 @@
             <stop offset="0%" stop-color="#6ee7b7"/><stop offset="35%" stop-color="#10b981"/>
             <stop offset="100%" stop-color="#064e3b"/>
           </linearGradient>
+          <linearGradient id="cartBodyRed" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#fca5a5"/><stop offset="35%" stop-color="#dc2626"/>
+            <stop offset="100%" stop-color="#450a0a"/>
+          </linearGradient>
           <linearGradient id="spongeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#fed7aa"/><stop offset="55%" stop-color="#fb923c"/>
             <stop offset="100%" stop-color="#9a3412"/>
@@ -370,6 +217,10 @@
           <linearGradient id="brickGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#fca5a5"/><stop offset="45%" stop-color="#dc2626"/>
             <stop offset="100%" stop-color="#7f1d1d"/>
+          </linearGradient>
+          <linearGradient id="woodGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#a16207"/><stop offset="50%" stop-color="#713f12"/>
+            <stop offset="100%" stop-color="#422006"/>
           </linearGradient>
           <linearGradient id="glassTube" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>
@@ -391,9 +242,24 @@
             <stop offset="0%" stop-color="#a5b4fc" stop-opacity="0.8"/>
             <stop offset="100%" stop-color="#1e3a8a" stop-opacity="0.92"/>
           </linearGradient>
+          <radialGradient id="metalShine" cx="30%" cy="25%" r="60%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+            <stop offset="40%" stop-color="#e2e8f0" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+          </radialGradient>
           <filter id="laserGlow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="5" result="blur"/>
             <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="softShadow" x="-30%" y="-30%" width="160%" height="180%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+            <feOffset dx="0" dy="5" result="offsetBlur"/>
+            <feComponentTransfer><feFuncA type="linear" slope="0.5"/></feComponentTransfer>
+            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="glowCyan" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
           <filter id="dropShadow">
             <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
@@ -401,8 +267,22 @@
             <feComponentTransfer><feFuncA type="linear" slope="0.4"/></feComponentTransfer>
             <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
+          <pattern id="brickPattern" width="30" height="16" patternUnits="userSpaceOnUse">
+            <rect width="30" height="16" fill="#b91c1c"/>
+            <rect x="0" y="0" width="15" height="8" fill="#dc2626" stroke="#7f1d1d" stroke-width="0.5"/>
+            <rect x="15" y="8" width="15" height="8" fill="#dc2626" stroke="#7f1d1d" stroke-width="0.5"/>
+          </pattern>
+          <pattern id="woodPattern" width="20" height="8" patternUnits="userSpaceOnUse">
+            <rect width="20" height="8" fill="#713f12"/>
+            <path d="M0,4 Q5,2 10,4 Q15,6 20,4" stroke="#422006" stroke-width="0.5" fill="none" opacity="0.6"/>
+          </pattern>
           <pattern id="gridPattern" width="40" height="40" patternUnits="userSpaceOnUse">
             <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(56,189,248,0.08)" stroke-width="1"/>
+          </pattern>
+          <!-- wooden crate -->
+          <pattern id="cratePattern" width="20" height="20" patternUnits="userSpaceOnUse">
+            <rect width="20" height="20" fill="#a16207"/>
+            <path d="M0,0 L20,20 M20,0 L0,20" stroke="#78350f" stroke-width="1" opacity="0.4"/>
           </pattern>
         </defs>
 
@@ -412,6 +292,7 @@
         <g id="vectorLayer"></g>
       </svg>
 
+      <!-- RESULTS OVERLAY -->
       <div class="results-overlay" id="resultsOverlay">
         <div class="results-card">
           <h2>✅ آزمایش به پایان رسید</h2>
@@ -440,9 +321,11 @@
   <aside class="control-sidebar">
     <div class="panel-box">
       <h3>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
         کنترلرها و متغیرهای فیزیکی
-        <span class="h3-desc">تنظیم پارامترها</span>
       </h3>
       <div id="dynamicInputs"></div>
       <div class="btn-grid">
@@ -454,9 +337,10 @@
 
     <div class="panel-box">
       <h3>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
         آنالیز برخط نمودار فیزیکی
-        <span class="h3-desc">رشد زنده</span>
       </h3>
       <canvas id="rtChart"></canvas>
       <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:0.68rem; color:var(--text-dim);">
@@ -489,7 +373,7 @@
 "use strict";
 
 /* ============================================================
-   DATABASE — 15 experiments
+   DATABASE — 15 experiments with expanded configurations
    ============================================================ */
 const PHYS_DATABASE = {
   1: [
@@ -502,9 +386,7 @@ const PHYS_DATABASE = {
       ],
       theory: "در حرکت یکنواخت روی خط راست، متحرک مسافت‌های مساوی را در زمان‌های مساوی طی می‌کند و شتاب صفر است (a=0). شیب نمودار مکان-زمان نشان‌دهنده تندی است.",
       eq: "v = Δx / Δt  |  x(t) = v · t + x₀",
-      yLabel: "مکان x (m)", xLabel: "زمان t (s)",
-      simpleDesc: "کالسکه هوایی روی ریل بدون اصطکاک با تندی ثابت حرکت می‌کند.",
-      simpleAnim: "کالسکه در امتداد ریل کرومی حرکت می‌کند و خط نور از سنسورها عبور می‌کند." },
+      yLabel: "مکان x (m)", xLabel: "زمان t (s)", hasCompletion: true },
 
     { title: "لوله سقوط آزاد نیوتون (خلاء در برابر هوا)", type: "newton_tube",
       items: [
@@ -514,21 +396,17 @@ const PHYS_DATABASE = {
       ],
       theory: "در خلاء، تمام اجسام صرف‌نظر از جرم با شتاب یکسان گرانش (g ≈ 9.8 m/s²) سقوط می‌کنند. مقاومت هوا در شرایط عادی مانع سقوط همزمان پر و ساچمه می‌شود.",
       eq: "y = ½ g t²  |  g ≈ 9.8 m/s²",
-      yLabel: "مسافت سقوط y (m)", xLabel: "زمان t (s)",
-      simpleDesc: "ساچمه فلزی و پر در لوله شیشه‌ای؛ در خلاء هر دو همزمان سقوط می‌کنند.",
-      simpleAnim: "پر با احتیاط در هوا شناور می‌ماند اما ساچمه سریع سقوط می‌کند؛ در خلاء هر دو یکسان." },
+      yLabel: "مسافت سقوط y (m)", xLabel: "زمان t (s)", hasCompletion: true },
 
     { title: "مقاومت هوا و سرعت حدی (چتر نجات)", type: "terminal_velocity",
       items: [
         { name: "چترباز با چتر باز (سطح بزرگ)", area: 8.0, mass: 80, vTerm: 5.5 },
-        { name: "چترباز چتر کوچک (تندرو)", area: 3.0, mass: 80, vTerm: 14.0 },
-        { name: "چترباز بدون چتر (سقوط آزاد)", area: 0.6, mass: 80, vTerm: 52.0 }
+        { name: "چترباز بدون چتر (سقوط آزاد)", area: 0.6, mass: 80, vTerm: 52.0 },
+        { name: "چترباز چتر کوچک (تندرو)", area: 3.0, mass: 80, vTerm: 14.0 }
       ],
       theory: "با افزایش تندی سقوط، نیروی مقاومت هوا افزایش می‌یابد تا با نیروی وزن برابر شود (F_D = W). در این حالت شتاب صفر شده و متحرک با تندی حدی ثابت حرکت می‌کند.",
       eq: "F_net = W − F_D = m·a  |  a→0 ⇒ v = v_terminal",
-      yLabel: "تندی v (m/s)", xLabel: "زمان t (s)",
-      simpleDesc: "چترباز از ارتفاع ۶۰ متری سقوط می‌کند؛ چتر بزرگ‌تر = سرعت حدی کمتر و فرود نرم‌تر.",
-      simpleAnim: "چترباز از بالای صفحه سقوط می‌کند، چتر باز می‌شود و در نهایت روی زمین فرود می‌آید." },
+      yLabel: "تندی v (m/s)", xLabel: "زمان t (s)", hasCompletion: true },
 
     { title: "شتاب بر روی سطح شیب‌دار گالیله", type: "inclined_plane",
       items: [
@@ -540,9 +418,7 @@ const PHYS_DATABASE = {
       ],
       theory: "گالیله دریافت که بر روی سطح شیب‌دار بدون اصطکاک، مؤلفه موازی وزن (mg·sinθ) سبب شتاب ثابت در راستای سطح می‌شود: a = g·sinθ.",
       eq: "a = g·sin(θ)  |  v = a·t  |  x = ½ a t²",
-      yLabel: "تندی v (m/s)", xLabel: "زمان t (s)",
-      simpleDesc: "کالسکه روی سطح شیب‌دار؛ هر چه زاویه بزرگ‌تر، شتاب بیشتر.",
-      simpleAnim: "سطح شیب‌دار می‌چرخد و کالسکه با شتاب g·sinθ به پایین سُر می‌خورد." },
+      yLabel: "تندی v (m/s)", xLabel: "زمان t (s)", hasCompletion: true },
 
     { title: "آنالیز شتاب خودرو (نمودار v-t)", type: "car_accel",
       items: [
@@ -553,23 +429,19 @@ const PHYS_DATABASE = {
       ],
       theory: "شتاب یعنی آهنگ تغییرات سرعت در واحد زمان. شیب خط مماس بر نمودار سرعت-زمان برابر شتاب متحرک و مساحت زیر نمودار نشان‌دهنده مسافت طی‌شده است.",
       eq: "a = Δv / Δt  |  v = v₀ + a·t",
-      yLabel: "سرعت v (m/s)", xLabel: "زمان t (s)",
-      simpleDesc: "خودرو روی جاده شتاب می‌گیرد یا ترمز می‌کند؛ عقربه سرعت‌سنج حرکت می‌کند.",
-      simpleAnim: "خودرو روی جاده حرکت می‌کند، عقربه سرعت‌سنج بالا و پایین می‌رود." }
+      yLabel: "سرعت v (m/s)", xLabel: "زمان t (s)", hasCompletion: true }
   ],
 
   2: [
     { title: "قانون اول نیوتون و لختی (اینرسی)", type: "inertia_cart",
       items: [
-        { name: "جعبه سبک چوبی (m = 2 kg)", mass: 2, color: "#a16207" },
-        { name: "جعبه سنگین فلزی (m = 8 kg)", mass: 8, color: "#94a3b8" },
-        { name: "کره شیشه‌ای (m = 4 kg)", mass: 4, color: "#7dd3fc" }
+        { name: "جعبه سبک چوبی (m = 2 kg)", mass: 2, color: "#a16207", cargo: "wood" },
+        { name: "جعبه سنگین فلزی (m = 8 kg)", mass: 8, color: "#94a3b8", cargo: "metal" },
+        { name: "کره شیشه‌ای (m = 4 kg)", mass: 4, color: "#7dd3fc", cargo: "glass" }
       ],
       theory: "قانون اول نیوتون: جسم تمایل دارد حالت سکون یا حرکت یکنواخت خود را حفظ کند مگر نیروی خالص خارجی وارد شود. هنگام توقف کالسکه، بار بر اثر لختی پرتاب می‌شود.",
       eq: "ΣF = 0 ⇒ v = const",
-      yLabel: "مکان بار (cm)", xLabel: "زمان t (s)",
-      simpleDesc: "کالسکه به دیواره برخورد می‌کند و بار روی آن به جلو پرتاب می‌شود.",
-      simpleAnim: "کالسکه به دیوار نزدیک می‌شود، متوقف می‌شود و بار به دلیل لختی به جلو پرتاب می‌شود." },
+      yLabel: "مکان بار (cm)", xLabel: "زمان t (s)", hasCompletion: true },
 
     { title: "قانون دوم نیوتون (F = ma)", type: "newton_second",
       items: [
@@ -581,9 +453,7 @@ const PHYS_DATABASE = {
       ],
       theory: "شتاب با نیروی خالص نسبت مستقیم و با جرم نسبت عکس دارد: a = F_net / m_total.",
       eq: "a = (m_h · g) / (m_c + m_h)",
-      yLabel: "شتاب a (m/s²)", xLabel: "زمان t (s)",
-      simpleDesc: "کالسکه به وزنه آویزان متصل است؛ با افزایش جرم کالسکه، شتاب کاهش می‌یابد.",
-      simpleAnim: "وزنه آویزان سقوط می‌کند و کالسکه روی میز حرکت می‌کند." },
+      yLabel: "شتاب a (m/s²)", xLabel: "زمان t (s)", hasCompletion: true },
 
     { title: "اصطکاک ایستایی و جنبشی", type: "friction_test",
       items: [
@@ -594,9 +464,7 @@ const PHYS_DATABASE = {
       ],
       theory: "نیروی اصطکاک در برابر حرکت مقاومت می‌کند. نیروی اصطکاک ایستایی بیشینه همواره از اصطکاک جنبشی بزرگ‌تر است (f_s,max > f_k).",
       eq: "f_s ≤ μs·N  |  f_k = μk·N  |  N = m·g",
-      yLabel: "نیرو F (N)", xLabel: "زمان t (s)",
-      simpleDesc: "نیروسنج به جعبه کشیده می‌شود؛ ابتدا ایستا می‌ماند، سپس سُر می‌خورد.",
-      simpleAnim: "نیروسنج کشیده می‌شود؛ ابتدا جعبه ثابت می‌ماند، سپس با جهش شروع به سُر خوردن می‌کند." },
+      yLabel: "نیرو F (N)", xLabel: "زمان t (s)", hasCompletion: true },
 
     { title: "قانون سوم نیوتون (کنش و واکنش)", type: "action_reaction",
       items: [
@@ -606,9 +474,7 @@ const PHYS_DATABASE = {
       ],
       theory: "هرگاه جسم ۱ به جسم ۲ نیرو وارد کند، جسم ۲ نیز نیرویی هم‌اندازه و در خلاف جهت به جسم ۱ وارد می‌سازد: F₁₂ = −F₂₁. کالسکه سبک‌تر شتاب بیشتری می‌گیرد.",
       eq: "F₁₂ = −F₂₁  |  m₁a₁ = −m₂a₂",
-      yLabel: "اندازه نیرو |F| (N)", xLabel: "زمان t (s)",
-      simpleDesc: "دو کالسکه به فنر فشرده متصل‌اند؛ با آزاد شدن، در جهت مخالف حرکت می‌کنند.",
-      simpleAnim: "فنر آزاد می‌شود و دو کالسکه در جهت مخالف از هم جدا می‌شوند." },
+      yLabel: "اندازه نیرو |F| (N)", xLabel: "زمان t (s)", hasCompletion: true },
 
     { title: "قانون کشسانی فنر (هوک)", type: "hooke_law",
       items: [
@@ -620,9 +486,7 @@ const PHYS_DATABASE = {
       ],
       theory: "در محدوده کشسانی، تغییر طول فنر با نیروی وارد بر آن نسبت مستقیم دارد: F = k·Δx. ثابت فنر k نشان‌دهنده سختی فنر است.",
       eq: "F = k·Δx  |  W = m·g",
-      yLabel: "تغییر طول Δx (cm)", xLabel: "وزن F (N)",
-      simpleDesc: "فنر با وزنه‌های فزاینده کشیده می‌شود؛ تغییر طول با نیرو نسبت مستقیم دارد.",
-      simpleAnim: "فنر به‌آرامی کشیده می‌شود و به وضعیت جدید می‌رسد." }
+      yLabel: "تغییر طول Δx (cm)", xLabel: "وزن F (N)", hasCompletion: true }
   ],
 
   3: [
@@ -635,9 +499,7 @@ const PHYS_DATABASE = {
       ],
       theory: "فشار برابر نیروی وارد بر یکای سطح است (P = F/A). با کاهش مساحت اتکا، اثر نیرو متمرکزتر و فرورفتگی بیشتر می‌شود.",
       eq: "P = F / A = (m·g) / A  [Pa]",
-      yLabel: "فرورفتگی (mm)", xLabel: "زمان t (s)",
-      simpleDesc: "آجر روی اسفنج قرار می‌گیرد؛ هرچه سطح اتکا کوچک‌تر، فرورفتگی بیشتر.",
-      simpleAnim: "آجر آرام روی اسفنج می‌نشیند و اسفنج در محل تماس فشرده می‌شود." },
+      yLabel: "فرورفتگی (mm)", xLabel: "زمان t (s)", hasCompletion: true },
 
     { title: "فشار مایعات و عمق مانومتر (P = ρgh)", type: "liquid_depth",
       items: [
@@ -649,9 +511,7 @@ const PHYS_DATABASE = {
       ],
       theory: "فشار در مایعات ساکن تنها به چگالی مایع (ρ)، عمق (h) و گرانش بستگی دارد و مستقل از شکل ظرف است: P = ρgh.",
       eq: "P = ρ·g·h  |  Δh_manometer ∝ P",
-      yLabel: "فشار P (kPa)", xLabel: "عمق h (cm)",
-      simpleDesc: "کاوشگر در مایع فرو می‌رود؛ مایع در مانومتر U شکل جابجا می‌شود.",
-      simpleAnim: "کاوشگر به عمق می‌رود، ستون مایع در مانومتر بالا می‌رود و فشار افزایش می‌یابد." },
+      yLabel: "فشار P (kPa)", xLabel: "عمق h (cm)", hasCompletion: true },
 
     { title: "اصل پاسکال و بالابر هیدرولیکی", type: "pascal_lift",
       items: [
@@ -662,41 +522,35 @@ const PHYS_DATABASE = {
       ],
       theory: "اصل پاسکال: فشار اعمال شده بر مایع محصور بدون افت به تمام نقاط منتقل می‌شود (P₁ = P₂). بنابراین نیروی بزرگ‌تری روی پیستون پهن به دست می‌آید.",
       eq: "F₁/A₁ = F₂/A₂  ⇒  F₂ = F₁·(A₂/A₁)",
-      yLabel: "نیروی خروجی F₂ (N)", xLabel: "زمان t (s)",
-      simpleDesc: "با فشردن پیستون کوچک، جسم سنگین روی پیستون بزرگ بالا می‌رود.",
-      simpleAnim: "پیستون کوچک پایین می‌رود و پیستون بزرگ با نسبت معکوس سطح بالا می‌آید." },
+      yLabel: "نیروی خروجی F₂ (N)", xLabel: "زمان t (s)", hasCompletion: true },
 
     { title: "اصل ارشمیدس و نیروی شناوری", type: "archimedes_buoyancy",
       items: [
-        { name: "استوانه آلومینیومی در آب", rhoFluid: 1000, mSolid: 0.27, V: 100 },
-        { name: "استوانه در آب‌نمک چگال‌تر", rhoFluid: 1200, mSolid: 0.27, V: 100 },
-        { name: "استوانه در جیوه (ρ=۱۳۶۰۰)", rhoFluid: 13600, mSolid: 0.27, V: 100 }
+        { name: "استوانه آلومینیومی در آب", rhoFluid: 1000, mSolid: 0.27, V: 100, fluidColor: "water" },
+        { name: "استوانه در آب‌نمک چگال‌تر", rhoFluid: 1200, mSolid: 0.27, V: 100, fluidColor: "salt" },
+        { name: "استوانه در جیوه (ρ=۱۳۶۰۰)", rhoFluid: 13600, mSolid: 0.27, V: 100, fluidColor: "mercury" }
       ],
       theory: "بر جسم غوطه‌ور در سیال، نیروی رو به بالایی از طرف سیال وارد می‌شود که برابر وزن سیال هم‌حجم جابه‌جاشده است (F_b = ρ_fluid·V·g).",
       eq: "F_b = ρ_fluid·V·g  |  W_app = W_real − F_b",
-      yLabel: "وزن ظاهری W (N)", xLabel: "زمان t (s)",
-      simpleDesc: "استوانه فلزی در مایع فرو می‌رود؛ نیروی فنر کمتر می‌شود و سیال سرریز می‌کند.",
-      simpleAnim: "استوانه در مایع پایین می‌رود، مایع از لبه سرریز می‌شود و وزن ظاهری کاهش می‌یابد." },
+      yLabel: "وزن ظاهری W (N)", xLabel: "زمان t (s)", hasCompletion: true },
 
     { title: "ماشین‌های ساده (اهرم و تعادل)", type: "lever_balance",
       items: [
         { name: "تعادل کامل (d₁ = d₂ = ۱۵ cm)", d1: 15, d2: 15, m1: 2, m2: 2 },
-        { name: "مزیت مکانیکی (d₁ = ۲۰، d₂ = ۱۰)", d1: 20, d2: 10, m1: 1, m2: 2 },
+        { name: "مزیت مکانیکی (d₁ = ۲۰، d₂ = ۱۰، F₁=۱۰، F₂=۲۰)", d1: 20, d2: 10, m1: 1, m2: 2 },
         { name: "عدم تعادل چپ (d₁ = ۲۵، d₂ = ۱۰)", d1: 25, d2: 10, m1: 2, m2: 1 },
         { name: "عدم تعادل راست (d₁ = ۱۰، d₂ = ۲۵)", d1: 10, d2: 25, m1: 2, m2: 1 }
       ],
       theory: "در اهرم در حالت تعادل، مجموع گشتاورهای پادساعت‌گرد برابر ساعت‌گرد است: F₁d₁ = F₂d₂. مزیت مکانیکی برابر نسبت بازوی محرک به بازوی مقاوم است.",
       eq: "τ = F·d  |  F₁d₁ = F₂d₂  |  MA = d₁/d₂",
-      yLabel: "گشتاور برآیند τ (N·m)", xLabel: "زمان t (s)",
-      simpleDesc: "دو وزنه روی اهرم؛ اگر گشتاورها برابر باشند اهرم متعادل می‌ماند.",
-      simpleAnim: "اهرم آرام کج می‌شود تا در جهت گشتاور بزرگ‌تر به تعادل برسد." }
+      yLabel: "گشتاور برآیند τ (N·m)", xLabel: "زمان t (s)", hasCompletion: true }
   ]
 };
 
 const CHAPTER_TITLES = {
-  1: { title: "فصل ۴: حرکت چیست؟", count: 5, icon: "🏃" },
-  2: { title: "فصل ۵: نیرو و قوانین نیوتون", count: 5, icon: "⚙️" },
-  3: { title: "فصل ۸ و ۹: فشار و ماشین‌ها", count: 5, icon: "💧" }
+  1: { title: "فصل ۴: حرکت چیست؟", count: 5 },
+  2: { title: "فصل ۵: نیرو و قوانین نیوتون", count: 5 },
+  3: { title: "فصل ۸ و ۹: فشار و ماشین‌ها", count: 5 }
 };
 
 function toFa(n) { return String(n).replace(/[0-9]/g, d => "۰۱۲۳۴۵۶۷۸۹"[+d]); }
@@ -721,6 +575,9 @@ let physicsAccumulator = 0;
 let lastChartPush = 0;
 let completionShown = false;
 
+// World scale: SVG pixels per meter for consistent speeds
+const PX_PER_M = 100;
+
 let physState = {
   x: 0, v: 0, a: 0, y: 0, t: 0,
   theta: 0.25, omega: 0,
@@ -728,64 +585,25 @@ let physState = {
   settled: false
 };
 
-/* ============================================================
-   GUIDE OVERLAY
-   ============================================================ */
-function openGuide() { document.getElementById("guideOverlay").classList.remove("hidden"); }
-function closeGuide() {
-  document.getElementById("guideOverlay").classList.add("hidden");
-  try { localStorage.setItem("hamyar_intro_seen", "1"); } catch(e) {}
-}
-
-/* ============================================================
-   DESCRIPTION BANNER
-   ============================================================ */
-function updateDescBanner(exp, item) {
-  if (!exp) return;
-  const banner = document.getElementById("descBanner");
-  if (!banner) return;
-  banner.style.animation = "none";
-  void banner.offsetWidth;
-  banner.style.animation = "bannerSlideIn 0.55s cubic-bezier(0.34,1.56,0.64,1)";
-  document.getElementById("descTitle").innerHTML = `<strong>${exp.title}</strong>`;
-  document.getElementById("descText").textContent = exp.simpleDesc || exp.theory;
-  document.getElementById("descEq").textContent = exp.eq;
-}
-
-/* ============================================================
-   NAV TREE — ACCORDION (closed by default)
-   ============================================================ */
 function buildNavTree() {
   const tree = document.getElementById("navTree");
   let html = "";
   for (const chap in CHAPTER_TITLES) {
-    const c = CHAPTER_TITLES[chap];
     html += `<div class="chapter-group">
-      <details class="chapter-accordion" data-chap="${chap}">
-        <summary>
-          <span class="chapter-label">
-            <span class="chev-icon">◀</span>
-            <span class="chapter-name">${c.icon} ${c.title}</span>
-          </span>
-          <span class="chapter-count">${toFa(c.count)} آزمایش</span>
-        </summary>
-        <ul class="exp-list">`;
+      <div class="chapter-title">
+        <span>${CHAPTER_TITLES[chap].title}</span>
+        <small style="color:var(--accent-cyan); font-weight:700;">${toFa(CHAPTER_TITLES[chap].count)} آزمایش</small>
+      </div>
+      <ul class="exp-list">`;
     PHYS_DATABASE[chap].forEach((exp, idx) => {
       const isActive = (chap == currentChap && idx === currentExpIdx);
-      html += `<li class="exp-item${isActive ? " active" : ""}" onclick="navigatePhysLab(${chap}, ${idx}, this)">${toFa(idx + 1)}. ${exp.title}</li>`;
+      html += `<li class="exp-item${isActive ? " active" : ""}" onclick="navigatePhysLab(${chap}, ${idx}, this)">
+        ${toFa(idx + 1)}. ${exp.title}
+      </li>`;
     });
-    html += `</ul></details></div>`;
+    html += `</ul></div>`;
   }
   tree.innerHTML = html;
-  document.querySelectorAll(".chapter-accordion").forEach(det => {
-    det.addEventListener("toggle", () => {
-      if (det.open) {
-        document.querySelectorAll(".chapter-accordion").forEach(other => {
-          if (other !== det && other.open) other.open = false;
-        });
-      }
-    });
-  });
 }
 
 function navigatePhysLab(chap, expIdx, element) {
@@ -794,10 +612,6 @@ function navigatePhysLab(chap, expIdx, element) {
   activeItemIdx = 0;
   document.querySelectorAll(".exp-item").forEach(item => item.classList.remove("active"));
   if (element) element.classList.add("active");
-  document.querySelectorAll(".chapter-accordion").forEach(det => {
-    if (det.dataset.chap == chap) det.open = true;
-    else det.open = false;
-  });
   const exp = PHYS_DATABASE[currentChap][currentExpIdx];
   const chapLabel = currentChap === 3 ? "۸ و ۹" : (currentChap + 3);
   document.getElementById("topNavStatus").textContent = `فصل ${chapLabel} ◄ ${exp.title}`;
@@ -806,7 +620,7 @@ function navigatePhysLab(chap, expIdx, element) {
 }
 
 /* ============================================================
-   SETUP
+   SETUP UI & APPARATUS
    ============================================================ */
 function setupPhysicsEnvironment() {
   const exp = PHYS_DATABASE[currentChap][currentExpIdx];
@@ -814,7 +628,8 @@ function setupPhysicsEnvironment() {
   document.getElementById("theoryEq").textContent = exp.eq;
   document.getElementById("chartYLabel").textContent = exp.yLabel;
   document.getElementById("chartXLabel").textContent = exp.xLabel;
-  document.getElementById("dynamicInputs").innerHTML = `
+  const ctrlBox = document.getElementById("dynamicInputs");
+  ctrlBox.innerHTML = `
     <div class="control-row">
       <label>انتخاب پیکربندی آزمایش: <span class="val" id="configHint">پیش‌نمایش زنده</span></label>
       <select id="selItem" onchange="onItemChange(this.value)">
@@ -823,16 +638,14 @@ function setupPhysicsEnvironment() {
     </div>`;
   buildApparatusVisual(exp);
   applyConfigPreview();
-  updateDescBanner(exp, exp.items[activeItemIdx]);
 }
 
 function onItemChange(val) {
   activeItemIdx = parseInt(val);
   resetPhysExp(false);
-  const exp = PHYS_DATABASE[currentChap][currentExpIdx];
-  buildApparatusVisual(exp);
+  buildApparatusVisual(PHYS_DATABASE[currentChap][currentExpIdx]);
   applyConfigPreview();
-  updateDescBanner(exp, exp.items[activeItemIdx]);
+  // brief pulse to signal preview
   const svg = document.getElementById("physCanvas");
   svg.style.transition = "filter 0.4s";
   svg.style.filter = "drop-shadow(0 0 30px rgba(0,245,212,0.5))";
@@ -840,7 +653,7 @@ function onItemChange(val) {
 }
 
 /* ============================================================
-   APPLY CONFIG PREVIEW
+   APPLY CONFIG PREVIEW — instantly reflect variables in visuals
    ============================================================ */
 function applyConfigPreview() {
   const exp = PHYS_DATABASE[currentChap][currentExpIdx];
@@ -848,15 +661,18 @@ function applyConfigPreview() {
   const item = exp.items[activeItemIdx];
   const tel = document.getElementById("txtTelemetry");
 
+  // Reset internal state but keep sim paused
   physState = { x: 0, v: 0, a: 0, y: 0, t: 0, theta: 0.25, omega: 0,
                 frictionPhase: 0, frictionCurrentF: 0, settled: false };
 
+  // Apply per-type preview
   switch (exp.type) {
     case "uniform_motion": {
       const glider = document.getElementById("airGlider");
       if (glider) glider.setAttribute("transform", "translate(120, 348)");
       const sp = document.getElementById("instSpeed");
-      if (sp) { sp.textContent = "0.00"; sp.setAttribute("fill", item.color); }
+      if (sp) { sp.textContent = item.v.toFixed(2); sp.setAttribute("fill", item.color); }
+      // color the glider body
       const body = document.querySelector("#airGlider path");
       if (body) body.setAttribute("fill", item.color);
       if (tel) tel.textContent = `v: ${item.v.toFixed(2)} m/s | x: 0.00 m`;
@@ -871,19 +687,20 @@ function applyConfigPreview() {
       if (timer) timer.textContent = "0.00 s";
       const tubeLabel = document.getElementById("tubeLabel");
       if (tubeLabel) tubeLabel.textContent = item.vacuum ? "لوله خلاء" : (item.airDensity < 0.5 ? "لوله نیمه‌تخلیه" : "لوله پر از هوا");
+      // opacity for air
+      const tube = document.querySelector("#apparatusMount rect[stroke='#38bdf8']");
+      if (tube) tube.setAttribute("opacity", item.vacuum ? "1" : (0.6 + item.airDensity*0.4).toFixed(2));
       if (tel) tel.textContent = `t: 0.00 s | ${item.vacuum ? "خلاء" : "هوا"} | g: 9.80 m/s²`;
       break;
     }
     case "terminal_velocity": {
       const rig = document.getElementById("skydiverRig");
-      if (rig) rig.setAttribute("transform", "translate(0, 90)");
+      if (rig) rig.setAttribute("transform", "translate(0, 30)");
       const canopy = document.getElementById("parachuteCanopy");
       if (canopy) canopy.style.display = (item.area > 2.0) ? "block" : "none";
       const sp = document.getElementById("skydiverSpeed");
       if (sp) sp.textContent = "0.0";
-      physState.v = 0;
-      physState.y = 0;
-      if (tel) tel.textContent = `v: 0.0 m/s | y: 0.0 m | v_حد: ${item.vTerm.toFixed(1)} m/s`;
+      if (tel) tel.textContent = `v: 0.0 m/s | v_حد: ${item.vTerm.toFixed(1)} m/s`;
       break;
     }
     case "inclined_plane": {
@@ -917,7 +734,10 @@ function applyConfigPreview() {
       const car = document.getElementById("physCar");
       if (car) car.setAttribute("transform", "translate(140, 400)");
       const needle = document.getElementById("speedoNeedle");
-      if (needle) { const ang = -140 + (item.v0 / 45) * 280; needle.setAttribute("transform", `rotate(${ang})`); }
+      if (needle) {
+        const ang = -140 + (item.v0 / 45) * 280;
+        needle.setAttribute("transform", `rotate(${ang})`);
+      }
       const spTxt = document.getElementById("speedoText");
       if (spTxt) spTxt.textContent = Math.round(item.v0 * 3.6) + " km/h";
       if (tel) tel.textContent = `a: ${item.a.toFixed(1)} m/s² | v: ${item.v0.toFixed(1)} m/s`;
@@ -943,12 +763,12 @@ function applyConfigPreview() {
       const accel = document.getElementById("n2Accel");
       const string = document.getElementById("stringNewton2");
       if (cart) cart.setAttribute("transform", "translate(200, 258)");
-      if (massHang) massHang.setAttribute("transform", "translate(690, 420)");
+      if (massHang) massHang.setAttribute("transform", "translate(680, 420)");
       if (extra) extra.setAttribute("opacity", (item.mCart > 0.6) ? "1" : "0");
       if (lblHang) lblHang.textContent = Math.round(item.mHanging * 1000) + "g";
       const aVal = (item.mHanging * 9.8) / (item.mCart + item.mHanging);
       if (accel) accel.textContent = aVal.toFixed(2);
-      if (string) string.setAttribute("d", "M250,258 L690,258 L690,310 L690,420");
+      if (string) string.setAttribute("d", "M250,258 L680,258 L680,310 L680,420");
       if (tel) tel.textContent = `F: ${(item.mHanging * 9.8).toFixed(2)} N | a: ${aVal.toFixed(2)} m/s²`;
       break;
     }
@@ -985,6 +805,7 @@ function applyConfigPreview() {
       if (spr) spr.setAttribute("transform", "scale(1, 1)");
       if (holder) holder.setAttribute("transform", "translate(0, 140)");
       if (weightsGroup) {
+        // Resize weight stack to hint at F
         const cnt = Math.round(item.F);
         weightsGroup.innerHTML = Array.from({length: cnt}, (_, i) => {
           const y = i * 16;
@@ -993,6 +814,8 @@ function applyConfigPreview() {
       }
       const fEl = document.getElementById("hookeF");
       const dEl = document.getElementById("hookeDx");
+      const k = 25.0;
+      const dx = (item.F / k) * 100;
       if (fEl) fEl.textContent = item.F.toFixed(1) + " N";
       if (dEl) dEl.textContent = "0.0 cm";
       if (tel) tel.textContent = `F: ${item.F.toFixed(1)} N | Δx: 0.0 cm (آماده)`;
@@ -1006,11 +829,20 @@ function applyConfigPreview() {
       const bLbl = document.getElementById("brickFaceLabel");
       const pr = document.getElementById("pressureReadout");
       if (bShape) {
-        bShape.setAttribute("width", item.w); bShape.setAttribute("height", item.h);
-        bShape.setAttribute("x", -item.w/2); bShape.setAttribute("y", -item.h);
+        bShape.setAttribute("width", item.w);
+        bShape.setAttribute("height", item.h);
+        bShape.setAttribute("x", -item.w/2);
+        bShape.setAttribute("y", -item.h);
       }
-      if (bShape2) { bShape2.setAttribute("width", item.w); bShape2.setAttribute("x", -item.w/2); bShape2.setAttribute("y", -item.h); }
-      if (bLbl) { bLbl.textContent = item.label; bLbl.setAttribute("y", -item.h/2 + 4); }
+      if (bShape2) {
+        bShape2.setAttribute("width", item.w);
+        bShape2.setAttribute("x", -item.w/2);
+        bShape2.setAttribute("y", -item.h);
+      }
+      if (bLbl) {
+        bLbl.textContent = item.label;
+        bLbl.setAttribute("y", -item.h/2 + 4);
+      }
       if (brick) brick.setAttribute("transform", "translate(0, -20)");
       if (sponge) sponge.setAttribute("d", "M-240,0 Q0,0 240,0 L240,140 L-240,140 Z");
       const P = (3.0 * 9.8) / item.A;
@@ -1020,21 +852,22 @@ function applyConfigPreview() {
     }
     case "liquid_depth": {
       const probe = document.getElementById("depthProbe");
-      if (probe) probe.setAttribute("transform", `translate(0, ${30 + item.h * 9})`);
       const flLeft = document.getElementById("manometerFluidLeft");
       const flRight = document.getElementById("manometerFluidRight");
-      if (flLeft) flLeft.setAttribute("d", "M-25,60 L-25,150 Q-25,182 10,182");
-      if (flRight) flRight.setAttribute("d", "M10,182 Q45,182 45,150 L45,60");
       const deltaLabel = document.getElementById("manoDelta");
-      if (deltaLabel) deltaLabel.textContent = `Δh = 0.0 cm`;
       const pReadout = document.getElementById("pressureLiquid");
-      if (pReadout) pReadout.textContent = "0.00 kPa";
       const tankFluid = document.getElementById("tankFluid");
       const fluidSurface = document.getElementById("fluidSurface");
+      if (probe) probe.setAttribute("transform", `translate(0, ${30 + item.h * 9})`);
+      if (flLeft) flLeft.setAttribute("d", "M-25,80 L-25,150 Q-25,182 10,182");
+      if (flRight) flRight.setAttribute("d", "M10,182 Q45,182 45,150 L45,80");
+      if (deltaLabel) deltaLabel.textContent = `Δh = 0.0 cm`;
+      const P = (item.rho * 9.8 * (item.h/100)) / 1000.0;
+      if (pReadout) pReadout.textContent = "0.00 kPa";
+      // fluid color
       const fill = item.fluid === "salt" ? "url(#saltWaterGrad)" : "url(#waterGrad)";
       if (tankFluid) tankFluid.setAttribute("fill", fill);
       if (fluidSurface) fluidSurface.setAttribute("fill", item.fluid === "salt" ? "#a5b4fc" : "#7dd3fc");
-      const P = (item.rho * 9.8 * (item.h/100)) / 1000.0;
       if (tel) tel.textContent = `h: ${item.h} cm | ρ: ${item.rho} kg/m³ | P: ${P.toFixed(2)} kPa`;
       break;
     }
@@ -1088,11 +921,13 @@ function applyConfigPreview() {
       break;
     }
   }
+
+  // Update chart label just in case
   renderChart();
 }
 
 /* ============================================================
-   SVG APPARATUS BUILDERS
+   SVG APPARATUS — richer detail
    ============================================================ */
 function buildApparatusVisual(exp) {
   const mount = document.getElementById("apparatusMount");
@@ -1123,15 +958,21 @@ function buildUniformMotion() {
       <rect x="80" y="378" width="740" height="40" rx="4" fill="url(#chromeTrack)" stroke="#1e293b" stroke-width="1.5"/>
       <rect x="80" y="378" width="740" height="4" fill="rgba(255,255,255,0.35)"/>
       <rect x="80" y="414" width="740" height="4" fill="rgba(0,0,0,0.4)"/>
-      <g opacity="0.6">${Array.from({length: 30}, (_, i) => `<circle cx="${110 + i*24}" cy="395" r="1.6" fill="#0f172a"/>`).join("")}</g>
+      <g opacity="0.6">
+        ${Array.from({length: 30}, (_, i) => `<circle cx="${110 + i*24}" cy="395" r="1.6" fill="#0f172a"/>`).join("")}
+      </g>
     </g>
+    <!-- Ruler -->
     <g transform="translate(80, 425)">
       ${Array.from({length: 21}, (_, i) => {
-        const x = i * 37; const major = i % 5 === 0;
-        return `<line x1="${x}" y1="0" x2="${x}" y2="${major?10:5}" stroke="#94a3b8" stroke-width="${major?1.5:0.8}"/>${major ? `<text x="${x}" y="22" fill="#94a3b8" font-size="9" text-anchor="middle">${(i*0.2).toFixed(1)}</text>` : ""}`;
+        const x = i * 37;
+        const major = i % 5 === 0;
+        return `<line x1="${x}" y1="0" x2="${x}" y2="${major?10:5}" stroke="#94a3b8" stroke-width="${major?1.5:0.8}"/>
+                ${major ? `<text x="${x}" y="22" fill="#94a3b8" font-size="9" text-anchor="middle">${(i*0.2).toFixed(1)}</text>` : ""}`;
       }).join("")}
       <text x="370" y="36" fill="#64748b" font-size="9" text-anchor="middle">x (m)</text>
     </g>
+    <!-- photogates -->
     <g transform="translate(280, 295)" filter="url(#dropShadow)">
       <rect x="-12" y="0" width="24" height="85" rx="3" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
       <circle cx="0" cy="20" r="5" fill="#ef4444" filter="url(#laserGlow)"/>
@@ -1146,10 +987,12 @@ function buildUniformMotion() {
       <text x="0" y="-10" fill="#38bdf8" font-size="10" font-weight="700" text-anchor="middle">سنسور ۲</text>
       <rect x="-14" y="80" width="28" height="6" rx="1" fill="#334155"/>
     </g>
+    <!-- end stop -->
     <g transform="translate(830, 340)" filter="url(#dropShadow)">
       <rect x="-8" y="0" width="16" height="40" rx="3" fill="#dc2626" stroke="#7f1d1d"/>
       <rect x="-8" y="0" width="16" height="5" fill="#fca5a5"/>
     </g>
+    <!-- glider -->
     <g id="airGlider" transform="translate(120, 348)">
       <g filter="url(#dropShadow)">
         <path d="M-38,32 L-28,0 L28,0 L38,32 Z" fill="url(#cartBodyGrad)" stroke="#0ea5e9" stroke-width="1.2"/>
@@ -1161,36 +1004,46 @@ function buildUniformMotion() {
         <line x1="-38" y1="16" x2="38" y2="16" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
       </g>
     </g>
+    <!-- digital readout -->
     <g id="speedReadout" transform="translate(450, 200)">
       <rect x="-95" y="-38" width="190" height="70" rx="10" fill="rgba(10,18,32,0.92)" stroke="#00f5d4" stroke-width="1.5"/>
       <text x="0" y="-14" fill="#94a3b8" font-size="10" text-anchor="middle">سرعت لحظه‌ای</text>
       <text id="instSpeed" x="-20" y="18" fill="#00f5d4" font-family="Courier New" font-size="24" font-weight="700" text-anchor="middle">۰٫۰۰</text>
       <text x="52" y="18" fill="#64748b" font-family="Courier New" font-size="12">m/s</text>
-    </g>`;
+    </g>
+  `;
 }
 
 function buildNewtonTube() {
   const mount = document.getElementById("apparatusMount");
   mount.innerHTML = `
+    <!-- stand -->
     <g transform="translate(450, 40)">
       <rect x="-160" y="0" width="320" height="18" rx="4" fill="#334155" stroke="#1e293b" stroke-width="1"/>
       <rect x="-160" y="0" width="320" height="4" fill="rgba(255,255,255,0.1)"/>
       <rect x="-150" y="18" width="18" height="500" fill="#1e293b"/>
       <rect x="132" y="18" width="18" height="500" fill="#1e293b"/>
     </g>
+
+    <!-- tube -->
     <g transform="translate(450, 70)">
       <g filter="url(#dropShadow)">
         <rect x="-50" y="0" width="100" height="450" rx="50" fill="url(#glassTube)" stroke="#38bdf8" stroke-width="2.5"/>
         <rect x="-45" y="6" width="12" height="438" rx="6" fill="rgba(255,255,255,0.35)"/>
         <rect x="-8" y="450" width="16" height="28" rx="3" fill="#334155"/>
+        <rect x="-8" y="450" width="16" height="4" fill="rgba(255,255,255,0.15)"/>
         <circle cx="20" cy="464" r="7" fill="#f43f5e" filter="url(#laserGlow)"/>
       </g>
+
       <text x="0" y="-20" fill="#38bdf8" font-size="12" font-weight="700" text-anchor="middle" id="tubeLabel">لوله خلاء</text>
+
+      <!-- steel ball -->
       <g id="newtonBallGroup">
         <circle id="newtonBall" cx="-18" cy="35" r="12" fill="url(#chromeVert)" stroke="#0f172a" stroke-width="1"/>
         <circle cx="-22" cy="30" r="3" fill="rgba(255,255,255,0.7)"/>
         <ellipse cx="-14" cy="32" rx="4" ry="2" fill="rgba(255,255,255,0.3)"/>
       </g>
+      <!-- feather -->
       <g id="newtonFeather" transform="translate(18, 35)">
         <path d="M0,-2 Q14,18 0,44 Q-14,18 0,-2 Z" fill="#f8fafc" stroke="#94a3b8" stroke-width="0.8"/>
         <line x1="0" y1="-2" x2="0" y2="44" stroke="#94a3b8" stroke-width="1"/>
@@ -1200,37 +1053,34 @@ function buildNewtonTube() {
         <line x1="-3" y1="38" x2="3" y2="38" stroke="#94a3b8" stroke-width="0.5"/>
       </g>
     </g>
+
+    <!-- vacuum pump label -->
     <g transform="translate(650, 100)">
       <rect x="0" y="0" width="180" height="80" rx="10" fill="rgba(10,18,32,0.9)" stroke="#38bdf8" stroke-width="1.5"/>
       <text x="90" y="22" fill="#94a3b8" font-size="10" text-anchor="middle">زمان سقوط</text>
       <text id="fallTimer" x="90" y="55" fill="#00f5d4" font-family="Courier New" font-size="22" font-weight="700" text-anchor="middle">۰٫۰۰ s</text>
-    </g>`;
+    </g>
+  `;
 }
 
 function buildSkydiver() {
   const mount = document.getElementById("apparatusMount");
   mount.innerHTML = `
-    <!-- Ground line at bottom -->
-    <rect x="60" y="500" width="780" height="40" fill="#1a2333"/>
-    <rect x="60" y="500" width="780" height="4" fill="#334155"/>
-    <line x1="60" y1="520" x2="840" y2="520" stroke="rgba(250,204,21,0.6)" stroke-dasharray="20 15" stroke-width="2"/>
-    <text x="450" y="545" fill="#94a3b8" font-size="11" text-anchor="middle" font-weight="700">زمین — ارتفاع سقوط: ۶۰ متر</text>
+    <g transform="translate(450, 60)">
+      <line x1="-140" y1="0" x2="-140" y2="460" stroke="rgba(56,189,248,0.15)" stroke-dasharray="5 5"/>
+      <line x1="140" y1="0" x2="140" y2="460" stroke="rgba(56,189,248,0.15)" stroke-dasharray="5 5"/>
+      ${[0, 100, 200, 300, 400].map(y =>
+        `<line x1="-140" y1="${y}" x2="-130" y2="${y}" stroke="rgba(56,189,248,0.4)" stroke-width="1"/>
+         <text x="-155" y="${y+3}" fill="rgba(56,189,248,0.6)" font-size="9" text-anchor="middle">${(400-y)}</text>`
+      ).join("")}
 
-    <g transform="translate(450, 40)">
-      <!-- altitude ruler -->
-      <line x1="-140" y1="50" x2="-140" y2="460" stroke="rgba(56,189,248,0.25)" stroke-dasharray="5 5"/>
-      <line x1="140" y1="50" x2="140" y2="460" stroke="rgba(56,189,248,0.25)" stroke-dasharray="5 5"/>
-      ${[0, 15, 30, 45, 60].map(m => {
-        const y = 50 + (m / 60) * 410;
-        return `<line x1="-140" y1="${y}" x2="-130" y2="${y}" stroke="rgba(56,189,248,0.5)" stroke-width="1.5"/>
-                <text x="-155" y="${y+3}" fill="rgba(56,189,248,0.75)" font-size="9" text-anchor="middle" font-weight="700">${60-m}m</text>`;
-      }).join("")}
-
-      <g id="skydiverRig" transform="translate(0, 90)">
+      <g id="skydiverRig" transform="translate(0, 30)">
         <g id="parachuteCanopy">
           <path d="M-85,0 Q0,-70 85,0 Z" fill="#f43f5e" stroke="#fff" stroke-width="1.8"/>
           <path d="M-85,0 Q-42,-35 0,0 Z" fill="#be123c"/>
           <path d="M0,0 Q42,-35 85,0 Z" fill="#be123c"/>
+          <path d="M-42,-35 Q-21,-50 0,-35" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+          <path d="M0,-35 Q21,-50 42,-35" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
           <line x1="-85" y1="0" x2="0" y2="65" stroke="#cbd5e1" stroke-width="1.2"/>
           <line x1="-30" y1="-8" x2="0" y2="65" stroke="#cbd5e1" stroke-width="1.2"/>
           <line x1="30" y1="-8" x2="0" y2="65" stroke="#cbd5e1" stroke-width="1.2"/>
@@ -1246,13 +1096,13 @@ function buildSkydiver() {
       </g>
 
       <g transform="translate(240, 200)">
-        <rect x="0" y="0" width="200" height="110" rx="10" fill="rgba(10,18,32,0.92)" stroke="#f43f5e" stroke-width="1.5"/>
-        <text x="100" y="22" fill="#94a3b8" font-size="10" text-anchor="middle">سرعت لحظه‌ای</text>
-        <text id="skydiverSpeed" x="100" y="58" fill="#f43f5e" font-family="Courier New" font-size="24" font-weight="700" text-anchor="middle">۰٫۰</text>
-        <text x="100" y="82" fill="#64748b" font-family="Courier New" font-size="11" text-anchor="middle">m/s</text>
-        <text id="skydiverAltitude" x="100" y="102" fill="#00f5d4" font-family="Courier New" font-size="11" text-anchor="middle">ارتفاع: ۶۰٫۰ m</text>
+        <rect x="0" y="0" width="180" height="90" rx="10" fill="rgba(10,18,32,0.9)" stroke="#f43f5e" stroke-width="1.5"/>
+        <text x="90" y="22" fill="#94a3b8" font-size="10" text-anchor="middle">سرعت سقوط</text>
+        <text id="skydiverSpeed" x="90" y="55" fill="#f43f5e" font-family="Courier New" font-size="22" font-weight="700" text-anchor="middle">۰٫۰</text>
+        <text x="90" y="78" fill="#64748b" font-family="Courier New" font-size="11" text-anchor="middle">m/s</text>
       </g>
-    </g>`;
+    </g>
+  `;
 }
 
 function buildInclinedPlane() {
@@ -1265,9 +1115,13 @@ function buildInclinedPlane() {
       <g id="rampArm">
         <line x1="0" y1="0" x2="560" y2="0" stroke="url(#chromeTrack)" stroke-width="20" stroke-linecap="round"/>
         <line x1="10" y1="-8" x2="550" y2="-8" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+        <line x1="10" y1="9" x2="550" y2="9" stroke="rgba(0,0,0,0.4)" stroke-width="1"/>
+        <!-- tick marks on ramp -->
         ${Array.from({length: 12}, (_, i) => {
-          const x = 20 + i*46; const major = i % 2 === 0;
-          return `<line x1="${x}" y1="${major?2:4}" x2="${x}" y2="9" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>${major ? `<text x="${x}" y="-14" fill="rgba(148,163,184,0.8)" font-size="8" text-anchor="middle">${(i*0.4).toFixed(1)}</text>` : ""}`;
+          const x = 20 + i*46;
+          const major = i % 2 === 0;
+          return `<line x1="${x}" y1="${major?2:4}" x2="${x}" y2="9" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+                  ${major ? `<text x="${x}" y="-14" fill="rgba(148,163,184,0.8)" font-size="8" text-anchor="middle">${(i*0.4).toFixed(1)}</text>` : ""}`;
         }).join("")}
         <g id="rampCart" transform="translate(500, -26)">
           <g filter="url(#dropShadow)">
@@ -1281,13 +1135,15 @@ function buildInclinedPlane() {
         </g>
       </g>
     </g>
+
     <g transform="translate(680, 180)">
       <rect x="-85" y="-45" width="170" height="90" rx="10" fill="rgba(10,18,32,0.9)" stroke="#00f5d4" stroke-width="1.5"/>
       <text x="0" y="-20" fill="#94a3b8" font-size="10" text-anchor="middle">شتاب a = g·sinθ</text>
       <text id="rampAccel" x="-15" y="14" fill="#00f5d4" font-family="Courier New" font-size="22" font-weight="700" text-anchor="middle">۲٫۵۴</text>
       <text x="55" y="14" fill="#64748b" font-family="Courier New" font-size="10">m/s²</text>
       <text id="rampVelocity" x="0" y="34" fill="#facc15" font-family="Courier New" font-size="11" text-anchor="middle">v = ۰٫۰۰ m/s</text>
-    </g>`;
+    </g>
+  `;
 }
 
 function buildCarAccel() {
@@ -1296,13 +1152,18 @@ function buildCarAccel() {
     <rect x="40" y="450" width="820" height="70" fill="#1a2333"/>
     <rect x="40" y="450" width="820" height="4" fill="#334155"/>
     <line x1="40" y1="485" x2="860" y2="485" stroke="#facc15" stroke-dasharray="35 25" stroke-width="3" opacity="0.8"/>
+    <line x1="40" y1="452" x2="860" y2="452" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+    <!-- distance markers -->
     <g transform="translate(140, 505)">
       ${Array.from({length: 9}, (_, i) => {
         const x = i * 80;
-        return `<line x1="${x}" y1="0" x2="${x}" y2="8" stroke="#94a3b8" stroke-width="1"/><text x="${x}" y="24" fill="#94a3b8" font-size="9" text-anchor="middle">${i*10}</text>`;
+        return `<line x1="${x}" y1="0" x2="${x}" y2="8" stroke="#94a3b8" stroke-width="1"/>
+                <text x="${x}" y="24" fill="#94a3b8" font-size="9" text-anchor="middle">${i*10}</text>`;
       }).join("")}
       <text x="360" y="38" fill="#64748b" font-size="9" text-anchor="middle">مسافت (m)</text>
     </g>
+
     <g id="physCar" transform="translate(140, 400)">
       <g filter="url(#dropShadow)">
         <path d="M-55,28 L-42,2 L-5,-14 L48,-14 L68,10 L80,28 Z" fill="url(#cartBodyGrad)" stroke="#0ea5e9" stroke-width="1.5"/>
@@ -1319,67 +1180,140 @@ function buildCarAccel() {
       <circle cx="-32" cy="30" r="2" fill="#0f172a"/>
       <circle cx="48" cy="30" r="2" fill="#0f172a"/>
     </g>
+
     <g transform="translate(740, 240)">
-      <g filter="url(#dropShadow)"><circle cx="0" cy="0" r="72" fill="#0b1324" stroke="#38bdf8" stroke-width="3"/><circle cx="0" cy="0" r="64" fill="none" stroke="#1e293b" stroke-width="1"/></g>
+      <g filter="url(#dropShadow)">
+        <circle cx="0" cy="0" r="72" fill="#0b1324" stroke="#38bdf8" stroke-width="3"/>
+        <circle cx="0" cy="0" r="64" fill="none" stroke="#1e293b" stroke-width="1"/>
+      </g>
       <path d="M-52,36 A60,60 0 1,1 52,36" fill="none" stroke="#334155" stroke-width="5"/>
       <path d="M-52,36 A60,60 0 0,1 0,-60" fill="none" stroke="#00f5d4" stroke-width="5" opacity="0.6"/>
-      ${Array.from({length: 11}, (_, i) => { const a = (-140 + i*28) * Math.PI / 180; const r1 = 52, r2 = 60;
-        return `<line x1="${Math.cos(a)*r1}" y1="${Math.sin(a)*r1}" x2="${Math.cos(a)*r2}" y2="${Math.sin(a)*r2}" stroke="#94a3b8" stroke-width="${i%5===0?2:1}"/>`;}).join("")}
-      <g id="speedoNeedle"><line x1="0" y1="0" x2="0" y2="-52" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/><circle cx="0" cy="0" r="6" fill="#f8fafc"/></g>
+      ${Array.from({length: 11}, (_, i) => {
+        const a = (-140 + i*28) * Math.PI / 180;
+        const r1 = 52, r2 = 60;
+        return `<line x1="${Math.cos(a)*r1}" y1="${Math.sin(a)*r1}" x2="${Math.cos(a)*r2}" y2="${Math.sin(a)*r2}" stroke="#94a3b8" stroke-width="${i%5===0?2:1}"/>`;
+      }).join("")}
+      <g id="speedoNeedle">
+        <line x1="0" y1="0" x2="0" y2="-52" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="0" cy="0" r="6" fill="#f8fafc"/>
+      </g>
       <text id="speedoText" x="0" y="52" fill="#00f5d4" font-family="Courier New" font-size="14" font-weight="700" text-anchor="middle">۰ km/h</text>
-    </g>`;
+    </g>
+  `;
 }
 
 function buildInertiaCart() {
   const mount = document.getElementById("apparatusMount");
   mount.innerHTML = `
-    <g filter="url(#dropShadow)"><rect x="60" y="440" width="740" height="22" rx="3" fill="url(#chromeTrack)"/><rect x="60" y="440" width="740" height="3" fill="rgba(255,255,255,0.4)"/></g>
-    <g transform="translate(770, 380)" filter="url(#dropShadow)"><rect x="-14" y="0" width="28" height="62" rx="4" fill="#dc2626" stroke="#7f1d1d" stroke-width="1.5"/><rect x="-14" y="0" width="28" height="6" fill="#fca5a5"/></g>
+    <g filter="url(#dropShadow)">
+      <rect x="60" y="440" width="740" height="22" rx="3" fill="url(#chromeTrack)"/>
+      <rect x="60" y="440" width="740" height="3" fill="rgba(255,255,255,0.4)"/>
+    </g>
+    <g transform="translate(60, 462)">
+      ${Array.from({length: 15}, (_, i) => {
+        const x = i * 50;
+        return `<line x1="${x}" y1="0" x2="${x}" y2="6" stroke="rgba(148,163,184,0.4)" stroke-width="1"/>`;
+      }).join("")}
+    </g>
+
+    <g transform="translate(770, 380)" filter="url(#dropShadow)">
+      <rect x="-14" y="0" width="28" height="62" rx="4" fill="#dc2626" stroke="#7f1d1d" stroke-width="1.5"/>
+      <rect x="-14" y="0" width="28" height="6" fill="#fca5a5"/>
+      <line x1="-14" y1="20" x2="14" y2="20" stroke="rgba(0,0,0,0.3)" stroke-width="1"/>
+      <line x1="-14" y1="40" x2="14" y2="40" stroke="rgba(0,0,0,0.3)" stroke-width="1"/>
+    </g>
+
     <g id="inertiaCart" transform="translate(180, 400)">
-      <g filter="url(#dropShadow)"><rect x="-52" y="0" width="104" height="28" rx="5" fill="url(#cartBodyGrad)" stroke="#0ea5e9" stroke-width="1.2"/><rect x="-52" y="0" width="104" height="4" fill="rgba(255,255,255,0.4)"/></g>
+      <g filter="url(#dropShadow)">
+        <rect x="-52" y="0" width="104" height="28" rx="5" fill="url(#cartBodyGrad)" stroke="#0ea5e9" stroke-width="1.2"/>
+        <rect x="-52" y="0" width="104" height="4" fill="rgba(255,255,255,0.4)"/>
+        <line x1="-50" y1="18" x2="50" y2="18" stroke="rgba(0,0,0,0.15)" stroke-width="1"/>
+      </g>
       <circle cx="-34" cy="30" r="9" fill="#0f172a" stroke="#64748b" stroke-width="2"/>
       <circle cx="34" cy="30" r="9" fill="#0f172a" stroke="#64748b" stroke-width="2"/>
+      <circle cx="-34" cy="30" r="3" fill="#94a3b8"/>
+      <circle cx="34" cy="30" r="3" fill="#94a3b8"/>
+
       <g id="inertiaCargo" transform="translate(0, -30)">
-        <g filter="url(#dropShadow)"><rect x="-24" y="0" width="48" height="30" rx="4" fill="#a16207" stroke="#78350f" stroke-width="1.2"/><rect x="-24" y="0" width="48" height="6" rx="3" fill="rgba(255,255,255,0.35)"/></g>
+        <g filter="url(#dropShadow)">
+          <rect x="-24" y="0" width="48" height="30" rx="4" fill="#a16207" stroke="#78350f" stroke-width="1.2"/>
+          <rect x="-24" y="0" width="48" height="6" rx="3" fill="rgba(255,255,255,0.35)"/>
+          <path d="M-24,0 L24,30 M24,0 L-24,30" stroke="rgba(0,0,0,0.25)" stroke-width="1"/>
+        </g>
         <text x="0" y="19" fill="#fef3c7" font-size="10" font-weight="700" text-anchor="middle">بار</text>
       </g>
     </g>
+
     <g transform="translate(450, 200)">
       <rect x="-115" y="-42" width="230" height="84" rx="10" fill="rgba(10,18,32,0.9)" stroke="#facc15" stroke-width="1.5"/>
       <text x="0" y="-16" fill="#94a3b8" font-size="10" text-anchor="middle">وضعیت لختی</text>
       <text id="inertiaStatus" x="0" y="14" fill="#facc15" font-family="Tahoma" font-size="14" font-weight="700" text-anchor="middle">حرکت یکنواخت</text>
-    </g>`;
+    </g>
+  `;
 }
 
 function buildNewtonSecond() {
   const mount = document.getElementById("apparatusMount");
   mount.innerHTML = `
-    <g filter="url(#dropShadow)"><rect x="80" y="300" width="600" height="22" rx="3" fill="url(#chromeTrack)"/><rect x="80" y="300" width="600" height="3" fill="rgba(255,255,255,0.4)"/></g>
-    <g transform="translate(690, 315)" filter="url(#dropShadow)"><circle r="20" fill="#334155" stroke="#94a3b8" stroke-width="2"/><circle r="7" fill="#0f172a"/><circle r="3" fill="#64748b"/></g>
+    <!-- table -->
+    <g filter="url(#dropShadow)">
+      <rect x="80" y="300" width="600" height="22" rx="3" fill="url(#chromeTrack)"/>
+      <rect x="80" y="300" width="600" height="3" fill="rgba(255,255,255,0.4)"/>
+    </g>
+
+    <!-- pulley -->
+    <g transform="translate(690, 315)" filter="url(#dropShadow)">
+      <circle r="20" fill="#334155" stroke="#94a3b8" stroke-width="2"/>
+      <circle r="7" fill="#0f172a"/>
+      <circle r="3" fill="#64748b"/>
+      <line x1="-18" y1="0" x2="18" y2="0" stroke="rgba(148,163,184,0.4)" stroke-width="1"/>
+    </g>
     <rect x="686" y="295" width="8" height="40" fill="#1e293b"/>
+
+    <!-- cart -->
     <g id="cartNewton2" transform="translate(200, 258)">
-      <g filter="url(#dropShadow)"><rect x="-50" y="0" width="100" height="30" rx="5" fill="url(#cartBodyGrad)" stroke="#0ea5e9"/><rect x="-50" y="0" width="100" height="5" fill="rgba(255,255,255,0.4)"/></g>
+      <g filter="url(#dropShadow)">
+        <rect x="-50" y="0" width="100" height="30" rx="5" fill="url(#cartBodyGrad)" stroke="#0ea5e9"/>
+        <rect x="-50" y="0" width="100" height="5" fill="rgba(255,255,255,0.4)"/>
+      </g>
       <circle cx="-32" cy="32" r="9" fill="#0f172a" stroke="#64748b" stroke-width="2"/>
       <circle cx="32" cy="32" r="9" fill="#0f172a" stroke="#64748b" stroke-width="2"/>
-      <g id="cartExtraMass" opacity="0"><rect x="-32" y="-14" width="64" height="14" rx="2" fill="url(#brassWeight)" stroke="#78350f"/></g>
+      <circle cx="-32" cy="32" r="3" fill="#94a3b8"/>
+      <circle cx="32" cy="32" r="3" fill="#94a3b8"/>
+      <g id="cartExtraMass" opacity="0">
+        <rect x="-32" y="-14" width="64" height="14" rx="2" fill="url(#brassWeight)" stroke="#78350f"/>
+        <rect x="-32" y="-14" width="64" height="3" fill="rgba(255,255,255,0.4)" rx="1"/>
+      </g>
     </g>
+
+    <!-- string -->
     <path id="stringNewton2" d="M250,258 L690,258 L690,315 L690,420" fill="none" stroke="#94a3b8" stroke-width="1.8"/>
+
+    <!-- hanging weight -->
     <g id="hangingWeight" transform="translate(690, 420)">
-      <g filter="url(#dropShadow)"><rect x="-18" y="0" width="36" height="42" rx="3" fill="url(#brassWeight)" stroke="#78350f" stroke-width="1.2"/><rect x="-18" y="0" width="36" height="7" fill="rgba(255,255,255,0.4)"/></g>
+      <g filter="url(#dropShadow)">
+        <rect x="-18" y="0" width="36" height="42" rx="3" fill="url(#brassWeight)" stroke="#78350f" stroke-width="1.2"/>
+        <rect x="-18" y="0" width="36" height="7" fill="rgba(255,255,255,0.4)"/>
+        <line x1="-18" y1="20" x2="18" y2="20" stroke="rgba(0,0,0,0.15)" stroke-width="1"/>
+      </g>
       <text id="lblHangingMass" x="0" y="26" font-size="9" font-weight="700" text-anchor="middle" fill="#422006">100g</text>
     </g>
-    <g id="forceArrow" transform="translate(200, 340)"><line x1="0" y1="0" x2="60" y2="0" stroke="#f43f5e" stroke-width="3" marker-end="url(#arrowRed)"/><text x="30" y="-8" fill="#f43f5e" font-size="11" font-weight="700" text-anchor="middle">F</text></g>
+
+    <!-- force arrow -->
+    <g id="forceArrow" transform="translate(200, 340)">
+      <line x1="0" y1="0" x2="60" y2="0" stroke="#f43f5e" stroke-width="3" marker-end="url(#arrowRed)"/>
+      <text x="30" y="-8" fill="#f43f5e" font-size="11" font-weight="700" text-anchor="middle">F</text>
+    </g>
+
     <g transform="translate(200, 150)">
       <rect x="-120" y="-55" width="240" height="110" rx="10" fill="rgba(10,18,32,0.92)" stroke="#00f5d4" stroke-width="1.5"/>
       <text x="0" y="-30" fill="#94a3b8" font-size="10" text-anchor="middle">شتاب کالسکه</text>
       <text id="n2Accel" x="-20" y="8" fill="#00f5d4" font-family="Courier New" font-size="26" font-weight="700" text-anchor="middle">۰٫۰۰</text>
       <text x="55" y="8" fill="#64748b" font-family="Courier New" font-size="11">m/s²</text>
       <text id="n2Force" x="0" y="35" fill="#f43f5e" font-family="Courier New" font-size="12" text-anchor="middle">F = ۰٫۹۸ N</text>
-    </g>`;
-  ensureArrowMarker();
-}
-
-function ensureArrowMarker() {
+    </g>
+  `;
+  // Add arrow marker
   const defs = document.querySelector("#physCanvas defs");
   if (!document.querySelector("#arrowRed")) {
     const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
@@ -1399,86 +1333,155 @@ function buildFrictionTest() {
   const mount = document.getElementById("apparatusMount");
   const item = PHYS_DATABASE[currentChap][currentExpIdx].items[activeItemIdx];
   mount.innerHTML = `
+    <!-- surface with texture -->
     <g filter="url(#dropShadow)">
       <rect id="frictionBed" x="100" y="410" width="700" height="36" rx="4" fill="${item.color}" stroke="#422006" stroke-width="1.5"/>
-      <g opacity="0.35">${Array.from({length: 22}, (_, i) => `<line x1="${115 + i*32}" y1="414" x2="${128 + i*32}" y2="440" stroke="#000" stroke-width="0.7"/>`).join("")}</g>
+      <g opacity="0.35">
+        ${Array.from({length: 22}, (_, i) =>
+          `<line x1="${115 + i*32}" y1="414" x2="${128 + i*32}" y2="440" stroke="#000" stroke-width="0.7"/>`
+        ).join("")}
+      </g>
+      <rect x="100" y="410" width="700" height="5" fill="rgba(255,255,255,0.15)"/>
     </g>
     <text x="450" y="468" fill="#94a3b8" font-size="11" text-anchor="middle">سطح: ${item.matName}</text>
+
+    <!-- block -->
     <g id="frictionBlock" transform="translate(240, 360)">
-      <g filter="url(#dropShadow)"><rect x="-42" y="0" width="84" height="50" rx="4" fill="${item.color}" stroke="#1e293b" stroke-width="1.5"/><rect x="-42" y="0" width="84" height="6" fill="rgba(255,255,255,0.25)"/></g>
+      <g filter="url(#dropShadow)">
+        <rect x="-42" y="0" width="84" height="50" rx="4" fill="${item.color}" stroke="#1e293b" stroke-width="1.5"/>
+        <rect x="-42" y="0" width="84" height="6" fill="rgba(255,255,255,0.25)"/>
+        <path d="M-42,0 L42,50 M42,0 L-42,50" stroke="rgba(0,0,0,0.15)" stroke-width="1"/>
+      </g>
       <text x="0" y="32" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">${item.blockLabel}</text>
     </g>
-    <g id="frictionForceArrow" transform="translate(150, 385)"><line x1="0" y1="0" x2="45" y2="0" stroke="#f43f5e" stroke-width="3" marker-end="url(#arrowRed)"/></g>
+
+    <!-- force arrow left of block -->
+    <g id="frictionForceArrow" transform="translate(150, 385)">
+      <line x1="0" y1="0" x2="45" y2="0" stroke="#f43f5e" stroke-width="3" marker-end="url(#arrowRed)"/>
+    </g>
+
+    <!-- dynamometer -->
     <g id="dynamometerRig" transform="translate(340, 375)">
-      <g filter="url(#dropShadow)"><rect x="42" y="-6" width="200" height="30" rx="5" fill="url(#glassVert)" stroke="#38bdf8" stroke-width="1.5"/></g>
-      ${Array.from({length: 11}, (_, i) => { const x = 50 + i*18; return `<line x1="${x}" y1="0" x2="${x}" y2="${i%5===0?10:6}" stroke="#94a3b8" stroke-width="1"/>${i%5===0 ? `<text x="${x}" y="-4" fill="#94a3b8" font-size="8" text-anchor="middle">${i*0.8}</text>` : ""}`;}).join("")}
-      <g id="dynPointer"><polygon points="0,-8 6,0 -6,0" fill="#ef4444"/></g>
+      <g filter="url(#dropShadow)">
+        <rect x="42" y="-6" width="200" height="30" rx="5" fill="url(#glassVert)" stroke="#38bdf8" stroke-width="1.5"/>
+      </g>
+      ${Array.from({length: 11}, (_, i) => {
+        const x = 50 + i*18;
+        return `<line x1="${x}" y1="0" x2="${x}" y2="${i%5===0?10:6}" stroke="#94a3b8" stroke-width="1"/>
+                ${i%5===0 ? `<text x="${x}" y="-4" fill="#94a3b8" font-size="8" text-anchor="middle">${i*0.8}</text>` : ""}`;
+      }).join("")}
+      <path id="dynSpring" d="M45,10 Q50,4 55,10 Q60,16 65,10 Q70,4 75,10 Q80,16 85,10 Q90,4 95,10 Q100,16 105,10 Q110,4 115,10 Q120,16 125,10 L135,10" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+      <g id="dynPointer">
+        <polygon points="0,-8 6,0 -6,0" fill="#ef4444"/>
+      </g>
       <text id="dynReadout" x="142" y="-14" fill="#00f5d4" font-family="Courier New" font-size="13" font-weight="700" text-anchor="middle">0.00 N</text>
     </g>
+
     <g transform="translate(700, 180)">
       <rect x="-105" y="-50" width="210" height="100" rx="10" fill="rgba(10,18,32,0.92)" stroke="#f43f5e" stroke-width="1.5"/>
       <text x="0" y="-26" fill="#94a3b8" font-size="10" text-anchor="middle">نیروسنج دیجیتال</text>
       <text id="frictionForce" x="0" y="6" fill="#f43f5e" font-family="Courier New" font-size="22" font-weight="700" text-anchor="middle">۰٫۰۰ N</text>
       <text id="frictionPhaseLbl" x="0" y="30" fill="#00f5d4" font-family="Tahoma" font-size="11" text-anchor="middle">ایستا</text>
     </g>
+
+    <!-- Static/kinetic indicator -->
     <g transform="translate(200, 160)">
       <rect x="-95" y="-50" width="190" height="100" rx="10" fill="rgba(10,18,32,0.92)" stroke="#facc15" stroke-width="1.5"/>
       <text x="0" y="-24" fill="#94a3b8" font-size="10" text-anchor="middle">فاز</text>
       <text id="frictionStateName" x="0" y="4" fill="#facc15" font-family="Tahoma" font-size="14" font-weight="700" text-anchor="middle">اصطکاک ایستا</text>
       <text id="frictionCoeff" x="0" y="28" fill="#94a3b8" font-family="Courier New" font-size="11" text-anchor="middle">μs = 0.40</text>
-    </g>`;
-  ensureArrowMarker();
+    </g>
+  `;
 }
 
 function buildActionReaction() {
   const mount = document.getElementById("apparatusMount");
   mount.innerHTML = `
-    <g filter="url(#dropShadow)"><rect x="80" y="420" width="740" height="24" rx="3" fill="url(#chromeTrack)"/><rect x="80" y="420" width="740" height="3" fill="rgba(255,255,255,0.4)"/></g>
+    <g filter="url(#dropShadow)">
+      <rect x="80" y="420" width="740" height="24" rx="3" fill="url(#chromeTrack)"/>
+      <rect x="80" y="420" width="740" height="3" fill="rgba(255,255,255,0.4)"/>
+    </g>
+
     <g id="cartLeft" transform="translate(400, 380)">
-      <g filter="url(#dropShadow)"><rect x="-52" y="0" width="104" height="30" rx="5" fill="url(#cartBodyGrad)" stroke="#0ea5e9"/><rect x="-52" y="0" width="104" height="5" fill="rgba(255,255,255,0.4)"/></g>
+      <g filter="url(#dropShadow)">
+        <rect x="-52" y="0" width="104" height="30" rx="5" fill="url(#cartBodyGrad)" stroke="#0ea5e9"/>
+        <rect x="-52" y="0" width="104" height="5" fill="rgba(255,255,255,0.4)"/>
+      </g>
       <circle cx="-32" cy="32" r="9" fill="#0f172a" stroke="#64748b" stroke-width="2"/>
       <circle cx="32" cy="32" r="9" fill="#0f172a" stroke="#64748b" stroke-width="2"/>
+      <circle cx="-32" cy="32" r="3" fill="#94a3b8"/>
+      <circle cx="32" cy="32" r="3" fill="#94a3b8"/>
       <text x="0" y="20" fill="#fff" font-size="10" font-weight="700" text-anchor="middle">کالسکه ۱</text>
     </g>
+
     <g id="cartRight" transform="translate(500, 380)">
-      <g filter="url(#dropShadow)"><rect x="-52" y="0" width="104" height="30" rx="5" fill="url(#cartBodyGreen)" stroke="#059669"/><rect x="-52" y="0" width="104" height="5" fill="rgba(255,255,255,0.4)"/></g>
+      <g filter="url(#dropShadow)">
+        <rect x="-52" y="0" width="104" height="30" rx="5" fill="url(#cartBodyGreen)" stroke="#059669"/>
+        <rect x="-52" y="0" width="104" height="5" fill="rgba(255,255,255,0.4)"/>
+      </g>
       <circle cx="-32" cy="32" r="9" fill="#0f172a" stroke="#64748b" stroke-width="2"/>
       <circle cx="32" cy="32" r="9" fill="#0f172a" stroke="#64748b" stroke-width="2"/>
+      <circle cx="-32" cy="32" r="3" fill="#94a3b8"/>
+      <circle cx="32" cy="32" r="3" fill="#94a3b8"/>
       <text x="0" y="20" fill="#fff" font-size="10" font-weight="700" text-anchor="middle">کالسکه ۲</text>
     </g>
+
+    <!-- spring between -->
     <path id="bumperSpring" d="M448,392 Q452,386 456,392 Q460,398 464,392 Q468,386 472,392 L452,392" fill="none" stroke="#facc15" stroke-width="3"/>
+
     <g transform="translate(450, 160)">
       <rect x="-150" y="-55" width="300" height="110" rx="10" fill="rgba(10,18,32,0.92)" stroke="#a78bfa" stroke-width="1.5"/>
       <text x="0" y="-28" fill="#94a3b8" font-size="10" text-anchor="middle">نیروی کنش و واکنش</text>
       <text id="arForce" x="0" y="6" fill="#a78bfa" font-family="Courier New" font-size="20" font-weight="700" text-anchor="middle">F = ۰٫۰ N</text>
       <text id="arMomentum" x="0" y="32" fill="#00f5d4" font-family="Courier New" font-size="11" text-anchor="middle">p = ۰٫۰</text>
-    </g>`;
+    </g>
+  `;
 }
 
 function buildHookeLaw() {
   const mount = document.getElementById("apparatusMount");
   mount.innerHTML = `
     <g transform="translate(400, 60)">
+      <!-- support ceiling -->
       <rect x="-160" y="-30" width="320" height="20" rx="4" fill="#334155" stroke="#1e293b"/>
       <rect x="-160" y="-30" width="320" height="4" fill="rgba(255,255,255,0.1)"/>
       <line x1="0" y1="-10" x2="0" y2="0" stroke="#475569" stroke-width="6"/>
+
+      <!-- ruler -->
       <rect x="70" y="0" width="44" height="380" fill="rgba(15,23,42,0.85)" stroke="#38bdf8" stroke-width="1.5"/>
-      ${Array.from({length: 39}, (_, i) => { const y = i * 10; const major = i % 5 === 0;
-        return `<line x1="70" y1="${y}" x2="${major ? 92 : 82}" y2="${y}" stroke="#94a3b8" stroke-width="${major?1.5:0.8}"/>${major ? `<text x="96" y="${y+3}" fill="#94a3b8" font-size="9">${i/5}</text>` : ""}`;}).join("")}
+      ${Array.from({length: 39}, (_, i) => {
+        const y = i * 10;
+        const major = i % 5 === 0;
+        return `<line x1="70" y1="${y}" x2="${major ? 92 : 82}" y2="${y}" stroke="#94a3b8" stroke-width="${major?1.5:0.8}"/>
+                ${major ? `<text x="96" y="${y+3}" fill="#94a3b8" font-size="9">${i/5}</text>` : ""}`;
+      }).join("")}
       <text x="92" y="-8" fill="#38bdf8" font-size="10" text-anchor="middle">cm</text>
+
+      <!-- zero marker -->
       <line x1="60" y1="0" x2="130" y2="0" stroke="#00f5d4" stroke-width="1.5" stroke-dasharray="3 3"/>
       <text x="145" y="4" fill="#00f5d4" font-size="9">مبنا</text>
+
+      <!-- spring group -->
       <g id="hookeSpringGroup">
-        <path id="hookeSpring" d="M0,0 Q15,8 0,16 Q-15,24 0,32 Q15,40 0,48 Q-15,56 0,64 Q15,72 0,80 Q-15,88 0,96 Q15,104 0,112 Q-15,120 0,128 L0,140" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+        <path id="hookeSpring" d="M0,0
+          Q15,8 0,16 Q-15,24 0,32 Q15,40 0,48 Q-15,56 0,64
+          Q15,72 0,80 Q-15,88 0,96 Q15,104 0,112 Q-15,120 0,128
+          L0,140" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
       </g>
+
+      <!-- weight holder -->
       <g id="springWeightHolder" transform="translate(0, 140)">
         <line x1="0" y1="0" x2="58" y2="0" stroke="#ef4444" stroke-width="2"/>
         <circle cx="0" cy="5" r="4" fill="#facc15" stroke="#a16207"/>
         <g id="hookeWeightsGroup" transform="translate(0, 12)">
-          <g filter="url(#dropShadow)"><rect x="-22" y="0" width="44" height="16" rx="2" fill="url(#brassWeight)" stroke="#78350f" stroke-width="1.2"/></g>
+          <g filter="url(#dropShadow)">
+            <rect x="-22" y="0" width="44" height="16" rx="2" fill="url(#brassWeight)" stroke="#78350f" stroke-width="1.2"/>
+            <rect x="-22" y="0" width="44" height="3" fill="rgba(255,255,255,0.4)" rx="1.5"/>
+          </g>
         </g>
       </g>
     </g>
+
     <g transform="translate(180, 200)">
       <rect x="-95" y="-70" width="190" height="140" rx="10" fill="rgba(10,18,32,0.92)" stroke="#facc15" stroke-width="1.5"/>
       <text x="0" y="-44" fill="#94a3b8" font-size="10" text-anchor="middle">نیروی وزن F</text>
@@ -1486,7 +1489,8 @@ function buildHookeLaw() {
       <line x1="-60" y1="0" x2="60" y2="0" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
       <text x="0" y="22" fill="#94a3b8" font-size="10" text-anchor="middle">تغییر طول Δx</text>
       <text id="hookeDx" x="0" y="48" fill="#00f5d4" font-family="Courier New" font-size="18" font-weight="700" text-anchor="middle">۰٫۰ cm</text>
-    </g>`;
+    </g>
+  `;
 }
 
 function buildSolidPressure() {
@@ -1495,7 +1499,15 @@ function buildSolidPressure() {
   mount.innerHTML = `
     <g transform="translate(450, 380)">
       <path id="spongeBed" d="M-240,0 Q0,0 240,0 L240,140 L-240,140 Z" fill="url(#spongeGrad)" stroke="#7c2d12" stroke-width="2"/>
+      <g opacity="0.25">
+        ${Array.from({length: 80}, () => {
+          const x = (Math.random() - 0.5) * 460;
+          const y = Math.random() * 130;
+          return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.5" fill="#7c2d12"/>`;
+        }).join("")}
+      </g>
       <text x="0" y="100" fill="#7c2d12" font-size="13" font-weight="700" opacity="0.5" text-anchor="middle">بستر فومی اسفنجی</text>
+
       <g id="pressureBrick" transform="translate(0, -20)">
         <g filter="url(#dropShadow)">
           <rect id="brickShape" x="${-item.w/2}" y="${-item.h}" width="${item.w}" height="${item.h}" rx="4" fill="url(#brickGrad)" stroke="#7f1d1d" stroke-width="1.8"/>
@@ -1503,26 +1515,43 @@ function buildSolidPressure() {
         </g>
         <text id="brickFaceLabel" x="0" y="${-item.h/2 + 4}" fill="#fef2f2" font-size="11" font-weight="700" text-anchor="middle">${item.label}</text>
       </g>
-      <g transform="translate(0, -180)"><line x1="0" y1="0" x2="0" y2="40" stroke="#f43f5e" stroke-width="3" marker-end="url(#arrowRed)"/><text x="12" y="20" fill="#f43f5e" font-size="11" font-weight="700">W = mg</text></g>
+
+      <!-- force arrow -->
+      <g transform="translate(0, -180)">
+        <line x1="0" y1="0" x2="0" y2="40" stroke="#f43f5e" stroke-width="3" marker-end="url(#arrowRed)"/>
+        <text x="12" y="20" fill="#f43f5e" font-size="11" font-weight="700">W = mg</text>
+      </g>
     </g>
+
     <g transform="translate(720, 160)">
       <rect x="-100" y="-58" width="200" height="116" rx="10" fill="rgba(10,18,32,0.92)" stroke="#f43f5e" stroke-width="1.5"/>
       <text x="0" y="-32" fill="#94a3b8" font-size="10" text-anchor="middle">فشار</text>
       <text id="pressureReadout" x="0" y="-2" fill="#f43f5e" font-family="Courier New" font-size="22" font-weight="700" text-anchor="middle">۰ Pa</text>
+      <line x1="-70" y1="12" x2="70" y2="12" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
       <text id="pressureMass" x="0" y="32" fill="#00f5d4" font-family="Courier New" font-size="11" text-anchor="middle">آجر m = ۳ kg — A = ${item.A} m²</text>
       <text id="pressureSink" x="0" y="50" fill="#facc15" font-family="Courier New" font-size="10" text-anchor="middle">فرورفتگی: ۰ mm</text>
-    </g>`;
-  ensureArrowMarker();
+    </g>
+  `;
 }
 
 function buildLiquidDepth() {
   const mount = document.getElementById("apparatusMount");
   mount.innerHTML = `
     <g transform="translate(280, 180)">
-      <g filter="url(#dropShadow)"><rect x="-100" y="0" width="200" height="330" rx="6" fill="url(#glassTube)" stroke="#38bdf8" stroke-width="2"/></g>
+      <g filter="url(#dropShadow)">
+        <rect x="-100" y="0" width="200" height="330" rx="6" fill="url(#glassTube)" stroke="#38bdf8" stroke-width="2"/>
+      </g>
       <rect id="tankFluid" x="-96" y="30" width="192" height="296" fill="url(#waterGrad)"/>
       <ellipse id="fluidSurface" cx="0" cy="30" rx="96" ry="4" fill="#7dd3fc" opacity="0.7"/>
-      ${[0,1,2,3,4,5].map(i => { const y = 30 + i*59; return `<line x1="100" y1="${y}" x2="108" y2="${y}" stroke="#38bdf8" stroke-width="1"/><text x="115" y="${y+3}" fill="#38bdf8" font-size="9">${i*5}</text>`;}).join("")}
+      <line x1="-100" y1="0" x2="-100" y2="330" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <line x1="100" y1="0" x2="100" y2="330" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+
+      ${[0,1,2,3,4,5].map(i => {
+        const y = 30 + i*59;
+        return `<line x1="100" y1="${y}" x2="108" y2="${y}" stroke="#38bdf8" stroke-width="1"/>
+                <text x="115" y="${y+3}" fill="#38bdf8" font-size="9">${i*5}</text>`;
+      }).join("")}
+
       <g id="depthProbe" transform="translate(0, 80)">
         <line x1="0" y1="0" x2="0" y2="-120" stroke="#64748b" stroke-width="4"/>
         <circle cx="0" cy="0" r="14" fill="#334155" stroke="#38bdf8" stroke-width="1.5"/>
@@ -1530,20 +1559,25 @@ function buildLiquidDepth() {
         <text x="0" y="-130" fill="#38bdf8" font-size="10" text-anchor="middle">کاوشگر فشار</text>
       </g>
     </g>
+
     <path d="M280,180 Q420,160 500,260" fill="none" stroke="#64748b" stroke-width="4" stroke-dasharray="8 4"/>
+
     <g transform="translate(600, 280)">
       <path d="M-25,0 L-25,150 Q-25,185 10,185 Q45,185 45,150 L45,0" fill="none" stroke="url(#glassTube)" stroke-width="18" stroke-linecap="round"/>
-      <path id="manometerFluidLeft" d="M-25,60 L-25,150 Q-25,182 10,182" fill="none" stroke="#ef4444" stroke-width="14" stroke-linecap="round"/>
-      <path id="manometerFluidRight" d="M10,182 Q45,182 45,150 L45,60" fill="none" stroke="#ef4444" stroke-width="14" stroke-linecap="round"/>
+      <path d="M-25,0 L-25,150 Q-25,185 10,185 Q45,185 45,150 L45,0" fill="none" stroke="rgba(56,189,248,0.4)" stroke-width="2"/>
+      <path id="manometerFluidLeft" d="M-25,80 L-25,150 Q-25,182 10,182" fill="none" stroke="#ef4444" stroke-width="14" stroke-linecap="round"/>
+      <path id="manometerFluidRight" d="M10,182 Q45,182 45,150 L45,80" fill="none" stroke="#ef4444" stroke-width="14" stroke-linecap="round"/>
       <text x="10" y="-14" fill="#38bdf8" font-size="11" font-weight="700" text-anchor="middle">مانومتر U شکل</text>
       <text id="manoDelta" x="10" y="210" fill="#00f5d4" font-family="Courier New" font-size="11" text-anchor="middle">Δh = 0.0 cm</text>
     </g>
+
     <g transform="translate(770, 100)">
       <rect x="-100" y="-50" width="200" height="100" rx="10" fill="rgba(10,18,32,0.92)" stroke="#00f5d4" stroke-width="1.5"/>
       <text x="0" y="-24" fill="#94a3b8" font-size="10" text-anchor="middle">فشار هیدرواستاتیک</text>
       <text id="pressureLiquid" x="0" y="6" fill="#00f5d4" font-family="Courier New" font-size="20" font-weight="700" text-anchor="middle">۰٫۰۰ kPa</text>
       <text id="liquidDepthLbl" x="0" y="30" fill="#facc15" font-family="Courier New" font-size="10" text-anchor="middle">h = ۵ cm</text>
-    </g>`;
+    </g>
+  `;
 }
 
 function buildPascalLift() {
@@ -1553,12 +1587,18 @@ function buildPascalLift() {
       <rect x="-190" y="40" width="80" height="140" rx="6" fill="url(#glassVert)" stroke="#38bdf8" stroke-width="2"/>
       <rect x="60" y="0" width="160" height="180" rx="6" fill="url(#glassVert)" stroke="#38bdf8" stroke-width="2"/>
       <rect x="-190" y="150" width="410" height="30" fill="url(#waterGrad)" opacity="0.85"/>
+      <path d="M-190,140 L220,140" stroke="#38bdf8" stroke-width="1" opacity="0.5"/>
+      <path d="M-190,180 L220,180" stroke="#38bdf8" stroke-width="1" opacity="0.5"/>
+
       <g id="pistonSmall" transform="translate(-150, 70)">
         <rect x="-35" y="0" width="70" height="16" rx="3" fill="url(#chromeTrack)" stroke="#0f172a" stroke-width="1"/>
         <rect x="-6" y="-70" width="12" height="70" fill="#475569" stroke="#1e293b" stroke-width="1"/>
-        <g filter="url(#dropShadow)"><rect x="-20" y="-90" width="40" height="20" rx="4" fill="url(#brassWeight)" stroke="#78350f"/></g>
+        <g filter="url(#dropShadow)">
+          <rect x="-20" y="-90" width="40" height="20" rx="4" fill="url(#brassWeight)" stroke="#78350f"/>
+        </g>
         <text x="0" y="-98" fill="#38bdf8" font-size="11" font-weight="700" text-anchor="middle">نیرو F₁</text>
       </g>
+
       <g id="pistonLarge" transform="translate(140, 60)">
         <rect x="-75" y="0" width="150" height="20" rx="3" fill="url(#chromeTrack)" stroke="#0f172a" stroke-width="1"/>
         <rect x="-8" y="-55" width="16" height="55" fill="#475569" stroke="#1e293b" stroke-width="1"/>
@@ -1569,80 +1609,118 @@ function buildPascalLift() {
         </g>
       </g>
     </g>
+
     <g transform="translate(450, 130)">
       <rect x="-170" y="-60" width="340" height="120" rx="12" fill="rgba(10,18,32,0.92)" stroke="#00f5d4" stroke-width="1.5"/>
       <text x="0" y="-32" fill="#94a3b8" font-size="11" text-anchor="middle">اصل پاسکال — فشار در تمام نقاط برابر است</text>
       <text id="pascalForce" x="0" y="6" fill="#00f5d4" font-family="Courier New" font-size="22" font-weight="700" text-anchor="middle">F₂ = ۰ N</text>
       <text id="pascalRatio" x="0" y="34" fill="#a78bfa" font-family="Courier New" font-size="12" text-anchor="middle">A₂/A₁ = ۵</text>
-    </g>`;
+    </g>
+  `;
 }
 
 function buildArchimedes() {
   const mount = document.getElementById("apparatusMount");
   mount.innerHTML = `
     <g transform="translate(360, 220)">
-      <g filter="url(#dropShadow)"><rect x="-80" y="90" width="160" height="200" rx="5" fill="url(#glassTube)" stroke="#38bdf8" stroke-width="2"/></g>
+      <g filter="url(#dropShadow)">
+        <rect x="-80" y="90" width="160" height="200" rx="5" fill="url(#glassTube)" stroke="#38bdf8" stroke-width="2"/>
+      </g>
       <rect x="-76" y="120" width="152" height="166" fill="url(#waterGrad)" opacity="0.7"/>
       <ellipse cx="0" cy="120" rx="76" ry="4" fill="#7dd3fc" opacity="0.7"/>
       <path d="M80,120 L130,165" stroke="#38bdf8" stroke-width="9" fill="none" stroke-linecap="round"/>
+      <path d="M80,120 L130,165" stroke="rgba(255,255,255,0.3)" stroke-width="3" fill="none" stroke-linecap="round"/>
+
       <g transform="translate(0, 0)">
-        <g filter="url(#dropShadow)"><rect x="-22" y="0" width="44" height="100" rx="5" fill="url(#glassVert)" stroke="#38bdf8" stroke-width="1.5"/></g>
+        <g filter="url(#dropShadow)">
+          <rect x="-22" y="0" width="44" height="100" rx="5" fill="url(#glassVert)" stroke="#38bdf8" stroke-width="1.5"/>
+        </g>
         <text id="archimedesScaleReadout" x="0" y="-10" fill="#00f5d4" font-size="12" font-weight="700" text-anchor="middle">W = ۲٫۶۵ N</text>
+
         <g id="submergedMetal" transform="translate(0, 100)">
           <line x1="0" y1="-20" x2="0" y2="0" stroke="#94a3b8" stroke-width="2"/>
-          <g filter="url(#dropShadow)"><rect x="-26" y="0" width="52" height="70" rx="4" fill="url(#chromeVert)" stroke="#0f172a" stroke-width="1.2"/><rect x="-26" y="0" width="52" height="6" fill="rgba(255,255,255,0.35)" rx="2"/></g>
+          <g filter="url(#dropShadow)">
+            <rect x="-26" y="0" width="52" height="70" rx="4" fill="url(#chromeVert)" stroke="#0f172a" stroke-width="1.2"/>
+            <rect x="-26" y="0" width="52" height="6" fill="rgba(255,255,255,0.35)" rx="2"/>
+          </g>
           <text x="0" y="42" fill="#1e293b" font-size="10" font-weight="700" text-anchor="middle">Al</text>
         </g>
       </g>
     </g>
+
     <g transform="translate(540, 420)">
-      <g filter="url(#dropShadow)"><rect x="-32" y="0" width="64" height="75" rx="4" fill="url(#glassVert)" stroke="#38bdf8" stroke-width="1.5"/></g>
+      <g filter="url(#dropShadow)">
+        <rect x="-32" y="0" width="64" height="75" rx="4" fill="url(#glassVert)" stroke="#38bdf8" stroke-width="1.5"/>
+      </g>
       <rect id="overflowCaughtFluid" x="-29" y="71" width="58" height="3" fill="url(#waterGrad)" opacity="0.75"/>
       <text x="0" y="92" fill="#38bdf8" font-size="10" text-anchor="middle">آب سرریز</text>
     </g>
+
     <g transform="translate(700, 180)">
       <rect x="-115" y="-60" width="230" height="120" rx="12" fill="rgba(10,18,32,0.92)" stroke="#00f5d4" stroke-width="1.5"/>
       <text x="0" y="-32" fill="#94a3b8" font-size="10" text-anchor="middle">نیروی شناوری ارشمیدس</text>
       <text id="buoyancyForce" x="0" y="-2" fill="#00f5d4" font-family="Courier New" font-size="20" font-weight="700" text-anchor="middle">F_b = ۰ N</text>
+      <line x1="-80" y1="12" x2="80" y2="12" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
       <text id="buoyancyWeight" x="0" y="34" fill="#facc15" font-family="Courier New" font-size="13" text-anchor="middle">W_app = ۲٫۶۵ N</text>
-    </g>`;
+    </g>
+  `;
 }
 
 function buildLeverBalance() {
   const mount = document.getElementById("apparatusMount");
   mount.innerHTML = `
     <g transform="translate(450, 370)">
-      <g filter="url(#dropShadow)"><polygon points="0,0 -35,60 35,60" fill="url(#chromeVert)" stroke="#0f172a" stroke-width="1.5"/></g>
+      <g filter="url(#dropShadow)">
+        <polygon points="0,0 -35,60 35,60" fill="url(#chromeVert)" stroke="#0f172a" stroke-width="1.5"/>
+      </g>
       <circle cx="0" cy="0" r="7" fill="#facc15" stroke="#a16207" stroke-width="1"/>
+
       <g id="leverBeam" style="transform-origin: 0 0;">
         <rect x="-290" y="-9" width="580" height="18" rx="4" fill="url(#chromeTrack)" stroke="#1e293b" stroke-width="1"/>
         <rect x="-290" y="-9" width="580" height="4" fill="rgba(255,255,255,0.4)" rx="2"/>
-        ${[-250, -200, -150, -100, -50, 0, 50, 100, 150, 200, 250].map(x => `<line x1="${x}" y1="-9" x2="${x}" y2="9" stroke="rgba(255,255,255,0.5)" stroke-width="${x===0?2:1}"/><text x="${x}" y="22" fill="#94a3b8" font-size="9" text-anchor="middle">${x/10}</text>`).join("")}
+        ${[-250, -200, -150, -100, -50, 0, 50, 100, 150, 200, 250].map(x =>
+          `<line x1="${x}" y1="-9" x2="${x}" y2="9" stroke="rgba(255,255,255,0.5)" stroke-width="${x===0?2:1}"/>
+           <text x="${x}" y="22" fill="#94a3b8" font-size="9" text-anchor="middle">${x/10}</text>`
+        ).join("")}
+
         <g id="loadLeft" transform="translate(-150, 9)">
           <line x1="0" y1="0" x2="0" y2="26" stroke="#94a3b8" stroke-width="2"/>
-          <g filter="url(#dropShadow)"><rect x="-22" y="26" width="44" height="32" rx="4" fill="url(#brassWeight)" stroke="#78350f"/></g>
+          <g filter="url(#dropShadow)">
+            <rect x="-22" y="26" width="44" height="32" rx="4" fill="url(#brassWeight)" stroke="#78350f"/>
+            <rect x="-22" y="26" width="44" height="6" rx="3" fill="rgba(255,255,255,0.35)"/>
+          </g>
           <text x="0" y="52" fill="#422006" font-size="11" font-weight="700" text-anchor="middle">F₁</text>
         </g>
+
         <g id="loadRight" transform="translate(150, 9)">
           <line x1="0" y1="0" x2="0" y2="26" stroke="#94a3b8" stroke-width="2"/>
-          <g filter="url(#dropShadow)"><rect x="-22" y="26" width="44" height="32" rx="4" fill="url(#brassWeight)" stroke="#78350f"/></g>
+          <g filter="url(#dropShadow)">
+            <rect x="-22" y="26" width="44" height="32" rx="4" fill="url(#brassWeight)" stroke="#78350f"/>
+            <rect x="-22" y="26" width="44" height="6" rx="3" fill="rgba(255,255,255,0.35)"/>
+          </g>
           <text x="0" y="52" fill="#422006" font-size="11" font-weight="700" text-anchor="middle">F₂</text>
         </g>
       </g>
     </g>
+
     <g transform="translate(450, 130)">
       <rect x="-170" y="-60" width="340" height="120" rx="12" fill="rgba(10,18,32,0.92)" stroke="#a78bfa" stroke-width="1.5"/>
       <text x="0" y="-32" fill="#94a3b8" font-size="11" text-anchor="middle">تعادل گشتاورها</text>
       <text id="leverTorque" x="0" y="0" fill="#a78bfa" font-family="Courier New" font-size="20" font-weight="700" text-anchor="middle">τ_net = ۰ N·m</text>
       <text id="leverState" x="0" y="32" fill="#00f5d4" font-family="Tahoma" font-size="12" text-anchor="middle">در تعادل</text>
-    </g>`;
+    </g>
+  `;
 }
 
 /* ============================================================
    SIMULATION CONTROL
    ============================================================ */
 function togglePhysSim() {
-  if (simComplete) { resetPhysExp(true); return; }
+  if (simComplete) {
+    // Restart
+    resetPhysExp(true);
+    return;
+  }
   isSimulating = !isSimulating;
   const btn = document.getElementById("btnRun");
   if (isSimulating) {
@@ -1669,18 +1747,19 @@ function resetPhysExp(rebuild) {
   physState = { x: 0, v: 0, a: 0, y: 0, t: 0, theta: 0.25, omega: 0,
                 frictionPhase: 0, frictionCurrentF: 0, settled: false };
   const btn = document.getElementById("btnRun");
-  if (btn) { btn.innerHTML = "▶ آغاز شبیه‌سازی"; btn.style.background = "linear-gradient(135deg, #0369a1, #00f5d4)"; }
+  if (btn) {
+    btn.innerHTML = "▶ آغاز شبیه‌سازی";
+    btn.style.background = "linear-gradient(135deg, #0369a1, #00f5d4)";
+  }
   const st = document.getElementById("txtSimState");
   if (st) st.textContent = "آماده آزمایش";
-  const dot = document.getElementById("statusDot");
-  if (dot) { dot.style.background = "var(--accent-emerald)"; dot.style.boxShadow = "0 0 8px var(--accent-emerald)"; dot.style.animation = "dot-pulse-simple 1.6s ease-in-out infinite"; }
   const pLayer = document.getElementById("particleLayer");
   if (pLayer) pLayer.innerHTML = "";
   hideResults();
   renderChart();
   if (rebuild) {
     const exp = PHYS_DATABASE[currentChap][currentExpIdx];
-    if (exp) { buildApparatusVisual(exp); applyConfigPreview(); updateDescBanner(exp, exp.items[activeItemIdx]); }
+    if (exp) { buildApparatusVisual(exp); applyConfigPreview(); }
   }
 }
 
@@ -1689,7 +1768,7 @@ function resetPhysExp(rebuild) {
    ============================================================ */
 function spawnParticle(x, y, opts = {}) {
   if (!particlesEnabled) return;
-  if (particles.length > 400) particles.shift();
+  if (particles.length > 300) particles.shift();
   particles.push({
     x, y,
     vx: opts.vx ?? (Math.random() - 0.5) * 60,
@@ -1698,7 +1777,8 @@ function spawnParticle(x, y, opts = {}) {
     maxLife: opts.life ?? 1.0,
     size: opts.size ?? 2.5,
     color: opts.color ?? "#94a3b8",
-    gravity: opts.gravity ?? 0
+    gravity: opts.gravity ?? 0,
+    fade: opts.fade ?? true
   });
 }
 
@@ -1707,7 +1787,8 @@ function updateParticles(dt) {
   if (!layer) return;
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
-    p.x += p.vx * dt; p.y += p.vy * dt;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
     p.vy += p.gravity * dt;
     p.life -= dt;
     if (p.life <= 0) particles.splice(i, 1);
@@ -1727,6 +1808,7 @@ function physEngineLoop(now) {
   lastFrameTime = now;
   if (dt > 0.1) dt = 0.1;
   if (dt < 0) dt = 0;
+
   if (isSimulating && !simComplete) {
     const step = dt * simSpeed;
     simTime += step;
@@ -1751,6 +1833,7 @@ function computePhysicsState(dt) {
   const tel = document.getElementById("txtTelemetry");
 
   switch (exp.type) {
+
     case "uniform_motion": {
       const v = item.v;
       const totalDist = 3.0;
@@ -1766,30 +1849,50 @@ function computePhysicsState(dt) {
       }
       primaryMetric = physState.x;
       const glider = document.getElementById("airGlider");
-      if (glider) { const px = 120 + (physState.x / totalDist) * 540; glider.setAttribute("transform", `translate(${px.toFixed(1)}, 348)`); }
+      if (glider) {
+        const px = 120 + (physState.x / totalDist) * 540;
+        glider.setAttribute("transform", `translate(${px.toFixed(1)}, 348)`);
+      }
       const sp = document.getElementById("instSpeed");
       if (sp) sp.textContent = v.toFixed(2);
       if (tel) tel.textContent = `v: ${v.toFixed(2)} m/s | x: ${physState.x.toFixed(2)} m | t: ${simTime.toFixed(2)} s`;
-      if (Math.random() < 0.4 && !simComplete) { const px = 120 + (physState.x / totalDist) * 540; spawnParticle(px - 40, 380, { vx: -30, vy: -10, life: 0.5, size: 1.5, color: item.color }); }
+
+      if (Math.random() < 0.4 && !simComplete) {
+        const px = 120 + (physState.x / totalDist) * 540;
+        spawnParticle(px - 40, 380, { vx: -30, vy: -10, life: 0.5, size: 1.5, color: item.color });
+      }
       break;
     }
+
     case "newton_tube": {
-      const g = 9.8; const tubeTop = 35, tubeBot = 380; const maxFall = tubeBot - tubeTop;
+      const g = 9.8;
+      const tubeTop = 35, tubeBot = 380;
+      const maxFall = tubeBot - tubeTop;
       let t = physState.t;
       let yBall = 0.5 * g * t * t * 30;
       let yFeather;
       const airFactor = item.vacuum ? 30 : (3.5 * (1 - item.airDensity * 0.6));
-      if (item.vacuum) yFeather = yBall; else yFeather = Math.min(maxFall, 0.5 * airFactor * t * t * 30);
-      let ballHit = yBall >= maxFall; let featherHit = yFeather >= maxFall;
-      if (yBall > maxFall) yBall = maxFall; if (yFeather > maxFall) yFeather = maxFall;
-      physState.t = t + dt; physState.y = yBall;
+      if (item.vacuum) {
+        yFeather = yBall;
+      } else {
+        yFeather = Math.min(maxFall, 0.5 * airFactor * t * t * 30);
+      }
+      let ballHit = yBall >= maxFall;
+      let featherHit = yFeather >= maxFall;
+      if (yBall > maxFall) yBall = maxFall;
+      if (yFeather > maxFall) yFeather = maxFall;
+      physState.t = t + dt;
+      physState.y = yBall;
       primaryMetric = (yBall - tubeTop) / 30;
+
       const ball = document.getElementById("newtonBallGroup");
       const feather = document.getElementById("newtonFeather");
       if (ball) ball.setAttribute("transform", `translate(0, ${yBall.toFixed(1)})`);
       if (feather) feather.setAttribute("transform", `translate(18, ${(yFeather + 35).toFixed(1)})`);
+
       const timer = document.getElementById("fallTimer");
       if (timer) timer.textContent = t.toFixed(2) + " s";
+
       if (ballHit && featherHit && !simComplete) {
         const tBall = Math.sqrt(maxFall / (0.5 * g * 30));
         const tFeather = item.vacuum ? tBall : Math.sqrt(maxFall / (0.5 * airFactor * 30));
@@ -1800,150 +1903,126 @@ function computePhysicsState(dt) {
           { label: "اختلاف زمانی", value: item.vacuum ? "0.000 s (همزمان)" : `${(tFeather-tBall).toFixed(3)} s` }
         ], "y");
       }
-      if (yBall >= maxFall - 1 && Math.random() < 0.3 && !simComplete) spawnParticle(432 + Math.random()*36, 460, { vx: (Math.random()-0.5)*120, vy: -Math.random()*100, life: 0.6, size: 2, color: "#facc15", gravity: 300 });
+
+      if (yBall >= maxFall - 1 && Math.random() < 0.3 && !simComplete) {
+        spawnParticle(432 + Math.random()*36, 460, {
+          vx: (Math.random()-0.5)*120, vy: -Math.random()*100,
+          life: 0.6, size: 2, color: "#facc15", gravity: 300
+        });
+      }
+
       if (tel) tel.textContent = `t: ${t.toFixed(2)} s | ${item.vacuum ? "خلاء" : "هوا"} | g: 9.80 m/s²`;
       break;
     }
-    /* =========================================================
-       ★ اصلاح شده: چترباز و سقوط آزاد — تا انتها به زمین می‌رسد ★
-       ========================================================= */
+
     case "terminal_velocity": {
       const g = 9.8;
       const vt = item.vTerm;
-      const H = 60;                          /* ارتفاع سقوط واقعی (متر) */
-      const yStartPx = 90;                   /* شروع روی SVG */
-      const yEndPx = 500;                    /* خط زمین روی SVG */
-      const ppm = (yEndPx - yStartPx) / H;   /* پیکسل بر متر */
+      const v = vt * Math.tanh((g * simTime) / vt);
+      primaryMetric = v;
 
-      /* معادله‌ی دیفرانسیل واقعی سقوط با مقاومت هوا:
-         dv/dt = g · (1 − (v/v_حدی)²) */
-      const accel = g * (1 - Math.pow(physState.v / vt, 2));
-      physState.v += accel * dt;
-      if (physState.v < 0) physState.v = 0;
-      physState.y += physState.v * dt;
+      physState.y += v * dt;
+      const maxY = 340;
+      const reachGround = physState.y >= maxY;
 
-      const yMeters = Math.min(physState.y, H);
-      primaryMetric = physState.v;
-
-      /* نمایش بصری */
       const rig = document.getElementById("skydiverRig");
       const canopy = document.getElementById("parachuteCanopy");
       if (canopy) canopy.style.display = (item.area > 2.0) ? "block" : "none";
-      const visualY = yStartPx + yMeters * ppm;
-      if (rig) rig.setAttribute("transform", `translate(0, ${visualY.toFixed(1)})`);
+      if (rig) rig.setAttribute("transform", `translate(0, ${Math.min(30 + physState.y, 30+maxY)})`);
 
       const sp = document.getElementById("skydiverSpeed");
-      if (sp) sp.textContent = physState.v.toFixed(1);
-      const altEl = document.getElementById("skydiverAltitude");
-      if (altEl) altEl.textContent = `ارتفاع: ${(H - yMeters).toFixed(1)} m`;
+      if (sp) sp.textContent = v.toFixed(1);
 
-      /* پرتاب ذرات هنگام نزدیک شدن به زمین */
-      if (yMeters >= H * 0.95 && Math.random() < 0.4 && !simComplete) {
-        spawnParticle(
-          450 + (Math.random() - 0.5) * 100,
-          470 + (Math.random() - 0.5) * 20,
-          {
-            vx: (Math.random() - 0.5) * 180,
-            vy: -Math.random() * 140,
-            life: 0.9,
-            size: 2 + Math.random() * 2.5,
-            color: "rgba(148,163,184,0.75)",
-            gravity: 380
-          }
-        );
-      }
-
-      /* رسیدن به زمین — محاسبه و نمایش نتایج */
-      if (yMeters >= H && !simComplete) {
-        const tTotal = simTime;
-        const tTermEstimate = 3 * vt / g;         /* زمان تقریبی رسیدن به سرعت حدی */
-        const theoreticalV = Math.sqrt(2 * g * H); /* سرعت بدون مقاومت هوا */
-        const isChute = item.area > 2.0;
-        const scenarioLabel = isChute
-          ? (item.area > 6 ? "چتر باز بزرگ" : "چتر کوچک")
-          : "بدون چتر (سقوط آزاد)";
-
-        /* پرتاب ذرات هنگام برخورد */
-        for (let i = 0; i < 20; i++) {
-          spawnParticle(
-            450 + (Math.random() - 0.5) * 120,
-            500 + (Math.random() - 0.5) * 15,
-            {
-              vx: (Math.random() - 0.5) * 200,
-              vy: -Math.random() * 180,
-              life: 1.0,
-              size: 2 + Math.random() * 3,
-              color: "rgba(148,163,184,0.8)",
-              gravity: 400
-            }
-          );
-        }
-
+      // terminal reached when v within 1% of vTerm
+      if (v >= vt * 0.99 && !simComplete) {
         finishExperiment([
-          { label: "سناریو", value: scenarioLabel },
-          { label: "ارتفاع سقوط", value: `${H} متر` },
           { label: "سرعت حدی", value: `${vt.toFixed(1)} m/s` },
-          { label: "سرعت لحظه‌ی برخورد", value: `${physState.v.toFixed(1)} m/s` },
-          { label: "سرعت تئوری بدون مقاومت هوا", value: `${theoreticalV.toFixed(1)} m/s` },
-          { label: "زمان کل سقوط", value: `${tTotal.toFixed(2)} s` },
-          { label: "زمان تقریبی رسیدن به سرعت حدی", value: `${tTermEstimate.toFixed(2)} s` },
-          { label: "نیروی مقاومت هوا در سرعت حدی", value: `${(item.mass * g).toFixed(0)} N (= وزن)` }
+          { label: "زمان رسیدن به تعادل", value: `${(2*vt/g).toFixed(2)} s` },
+          { label: "جرم چترباز", value: `${item.mass} kg` },
+          { label: "نیروی مقاومت هوا", value: `${(item.mass*g).toFixed(0)} N = W` }
         ], "v");
       }
 
-      if (tel) tel.textContent = `v: ${physState.v.toFixed(1)} m/s | y: ${yMeters.toFixed(1)} m | v_حد: ${vt.toFixed(1)} m/s`;
+      if (tel) tel.textContent = `v: ${v.toFixed(1)} m/s | v_حد: ${vt.toFixed(1)} m/s`;
       break;
     }
+
     case "inclined_plane": {
-      const g = 9.8; const rad = (item.angle * Math.PI) / 180; const a = g * Math.sin(rad);
-      physState.v += a * dt; primaryMetric = physState.v;
-      const rampLenM = 5.0; const rampLenPx = 560; const pxPerM = rampLenPx / rampLenM;
+      const g = 9.8;
+      const rad = (item.angle * Math.PI) / 180;
+      const a = g * Math.sin(rad);
+      physState.v += a * dt;
+      primaryMetric = physState.v;
+
+      const rampLenM = 5.0;
+      const rampLenPx = 560;
+      const pxPerM = rampLenPx / rampLenM;
       physState.x += physState.v * dt;
       let cartPx = 500 - physState.x * pxPerM;
       if (cartPx < 30) {
-        cartPx = 30; const finalV = physState.v; const traveled = (500 - 30) / pxPerM;
+        cartPx = 30;
+        const finalV = physState.v;
+        const traveled = (500 - 30) / pxPerM;
         const tTotal = Math.sqrt(2 * traveled / a);
         physState.v = 0; physState.x = (500 - 30) / pxPerM;
-        if (!simComplete) finishExperiment([
-          { label: "شتاب حرکت", value: `${a.toFixed(2)} m/s²` },
-          { label: "مسافت طی‌شده", value: `${traveled.toFixed(2)} m` },
-          { label: "سرعت نهایی", value: `${finalV.toFixed(2)} m/s` },
-          { label: "زمان کل", value: `${tTotal.toFixed(2)} s` }
-        ], "v");
+        if (!simComplete) {
+          finishExperiment([
+            { label: "شتاب حرکت", value: `${a.toFixed(2)} m/s²` },
+            { label: "مسافت طی‌شده", value: `${traveled.toFixed(2)} m` },
+            { label: "سرعت نهایی", value: `${finalV.toFixed(2)} m/s` },
+            { label: "زمان کل", value: `${tTotal.toFixed(2)} s` }
+          ], "v");
+        }
       }
+
       const rampArm = document.getElementById("rampArm");
       const rampCart = document.getElementById("rampCart");
       if (rampArm) rampArm.setAttribute("transform", `rotate(${-item.angle})`);
       if (rampCart) rampCart.setAttribute("transform", `translate(${cartPx.toFixed(1)}, -26)`);
+
       const aEl = document.getElementById("rampAccel");
       if (aEl) aEl.textContent = a.toFixed(2);
       const vEl = document.getElementById("rampVelocity");
       if (vEl) vEl.textContent = `v = ${physState.v.toFixed(2)} m/s`;
+
       if (tel) tel.textContent = `θ: ${item.angle}° | a: ${a.toFixed(2)} m/s² | v: ${physState.v.toFixed(2)} m/s`;
       break;
     }
+
     case "car_accel": {
-      const a = item.a; const v0 = item.v0;
-      let v = v0 + a * simTime; v = Math.max(0, Math.min(45, v));
+      const a = item.a;
+      const v0 = item.v0;
+      let v = v0 + a * simTime;
+      v = Math.max(0, Math.min(45, v));
       primaryMetric = v;
+
       physState.x += v * dt;
       const maxX = 4.5;
       let cx = 140 + (physState.x / maxX) * 640;
       if (cx > 800) { physState.x = 0; cx = 140; }
+
       const car = document.getElementById("physCar");
       const needle = document.getElementById("speedoNeedle");
       const spTxt = document.getElementById("speedoText");
       if (car) car.setAttribute("transform", `translate(${cx.toFixed(1)}, 400)`);
-      if (needle) { const ang = -140 + (v / 45) * 280; needle.setAttribute("transform", `rotate(${ang})`); }
+      if (needle) {
+        const ang = -140 + (v / 45) * 280;
+        needle.setAttribute("transform", `rotate(${ang})`);
+      }
       if (spTxt) spTxt.textContent = Math.round(v * 3.6) + " km/h";
-      if (item.a > 0 && v >= 42 && !simComplete) finishExperiment([
-        { label: "شتاب", value: `${item.a.toFixed(1)} m/s²` },
-        { label: "سرعت نهایی", value: `${v.toFixed(1)} m/s` },
-        { label: "زمان تا سرعت نهایی", value: `${(v/item.a).toFixed(2)} s` },
-        { label: "سرعت به km/h", value: `${(v*3.6).toFixed(0)} km/h` }
-      ], "v");
+
+      // For accelerating car: complete when reaches max speed; for braking: when stops
+      if (item.a > 0 && v >= 42 && !simComplete) {
+        finishExperiment([
+          { label: "شتاب", value: `${item.a.toFixed(1)} m/s²` },
+          { label: "سرعت نهایی", value: `${v.toFixed(1)} m/s` },
+          { label: "زمان تا سرعت نهایی", value: `${(v/item.a).toFixed(2)} s` },
+          { label: "سرعت به km/h", value: `${(v*3.6).toFixed(0)} km/h` }
+        ], "v");
+      }
       if (item.a < 0 && v <= 0.01 && !simComplete && simTime > 0.5) {
-        const stopT = v0 / (-item.a); const stopDist = v0 * v0 / (2 * -item.a);
+        const stopT = v0 / (-item.a);
+        const stopDist = v0 * v0 / (2 * -item.a);
         finishExperiment([
           { label: "سرعت اولیه", value: `${v0.toFixed(1)} m/s (${(v0*3.6).toFixed(0)} km/h)` },
           { label: "شتاب ترمز", value: `${item.a.toFixed(1)} m/s²` },
@@ -1951,52 +2030,88 @@ function computePhysicsState(dt) {
           { label: "مسافت ترمز", value: `${stopDist.toFixed(2)} m` }
         ], "v");
       }
-      if (Math.random() < 0.5 && v > 0.5 && !simComplete) spawnParticle(cx - 55, 428, { vx: -Math.random()*60 - 20, vy: -Math.random()*30, life: 0.7, size: 2 + Math.random()*2, color: "rgba(148,163,184,0.5)" });
+
+      if (Math.random() < 0.5 && v > 0.5 && !simComplete) {
+        spawnParticle(cx - 55, 428, {
+          vx: -Math.random()*60 - 20, vy: -Math.random()*30,
+          life: 0.7, size: 2 + Math.random()*2,
+          color: "rgba(148,163,184,0.5)"
+        });
+      }
+
       if (tel) tel.textContent = `a: ${a.toFixed(1)} m/s² | v: ${v.toFixed(1)} m/s | t: ${simTime.toFixed(2)} s`;
       break;
     }
+
     case "inertia_cart": {
       const cart = document.getElementById("inertiaCart");
       const cargo = document.getElementById("inertiaCargo");
       const status = document.getElementById("inertiaStatus");
-      const startX = 180; const bumperX = 770; const moveSpeed = 220;
-      if (!physState.settled) physState.x += moveSpeed * dt;
+
+      const startX = 180;
+      const bumperX = 770;
+      const moveSpeed = 220;
+
+      if (!physState.settled) {
+        physState.x += moveSpeed * dt;
+      }
       let cartX = startX + physState.x;
       const impacted = cartX >= bumperX - 55;
+
       if (impacted) {
         cartX = bumperX - 55;
-        if (!physState.settled) { physState.settled = true; physState.y = 0; }
+        if (!physState.settled) {
+          physState.settled = true;
+          // Cargo flight per mass
+          physState.y = 0;
+        }
         physState.y += dt * 250;
         let flyDist = physState.y * (item.mass / 2.0);
         if (flyDist > 200) flyDist = 200;
         if (cargo) cargo.setAttribute("transform", `translate(${flyDist.toFixed(1)}, ${(-30 - flyDist*0.3).toFixed(1)})`);
         primaryMetric = flyDist;
-        if (status) { status.textContent = "پرتاب بر اثر لختی"; status.setAttribute("fill", "#f43f5e"); }
-        if (physState.y > 1.5 && !simComplete) finishExperiment([
-          { label: "جرم بار", value: `${item.mass} kg` },
-          { label: "مسافت پرتاب بار", value: `${(flyDist/100).toFixed(2)} m` },
-          { label: "زمان حرکت کالسکه", value: `${((bumperX-55-startX)/moveSpeed).toFixed(2)} s` },
-          { label: "قانون اول نیوتون", value: "لختی بار تأیید شد" }
-        ], "y");
+        if (status) {
+          status.textContent = "پرتاب بر اثر لختی";
+          status.setAttribute("fill", "#f43f5e");
+        }
+        // complete after cargo lands
+        if (physState.y > 1.5 && !simComplete) {
+          finishExperiment([
+            { label: "جرم بار", value: `${item.mass} kg` },
+            { label: "مسافت پرتاب بار", value: `${(flyDist/100).toFixed(2)} m` },
+            { label: "زمان حرکت کالسکه", value: `${((bumperX-55-startX)/moveSpeed).toFixed(2)} s` },
+            { label: "قانون اول نیوتون", value: "لختی بار تأیید شد" }
+          ], "y");
+        }
       } else {
         primaryMetric = 0;
         if (cargo) cargo.setAttribute("transform", "translate(0, -30)");
-        if (status) { status.textContent = "حرکت یکنواخت"; status.setAttribute("fill", "#facc15"); }
+        if (status) {
+          status.textContent = "حرکت یکنواخت";
+          status.setAttribute("fill", "#facc15");
+        }
       }
       if (cart) cart.setAttribute("transform", `translate(${cartX.toFixed(1)}, 400)`);
+
       if (tel) tel.textContent = `m: ${item.mass} kg | وضعیت: ${impacted ? "پرتاب" : "حرکت یکنواخت"}`;
       break;
     }
+
     case "newton_second": {
-      const g = 9.8; const a = (item.mHanging * g) / (item.mCart + item.mHanging);
-      physState.a = a; physState.v += a * dt; physState.x += physState.v * dt;
+      const g = 9.8;
+      const a = (item.mHanging * g) / (item.mCart + item.mHanging);
+      physState.a = a;
+      physState.v += a * dt;
+      physState.x += physState.v * dt;
       primaryMetric = a;
+
       const maxDist = 4.5;
       const reached = physState.x >= maxDist;
       if (reached) {
         physState.x = maxDist;
         if (!simComplete) {
-          const finalV = physState.v; const tTotal = Math.sqrt(2 * maxDist / a);
+          const finalV = physState.v;
+          const tTotal = Math.sqrt(2 * maxDist / a);
           finishExperiment([
             { label: "شتاب سیستم", value: `${a.toFixed(2)} m/s²` },
             { label: "نیروی محرک", value: `${(item.mHanging*g).toFixed(2)} N` },
@@ -2006,6 +2121,7 @@ function computePhysicsState(dt) {
         }
         physState.v = 0;
       }
+
       const cart = document.getElementById("cartNewton2");
       const extra = document.getElementById("cartExtraMass");
       const massHang = document.getElementById("hangingWeight");
@@ -2013,39 +2129,62 @@ function computePhysicsState(dt) {
       const accel = document.getElementById("n2Accel");
       const forceArrow = document.getElementById("forceArrow");
       const n2Force = document.getElementById("n2Force");
+
       if (extra) extra.setAttribute("opacity", (item.mCart > 0.6) ? "1" : "0");
       if (lblHang) lblHang.textContent = Math.round(item.mHanging * 1000) + "g";
       if (accel) accel.textContent = a.toFixed(2);
       if (n2Force) n2Force.textContent = `F = ${(item.mHanging * g).toFixed(2)} N`;
+
       const cx = 200 + (physState.x / maxDist) * 380;
       const hy = 420 + (physState.x / maxDist) * 60;
+
       if (cart) cart.setAttribute("transform", `translate(${cx.toFixed(1)}, 258)`);
       if (massHang) massHang.setAttribute("transform", `translate(690, ${hy.toFixed(1)})`);
       if (forceArrow) forceArrow.setAttribute("transform", `translate(${cx.toFixed(1)}, 340)`);
+
       const string = document.getElementById("stringNewton2");
-      if (string) string.setAttribute("d", `M${(cx+50).toFixed(0)},258 L690,258 L690,315 L690,${hy.toFixed(0)}`);
+      if (string) {
+        string.setAttribute("d", `M${(cx+50).toFixed(0)},258 L690,258 L690,315 L690,${hy.toFixed(0)}`);
+      }
+
       if (tel) tel.textContent = `F: ${(item.mHanging * g).toFixed(2)} N | a: ${a.toFixed(2)} m/s²`;
       break;
     }
+
     case "friction_test": {
-      const m = 1.0; const g = 9.8; const N = m * g;
-      const fsMax = item.us * N; const fk = item.uk * N;
+      const m = 1.0;
+      const g = 9.8;
+      const N = m * g;
+      const fsMax = item.us * N;
+      const fk = item.uk * N;
+
       let currentF;
+      let blockMove = 0;
+
       const stateName = document.getElementById("frictionStateName");
       const coeffEl = document.getElementById("frictionCoeff");
       const phaseLbl = document.getElementById("frictionPhaseLbl");
+
       if (physState.frictionPhase === 0) {
         physState.frictionCurrentF += dt * 6.0;
         currentF = Math.min(physState.frictionCurrentF, fsMax);
         if (coeffEl) coeffEl.textContent = `μs = ${item.us}`;
         if (phaseLbl) phaseLbl.textContent = "ایستا (نیرو افزایش می‌یابد)";
         if (stateName) { stateName.textContent = "اصطکاک ایستا"; stateName.setAttribute("fill", "#facc15"); }
+
         if (physState.frictionCurrentF >= fsMax) {
-          physState.frictionPhase = 1; physState.frictionCurrentF = fk;
-          for (let i = 0; i < 16; i++) spawnParticle(282, 395, { vx: Math.random()*80, vy: -Math.random()*60, life: 0.6, size: 1.8 + Math.random()*1.5, color: "#facc15", gravity: 200 });
+          physState.frictionPhase = 1;
+          physState.frictionCurrentF = fk;
+          for (let i = 0; i < 16; i++) {
+            spawnParticle(282, 395, {
+              vx: Math.random()*80, vy: -Math.random()*60,
+              life: 0.6, size: 1.8 + Math.random()*1.5, color: "#facc15", gravity: 200
+            });
+          }
         }
       } else {
-        physState.frictionCurrentF = fk; currentF = fk;
+        physState.frictionCurrentF = fk;
+        currentF = fk;
         physState.x += dt * 80;
         if (coeffEl) coeffEl.textContent = `μk = ${item.uk}`;
         if (phaseLbl) phaseLbl.textContent = "جنبشی (لغزش)";
@@ -2062,36 +2201,57 @@ function computePhysicsState(dt) {
         }
       }
       primaryMetric = currentF;
+
       const block = document.getElementById("frictionBlock");
       const ptr = document.getElementById("dynPointer");
       const readout = document.getElementById("dynReadout");
       const forceReadout = document.getElementById("frictionForce");
+
       if (block) block.setAttribute("transform", `translate(${(240 + physState.x).toFixed(1)}, 360)`);
-      if (ptr) { const offset = (currentF / 10) * 130; ptr.setAttribute("transform", `translate(${offset.toFixed(1)}, 0)`); }
+      if (ptr) {
+        const offset = (currentF / 10) * 130;
+        ptr.setAttribute("transform", `translate(${offset.toFixed(1)}, 0)`);
+      }
       if (readout) readout.textContent = currentF.toFixed(2) + " N";
       if (forceReadout) forceReadout.textContent = currentF.toFixed(2) + " N";
+
       if (tel) tel.textContent = `F_s(max): ${fsMax.toFixed(2)} N | f_k: ${fk.toFixed(2)} N | F: ${currentF.toFixed(2)} N`;
       break;
     }
+
     case "action_reaction": {
-      const tSpring = 0.4; let forcePeak = 0;
-      if (simTime < tSpring) forcePeak = 15 * Math.sin((simTime / tSpring) * Math.PI);
-      else if (simTime < tSpring * 2) forcePeak = 0;
-      else forcePeak = 15 * Math.sin(((simTime - tSpring*2) / tSpring) * Math.PI);
+      const tSpring = 0.4;
+      let forcePeak = 0;
+      if (simTime < tSpring) {
+        forcePeak = 15 * Math.sin((simTime / tSpring) * Math.PI);
+      } else if (simTime < tSpring * 2) {
+        forcePeak = 0;
+      } else {
+        forcePeak = 15 * Math.sin(((simTime - tSpring*2) / tSpring) * Math.PI);
+      }
       primaryMetric = forcePeak;
+
       const impulse = forcePeak * dt * 0.25;
-      physState.x += impulse / item.m1; physState.y += impulse / item.m2;
+      physState.x += impulse / item.m1;
+      physState.y += impulse / item.m2;
+
       const cLeft = document.getElementById("cartLeft");
       const cRight = document.getElementById("cartRight");
       const forceTxt = document.getElementById("arForce");
       const pTxt = document.getElementById("arMomentum");
+
       const leftOffset = Math.min(physState.x * 15, 180);
       const rightOffset = Math.min(physState.y * 15, 180);
+
       if (cLeft) cLeft.setAttribute("transform", `translate(${(400 - leftOffset).toFixed(1)}, 380)`);
       if (cRight) cRight.setAttribute("transform", `translate(${(500 + rightOffset).toFixed(1)}, 380)`);
       if (forceTxt) forceTxt.textContent = `F = ${forcePeak.toFixed(1)} N`;
       if (pTxt) pTxt.textContent = `p = ${(item.m1 * physState.x * 15).toFixed(1)} | ${(item.m2 * physState.y * 15).toFixed(1)}`;
+
+      // Complete when carts separate enough
       if (leftOffset > 150 && rightOffset > 150 && !simComplete) {
+        const v1 = physState.x * 15 / (tSpring * 2);
+        const v2 = physState.y * 15 / (tSpring * 2);
         finishExperiment([
           { label: "جرم کالسکه ۱", value: `${item.m1} kg` },
           { label: "جرم کالسکه ۲", value: `${item.m2} kg` },
@@ -2099,211 +2259,306 @@ function computePhysicsState(dt) {
           { label: "نسبت سرعت‌ها", value: `${(item.m2/item.m1).toFixed(2)} : 1` }
         ], "F");
       }
+
       if (tel) tel.textContent = `کنش: +${forcePeak.toFixed(1)} N | واکنش: −${forcePeak.toFixed(1)} N`;
       break;
     }
+
     case "hooke_law": {
-      const k = 25.0; const targetDeltaCm = (item.F / k) * 100;
+      const k = 25.0;
+      const targetDeltaCm = (item.F / k) * 100;
+      // Animate spring extension with damping oscillation
       const targetScale = 1 + targetDeltaCm / 14;
+      // Use a critically damped approach
       const desired = targetScale;
       const current = physState.theta === 0.25 ? 1 : (physState.theta || 1);
+      // stiffness factor: converge within ~2s
       const omega = 8.0;
       const newVal = current + (desired - current) * Math.min(1, omega * dt);
       physState.theta = newVal;
       const animatedScale = newVal;
       const animatedDxCm = (animatedScale - 1) * 14;
+
       primaryMetric = animatedDxCm;
+
       const spr = document.getElementById("hookeSpring");
       const holder = document.getElementById("springWeightHolder");
       if (spr) spr.setAttribute("transform", `scale(1, ${animatedScale.toFixed(4)})`);
       if (holder) holder.setAttribute("transform", `translate(0, ${(140 * animatedScale).toFixed(1)})`);
+
       const fEl = document.getElementById("hookeF");
       const dEl = document.getElementById("hookeDx");
       if (fEl) fEl.textContent = item.F.toFixed(1) + " N";
       if (dEl) dEl.textContent = animatedDxCm.toFixed(1) + " cm";
+
+      // settle check
       if (Math.abs(desired - current) < 0.002 && !physState.settled) {
         physState.settled = true;
-        if (!simComplete) finishExperiment([
-          { label: "نیروی وزن", value: `${item.F.toFixed(2)} N` },
-          { label: "تغییر طول فنر", value: `${targetDeltaCm.toFixed(2)} cm` },
-          { label: "ثابت فنر k", value: `${k.toFixed(1)} N/m` },
-          { label: "تحقق هوک", value: "F = k·Δx ✓" }
-        ], "Δx");
+        if (!simComplete) {
+          finishExperiment([
+            { label: "نیروی وزن", value: `${item.F.toFixed(2)} N` },
+            { label: "تغییر طول فنر", value: `${targetDeltaCm.toFixed(2)} cm` },
+            { label: "ثابت فنر k", value: `${k.toFixed(1)} N/m` },
+            { label: "تحقق هوک", value: "F = k·Δx ✓" }
+          ], "Δx");
+        }
       }
+
       if (tel) tel.textContent = `F: ${item.F.toFixed(2)} N | Δx: ${animatedDxCm.toFixed(2)} cm`;
       break;
     }
+
     case "solid_pressure": {
-      const m = 3.0; const F = m * 9.8; const P = F / item.A;
+      const m = 3.0;
+      const F = m * 9.8;
+      const P = F / item.A;
+      // Sink proportional to pressure
       const targetSink = Math.min(55, (P / 3000) * 20 + 5);
       const current = physState.theta === 0.25 ? 0 : (physState.theta || 0);
       const newSink = current + (targetSink - current) * Math.min(1, 6 * dt);
-      physState.theta = newSink; primaryMetric = newSink;
+      physState.theta = newSink;
+      primaryMetric = newSink;
+
       const brick = document.getElementById("pressureBrick");
       const sponge = document.getElementById("spongeBed");
       const pr = document.getElementById("pressureReadout");
       const pSink = document.getElementById("pressureSink");
+
       if (brick) brick.setAttribute("transform", `translate(0, ${(-20 + newSink).toFixed(1)})`);
       if (sponge) sponge.setAttribute("d", `M-240,0 Q0,${(newSink*1.6).toFixed(1)} 240,0 L240,140 L-240,140 Z`);
       if (pr) pr.textContent = Math.round(P) + " Pa";
       if (pSink) pSink.textContent = `فرورفتگی: ${newSink.toFixed(1)} mm`;
+
       if (Math.abs(targetSink - current) < 0.1 && !physState.settled) {
         physState.settled = true;
-        if (!simComplete) finishExperiment([
-          { label: "نیروی وزن آجر", value: `${F.toFixed(1)} N` },
-          { label: "سطح اتکا", value: `${item.A} m²` },
-          { label: "فشار وارد شده", value: `${Math.round(P).toLocaleString('en-US')} Pa` },
-          { label: "فرورفتگی نهایی", value: `${targetSink.toFixed(1)} mm` }
-        ], "P");
+        if (!simComplete) {
+          finishExperiment([
+            { label: "نیروی وزن آجر", value: `${F.toFixed(1)} N` },
+            { label: "سطح اتکا", value: `${item.A} m²` },
+            { label: "فشار وارد شده", value: `${Math.round(P).toLocaleString('en-US')} Pa` },
+            { label: "فرورفتگی نهایی", value: `${targetSink.toFixed(1)} mm` }
+          ], "P");
+        }
       }
+
       if (tel) tel.textContent = `A: ${item.A} m² | F: ${F.toFixed(1)} N | P: ${Math.round(P)} Pa`;
       break;
     }
+
     case "liquid_depth": {
-      const g = 9.8; const hMeter = item.h / 100.0;
+      const g = 9.8;
+      const hMeter = item.h / 100.0;
       const P = (item.rho * g * hMeter) / 1000.0;
+      // animate pressure rising
       const target = P;
       const current = physState.theta === 0.25 ? 0 : (physState.theta || 0);
       const newP = current + (target - current) * Math.min(1, 4 * dt);
-      physState.theta = newP; primaryMetric = newP;
+      physState.theta = newP;
+      primaryMetric = newP;
+
       const probe = document.getElementById("depthProbe");
       const flLeft = document.getElementById("manometerFluidLeft");
       const flRight = document.getElementById("manometerFluidRight");
       const deltaLabel = document.getElementById("manoDelta");
       const pReadout = document.getElementById("pressureLiquid");
       const depthLbl = document.getElementById("liquidDepthLbl");
+
       if (probe) probe.setAttribute("transform", `translate(0, ${(30 + item.h * 9).toFixed(0)})`);
       const dH = Math.min(60, newP * 12);
+
       if (flLeft) flLeft.setAttribute("d", `M-25,${(60 + dH).toFixed(1)} L-25,150 Q-25,182 10,182`);
       if (flRight) flRight.setAttribute("d", `M10,182 Q45,182 45,150 L45,${(60 - dH).toFixed(1)}`);
       if (deltaLabel) deltaLabel.textContent = `Δh = ${(dH/6).toFixed(1)} cm`;
       if (pReadout) pReadout.textContent = newP.toFixed(2) + " kPa";
       if (depthLbl) depthLbl.textContent = `h = ${toFa(item.h)} cm | ρ = ${item.rho}`;
+
       if (Math.abs(target - current) < 0.02 && !physState.settled) {
         physState.settled = true;
-        if (!simComplete) finishExperiment([
-          { label: "عمق مایع", value: `${item.h} cm` },
-          { label: "چگالی مایع", value: `${item.rho} kg/m³` },
-          { label: "فشار هیدرواستاتیک", value: `${P.toFixed(2)} kPa` },
-          { label: "اختلاف ارتفاع مانومتر", value: `${(P*12/6).toFixed(1)} cm` }
-        ], "P");
+        if (!simComplete) {
+          finishExperiment([
+            { label: "عمق مایع", value: `${item.h} cm` },
+            { label: "چگالی مایع", value: `${item.rho} kg/m³` },
+            { label: "فشار هیدرواستاتیک", value: `${P.toFixed(2)} kPa` },
+            { label: "اختلاف ارتفاع مانومتر", value: `${(P*12/6).toFixed(1)} cm` }
+          ], "P");
+        }
       }
+
       if (tel) tel.textContent = `h: ${item.h} cm | ρ: ${item.rho} kg/m³ | P: ${newP.toFixed(2)} kPa`;
       break;
     }
+
     case "pascal_lift": {
-      const ratio = item.A2 / item.A1; const F2 = item.F1 * ratio;
+      const ratio = item.A2 / item.A1;
+      const F2 = item.F1 * ratio;
       primaryMetric = F2;
-      const tMax = 3.0; const progress = Math.min(1, simTime / tMax);
+
+      // Animate pistons: small goes down, large goes up
+      const tMax = 3.0;
+      const progress = Math.min(1, simTime / tMax);
       const eased = 1 - Math.pow(1 - progress, 3);
-      const smallDown = eased * 45; const largeUp = eased * (45 / ratio);
+      const smallDown = eased * 45;
+      const largeUp = eased * (45 / ratio);
+
       const pSmall = document.getElementById("pistonSmall");
       const pLarge = document.getElementById("pistonLarge");
       const forceTxt = document.getElementById("pascalForce");
       const ratioTxt = document.getElementById("pascalRatio");
+
       if (pSmall) pSmall.setAttribute("transform", `translate(-150, ${(70 + smallDown).toFixed(1)})`);
       if (pLarge) pLarge.setAttribute("transform", `translate(140, ${(60 - largeUp).toFixed(1)})`);
       if (forceTxt) forceTxt.textContent = `F₂ = ${F2.toFixed(1)} N`;
       if (ratioTxt) ratioTxt.textContent = `A₂/A₁ = ${ratio.toFixed(1)}`;
+
       if (progress >= 1 && !physState.settled) {
         physState.settled = true;
-        if (!simComplete) finishExperiment([
-          { label: "نیروی ورودی F₁", value: `${item.F1} N` },
-          { label: "نسبت سطح پیستون‌ها", value: `${ratio.toFixed(1)}` },
-          { label: "نیروی خروجی F₂", value: `${F2.toFixed(1)} N` },
-          { label: "مزیت مکانیکی", value: `${ratio.toFixed(1)}×` },
-          { label: "فشار در سیستم", value: `${(item.F1/item.A1).toFixed(2)} N/unit` }
-        ], "F");
+        if (!simComplete) {
+          finishExperiment([
+            { label: "نیروی ورودی F₁", value: `${item.F1} N` },
+            { label: "نسبت سطح پیستون‌ها", value: `${ratio.toFixed(1)}` },
+            { label: "نیروی خروجی F₂", value: `${F2.toFixed(1)} N` },
+            { label: "مزیت مکانیکی", value: `${ratio.toFixed(1)}×` },
+            { label: "فشار در سیستم", value: `${(item.F1/item.A1).toFixed(2)} N/unit` }
+          ], "F");
+        }
       }
+
       if (tel) tel.textContent = `F₁: ${item.F1} N | A₂/A₁: ${ratio} | F₂: ${F2.toFixed(1)} N`;
       break;
     }
+
     case "archimedes_buoyancy": {
-      const g = 9.8; const W_real = item.mSolid * g;
-      const tImmerse = 3.0; const progress = Math.min(1, simTime / tImmerse);
+      const g = 9.8;
+      const W_real = item.mSolid * g;
+      // Animate immersion
+      const tImmerse = 3.0;
+      const progress = Math.min(1, simTime / tImmerse);
       const submFraction = progress;
       const Fb = item.rhoFluid * (item.V * submFraction * 1e-6) * g;
       const W_app = W_real - Fb;
       primaryMetric = Fb;
+
       const metal = document.getElementById("submergedMetal");
       const scaleTxt = document.getElementById("archimedesScaleReadout");
       const caught = document.getElementById("overflowCaughtFluid");
       const bForce = document.getElementById("buoyancyForce");
       const bWeight = document.getElementById("buoyancyWeight");
+
       if (metal) metal.setAttribute("transform", `translate(0, ${(100 + submFraction * 50).toFixed(1)})`);
       if (scaleTxt) scaleTxt.textContent = `W = ${W_app.toFixed(2)} N`;
-      if (caught) { const h = 3 + submFraction * 30; caught.setAttribute("y", (71 - h).toFixed(1)); caught.setAttribute("height", h.toFixed(1)); }
+      if (caught) {
+        const h = 3 + submFraction * 30;
+        caught.setAttribute("y", (71 - h).toFixed(1));
+        caught.setAttribute("height", h.toFixed(1));
+      }
       if (bForce) bForce.textContent = `F_b = ${Fb.toFixed(2)} N`;
       if (bWeight) bWeight.textContent = `W_app = ${W_app.toFixed(2)} N`;
-      if (submFraction > 0.1 && Math.random() < 0.2 && !simComplete) spawnParticle(490, 380 + Math.random()*20, { vx: 20 + Math.random()*30, vy: -Math.random()*10, life: 0.6, size: 2, color: "#7dd3fc", gravity: 200 });
+
+      if (submFraction > 0.1 && Math.random() < 0.2 && !simComplete) {
+        spawnParticle(490, 380 + Math.random()*20, {
+          vx: 20 + Math.random()*30, vy: -Math.random()*10,
+          life: 0.6, size: 2, color: "#7dd3fc", gravity: 200
+        });
+      }
+
       if (progress >= 1 && !physState.settled) {
         physState.settled = true;
-        if (!simComplete) finishExperiment([
-          { label: "وزن واقعی جسم", value: `${W_real.toFixed(2)} N` },
-          { label: "نیروی شناوری", value: `${Fb.toFixed(2)} N` },
-          { label: "وزن ظاهری", value: `${W_app.toFixed(2)} N` },
-          { label: "چگالی سیال", value: `${item.rhoFluid} kg/m³` }
-        ], "F_b");
+        if (!simComplete) {
+          finishExperiment([
+            { label: "وزن واقعی جسم", value: `${W_real.toFixed(2)} N` },
+            { label: "نیروی شناوری", value: `${Fb.toFixed(2)} N` },
+            { label: "وزن ظاهری", value: `${W_app.toFixed(2)} N` },
+            { label: "چگالی سیال", value: `${item.rhoFluid} kg/m³` }
+          ], "F_b");
+        }
       }
+
       if (tel) tel.textContent = `W: ${W_real.toFixed(2)} N | F_b: ${Fb.toFixed(2)} N | W_app: ${W_app.toFixed(2)} N`;
       break;
     }
+
     case "lever_balance": {
-      const g = 9.8; const F1 = item.m1 * g; const F2 = item.m2 * g;
-      const tau1 = F1 * (item.d1 / 100); const tau2 = F2 * (item.d2 / 100);
+      const g = 9.8;
+      const F1 = item.m1 * g;
+      const F2 = item.m2 * g;
+      const tau1 = F1 * (item.d1 / 100);
+      const tau2 = F2 * (item.d2 / 100);
       const tauNet = tau1 - tau2;
       primaryMetric = tauNet;
+
       const beam = document.getElementById("leverBeam");
       const torqueTxt = document.getElementById("leverTorque");
       const stateTxt = document.getElementById("leverState");
+
       const targetTilt = Math.max(-18, Math.min(18, -tauNet * 8));
+      // Animate tilt
       const current = physState.theta === 0.25 ? 0 : (physState.theta || 0);
       const newTilt = current + (targetTilt - current) * Math.min(1, 4 * dt);
       physState.theta = newTilt;
+
       if (beam) beam.setAttribute("transform", `rotate(${newTilt.toFixed(2)})`);
       if (torqueTxt) torqueTxt.textContent = `τ_net = ${tauNet.toFixed(2)} N·m`;
       if (stateTxt) {
-        if (Math.abs(tauNet) < 0.15) { stateTxt.textContent = "⚖ در تعادل"; stateTxt.setAttribute("fill", "#10b981"); }
-        else if (tauNet > 0) { stateTxt.textContent = "◄ چرخش به چپ"; stateTxt.setAttribute("fill", "#f43f5e"); }
-        else { stateTxt.textContent = "چرخش به راست ►"; stateTxt.setAttribute("fill", "#f43f5e"); }
+        if (Math.abs(tauNet) < 0.15) {
+          stateTxt.textContent = "⚖ در تعادل";
+          stateTxt.setAttribute("fill", "#10b981");
+        } else if (tauNet > 0) {
+          stateTxt.textContent = "◄ چرخش به چپ";
+          stateTxt.setAttribute("fill", "#f43f5e");
+        } else {
+          stateTxt.textContent = "چرخش به راست ►";
+          stateTxt.setAttribute("fill", "#f43f5e");
+        }
       }
+
       if (Math.abs(targetTilt - current) < 0.2 && !physState.settled) {
         physState.settled = true;
-        if (!simComplete) finishExperiment([
-          { label: "گشتاور F₁", value: `${tau1.toFixed(2)} N·m` },
-          { label: "گشتاور F₂", value: `${tau2.toFixed(2)} N·m` },
-          { label: "گشتاور برآیند", value: `${tauNet.toFixed(2)} N·m` },
-          { label: "نتیجه", value: Math.abs(tauNet) < 0.15 ? "تعادل برقرار است ✓" : (tauNet > 0 ? "چرخش به چپ" : "چرخش به راست") }
-        ], "τ");
+        if (!simComplete) {
+          finishExperiment([
+            { label: "گشتاور F₁", value: `${tau1.toFixed(2)} N·m` },
+            { label: "گشتاور F₂", value: `${tau2.toFixed(2)} N·m` },
+            { label: "گشتاور برآیند", value: `${tauNet.toFixed(2)} N·m` },
+            { label: "نتیجه", value: Math.abs(tauNet) < 0.15 ? "تعادل برقرار است ✓" : (tauNet > 0 ? "چرخش به چپ" : "چرخش به راست") }
+          ], "τ");
+        }
       }
+
       if (tel) tel.textContent = `τ₁: ${tau1.toFixed(2)} | τ₂: ${tau2.toFixed(2)} | τ_net: ${tauNet.toFixed(2)} N·m`;
       break;
     }
   }
 
+  // Push to chart
   if (simTime - lastChartPush >= 0.2 && !simComplete) {
     chartSeries.push({ t: simTime, val: primaryMetric });
-    if (chartSeries.length > 100) chartSeries.shift();
+    if (chartSeries.length > 80) chartSeries.shift();
     lastChartPush = simTime;
     renderChart();
   }
 }
 
 /* ============================================================
-   FINISH
+   FINISH EXPERIMENT
    ============================================================ */
-function finishExperiment(rows) {
+function finishExperiment(rows, metric) {
   if (simComplete) return;
   simComplete = true;
   isSimulating = false;
   const btn = document.getElementById("btnRun");
-  if (btn) { btn.innerHTML = "🔁 تکرار آزمایش"; btn.style.background = "linear-gradient(135deg, #b45309, #f59e0b)"; }
+  if (btn) {
+    btn.innerHTML = "🔁 تکرار آزمایش";
+    btn.style.background = "linear-gradient(135deg, #b45309, #f59e0b)";
+  }
   const st = document.getElementById("txtSimState");
   if (st) st.textContent = "✅ آزمایش کامل شد";
   const dot = document.getElementById("statusDot");
   if (dot) { dot.style.background = "#facc15"; dot.style.boxShadow = "0 0 10px #facc15"; dot.style.animation = "none"; }
+
+  // Force chart final render
   renderChart();
-  setTimeout(() => showResults(rows), 400);
+
+  // Show results
+  setTimeout(() => showResults(rows), 350);
 }
 
 function showResults(rows) {
@@ -2322,12 +2577,22 @@ function showResults(rows) {
   overlay.classList.add("show");
 }
 
-function hideResults() { document.getElementById("resultsOverlay").classList.remove("show"); }
-function hideResultsAndReset() { hideResults(); resetPhysExp(true); }
-function recordAndClose() { recordDataPoint(); hideResults(); }
+function hideResults() {
+  document.getElementById("resultsOverlay").classList.remove("show");
+}
+
+function hideResultsAndReset() {
+  hideResults();
+  resetPhysExp(true);
+}
+
+function recordAndClose() {
+  recordDataPoint();
+  hideResults();
+}
 
 /* ============================================================
-   CHART
+   CHART RENDERER
    ============================================================ */
 function renderChart() {
   const canvas = document.getElementById("rtChart");
@@ -2335,46 +2600,92 @@ function renderChart() {
   const ctx = canvas.getContext("2d");
   const w = canvas.width, h = canvas.height;
   ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = "#040810"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#040810";
+  ctx.fillRect(0, 0, w, h);
+
   const padL = 42, padR = 12, padT = 12, padB = 22;
-  const plotW = w - padL - padR; const plotH = h - padT - padB;
-  ctx.strokeStyle = "rgba(56,189,248,0.08)"; ctx.lineWidth = 1;
-  for (let i = 0; i <= 4; i++) { const y = padT + (plotH / 4) * i; ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke(); }
-  for (let i = 0; i <= 5; i++) { const x = padL + (plotW / 5) * i; ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, h - padB); ctx.stroke(); }
-  ctx.strokeStyle = "rgba(56,189,248,0.4)"; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, h - padB); ctx.lineTo(w - padR, h - padB); ctx.stroke();
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+
+  ctx.strokeStyle = "rgba(56,189,248,0.08)";
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = padT + (plotH / 4) * i;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
+  }
+  for (let i = 0; i <= 5; i++) {
+    const x = padL + (plotW / 5) * i;
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, h - padB); ctx.stroke();
+  }
+  ctx.strokeStyle = "rgba(56,189,248,0.4)";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(padL, padT); ctx.lineTo(padL, h - padB); ctx.lineTo(w - padR, h - padB);
+  ctx.stroke();
+
   let maxAbs = 0.001;
   chartSeries.forEach(p => { if (Math.abs(p.val) > maxAbs) maxAbs = Math.abs(p.val); });
   const yMax = maxAbs * 1.2;
   const yMin = chartSeries.some(p => p.val < 0) ? -yMax : 0;
-  ctx.fillStyle = "#64748b"; ctx.font = "9px Tahoma"; ctx.textAlign = "right";
-  for (let i = 0; i <= 4; i++) { const val = yMax - ((yMax - yMin) * i / 4); const y = padT + (plotH / 4) * i; ctx.fillText(val.toFixed(1), padL - 5, y + 3); }
+
+  ctx.fillStyle = "#64748b";
+  ctx.font = "9px Tahoma";
+  ctx.textAlign = "right";
+  for (let i = 0; i <= 4; i++) {
+    const val = yMax - ((yMax - yMin) * i / 4);
+    const y = padT + (plotH / 4) * i;
+    ctx.fillText(val.toFixed(1), padL - 5, y + 3);
+  }
+
   if (chartSeries.length < 2) {
-    ctx.fillStyle = "rgba(148,163,184,0.4)"; ctx.font = "11px Tahoma"; ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(148,163,184,0.4)";
+    ctx.font = "11px Tahoma";
+    ctx.textAlign = "center";
     ctx.fillText("شبیه‌سازی را آغاز کنید…", w / 2, h / 2);
     return;
   }
-  const tMin = chartSeries[0].t; const tMax = chartSeries[chartSeries.length - 1].t;
+
+  const tMin = chartSeries[0].t;
+  const tMax = chartSeries[chartSeries.length - 1].t;
   const tRange = Math.max(0.1, tMax - tMin);
+
   ctx.beginPath();
   chartSeries.forEach((p, i) => {
     const x = padL + ((p.t - tMin) / tRange) * plotW;
     const y = padT + plotH - ((p.val - yMin) / (yMax - yMin)) * plotH;
     if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
   });
+
   const grad = ctx.createLinearGradient(padL, 0, w - padR, 0);
-  grad.addColorStop(0, "#38bdf8"); grad.addColorStop(1, "#00f5d4");
-  ctx.strokeStyle = grad; ctx.lineWidth = 2.2; ctx.lineJoin = "round";
-  ctx.shadowColor = "#00f5d4"; ctx.shadowBlur = 8; ctx.stroke(); ctx.shadowBlur = 0;
-  ctx.lineTo(padL + plotW, h - padB); ctx.lineTo(padL, h - padB); ctx.closePath();
+  grad.addColorStop(0, "#38bdf8");
+  grad.addColorStop(1, "#00f5d4");
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = 2.2;
+  ctx.lineJoin = "round";
+  ctx.shadowColor = "#00f5d4";
+  ctx.shadowBlur = 8;
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  ctx.lineTo(padL + plotW, h - padB);
+  ctx.lineTo(padL, h - padB);
+  ctx.closePath();
   const fillGrad = ctx.createLinearGradient(0, padT, 0, h - padB);
-  fillGrad.addColorStop(0, "rgba(0,245,212,0.22)"); fillGrad.addColorStop(1, "rgba(0,245,212,0)");
-  ctx.fillStyle = fillGrad; ctx.fill();
+  fillGrad.addColorStop(0, "rgba(0,245,212,0.22)");
+  fillGrad.addColorStop(1, "rgba(0,245,212,0)");
+  ctx.fillStyle = fillGrad;
+  ctx.fill();
+
   const last = chartSeries[chartSeries.length - 1];
   const lx = padL + ((last.t - tMin) / tRange) * plotW;
   const ly = padT + plotH - ((last.val - yMin) / (yMax - yMin)) * plotH;
-  ctx.beginPath(); ctx.arc(lx, ly, 4, 0, 7); ctx.fillStyle = "#00f5d4"; ctx.fill();
-  ctx.strokeStyle = "rgba(0,245,212,0.4)"; ctx.lineWidth = 6; ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(lx, ly, 4, 0, 7);
+  ctx.fillStyle = "#00f5d4";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(0,245,212,0.4)";
+  ctx.lineWidth = 6;
+  ctx.stroke();
 }
 
 /* ============================================================
@@ -2384,8 +2695,10 @@ function recordDataPoint() {
   const exp = PHYS_DATABASE[currentChap][currentExpIdx];
   const item = exp.items[activeItemIdx];
   let input = "—";
-  const keys = ["v", "angle", "a", "mass", "F", "h", "rho", "A", "d1", "m1", "mHanging", "us", "area"];
-  for (const k of keys) { if (item[k] !== undefined && item[k] !== null) { input = `${k} = ${item[k]}`; break; } }
+  const keys = ["v", "angle", "a", "mass", "F", "h", "rho", "A", "d1", "m1", "mHanging", "us"];
+  for (const k of keys) {
+    if (item[k] !== undefined && item[k] !== null) { input = `${k} = ${item[k]}`; break; }
+  }
   const entry = {
     id: tableRecords.length + 1,
     name: item.name.length > 40 ? item.name.substring(0, 40) + "…" : item.name,
@@ -2403,7 +2716,8 @@ function recordDataPoint() {
     <td style="color:var(--accent-cyan); font-weight:700; font-size:0.66rem;">${entry.name}</td>
     <td>${entry.input}</td>
     <td style="color:var(--accent-gold); font-weight:700;">${entry.output}</td>
-    <td>${entry.time}</td>`;
+    <td>${entry.time}</td>
+  `;
   tbody.prepend(tr);
 }
 
@@ -2420,7 +2734,7 @@ function exportCSV() {
 }
 
 /* ============================================================
-   TOOLBAR
+   STAGE TOOLBAR
    ============================================================ */
 function takeScreenshot() {
   const svg = document.getElementById("physCanvas");
@@ -2438,7 +2752,8 @@ function takeScreenshot() {
     const canvas = document.createElement("canvas");
     canvas.width = 1800; canvas.height = 1200;
     const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#050912"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#050912";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     canvas.toBlob(b => {
       const a = document.createElement("a");
@@ -2476,12 +2791,15 @@ document.addEventListener("DOMContentLoaded", () => {
   buildNavTree();
   setupPhysicsEnvironment();
   requestAnimationFrame(physEngineLoop);
-
   const ss = document.getElementById("speedSlider");
   const sv = document.getElementById("speedVal");
-  if (ss) ss.addEventListener("input", e => { simSpeed = parseFloat(e.target.value); if (sv) sv.textContent = simSpeed.toFixed(1) + "×"; });
+  if (ss) {
+    ss.addEventListener("input", e => {
+      simSpeed = parseFloat(e.target.value);
+      if (sv) sv.textContent = simSpeed.toFixed(1) + "×";
+    });
+  }
   renderChart();
-
   window.addEventListener("resize", () => {
     const c = document.getElementById("rtChart");
     if (c) { c.width = c.offsetWidth; c.height = 140; }
@@ -2489,11 +2807,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   const c = document.getElementById("rtChart");
   if (c) { c.width = c.offsetWidth; c.height = 140; }
-
-  /* راهنمای اولیه در اولین بازدید */
-  let seen = false;
-  try { seen = localStorage.getItem("hamyar_intro_seen") === "1"; } catch(e) {}
-  if (!seen) setTimeout(() => openGuide(), 600);
 });
 </script>
 </body>

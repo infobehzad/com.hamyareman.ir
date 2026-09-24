@@ -49,7 +49,7 @@ fun SchoolHubScreen(nav: NavController) {
     }
 
     HubBody {
-        HubHeader("مدرسه 🎒", "کلاسِ درس همیشه باز است — هر روز یک قدم با برنامه و درس‌هایت جلو برو")
+        HubHeader("مدرسه 🎒", "کلاسِ درس همیشه باز است — هر روز یک قدم با برنامه و درس‌هایت جلو برو", slotId = "hub.school.header")
 
         val books = remember {
             runCatching {
@@ -61,6 +61,7 @@ fun SchoolHubScreen(nav: NavController) {
             "${books.size} کتاب درسی — هر کتاب با درس‌ها، صوت، ویدیو و آزمونش",
             open = openGroup == "books",
             onToggle = { toggleGroup("books") },
+            slotId = "hub.school.group.books",
         ) {
             val ctx = LocalContext.current
             books.chunked(2).forEach { pair ->
@@ -82,11 +83,19 @@ fun SchoolHubScreen(nav: NavController) {
                                     )
                                 }
                                 Column(Modifier.padding(10.dp)) {
-                                    Text(book.title, style = MaterialTheme.typography.titleSmall, maxLines = 2)
+                                    Text(
+                                        book.title,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        maxLines = 2,
+                                        fontFamily = com.hamyareman.ir.ui.appearance.TypeSlots.family("hub.school.item.book"),
+                                        fontSize = com.hamyareman.ir.ui.appearance.TypeSlots.size("hub.school.item.book", 13),
+                                    )
                                     Text(
                                         "${lessonCount(book)} درس",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontFamily = com.hamyareman.ir.ui.appearance.TypeSlots.family("hub.school.item.book"),
+                                        fontSize = com.hamyareman.ir.ui.appearance.TypeSlots.size("hub.school.item.book", 11),
                                     )
                                 }
                             }
@@ -104,9 +113,11 @@ fun SchoolHubScreen(nav: NavController) {
                 group.subtitle,
                 open = openGroup == group.id,
                 onToggle = { toggleGroup(group.id) },
+                slotId = "hub.school.group.${group.id}",
             ) {
                 group.items.forEach { item ->
-                    HubCard(item.emojiFor(gender), item.title, item.subtitle) { nav.hubTo(item.route) }
+                    val key = item.route.substringBefore("?").substringBefore("/")
+                    HubCard(item.emojiFor(gender), item.title, item.subtitle, slotId = "hub.school.item.$key") { nav.hubTo(item.route) }
                 }
             }
         }

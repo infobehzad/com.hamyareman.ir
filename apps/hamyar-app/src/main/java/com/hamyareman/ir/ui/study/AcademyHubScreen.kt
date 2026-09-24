@@ -16,11 +16,12 @@ import com.hamyareman.ir.ui.hub.hubTo
 fun AcademyHubScreen(nav: NavController) {
     val gender = HubCatalog.gender()
     HubBody {
-        HubHeader("آموزشگاه ✨", "آموزش هوش مصنوعی و کلاس‌های مهارتی")
+        HubHeader("آموزشگاه ✨", "آموزش هوش مصنوعی و کلاس‌های مهارتی", slotId = "hub.academy.header")
         HubCatalog.academy().forEach { group ->
-            HubMenuGroup(group.title, group.subtitle) {
+            HubMenuGroup(group.title, group.subtitle, slotId = "hub.academy.group.${group.id}") {
                 group.items.forEach { item ->
-                    HubCard(item.emojiFor(gender), item.title, item.subtitle) { nav.hubTo(item.route) }
+                    val key = item.route.substringBefore("?").substringBefore("/")
+                    HubCard(item.emojiFor(gender), item.title, item.subtitle, slotId = "hub.academy.item.$key") { nav.hubTo(item.route) }
                 }
             }
         }

@@ -47,6 +47,9 @@ class UiPrefs(context: Context) {
     var fontSlots by mutableStateOf(loadSlots())
         private set
 
+    var slotChoices by mutableStateOf(loadSlotChoices())
+        private set
+
     private var themeUserSet: Boolean
         get() = store.getString(KEY_THEME_USER, "0") == "1"
         set(v) { store.putString(KEY_THEME_USER, if (v) "1" else "0") }
@@ -61,6 +64,7 @@ class UiPrefs(context: Context) {
 
     init {
         AppTypography.apply(fontTheme)
+        TypeSlots.load(slotChoices)
     }
 
     fun updateTheme(value: BrandTheme) {
@@ -120,6 +124,35 @@ class UiPrefs(context: Context) {
         updateFontTheme(fontTheme.withRole(role, size = size))
     }
 
+    fun updateSlot(id: String, font: String? = null, size: Int? = null) {
+        val cur = slotChoices[id] ?: TypeSlots.resolved(id)
+        val next = cur.copy(
+            font = font?.takeIf { EmbeddedFonts.isKnown(it) } ?: cur.font,
+            size = (size ?: cur.size).coerceIn(-20, 20),
+        )
+        val map = slotChoices.toMutableMap()
+        map[id] = next
+        slotChoices = map
+        store.putString(KEY_SLOT_MAP, slotMapJson(map))
+        TypeSlots.load(map)
+    }
+
+    fun importSlotMap(raw: JSONObject) {
+        val map = parseSlotMap(raw)
+        if (map.isEmpty()) return
+        slotChoices = map
+        store.putString(KEY_SLOT_MAP, slotMapJson(map))
+        TypeSlots.load(map)
+    }
+
+    fun slotMapObject(): JSONObject {
+        val o = JSONObject()
+        slotChoices.forEach { (id, c) ->
+            o.put(id, JSONObject().put("font", c.font).put("size", c.size))
+        }
+        return o
+    }
+
     fun saveSlot(index: Int) {
         if (index !in 0..4) return
         val named = fontTheme.withName(fontTheme.name.ifBlank { "تم ${index + 1}" })
@@ -159,6 +192,12 @@ class UiPrefs(context: Context) {
             else -> if (EmbeddedFonts.isKnown(old)) old else "badkhat_bold"
         }
         return FontTheme(bodyFont = body)
+    }
+
+    private fun loadSlotChoices(): Map<String, SlotChoice> {
+        val raw = store.getString(KEY_SLOT_MAP, "")
+        if (raw.isBlank()) return emptyMap()
+        return runCatching { parseSlotMap(JSONObject(raw)) }.getOrDefault(emptyMap())
     }
 
     private fun loadSlots(): List<FontTheme?> {

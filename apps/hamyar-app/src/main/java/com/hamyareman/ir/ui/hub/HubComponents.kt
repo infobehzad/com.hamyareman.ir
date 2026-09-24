@@ -33,17 +33,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.hamyareman.ir.ui.AppTypography
+import com.hamyareman.ir.ui.appearance.FontCatalog
+import com.hamyareman.ir.ui.appearance.TypeSlots
 
 /** سربرگ مشترک صفحات هاب با دکمه‌ی بازگشت. */
 @Composable
-fun HubHeader(title: String, subtitle: String, onBack: (() -> Unit)? = null) {
+fun HubHeader(title: String, subtitle: String, onBack: (() -> Unit)? = null, slotId: String = FontCatalog.ROLE_HEADING) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
         if (onBack != null) {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "بازگشت") }
         }
         Column {
-            Text(title, style = MaterialTheme.typography.headlineMedium)
-            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(title, style = MaterialTheme.typography.headlineMedium, fontFamily = TypeSlots.family(slotId), fontSize = TypeSlots.size(slotId, 22))
+            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = TypeSlots.family(slotId), fontSize = TypeSlots.size(slotId, 14))
         }
     }
 }
@@ -55,6 +57,7 @@ fun HubCard(
     title: String,
     subtitle: String,
     modifier: Modifier = Modifier,
+    slotId: String = FontCatalog.ROLE_TILE,
     onClick: () -> Unit,
 ) {
     Card(
@@ -65,8 +68,8 @@ fun HubCard(
             Text(emoji, style = MaterialTheme.typography.headlineMedium)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.titleMedium, fontFamily = AppTypography.tile, fontSize = AppTypography.bump(AppTypography.tile, 14))
-                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = AppTypography.body, fontSize = AppTypography.bump(AppTypography.body, 14))
+                Text(title, style = MaterialTheme.typography.titleMedium, fontFamily = TypeSlots.family(slotId), fontSize = TypeSlots.size(slotId, 14))
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = TypeSlots.family(slotId), fontSize = TypeSlots.size(slotId, 12))
             }
         }
     }

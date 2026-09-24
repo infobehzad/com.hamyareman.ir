@@ -12,7 +12,9 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.hamyareman.ir.R
 import com.hamyareman.ir.ui.appearance.EmbeddedFonts
+import com.hamyareman.ir.ui.appearance.FontCatalog
 import com.hamyareman.ir.ui.appearance.FontTheme
+import com.hamyareman.ir.ui.appearance.SlotChoice
 
 /**
  * تایپوگرافی واحد کل اپ همیار من.
@@ -99,6 +101,40 @@ object AppTypography {
         headingDelta = theme.headingSize.coerceIn(-20, 20)
         tileDelta = theme.tileSize.coerceIn(-20, 20)
         bodyDelta = theme.bodySize.coerceIn(-20, 20)
+    }
+
+    fun applyRoute(route: String, slots: Map<String, SlotChoice>) {
+        val r = FontCatalog.normalize(route)
+        fun pick(id: String): SlotChoice {
+            var cur: String? = id
+            val seen = HashSet<String>()
+            while (cur != null && seen.add(cur)) {
+                slots[cur]?.let { return it }
+                val slot = FontCatalog.slot(cur) ?: break
+                if (slot.fallbackId == cur) return SlotChoice(slot.defaultFont, 0)
+                cur = slot.fallbackId
+            }
+            return SlotChoice("badkhat_bold", 0)
+        }
+        val greet = pick(if (r == "home") "page.home.greeting" else FontCatalog.ROLE_GREETING)
+        val clk = pick(if (r == "home") "page.home.clock" else FontCatalog.ROLE_CLOCK)
+        val head = pick(if (r == "home") "page.home.heading" else "page.$r.title")
+        val tiles = pick(if (r == "home") "page.home.tile" else "page.$r.card")
+        val bodies = pick(if (r == "home") "page.home.body" else "page.$r.body")
+        apply(
+            FontTheme(
+                greetingFont = greet.font,
+                greetingSize = greet.size,
+                clockFont = clk.font,
+                clockSize = clk.size,
+                headingFont = head.font,
+                headingSize = head.size,
+                tileFont = tiles.font,
+                tileSize = tiles.size,
+                bodyFont = bodies.font,
+                bodySize = bodies.size,
+            ),
+        )
     }
 
     fun bump(baseSp: Int): TextUnit = (baseSp + BUMP).sp
