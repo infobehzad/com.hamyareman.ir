@@ -121,8 +121,20 @@ sealed class Screen(val route: String) {
     data object Lock : Screen("lock")
     data object Reminders : Screen("reminders")
     data object Sync : Screen("sync")
-    /** پرامپت ۰۲: ماژول سلامتی (یوگا/ورزش/تنفس/یادگیری). */
-    data object Wellness : Screen("wellness")
+    /** پرامپت ۰۲: ماژول سلامتی (یوگا/ورزش/تنفس/یادگیری). `cat` اختیاری: yoga/exercise/breathing/learning. */
+    data object Wellness : Screen("wellness?cat={cat}") {
+        fun of(cat: String? = null) =
+            if (cat.isNullOrBlank()) "wellness" else "wellness?cat=${Uri.encode(cat)}"
+    }
+    /** گروه تو در توی ذهن‌آگاهی / کسب آرامش / بین دروس / پریود. */
+    data object PracticeGroup : Screen("practice-group/{groupId}") {
+        fun of(id: String) = "practice-group/${Uri.encode(id)}"
+    }
+    data object PracticeItem : Screen("practice/{itemId}") {
+        fun of(id: String) = "practice/${Uri.encode(id)}"
+    }
+    /** فلوتر داشبورد: تمرینات کوتاه بین دروس. */
+    data object BetweenLessons : Screen("between-lessons")
     /** پرامپت ۰۲: گالری مرجع‌های نقاشی سیاه‌قلم. */
     data object SketchGallery : Screen("sketch-gallery")
     /** «تمرینات مخصوص این دوره» — چهار سربرگِ یوگا/تنفس/کنترل درد/آرامش برای روزهای چرخه. */
@@ -146,6 +158,5 @@ val Tabs = listOf(
     Tab(Screen.Academy.route, Icons.Filled.LocalLibrary, "آموزشگاه"),
     Tab(Screen.HealthHub.route, Icons.Filled.FitnessCenter, "سلامتی"),
     Tab(Screen.Chat.route, Icons.Filled.SmartToy, "همراه من"),
-    Tab(Screen.More.route, Icons.Filled.MoreHoriz, "بیشتر"),
-)
+    Tab(Screen.More.route, Icons.Filled.MoreHoriz, "بیشتر"))
 val TopRoutes = Tabs.map { it.route }.toSet()

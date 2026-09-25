@@ -86,6 +86,9 @@ import com.hamyareman.ir.ui.study.StudyHomeScreen
 import com.hamyareman.ir.ui.study.VideoTeachScreen
 import com.hamyareman.ir.ui.study.VirtualClassScreen
 import com.hamyareman.ir.ui.water.WaterScreen
+import com.hamyareman.ir.ui.wellness.BetweenLessonsHubScreen
+import com.hamyareman.ir.ui.wellness.PracticeGroupScreen
+import com.hamyareman.ir.ui.wellness.PracticeItemScreen
 import com.hamyareman.ir.ui.wellness.SketchGalleryScreen
 import com.hamyareman.ir.ui.wellness.WellnessScreen
 import kotlinx.coroutines.launch
@@ -148,10 +151,8 @@ fun ZahraNavHost() {
                                 tab.label,
                                 fontFamily = com.hamyareman.ir.ui.AppTypography.navBar.family,
                                 fontWeight = com.hamyareman.ir.ui.AppTypography.navBar.weight,
-                                fontSize = com.hamyareman.ir.ui.AppTypography.navBar.size,
-                            )
-                        },
-                    )
+                                fontSize = com.hamyareman.ir.ui.AppTypography.navBar.size)
+                        })
                 }
             }
         }
@@ -163,59 +164,51 @@ fun ZahraNavHost() {
             composable(Screen.Chat.route) {
                 ChatScreen(
                     onSettings = { nav.navigate(Screen.ChatSettings.route) },
-                    onHelplines = { nav.navigate(Screen.Helplines.route) },
-                )
+                    onHelplines = { nav.navigate(Screen.Helplines.route) })
             }
             composable(Screen.More.route) { MoreScreen(nav) }
             composable(Screen.HealthHub.route) { HealthHubScreen(nav) }
             composable(Screen.Academy.route) { AcademyHubScreen(nav) }
             composable(
                 Screen.Book.route,
-                listOf(navArgument("bookCode") { type = NavType.StringType }),
-            ) { entry ->
+                listOf(navArgument("bookCode") { type = NavType.StringType })) { entry ->
                 BookDetailScreen(
                     bookCode = entry.arguments?.getString("bookCode").orEmpty(),
                     onBack = { nav.popBackStack() },
                     onTeach = { packId -> nav.navigate(Screen.LessonTeach.of(packId)) },
                     onStudy = { packId -> nav.navigate(Screen.LessonStudy.of(packId)) },
                     onVideoTeach = { packId -> nav.navigate(Screen.VideoTeach.of(packId)) },
-                    onCharts = { nav.navigate(Screen.Charts.of(entry.arguments?.getString("bookCode"))) },
-                )
+                    onCharts = { nav.navigate(Screen.Charts.of(entry.arguments?.getString("bookCode"))) })
             }
             composable(
                 Screen.LessonTeach.route,
-                listOf(navArgument("packId") { type = NavType.StringType }),
-            ) { entry ->
+                listOf(navArgument("packId") { type = NavType.StringType })) { entry ->
                 LessonTeachScreen(
                     packId = entry.arguments?.getString("packId").orEmpty(),
                     onBack = { nav.popBackStack() },
                     onStudy = { packId -> nav.navigate(Screen.LessonStudy.of(packId)) },
-                    onPdf = { packId -> nav.navigate(Screen.LessonPdf.of(packId)) },
-                )
+                    onPdf = { packId -> nav.navigate(Screen.LessonPdf.of(packId)) })
             }
-            composable(Screen.AwarenessHub.route) { AwarenessHubScreen(nav) }
+            composable(Screen.AwarenessHub.route) { AwarenessHubScreen(nav) { nav.popBackStack() } }
             composable(Screen.HealthProgress.route) { HealthProgressScreen(onBack = { nav.popBackStack() }) }
             composable(Screen.WeeklySchedule.route) { WeeklyScheduleScreen { nav.popBackStack() } }
             composable(Screen.ClassPlan.route) {
                 ClassPlanScreen(
                     onBack = { nav.popBackStack() },
                     initialTab = 0,
-                    onVirtualHours = { nav.navigate(Screen.VirtualClass.route) },
-                )
+                    onVirtualHours = { nav.navigate(Screen.VirtualClass.route) })
             }
             composable(Screen.ClassPlanShift.route) {
                 ClassPlanScreen(
                     onBack = { nav.popBackStack() },
                     initialTab = 2,
-                    onVirtualHours = { nav.navigate(Screen.VirtualClass.route) },
-                )
+                    onVirtualHours = { nav.navigate(Screen.VirtualClass.route) })
             }
             composable(Screen.ClassPlanCalendar.route) {
                 ClassPlanScreen(
                     onBack = { nav.popBackStack() },
                     initialTab = 1,
-                    onVirtualHours = { nav.navigate(Screen.VirtualClass.route) },
-                )
+                    onVirtualHours = { nav.navigate(Screen.VirtualClass.route) })
             }
             composable(Screen.VirtualClass.route) { VirtualClassScreen { nav.popBackStack() } }
             composable(Screen.Subscription.route) { com.hamyareman.ir.ui.home.SubscriptionScreen { nav.popBackStack() } }
@@ -229,8 +222,7 @@ fun ZahraNavHost() {
                 com.hamyareman.ir.ui.cycle.MonthlyCycleScreen(
                     onBack = { nav.popBackStack() },
                     onMood = { nav.navigate(Screen.Mood.route) },
-                    onMoves = { nav.navigate(Screen.PeriodTraining.route) },
-                )
+                    onMoves = { nav.navigate(Screen.PeriodTraining.route) })
             }
             composable(Screen.Mood.route) { MoodCheckInScreen { nav.popBackStack() } }
             composable(Screen.Mindfulness.route) { MindfulnessScreen { nav.popBackStack() } }
@@ -241,8 +233,7 @@ fun ZahraNavHost() {
             composable(Screen.GeneralToolkit.route) {
                 com.hamyareman.ir.ui.tools.GeneralToolkitScreen(
                     onBack = { nav.popBackStack() },
-                    onOpen = { id -> nav.navigate(Screen.ToolHtml.of(id)) },
-                )
+                    onOpen = { id -> nav.navigate(Screen.ToolHtml.of(id)) })
             }
             composable(Screen.ChemistryLab.route) { com.hamyareman.ir.ui.tools.ChemistryLabScreen { nav.popBackStack() } }
             composable(Screen.PhysicsLab.route) { com.hamyareman.ir.ui.tools.PhysicsLabScreen { nav.popBackStack() } }
@@ -250,19 +241,16 @@ fun ZahraNavHost() {
             composable(Screen.MathToolkit.route) {
                 com.hamyareman.ir.ui.tools.MathToolkitScreen(
                     onBack = { nav.popBackStack() },
-                    onOpen = { id -> nav.navigate(Screen.ToolHtml.of(id)) },
-                )
+                    onOpen = { id -> nav.navigate(Screen.ToolHtml.of(id)) })
             }
             composable(
                 Screen.ToolHtml.route,
-                listOf(navArgument("toolId") { type = NavType.StringType }),
-            ) { entry ->
+                listOf(navArgument("toolId") { type = NavType.StringType })) { entry ->
                 val id = entry.arguments?.getString("toolId").orEmpty()
                 com.hamyareman.ir.ui.tools.ToolWebScreen(
                     toolId = id,
                     title = com.hamyareman.ir.ui.tools.toolTitle(id),
-                    onBack = { nav.popBackStack() },
-                )
+                    onBack = { nav.popBackStack() })
             }
             composable(Screen.Journal.route) { JournalScreen { nav.popBackStack() } }
             composable(Screen.Breath.route) { BreathingScreen { nav.popBackStack() } }
@@ -277,59 +265,48 @@ fun ZahraNavHost() {
                 ClassPlanScreen(
                     onBack = { nav.popBackStack() },
                     initialTab = 2,
-                    onVirtualHours = { nav.navigate(Screen.VirtualClass.route) },
-                )
+                    onVirtualHours = { nav.navigate(Screen.VirtualClass.route) })
             }
             composable(
                 Screen.Quiz.route,
-                listOf(navArgument("lessonId") { type = NavType.StringType; defaultValue = "" }),
-            ) { entry ->
+                listOf(navArgument("lessonId") { type = NavType.StringType; defaultValue = "" })) { entry ->
                 QuizScreen(
                     lessonId = entry.arguments?.getString("lessonId").orEmpty(),
                     onBack = { nav.popBackStack() },
-                    onReview = { nav.navigate(Screen.QuizReview.route) },
-                )
+                    onReview = { nav.navigate(Screen.QuizReview.route) })
             }
 
             composable(
                 Screen.LessonStudy.route,
-                listOf(navArgument("packId") { type = NavType.StringType }),
-            ) { entry ->
+                listOf(navArgument("packId") { type = NavType.StringType })) { entry ->
                 val packId = entry.arguments?.getString("packId").orEmpty()
                 LessonStudyScreen(
                     packId = packId,
-                    onBack = { nav.popBackStack() },
-                )
+                    onBack = { nav.popBackStack() })
             }
             composable(
                 Screen.LessonPdf.route,
-                listOf(navArgument("packId") { type = NavType.StringType }),
-            ) { entry ->
+                listOf(navArgument("packId") { type = NavType.StringType })) { entry ->
                 LessonPdfScreen(
                     packId = entry.arguments?.getString("packId").orEmpty(),
-                    onBack = { nav.popBackStack() },
-                )
+                    onBack = { nav.popBackStack() })
             }
             composable(Screen.QuizReview.route) { QuizReviewScreen { nav.popBackStack() } }
             composable(Screen.Pdf.route) { PdfUploadScreen { nav.popBackStack() } }
             composable(
                 Screen.Charts.route,
-                listOf(navArgument("bookCode") { type = NavType.StringType; defaultValue = "" }),
-            ) { entry ->
+                listOf(navArgument("bookCode") { type = NavType.StringType; defaultValue = "" })) { entry ->
                 ProgressChartsScreen(
                     bookCode = entry.arguments?.getString("bookCode").orEmpty().ifBlank { null },
                     onBack = { nav.popBackStack() },
-                    onPickBook = { code -> nav.navigate(Screen.Charts.of(code)) },
-                )
+                    onPickBook = { code -> nav.navigate(Screen.Charts.of(code)) })
             }
             composable(
                 Screen.VideoTeach.route,
-                listOf(navArgument("packId") { type = NavType.StringType }),
-            ) { entry ->
+                listOf(navArgument("packId") { type = NavType.StringType })) { entry ->
                 VideoTeachScreen(
                     packId = entry.arguments?.getString("packId").orEmpty(),
-                    onBack = { nav.popBackStack() },
-                )
+                    onBack = { nav.popBackStack() })
             }
             composable(Screen.Downloads.route) { DownloadsScreen { nav.popBackStack() } }
             composable(Screen.Art.route) { DailyArtPromptScreen({ nav.popBackStack() }, { nav.navigate(Screen.Gallery.route) }) }
@@ -337,40 +314,33 @@ fun ZahraNavHost() {
             composable(Screen.Learning.route) { LearningHomeScreen(nav) }
             composable(
                 Screen.Lesson.route,
-                listOf(navArgument("id") { type = NavType.StringType }),
-            ) { entry ->
+                listOf(navArgument("id") { type = NavType.StringType })) { entry ->
                 LessonScreen(
                     lessonId = entry.arguments?.getString("id").orEmpty(),
                     onBack = { nav.popBackStack() },
-                    onQuiz = { lessonId -> nav.navigate(Screen.Quiz.of(lessonId)) },
-                )
+                    onQuiz = { lessonId -> nav.navigate(Screen.Quiz.of(lessonId)) })
             }
             composable(Screen.Placement.route) { PlacementTestScreen { nav.popBackStack() } }
             composable(
                 Screen.Roadmap.route,
-                listOf(navArgument("track") { type = NavType.StringType; defaultValue = "" }),
-            ) { entry ->
+                listOf(navArgument("track") { type = NavType.StringType; defaultValue = "" })) { entry ->
                 RoadmapScreen(
                     onBack = { nav.popBackStack() },
-                    trackFilter = entry.arguments?.getString("track").orEmpty(),
-                )
+                    trackFilter = entry.arguments?.getString("track").orEmpty())
             }
             composable(Screen.AiLearning.route) { AiLearningHomeScreen(nav) }
             composable(Screen.AiAssessment.route) { AiAssessmentScreen { nav.popBackStack() } }
             composable(Screen.Recipes.route) {
                 RecipesScreen(
                     onBack = { nav.popBackStack() },
-                    onDetail = { recipeId -> nav.navigate(Screen.RecipeDetail.of(recipeId)) },
-                )
+                    onDetail = { recipeId -> nav.navigate(Screen.RecipeDetail.of(recipeId)) })
             }
             composable(
                 Screen.RecipeDetail.route,
-                listOf(navArgument("id") { type = NavType.StringType }),
-            ) { entry ->
+                listOf(navArgument("id") { type = NavType.StringType })) { entry ->
                 RecipeDetailScreen(
                     recipeId = entry.arguments?.getString("id").orEmpty(),
-                    onBack = { nav.popBackStack() },
-                )
+                    onBack = { nav.popBackStack() })
             }
             composable(Screen.Exercise.route) {
                 ExerciseScreen(onExerciseClick = { id -> nav.navigate(Screen.ExerciseDetail.of(id)) })
@@ -378,8 +348,7 @@ fun ZahraNavHost() {
             composable(Screen.ExerciseDetail.route, listOf(navArgument("id") { type = NavType.StringType })) { e ->
                 ExerciseDetailScreen(
                     exerciseId = e.arguments?.getString("id").orEmpty(),
-                    onBack = { nav.popBackStack() },
-                )
+                    onBack = { nav.popBackStack() })
             }
             composable(Screen.Water.route) { WaterScreen() }
             composable(Screen.Settings.route) { SettingsScreen(nav) }
@@ -396,8 +365,7 @@ fun ZahraNavHost() {
                         runCatching { com.hamyareman.ir.ui.profile.StudentProfileRepo.fetch(container.tables, uid) }.getOrNull()
                     profile?.let { fetched ->
                         com.hamyareman.ir.ui.profile.StudentProfileState.writeMirror(
-                            ctx, fetched.grade, true, fetched.firstName, fetched.subscription, fetched.gender,
-                        )
+                            ctx, fetched.grade, true, fetched.firstName, fetched.subscription, fetched.gender)
                     }
                     if (uid.isNotBlank()) {
                         runCatching { com.hamyareman.ir.ui.profile.AvatarSync.pull(ctx, uid) }
@@ -428,15 +396,13 @@ fun ZahraNavHost() {
                                 com.hamyareman.ir.ui.profile.StudentProfileState.writeMirror(
                                     ctx, toSave.grade, true, toSave.firstName,
                                     profile?.subscription ?: com.hamyareman.ir.ui.profile.StudentProfileState.subscription.ifBlank { "free" },
-                                    toSave.gender,
-                                )
+                                    toSave.gender)
                                 container.uiPrefs.applyDefaultForGender(toSave.gender)
                                 profile = toSave.copy(subscription = profile?.subscription ?: "free")
                                 runCatching { com.hamyareman.ir.ui.profile.AvatarSync.push(ctx, container.storage, uid) }
                             }
                             ok
-                        },
-                    )
+                        })
                 }
             }
             composable(Screen.Privacy.route) { PrivacySettingsScreen { nav.popBackStack() } }
@@ -445,11 +411,33 @@ fun ZahraNavHost() {
             composable(Screen.Lock.route) { AppLockScreen { nav.popBackStack() } }
             composable(Screen.Reminders.route) { RemindersScreen { nav.popBackStack() } }
             composable(Screen.Sync.route) { SyncScreen { nav.popBackStack() } }
-            composable(Screen.Wellness.route) {
+            composable(
+                Screen.Wellness.route,
+                listOf(navArgument("cat") { type = NavType.StringType; defaultValue = "" })) { entry ->
                 WellnessScreen(
                     onBack = { nav.popBackStack() },
                     onSketchGallery = { nav.navigate(Screen.SketchGallery.route) },
-                )
+                    initialCategory = entry.arguments?.getString("cat").orEmpty().ifBlank { null })
+            }
+            composable(Screen.BetweenLessons.route) {
+                BetweenLessonsHubScreen(nav) { nav.popBackStack() }
+            }
+            composable(
+                Screen.PracticeGroup.route,
+                listOf(navArgument("groupId") { type = NavType.StringType })) { entry ->
+                PracticeGroupScreen(
+                    nav = nav,
+                    groupId = entry.arguments?.getString("groupId").orEmpty(),
+                    onBack = { nav.popBackStack() })
+            }
+            composable(
+                Screen.PracticeItem.route,
+                listOf(navArgument("itemId") { type = NavType.StringType })) { entry ->
+                PracticeItemScreen(
+                    itemId = entry.arguments?.getString("itemId").orEmpty(),
+                    onBack = { nav.popBackStack() },
+                    onWellness = { cat -> nav.navigate(Screen.Wellness.of(cat)) },
+                    onRoute = { r -> nav.navigate(r) })
             }
             composable(Screen.SketchGallery.route) {
                 SketchGalleryScreen(onBack = { nav.popBackStack() })

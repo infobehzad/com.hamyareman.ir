@@ -1,11 +1,14 @@
 package com.hamyareman.ir.ui.hub
 
+import android.graphics.BitmapFactory
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,11 +29,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.Image
 import androidx.navigation.NavController
 import com.hamyareman.ir.ui.AppTypography
 import com.hamyareman.ir.ui.appearance.FontCatalog
@@ -87,6 +95,76 @@ fun HubBody(content: @Composable () -> Unit) {
 fun NavController.hubTo(route: String) {
     navigate(route) { launchSingleTop = true }
 }
+
+/** کاشی جلد مربعی — الگوی کتاب‌های مدرسه: ۲ تا در هر ردیف، ۱×۱، عنوان + زیرعنوان. */
+data class HubCoverTile(
+    val id: String,
+    val title: String,
+    val subtitle: String,
+    val onClick: () -> Unit,
+)
+
+@Composable
+fun HubCoverGrid(tiles: List<HubCoverTile>, slotId: String = "hub.practice.item") {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+        tiles.chunked(2).forEach { pair ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                pair.forEach { tile ->
+                    HubCoverCard(tile, Modifier.weight(1f), slotId)
+                }
+                if (pair.size == 1) Spacer(Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+@Composable
+private fun HubCoverCard(tile: HubCoverTile, modifier: Modifier, slotId: String) {
+    val ctx = LocalContext.current
+    val cover = remember(tile.id) { loadPracticeCover(ctx, tile.id) }
+    Card(modifier = modifier.clickable(onClick = tile.onClick)) {
+        Column {
+            if (cover != null) {
+                Image(
+                    bitmap = cover,
+                    contentDescription = tile.title,
+                    modifier = Modifier.fillMaxWidth().aspectRatio(1f),
+                    contentScale = ContentScale.Crop,
+                )
+            } else {
+                Box(
+                    Modifier.fillMaxWidth().aspectRatio(1f),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(tile.title.take(1), style = MaterialTheme.typography.headlineLarge)
+                }
+            }
+            Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    tile.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 2,
+                    fontFamily = AppTypography.cardTitle.family,
+                    fontWeight = AppTypography.cardTitle.weight,
+                    fontSize = AppTypography.cardTitle.size,
+                )
+                Text(
+                    tile.subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 2,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontFamily = AppTypography.cardSub.family,
+                    fontWeight = AppTypography.cardSub.weight,
+                    fontSize = AppTypography.cardSub.size,
+                )
+            }
+        }
+    }
+}
+
+internal fun loadPracticeCover(ctx: android.content.Context, id: String) = runCatching {
+    ctx.assets.open("practice-covers/$id.jpg").use { BitmapFactory.decodeStream(it) }?.asImageBitmap()
+}.getOrNull()
 
 /** گروه تاشوی منوی هاب — دسته‌بندی در تو در تو (مشترک بین مدرسه/آموزشگاه/سلامتی). */
 @Composable

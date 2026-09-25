@@ -3,11 +3,8 @@ package com.hamyareman.ir.ui.hub
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -26,22 +23,25 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-/** هاب «سلامتی»: حرکات، آب، خواب، چرخه، یادآور دارو. */
+/** هاب «سلامتی»: جلدهای مربعی ۲ در ردیف، مثل کتاب‌ها. */
 @Composable
 fun HealthHubScreen(nav: NavController) {
+    val girl = com.hamyareman.ir.ui.profile.StudentProfileState.gender != "boy"
+    val tiles = buildList {
+        add(HubCoverTile("hl-progress", "پیشرفت سلامتی", "آب، ورزش و آمار درس", { nav.hubTo(Screen.HealthProgress.route) }))
+        if (girl) {
+            add(HubCoverTile("hl-period", "چرخه ماهانه", "تقویم، علائم، تنفس درد و تمرین ملایم", { nav.hubTo(Screen.PracticeGroup.of("hl-cycle")) }))
+        }
+        add(HubCoverTile("hl-yoga", "یوگا", "حرکات با راهنمای صوتی و تایمر", { nav.hubTo(Screen.Wellness.of("yoga")) }))
+        add(HubCoverTile("hl-exercise", "ورزش عمومی", "کشش و تقویت ملایم", { nav.hubTo(Screen.Wellness.of("exercise")) }))
+        add(HubCoverTile("hl-food", "آب و تغذیه", "یادآور آب و راهنمای تمرکز", { nav.hubTo(Screen.PracticeGroup.of("hl-nutrition")) }))
+        add(HubCoverTile("hl-sleep", "خواب", "ثبت خواب، قصه‌ی شب، آرام‌سازی", { nav.hubTo(Screen.PracticeGroup.of("hl-sleep")) }))
+        add(HubCoverTile("hl-meds", "یادآور دارو و مراقبت", "هشدار سرِ وقت", { nav.hubTo(Screen.Meds.route) }))
+        add(HubCoverTile("hl-routine", "روتین روز", "بلوک‌های روز یا روز سبک", { nav.hubTo(Screen.Routine.route) }))
+    }
     HubBody {
         HubHeader("سلامتی 💚", "بدنت دوست توست — هر روز یک قدم مهربانی", slotId = "hub.health.header")
-        HubCard("📊", "پیشرفت سلامتی", "آب/ورزش/نقاشی + آمار تدریس، مرور و آزمون‌ها", slotId = "hub.health.item.health-progress") { nav.hubTo(Screen.HealthProgress.route) }
-        HubCard("🧘", "حرکات ورزشی و یوگا", "۴۳ حرکت با راهنمای صوتی آزرا و تایمر", slotId = "hub.health.item.wellness") { nav.hubTo(Screen.Wellness.route) }
-        HubCard("💧", "آب بنوش", "لیوان‌های امروز را ثبت کن", slotId = "hub.health.item.water") { nav.hubTo(Screen.Water.route) }
-        HubCard("😴", "خواب من", "خوابیدن و بیدار شدن را ثبت کن؛ رشته‌ات را نگه دار", slotId = "hub.health.item.sleep-log") { nav.hubTo(Screen.SleepLog.route) }
-        // «چرخه ی ماهانه» فقط برای دخترها دیده می‌شود (کارت کامل برای پسرها پنهان است).
-        if (com.hamyareman.ir.ui.profile.StudentProfileState.gender != "boy") {
-            HubCard("🌸", "چرخه ی ماهانه", "تقویم پریود، راهنمای روزبه‌روز و کم‌کردن درد", slotId = "hub.health.item.cycle") { nav.hubTo(Screen.Cycle.route) }
-        }
-        HubCard("💊", "یادآور دارو و مراقبت", "دارو یا مراقبت روزانه با هشدار سرِ وقت", slotId = "hub.health.item.meds") { nav.hubTo(Screen.Meds.route) }
-        HubCard("🌤", "روتین روز", "بلوک‌های روزت را ببین یا روز سبک انتخاب کن", slotId = "hub.health.item.routine") { nav.hubTo(Screen.Routine.route) }
-        // کارت/گروه «آگاهی» فقط در داشبورد می‌ماند.
+        HubCoverGrid(tiles)
     }
 }
 
@@ -61,29 +61,25 @@ fun SleepLogScreen(onBack: () -> Unit) {
         Text(
             "نیمی از شارژِ فردا در خوابِ امشب ذخیره می‌شود. ساعت‌ها را حدودی بنویس؛ کافی است.",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(
                 value = bedtime,
                 onValueChange = { v -> if (v.length <= 5) { bedtime = v; store.putString("sleep_bed_${todayKey()}", v) } },
                 label = { Text("خوابیدم (مثلاً 22:30)") },
-                modifier = Modifier.weight(1f),
-            )
+                modifier = Modifier.weight(1f))
             OutlinedTextField(
                 value = waketime,
                 onValueChange = { v -> if (v.length <= 5) { waketime = v; store.putString("sleep_wake_${todayKey()}", v) } },
                 label = { Text("بیدار شدم") },
-                modifier = Modifier.weight(1f),
-            )
+                modifier = Modifier.weight(1f))
         }
         val streak = remember { sleepStreak(store) }
         Text("🌙 رشته‌ی شب‌های ثبت‌شده: $streak شب پیوسته", style = MaterialTheme.typography.titleMedium)
         Text(
             "ثبتِ ناقص هم اشکال ندارد؛ مهم این است که زنجیره پاره نشود.",
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

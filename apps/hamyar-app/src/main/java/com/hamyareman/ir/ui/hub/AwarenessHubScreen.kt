@@ -2,12 +2,9 @@ package com.hamyareman.ir.ui.hub
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -23,7 +20,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.hamyareman.ir.platform.core.common.LocalStore
-import com.hamyareman.ir.ui.navigation.Screen
+import com.hamyareman.ir.ui.wellness.PracticeHubScreen
+import com.hamyareman.ir.ui.wellness.WellnessMenu
 import java.util.Calendar
 
 private val SelfQuestions = listOf(
@@ -36,14 +34,13 @@ private val SelfQuestions = listOf(
     "چه چیزی را از امروز می‌خواهی فردا هم تکرار کنی؟",
     "امروز کجا مهربانِ خودت بودی؟",
     "یک لطف کوچکِ کسی که دیدی چه بود؟",
-    "امروز چه چیزی را از خودت یاد گرفتی؟",
-)
+    "امروز چه چیزی را از خودت یاد گرفتی؟")
 
 /**
- * هاب «آگاهی» — خودشناسی روزانه + تمرین‌های ذهن و آرامش + مطالعه‌ی غیردرسی.
+ * هاب «ذهن‌آگاهی» — حضور ذهن، خودهیپنوز سالم، افکار، آگاهی اجتماعی، روزنوشت، یادگیری.
  */
 @Composable
-fun AwarenessHubScreen(nav: NavController) {
+fun AwarenessHubScreen(nav: NavController, onBack: () -> Unit) {
     val context = LocalContext.current
     val store = remember { LocalStore(context, "hamyar_awareness") }
     val dayIndex = remember { Calendar.getInstance().get(Calendar.DAY_OF_YEAR) }
@@ -51,30 +48,29 @@ fun AwarenessHubScreen(nav: NavController) {
     val dateKey = remember { todayKey() }
     var answer by remember { mutableStateOf(store.getString("self_answer_$dateKey", "")) }
 
-    HubBody {
-        HubHeader("آگاهی 🪷", "هر روز یک قدم به خودت نزدیک‌تر", slotId = "hub.awareness.header")
-
-        Card(Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("سوال امروز", style = MaterialTheme.typography.titleMedium)
-                Text(question, style = MaterialTheme.typography.bodyLarge)
-                OutlinedTextField(
-                    value = answer,
-                    onValueChange = { v -> answer = v; store.putString("self_answer_$dateKey", v) },
-                    label = { Text("جواب کوتاه تو…") },
-                    modifier = Modifier.fillMaxWidth().height(110.dp),
-                )
-                Text("فقط برای خودت است؛ همین‌جا می‌ماند.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    PracticeHubScreen(
+        nav = nav,
+        rootIds = WellnessMenu.mindfulnessIds,
+        title = "ذهن‌آگاهی 🪷",
+        subtitle = "حضور، فکر سالم، یادگیری آرام",
+        headerSlot = "hub.awareness.header",
+        accKey = "acc_mindfulness",
+        onBack = onBack,
+        extraTop = {
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("سوال امروز", style = MaterialTheme.typography.titleMedium)
+                    Text(question, style = MaterialTheme.typography.bodyLarge)
+                    OutlinedTextField(
+                        value = answer,
+                        onValueChange = { v -> answer = v; store.putString("self_answer_$dateKey", v) },
+                        label = { Text("جواب کوتاه تو…") },
+                        modifier = Modifier.fillMaxWidth().height(110.dp))
+                    Text("فقط برای خودت است؛ همین‌جا می‌ماند.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
-        }
-
-        HubCard("📓", "دفترچه‌ی من", "حرف‌های بلندتر؛ روزنوشت آزاد", slotId = "hub.awareness.item.journal") { nav.hubTo(Screen.Journal.route) }
-        HubCard("🌬", "تمرین نفس", "با شمارش صوتی و انیمیشن", slotId = "hub.awareness.item.breath") { nav.hubTo(Screen.Breath.route) }
-        HubCard("🧠", "ذهن‌آگاهی", "تمرین‌های کوتاه حضور", slotId = "hub.awareness.item.mindfulness") { nav.hubTo(Screen.Mindfulness.route) }
-        HubCard("💛", "آرامش سریع", "امواج، جنگل بارانی و ریست طلایی", slotId = "hub.awareness.item.calm") { nav.hubTo(Screen.Calm.route) }
-        HubCard("📖", "مطالعه‌ی غیردرسی", "قفسه‌ی کتاب‌های خودم", slotId = "hub.awareness.item.reading-corner") { nav.hubTo(Screen.ReadingCorner.route) }
-        HubCard("🎧", "صداهای آرامش‌بخش", "جلسه‌های صوتی کامل", slotId = "hub.awareness.item.wellness") { nav.hubTo(Screen.Wellness.route) }
-    }
+        },
+    )
 }
 
 /**
@@ -94,8 +90,7 @@ fun ReadingCornerScreen(onBack: () -> Unit) {
             value = title,
             onValueChange = { title = it },
             label = { Text("نام کتابی که می‌خواهی بخوانی…") },
-            modifier = Modifier.fillMaxWidth(),
-        )
+            modifier = Modifier.fillMaxWidth())
         OutlinedButton(onClick = {
             if (title.isNotBlank()) {
                 store.putStringSet("my_shelf", store.getStringSet("my_shelf") + title.trim())
@@ -112,7 +107,6 @@ fun ReadingCornerScreen(onBack: () -> Unit) {
         Text(
             "به‌زودی: پلیر مخصوص کتاب‌ها، هدف‌گذاری صفحات روزانه و پیشنهاد کتاب — این ماژول کامل جدا توسعه داده می‌شود.",
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

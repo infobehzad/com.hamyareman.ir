@@ -56,25 +56,27 @@ fun PeriodTrainingScreen(onBack: () -> Unit) {
 
     // ---- دادهٔ هر سربرگ: فقط ملایم‌ها ----
     val yoga = remember(moves) {
-        moves.filter { it.category == WellnessMove.Category.YOGA && it.level <= 4 }
-            .ifEmpty { moves.filter { it.category == WellnessMove.Category.YOGA } }
+        val prefer = setOf("yoga-cat-cow", "yoga-balasana", "yoga-spinal-twist", "yoga-wide-child")
+        moves.filter { it.slug in prefer }.ifEmpty {
+            moves.filter { it.category == WellnessMove.Category.YOGA && it.level <= 4 }
+        }
     }
     val breathing = remember(moves) {
-        moves.filter { it.category == WellnessMove.Category.BREATHING }
-    }
-    val relaxMoves = remember(moves) {
-        moves.filter { it.level <= 2 && (it.category == WellnessMove.Category.BREATHING || it.category == WellnessMove.Category.YOGA) }
+        val prefer = setOf("breath-diaphragm", "breath-4-7-8")
+        moves.filter { it.slug in prefer }.ifEmpty {
+            moves.filter { it.category == WellnessMove.Category.BREATHING }
+        }
     }
 
+
     Column(Modifier.fillMaxSize()) {
-        AppTopBar("تمرینات مخصوص این دوره", onBack)
+        AppTopBar("تمرینات مشترکِ چرخه‌ی پریود", onBack)
         TabRow(selectedTabIndex = tab) {
-            listOf("یوگا", "تمرینات تنفسی", "کنترل درد", "آرامش").forEachIndexed { i, label ->
+            listOf("یوگا", "تنفس کرامپ", "کشش", "تغذیه").forEachIndexed { i, label ->
                 Tab(
                     selected = tab == i,
                     onClick = { tab = i; expanded = null },
-                    text = { Text(label, style = MaterialTheme.typography.labelLarge) },
-                )
+                    text = { Text(label, style = MaterialTheme.typography.labelLarge) })
             }
         }
 
@@ -83,8 +85,7 @@ fun PeriodTrainingScreen(onBack: () -> Unit) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
+            verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Card(Modifier.fillMaxWidth()) {
                 Text(
                     "این فهرست مخصوصِ همین روزهای چرخه است: فقط حرکاتِ ملایم و تمرین‌های سبک. " +
@@ -92,61 +93,63 @@ fun PeriodTrainingScreen(onBack: () -> Unit) {
                         "به مامان/بابا بگو و با پزشک مشورت کن.",
                     Modifier.padding(12.dp),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             when (tab) {
-                0 -> MoveSection(
-                    emptyText = "فهرست حرکاتِ یوگا الان در دسترس نیست؛ بعداً دوباره سر بزن.",
-                    moves = yoga,
-                    expanded = expanded,
-                    onToggle = { expanded = if (expanded == it) null else it },
-                )
+                0 -> {
+                    MoveSection(
+                        emptyText = "فهرست حرکاتِ یوگا الان در دسترس نیست؛ بعداً دوباره سر بزن.",
+                        moves = yoga,
+                        expanded = expanded,
+                        onToggle = { expanded = if (expanded == it) null else it })
+                    com.hamyareman.ir.ui.wellness.WellnessMenu.group("pd-yoga")?.items
+                        ?.filter { it.wellnessSlug.isBlank() }
+                        ?.forEach { item ->
+                            InfoCard(
+                                emoji = item.emoji,
+                                title = item.title,
+                                meta = item.minutes,
+                                body = item.body.ifBlank { item.steps.joinToString(" ") })
+                        }
+                }
 
                 1 -> MoveSection(
                     emptyText = "تمرین‌های تنفسی الان در دسترس نیست؛ بعداً دوباره سر بزن.",
                     moves = breathing,
                     expanded = expanded,
-                    onToggle = { expanded = if (expanded == it) null else it },
-                )
+                    onToggle = { expanded = if (expanded == it) null else it })
 
                 2 -> {
                     Text(
-                        "کنترلِ درد — کارهایی که واقعاً دردِ روزهای اول را کم می‌کنند:",
-                        style = MaterialTheme.typography.titleSmall,
-                    )
+                        "کشش‌های هدفمند — کمر، لگن و گرما:",
+                        style = MaterialTheme.typography.titleSmall)
                     MonthlyCycle.painExercises.forEach { ex ->
                         InfoCard(
                             emoji = ex.emoji,
                             title = ex.title,
                             meta = ex.duration,
-                            body = ex.how,
-                        )
+                            body = ex.how)
+                    }
+                    com.hamyareman.ir.ui.wellness.WellnessMenu.group("pd-stretch")?.items?.forEach { item ->
+                        InfoCard(
+                            emoji = item.emoji,
+                            title = item.title,
+                            meta = item.minutes,
+                            body = item.body.ifBlank { item.steps.joinToString(" ") })
                     }
                 }
 
                 else -> {
                     Text(
-                        "آرامش — چند دقیقه سکون و نفسِ آرام، حالِ جسم و ذهن را بهتر می‌کند:",
-                        style = MaterialTheme.typography.titleSmall,
-                    )
-                    RELAX_ITEMS.forEach { item ->
+                        "راهنمای تغذیه‌ی هر فاز — آهن، منیزیم، آب بیشتر:",
+                        style = MaterialTheme.typography.titleSmall)
+                    com.hamyareman.ir.ui.wellness.WellnessMenu.group("pd-food")?.items?.forEach { item ->
                         InfoCard(
                             emoji = item.emoji,
                             title = item.title,
-                            meta = item.minutes,
-                            body = item.how,
-                        )
-                    }
-                    if (relaxMoves.isNotEmpty()) {
-                        Text("تمرین‌های آرام‌سازی از بخش سلامتی:", style = MaterialTheme.typography.titleSmall)
-                        MoveSection(
-                            emptyText = "",
-                            moves = relaxMoves,
-                            expanded = expanded,
-                            onToggle = { expanded = if (expanded == it) null else it },
-                        )
+                            meta = item.minutes.ifBlank { "راهنما" },
+                            body = item.body)
                     }
                 }
             }
@@ -162,8 +165,7 @@ private fun MoveSection(
     emptyText: String,
     moves: List<WellnessMove>,
     expanded: String?,
-    onToggle: (String) -> Unit,
-) {
+    onToggle: (String) -> Unit) {
     if (moves.isEmpty()) {
         if (emptyText.isNotBlank()) {
             Text(emptyText, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -176,8 +178,7 @@ private fun MoveSection(
             Card(
                 Modifier.fillMaxWidth().clickable { onToggle(m.slug) },
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                shape = RoundedCornerShape(16.dp),
-            ) {
+                shape = RoundedCornerShape(16.dp)) {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("🧘", style = MaterialTheme.typography.titleMedium)
@@ -187,8 +188,7 @@ private fun MoveSection(
                         Text(
                             toPersianDigits(m.totalSeconds.toString()) + " ثانیه",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     if (m.instructionsFa.isNotBlank() && open) {
                         Text(m.instructionsFa, style = MaterialTheme.typography.bodySmall)
@@ -196,8 +196,7 @@ private fun MoveSection(
                         Text(
                             "برای دیدنِ راهنما بزن",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -219,8 +218,7 @@ private fun InfoCard(emoji: String, title: String, meta: String, body: String) {
                     Text(
                         meta,
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Text(body, style = MaterialTheme.typography.bodySmall)
             }
@@ -228,28 +226,4 @@ private fun InfoCard(emoji: String, title: String, meta: String, body: String) {
     }
 }
 
-/** تمرین‌های آرام‌سازیِ ثابتِ دوره (کوتاه، کم‌هزینه و ملایم). */
-private data class RelaxItem(val emoji: String, val title: String, val minutes: String, val how: String)
 
-private val RELAX_ITEMS = listOf(
-    RelaxItem(
-        "🫧", "نفسِ شکمیِ آرام", "۳ دقیقه",
-        "دست روی شکم؛ ۴ شماره دم از بینی، ۶ شماره بازدمِ آرام. شکم بالا و پایین برود، نه سینه.",
-    ),
-    RelaxItem(
-        "😌", "ریلکسیشنِ کوتاه", "۵ دقیقه",
-        "دراز بکش، از پاها شروع کن و آرام هر قسمت بدن را شل کن؛ چشم‌ها بسته و فک آزاد.",
-    ),
-    RelaxItem(
-        "🎵", "سکون با موسیقیِ آرام", "۵ دقیقه",
-        "یک قطعهٔ بی‌کلامِ آرام بگذار و فقط به نفس‌هایت گوش بده؛ گوشی را دور از دستت بگذار.",
-    ),
-    RelaxItem(
-        "🌿", "نوشیدنیِ گرم و سکون", "۱۰ دقیقه",
-        "دمنوشِ گرم (بابونه/زنجبیل)، بدونِ صفحهٔ نمایش؛ عضله‌ها را رها کن و نفسِ آهسته بکش.",
-    ),
-    RelaxItem(
-        "🧸", "حالتِ جنینیِ راحت", "۵ دقیقه",
-        "به پهلو بخواب، زانوها را جمع کن و بالش را بین زانوها بگذار؛ فشارِ کمر و شکم کم می‌شود.",
-    ),
-)

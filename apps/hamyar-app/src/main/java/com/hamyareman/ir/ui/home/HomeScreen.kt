@@ -129,7 +129,7 @@ fun HomeScreen(nav: NavController) {
     val who = StudentProfileState.firstName.ifBlank { "دوست من" }
 
     Scaffold(floatingActionButton = {
-        FloatingActionButton(onClick = { nav.navigate(Screen.Calm.route) }) { Text("💛") }
+        FloatingActionButton(onClick = { nav.navigate(Screen.BetweenLessons.route) }) { Text("💛") }
     }) { pad ->
         Column(
             Modifier.fillMaxSize().padding(pad).padding(vertical = 16.dp).verticalScroll(rememberScrollState()),
@@ -204,8 +204,8 @@ fun HomeScreen(nav: NavController) {
                 QuickTile("📖", "کتاب متنی و صوتی", Modifier.weight(1f)) { nav.navigate(Screen.FreeReading.route) }
             }
             Row(Modifier.fillMaxWidth().padding(horizontal = HomeSide), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                QuickTile("🪷", "آگاهی", Modifier.weight(1f)) { nav.hubTo(Screen.AwarenessHub.route) }
-                QuickTile("💛", "آرامش", Modifier.weight(1f)) { nav.navigate(Screen.CalmHub.route) }
+                QuickTile("🪷", "ذهن‌آگاهی", Modifier.weight(1f)) { nav.hubTo(Screen.AwarenessHub.route) }
+                QuickTile("🌙", "کسب آرامش", Modifier.weight(1f)) { nav.navigate(Screen.CalmHub.route) }
             }
 
             ClassPlanCard(

@@ -21,7 +21,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -40,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.hamyareman.ir.LocalAppContainer
 import com.hamyareman.ir.platform.core.common.AppResult
 import com.hamyareman.ir.platform.core.common.JalaliDate
+import com.hamyareman.ir.platform.core.common.LocalStore
 import com.hamyareman.ir.platform.core.common.toPersianDigits
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 import com.hamyareman.ir.platform.core.designsystem.SectionCard
@@ -58,17 +61,15 @@ import java.time.LocalDate
 fun MonthlyCycleScreen(
     onBack: () -> Unit,
     onMood: () -> Unit,
-    onMoves: () -> Unit,
-) {
+    onMoves: () -> Unit) {
     if (StudentProfileState.gender == "boy") {
         // محافظِ دوم (کارت هم در هاب سلامتی پنهان است): هیچ داده‌ای نمایش داده نمی‌شود.
         Column(Modifier.fillMaxSize()) {
-            AppTopBar("سلامتی", onBack)
+            AppTopBar("چرخه ماهانه", onBack)
             Text(
                 "این بخش برای دخترهاست.",
                 modifier = Modifier.padding(16.dp),
-                style = MaterialTheme.typography.bodyLarge,
-            )
+                style = MaterialTheme.typography.bodyLarge)
         }
         return
     }
@@ -93,7 +94,13 @@ fun MonthlyCycleScreen(
         }
     }
 
+    val extraStore = remember { LocalStore(ctx, "hamyar_cycle") }
     val today = remember { LocalDate.now(JalaliDate.TEHRAN).toString() }
+    val symptomOpts = listOf("درد", "خلق‌وخو", "جریان", "سردرد", "نفخ")
+    var symptoms by remember {
+        mutableStateOf(extraStore.getString("sym_$today", "").split("|").filter { it.isNotBlank() }.toSet())
+    }
+    var dayNote by remember { mutableStateOf(extraStore.getString("note_$today", "")) }
     // تبدیلِ شمسیِ «امروز» قطعی است؛ نگهبانِ null فقط برای امنیتِ نوع است.
     val todayJalali = remember { JalaliDate.toJalali(today) ?: JalaliDate.Jalali(1400, 1, 1) }
     var viewYear by remember { mutableStateOf(todayJalali.year) }
@@ -128,18 +135,17 @@ fun MonthlyCycleScreen(
     val nextStart = MonthlyCycle.nextStart(state)
 
     Column(Modifier.fillMaxSize()) {
-        AppTopBar("چرخه ی ماهانه", onBack)
+        AppTopBar("چرخه ماهانه", onBack)
         Column(
             Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
+            verticalArrangement = Arrangement.spacedBy(10.dp)) {
             // ---- امروز ----
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("امروز — $phaseTitle", style = MaterialTheme.typography.titleMedium)
+                    Text("امروز بدنت چی می‌خواد — $phaseTitle", style = MaterialTheme.typography.titleMedium)
                     Text(phaseBody, style = MaterialTheme.typography.bodyMedium)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(onClick = {
@@ -155,6 +161,42 @@ fun MonthlyCycleScreen(
                 }
             }
 
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("علائم امروز", style = MaterialTheme.typography.titleMedium)
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+                        symptomOpts.take(3).forEach { label ->
+                            FilterChip(
+                                selected = label in symptoms,
+                                onClick = {
+                                    symptoms = if (label in symptoms) symptoms - label else symptoms + label
+                                    extraStore.putString("sym_$today", symptoms.joinToString("|"))
+                                },
+                                label = { Text(label) })
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        symptomOpts.drop(3).forEach { label ->
+                            FilterChip(
+                                selected = label in symptoms,
+                                onClick = {
+                                    symptoms = if (label in symptoms) symptoms - label else symptoms + label
+                                    extraStore.putString("sym_$today", symptoms.joinToString("|"))
+                                },
+                                label = { Text(label) })
+                        }
+                    }
+                    OutlinedTextField(
+                        value = dayNote,
+                        onValueChange = { v ->
+                            dayNote = v
+                            extraStore.putString("note_$today", v)
+                        },
+                        label = { Text("یادداشت آزاد این روز از چرخه") },
+                        modifier = Modifier.fillMaxWidth())
+                }
+            }
+
             // ---- تقویم شمسی ----
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -165,8 +207,7 @@ fun MonthlyCycleScreen(
                         Text(
                             JalaliDate.monthName(viewMonth) + " " + toPersianDigits(viewYear.toString()),
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.weight(1f),
-                        )
+                            modifier = Modifier.weight(1f))
                         TextButton(onClick = {
                             if (viewMonth == 12) { viewMonth = 1; viewYear += 1 } else viewMonth += 1
                         }) { Text("ماه بعد ›") }
@@ -178,8 +219,7 @@ fun MonthlyCycleScreen(
                                 d,
                                 modifier = Modifier.weight(1f),
                                 style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
 
@@ -206,8 +246,7 @@ fun MonthlyCycleScreen(
                                         today = today,
                                         selected = iso == picked,
                                         modifier = Modifier.weight(1f),
-                                        onClick = { picked = iso.orEmpty() },
-                                    )
+                                        onClick = { picked = iso.orEmpty() })
                                 }
                             }
                         }
@@ -221,8 +260,7 @@ fun MonthlyCycleScreen(
 
                     Text(
                         "روزِ انتخابی: " + (JalaliDate.toJalali(picked)?.faLong ?: "—"),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+                        style = MaterialTheme.typography.bodyMedium)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(onClick = {
                             if (picked in state.periodDays) askRemove = picked
@@ -246,8 +284,7 @@ fun MonthlyCycleScreen(
                             state.lastStart.takeIf { it.length == 10 }
                                 ?.let { JalaliDate.toJalali(it)?.faLong } ?: "هنوز ثبت نشده"
                             ),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+                        style = MaterialTheme.typography.bodyMedium)
                     Text(
                         "شروعِ بعدی (تخمینی): " + (
                             nextStart?.let { JalaliDate.toJalali(it)?.faLong } ?: "—"
@@ -258,8 +295,7 @@ fun MonthlyCycleScreen(
                                 else -> toPersianDigits((-daysToNext).toString()) + " روز گذشته"
                             }
                         } else "",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+                        style = MaterialTheme.typography.bodyMedium)
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text("طولِ چرخه: " + toPersianDigits(state.cycleLength.toString()) + " روز", style = MaterialTheme.typography.bodyMedium)
                         TextButton(onClick = { update(state.copy(cycleLength = (state.cycleLength - 1).coerceAtLeast(21))) }) { Text("−") }
@@ -273,8 +309,7 @@ fun MonthlyCycleScreen(
                     Text(
                         "این عددها تخمینی‌اند و مالِ خودت؛ اگر بی‌نظمی دیدی، برای بررسی با پزشک حرف بزن.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -290,13 +325,11 @@ fun MonthlyCycleScreen(
                                 Text(
                                     ex.title + "  ·  " + ex.duration,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Bold,
-                                )
+                                    fontWeight = FontWeight.Bold)
                                 Text(
                                     ex.how,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
@@ -305,8 +338,7 @@ fun MonthlyCycleScreen(
                         "اگر درد طوری است که نمی‌توانی مدرسه بروی یا با مسکنِ معمولی بهتر نمی‌شود، " +
                             "به مامان/بابا بگو و با پزشک مشورت کن.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -322,14 +354,12 @@ fun MonthlyCycleScreen(
                             "(سطرِ خصوصیِ خودت؛ هیچ‌کس دیگری نمی‌بیند). اگر اینترنت نباشد، تغییرها " +
                             "همین‌جا می‌مانند و به‌محضِ وصل‌شدن فرستاده می‌شوند.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(
                         "آخرین تغییر محلی: " + (
                             MonthlyCycle.localAt(ctx).takeIf { it > 0 }?.let { JalaliDate.clockFa(it) } ?: "—"
                             ),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
+                        style = MaterialTheme.typography.bodySmall)
                     syncNote?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
                 }
             }
@@ -346,8 +376,7 @@ fun MonthlyCycleScreen(
             text = {
                 Text(
                     "علامتِ " + (JalaliDate.toJalali(day)?.faLong ?: "این روز") +
-                        " برداشته شود؟ بعداً می‌توانی دوباره ثبتش کنی.",
-                )
+                        " برداشته شود؟ بعداً می‌توانی دوباره ثبتش کنی.")
             },
             confirmButton = {
                 androidx.compose.material3.TextButton(onClick = {
@@ -357,8 +386,7 @@ fun MonthlyCycleScreen(
             },
             dismissButton = {
                 androidx.compose.material3.TextButton(onClick = { askRemove = null }) { Text("نه، بماند") }
-            },
-        )
+            })
     }
 }
 
@@ -371,8 +399,7 @@ private fun DayCell(
     today: String,
     selected: Boolean,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
+    onClick: () -> Unit) {
     val isPeriod = iso.isNotBlank() && iso in state.periodDays
     val next = MonthlyCycle.nextStart(state)
     val predicted = next != null && iso.isNotBlank() && runCatching {
@@ -394,25 +421,21 @@ private fun DayCell(
             .background(bg, RoundedCornerShape(10.dp))
             .then(
                 if (selected) Modifier.border(2.dp, MaterialTheme.colorScheme.tertiary, RoundedCornerShape(10.dp))
-                else Modifier,
-            )
+                else Modifier)
             .clickable { onClick() },
-        contentAlignment = Alignment.Center,
-    ) {
+        contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 toPersianDigits(day.toString()),
                 style = MaterialTheme.typography.bodyMedium,
                 color = fg,
-                fontWeight = if (iso == today) FontWeight.Bold else FontWeight.Normal,
-            )
+                fontWeight = if (iso == today) FontWeight.Bold else FontWeight.Normal)
             if (iso == today) {
                 Box(
                     Modifier
                         .width(4.dp)
                         .height(4.dp)
-                        .background(MaterialTheme.colorScheme.tertiary, CircleShape),
-                )
+                        .background(MaterialTheme.colorScheme.tertiary, CircleShape))
             }
         }
     }
