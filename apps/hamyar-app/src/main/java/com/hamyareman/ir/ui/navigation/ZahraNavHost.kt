@@ -44,6 +44,7 @@ import com.hamyareman.ir.ui.exercise.ExerciseScreen
 import com.hamyareman.ir.ui.gamification.BadgesScreen
 import com.hamyareman.ir.ui.home.HomeScreen
 import com.hamyareman.ir.ui.hub.AwarenessHubScreen
+import com.hamyareman.ir.ui.hub.layerTo
 import com.hamyareman.ir.ui.hub.HealthHubScreen
 import com.hamyareman.ir.ui.hub.MedsScreen
 import com.hamyareman.ir.ui.hub.ReadingCornerScreen
@@ -214,16 +215,14 @@ fun ZahraNavHost() {
             composable(Screen.Subscription.route) { com.hamyareman.ir.ui.home.SubscriptionScreen { nav.popBackStack() } }
             composable(Screen.TomorrowPrep.route) { TomorrowPrepScreen { nav.popBackStack() } }
             composable(Screen.SleepNight.route) { com.hamyareman.ir.ui.study.SleepNightScreen { nav.popBackStack() } }
+            composable(Screen.SleepBreath.route) { com.hamyareman.ir.ui.study.SleepBreathScreen { nav.popBackStack() } }
             composable(Screen.Meds.route) { MedsScreen { nav.popBackStack() } }
             composable(Screen.SleepLog.route) { SleepLogScreen { nav.popBackStack() } }
             composable(Screen.ReadingCorner.route) { ReadingCornerScreen { nav.popBackStack() } }
             composable(Screen.Appearance.route) { AppearanceScreen { nav.popBackStack() } }
-            composable(Screen.Cycle.route) {
-                com.hamyareman.ir.ui.cycle.MonthlyCycleScreen(
-                    onBack = { nav.popBackStack() },
-                    onMood = { nav.navigate(Screen.Mood.route) },
-                    onMoves = { nav.navigate(Screen.PeriodTraining.route) })
-            }
+            composable(Screen.CycleCal.route) { com.hamyareman.ir.ui.cycle.CycleCalScreen { nav.popBackStack() } }
+            composable(Screen.CycleLog.route) { com.hamyareman.ir.ui.cycle.CycleLogScreen { nav.popBackStack() } }
+            composable(Screen.CycleToday.route) { com.hamyareman.ir.ui.cycle.CycleTodayScreen(nav) { nav.popBackStack() } }
             composable(Screen.Mood.route) { MoodCheckInScreen { nav.popBackStack() } }
             composable(Screen.Mindfulness.route) { MindfulnessScreen { nav.popBackStack() } }
             composable(Screen.Calm.route) { CalmMenuScreen(nav) }
@@ -436,8 +435,8 @@ fun ZahraNavHost() {
                 PracticeItemScreen(
                     itemId = entry.arguments?.getString("itemId").orEmpty(),
                     onBack = { nav.popBackStack() },
-                    onWellness = { cat -> nav.navigate(Screen.Wellness.of(cat)) },
-                    onRoute = { r -> nav.navigate(r) })
+                    onWellness = { cat -> nav.layerTo(Screen.Wellness.of(cat)) },
+                    onRoute = { r -> nav.layerTo(r) })
             }
             composable(Screen.SketchGallery.route) {
                 SketchGalleryScreen(onBack = { nav.popBackStack() })

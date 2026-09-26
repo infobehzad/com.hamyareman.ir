@@ -25,7 +25,7 @@ import com.hamyareman.ir.ui.hub.HubBody
 import com.hamyareman.ir.ui.hub.HubCoverGrid
 import com.hamyareman.ir.ui.hub.HubCoverTile
 import com.hamyareman.ir.ui.hub.HubHeader
-import com.hamyareman.ir.ui.hub.hubTo
+import com.hamyareman.ir.ui.hub.layerTo
 import com.hamyareman.ir.ui.navigation.Screen
 
 /** هاب ریشه‌ی یک شاخه — جلدهای مربعی ۲ در هر ردیف، مثل کتاب‌ها. */
@@ -50,7 +50,7 @@ fun PracticeHubScreen(
                     id = g.id,
                     title = g.title,
                     subtitle = g.subtitle,
-                    onClick = { nav.hubTo(Screen.PracticeGroup.of(g.id)) },
+                    onClick = { nav.layerTo(Screen.PracticeGroup.of(g.id)) },
                 )
             },
         )
@@ -89,7 +89,7 @@ fun PracticeGroupScreen(nav: NavController, groupId: String, onBack: () -> Unit)
                         id = child.id,
                         title = child.title,
                         subtitle = child.subtitle,
-                        onClick = { nav.hubTo(Screen.PracticeGroup.of(child.id)) },
+                        onClick = { nav.layerTo(Screen.PracticeGroup.of(child.id)) },
                     ),
                 )
             }
@@ -108,6 +108,8 @@ fun PracticeItemScreen(
     val item = WellnessMenu.item(itemId)
     val move = item?.wellnessSlug?.takeIf { it.isNotBlank() }?.let { WellnessCatalog.bySlug(it) }
     val (body, steps) = if (item != null) WellnessMenu.resolveInstructions(item) else "" to emptyList()
+    var session by remember { mutableStateOf(false) }
+    var stepIx by remember { mutableStateOf(0) }
 
     Column(Modifier.fillMaxSize()) {
         com.hamyareman.ir.platform.core.designsystem.AppTopBar(
@@ -133,22 +135,43 @@ fun PracticeItemScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            if (body.isNotBlank()) {
-                Text(body, style = AppTypography.pageBody.style)
-            }
-            steps.forEachIndexed { i, s ->
-                Text(
-                    toPersianDigits((i + 1).toString()) + ". " + s,
-                    style = AppTypography.pageBody.style,
-                )
-            }
-            if (move != null) {
+            if (!session) {
+                if (body.isNotBlank()) {
+                    Text(body, style = AppTypography.pageBody.style)
+                }
+                steps.forEachIndexed { i, s ->
+                    Text(
+                        toPersianDigits((i + 1).toString()) + ". " + s,
+                        style = AppTypography.pageBody.style,
+                    )
+                }
                 Spacer(Modifier.height(8.dp))
-                PrimaryButton("شروع با راهنمای حرکات سلامتی") { onWellness(move.category.wire) }
-            }
-            if (item.route.isNotBlank()) {
-                Spacer(Modifier.height(4.dp))
-                PrimaryButton("باز کردن صفحه‌ی مرتبط") { onRoute(item.route) }
+                PrimaryButton("شروع جلسه") {
+                    when {
+                        steps.isNotEmpty() || body.isNotBlank() -> {
+                            session = true
+                            stepIx = 0
+                        }
+                        move != null -> onWellness(move.category.wire)
+                        item.route.isNotBlank() -> onRoute(item.route)
+                        else -> {
+                            session = true
+                            stepIx = 0
+                        }
+                    }
+                }
+            } else {
+                val lines = if (steps.isNotEmpty()) steps else listOf(body.ifBlank { "یک دقیقه آرام بمان؛ بعد تمام." })
+                Text(
+                    "گام " + toPersianDigits((stepIx + 1).toString()) + " از " + toPersianDigits(lines.size.toString()),
+                    style = AppTypography.pageHeading.style,
+                )
+                Text(lines[stepIx], style = AppTypography.pageBody.style)
+                if (stepIx < lines.lastIndex) {
+                    PrimaryButton("گام بعد") { stepIx++ }
+                } else {
+                    PrimaryButton("پایان جلسه") { session = false; stepIx = 0 }
+                }
             }
         }
     }
@@ -169,14 +192,14 @@ fun BetweenLessonsHubScreen(nav: NavController, onBack: () -> Unit) {
 
 internal fun openPractice(nav: NavController, item: PracticeItem) {
     when {
-        item.childGroupId.isNotBlank() -> nav.hubTo(Screen.PracticeGroup.of(item.childGroupId))
+        item.childGroupId.isNotBlank() -> nav.layerTo(Screen.PracticeGroup.of(item.childGroupId))
         item.route.isNotBlank() && item.steps.isEmpty() && item.body.isBlank() && item.wellnessSlug.isBlank() ->
-            nav.hubTo(item.route)
+            nav.layerTo(item.route)
         item.wellnessSlug.isNotBlank() && item.steps.isEmpty() && item.body.isBlank() ->
-            nav.hubTo(Screen.PracticeItem.of(item.id))
+            nav.layerTo(Screen.PracticeItem.of(item.id))
         item.steps.isNotEmpty() || item.body.isNotBlank() ->
-            nav.hubTo(Screen.PracticeItem.of(item.id))
-        item.route.isNotBlank() -> nav.hubTo(item.route)
-        else -> nav.hubTo(Screen.PracticeItem.of(item.id))
+            nav.layerTo(Screen.PracticeItem.of(item.id))
+        item.route.isNotBlank() -> nav.layerTo(item.route)
+        else -> nav.layerTo(Screen.PracticeItem.of(item.id))
     }
 }

@@ -41,6 +41,7 @@ object WellnessMenu {
     val mindfulnessIds = listOf("mf-presence", "mf-hypnosis", "mf-thoughts", "mf-social", "mf-journal", "mf-learn")
     val calmIds = listOf("cl-breath", "cl-pmr", "cl-journey", "cl-visual", "cl-story", "cl-sounds", "cl-bedtime")
     val betweenIds = listOf("bl-desk", "bl-eyes", "bl-body", "bl-focus")
+    val skillsIds = SkillsCatalog.ids
 
     private fun i(
         id: String,
@@ -667,9 +668,9 @@ object WellnessMenu {
         g(
             "hl-cycle", "🌸", "چرخه ماهانه", "تقویم، علائم، تنفس درد و تمرین ملایم",
             items = listOf(
-                i("cy-cal", "📅", "تقویم ماهانه با فازبندی", "پیش‌قاعدگی / قاعدگی / پس از قاعدگی / میانه", route = Screen.Cycle.route),
-                i("cy-log", "📝", "علائم و یادداشت روزانه", "درد، خلق، جریان، سردرد، نفخ", route = Screen.Cycle.route),
-                i("cy-today", "💗", "امروز بدنت چی می‌خواد", "راهنما بر اساس فاز همان روز", route = Screen.Cycle.route),
+                i("cy-cal", "📅", "تقویم ماهانه با فازبندی", "پیش‌قاعدگی / قاعدگی / پس از قاعدگی / میانه", route = Screen.CycleCal.route),
+                i("cy-log", "📝", "علائم و یادداشت روزانه", "درد، خلق، جریان، سردرد، نفخ", route = Screen.CycleLog.route),
+                i("cy-today", "💗", "امروز بدنت چی می‌خواد", "راهنما بر اساس فاز همان روز", route = Screen.CycleToday.route),
                 i("cy-pain", "🌬️", "تنفس برای کرامپ و کنترل درد", "تنفس شکمی آرام‌بخش", child = "pd-breath"),
             ),
             children = listOf("pd-yoga", "pd-stretch", "pd-food"),
@@ -685,14 +686,18 @@ object WellnessMenu {
             ),
         ),
         g(
-            "hl-sleep", "😴", "خواب", "ثبت خواب، قصه‌ی شب، آرام‌سازی پیش از خواب",
+            "hl-sleep", "😴", "خواب", "ثبت، قصه، بشنو و بخواب، تنفس پیش از خواب",
             items = listOf(
                 i("hl-sleep-log", "🌙", "ثبت خواب و رشته", "ساعت خواب و بیداری", route = Screen.SleepLog.route),
-                i("hl-sleep-story", "📖", "پل به قصه‌ی شب", "روایت برای خواب", child = "cl-story"),
-                i("hl-sleep-calm", "🌜", "پل به آرام‌سازی پیش از خواب", "صوت و تنفس", route = Screen.SleepNight.route),
+                i("hl-sleep-story", "📖", "قصه‌ی شب", "روایت برای خواب", child = "cl-story"),
+                i("hl-sleep-listen", "🎧", "بشنو و بخواب", "صوت یکنواخت شب", route = Screen.SleepNight.route),
+                i(
+                    "hl-sleep-breath", "🌬️", "تنفس پیش از خواب", "شکمی و ۴-۷-۸ برای خواب، نه بیداری",
+                    route = Screen.SleepBreath.route,
+                ),
             ),
         ),
-    )
+    ) + SkillsCatalog.groups
 
     private val groups: Map<String, PracticeGroup> = allGroups.associateBy { it.id }
 

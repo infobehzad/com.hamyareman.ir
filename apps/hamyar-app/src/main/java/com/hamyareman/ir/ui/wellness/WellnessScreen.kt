@@ -25,7 +25,6 @@ import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -52,17 +51,11 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 import com.hamyareman.ir.platform.core.designsystem.PrimaryButton
-import com.hamyareman.ir.platform.core.designsystem.SectionCard
 import com.hamyareman.ir.LocalAppContainer
 import kotlinx.coroutines.launch
 
 /**
- * پرامپت ۰۲ — صفحه‌ی ماژول ورزش/یوگا/تنفس/یادگیری.
- *
- * سه تب:
- *  1) همه (همه‌ی ۴۳ حرکت با فیلتر سطح و شدت)
- *  2) جلسه‌ی فعال (تایمر در حال اجرا)
- *  3) مرجع‌های من (گالری سیاه‌قلم)
+ * یک دسته در هر صفحه: یوگا / ورزش / تنفس / یادگیری — بدون سربرگ «همه».
  */
 @Composable
 fun WellnessScreen(
@@ -73,10 +66,8 @@ fun WellnessScreen(
     val scope = rememberCoroutineScope()
     var moves by remember { mutableStateOf<List<WellnessMove>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
-    var selectedCategory by remember {
-        mutableStateOf(
-            initialCategory?.let { WellnessMove.Category.fromWire(it) },
-        )
+    val selectedCategory = remember(initialCategory) {
+        WellnessMove.Category.fromWire(initialCategory ?: "yoga")
     }
     var activeMove by remember { mutableStateOf<WellnessMove?>(null) }
 
@@ -92,7 +83,6 @@ fun WellnessScreen(
                 WellnessMove.Category.EXERCISE -> "ورزش عمومی"
                 WellnessMove.Category.BREATHING -> "تنفس آرام‌بخش"
                 WellnessMove.Category.LEARNING -> "تمرینات تمرکز و یادگیری"
-                null -> "حرکات سلامتی"
             },
             onBack)
         if (loading) {
@@ -100,22 +90,6 @@ fun WellnessScreen(
                 CircularProgressIndicator()
             }
             return@Column
-        }
-
-        // تب‌ها
-        Row(
-            Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(
-                selected = selectedCategory == null,
-                onClick = { selectedCategory = null },
-                label = { Text("همه") })
-            WellnessMove.Category.entries.forEach { c ->
-                FilterChip(
-                    selected = selectedCategory == c,
-                    onClick = { selectedCategory = if (selectedCategory == c) null else c },
-                    label = { Text(c.displayFa) })
-            }
         }
 
         if (activeMove != null) {
@@ -126,14 +100,7 @@ fun WellnessScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                if (initialCategory == null) {
-                    item {
-                        SectionCard(
-                            "مرجع‌های نقاشی سیاه‌قلم",
-                            "تولید تصویر سیاه‌وسفید برای تمرین نقاشی با سطوح مختلف") { onSketchGallery() }
-                    }
-                }
-                val filtered = if (selectedCategory == null) moves else moves.filter { it.category == selectedCategory }
+                val filtered = moves.filter { it.category == selectedCategory }
                 items(filtered, key = { it.slug }) { move ->
                     val ctx = LocalContext.current
                     MoveCard(move = move, onStart = {

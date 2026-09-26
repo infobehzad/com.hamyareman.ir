@@ -18,7 +18,7 @@ import java.time.LocalDate
  *
  * چرا این‌جا: نسخه‌ی قبلی («چرخه و حال‌ها») فقط یک دکمه‌ی «ثبت شروع دوره» روی
  * LocalStore بود؛ نه تقویم داشت، نه راهنما، نه سینکِ سرور. این فایل مدل و منطق را
- * نگه می‌دارد (خالص و تست‌پذیر) و [MonthlyCycleScreen] فقط نمایش/لمس است.
+ * نگه می‌دارد (خالص و تست‌پذیر). نمایش در CycleCal / CycleLog / CycleToday است.
  *
  * **حریم خصوصی:** داده زیرِ کلیدِ `cycle_month` در جدولِ `app_state` و با مجوزِ
  * مالکیتِ خودِ کاربر (`ownerOnly`) سینک می‌شود، یعنی همان قراردادِ «چرخه هرگز
@@ -40,8 +40,7 @@ object MonthlyCycle {
         /** طولِ چرخه (۲۱..۳۵). */
         val cycleLength: Int = DEFAULT_CYCLE,
         /** طولِ پریود (۲..۱۰) برای پیش‌بینی روزهای بعدی. */
-        val periodLength: Int = DEFAULT_PERIOD,
-    )
+        val periodLength: Int = DEFAULT_PERIOD)
 
     /** فازِ چرخه برای یک روز — برای راهنمای همان روز. */
     enum class Phase { PERIOD, PMS, FOLLICULAR, OVULATION, LUTEAL }
@@ -96,8 +95,7 @@ object MonthlyCycle {
                 periodDays = days,
                 lastStart = o.optString("lastStart"),
                 cycleLength = o.optInt("cycle", DEFAULT_CYCLE).coerceIn(21, 35),
-                periodLength = o.optInt("period", DEFAULT_PERIOD).coerceIn(2, 10),
-            )
+                periodLength = o.optInt("period", DEFAULT_PERIOD).coerceIn(2, 10))
         }.getOrDefault(State())
     }
 
@@ -106,12 +104,10 @@ object MonthlyCycle {
     /** مهارِ عددها به بازهٔ مجاز — منبعِ داده ممکن است هر عددی بدهد. */
     private fun State.saned(): State = copy(
         cycleLength = cycleLength.coerceIn(21, 35),
-        periodLength = periodLength.coerceIn(2, 10),
-    )
+        periodLength = periodLength.coerceIn(2, 10))
 
     fun toggleDay(state: State, iso: String): State = state.copy(
-        periodDays = if (iso in state.periodDays) state.periodDays - iso else state.periodDays + iso,
-    )
+        periodDays = if (iso in state.periodDays) state.periodDays - iso else state.periodDays + iso)
 
     /** «از این روز دوره شروع شد»: این روز و روزهای بعدیِ آن دوره علامت می‌خورند. */
     fun markStart(state: State, iso: String): State {
@@ -242,8 +238,7 @@ object MonthlyCycle {
         Exercise("🐈", "گربه-شترِ ملایم", "۸ تکرارِ آرام", "روی چهار دست‌وپا، ستون فقرات را آرام قوس بده و رها کن؛ نه تند، نه تا درد."),
         Exercise("🚶", "پیاده‌رویِ کوتاه", "۱۰ دقیقه", "قدمِ آرام و نفسِ راحت؛ جریانِ خون بهتر می‌شود و دل‌درد سبک‌تر."),
         Exercise("💧", "آب و خوراکِ گرم", "در طول روز", "سوپ، دمنوش و آب؛ کافئین و نوشابهٔ گازدار را کم کن."),
-        Exercise("😴", "خوابِ کافی", "۸ ساعت", "خوابِ کم درد را بدتر می‌کند؛ شبِ قبلِ دوره کمی زودتر بخواب."),
-    )
+        Exercise("😴", "خوابِ کافی", "۸ ساعت", "خوابِ کم درد را بدتر می‌کند؛ شبِ قبلِ دوره کمی زودتر بخواب."))
 
     data class Exercise(val emoji: String, val title: String, val duration: String, val how: String)
 
@@ -256,8 +251,7 @@ object MonthlyCycle {
     suspend fun sync(
         ctx: Context,
         tables: TablesDbService,
-        uid: String,
-    ): Boolean = withContext(Dispatchers.IO) {
+        uid: String): Boolean = withContext(Dispatchers.IO) {
         if (uid.isBlank()) return@withContext false
         val local = store(ctx).getString(P_JSON)
         val localAt = StateSync.localAt(ctx, KEY)
@@ -293,9 +287,7 @@ object MonthlyCycle {
                 } else {
                     AppResult.Err(
                         com.hamyareman.ir.platform.core.common.AppError.Local(
-                            "سرور جواب نداد؛ داده همین‌جا روی گوشی محفوظ است و بعداً دوباره فرستاده می‌شود.",
-                        ),
-                    )
+                            "سرور جواب نداد؛ داده همین‌جا روی گوشی محفوظ است و بعداً دوباره فرستاده می‌شود."))
                 }
             }
         }

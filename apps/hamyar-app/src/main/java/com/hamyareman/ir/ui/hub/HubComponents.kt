@@ -96,6 +96,11 @@ fun NavController.hubTo(route: String) {
     navigate(route) { launchSingleTop = true }
 }
 
+/** رفتن به لایه‌ی بعدی منو — برگشت، منوی پدر همان بخش است نه ریشه‌ی اپ. */
+fun NavController.layerTo(route: String) {
+    navigate(route)
+}
+
 /** کاشی جلد مربعی — الگوی کتاب‌های مدرسه: ۲ تا در هر ردیف، ۱×۱، عنوان + زیرعنوان. */
 data class HubCoverTile(
     val id: String,
