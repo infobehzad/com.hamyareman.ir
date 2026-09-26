@@ -615,7 +615,8 @@ object MediaVault {
         val iv = all.copyOfRange(4, 20)
         val cipher = Cipher.getInstance("AES/CTR/NoPadding")
         cipher.init(Cipher.DECRYPT_MODE, key(ctx), IvParameterSpec(iv))
-        return cipher.doFinal(all, 20, all.size - 20)
+        val plain = cipher.doFinal(all, 20, all.size - 20)
+        return HtmlCodec.unwrap(ctx, plain)
     }
 
     private fun ByteArray.startsWith(prefix: ByteArray): Boolean {
