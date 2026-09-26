@@ -31,7 +31,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.abs
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -95,6 +97,7 @@ fun MathLessonScreen(
     initialTab: Int = 0,
     onBack: () -> Unit,
 ) {
+    SecureWebEffect()
     val pack = remember(packId) { BookModuleRegistry.pack(packId) }
     val bookTitle = remember(packId) {
         BookModuleRegistry.modules.firstOrNull { m -> m.packs.any { it.packId == packId } }?.title.orEmpty()
@@ -385,14 +388,36 @@ private fun MathExamHtmlTab(pack: StudyPack, html: MathHtmlAssets.Spec?, onZoomC
 private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean = true, onZoomChanged: (Boolean) -> Unit = {}) {
     val tracks = teachTracksOf(pack)
     val ctx = androidx.compose.ui.platform.LocalContext.current
+    val container = LocalAppContainer.current
+    var remoteHtml by remember(pack.packId) { mutableStateOf<String?>(null) }
+    var remoteTried by remember(pack.packId) { mutableStateOf(false) }
+    LaunchedEffect(pack.packId) {
+        val fid = MathHtmlAssets.teachAsset(pack.packId)?.substringAfterLast('/')
+        if (fid.isNullOrBlank()) {
+            remoteTried = true
+            return@LaunchedEffect
+        }
+        remoteHtml = withContext(Dispatchers.IO) {
+            try { HtmlMediaKey.fetch(ctx, container.tables) } catch (_: Throwable) {}
+            runCatching {
+                if (!MediaVault.isVerified(ctx, fid)) {
+                    MediaVault.downloadEncrypted(ctx, StudyMedia.viewUrl(fid), fid) { _, _ -> }
+                }
+                String(MediaVault.decryptToMemory(ctx, fid), Charsets.UTF_8)
+            }.getOrNull()
+        }
+        remoteTried = true
+    }
     val htmlFromAsset = remember(pack.packId) {
         MathHtmlAssets.teachAsset(pack.packId)?.let { path ->
             runCatching { ctx.assets.open(path).bufferedReader(Charsets.UTF_8).use { it.readText() } }.getOrNull()
         }.orEmpty()
     }
-    // اگر HTML (نسخه‌ی ریموت یا قدیمی) پل سیک نداشت، شیم را می‌چسبانیم تا
-    // لینک‌های فهرست با data-seek-ms همیشه به پلیر برسند.
-    val teachHtml = ensureSeekShim(pack.teachHtml.ifBlank { htmlFromAsset }, TeachSeekMap.times(pack.packId))
+    // سرور رمزشده اول؛ اگر نبود همان assets.
+    val teachHtml = ensureSeekShim(
+        pack.teachHtml.ifBlank { remoteHtml.orEmpty().ifBlank { if (remoteTried) htmlFromAsset else "" } },
+        TeachSeekMap.times(pack.packId),
+    )
     val body = pack.teachText.ifBlank {
         pack.sections.filter { it.kind != "exam" }.joinToString("\n\n") { "«${it.title}»\n${it.body}" }
             .ifBlank { "متن تدریس این درس به‌زودی از پوشهٔ Books اضافه می‌شود." }
@@ -405,7 +430,9 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
             TeachAudioBar(packId = pack.packId, screenTitle = pack.title, bookTitle = bookTitle, tracks = tracks)
         }
         Card(Modifier.fillMaxWidth().weight(1f)) {
-            if (teachHtml.isNotBlank()) {
+            if (!remoteTried && teachHtml.isBlank()) {
+                HtmlPercentLoader(35)
+            } else if (teachHtml.isNotBlank()) {
                 AndroidView(
                     factory = { c ->
                         WebView(c).apply {
