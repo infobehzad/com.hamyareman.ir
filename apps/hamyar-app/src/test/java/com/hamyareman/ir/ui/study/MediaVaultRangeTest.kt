@@ -74,28 +74,31 @@ class MediaVaultRangeTest {
             if (want.isEmpty()) continue
             val html = File("src/main/assets/math/c905/$name.html")
             val txt = File(dir, "$name.txt")
-            if (!html.exists() || !txt.exists()) continue
-            val got = seekTimes(html.readText())
-            assertEquals(
-                "$name — HTML با انتظارِ همگام‌شده یکی نیست؛ " +
-                    "`python3 tools/seek-shim/sync_seek_html.py` را اجرا کن",
-                want,
-                got,
-            )
-            assertTrue(
-                "$name — زمان‌های انتظار، زیردنبولهٔ فهرستِ Books نیستند (.txt عوض شده؟)",
-                isSubsequence(want, parseTimingList(txt.readText())),
-            )
             val pack = packOf(name)
             if (pack != null) {
                 val mapped = TeachSeekMap.times(pack)
                 if (mapped.isNotEmpty()) {
-                    assertEquals("$name — TeachSeekMap با HTML یکی نیست ($pack)", want, mapped)
+                    assertEquals("$name — TeachSeekMap با انتظار یکی نیست ($pack)", want, mapped)
+                    checked++
                 }
             }
-            checked++
+            if (html.exists()) {
+                val got = seekTimes(html.readText())
+                assertEquals(
+                    "$name — HTML با انتظارِ همگام‌شده یکی نیست؛ " +
+                        "`python3 tools/seek-shim/sync_seek_html.py` را اجرا کن",
+                    want,
+                    got,
+                )
+            }
+            if (txt.exists()) {
+                assertTrue(
+                    "$name — زمان‌های انتظار، زیردنبولهٔ فهرستِ Books نیستند (.txt عوض شده؟)",
+                    isSubsequence(want, parseTimingList(txt.readText())),
+                )
+            }
         }
-        assertTrue("هیچ HTML همگام‌شده‌ای پیدا نشد", checked >= 5)
+        assertTrue("هیچ زمان‌بندیِ همگام‌شده‌ای پیدا نشد", checked >= 5)
     }
 
     private fun seekTimes(html: String): List<Long> =
