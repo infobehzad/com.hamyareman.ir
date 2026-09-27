@@ -408,14 +408,9 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
         }
         remoteTried = true
     }
-    val htmlFromAsset = remember(pack.packId) {
-        MathHtmlAssets.teachAsset(pack.packId)?.let { path ->
-            runCatching { ctx.assets.open(path).bufferedReader(Charsets.UTF_8).use { it.readText() } }.getOrNull()
-        }.orEmpty()
-    }
-    // سرور رمزشده اول؛ اگر نبود همان assets.
+    // فقط سرور رمزشده — HTML داخل APK نیست.
     val teachHtml = ensureSeekShim(
-        pack.teachHtml.ifBlank { remoteHtml.orEmpty().ifBlank { if (remoteTried) htmlFromAsset else "" } },
+        pack.teachHtml.ifBlank { remoteHtml.orEmpty() },
         TeachSeekMap.times(pack.packId),
     )
     val body = pack.teachText.ifBlank {
