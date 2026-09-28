@@ -10,6 +10,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.hamyareman.ir.ui.content.ContentCatalog
+import com.hamyareman.ir.ui.content.ContentDownloadStore
 import com.hamyareman.ir.ui.content.ContentItem
 import java.io.ByteArrayInputStream
 import java.io.InputStream

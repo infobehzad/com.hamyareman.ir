@@ -122,7 +122,7 @@ object ContentDownloadStore {
                     attempt++
                 } catch (e: Exception) {
                     attempt++
-                    if (!NetState.isOnline(ctx)) NetState.awaitOnlineBlocking(ctx)
+                    if (!NetState.isOnline(ctx)) NetState.awaitOnline(ctx)
                 }
             }
             if (downloadedBytes != null && downloadedBytes.isNotEmpty()) break
