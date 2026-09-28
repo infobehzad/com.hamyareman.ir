@@ -195,7 +195,7 @@ fun SafeSpaceScreen(nav: NavController) {
                     biometricBusy = bioBusy,
                     externalNotice = bioNotice,
                     onBiometricRequest = if (offerBiometric) { { unlockBio() } } else null,
-                    onVerify = { pin -> container.lock.verifyPin(pin) },
+                    onVerify = { pin -> container.lock.verify(pin) },
                     onUnlocked = { isUnlocked = true },
                 )
             } else {
