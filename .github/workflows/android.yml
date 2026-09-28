@@ -28,7 +28,15 @@ jobs:
           cache-cleanup: never
       - name: ساخت APK
         run: |
-          ./gradlew :hamyar-app:assembleP09Debug --stacktrace
+          set +e
+          ./gradlew :hamyar-app:assembleP09Debug --stacktrace > build_log.txt 2>&1
+          CODE=$?
+          if [ $CODE -ne 0 ]; then
+            echo "::error::Gradle build failed with code $CODE"
+            grep -E "e: |error:|FAILURE:|Exception|BUILD FAILED" build_log.txt -A 5 -B 2 || cat build_log.txt
+            exit $CODE
+          fi
+          set -e
       - name: نام‌گذاری APK
         run: |
           set -e
