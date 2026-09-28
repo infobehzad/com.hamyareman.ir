@@ -27,8 +27,9 @@ object LessonAccess {
         if (isToc(packId)) return true
         val pack = BookModuleRegistry.pack(packId)
         if (pack?.pdfOnly == true) return true
-        if (packId.startsWith("C905_E01")) return true
-        if (packId.startsWith("C905_")) return false
+        if (packId.startsWith("C905_E01") || packId.startsWith("C905_g9-math-f01") || packId.startsWith("C905_g9-math-p01") || packId.startsWith("C905_g9-math-p02") || packId.startsWith("C905_g9-math-p03") || packId.startsWith("C905_g9-math-p04")) return true
+        if (packId.startsWith("C603_g6-math-f01") || packId.startsWith("C603_g6-math-c01")) return true
+        if (packId.startsWith("C905_") || packId.startsWith("C603_")) return false
         val book = pack?.bookCode ?: return false
         return packId == firstLessonPack(book)
     }

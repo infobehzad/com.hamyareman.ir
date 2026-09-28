@@ -89,7 +89,7 @@ fun LessonPdfScreen(packId: String, onBack: () -> Unit) {
             val target = File(cacheDir, fileId)
             if (!target.exists() || target.length() < 1024) {
                 state = PdfState.Downloading(0)
-                val url = "$PDF_ENDPOINT/storage/buckets/$PDF_BUCKET/files/$fileId/view?project=$PDF_PROJECT"
+                val url = StudyMedia.viewUrl(StudyMedia.resolveFileId(fileId))
                 // دانلودِ مقاوم: اگر شبکه/پروکسی وسطِ راه عوض شود، به‌جای شکستن، از
                 // همان‌جا ادامه می‌دهد (تا ۶ تلاش، با صبر برای برگشتنِ اینترنت).
                 var attempt = 0

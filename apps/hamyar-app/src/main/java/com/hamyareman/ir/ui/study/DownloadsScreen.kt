@@ -471,15 +471,15 @@ private fun BookDlCard(
             }
             if (!expanded) return@Column
             Spacer(Modifier.height(8.dp))
-            // نوار وضعیت PDF — تفکیک از صوت
+            // نوار وضعیت کتاب درسی — تفکیک از صوت
             KindBar(
-                label = "PDF",
+                label = "کتاب درسی",
                 done = pdfStat.done,
                 total = pdfStat.total,
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(6.dp))
-            // نوار وضعیت صوت — تفکیک از PDF
+            // نوار وضعیت صوت — تفکیک از کتاب درسی
             KindBar(
                 label = "صوت",
                 done = audioStat.done,
@@ -495,7 +495,7 @@ private fun BookDlCard(
                 ) {
                     Icon(Icons.Outlined.Download, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("PDFها (${fixNum(pdfStat.missing.size)})", style = numStyle, maxLines = 1)
+                    Text("کتاب درسی (${fixNum(pdfStat.missing.size)})", style = numStyle, maxLines = 1)
                 }
                 Button(
                     onClick = { onDownload(audioStat.missing) },
@@ -667,7 +667,7 @@ private fun DlLessonRow(
         val is404 = store.getString("dl404_$fileId", "0") == "1"
         val pct = busy[key]
         return Chip(
-            label = if (isPdf) "PDF" else track!!.label,
+            label = if (isPdf) "کتاب درسی" else track!!.label,
             done = done,
             is404 = is404,
             isNetErr = netErr[key] == true,
