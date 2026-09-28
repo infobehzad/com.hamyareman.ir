@@ -33,7 +33,7 @@ jobs:
           CODE=$?
           if [ $CODE -ne 0 ]; then
             echo "=== BUILD LOG TAIL ==="
-            tail -n 120 build_log.txt
+            tail -n 300 build_log.txt
             exit $CODE
           fi
           set -e
