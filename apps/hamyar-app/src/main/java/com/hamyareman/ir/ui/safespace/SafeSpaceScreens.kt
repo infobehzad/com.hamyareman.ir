@@ -31,20 +31,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.outlined.Audiotrack
-import androidx.compose.material.icons.outlined.Backup
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.Movie
-import androidx.compose.material.icons.outlined.Pause
-import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.Restore
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -208,7 +207,7 @@ fun SafeSpaceScreen(nav: NavController) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Icon(
-                        Icons.Outlined.Lock,
+                        Icons.Filled.Lock,
                         contentDescription = null,
                         modifier = Modifier.size(64.dp),
                         tint = MaterialTheme.colorScheme.primary,
@@ -510,7 +509,7 @@ private fun SafeNotebookTab(categoryKey: String, tabTitle: String) {
                                         syncNotesWithCloud(next)
                                     }) {
                                         Icon(
-                                            Icons.Outlined.Delete,
+                                            Icons.Filled.Delete,
                                             contentDescription = "حذف",
                                             tint = MaterialTheme.colorScheme.error,
                                         )
@@ -520,7 +519,7 @@ private fun SafeNotebookTab(categoryKey: String, tabTitle: String) {
                                         noteTitle = note.title
                                         noteText = note.text
                                     }) {
-                                        Icon(Icons.Outlined.Edit, contentDescription = "ویرایش")
+                                        Icon(Icons.Filled.Edit, contentDescription = "ویرایش")
                                     }
                                     Column(
                                         modifier = Modifier
@@ -813,7 +812,7 @@ private fun SafeVaultGalleryTab() {
                 onClick = { backupLauncher.launch("safespace-vault-backup.zip") },
                 modifier = Modifier.weight(1f),
             ) {
-                Icon(Icons.Outlined.Backup, contentDescription = null, modifier = Modifier.size(16.dp))
+                Icon(Icons.Filled.CloudUpload, contentDescription = null, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(4.dp))
                 Text("پشتیبان‌گیری")
             }
@@ -821,7 +820,7 @@ private fun SafeVaultGalleryTab() {
                 onClick = { restoreLauncher.launch(arrayOf("application/zip", "*/*")) },
                 modifier = Modifier.weight(1f),
             ) {
-                Icon(Icons.Outlined.Restore, contentDescription = null, modifier = Modifier.size(16.dp))
+                Icon(Icons.Filled.CloudDownload, contentDescription = null, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(4.dp))
                 Text("بازگردانی")
             }
@@ -968,7 +967,7 @@ private fun SafeVaultGalleryTab() {
                             modifier = Modifier.padding(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
-                            Icon(Icons.Outlined.Movie, contentDescription = null, modifier = Modifier.size(54.dp))
+                            Icon(Icons.Filled.Movie, contentDescription = null, modifier = Modifier.size(54.dp))
                             Spacer(Modifier.height(8.dp))
                             Text("ویدیو: ${item.title}.${item.ext}")
                             Spacer(Modifier.height(8.dp))
@@ -1026,7 +1025,7 @@ private fun VaultMediaTile(
                             contentScale = ContentScale.Crop,
                         )
                     } else {
-                        Icon(Icons.Outlined.Image, contentDescription = null, modifier = Modifier.align(Alignment.Center))
+                        Icon(Icons.Filled.Image, contentDescription = null, modifier = Modifier.align(Alignment.Center))
                     }
                 }
                 item.mime.startsWith("video/") -> {
@@ -1035,7 +1034,7 @@ private fun VaultMediaTile(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Icon(Icons.Outlined.Movie, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.Filled.Movie, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         Spacer(Modifier.height(2.dp))
                         Text(item.title, style = MaterialTheme.typography.labelSmall, maxLines = 1)
                     }
@@ -1047,7 +1046,7 @@ private fun VaultMediaTile(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Icon(
-                            if (isPlaying) Icons.Outlined.Pause else Icons.Outlined.PlayArrow,
+                            if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                         )
@@ -1061,7 +1060,7 @@ private fun VaultMediaTile(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Icon(Icons.Outlined.Description, contentDescription = null)
+                        Icon(Icons.Filled.Description, contentDescription = null)
                         Spacer(Modifier.height(2.dp))
                         Text(item.title, style = MaterialTheme.typography.labelSmall, maxLines = 1)
                     }
@@ -1080,7 +1079,7 @@ private fun VaultMediaTile(
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    Icons.Outlined.Close,
+                    Icons.Filled.Close,
                     contentDescription = "حذف",
                     tint = Color.White,
                     modifier = Modifier.size(14.dp),

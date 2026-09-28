@@ -32,8 +32,10 @@ jobs:
           ./gradlew :hamyar-app:assembleP09Debug --stacktrace > build_log.txt 2>&1
           CODE=$?
           if [ $CODE -ne 0 ]; then
-            echo "::error::Gradle build failed with code $CODE"
-            grep -E "e: |error:|FAILURE:|Exception|BUILD FAILED" build_log.txt -A 5 -B 2 || cat build_log.txt
+            echo "### خطا در ساخت بیلد" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            tail -n 120 build_log.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
             exit $CODE
           fi
           set -e
