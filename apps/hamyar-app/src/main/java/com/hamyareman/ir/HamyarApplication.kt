@@ -22,6 +22,10 @@ class HamyarApplication : Application() {
             previous?.uncaughtException(thread, error)
         }
         container = AppContainer(this)
+        // نشانی دوگانهٔ محتوا: تنظیمات سرور + کاتالوگ assets (پیش‌بارگذاری در آغاز اجرا)
+        com.hamyareman.ir.ui.study.ServerPrefs.init(this)
+        runCatching { com.hamyareman.ir.ui.content.ContentCatalog.load(this) }
+        com.hamyareman.ir.ui.study.ServerResolver.probeAsync()
         // پخشِ فایل‌های گاوصندوق: طرحِ vault:// به جریانِ رمزگشاییِ تنبل وصل می‌شود
         // (خوانشِ جسته‌گریخته؛ بدونِ بلوکه‌شدنِ لودرِ پلیر برای رمزگشاییِ کل فایل).
         com.hamyareman.ir.platform.feature.playback.VaultSourceHooks.open = { key ->

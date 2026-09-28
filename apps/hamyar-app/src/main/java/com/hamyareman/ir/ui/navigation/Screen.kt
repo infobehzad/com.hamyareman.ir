@@ -125,6 +125,15 @@ sealed class Screen(val route: String) {
     data object Lock : Screen("lock")
     data object Reminders : Screen("reminders")
     data object Sync : Screen("sync")
+
+    /** محتوای همیار: منوی دسته‌ها + فهرست و نمایش HTML از کاتالوگ assets. */
+    data object ContentHub : Screen("content-hub")
+    data object ContentCategory : Screen("content-category/{cat}") {
+        fun of(cat: String) = "content-category/${Uri.encode(cat)}"
+    }
+    data object ContentHtml : Screen("content-html/{id}") {
+        fun of(id: String) = "content-html/${Uri.encode(id)}"
+    }
     /** پرامپت ۰۲: ماژول سلامتی (یوگا/ورزش/تنفس/یادگیری). `cat` اختیاری: yoga/exercise/breathing/learning. */
     data object Wellness : Screen("wellness?cat={cat}") {
         fun of(cat: String? = null) =

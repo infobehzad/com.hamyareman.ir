@@ -79,9 +79,10 @@ fun SettingsScreen(nav: NavController) {
                 "یادآورهای ملایم + بازه‌ی بی‌اعلان شبانه.",
             ) { nav.navigate(Screen.Reminders.route) }
             SectionCard(
-                "کش و همگام‌سازی خودکار",
-                "حجمِ کش، تعدادِ داده‌های کش‌شده، صفِ ارسال، وضعیتِ اتصال و زمانِ آخرین " +
-                    "همگام‌سازی — همگام‌سازی خودکار در پس‌زمینه انجام می‌شود، بدونِ دکمه.",
+                "تنظیمات سرور",
+                "سرور محتوا (پیش‌فرض: سریع‌ترین — خارجی Appwrite — ایرانی آروان)، به‌علاوهٔ " +
+                    "حجمِ کش، صفِ ارسال، وضعیتِ اتصال و زمانِ آخرین همگام‌سازی — همگام‌سازی " +
+                    "خودکار در پس‌زمینه انجام می‌شود، بدونِ دکمه.",
             ) { nav.navigate(Screen.Sync.route) }
             SectionCard(
                 "تم",
@@ -473,8 +474,10 @@ fun SyncScreen(onBack: () -> Unit) {
     }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        AppTopBar("کش و همگام‌سازی", onBack)
+        AppTopBar("تنظیمات سرور", onBack)
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+
+            ServerOptionsSection()
 
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {

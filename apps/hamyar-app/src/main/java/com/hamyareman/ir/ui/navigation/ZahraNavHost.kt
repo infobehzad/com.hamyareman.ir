@@ -37,6 +37,9 @@ import com.hamyareman.ir.ui.calmdown.CalmMenuScreen
 import com.hamyareman.ir.ui.calmdown.JournalScreen
 import com.hamyareman.ir.ui.chatbot.ChatScreen
 import com.hamyareman.ir.ui.chatbot.ChatSettingsScreen
+import com.hamyareman.ir.ui.content.ContentCategoryScreen
+import com.hamyareman.ir.ui.content.ContentHubScreen
+import com.hamyareman.ir.ui.content.ContentHtmlScreen
 import com.hamyareman.ir.ui.cycle.MindfulnessScreen
 import com.hamyareman.ir.ui.cycle.MoodCheckInScreen
 import com.hamyareman.ir.ui.exercise.ExerciseDetailScreen
@@ -410,6 +413,31 @@ fun ZahraNavHost() {
             composable(Screen.Lock.route) { AppLockScreen { nav.popBackStack() } }
             composable(Screen.Reminders.route) { RemindersScreen { nav.popBackStack() } }
             composable(Screen.Sync.route) { SyncScreen { nav.popBackStack() } }
+            composable(Screen.ContentHub.route) {
+                ContentHubScreen(
+                    onBack = { nav.popBackStack() },
+                    onCategory = { c -> nav.navigate(Screen.ContentCategory.of(c)) },
+                )
+            }
+            composable(
+                Screen.ContentCategory.route,
+                listOf(navArgument("cat") { type = NavType.StringType }),
+            ) { entry ->
+                ContentCategoryScreen(
+                    cat = entry.arguments?.getString("cat").orEmpty(),
+                    onBack = { nav.popBackStack() },
+                    onOpen = { id -> nav.navigate(Screen.ContentHtml.of(id)) },
+                )
+            }
+            composable(
+                Screen.ContentHtml.route,
+                listOf(navArgument("id") { type = NavType.StringType }),
+            ) { entry ->
+                ContentHtmlScreen(
+                    itemId = entry.arguments?.getString("id").orEmpty(),
+                    onBack = { nav.popBackStack() },
+                )
+            }
             composable(
                 Screen.Wellness.route,
                 listOf(navArgument("cat") { type = NavType.StringType; defaultValue = "" })) { entry ->

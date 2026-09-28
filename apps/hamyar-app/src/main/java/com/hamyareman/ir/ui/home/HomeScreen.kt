@@ -232,6 +232,13 @@ fun HomeScreen(nav: NavController) {
                 ToolTile("🧬", "آزمایشگاه زیست‌شناسی", Modifier.weight(1f)) { nav.navigate(Screen.BiologyLab.route) }
             }
 
+            HubCard(
+                "📚", "محتوای همیار",
+                "آموزشگاه، یوگا، حرکات ورزشی و تنفس — منوی هر دسته",
+                Modifier.padding(horizontal = HomeSide),
+                slotId = "page.home.tile",
+            ) { nav.navigate(Screen.ContentHub.route) }
+
             Text(
                 "امروز",
                 style = MaterialTheme.typography.titleMedium,
