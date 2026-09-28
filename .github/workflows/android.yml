@@ -56,8 +56,15 @@ jobs:
           src=$(echo apps/hamyar-app/build/outputs/apk/**/*.apk | awk '{print $1}')
           test -n "$src" && test -f "$src"
           mkdir -p dist
-          cp -f "$src" dist/hamyar-1.98.apk
-          ls -l dist/hamyar-1.98.apk
+      - name: نام‌گذاری APK
+        run: |
+          set -e
+          shopt -s nullglob globstar
+          src=$(echo apps/hamyar-app/build/outputs/apk/**/*.apk | awk '{print $1}')
+          test -n "$src" && test -f "$src"
+          mkdir -p dist
+          cp -f "$src" dist/hamyar-1.99.apk
+          ls -l dist/hamyar-1.99.apk
       - name: انتشارِ APK روی Release (ci-apk)
         if: success()
         env:
@@ -66,7 +73,7 @@ jobs:
           set -e
           gh release view ci-apk >/dev/null 2>&1 || \
             gh release create ci-apk --title "CI APK" --notes "آخرین فایل نصبی debug نهم." || true
-          gh release upload ci-apk dist/hamyar-1.98.apk --clobber
+          gh release upload ci-apk dist/hamyar-1.99.apk --clobber
           gh release view ci-apk
       - name: آپلود در باکت ایرانی آروان (پوشه apk و ریشه)
         if: success()
@@ -75,7 +82,7 @@ jobs:
         env:
           ARVAN_ACCESS_KEY: ${{ secrets.ARVAN_ACCESS_KEY }}
           ARVAN_SECRET_KEY: ${{ secrets.ARVAN_SECRET_KEY }}
-          ASSET: "hamyar-1.98.apk"
+          ASSET: "hamyar-1.99.apk"
         run: |
           if [ -z "${ARVAN_ACCESS_KEY:-}" ] || [ -z "${ARVAN_SECRET_KEY:-}" ]; then
             echo "Arvan keys not configured in secrets, skipping S3 upload."
@@ -145,21 +152,22 @@ jobs:
 
           # تنظیمات آپدیت اجباری با لینک مستقیم سرور ایرانی آروان
           payload = {
-              'latest': 99,
-              'name': '1.98',
-              'min': 99,
-              'url': 'https://hamyar-e-man.s3.ir-thr-at1.arvanstorage.ir/apk/hamyar-1.98.apk',
-              'size': 55000000,
+              'latest': 100,
+              'name': '1.99',
+              'min': 100,
+              'url': 'https://hamyar-e-man.s3.ir-thr-at1.arvanstorage.ir/apk/hamyar-1.99.apk',
+              'size': 56000000,
               'sha256': '',
               'chan': 'stable',
               'rollout': 100,
               'notes': [
-                  'نمایش تمام‌صفحه و مخفی‌سازی سربرگ در تمام صفحات HTML و ابزارها',
-                  'کوچک‌تر شدن ۲۰ درصدی کاشی‌های سلامتی، آموزشگاه، کسب آگاهی و ذهن‌آگاهی با کادر فیکس و فونت تطبیقی',
-                  'تطبیق کامل ۱۰ دسته‌بندی آموزشگاه با ۳۴ فایل تعاملی HTML و حذف متفرقه و هوش مصنوعی',
-                  'نوسازی گرافیکی فضای امن من با قفل بیومتریک/PIN، ۴ دفترچه سینک‌شونده و آلبوم امن آفلاین با بکاپ/بازگردانی',
-                  'چرخش ۱۸۰ درجه تصویر دفترچه جزوه‌ها، حذف خط قرمز و فونت ۳ سایز بزرگتر و بولد',
-                  'مدیریت دانلود محتوا و به‌روزرسانی بخش تنظیمات، درباره ما و تماس با ما',
+                  'سازماندهی کامل کتاب‌های درسی پایه‌های نهم و ششم طبق راهنمای رسمی کتاب‌ها',
+                  'حذف و فیلتر کامل صفحات حاشیه‌ای و غیردرسی از فهرست کتاب‌ها',
+                  'اتصال مستقیم ۵۸۲ فایل کتاب درسی با آدرس‌دهی دوگانه سرور ایرانی (آروان) و خارجی (آپ‌رایت)',
+                  'به‌روزرسانی بخش دانلودها و تغییر عنوان به «کتاب درسی»',
+                  'سوال خودشناسی روزانه ۵۰ تایی با استایل دفترچه در انتهای صفحه ذهن‌آگاهی و همگام‌سازی ابری',
+                  'دفترچه شکرگزاری بدون قفل در هاب ذهن‌آگاهی و تفکیک فضای امن با قفل بیومتریک/PIN',
+                  'لود آفلاین و بدون نقص آزمایشگاه‌های سه‌گانه و جعبه‌ابزارها در حالت تمام‌صفحه',
               ],
           }
 
@@ -189,7 +197,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: hamyar-1.98-debug
-          path: dist/hamyar-1.98.apk
+          name: hamyar-1.99-debug
+          path: dist/hamyar-1.99.apk
           if-no-files-found: error
           retention-days: 3

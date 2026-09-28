@@ -32,8 +32,8 @@ android {
         applicationId = "com.hamyareman.ir"   // Platform ثبت‌شده در کنسول Appwrite
         minSdk = 26
         targetSdk = 36
-        versionCode = 99
-        versionName = "1.98"
+        versionCode = 100
+        versionName = "1.99"
         ndk {
             // فقط معماری‌های واقعیِ گوشی. x86/x86_64 (شبیه‌ساز) عمداً حذف‌اند:
             // کتابخانه‌ی بومیِ WebRTC برای هر معماری ~۶ تا ۱۲ مگابایت است و هر دو
