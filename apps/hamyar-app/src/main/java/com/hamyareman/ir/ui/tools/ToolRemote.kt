@@ -88,17 +88,37 @@ object ToolRemote {
      * @return مسیر محلی (متن ساده) یا null
      */
     fun ensure(ctx: Context, toolId: String): String? {
+        ContentCatalog.load(ctx)
         cachedPath(ctx, toolId)?.let { return it }
-        val id = fileId(toolId)
-        val key = ContentCatalog.keyFor(id)
-        val dest = cacheFile(ctx, toolId)
-        val part = File(dest.absolutePath + ".part")
 
-        val first = ServerResolver.pick(id, key)
-        var ok = download(first, part)
-        if (!ok && ServerPrefs.mode == ServerPrefs.Mode.FASTEST) {
-            val alt = ServerResolver.external(id)
-            if (alt != first) ok = download(alt, part)
+        val id = fileId(toolId)
+        val dest = cacheFile(ctx, toolId)
+
+        // ۱. بررسی حافظه کش مشترک ContentDownloadStore
+        val cachedHtml = com.hamyareman.ir.ui.content.ContentDownloadStore.getCachedHtml(ctx, id)
+        if (cachedHtml != null && cachedHtml.length > 64) {
+            runCatching {
+                dest.writeText(cachedHtml, Charsets.UTF_8)
+                return dest.absolutePath
+            }
+        }
+
+        // ۲. تلاش برای دانلود از سرور ایرانی (پوشه‌بندی) و سرور خارجی
+        val key = ContentCatalog.keyFor(id)
+        val candidates = listOf(
+            if (key != null) ServerResolver.internal(key) else "",
+            ServerResolver.pick(id, key),
+            ServerResolver.external(id),
+            if (key != null) "${ServerResolver.ARVAN_PUBLIC}/$key" else "",
+        ).filter { it.isNotBlank() }.distinct()
+
+        val part = File(dest.absolutePath + ".part")
+        var ok = false
+        for (url in candidates) {
+            if (download(url, part)) {
+                ok = true
+                break
+            }
         }
 
         if (!ok) {
@@ -109,19 +129,19 @@ object ToolRemote {
         // باز کردن HMK1 ← کش همیشه متن ساده است
         val plain = runCatching {
             val raw = part.readBytes()
-            HtmlCodec.unwrap(ctx, raw)
+            if (HtmlCodec.isWrapped(raw)) HtmlCodec.unwrap(ctx, raw) else raw
         }.getOrElse {
             part.delete()
             dest.delete()
             return null
         }
-        runCatching { part.writeBytes(plain) }.getOrElse {
+        runCatching {
+            dest.writeBytes(plain)
             part.delete()
-            return null
-        }
-        if (!part.renameTo(dest)) {
+            // ذخیره همزمان در کش کاتالوگ محتوا
+            com.hamyareman.ir.ui.content.ContentDownloadStore.saveHtml(ctx, id, String(plain, Charsets.UTF_8))
+        }.getOrElse {
             part.delete()
-            dest.delete()
             return null
         }
         return dest.absolutePath

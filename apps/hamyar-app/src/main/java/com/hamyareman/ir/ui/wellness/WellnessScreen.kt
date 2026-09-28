@@ -80,7 +80,7 @@ fun WellnessScreen(
         AppTopBar(
             when (selectedCategory) {
                 WellnessMove.Category.YOGA -> "یوگا"
-                WellnessMove.Category.EXERCISE -> "ورزش عمومی"
+                WellnessMove.Category.EXERCISE -> "حرکات ورزشی"
                 WellnessMove.Category.BREATHING -> "تنفس آرام‌بخش"
                 WellnessMove.Category.LEARNING -> "تمرینات تمرکز و یادگیری"
             },

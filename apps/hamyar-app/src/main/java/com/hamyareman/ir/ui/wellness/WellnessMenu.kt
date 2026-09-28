@@ -303,9 +303,12 @@ object WellnessMenu {
             ),
         ),
         g(
-            "mf-journal", "📓", "روزنوشت آزاد و شکرگزاری", "دفترچه‌ی خصوصی رمزشده روی همین گوشی",
+            "mf-journal", "📓", "دفترچه‌های من", "یادداشت‌های خصوصی، دل‌نوشت، رونوشت آزاد و شکرگزاری",
             items = listOf(
-                i("jo-free", "✍️", "دفترچه‌ی من", "حرف‌های بلندتر؛ فقط برای خودت", route = Screen.Journal.route),
+                i("jo-free", "✍️", "دفترچه‌ی من", "یادداشت‌های مهم و روزانه", route = Screen.SafeSpace.route),
+                i("jo-del", "💌", "دل‌نوشت", "حرف‌های دل و احساسات", route = Screen.SafeSpace.route),
+                i("jo-roonevesht", "📜", "رونوشت آزاد", "نوشتن آزاد بدون قید و بند", route = Screen.SafeSpace.route),
+                i("jo-shokr", "🙏", "شکرگزاری", "ثبت نعمت‌ها و حس خوب امروز", route = Screen.SafeSpace.route),
             ),
         ),
         g(
