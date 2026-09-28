@@ -428,10 +428,11 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
             if (!remoteTried && teachHtml.isBlank()) {
                 HtmlPercentLoader(35)
             } else if (teachHtml.isNotBlank()) {
+                val processedTeachHtml = remember(teachHtml) { HamyarHtmlSupport.preprocessHtml(teachHtml) }
                 AndroidView(
                     factory = { c ->
                         WebView(c).apply {
-                            webViewClient = WebViewClient()
+                            webViewClient = HamyarHtmlSupport.createWebViewClient()
                             settings.javaScriptEnabled = true
                             settings.domStorageEnabled = true
                             settings.loadWithOverviewMode = false
@@ -439,6 +440,7 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
                             settings.setSupportZoom(true)
                             settings.builtInZoomControls = true
                             settings.displayZoomControls = false
+                            settings.mediaPlaybackRequiresUserGesture = false
                             setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
                             addJavascriptInterface(TeachHtmlBridge(), "HamyarPlayer")
                             setBackgroundColor(android.graphics.Color.WHITE)
@@ -449,12 +451,12 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
                         }
                     },
                     update = { wv ->
-                        val tag = teachHtml.hashCode()
+                        val tag = processedTeachHtml.hashCode()
                         if (wv.tag != tag) {
                             wv.tag = tag
                             wv.loadDataWithBaseURL(
                                 "https://local.hamyar/",
-                                teachHtml,
+                                processedTeachHtml,
                                 "text/html",
                                 "utf-8",
                                 null,

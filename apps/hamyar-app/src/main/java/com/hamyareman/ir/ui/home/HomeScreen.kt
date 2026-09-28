@@ -220,24 +220,17 @@ fun HomeScreen(nav: NavController) {
                 Modifier.fillMaxWidth().padding(horizontal = HomeSide),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                ToolTile("🧰", "جعبه‌ابزار عمومی", Modifier.weight(1f)) { nav.navigate(Screen.GeneralToolkit.route) }
                 ToolTile("⚗️", "آزمایشگاه شیمی", Modifier.weight(1f)) { nav.navigate(Screen.ChemistryLab.route) }
                 ToolTile("🔬", "آزمایشگاه فیزیک", Modifier.weight(1f)) { nav.navigate(Screen.PhysicsLab.route) }
+                ToolTile("🧬", "آزمایشگاه زیست", Modifier.weight(1f)) { nav.navigate(Screen.BiologyLab.route) }
             }
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = HomeSide),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
+                ToolTile("🧰", "جعبه‌ابزار عمومی", Modifier.weight(1f)) { nav.navigate(Screen.GeneralToolkit.route) }
                 ToolTile("🧮", "جعبه‌ابزار ریاضی", Modifier.weight(1f)) { nav.navigate(Screen.MathToolkit.route) }
-                ToolTile("🧬", "آزمایشگاه زیست‌شناسی", Modifier.weight(1f)) { nav.navigate(Screen.BiologyLab.route) }
             }
-
-            HubCard(
-                "📚", "محتوای همیار",
-                "آموزشگاه، یوگا، حرکات ورزشی و تنفس — منوی هر دسته",
-                Modifier.padding(horizontal = HomeSide),
-                slotId = "page.home.tile",
-            ) { nav.navigate(Screen.ContentHub.route) }
 
             Text(
                 "امروز",

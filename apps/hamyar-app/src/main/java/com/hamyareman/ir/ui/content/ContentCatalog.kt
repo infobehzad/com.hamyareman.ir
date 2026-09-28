@@ -87,8 +87,16 @@ object ContentCatalog {
 
     fun item(id: String): ContentItem? = itemsById[id]
 
-    /** نگاشت شناسهٔ Appwrite ← کلید آروان (برای ابزارها/آزمایشگاه‌ها هم). */
-    fun keyFor(fileId: String): String? = itemsById[fileId]?.key
+    /** نگاشت شناسهٔ Appwrite ← کلید آروان (برای ابزارها/آزمایشگاه‌ها و موسیقی پس‌زمینه هم). */
+    fun keyFor(fileId: String): String? {
+        if (fileId.equals("Background-music.html", ignoreCase = true) ||
+            fileId.equals("Background_music.html", ignoreCase = true) ||
+            fileId.equals("background-music.html", ignoreCase = true)
+        ) {
+            return itemsById[fileId]?.key ?: "Background-music.html"
+        }
+        return itemsById[fileId]?.key
+    }
 
     /** یک کلید HTML کوچک‌تر برای کاوش — نخستین آیتم HTML. */
     fun sampleHtmlKey(): String? =

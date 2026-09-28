@@ -52,6 +52,7 @@ import com.hamyareman.ir.LocalAppContainer
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 import com.hamyareman.ir.ui.AppTypography
 import com.hamyareman.ir.ui.profile.StudentProfileState
+import com.hamyareman.ir.ui.study.HamyarHtmlSupport
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
@@ -158,7 +159,7 @@ fun PhysicsLabScreen(onBack: () -> Unit) = ToolWebScreen("physics", "آزمای�
 fun ChemistryLabScreen(onBack: () -> Unit) = ToolWebScreen("chemistry", "آزمایشگاه شیمی", onBack)
 
 @Composable
-fun BiologyLabScreen(onBack: () -> Unit) = ToolWebScreen("biology", "آزمایشگاه زیست‌شناسی", onBack)
+fun BiologyLabScreen(onBack: () -> Unit) = ToolWebScreen("biology", "آزمایشگاه زیست", onBack)
 
 internal fun toolTitle(id: String): String = when (id) {
     "calendar" -> "تقویم"
@@ -166,7 +167,7 @@ internal fun toolTitle(id: String): String = when (id) {
     "converter" -> "مبدل"
     "physics" -> "آزمایشگاه فیزیک"
     "chemistry" -> "آزمایشگاه شیمی"
-    "biology" -> "آزمایشگاه زیست‌شناسی"
+    "biology" -> "آزمایشگاه زیست"
     "ti_nspire" -> "TI-Nspire CX II-T CAS"
     "casio991" -> "CASIO fx-991CW"
     else -> "ابزار"
@@ -249,6 +250,7 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
                             settings.domStorageEnabled = true
                             settings.allowFileAccess = true
                             settings.allowContentAccess = true
+                            settings.mediaPlaybackRequiresUserGesture = false
                             @Suppress("DEPRECATION")
                             run {
                                 settings.allowFileAccessFromFileURLs = true
@@ -264,6 +266,11 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
                             }
                             webViewClient = object : WebViewClient() {
                                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest) = false
+                                override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): android.webkit.WebResourceResponse? {
+                                    val intercepted = HamyarHtmlSupport.interceptRequest(request)
+                                    if (intercepted != null) return intercepted
+                                    return super.shouldInterceptRequest(view, request)
+                                }
                                 override fun onPageFinished(view: WebView, url: String) {
                                     view.evaluateJavascript(toolPageJs(toolId, premium), null)
                                     view.post { applyLabViewport(view) }

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.hamyareman.ir.platform.core.designsystem.AppTopBar
 import com.hamyareman.ir.ui.profile.StudentProfileState
+import com.hamyareman.ir.ui.study.HamyarHtmlSupport
 import com.hamyareman.ir.ui.study.HtmlCodec
 import com.hamyareman.ir.ui.study.SecureWebEffect
 import com.hamyareman.ir.ui.study.ServerResolver
@@ -169,21 +170,21 @@ fun ContentHtmlScreen(itemId: String, onBack: () -> Unit) {
                 CircularProgressIndicator()
             }
             else -> key(html) {
+                val processedHtml = remember(html) { html?.let { HamyarHtmlSupport.preprocessHtml(it) } ?: "" }
                 AndroidView(
                     factory = { c ->
                         WebView(c).apply {
-                            settings.javaScriptEnabled = true
-                            settings.domStorageEnabled = true
-                            settings.setSupportZoom(true)
-                            settings.builtInZoomControls = true
-                            settings.displayZoomControls = false
-                            settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
-                            settings.useWideViewPort = true
-                            settings.loadWithOverviewMode = true
+                            HamyarHtmlSupport.applySettings(settings)
+                            webViewClient = HamyarHtmlSupport.createWebViewClient()
                             loadDataWithBaseURL(
-                                "https://local.hamyar/", html!!, "text/html", "utf-8", null,
+                                "https://local.hamyar/", processedHtml, "text/html", "utf-8", null,
                             )
                         }
+                    },
+                    update = { wv ->
+                        wv.loadDataWithBaseURL(
+                            "https://local.hamyar/", processedHtml, "text/html", "utf-8", null,
+                        )
                     },
                     modifier = Modifier.fillMaxSize(),
                 )
