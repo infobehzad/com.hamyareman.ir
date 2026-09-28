@@ -181,19 +181,19 @@ private fun downloadPdfBlocking(ctx: android.content.Context, fileId: String, on
 }
 
 @Composable
-fun DownloadsScreen(onBack: () -> Unit) {
+fun DownloadsScreen(onBack: () -> Unit, onOpenContentDownloads: (() -> Unit)? = null) {
     // v1.18: فونت همه‌ی متن‌های این صفحه ۱٫۵ برابر (فقط متن — چیدمان ثابت می‌ماند).
     val baseDensity = androidx.compose.ui.platform.LocalDensity.current
     androidx.compose.runtime.CompositionLocalProvider(
         androidx.compose.ui.platform.LocalDensity provides
             androidx.compose.ui.unit.Density(baseDensity.density, baseDensity.fontScale * 1.5f),
     ) {
-        DownloadsScreenInner(onBack)
+        DownloadsScreenInner(onBack, onOpenContentDownloads)
     }
 }
 
 @Composable
-private fun DownloadsScreenInner(onBack: () -> Unit) {
+private fun DownloadsScreenInner(onBack: () -> Unit, onOpenContentDownloads: (() -> Unit)? = null) {
     val ctx = LocalContext.current
     val store = remember { LocalStore(ctx, "hamyar_downloads") }
     // v1.19: آکاردئون کتاب‌ها — فقط یک کتاب باز؛ حافظه‌دار
@@ -281,6 +281,16 @@ private fun DownloadsScreenInner(onBack: () -> Unit) {
 
     AppTopBar("مدیریت دانلود کتاب‌ها", onBack)
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(12.dp)) {
+        if (onOpenContentDownloads != null) {
+            item {
+                OutlinedButton(
+                    onClick = onOpenContentDownloads,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                ) {
+                    Text("📄 مدیریت دانلود محتوا و HTMLها (یوگا، ورزش، آموزشگاه)")
+                }
+            }
+        }
         item {
             MediaUpdateCard(
                 check = mediaCheck,

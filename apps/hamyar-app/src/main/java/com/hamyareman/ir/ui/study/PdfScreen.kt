@@ -48,6 +48,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.sp
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -955,13 +957,12 @@ fun PdfUploadScreen(onBack: () -> Unit) {
 }
 
 /**
- * دفتر نکات (دفتر ۸خطِ وکتور با قاب) — فونت بدخط و اندازه‌ی همسان با خط‌ها.
+ * دفتر نکات (دفتر ۸خطِ وکتور با قاب) — چرخش ۱۸۰ درجه پس‌زمینه و فونت بزرگتر و بولد.
  */
 @Composable
-private fun LinedNotesPaper(value: String, onValueChange: (String) -> Unit) {
+fun LinedNotesPaper(value: String, onValueChange: (String) -> Unit) {
     val density = LocalDensity.current
-    // ۸ خطِ دفتر در ۲۳۶dp ⇒ گامِ هر خط ۲۴sp (فونت ۱۶sp روی همان گام می‌نشیند).
-    val lineSp = with(density) { 24.dp.toSp() }
+    val lineSp = with(density) { 26.dp.toSp() }
     Box(
         Modifier
             .fillMaxWidth()
@@ -972,7 +973,9 @@ private fun LinedNotesPaper(value: String, onValueChange: (String) -> Unit) {
         Image(
             painter = painterResource(R.drawable.notes_lined_paper),
             contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer(rotationZ = 180f),
             contentScale = ContentScale.FillBounds)
         BasicTextField(
             value = value,
@@ -981,6 +984,8 @@ private fun LinedNotesPaper(value: String, onValueChange: (String) -> Unit) {
                 onValueChange(lines.take(8).joinToString("\n"))
             },
             textStyle = TextStyle(
+                fontSize = 19.sp,
+                fontWeight = FontWeight.Bold,
                 lineHeight = lineSp,
                 color = Color(0xFF1E3A5F),
                 textAlign = TextAlign.Right,
@@ -1307,7 +1312,7 @@ private fun GalleryThumb(item: NoteFile) {
  * انتخاب عنوانِ نکته: چند عنوانِ آماده + گزینهٔ آخر برای ساختِ عنوانِ جدید.
  */
 @Composable
-private fun NoteTitlePicker(
+fun NoteTitlePicker(
     titles: List<String>,
     selected: String,
     onSelect: (String) -> Unit,
@@ -1322,12 +1327,14 @@ private fun NoteTitlePicker(
                 Text(
                     selected.ifBlank { "انتخاب عنوان نکته" },
                     modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Right)
+                    textAlign = TextAlign.Right,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp)
             }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                 titles.forEach { t ->
                     DropdownMenuItem(
-                        text = { Text(t, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Right) },
+                        text = { Text(t, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Right, fontWeight = FontWeight.Bold, fontSize = 15.sp) },
                         onClick = { onSelect(t); menu = false })
                 }
                 DropdownMenuItem(
@@ -1336,7 +1343,8 @@ private fun NoteTitlePicker(
                             "＋ افزودن عنوان جدید…",
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Right,
-                            fontWeight = FontWeight.Bold)
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp)
                     },
                     onClick = { menu = false; adding = true })
             }
@@ -1345,10 +1353,10 @@ private fun NoteTitlePicker(
             OutlinedTextField(
                 value = draft,
                 onValueChange = { draft = it },
-                label = { Text("عنوان جدید") },
+                label = { Text("عنوان جدید", fontWeight = FontWeight.Bold) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                textStyle = androidx.compose.ui.text.TextStyle(textAlign = TextAlign.Right))
+                textStyle = androidx.compose.ui.text.TextStyle(textAlign = TextAlign.Right, fontWeight = FontWeight.Bold, fontSize = 16.sp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(
                     onClick = { adding = false; draft = "" },
@@ -1360,7 +1368,7 @@ private fun NoteTitlePicker(
                         adding = false
                         draft = ""
                     },
-                    modifier = Modifier.weight(1f)) { Text("افزودن") }
+                    modifier = Modifier.weight(1f)) { Text("افزودن", fontWeight = FontWeight.Bold) }
             }
         }
     }

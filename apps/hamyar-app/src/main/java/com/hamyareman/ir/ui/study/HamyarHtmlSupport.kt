@@ -70,7 +70,7 @@ object HamyarHtmlSupport {
     }
 
     /**
-     * تنظیمات بهینه وب‌ویو: اجرای JS، استوریج محلی، زوم، دسترسی فایل و پخش خودکار صدا.
+     * تنظیمات بهینه وب‌ویو: اجرای JS، استوریج محلی، زوم، دسترسی فایل و انکودینگ UTF-8.
      */
     @SuppressLint("SetJavaScriptEnabled")
     fun applySettings(settings: WebSettings) {
@@ -78,7 +78,6 @@ object HamyarHtmlSupport {
         settings.domStorageEnabled = true
         settings.allowFileAccess = true
         settings.allowContentAccess = true
-        settings.mediaPlaybackRequiresUserGesture = false
         settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
         settings.setSupportZoom(true)
         settings.builtInZoomControls = true
@@ -257,16 +256,32 @@ object HamyarHtmlSupport {
     ): WebViewClient {
         return object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-                val url = request.url ?: return false
-                val last = runCatching { URLDecoder.decode(url.lastPathSegment.orEmpty(), "UTF-8") }.getOrDefault(url.lastPathSegment.orEmpty())
-                if (last.endsWith(".html", ignoreCase = true) || last.endsWith(".htm", ignoreCase = true)) {
+                val uri = request.url ?: return false
+                val urlStr = uri.toString()
+                val last = runCatching { URLDecoder.decode(uri.lastPathSegment.orEmpty(), "UTF-8") }.getOrDefault(uri.lastPathSegment.orEmpty())
+
+                // ناوبری بین صفحات HTML (دکمه‌های بعدی و قبلی)
+                if (last.endsWith(".html", ignoreCase = true) || last.endsWith(".htm", ignoreCase = true) || urlStr.contains(".html", ignoreCase = true)) {
                     ContentCatalog.load(context)
                     val item = ContentCatalog.findByPathOrName(last)
-                    if (item != null && onNavigateItem != null) {
-                        onNavigateItem(item)
+                    if (item != null) {
+                        if (onNavigateItem != null) {
+                            onNavigateItem(item)
+                        } else {
+                            val cached = ContentDownloadStore.getCachedHtml(context, item.id)
+                            if (cached != null) {
+                                view.loadDataWithBaseURL("https://local.hamyar/", preprocessHtml(cached), "text/html", "utf-8", null)
+                            }
+                        }
                         return true
                     }
                 }
+
+                // جلوگیری از ارسال هرگونه آدرس درون‌برنامه‌ای به مرورگر بیرونی
+                if (uri.host == "local.hamyar" || urlStr.contains("local.hamyar")) {
+                    return true
+                }
+
                 return false
             }
 

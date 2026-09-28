@@ -37,7 +37,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
 import androidx.navigation.NavController
 import com.hamyareman.ir.ui.AppTypography
@@ -67,16 +68,40 @@ fun HubCard(
     slotId: String = FontCatalog.ROLE_TILE,
     onClick: () -> Unit,
 ) {
+    val titleFontSize = remember(title) {
+        when {
+            title.length > 28 -> 11.5.sp
+            title.length > 20 -> 13.sp
+            else -> 14.5.sp
+        }
+    }
     Card(
         modifier = modifier.fillMaxWidth().clickable(onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
     ) {
-        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(emoji, style = MaterialTheme.typography.headlineMedium)
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.titleMedium, fontFamily = AppTypography.cardTitle.family, fontWeight = AppTypography.cardTitle.weight, fontSize = AppTypography.cardTitle.size)
-                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontFamily = AppTypography.cardSub.family, fontWeight = AppTypography.cardSub.weight, fontSize = AppTypography.cardSub.size)
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontFamily = AppTypography.cardTitle.family,
+                    fontWeight = AppTypography.cardTitle.weight,
+                    fontSize = titleFontSize,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontFamily = AppTypography.cardSub.family,
+                    fontWeight = AppTypography.cardSub.weight,
+                    fontSize = 11.5.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
         }
     }
@@ -127,40 +152,59 @@ fun HubCoverGrid(tiles: List<HubCoverTile>, slotId: String = "hub.practice.item"
 private fun HubCoverCard(tile: HubCoverTile, modifier: Modifier, slotId: String) {
     val ctx = LocalContext.current
     val cover = remember(tile.id) { loadPracticeCover(ctx, tile.id) }
+    val titleFontSize = remember(tile.title) {
+        when {
+            tile.title.length > 20 -> 10.5.sp
+            tile.title.length > 14 -> 12.sp
+            else -> 13.5.sp
+        }
+    }
+
     Card(modifier = modifier.clickable(onClick = tile.onClick)) {
         Column {
+            // کاشی‌ها ۲۰ درصد کوچکتر (نسبت ۱.۲۵ به جای ۱.۰)
             if (cover != null) {
                 Image(
                     bitmap = cover,
                     contentDescription = tile.title,
-                    modifier = Modifier.fillMaxWidth().aspectRatio(1f),
+                    modifier = Modifier.fillMaxWidth().aspectRatio(1.25f),
                     contentScale = ContentScale.Crop,
                 )
             } else {
                 Box(
-                    Modifier.fillMaxWidth().aspectRatio(1f),
+                    Modifier.fillMaxWidth().aspectRatio(1.25f),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(tile.title.take(1), style = MaterialTheme.typography.headlineLarge)
+                    Text(tile.title.take(1), style = MaterialTheme.typography.headlineMedium)
                 }
             }
-            Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            // کادر فیکس با فونت یک سطر عنوان و دو سطر توضیح
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(58.dp)
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.Center,
+            ) {
                 Text(
-                    tile.title,
+                    text = tile.title,
                     style = MaterialTheme.typography.titleSmall,
-                    maxLines = 2,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     fontFamily = AppTypography.cardTitle.family,
                     fontWeight = AppTypography.cardTitle.weight,
-                    fontSize = AppTypography.cardTitle.size,
+                    fontSize = titleFontSize,
                 )
                 Text(
-                    tile.subtitle,
+                    text = tile.subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontFamily = AppTypography.cardSub.family,
                     fontWeight = AppTypography.cardSub.weight,
-                    fontSize = AppTypography.cardSub.size,
+                    fontSize = 10.5.sp,
+                    lineHeight = 14.sp,
                 )
             }
         }

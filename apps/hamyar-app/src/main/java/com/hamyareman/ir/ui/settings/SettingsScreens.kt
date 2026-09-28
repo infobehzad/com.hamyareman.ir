@@ -56,43 +56,113 @@ import com.hamyareman.ir.ui.net.NetState
 import com.hamyareman.ir.ui.sync.SyncCenter
 import java.util.Locale
 
+import com.hamyareman.ir.ui.update.UpdateCheckCard
+
 @Composable
 fun SettingsScreen(nav: NavController) {
     val container = LocalAppContainer.current
+    var showAbout by remember { mutableStateOf(false) }
+    var showContact by remember { mutableStateOf(false) }
+
     Column(
         Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
         AppTopBar("تنظیمات") { nav.popBackStack() }
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             SectionCard(
-                "حریم خصوصی",
-                "چه چیزی هرگز از این دستگاه بیرون نمی‌رود.",
-            ) { nav.navigate(Screen.Privacy.route) }
+                "🎨 ظاهر و فونت",
+                "تم رنگی، قلم‌ها و اندازهٔ نوشته",
+            ) { nav.navigate(Screen.Appearance.route) }
+
             SectionCard(
-                "قفل اپ",
+                "🔒 قفل اپ",
                 if (container.lock.isEnabled()) "روشن — PIN لازم است." else "خاموش — با PIN محافظت کن.",
             ) { nav.navigate(Screen.Lock.route) }
+
             SectionCard(
-                "یادآورها و ساعات سکوت",
+                "⏰ یادآورها و ساعات سکوت",
                 "یادآورهای ملایم + بازه‌ی بی‌اعلان شبانه.",
             ) { nav.navigate(Screen.Reminders.route) }
+
             SectionCard(
-                "تنظیمات سرور",
-                "سرور محتوا (پیش‌فرض: سریع‌ترین — خارجی Appwrite — ایرانی آروان)، به‌علاوهٔ " +
-                    "حجمِ کش، صفِ ارسال، وضعیتِ اتصال و زمانِ آخرین همگام‌سازی — همگام‌سازی " +
-                    "خودکار در پس‌زمینه انجام می‌شود، بدونِ دکمه.",
+                "🌐 تنظیمات سرور",
+                "سرور محتوا (پیش‌فرض: سریع‌ترین — ایرانی آروان / خارجی Appwrite)، به‌علاوهٔ " +
+                    "حجمِ کش، وضعیتِ اتصال و زمانِ آخرین همگام‌سازی.",
             ) { nav.navigate(Screen.Sync.route) }
+
+            // بررسیِ دستیِ آپدیت برنامه
+            UpdateCheckCard()
+
             SectionCard(
-                "تم",
-                "پیش‌فرض «استیج عروسکی»؛ در حالت شب خودکار تیره می‌شود.",
-            ) { }
+                "ℹ️ درباره ما",
+                "آشنایی با اهداف، امکانات و نسخه همیار من",
+            ) { showAbout = true }
+
             SectionCard(
-                "نقش حساب",
-                "نقش از Labelهای سرور می‌آید: ${container.role.label}",
-            ) { }
+                "📞 تماس با ما",
+                "راه‌های ارتباطی، پشتیبانی و ارسال نظرات",
+            ) { showContact = true }
+
+            Text(
+                "همیار من — نسخه‌ی " + com.hamyareman.ir.BuildConfig.VERSION_NAME,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp),
+            )
         }
+    }
+
+    if (showAbout) {
+        AlertDialog(
+            onDismissRequest = { showAbout = false },
+            title = { Text("درباره ما", fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        "«همیار من» یک همراه هوشمند، آرامش‌بخش و آموزشی برای دانش‌آموزان و نوجوانان است.",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Text(
+                        "این برنامه با هدف ایجاد فضایی امن برای یادگیری، سلامت جسم و روان، برنامه‌ریزی روزانه و تمرینات مهارتی بدون نیاز به اینترنت پرسرعت طراحی شده است.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        "نسخه برنامه: ${com.hamyareman.ir.BuildConfig.VERSION_NAME}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showAbout = false }) { Text("بستن") }
+            },
+        )
+    }
+
+    if (showContact) {
+        AlertDialog(
+            onDismissRequest = { showContact = false },
+            title = { Text("تماس با ما", fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("پل‌های ارتباطی با تیم همیار من:", style = MaterialTheme.typography.bodyMedium)
+                    Text("🌐 وب‌سایت: hamyareman.ir", style = MaterialTheme.typography.bodySmall)
+                    Text("✉️ رایانامه پشتیبانی: info@hamyareman.ir", style = MaterialTheme.typography.bodySmall)
+                    Text("💬 پشتیبانی پیام‌رسان: @hamyareman_support", style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        "همواره پذیرای دیدگاه‌ها، پیشنهادات و انتقادات شما هستیم.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showContact = false }) { Text("بستن") }
+            },
+        )
     }
 }
 

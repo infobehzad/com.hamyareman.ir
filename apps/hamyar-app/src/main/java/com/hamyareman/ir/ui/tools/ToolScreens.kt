@@ -250,7 +250,6 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
                             settings.domStorageEnabled = true
                             settings.allowFileAccess = true
                             settings.allowContentAccess = true
-                            settings.mediaPlaybackRequiresUserGesture = false
                             @Suppress("DEPRECATION")
                             run {
                                 settings.allowFileAccessFromFileURLs = true

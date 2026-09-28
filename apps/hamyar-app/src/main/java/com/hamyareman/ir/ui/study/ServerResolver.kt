@@ -69,10 +69,8 @@ object ServerResolver {
         ServerPrefs.Mode.EXTERNAL -> external(fileId)
         ServerPrefs.Mode.INTERNAL -> arvanKey?.let { internal(it) } ?: external(fileId)
         ServerPrefs.Mode.FASTEST -> {
-            val inner = internalOkInMemory
-                ?: ServerPrefs.lastProbeOk
-                ?: false
-            if (inner && arvanKey != null) internal(arvanKey) else external(fileId)
+            val isKnownDead = internalOkInMemory == false || ServerPrefs.lastProbeOk == false
+            if (!isKnownDead && arvanKey != null) internal(arvanKey) else external(fileId)
         }
     }
 }

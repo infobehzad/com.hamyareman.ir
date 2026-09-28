@@ -440,7 +440,6 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
                             settings.setSupportZoom(true)
                             settings.builtInZoomControls = true
                             settings.displayZoomControls = false
-                            settings.mediaPlaybackRequiresUserGesture = false
                             setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
                             addJavascriptInterface(TeachHtmlBridge(), "HamyarPlayer")
                             setBackgroundColor(android.graphics.Color.WHITE)

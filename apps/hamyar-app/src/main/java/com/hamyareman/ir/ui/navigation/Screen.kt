@@ -95,6 +95,8 @@ sealed class Screen(val route: String) {
 
     /** مدیریت دانلود صوت/PDF کتاب‌ها (v1.14). */
     data object Downloads : Screen("study-downloads")
+    /** مدیریت دانلود محتوا و صفحات HTML تعاملی (آموزشگاه، یوگا، ورزش، تنفس، ابزارها و آزمایشگاه‌ها). */
+    data object ContentDownloads : Screen("content-downloads")
     data object HealthProgress : Screen("health-progress")
     data object Art : Screen("art")
     data object Gallery : Screen("gallery")

@@ -53,6 +53,7 @@ internal fun defaultSchoolExtra(): List<HubGroupSpec> = listOf(
         subtitle = "صوت و PDF هر کتاب — دانلود یکجا با نمایش حجم",
         items = listOf(
             HubItemSpec("📶", "مدیریت دانلود کتاب‌ها", "وضعیت دانلود صوت‌ها و PDFها به تفکیک کتاب", Screen.Downloads.route),
+            HubItemSpec("📄", "مدیریت دانلود محتوا (HTML)", "دانلود صفحات یوگا، ورزش، آموزشگاه و ابزارها برای استفاده آفلاین", Screen.ContentDownloads.route),
         ),
     ),
     HubGroupSpec(
@@ -76,26 +77,7 @@ internal fun defaultSchoolExtra(): List<HubGroupSpec> = listOf(
     ),
 )
 
-internal fun defaultAcademy(): List<HubGroupSpec> = listOf(
-    HubGroupSpec(
-        id = "ai",
-        title = "🤖 آموزش هوش مصنوعی",
-        subtitle = "مسیر پیش‌نیازدار و ارزیابی",
-        items = listOf(
-            HubItemSpec("📖", "درس‌های من", "محتوای تعاملی یادگیری، آزمون تعیین سطح و نقشه‌ی راه", Screen.Learning.route),
-            HubItemSpec("✨", "یادگیری با AI", "از پایه تا پروژه، درسِ روزانه‌شده", Screen.AiLearning.route),
-            HubItemSpec("🗺", "مسیرهای یادگیری", "فهرست مسیرها بر اساس علاقه", Screen.Roadmap.of("")),
-        ),
-    ),
-    HubGroupSpec(
-        id = "misc",
-        title = "🎨 متفرقه",
-        subtitle = "خلاقیت و آرامش",
-        items = listOf(
-            HubItemSpec("🎨", "هنر روزانه", "هر روز یک تمرین کوچک هنری", Screen.Art.route),
-        ),
-    ),
-)
+internal fun defaultAcademy(): List<HubGroupSpec> = emptyList()
 
 object GradeHubs {
     fun of(grade: GradeLevel): GradeHubSpec = when (grade) {

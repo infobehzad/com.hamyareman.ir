@@ -119,41 +119,58 @@ fun ContentCategoryScreen(cat: String, onBack: () -> Unit, onOpen: (String) -> U
 fun ContentHtmlScreen(itemId: String, onBack: () -> Unit) {
     val ctx = LocalContext.current
     SecureWebEffect()
+    var currentItemId by remember(itemId) { mutableStateOf(itemId) }
     var html by remember { mutableStateOf<String?>(null) }
     var err by remember { mutableStateOf<String?>(null) }
     remember { ContentCatalog.load(ctx) }
-    val item = remember(itemId) { ContentCatalog.item(itemId) }
+    val item = remember(currentItemId) { ContentCatalog.item(currentItemId) }
 
-    LaunchedEffect(itemId) {
+    LaunchedEffect(currentItemId) {
         val it = item
         if (it == null) {
             err = "این فایل در کاتالوگ نیست."
             return@LaunchedEffect
         }
+        err = null
+        html = null
+
+        // ۱. ابتدا بررسی حافظه کش محلی
+        val cached = ContentDownloadStore.getCachedHtml(ctx, it.id)
+        if (cached != null && cached.isNotBlank()) {
+            html = cached
+            return@LaunchedEffect
+        }
+
+        // ۲. در غیر این صورت دریافت از سرور (اول ایرانی با پوشه‌بندی، در صورت لزوم خارجی روت)
         html = withContext(Dispatchers.IO) {
             val candidates = listOf(
+                ServerResolver.internal(it.key),
                 ServerResolver.pick(it.aw, it.key),
                 ServerResolver.external(it.aw),
-                ServerResolver.internal(it.key),
+                "${ServerResolver.ARVAN_PUBLIC}/${it.key}",
             ).distinct()
             var result: String? = null
             for (u in candidates) {
                 val r = runCatching {
                     val conn = (URL(u).openConnection() as HttpURLConnection).apply {
-                        connectTimeout = 20_000
-                        readTimeout = 90_000
+                        connectTimeout = 15_000
+                        readTimeout = 45_000
                         instanceFollowRedirects = true
                     }
                     conn.connect()
                     if (conn.responseCode !in 200..299) error("HTTP ${conn.responseCode}")
                     val bytes = conn.inputStream.use { s -> s.readBytes() }
                     conn.disconnect()
-                    String(HtmlCodec.unwrap(ctx, bytes), Charsets.UTF_8)
+                    val plain = if (HtmlCodec.isWrapped(bytes)) HtmlCodec.unwrap(ctx, bytes) else bytes
+                    String(plain, Charsets.UTF_8)
                 }
                 if (r.isSuccess) {
                     result = r.getOrNull()
                     break
                 }
+            }
+            if (result != null) {
+                ContentDownloadStore.saveHtml(ctx, it.id, result)
             }
             result
         }
@@ -161,7 +178,6 @@ fun ContentHtmlScreen(itemId: String, onBack: () -> Unit) {
     }
 
     Column(Modifier.fillMaxSize()) {
-        AppTopBar(item?.title ?: "محتوا", onBack)
         when {
             err != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(err.orEmpty(), color = MaterialTheme.colorScheme.error)
@@ -169,13 +185,18 @@ fun ContentHtmlScreen(itemId: String, onBack: () -> Unit) {
             html == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-            else -> key(html) {
+            else -> key(currentItemId, html) {
                 val processedHtml = remember(html) { html?.let { HamyarHtmlSupport.preprocessHtml(it) } ?: "" }
                 AndroidView(
                     factory = { c ->
                         WebView(c).apply {
                             HamyarHtmlSupport.applySettings(settings)
-                            webViewClient = HamyarHtmlSupport.createWebViewClient(c)
+                            webViewClient = HamyarHtmlSupport.createWebViewClient(
+                                context = c,
+                                onNavigateItem = { nextItem ->
+                                    currentItemId = nextItem.id
+                                },
+                            )
                             loadDataWithBaseURL(
                                 "https://local.hamyar/", processedHtml, "text/html", "utf-8", null,
                             )

@@ -76,6 +76,7 @@ import com.hamyareman.ir.ui.study.AcademyHubScreen
 import com.hamyareman.ir.ui.study.AudiobookScreen
 import com.hamyareman.ir.ui.study.BookDetailScreen
 import com.hamyareman.ir.ui.study.DownloadsScreen
+import com.hamyareman.ir.ui.content.ContentDownloadsScreen
 import com.hamyareman.ir.ui.study.HealthProgressScreen
 import com.hamyareman.ir.ui.study.LeaveScreen
 import com.hamyareman.ir.ui.study.LessonPdfScreen
@@ -310,7 +311,18 @@ fun ZahraNavHost() {
                     packId = entry.arguments?.getString("packId").orEmpty(),
                     onBack = { nav.popBackStack() })
             }
-            composable(Screen.Downloads.route) { DownloadsScreen { nav.popBackStack() } }
+            composable(Screen.Downloads.route) {
+                DownloadsScreen(
+                    onBack = { nav.popBackStack() },
+                    onOpenContentDownloads = { nav.navigate(Screen.ContentDownloads.route) },
+                )
+            }
+            composable(Screen.ContentDownloads.route) {
+                ContentDownloadsScreen(
+                    onBack = { nav.popBackStack() },
+                    onOpenItem = { id -> nav.navigate(Screen.ContentHtml.of(id)) },
+                )
+            }
             composable(Screen.Art.route) { DailyArtPromptScreen({ nav.popBackStack() }, { nav.navigate(Screen.Gallery.route) }) }
             composable(Screen.Gallery.route) { ArtGalleryScreen { nav.popBackStack() } }
             composable(Screen.Learning.route) { LearningHomeScreen(nav) }
