@@ -118,7 +118,7 @@ fun AwarenessHubScreen(nav: NavController, onBack: () -> Unit) {
             val uid = container.auth.cachedUserId()
                 ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
             if (uid.isBlank()) return@launch
-            val client = container.clientProvider.client
+            val client = container.appwrite.client
             runCatching {
                 val db = io.appwrite.services.Databases(client)
                 val payload = JSONObject().apply {
