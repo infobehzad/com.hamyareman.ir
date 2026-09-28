@@ -32,13 +32,23 @@ jobs:
           ./gradlew :hamyar-app:assembleP09Debug --stacktrace > build_log.txt 2>&1
           CODE=$?
           if [ $CODE -ne 0 ]; then
-            echo "### خطا در ساخت بیلد" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            tail -n 120 build_log.txt >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "=== BUILD LOG TAIL ==="
+            tail -n 120 build_log.txt
             exit $CODE
           fi
           set -e
+      - name: ثبت لاگ خطا در برنچ دیباگ
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B debug-log
+          cp -f build_log.txt build_error.log || true
+          git add -f build_error.log
+          git commit -m "ci: debug log" || true
+          git push -f origin debug-log || true
       - name: نام‌گذاری APK
         run: |
           set -e
