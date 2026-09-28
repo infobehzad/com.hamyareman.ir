@@ -2,6 +2,7 @@ package com.hamyareman.ir.ui.hub
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.hamyareman.ir.LocalAppContainer
-import com.hamyareman.ir.platform.core.appwrite.AppwriteClientProvider
 import com.hamyareman.ir.platform.core.common.LocalStore
 import com.hamyareman.ir.platform.core.common.TableIds
 import com.hamyareman.ir.platform.core.designsystem.PrimaryButton
@@ -118,7 +118,7 @@ fun AwarenessHubScreen(nav: NavController, onBack: () -> Unit) {
             val uid = container.auth.cachedUserId()
                 ?: runCatching { container.auth.currentUserId() }.getOrNull().orEmpty()
             if (uid.isBlank()) return@launch
-            val client = AppwriteClientProvider.get() ?: return@launch
+            val client = container.clientProvider.client
             runCatching {
                 val db = io.appwrite.services.Databases(client)
                 val payload = JSONObject().apply {
@@ -128,8 +128,8 @@ fun AwarenessHubScreen(nav: NavController, onBack: () -> Unit) {
                     put("updatedAt", System.currentTimeMillis())
                 }.toString()
                 db.createDocument(
-                    databaseId = TableIds.MAIN_DATABASE,
-                    collectionId = TableIds.NOTEPAD,
+                    databaseId = TableIds.DATABASE,
+                    collectionId = TableIds.APP_STATE,
                     documentId = "self_$dateKey",
                     data = mapOf(
                         "userId" to uid,
