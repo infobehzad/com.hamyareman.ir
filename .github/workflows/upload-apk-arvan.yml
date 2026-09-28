@@ -6,7 +6,7 @@ on:
       asset:
         description: "نام فایل در ci-apk"
         required: true
-        default: "hamyar-1.96.apk"
+        default: "hamyar-1.98.apk"
 
 jobs:
   upload:
@@ -24,7 +24,7 @@ jobs:
           gh release download ci-apk --repo infobehzad/com.hamyareman.ir \
             --pattern "${{ inputs.asset }}" --dir dist
           test -f "dist/${{ inputs.asset }}"
-      - name: آپلود به باکت ایرانی
+      - name: آپلود به باکت ایرانی (پوشه apk و ریشه)
         env:
           ARVAN_ACCESS_KEY: ${{ secrets.ARVAN_ACCESS_KEY }}
           ARVAN_SECRET_KEY: ${{ secrets.ARVAN_SECRET_KEY }}
@@ -48,9 +48,11 @@ jobs:
                             connect_timeout=20, read_timeout=180, retries={"max_attempts": 3}),
           )
           extra = {"ContentType": "application/vnd.android.package-archive"}
-          try:
-              s3.put_object(Bucket="hamyar-e-man", Key=name, Body=data, ACL="public-read", **extra)
-          except Exception:
-              s3.put_object(Bucket="hamyar-e-man", Key=name, Body=data, **extra)
-          print("arvan ok", name, len(data))
+          for key in [f"apk/{name}", name]:
+              try:
+                  s3.put_object(Bucket="hamyar-e-man", Key=key, Body=data, ACL="public-read", **extra)
+                  print("arvan ok", key, len(data))
+              except Exception:
+                  s3.put_object(Bucket="hamyar-e-man", Key=key, Body=data, **extra)
+                  print("arvan fallback ok", key, len(data))
           PY

@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "arena/**"]
   workflow_dispatch:
 
 # یک جاب، فقط نهمِ دیباگ — بدون ادمین/R8/lint/تست تکراری تا سهمیهٔ Actions زود تمام نشود.
@@ -13,7 +13,7 @@ permissions:
 jobs:
   android:
     runs-on: ubuntu-22.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -34,8 +34,8 @@ jobs:
           src=$(echo apps/hamyar-app/build/outputs/apk/**/*.apk | awk '{print $1}')
           test -n "$src" && test -f "$src"
           mkdir -p dist
-          cp -f "$src" dist/hamyar-1.97.apk
-          ls -l dist/hamyar-1.97.apk
+          cp -f "$src" dist/hamyar-1.98.apk
+          ls -l dist/hamyar-1.98.apk
       - name: انتشارِ APK روی Release (ci-apk)
         if: success()
         env:
@@ -44,12 +44,114 @@ jobs:
           set -e
           gh release view ci-apk >/dev/null 2>&1 || \
             gh release create ci-apk --title "CI APK" --notes "آخرین فایل نصبی debug نهم." || true
-          gh release upload ci-apk dist/hamyar-1.97.apk --clobber
+          gh release upload ci-apk dist/hamyar-1.98.apk --clobber
           gh release view ci-apk
+      - name: آپلود در باکت ایرانی آروان (پوشه apk و ریشه)
+        if: success()
+        env:
+          ARVAN_ACCESS_KEY: ${{ secrets.ARVAN_ACCESS_KEY }}
+          ARVAN_SECRET_KEY: ${{ secrets.ARVAN_SECRET_KEY }}
+          ASSET: "hamyar-1.98.apk"
+        run: |
+          if [ -z "${ARVAN_ACCESS_KEY:-}" ] || [ -z "${ARVAN_SECRET_KEY:-}" ]; then
+            echo "Arvan keys not configured in secrets, skipping S3 upload."
+            exit 0
+          fi
+          pip install --quiet boto3
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import boto3
+          from botocore.config import Config
+
+          name = os.environ["ASSET"]
+          data = Path("dist", name).read_bytes()
+          s3 = boto3.client(
+              "s3",
+              aws_access_key_id=os.environ["ARVAN_ACCESS_KEY"],
+              aws_secret_access_key=os.environ["ARVAN_SECRET_KEY"],
+              endpoint_url="https://s3.ir-thr-at1.arvanstorage.ir",
+              region_name="ir-thr-at1",
+              config=Config(signature_version="s3v4", s3={"addressing_style": "path"},
+                            connect_timeout=20, read_timeout=180, retries={"max_attempts": 3}),
+          )
+          extra = {"ContentType": "application/vnd.android.package-archive"}
+          # ذخیره در پوشه apk و ریشه باکت
+          for key in [f"apk/{name}", name]:
+              try:
+                  s3.put_object(Bucket="hamyar-e-man", Key=key, Body=data, ACL="public-read", **extra)
+                  print(f"arvan s3 upload ok: {key} ({len(data)} bytes)")
+              except Exception as e:
+                  try:
+                      s3.put_object(Bucket="hamyar-e-man", Key=key, Body=data, **extra)
+                      print(f"arvan s3 upload fallback ok: {key} ({len(data)} bytes)")
+                  except Exception as ex:
+                      print(f"arvan s3 upload failed for {key}: {ex}")
+          PY
+      - name: تنظیم آپدیت اجباری از سرور ایرانی در Appwrite
+        if: success()
+        env:
+          APPWRITE_API_KEY: ${{ secrets.APPWRITE_API_KEY }}
+          APPWRITE_PROJECT_ID: ${{ secrets.APPWRITE_PROJECT_ID || '6a9d59e3002751cc3ea8' }}
+        run: |
+          if [ -z "${APPWRITE_API_KEY:-}" ]; then
+            echo "APPWRITE_API_KEY secret not found, skipping Appwrite release update."
+            exit 0
+          fi
+          python3 - <<'PY'
+          import json, os, time, urllib.request
+
+          key = os.environ['APPWRITE_API_KEY']
+          project = os.environ.get('APPWRITE_PROJECT_ID') or '6a9d59e3002751cc3ea8'
+          base = 'https://fra.cloud.appwrite.io/v1'
+
+          # تنظیمات آپدیت اجباری با لینک مستقیم سرور ایرانی آروان
+          payload = {
+              'latest': 99,
+              'name': '1.98',
+              'min': 99,
+              'url': 'https://hamyar-e-man.s3.ir-thr-at1.arvanstorage.ir/apk/hamyar-1.98.apk',
+              'size': 55000000,
+              'sha256': '',
+              'chan': 'stable',
+              'rollout': 100,
+              'notes': [
+                  'نمایش تمام‌صفحه و مخفی‌سازی سربرگ در تمام صفحات HTML و ابزارها',
+                  'کوچک‌تر شدن ۲۰ درصدی کاشی‌های سلامتی، آموزشگاه، کسب آگاهی و ذهن‌آگاهی با کادر فیکس و فونت تطبیقی',
+                  'تطبیق کامل ۱۰ دسته‌بندی آموزشگاه با ۳۴ فایل تعاملی HTML و حذف متفرقه و هوش مصنوعی',
+                  'نوسازی گرافیکی فضای امن من با قفل بیومتریک/PIN، ۴ دفترچه سینک‌شونده و آلبوم امن آفلاین با بکاپ/بازگردانی',
+                  'چرخش ۱۸۰ درجه تصویر دفترچه جزوه‌ها، حذف خط قرمز و فونت ۳ سایز بزرگتر و بولد',
+                  'مدیریت دانلود محتوا و به‌روزرسانی بخش تنظیمات، درباره ما و تماس با ما',
+              ],
+          }
+
+          body = json.dumps({
+              'data': {
+                  'userId': 'global',
+                  'key': 'app_release',
+                  'payload': json.dumps(payload, ensure_ascii=False, separators=(',', ':')),
+                  'updatedAt': int(time.time() * 1000),
+              },
+              'permissions': ['read("users")'],
+          }, ensure_ascii=False).encode()
+
+          req = urllib.request.Request(
+              f'{base}/databases/ZahraDB/collections/app_state/documents/app_release',
+              data=body, method='PATCH')
+          req.add_header('X-Appwrite-Project', project)
+          req.add_header('X-Appwrite-Key', key)
+          req.add_header('Content-Type', 'application/json')
+          try:
+              with urllib.request.urlopen(req, timeout=60) as r:
+                  print('تنظیمات آپدیت اجباری روی Appwrite با موفقیت به‌روز شد:', r.status)
+          except Exception as e:
+              print('خطا در ارتباط با Appwrite:', e)
+          print(json.dumps(payload, ensure_ascii=False, indent=2))
+          PY
       - uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: hamyar-1.97-debug
-          path: dist/hamyar-1.97.apk
+          name: hamyar-1.98-debug
+          path: dist/hamyar-1.98.apk
           if-no-files-found: error
           retention-days: 3
