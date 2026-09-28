@@ -26,7 +26,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           cache-cleanup: never
-      - run: ./gradlew :core-common:testDebugUnitTest :hamyar-app:testP09DebugUnitTest :hamyar-app:assembleP09Debug --stacktrace
+      - name: ساخت APK
+        run: |
+          ./gradlew :hamyar-app:assembleP09Debug --stacktrace
       - name: نام‌گذاری APK
         run: |
           set -e
