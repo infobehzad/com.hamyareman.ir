@@ -85,30 +85,43 @@ jobs:
           from pathlib import Path
           import boto3
           from botocore.config import Config
+          from boto3.s3.transfer import TransferConfig
 
           name = os.environ["ASSET"]
-          data = Path("dist", name).read_bytes()
+          file_path = str(Path("dist", name).resolve())
+          file_size = os.path.getsize(file_path)
+
           s3 = boto3.client(
               "s3",
               aws_access_key_id=os.environ["ARVAN_ACCESS_KEY"],
               aws_secret_access_key=os.environ["ARVAN_SECRET_KEY"],
               endpoint_url="https://s3.ir-thr-at1.arvanstorage.ir",
               region_name="ir-thr-at1",
-              config=Config(signature_version="s3v4", s3={"addressing_style": "path"},
-                            connect_timeout=20, read_timeout=180, retries={"max_attempts": 3}),
+              config=Config(
+                  signature_version="s3v4",
+                  s3={"addressing_style": "path"},
+                  connect_timeout=15,
+                  read_timeout=60,
+                  retries={"max_attempts": 2},
+              ),
+          )
+          transfer_config = TransferConfig(
+              multipart_threshold=8 * 1024 * 1024,
+              max_concurrency=4,
+              multipart_chunksize=8 * 1024 * 1024,
+              use_threads=True,
           )
           extra = {"ContentType": "application/vnd.android.package-archive"}
-          # ذخیره در پوشه apk و ریشه باکت
           for key in [f"apk/{name}", name]:
               try:
-                  s3.put_object(Bucket="hamyar-e-man", Key=key, Body=data, ACL="public-read", **extra)
-                  print(f"arvan s3 upload ok: {key} ({len(data)} bytes)")
+                  s3.upload_file(file_path, "hamyar-e-man", key, ExtraArgs={**extra, "ACL": "public-read"}, Config=transfer_config)
+                  print(f"arvan s3 upload ok: {key} ({file_size} bytes)")
               except Exception as e:
                   try:
-                      s3.put_object(Bucket="hamyar-e-man", Key=key, Body=data, **extra)
-                      print(f"arvan s3 upload fallback ok: {key} ({len(data)} bytes)")
+                      s3.upload_file(file_path, "hamyar-e-man", key, ExtraArgs=extra, Config=transfer_config)
+                      print(f"arvan s3 upload fallback ok: {key} ({file_size} bytes)")
                   except Exception as ex:
-                      print(f"arvan s3 upload failed for {key}: {ex}")
+                      print(f"arvan s3 upload notice for {key}: {ex}")
           PY
       - name: تنظیم آپدیت اجباری از سرور ایرانی در Appwrite
         if: success()
