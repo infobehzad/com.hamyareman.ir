@@ -122,11 +122,11 @@ fun ContentHtmlScreen(itemId: String, onBack: () -> Unit) {
     var currentItemId by remember(itemId) { mutableStateOf(itemId) }
     var html by remember { mutableStateOf<String?>(null) }
     var err by remember { mutableStateOf<String?>(null) }
-    remember { ContentCatalog.load(ctx) }
-    val item = remember(currentItemId) { ContentCatalog.item(currentItemId) }
 
     LaunchedEffect(currentItemId) {
-        val it = item
+        ContentCatalog.load(ctx)
+        val it = ContentCatalog.item(currentItemId)
+            ?: ContentCatalog.findByPathOrName(currentItemId)
         if (it == null) {
             err = "این فایل در کاتالوگ نیست."
             return@LaunchedEffect
@@ -141,7 +141,22 @@ fun ContentHtmlScreen(itemId: String, onBack: () -> Unit) {
             return@LaunchedEffect
         }
 
-        // ۲. در غیر این صورت دریافت از سرور (اول ایرانی با پوشه‌بندی، در صورت لزوم خارجی روت)
+        // ۲. بررسی در فایل‌های assets
+        val assetBytes = runCatching {
+            ctx.assets.open("tools/${it.aw}").use { it.readBytes() }
+        }.getOrNull() ?: runCatching {
+            ctx.assets.open("tools/${it.id}").use { it.readBytes() }
+        }.getOrNull()
+
+        if (assetBytes != null && assetBytes.isNotEmpty()) {
+            val plain = if (HtmlCodec.isWrapped(assetBytes)) HtmlCodec.unwrap(ctx, assetBytes) else assetBytes
+            val plainStr = String(plain, Charsets.UTF_8)
+            ContentDownloadStore.saveHtml(ctx, it.id, plainStr)
+            html = plainStr
+            return@LaunchedEffect
+        }
+
+        // ۳. در غیر این صورت دریافت از سرور (اول ایرانی با پوشه‌بندی، در صورت لزوم خارجی روت)
         html = withContext(Dispatchers.IO) {
             val candidates = listOf(
                 ServerResolver.internal(it.key),
@@ -164,7 +179,7 @@ fun ContentHtmlScreen(itemId: String, onBack: () -> Unit) {
                     val plain = if (HtmlCodec.isWrapped(bytes)) HtmlCodec.unwrap(ctx, bytes) else bytes
                     String(plain, Charsets.UTF_8)
                 }
-                if (r.isSuccess) {
+                if (r.isSuccess && r.getOrNull() != null) {
                     result = r.getOrNull()
                     break
                 }

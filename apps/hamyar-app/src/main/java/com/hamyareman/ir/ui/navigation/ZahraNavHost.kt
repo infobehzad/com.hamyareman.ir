@@ -255,7 +255,9 @@ fun ZahraNavHost() {
                     title = com.hamyareman.ir.ui.tools.toolTitle(id),
                     onBack = { nav.popBackStack() })
             }
-            composable(Screen.Journal.route) { SafeSpaceScreen(nav) }
+            composable(Screen.Journal.route) {
+                com.hamyareman.ir.ui.safespace.GratitudeJournalScreen { nav.popBackStack() }
+            }
             composable(Screen.Breath.route) { BreathingScreen { nav.popBackStack() } }
             composable(Screen.Routine.route) { RoutineScreen { nav.popBackStack() } }
             composable(Screen.SafeSpace.route) { SafeSpaceScreen(nav) }

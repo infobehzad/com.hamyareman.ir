@@ -39,6 +39,7 @@ fun PracticeHubScreen(
     accKey: String = "",
     onBack: (() -> Unit)? = null,
     extraTop: @Composable () -> Unit = {},
+    extraBottom: @Composable () -> Unit = {},
 ) {
     val groups = remember(rootIds) { WellnessMenu.groupsOf(rootIds) }
     HubBody {
@@ -54,6 +55,7 @@ fun PracticeHubScreen(
                 )
             },
         )
+        extraBottom()
     }
 }
 

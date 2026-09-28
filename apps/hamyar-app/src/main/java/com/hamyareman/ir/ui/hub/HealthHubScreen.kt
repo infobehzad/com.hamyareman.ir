@@ -32,8 +32,9 @@ fun HealthHubScreen(nav: NavController) {
         if (girl) {
             add(HubCoverTile("hl-period", "چرخه ماهانه", "تقویم، علائم، تنفس درد و تمرین ملایم", { nav.hubTo(Screen.PracticeGroup.of("hl-cycle")) }))
         }
-        add(HubCoverTile("hl-yoga", "یوگا", "حرکات با راهنمای صوتی و تایمر", { nav.hubTo(Screen.Wellness.of("yoga")) }))
-        add(HubCoverTile("hl-exercise", "حرکات ورزشی", "کشش و تقویت ملایم", { nav.hubTo(Screen.Wellness.of("exercise")) }))
+        add(HubCoverTile("hl-yoga", "یوگا", "۱۵ حرکت تعاملی یوگا با راهنمای تصویری", { nav.hubTo(Screen.PracticeGroup.of("hl-yoga")) }))
+        add(HubCoverTile("hl-exercise", "حرکات ورزشی", "۱۵ تمرین کششی و تقویتی با تایمر", { nav.hubTo(Screen.Wellness.of("exercise")) }))
+        add(HubCoverTile("cl-breath", "تمرینات تنفسی", "۸ تمرین تنفس آرام‌بخش و تمرکز", { nav.hubTo(Screen.PracticeGroup.of("cl-breath")) }))
         add(HubCoverTile("hl-food", "آب و تغذیه", "یادآور آب و راهنمای تمرکز", { nav.hubTo(Screen.PracticeGroup.of("hl-nutrition")) }))
         add(HubCoverTile("hl-sleep", "خواب", "ثبت، قصه، بشنو و بخواب، تنفس شب", { nav.hubTo(Screen.PracticeGroup.of("hl-sleep")) }))
         add(HubCoverTile("hl-meds", "یادآور دارو و مراقبت", "هشدار سرِ وقت", { nav.hubTo(Screen.Meds.route) }))

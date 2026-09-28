@@ -235,15 +235,13 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
         if (uid.isNotBlank()) runCatching { ToolSaveStore.pull(ctx, container.tables, uid) }
         applySaved(webRef[0])
     }
-    Column(Modifier.fillMaxSize()) {
-        if (!hideChrome) AppTopBar(title, onBack)
-        Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-            when {
-                pageUrl == null && loadErr != null -> Text(loadErr.orEmpty(), color = MaterialTheme.colorScheme.error)
-                pageUrl == null -> CircularProgressIndicator()
-                else -> {
-                    val url = pageUrl.orEmpty()
-                    AndroidView(
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        when {
+            pageUrl == null && loadErr != null -> Text(loadErr.orEmpty(), color = MaterialTheme.colorScheme.error)
+            pageUrl == null -> CircularProgressIndicator()
+            else -> {
+                val url = pageUrl.orEmpty()
+                AndroidView(
                     factory = { c ->
                         WebView(c).apply {
                             settings.javaScriptEnabled = true
@@ -286,7 +284,6 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
                         webRef[0]?.let { applyLabViewport(it) }
                     },
                     onRelease = { webRef[0] = null; it.destroy() })
-                }
             }
         }
     }

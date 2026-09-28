@@ -244,7 +244,6 @@ private fun SafeSpaceContent(nav: NavController) {
         "💖 دل‌نوشت",
         "📔 دفترچه من",
         "📝 رونوشت آزاد",
-        "🙏 شکرگزاری",
         "🖼️ آلبوم شخصی",
         "🚨 شماره‌های کمک",
     )
@@ -276,15 +275,25 @@ private fun SafeSpaceContent(nav: NavController) {
             0 -> SafeNotebookTab(categoryKey = "delnevesht", tabTitle = "دل‌نوشت")
             1 -> SafeNotebookTab(categoryKey = "daftarche", tabTitle = "دفترچه من")
             2 -> SafeNotebookTab(categoryKey = "ronevesht", tabTitle = "رونوشت آزاد")
-            3 -> SafeNotebookTab(categoryKey = "shokrgozari", tabTitle = "شکرگزاری")
-            4 -> SafeVaultGalleryTab()
-            5 -> SafeHelplinesTab()
+            3 -> SafeVaultGalleryTab()
+            4 -> SafeHelplinesTab()
         }
     }
 }
 
 /**
- * تب دفترچه یادداشت گرافیکی برای ۴ بخش نوشتاری (با تصویر دفترچه روتیت‌شده ۱۸۰ درجه، فونت بزرگتر و بولد و قابلیت همگام‌سازی).
+ * دفترچه شکرگزاری اختصاصی (بدون قفل) برای دسترسی روان و آرامش‌بخش از هاب ذهن‌آگاهی.
+ */
+@Composable
+fun GratitudeJournalScreen(onBack: () -> Unit) {
+    Column(Modifier.fillMaxSize()) {
+        AppTopBar("دفترچه شکرگزاری 🙏", onBack)
+        SafeNotebookTab(categoryKey = "shokrgozari", tabTitle = "شکرگزاری")
+    }
+}
+
+/**
+ * تب دفترچه یادداشت گرافیکی برای بخش‌های نوشتاری (با تصویر دفترچه روتیت‌شده ۱۸۰ درجه، فونت بزرگتر و بولد و قابلیت همگام‌سازی).
  */
 @Composable
 private fun SafeNotebookTab(categoryKey: String, tabTitle: String) {

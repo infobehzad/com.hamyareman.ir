@@ -303,12 +303,9 @@ object WellnessMenu {
             ),
         ),
         g(
-            "mf-journal", "📓", "دفترچه‌های من", "یادداشت‌های خصوصی، دل‌نوشت، رونوشت آزاد و شکرگزاری",
+            "mf-journal", "📓", "دفترچه‌های من", "ثبت شکرگزاری روزانه و قدردانی از نعمت‌ها",
             items = listOf(
-                i("jo-free", "✍️", "دفترچه‌ی من", "یادداشت‌های مهم و روزانه", route = Screen.SafeSpace.route),
-                i("jo-del", "💌", "دل‌نوشت", "حرف‌های دل و احساسات", route = Screen.SafeSpace.route),
-                i("jo-roonevesht", "📜", "رونوشت آزاد", "نوشتن آزاد بدون قید و بند", route = Screen.SafeSpace.route),
-                i("jo-shokr", "🙏", "شکرگزاری", "ثبت نعمت‌ها و حس خوب امروز", route = Screen.SafeSpace.route),
+                i("jo-shokr", "🙏", "دفترچه شکرگزاری", "ثبت روزانه نعمت‌ها و حس خوب امروز", route = Screen.Journal.route),
             ),
         ),
         g(
@@ -338,14 +335,40 @@ object WellnessMenu {
             ),
         ),
 
-        // ---- کسب آرامش ----
+        // ---- کسب آرامش و تنفس ----
         g(
-            "cl-breath", "🌬️", "تنفس آرام‌بخش", "۴-۷-۸، جعبه‌ای، نادی، شیر",
+            "cl-breath", "🌬️", "تمرینات تنفسی", "تنفس شکمی، ۴-۷-۸، نادی، شیر و آرامش پیش از خواب و امتحان",
             items = listOf(
-                i("br-478", "8️⃣", "تنفس ۴-۷-۸", "دم ۴، نگه ۷، بازدم ۸", slug = "breath-4-7-8"),
-                i("br-box", "⬛", "تنفس جعبه‌ای", "۴-۴-۴-۴", slug = "breath-box"),
-                i("br-nadi", "👃", "تنفس بینی متناوب", "Nadi Shodhana", slug = "breath-nadi"),
-                i("br-lion", "🦁", "تنفس شیر", "رهاسازی فک و تنش", slug = "breath-lion"),
+                i("bre-06", "🫧", "تنفس شکمی", "دم عمیق شکمی برای آرامش فوری", route = Screen.ContentHtml.of("bre-06")),
+                i("bre-01", "🌸", "تنفس آرام قاعدگی", "کاهش دردهای عضلانی و کرامپ", route = Screen.ContentHtml.of("bre-01")),
+                i("bre-02", "🌙", "تنفس پیش از خواب", "آرام‌سازی ذهن برای خواب عمیق", route = Screen.ContentHtml.of("bre-02")),
+                i("bre-03", "👃", "تنفس بینی متناوب", "تعادل دو نیمکره مغز و تمرکز", route = Screen.ContentHtml.of("bre-03")),
+                i("bre-04", "🌬️", "تنفس راحت", "تنفس طبیعی و روان روزمره", route = Screen.ContentHtml.of("bre-04")),
+                i("bre-05", "📝", "تنفس پیش از امتحان", "کاهش استرس و تپش قلب جلسه", route = Screen.ContentHtml.of("bre-05")),
+                i("bre-07", "🦁", "تنفس شیر ملایم", "تخلیه هیجان و گرفتگی فک", route = Screen.ContentHtml.of("bre-07")),
+                i("bre-08", "⏳", "یک دقیقه توجه به نفس", "مکث هوشیارانه بین فعالیت‌ها", route = Screen.ContentHtml.of("bre-08")),
+            ),
+        ),
+
+        // ---- یوگا ----
+        g(
+            "hl-yoga", "🧘", "یوگا", "۱۵ حرکت تعاملی یوگا با راهنمای تصویری و صوتی",
+            items = listOf(
+                i("yga-01", "🙇", "حالت کودک", "Child's Pose — کشش آرام کمر و ستون فقرات", route = Screen.ContentHtml.of("yga-01")),
+                i("yga-02", "🐱", "گربه–گاو", "Cat-Cow — هماهنگی دم و بازدم و انعطاف مهره‌ها", route = Screen.ContentHtml.of("yga-02")),
+                i("yga-03", "🐕", "سگ سر پایین", "Downward Dog — خون‌رسانی به مغز و کشش بدن", route = Screen.ContentHtml.of("yga-03")),
+                i("yga-04", "🐍", "کبرای ملایم", "Cobra — تقویت عضلات کمر و سینه", route = Screen.ContentHtml.of("yga-04")),
+                i("yga-05", "⚔️", "جنگجوی یک", "Warrior I — تمرکز، قدرت و ثبات", route = Screen.ContentHtml.of("yga-05")),
+                i("yga-06", "🏹", "جنگجوی دو", "Warrior II — تعادل و اعتمادبه‌نفس", route = Screen.ContentHtml.of("yga-06")),
+                i("yga-07", "🌳", "درخت", "Tree Pose — تعادل و استواری ذهن", route = Screen.ContentHtml.of("yga-07")),
+                i("yga-08", "🌉", "پل", "Bridge Pose — باز کردن قفسه سینه", route = Screen.ContentHtml.of("yga-08")),
+                i("yga-09", "🌀", "چرخش نشسته", "Seated Twist — تسکین خستگی ستون فقرات", route = Screen.ContentHtml.of("yga-09")),
+                i("yga-10", "✨", "کودک زانوباز", "Wide Child Pose — رهاسازی لگن", route = Screen.ContentHtml.of("yga-10")),
+                i("yga-11", "🕊️", "کبوتر حمایت‌شده", "Supported Pigeon — کشش عمیق لگن", route = Screen.ContentHtml.of("yga-11")),
+                i("yga-12", "📐", "مثلث", "Triangle Pose — کشش پهلوها و پاها", route = Screen.ContentHtml.of("yga-12")),
+                i("yga-13", "🛋️", "استراحت به پشت", "Corpse / Savasana — آرامش کامل بدن و ذهن", route = Screen.ContentHtml.of("yga-13")),
+                i("yga-14", "🛶", "نیم‌قایق زانوخم", "Half Boat — تقویت عضلات شکم و تعادل", route = Screen.ContentHtml.of("yga-14")),
+                i("yga-15", "🧘", "خم به جلو ایستاده", "Forward Fold — آرامش اعصاب و کشش پشت", route = Screen.ContentHtml.of("yga-15")),
             ),
         ),
         g(
