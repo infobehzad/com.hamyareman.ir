@@ -1,5 +1,6 @@
 package com.hamyareman.ir.ui.study
 
+import com.hamyareman.ir.ui.content.ContentCatalog
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
@@ -17,8 +18,16 @@ object StudyMedia {
     fun videoIds(packId: String): List<String> =
         listOf("${packId.replace("_", "-")}-V01.mp4")
 
-    fun viewUrl(fileId: String): String =
+    /** نشانی خام Appwrite — مبدأِ حقیقت (کاوش وجود فایل و کاندیداهای قدیمی). */
+    fun externalUrl(fileId: String): String =
         "$ENDPOINT/storage/buckets/$BUCKET/files/$fileId/view?project=$PROJECT"
+
+    /**
+     * نشانی دوآدرسی: طبق «تنظیمات سرور» از سرور ایرانی (کلید catalog.json) یا Appwrite.
+     * فایل‌های بدون کلید داخلی (آواتار، ویدیو، سفارشی‌ها) همیشه خارجی می‌مانند.
+     */
+    fun viewUrl(fileId: String): String =
+        ServerResolver.pick(fileId, ContentCatalog.keyFor(fileId))
 
     fun candidateIds(fileId: String): List<String> {
         if (fileId.isBlank()) return emptyList()
@@ -68,7 +77,7 @@ object StudyMedia {
 
     fun existsOnServer(fileId: String): Boolean {
         return runCatching {
-            val conn = (URL(viewUrl(fileId)).openConnection() as HttpURLConnection).apply {
+            val conn = (URL(externalUrl(fileId)).openConnection() as HttpURLConnection).apply {
                 connectTimeout = 8000
                 readTimeout = 8000
                 instanceFollowRedirects = true

@@ -24,7 +24,7 @@ object ServerResolver {
     @Volatile private var probeStarted = false
     @Volatile private var internalOkInMemory: Boolean? = null
 
-    fun external(fileId: String): String = StudyMedia.viewUrl(fileId)
+    fun external(fileId: String): String = StudyMedia.externalUrl(fileId)
 
     fun internal(key: String): String =
         ARVAN_PUBLIC + "/" + key.split("/").joinToString("/") {

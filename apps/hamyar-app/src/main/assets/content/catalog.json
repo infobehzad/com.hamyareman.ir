@@ -1,6 +1,6 @@
 {
- "version": 1,
- "generator": "SandBoxFiles/content-map.json",
+ "version": 2,
+ "generator": "SandBoxFiles/content-map.json + c905-unique.json",
  "categories": [
   {
    "id": "amozesh",
@@ -1017,6 +1017,231 @@
    "gender": "all",
    "aw": "tool-ti-nspire.html",
    "key": "html ها/جعبه ابزار ریاضی/tool-ti-nspire.html"
+  },
+  {
+   "id": "C905-fehrest.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "فهرست ریاضی نهم",
+   "gender": "all",
+   "aw": "C905-fehrest.pdf",
+   "key": "PDF ها/C905-fehrest.pdf"
+  },
+  {
+   "id": "C905f01d01.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 01، درس 01",
+   "gender": "all",
+   "aw": "C905f01d01.pdf",
+   "key": "PDF ها/C905f01d01.pdf"
+  },
+  {
+   "id": "C905f01d02.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 01، درس 02",
+   "gender": "all",
+   "aw": "C905f01d02.pdf",
+   "key": "PDF ها/C905f01d02.pdf"
+  },
+  {
+   "id": "C905f01d03.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 01، درس 03",
+   "gender": "all",
+   "aw": "C905f01d03.pdf",
+   "key": "PDF ها/C905f01d03.pdf"
+  },
+  {
+   "id": "C905f01d04.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 01، درس 04",
+   "gender": "all",
+   "aw": "C905f01d04.pdf",
+   "key": "PDF ها/C905f01d04.pdf"
+  },
+  {
+   "id": "C905f02d01.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 02، درس 01",
+   "gender": "all",
+   "aw": "C905f02d01.pdf",
+   "key": "PDF ها/C905f02d01.pdf"
+  },
+  {
+   "id": "C905f02d02.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 02، درس 02",
+   "gender": "all",
+   "aw": "C905f02d02.pdf",
+   "key": "PDF ها/C905f02d02.pdf"
+  },
+  {
+   "id": "C905f02d03.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 02، درس 03",
+   "gender": "all",
+   "aw": "C905f02d03.pdf",
+   "key": "PDF ها/C905f02d03.pdf"
+  },
+  {
+   "id": "C905f03d01.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 03، درس 01",
+   "gender": "all",
+   "aw": "C905f03d01.pdf",
+   "key": "PDF ها/C905f03d01.pdf"
+  },
+  {
+   "id": "C905f03d02.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 03، درس 02",
+   "gender": "all",
+   "aw": "C905f03d02.pdf",
+   "key": "PDF ها/C905f03d02.pdf"
+  },
+  {
+   "id": "C905f03d03.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 03، درس 03",
+   "gender": "all",
+   "aw": "C905f03d03.pdf",
+   "key": "PDF ها/C905f03d03.pdf"
+  },
+  {
+   "id": "C905f03d04.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 03، درس 04",
+   "gender": "all",
+   "aw": "C905f03d04.pdf",
+   "key": "PDF ها/C905f03d04.pdf"
+  },
+  {
+   "id": "C905f03d05.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 03، درس 05",
+   "gender": "all",
+   "aw": "C905f03d05.pdf",
+   "key": "PDF ها/C905f03d05.pdf"
+  },
+  {
+   "id": "C905f04d01.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 04، درس 01",
+   "gender": "all",
+   "aw": "C905f04d01.pdf",
+   "key": "PDF ها/C905f04d01.pdf"
+  },
+  {
+   "id": "C905f04d02.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 04، درس 02",
+   "gender": "all",
+   "aw": "C905f04d02.pdf",
+   "key": "PDF ها/C905f04d02.pdf"
+  },
+  {
+   "id": "C905f04d03.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 04، درس 03",
+   "gender": "all",
+   "aw": "C905f04d03.pdf",
+   "key": "PDF ها/C905f04d03.pdf"
+  },
+  {
+   "id": "C905f04d04.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 04، درس 04",
+   "gender": "all",
+   "aw": "C905f04d04.pdf",
+   "key": "PDF ها/C905f04d04.pdf"
+  },
+  {
+   "id": "C905f05d01.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 05، درس 01",
+   "gender": "all",
+   "aw": "C905f05d01.pdf",
+   "key": "PDF ها/C905f05d01.pdf"
+  },
+  {
+   "id": "C905f05d02.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 05، درس 02",
+   "gender": "all",
+   "aw": "C905f05d02.pdf",
+   "key": "PDF ها/C905f05d02.pdf"
+  },
+  {
+   "id": "C905f05d03.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 05، درس 03",
+   "gender": "all",
+   "aw": "C905f05d03.pdf",
+   "key": "PDF ها/C905f05d03.pdf"
+  },
+  {
+   "id": "C905f06d01.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 06، درس 01",
+   "gender": "all",
+   "aw": "C905f06d01.pdf",
+   "key": "PDF ها/C905f06d01.pdf"
+  },
+  {
+   "id": "C905f06d02.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 06، درس 02",
+   "gender": "all",
+   "aw": "C905f06d02.pdf",
+   "key": "PDF ها/C905f06d02.pdf"
+  },
+  {
+   "id": "C905f06d03.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 06، درس 03",
+   "gender": "all",
+   "aw": "C905f06d03.pdf",
+   "key": "PDF ها/C905f06d03.pdf"
+  },
+  {
+   "id": "C905f07d01.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 07، درس 01",
+   "gender": "all",
+   "aw": "C905f07d01.pdf",
+   "key": "PDF ها/C905f07d01.pdf"
+  },
+  {
+   "id": "C905f07d03.pdf",
+   "cat": "pdf",
+   "kind": "pdf",
+   "title": "ریاضی نهم — فصل 07، درس 03",
+   "gender": "all",
+   "aw": "C905f07d03.pdf",
+   "key": "PDF ها/C905f07d03.pdf"
   }
  ]
 }
