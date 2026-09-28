@@ -1,6 +1,5 @@
 package com.hamyareman.ir.ui.navigation
 
-import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -12,6 +11,11 @@ import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.ui.graphics.vector.ImageVector
+import java.net.URLEncoder
+
+private fun safeEncode(s: String): String =
+    runCatching { URLEncoder.encode(s, "UTF-8").replace("+", "%20") }
+        .getOrElse { s.replace("/", "%2F").replace(" ", "%20") }
 
 sealed class Screen(val route: String) {
     data object Home : Screen("home")
@@ -54,10 +58,10 @@ sealed class Screen(val route: String) {
     data object AwarenessHub : Screen("awareness")
     data object Academy : Screen("academy")
     data object Book : Screen("study-book/{bookCode}") {
-        fun of(bookCode: String) = "study-book/${Uri.encode(bookCode)}"
+        fun of(bookCode: String) = "study-book/${safeEncode(bookCode)}"
     }
     data object LessonTeach : Screen("study-teach/{packId}") {
-        fun of(packId: String) = "study-teach/${Uri.encode(packId)}"
+        fun of(packId: String) = "study-teach/${safeEncode(packId)}"
     }
     data object WeeklySchedule : Screen("weekly-schedule")
     data object Meds : Screen("meds")
@@ -67,30 +71,30 @@ sealed class Screen(val route: String) {
     /** آزمون. `lessonId` اختیاری است تا از صفحه‌ی درس فقط سؤال‌های همان درس بیاید. */
     data object Quiz : Screen("quiz?lessonId={lessonId}") {
         fun of(lessonId: String? = null) =
-            if (lessonId.isNullOrBlank()) "quiz" else "quiz?lessonId=${Uri.encode(lessonId)}"
+            if (lessonId.isNullOrBlank()) "quiz" else "quiz?lessonId=${safeEncode(lessonId)}"
     }
     data object QuizReview : Screen("quizreview")
 
     /** صفحه‌ی مطالعه‌ی عمیق یک درس (فلش‌کارت/آزمون/حل) — پک با `packId` مثل C905_E01-L01. */
     data object LessonStudy : Screen("study-lesson/{packId}") {
-        fun of(packId: String) = "study-lesson/" + Uri.encode(packId)
+        fun of(packId: String) = "study-lesson/" + safeEncode(packId)
     }
 
     /** نمایشگر PDF کتاب درس (از باکت Appwrite — کش فقط روی گوشی). */
     data object LessonPdf : Screen("study-lesson-pdf/{packId}") {
-        fun of(packId: String) = "study-lesson-pdf/" + Uri.encode(packId)
+        fun of(packId: String) = "study-lesson-pdf/" + safeEncode(packId)
     }
     data object Pdf : Screen("pdf")
 
     /** نمودار پیشرفت — v1.18: برای هر کتاب اختصاصی؛ bookCode اختیاری (بدون آن = انتخاب کتاب). */
     data object Charts : Screen("charts?bookCode={bookCode}") {
         fun of(bookCode: String? = null) =
-            if (bookCode.isNullOrBlank()) "charts" else "charts?bookCode=${Uri.encode(bookCode)}"
+            if (bookCode.isNullOrBlank()) "charts" else "charts?bookCode=${safeEncode(bookCode)}"
     }
 
     /** ویدیوی تدریس هر درس — صفحه‌ی مجزا و تمام‌صفحه (v1.18). */
     data object VideoTeach : Screen("video-teach/{packId}") {
-        fun of(packId: String) = "video-teach/" + Uri.encode(packId)
+        fun of(packId: String) = "video-teach/" + safeEncode(packId)
     }
 
     /** مدیریت دانلود صوت/PDF کتاب‌ها (v1.14). */
@@ -102,21 +106,21 @@ sealed class Screen(val route: String) {
     data object Gallery : Screen("gallery")
     data object Learning : Screen("learning")
     data object Lesson : Screen("lesson/{id}") {
-        fun of(id: String) = "lesson/${Uri.encode(id)}"
+        fun of(id: String) = "lesson/${safeEncode(id)}"
     }
     data object Placement : Screen("placement")
     /** نقشه‌ی راه. `track` اختیاری است تا ماژول هوش مصنوعی فقط گره‌های خودش را ببیند. */
     data object Roadmap : Screen("roadmap?track={track}") {
-        fun of(track: String? = null) = if (track.isNullOrBlank()) "roadmap" else "roadmap?track=${Uri.encode(track)}"
+        fun of(track: String? = null) = if (track.isNullOrBlank()) "roadmap" else "roadmap?track=${safeEncode(track)}"
     }
     data object AiLearning : Screen("ailearning")
     data object AiAssessment : Screen("aiassessment")
     data object Recipes : Screen("recipes")
     data object RecipeDetail : Screen("recipedetail/{id}") {
-        fun of(id: String) = "recipedetail/${Uri.encode(id)}"
+        fun of(id: String) = "recipedetail/${safeEncode(id)}"
     }
     data object Exercise : Screen("exercise")
-    data object ExerciseDetail : Screen("exercise/{id}") { fun of(id: String) = "exercise/${Uri.encode(id)}" }
+    data object ExerciseDetail : Screen("exercise/{id}") { fun of(id: String) = "exercise/${safeEncode(id)}" }
     data object Water : Screen("water")
     data object Call : Screen("call")
     data object Settings : Screen("settings")
@@ -131,22 +135,22 @@ sealed class Screen(val route: String) {
     /** محتوای همیار: منوی دسته‌ها + فهرست و نمایش HTML از کاتالوگ assets. */
     data object ContentHub : Screen("content-hub")
     data object ContentCategory : Screen("content-category/{cat}") {
-        fun of(cat: String) = "content-category/${Uri.encode(cat)}"
+        fun of(cat: String) = "content-category/${safeEncode(cat)}"
     }
     data object ContentHtml : Screen("content-html/{id}") {
-        fun of(id: String) = "content-html/${Uri.encode(id)}"
+        fun of(id: String) = "content-html/${safeEncode(id)}"
     }
     /** پرامپت ۰۲: ماژول سلامتی (یوگا/ورزش/تنفس/یادگیری). `cat` اختیاری: yoga/exercise/breathing/learning. */
     data object Wellness : Screen("wellness?cat={cat}") {
         fun of(cat: String? = null) =
-            if (cat.isNullOrBlank()) "wellness" else "wellness?cat=${Uri.encode(cat)}"
+            if (cat.isNullOrBlank()) "wellness" else "wellness?cat=${safeEncode(cat)}"
     }
     /** گروه تو در توی ذهن‌آگاهی / کسب آرامش / بین دروس / پریود. */
     data object PracticeGroup : Screen("practice-group/{groupId}") {
-        fun of(id: String) = "practice-group/${Uri.encode(id)}"
+        fun of(id: String) = "practice-group/${safeEncode(id)}"
     }
     data object PracticeItem : Screen("practice/{itemId}") {
-        fun of(id: String) = "practice/${Uri.encode(id)}"
+        fun of(id: String) = "practice/${safeEncode(id)}"
     }
     /** فلوتر داشبورد: تمرینات کوتاه بین دروس. */
     data object BetweenLessons : Screen("between-lessons")
@@ -162,7 +166,7 @@ sealed class Screen(val route: String) {
     data object BiologyLab : Screen("lab-biology")
     data object MathToolkit : Screen("toolkit-math")
     data object ToolHtml : Screen("tool/{toolId}") {
-        fun of(toolId: String) = "tool/${Uri.encode(toolId)}"
+        fun of(toolId: String) = "tool/${safeEncode(toolId)}"
     }
 }
 
