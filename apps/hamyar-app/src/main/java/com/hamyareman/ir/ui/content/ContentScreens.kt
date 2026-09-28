@@ -175,7 +175,7 @@ fun ContentHtmlScreen(itemId: String, onBack: () -> Unit) {
                     factory = { c ->
                         WebView(c).apply {
                             HamyarHtmlSupport.applySettings(settings)
-                            webViewClient = HamyarHtmlSupport.createWebViewClient()
+                            webViewClient = HamyarHtmlSupport.createWebViewClient(c)
                             loadDataWithBaseURL(
                                 "https://local.hamyar/", processedHtml, "text/html", "utf-8", null,
                             )

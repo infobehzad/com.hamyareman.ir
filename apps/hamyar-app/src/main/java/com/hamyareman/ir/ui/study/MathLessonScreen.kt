@@ -432,7 +432,7 @@ private fun MathTeachTab(pack: StudyPack, bookTitle: String, showPlayer: Boolean
                 AndroidView(
                     factory = { c ->
                         WebView(c).apply {
-                            webViewClient = HamyarHtmlSupport.createWebViewClient()
+                            webViewClient = HamyarHtmlSupport.createWebViewClient(c)
                             settings.javaScriptEnabled = true
                             settings.domStorageEnabled = true
                             settings.loadWithOverviewMode = false

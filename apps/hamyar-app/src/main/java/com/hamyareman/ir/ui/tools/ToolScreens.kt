@@ -267,7 +267,7 @@ fun ToolWebScreen(toolId: String, title: String, onBack: () -> Unit) {
                             webViewClient = object : WebViewClient() {
                                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest) = false
                                 override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): android.webkit.WebResourceResponse? {
-                                    val intercepted = HamyarHtmlSupport.interceptRequest(request)
+                                    val intercepted = HamyarHtmlSupport.interceptRequest(c, request)
                                     if (intercepted != null) return intercepted
                                     return super.shouldInterceptRequest(view, request)
                                 }

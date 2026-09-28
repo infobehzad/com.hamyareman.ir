@@ -102,6 +102,17 @@ object ContentCatalog {
     fun sampleHtmlKey(): String? =
         itemsById.values.firstOrNull { it.kind == "html" }?.key
 
-    /** برای ابزارها: از روی شناسهٔ Appwrite (tool-*.html). */
-    fun keyForOrNull(fileId: String): String? = keyFor(fileId)
+    /** جستجوی آیتم بر اساس نام فایل، شناسه، کلید یا مسیر نسبی (برای دکمه‌های بعدی/قبلی). */
+    fun findByPathOrName(nameOrPath: String): ContentItem? {
+        val clean = nameOrPath.trim().trimStart('/', '.').replace('\\', '/')
+        val fileName = clean.substringAfterLast('/')
+        val decoded = runCatching { java.net.URLDecoder.decode(fileName, "UTF-8") }.getOrDefault(fileName)
+
+        return itemsById[clean]
+            ?: itemsById[fileName]
+            ?: itemsById[decoded]
+            ?: itemsById.values.firstOrNull { it.aw.equals(fileName, ignoreCase = true) || it.aw.equals(decoded, ignoreCase = true) }
+            ?: itemsById.values.firstOrNull { it.key.substringAfterLast('/').equals(fileName, ignoreCase = true) || it.key.substringAfterLast('/').equals(decoded, ignoreCase = true) }
+            ?: itemsById.values.firstOrNull { it.key.equals(clean, ignoreCase = true) || it.key.equals(decoded, ignoreCase = true) }
+    }
 }
